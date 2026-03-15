@@ -506,11 +506,40 @@
 
     async function addManualItem() {
         try {
-            const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value);
+            const name = document.getElementById('m_name').value.trim(); 
+            const qty = parseFloat(document.getElementById('m_qty').value); 
+            const cost = parseFloat(document.getElementById('m_cost').value);
+            
             if(!name || isNaN(cost) || isNaN(qty) || qty <= 0) return alert("Valid Name, Qty & Cost required.");
-            sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
-            const { error } = await supabaseClient.from('full_landed_costs').insert({ parcel_no: 'MANUAL', di_item_id: 'MANUAL-' + Date.now(), item_name: name, neogleamz_name: document.getElementById('m_neo_name').value.trim(), neogleamz_product: document.getElementById('m_neo_prod').value.trim(), specification: document.getElementById('m_spec').value.trim(), quantity: qty, order_unit_price: cost/qty, final_cost_weight: cost/qty, total_cost_weight: cost, unit_weight_g: 0, total_dist_weight_g: 0, order_postage: 0, order_total: cost, unit_china_landed_price: cost/qty, actual_paid: 0, actual_chargeable_weight_g: 0, actual_shipping_fee: 0, unit_ship_weight: 0, order_date: new Date().toISOString().split('T')[0] });
+            sysLog(`Add Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
+            
+            let payload = {};
+            const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification'];
+            
+            Object.values(colMap).forEach(dbCol => {
+                if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } 
+                else { payload[dbCol] = 0; }
+            });
+
+            payload.parcel_no = 'MANUAL';
+            payload.di_item_id = 'MANUAL-' + Date.now();
+            payload.order_no = 'MANUAL';
+            payload.alibaba_order = 'MANUAL';
+            payload.item_name = name;
+            payload.neogleamz_name = document.getElementById('m_neo_name').value.trim();
+            payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim();
+            payload.specification = document.getElementById('m_spec').value.trim();
+            payload.quantity = qty;
+            payload.order_unit_price = cost/qty;
+            payload.final_cost_weight = cost/qty;
+            payload.total_cost_weight = cost;
+            payload.unit_china_landed_price = cost/qty;
+            payload.order_total = cost;
+            payload.order_date = new Date().toISOString().split('T')[0];
+
+            const { error } = await supabaseClient.from('full_landed_costs').insert(payload);
             if (error) throw new Error(error.message);
+            
             ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
         } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); }
     }
@@ -529,7 +558,7 @@
         } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
     }
 
-    // --- 7. CATALOG & INVENTORY (DRY) ---
+    // --- 7. CATALOG & INVENTORY ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
 
     function buildCatalogCache() {
