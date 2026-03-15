@@ -92,8 +92,9 @@
         .edited-success { animation: flashGreen 1s ease; }
         @keyframes flashGreen { 0% { background-color: #10b981; color: white; } 100% { background-color: transparent; color: inherit; } }
         
-        .trunc-col { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
-        .trunc-col:focus { max-width: none; white-space: normal; overflow: visible; z-index: 100; position: absolute; background: var(--bg-container); border: 2px solid var(--border-edit-focus); box-shadow: 0 5px 15px var(--shadow-color); padding: 10px; border-radius: 6px; }
+        /* FIXED: Truncation Expansion Bug */
+        .trunc-col { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .trunc-col:focus { max-width: none; white-space: normal; overflow: visible; position: relative; z-index: 100; background: var(--bg-container); box-shadow: 0 4px 12px var(--shadow-color); border-radius: 4px; }
 
         .bom-layout { display: grid; grid-template-columns: 300px 1fr; gap: 15px; align-items: stretch; flex-grow: 1; min-height: 0; }
         .bom-sidebar { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
@@ -102,7 +103,6 @@
         .product-list li { padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-input); margin-bottom: 4px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; transition: all 0.2s; color: var(--text-main); font-size: 13px; }
         .product-list li:hover { border-color: #3b82f6; }
         .product-list li.selected { background: #3b82f6 !important; color: white !important; border-color: #2563eb; }
-        .product-list li .prod-cost { font-weight: normal; opacity: 0.9; }
         
         .bom-main { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px var(--shadow-color); display: flex; flex-direction: column; min-height: 0; }
         .bom-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; flex-shrink: 0; }
@@ -511,7 +511,8 @@
             const cost = parseFloat(document.getElementById('m_cost').value);
             
             if(!name || isNaN(cost) || isNaN(qty) || qty <= 0) return alert("Valid Name, Qty & Cost required.");
-            sysLog(`Add Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
+            
+            sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
             
             let payload = {};
             const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification'];
@@ -531,16 +532,17 @@
             payload.specification = document.getElementById('m_spec').value.trim();
             payload.quantity = qty;
             payload.order_unit_price = cost/qty;
+            payload.unit_china_landed_price = cost/qty;
             payload.final_cost_weight = cost/qty;
             payload.total_cost_weight = cost;
-            payload.unit_china_landed_price = cost/qty;
             payload.order_total = cost;
             payload.order_date = new Date().toISOString().split('T')[0];
 
             const { error } = await supabaseClient.from('full_landed_costs').insert(payload);
             if (error) throw new Error(error.message);
             
-            ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
+            ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; 
+            await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
         } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); }
     }
 
@@ -647,6 +649,7 @@
         }); document.getElementById('bomTotalCost').innerText = `$${gt.toFixed(2)}`;
     }
 
+    // --- INVENTORY UI & LOGIC ---
     function renderInventoryTable() {
         const tb = document.getElementById('inventoryBody'); if(!tb) return; tb.innerHTML="";
         let a = Object.keys(catalogCache).map(k => {
