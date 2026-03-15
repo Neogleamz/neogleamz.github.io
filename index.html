@@ -31,10 +31,19 @@
             --tab-hover: #334155; --tab-active-bg: #1e293b;
         }
 
-        /* FLEXBOX FRAMEWORK */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-container); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px var(--shadow-color); transition: background-color 0.3s; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         
+        /* LOGIN SCREEN STYLES */
+        #loginUI { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-body); z-index: 10000; }
+        .login-box { background: var(--bg-container); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px var(--shadow-color); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border-color); }
+        .login-box h2 { color: var(--text-heading); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        .login-box button { width: 100%; padding: 12px; font-size: 16px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .login-box button:hover { background: #0284c7; }
+
+        #appUI { display: none; flex-direction: column; flex-grow: 1; min-height: 0; }
+
         .header-area { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; flex-shrink: 0; }
         .title-block h1 { font-size: 24px; margin: 0 0 2px 0; color: var(--text-heading); }
         .title-block .subtitle { font-size: 13px; color: var(--text-muted); margin: 0; }
@@ -55,10 +64,9 @@
         .btn-blue { background-color: #3b82f6; } .btn-blue:hover { background-color: #2563eb; }
         .btn-green { background-color: #10b981; } .btn-green:hover { background-color: #059669; }
         .btn-red { background-color: #ef4444; } .btn-red:hover { background-color: #dc2626; }
-        #themeToggle { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; }
-        #themeToggle:hover { background: var(--bg-panel); transform: scale(1.05); }
+        .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
+        .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
 
-        /* ULTRA COMPACT 5-COLUMN GRID */
         .control-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; align-items: stretch; flex-shrink: 0; }
         .panel-card { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; transition: all 0.3s ease; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
         .panel-card h3 { margin-top: 0; color: var(--text-heading); font-size: 14px; margin-bottom: 8px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; text-align: center; }
@@ -112,7 +120,7 @@
         .sort-arrow, .inv-sort-arrow { font-size: 10px; margin-left: 5px; opacity: 0.7; }
         .negative-stock { color: #ef4444; font-weight: bold; background-color: var(--bg-negative); }
 
-        #terminal { position: fixed; bottom: 0; right: 20px; width: 450px; background: #0f172a; color: #10b981; font-family: monospace; border-radius: 8px 8px 0 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        #terminal { position: fixed; bottom: 0; right: 20px; width: 450px; background: #0f172a; color: #10b981; font-family: monospace; border-radius: 8px 8px 0 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); border: 1px solid #334155; display: none; }
         #termHeader { background: #1e293b; padding: 10px; cursor: pointer; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; color: white; font-size: 13px; }
         #debugLog { height: 150px; overflow-y: auto; padding: 10px; font-size: 11px; line-height: 1.5; background: #0f172a; }
         #sysProgress { width: 100%; height: 4px; border: none; background-color: #334155; display: block; }
@@ -124,7 +132,17 @@
 </head>
 <body>
 
-<div class="container">
+<div id="loginUI">
+    <div class="login-box">
+        <h2>🔒 Neogleamz Secure Login</h2>
+        <input type="email" id="loginEmail" placeholder="Enterprise Email">
+        <input type="password" id="loginPass" placeholder="Master Password" onkeydown="if(event.key === 'Enter') handleLogin()">
+        <button onclick="handleLogin()" id="loginBtn">Authenticate to Command Center</button>
+        <p id="loginError" style="color:#ef4444; font-size:13px; margin-top:15px; display:none;"></p>
+    </div>
+</div>
+
+<div id="appUI" class="container">
     <div class="header-area">
         <div class="title-block">
             <h1>Neogleamz Command Center</h1>
@@ -135,7 +153,8 @@
             <button class="tab-btn" onclick="switchTab('simple')">📋 Simple Inventory</button>
             <button class="tab-btn" onclick="switchTab('bom')">🛠️ Product Builder</button>
             <button class="tab-btn" onclick="switchTab('inventory')">📊 Inventory Manager</button>
-            <button id="themeToggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
+            <button id="themeToggle" class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+            <button class="icon-btn" onclick="handleLogout()" title="Secure Logout" style="color:#ef4444; border-color:#fca5a5;">🚪</button>
         </div>
     </div>
 
@@ -259,7 +278,7 @@
                                 <th onclick="sortInventory('np')">Neo Product <span class="inv-sort-arrow"></span></th>
                                 <th onclick="sortInventory('n')">Item Name <span class="inv-sort-arrow"></span></th>
                                 <th onclick="sortInventory('sp')">Spec <span class="inv-sort-arrow"></span></th>
-                                <th class="text-right" onclick="sortInventory('p')">Total Purchased <span class="inv-sort-arrow"></span></th>
+                                <th class="text-right" onclick="sortInventory('p')">Purchased <span class="inv-sort-arrow"></span></th>
                                 <th class="text-right" onclick="sortInventory('c')" style="border-bottom:3px solid #ef4444;">Consumed ✏️ <span class="inv-sort-arrow"></span></th>
                                 <th class="text-right" onclick="sortInventory('a')">Manual Adj. <span class="inv-sort-arrow"></span></th>
                                 <th class="text-right" onclick="sortInventory('s')" style="border-bottom:3px solid #f59e0b;">Current Stock ✏️ <span class="inv-sort-arrow"></span></th>
@@ -279,7 +298,14 @@
     <div id="debugLog" style="display: none;"></div>
 </div>
 <script>
-    // --- 1. THEME & DIAGNOSTICS ---
+    // --- 1. GLOBALS & INIT ---
+    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
+    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
+    let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
+    let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; let currentInvSort = { column: 'nn', direction: 'asc' }; 
+    const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Specification': 'specification', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
+
+    // --- 2. THEME & DIAGNOSTICS ---
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; });
     function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️" : "🌙"; sysLog(`Theme switched to ${nt}.`); }
     function sysLog(msg, isError = false) { try { const b = document.getElementById('debugLog'); if(!b) return; const t = new Date().toLocaleTimeString(); const c = isError ? '#ef4444' : '#10b981'; b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; b.scrollTop = b.scrollHeight; if(isError) console.error(msg); else console.log(msg); } catch(e) { console.error(e); } }
@@ -287,38 +313,39 @@
     function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▼'; } else { b.style.display = 'none'; t.innerText = '▲'; } } catch(e) {} }
     function setMasterStatus(msg, type) { try { const e = document.getElementById('statusMaster'); if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } } catch(e) {} }
     function truncText(str, max = 50) { return !str ? "" : (String(str).length > max ? String(str).substring(0, max) + '...' : String(str)); }
+    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Specification': r.specification, 'Quantity': r.quantity, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Unit Price': r.order_unit_price, 'Order Postage': r.order_postage, 'Unit China Landed Price': r.unit_china_landed_price, 'Order Total': r.order_total, 'Actual Paid (Parcel)': r.actual_paid, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Total Landed Cost ($)': r.total_cost_weight, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
 
-    // --- 2. GLOBAL STATE & DB INIT ---
-    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
-    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
-    let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
-    let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; let currentInvSort = { column: 'nn', direction: 'asc' }; 
+    // --- 3. AUTHENTICATION LOGIC ---
+    window.onload = async () => { 
+        try { 
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) await launchApp();
+        } catch(e) { console.error("Auth check failed", e); } 
+    };
 
-    const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Specification': 'specification', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
-
-    function mapToUI(dbData) {
-        return dbData.map(r => ({
-            '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 
-            'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order,
-            'Item Name': r.item_name, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Specification': r.specification, 'Quantity': r.quantity, 
-            'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g,
-            'Order Unit Price': r.order_unit_price, 'Order Postage': r.order_postage, 'Unit China Landed Price': r.unit_china_landed_price, 'Order Total': r.order_total, 'Actual Paid (Parcel)': r.actual_paid,
-            'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Total Landed Cost ($)': r.total_cost_weight,
-            'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost,
-            'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost,
-            'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector,
-            'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code
-        }));
+    async function handleLogin() {
+        const btn = document.getElementById('loginBtn'); const err = document.getElementById('loginError');
+        const email = document.getElementById('loginEmail').value.trim(); const pass = document.getElementById('loginPass').value.trim();
+        if(!email || !pass) { err.innerText = "Please enter email and password."; err.style.display = "block"; return; }
+        btn.innerText = "Authenticating..."; btn.disabled = true; err.style.display = "none";
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
+        if (error) { btn.innerText = "Authenticate to Command Center"; btn.disabled = false; err.innerText = error.message; err.style.display = "block"; return; }
+        await launchApp();
     }
 
-    window.onload = async () => { try { sysLog("Booting..."); setMasterStatus("Fetching data...", "mod-working"); await loadData(); } catch(e) { sysLog(e.message, true); } };
+    async function handleLogout() { if(confirm("Are you sure you want to securely log out?")) { await supabaseClient.auth.signOut(); location.reload(); } }
 
+    async function launchApp() {
+        document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; document.getElementById('terminal').style.display = 'block';
+        sysLog("Session Verified. Booting System..."); setMasterStatus("Fetching data...", "mod-working"); await loadData();
+    }
+
+    // --- 4. DATA LOADING ---
     async function loadData() {
         try {
             setSysProgress(10, 'working');
             const [lR, pR, cR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*') ]);
             if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message);
-
             setSysProgress(40, 'working');
             if (lR.data && lR.data.length > 0) {
                 sysLog(`Ledger Loaded: ${lR.data.length} rows.`); finalResults = mapToUI(lR.data); 
@@ -326,12 +353,10 @@
                 buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true);
                 setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 3000);
             } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
-
             setSysProgress(60, 'working');
             inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
             setSysProgress(80, 'working');
             if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); }
-
             renderInventoryTable(); populateDropdowns(); setSysProgress(100, 'success'); sysLog("Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
@@ -344,78 +369,63 @@
         if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); }
     }
 
-    // --- 2.5 EXPORT / RESTORE SYSTEM ---
+    // --- 5. EXPORT / RESTORE SYSTEM ---
     async function exportDatabaseBackup() {
         if(typeof XLSX === 'undefined') return alert("SheetJS not loaded. Check internet connection.");
         sysLog("Starting database backup..."); setSysProgress(20, 'working'); setMasterStatus("Exporting Backup...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
         try {
             const [lR, pR, cR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*'), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*') ]);
             if(lR.error) throw new Error("Ledger fetch failed");
-            
             const safeRecipes = (pR.data||[]).map(r => ({...r, components: JSON.stringify(r.components)}));
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lR.data||[]), "Ledger");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRecipes), "Recipes");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cR.data||[]), "Inventory");
-            
-            let d = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(wb, `Neogleamz_Backup_${d}.xlsx`);
-            
-            sysLog("Backup exported."); setSysProgress(100, 'success'); setMasterStatus("Backup Exported!", "mod-success"); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-        } catch (err) { sysLog("Backup failed: " + err.message, true); setSysProgress(100, 'error'); setMasterStatus("Backup Failed.", "mod-error"); }
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lR.data||[]), "Ledger"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRecipes), "Recipes"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cR.data||[]), "Inventory");
+            XLSX.writeFile(wb, `Neogleamz_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
+            sysLog("Exported."); setSysProgress(100, 'success'); setMasterStatus("Exported!", "mod-success"); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
+        } catch (err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
     }
 
     async function restoreDatabaseBackup(fileInput) {
         if(!fileInput.files.length || typeof XLSX === 'undefined') return;
         if(!confirm("⚠️ DANGER: This will permanently OVERWRITE your entire database with the selected backup file. Continue?")) { fileInput.value = ""; return; }
-        
-        sysLog("Starting database restore..."); setSysProgress(20, 'working'); setMasterStatus("Restoring Database...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
-        const file = fileInput.files[0]; const reader = new FileReader();
-        
+        sysLog("Starting restore..."); setSysProgress(20, 'working'); setMasterStatus("Restoring Database...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
+        const reader = new FileReader();
         reader.onload = async (e) => {
             try {
-                const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, {type: 'array'});
-                let ld = wb.Sheets["Ledger"] ? XLSX.utils.sheet_to_json(wb.Sheets["Ledger"]) : null;
-                let rd = wb.Sheets["Recipes"] ? XLSX.utils.sheet_to_json(wb.Sheets["Recipes"]) : null;
-                let id = wb.Sheets["Inventory"] ? XLSX.utils.sheet_to_json(wb.Sheets["Inventory"]) : null;
-                if(!ld && !rd && !id) throw new Error("Invalid backup format.");
-                
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+                let ld = wb.Sheets["Ledger"] ? XLSX.utils.sheet_to_json(wb.Sheets["Ledger"]) : null; let rd = wb.Sheets["Recipes"] ? XLSX.utils.sheet_to_json(wb.Sheets["Recipes"]) : null; let id = wb.Sheets["Inventory"] ? XLSX.utils.sheet_to_json(wb.Sheets["Inventory"]) : null;
+                if(!ld && !rd && !id) throw new Error("Invalid format.");
                 if (rd) rd = rd.map(r => ({ ...r, components: typeof r.components === 'string' ? JSON.parse(r.components) : r.components }));
-                setSysProgress(60, 'working'); sysLog("Pushing restore data to Supabase...");
-                
-                if(ld && ld.length) await supabaseClient.from('full_landed_costs').upsert(ld);
-                if(rd && rd.length) await supabaseClient.from('product_recipes').upsert(rd);
-                if(id && id.length) await supabaseClient.from('inventory_consumption').upsert(id);
-                
-                sysLog("Restore Complete! Reloading..."); setSysProgress(100, 'success'); setMasterStatus("Restore Successful!", "mod-success");
-                fileInput.value = ""; await loadData(); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-            } catch(err) { sysLog("Restore failed: " + err.message, true); setSysProgress(100, 'error'); setMasterStatus("Restore Failed.", "mod-error"); }
-        }; reader.readAsArrayBuffer(file);
+                setSysProgress(60, 'working'); sysLog("Pushing...");
+                if(ld && ld.length) await supabaseClient.from('full_landed_costs').upsert(ld); if(rd && rd.length) await supabaseClient.from('product_recipes').upsert(rd); if(id && id.length) await supabaseClient.from('inventory_consumption').upsert(id);
+                sysLog("Complete!"); setSysProgress(100, 'success'); setMasterStatus("Success!", "mod-success"); fileInput.value = ""; await loadData(); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
+            } catch(err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
+        }; reader.readAsArrayBuffer(fileInput.files[0]);
     }
 
-    // --- 3. SHARED RENDERERS ---
+    // --- 6. SHARED RENDERERS & SORTING ---
     function renderColToggles() {
         if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return;
         c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => {
-            let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981';
-            return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`;
+            let b = hiddenSimpleCols.has(key) ? '#ef4444' : '#10b981';
+            return `<button onclick="toggleSimpleCol('${key.replace(/'/g, "\\'")}')" style="background-color: ${b}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`;
         }).join('');
     }
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderBothTables(); renderColToggles(); }
 
     function sortData(column, keepDirection = false) {
         if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' };
-        finalResults.sort((a, b) => {
-            let vA = (a[column] ?? "").toString().toLowerCase(); let vB = (b[column] ?? "").toString().toLowerCase();
-            if (vA < vB) return currentSort.direction === 'asc' ? -1 : 1; if (vA > vB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); 
+        finalResults.sort((a, b) => { 
+            let vA = a[column]; let vB = b[column]; 
+            if (typeof vA === 'number' && typeof vB === 'number') return currentSort.direction === 'asc' ? vA - vB : vB - vA;
+            vA = (vA ?? "").toString().toLowerCase(); vB = (vB ?? "").toString().toLowerCase(); 
+            if (vA < vB) return currentSort.direction === 'asc' ? -1 : 1; if (vA > vB) return currentSort.direction === 'asc' ? 1 : -1; 
+            return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); 
         }); renderBothTables();
     }
 
     function renderBothTables() { renderLedgerView(false, 'results'); renderLedgerView(true, 'simpleResults'); }
 
     function renderLedgerView(isSimple, containerId) {
-        if (finalResults.length === 0) return;
-        let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
+        if (finalResults.length === 0) return; let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
         let h = "<table><thead><tr>" + keys.map(k => `<th onclick="sortData('${k.replace(/'/g, "\\'")}')">${k} ✏️ <span class="sort-arrow">${currentSort.column === k ? (currentSort.direction === 'asc' ? "▲" : "▼") : ""}</span></th>`).join('') + "</tr></thead><tbody>";
         finalResults.forEach(r => {
             h += "<tr>" + keys.map(k => {
@@ -424,8 +434,7 @@
                 if (['Item Name', 'Specification', 'Alibaba Order', 'DI Item ID'].includes(k)) cls += ' trunc-col';
                 return `<td class="${cls}" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateDBCell(this, '${r._RowKey}', '${k.replace(/'/g, "\\'")}', ${isN})">${dVal}</td>`;
             }).join('') + "</tr>";
-        });
-        document.getElementById(containerId).innerHTML = h + "</tbody></table>";
+        }); document.getElementById(containerId).innerHTML = h + "</tbody></table>";
     }
 
     let oldValTemp = ""; function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
@@ -443,9 +452,7 @@
                 else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } 
                 else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; }
             }
-            let [pNo, di] = rowKey.split(':::');
-            const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di);
-            if (error) throw new Error(error.message);
+            let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message);
             setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000);
             if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderBothTables(); }
             setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
@@ -456,7 +463,7 @@
         try {
             const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value);
             if(!name || isNaN(cost) || isNaN(qty) || qty <= 0) return alert("Valid Name, Qty & Cost required.");
-            sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
+            sysLog(`Add Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
             const { error } = await supabaseClient.from('full_landed_costs').insert({ parcel_no: 'MANUAL', di_item_id: 'MANUAL-' + Date.now(), item_name: name, neogleamz_name: document.getElementById('m_neo_name').value.trim(), neogleamz_product: document.getElementById('m_neo_prod').value.trim(), specification: document.getElementById('m_spec').value.trim(), quantity: qty, order_unit_price: cost/qty, final_cost_weight: cost/qty, total_cost_weight: cost, unit_weight_g: 0, total_dist_weight_g: 0, order_postage: 0, order_total: cost, unit_china_landed_price: cost/qty, actual_paid: 0, actual_chargeable_weight_g: 0, actual_shipping_fee: 0, unit_ship_weight: 0, order_date: new Date().toISOString().split('T')[0] });
             if (error) throw new Error(error.message);
             ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
@@ -478,15 +485,14 @@
     }
 </script>
 <script>
-    // --- 4. CATALOG & INVENTORY (DRY) ---
+    // --- 7. CATALOG, BOM, INVENTORY ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
 
     function buildCatalogCache() {
         catalogCache = {}; finalResults.forEach(r => {
             let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim();
             let k = `${nn}:::${np}:::${inam}:::${sp}`;
-            if (k === "::::::Unknown:::") return; 
-            if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: inam, spec: sp, totalCostSum: 0, totalQty: 0 };
+            if (k === "::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: inam, spec: sp, totalCostSum: 0, totalQty: 0 };
             let qty = parseFloat(r['Quantity']) || 1; catalogCache[k].totalCostSum += (parseFloat(r['Final Landed Cost ($)']) || 0) * qty; catalogCache[k].totalQty += qty;
         });
         Object.keys(catalogCache).forEach(k => catalogCache[k].avgUnitCost = catalogCache[k].totalCostSum / (catalogCache[k].totalQty || 1));
@@ -523,7 +529,6 @@
         } catch(e) {}
     }
 
-    // --- BOM UI ---
     async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const {error} = await supabaseClient.from('product_recipes').upsert({product_name: name, components: productsDB[name]}); if(error) throw new Error(error.message); populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
     async function createNewProduct() { let n = prompt("Recipe Name:"); if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; await syncRecipe(n); currentProduct = n; renderProductList(); renderProductBOM(); }
     function selectProduct(n) { currentProduct = n; renderProductList(); renderProductBOM(); }
@@ -569,7 +574,6 @@
         }); document.getElementById('bomTotalCost').innerText = `$${gt.toFixed(2)}`;
     }
 
-    // --- INVENTORY UI & LOGIC ---
     function renderInventoryTable() {
         const tb = document.getElementById('inventoryBody'); if(!tb) return; tb.innerHTML="";
         let a = Object.keys(catalogCache).map(k => {
@@ -578,7 +582,12 @@
         });
         if(a.length===0){ tb.innerHTML="<tr><td colspan='8' style='text-align:center;'>No inventory.</td></tr>"; return; }
         document.querySelectorAll('.inv-sort-arrow').forEach(e => e.innerText=""); let ah=document.querySelector(`th[onclick="sortInventory('${currentInvSort.column}')"] .inv-sort-arrow`); if(ah) ah.innerText = currentInvSort.direction==='asc'?"▲":"▼";
-        a.sort((x,y) => { let u=x[currentInvSort.column]; let v=y[currentInvSort.column]; if(typeof u==='string'){u=u.toLowerCase(); v=v.toLowerCase();} if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
+        a.sort((x,y) => { 
+            let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; 
+            if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u;
+            u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); 
+            if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; 
+        });
         a.forEach(x => {
             let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = x.k.replace(/'/g,"\\'");
             tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td style="color:var(--text-muted);">${x.np}</td><td style="font-weight:bold;">${truncText(x.n,50)}</td><td>${truncText(x.sp,50)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td></tr>`;
@@ -615,7 +624,7 @@
         try { const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); if(error) throw new Error(error.message); inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
     }
 
-    // --- 5. PARSERS & SYNC (DRY Wrappers) ---
+    // --- 8. PARSERS & SYNC ---
     function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){} }
     document.getElementById('orderFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'orders');});
     document.getElementById('parcelFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'parcels');});
