@@ -111,15 +111,20 @@
         .add-part-bar { display: grid; grid-template-columns: 1fr 90px 130px; gap: 8px; background: var(--bg-bar); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; flex-shrink: 0; }
         optgroup { font-weight: bold; font-style: normal; color: var(--text-heading); background: var(--bg-input); }
         
+        /* TABLE STYLES & DRAG/RESIZE HANDLES */
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
-        th { background-color: var(--bg-th); color: var(--text-th); padding: 10px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: pointer; user-select: none; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
+        th { background-color: var(--bg-th); color: var(--text-th); padding: 10px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: grab; user-select: none; }
         th:hover { opacity: 0.9; }
         td { padding: 8px 10px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
         .text-right { text-align: right; }
         .highlight-calc { background-color: var(--bg-highlight); color: var(--text-highlight); font-weight: bold; }
         .sort-arrow, .inv-sort-arrow { font-size: 10px; margin-left: 5px; opacity: 0.7; }
         .negative-stock { color: #ef4444; font-weight: bold; background-color: var(--bg-negative); }
+
+        .resizer { position: absolute; right: 0; top: 0; width: 5px; height: 100%; cursor: col-resize; user-select: none; transition: background 0.2s; z-index: 15; }
+        .resizer:hover { background-color: #0ea5e9; }
+        .dragging { opacity: 0.4; background-color: #3b82f6 !important; }
 
         #terminal { position: fixed; bottom: 0; right: 20px; width: 450px; background: #0f172a; color: #10b981; font-family: monospace; border-radius: 8px 8px 0 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); border: 1px solid #334155; display: none; }
         #termHeader { background: #1e293b; padding: 10px; cursor: pointer; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; color: white; font-size: 13px; }
@@ -232,7 +237,7 @@
                     <div style="flex: 0.5;"><input id="partQty" type="number" step="any" min="0.0001" value="1" style="width:100%;"></div>
                     <button class="btn-green" style="padding:8px 15px; width:auto; font-size:13px;" onclick="addPartToProduct()">Add Part</button>
                 </div>
-                <div class="table-wrap">
+                <div class="table-wrap" id="bomTableWrap">
                     <table style="width:100%;">
                         <thead>
                             <tr>
@@ -271,7 +276,7 @@
             </div>
             <div class="bom-main">
                 <div class="bom-header"><h2 style="font-size:18px;">Live Inventory Levels</h2></div>
-                <div class="table-wrap">
+                <div class="table-wrap" id="invTableWrap">
                     <table style="width:100%;">
                         <thead>
                             <tr>
@@ -318,14 +323,17 @@
 
     const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Specification': 'specification', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
 
+    // RE-ORDERED FOR NEW DEFAULT
     function mapToUI(dbData) {
         return dbData.map(r => ({
             '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 
             'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order,
-            'Item Name': r.item_name, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Specification': r.specification, 'Quantity': r.quantity, 
-            'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g,
-            'Order Unit Price': r.order_unit_price, 'Order Postage': r.order_postage, 'Unit China Landed Price': r.unit_china_landed_price, 'Order Total': r.order_total, 'Actual Paid (Parcel)': r.actual_paid,
-            'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Total Landed Cost ($)': r.total_cost_weight,
+            'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 
+            'Quantity': r.quantity, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 
+            'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight,
+            
+            // Second half (Remaining fields pushed to back)
+            'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid,
             'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost,
             'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost,
             'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector,
@@ -333,7 +341,81 @@
         }));
     }
 
-    // --- 3. AUTHENTICATION LOGIC ---
+    // --- 3. CUSTOM DRAG AND RESIZE ENGINE (V2 CACHE + FIXED STICKY HEADERS) ---
+    let dragSrcTh = null; let isResizing = false;
+    function applyTableInteractivity(containerId) {
+        const container = document.getElementById(containerId); if(!container) return;
+        const table = container.querySelector('table'); if(!table) return;
+        
+        let prefs = JSON.parse(localStorage.getItem('neo_prefs_v2_' + containerId)) || { order: [], widths: {} };
+        let headerRow = table.querySelector('thead tr'); if(!headerRow) return;
+        let headers = Array.from(headerRow.children);
+        
+        if(prefs.order && prefs.order.length > 0) {
+            let newHeaders = [];
+            prefs.order.forEach(title => {
+                let th = headers.find(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim() === title);
+                if(th) newHeaders.push(th);
+            });
+            headers.forEach(h => { if(!newHeaders.includes(h)) newHeaders.push(h); }); 
+            newHeaders.forEach(th => headerRow.appendChild(th)); 
+            let bodyRows = table.querySelectorAll('tbody tr');
+            bodyRows.forEach(tr => {
+                let cells = Array.from(tr.children);
+                newHeaders.forEach(th => {
+                    let originalIdx = headers.indexOf(th);
+                    if(cells[originalIdx]) tr.appendChild(cells[originalIdx]);
+                });
+            });
+            headers = newHeaders; 
+        }
+
+        headers.forEach((th, idx) => {
+            let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
+            // Removed: th.style.position = 'relative';  <- This was breaking the CSS position: sticky
+            
+            if(prefs.widths[cleanTitle]) {
+                th.style.width = prefs.widths[cleanTitle]; th.style.minWidth = prefs.widths[cleanTitle]; th.style.maxWidth = prefs.widths[cleanTitle];
+                table.querySelectorAll('tbody tr').forEach(tr => { let td = tr.children[idx]; if(td) { td.style.maxWidth = prefs.widths[cleanTitle]; td.style.minWidth = prefs.widths[cleanTitle]; } });
+            }
+
+            if(!th.querySelector('.resizer')){
+                let rs = document.createElement('div'); rs.className = 'resizer'; th.appendChild(rs);
+                let x=0, w=0;
+                rs.addEventListener('mousedown', e => {
+                    e.stopPropagation(); isResizing = true; x = e.clientX; w = th.offsetWidth; rs.style.background = '#0ea5e9';
+                    const move = ev => { 
+                        let nw = w + (ev.clientX - x); if(nw < 30) nw = 30; 
+                        th.style.width = nw + 'px'; th.style.minWidth = nw + 'px'; th.style.maxWidth = nw + 'px';
+                        let currentIdx = Array.from(headerRow.children).indexOf(th);
+                        table.querySelectorAll('tbody tr').forEach(tr => { let td = tr.children[currentIdx]; if(td) { td.style.maxWidth = nw + 'px'; td.style.minWidth = nw + 'px'; } });
+                    };
+                    const up = () => { 
+                        document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); 
+                        rs.style.background = 'transparent'; setTimeout(()=>isResizing=false, 100);
+                        prefs.widths[cleanTitle] = th.style.width; localStorage.setItem('neo_prefs_v2_' + containerId, JSON.stringify(prefs));
+                    };
+                    document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
+                });
+            }
+
+            th.draggable = true;
+            th.addEventListener('dragstart', e => { if(isResizing) { e.preventDefault(); return; } dragSrcTh = th; e.dataTransfer.effectAllowed = 'move'; th.classList.add('dragging'); });
+            th.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+            th.addEventListener('drop', e => {
+                e.stopPropagation(); dragSrcTh.classList.remove('dragging');
+                if(dragSrcTh !== th && !isResizing) {
+                    let allThs = Array.from(headerRow.children); let srcIdx = allThs.indexOf(dragSrcTh); let tgtIdx = allThs.indexOf(th);
+                    if(srcIdx < tgtIdx) th.after(dragSrcTh); else th.before(dragSrcTh);
+                    prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); localStorage.setItem('neo_prefs_v2_' + containerId, JSON.stringify(prefs));
+                    table.querySelectorAll('tbody tr').forEach(tr => { let c = Array.from(tr.children); if(c[srcIdx] && c[tgtIdx]) { if(srcIdx < tgtIdx) c[tgtIdx].after(c[srcIdx]); else c[tgtIdx].before(c[srcIdx]); } });
+                }
+            });
+            th.addEventListener('dragend', () => { if(dragSrcTh) dragSrcTh.classList.remove('dragging'); });
+        });
+    }
+
+    // --- 4. AUTHENTICATION LOGIC ---
     window.onload = async () => { 
         try { 
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -358,7 +440,7 @@
         sysLog("Session Verified. Booting System..."); setMasterStatus("Fetching data...", "mod-working"); await loadData();
     }
 
-    // --- 4. DATA LOADING ---
+    // --- 5. DATA LOADING ---
     async function loadData() {
         try {
             setSysProgress(10, 'working');
@@ -390,7 +472,8 @@
         if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); }
         if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); }
     }
-
+</script>
+<script>
     // --- 5. EXPORT / RESTORE SYSTEM ---
     async function exportDatabaseBackup() {
         if(typeof XLSX === 'undefined') return alert("SheetJS not loaded. Check internet connection.");
@@ -398,49 +481,31 @@
         try {
             const [lR, pR, cR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*'), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*') ]);
             if(lR.error) throw new Error("Ledger fetch failed");
-            
             const safeRecipes = (pR.data||[]).map(r => ({...r, components: JSON.stringify(r.components)}));
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lR.data||[]), "Ledger");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRecipes), "Recipes");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cR.data||[]), "Inventory");
-            
-            let d = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(wb, `Neogleamz_Backup_${d}.xlsx`);
-            
-            sysLog("Backup exported."); setSysProgress(100, 'success'); setMasterStatus("Backup Exported!", "mod-success"); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-        } catch (err) { sysLog("Backup failed: " + err.message, true); setSysProgress(100, 'error'); setMasterStatus("Backup Failed.", "mod-error"); }
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lR.data||[]), "Ledger"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRecipes), "Recipes"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cR.data||[]), "Inventory");
+            XLSX.writeFile(wb, `Neogleamz_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
+            sysLog("Exported."); setSysProgress(100, 'success'); setMasterStatus("Exported!", "mod-success"); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
+        } catch (err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
     }
 
     async function restoreDatabaseBackup(fileInput) {
         if(!fileInput.files.length || typeof XLSX === 'undefined') return;
         if(!confirm("⚠️ DANGER: This will permanently OVERWRITE your entire database with the selected backup file. Continue?")) { fileInput.value = ""; return; }
-        
-        sysLog("Starting database restore..."); setSysProgress(20, 'working'); setMasterStatus("Restoring Database...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
-        const file = fileInput.files[0]; const reader = new FileReader();
-        
+        sysLog("Starting restore..."); setSysProgress(20, 'working'); setMasterStatus("Restoring Database...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
+        const reader = new FileReader();
         reader.onload = async (e) => {
             try {
-                const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, {type: 'array'});
-                let ld = wb.Sheets["Ledger"] ? XLSX.utils.sheet_to_json(wb.Sheets["Ledger"]) : null;
-                let rd = wb.Sheets["Recipes"] ? XLSX.utils.sheet_to_json(wb.Sheets["Recipes"]) : null;
-                let id = wb.Sheets["Inventory"] ? XLSX.utils.sheet_to_json(wb.Sheets["Inventory"]) : null;
-                if(!ld && !rd && !id) throw new Error("Invalid backup format.");
-                
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+                let ld = wb.Sheets["Ledger"] ? XLSX.utils.sheet_to_json(wb.Sheets["Ledger"]) : null; let rd = wb.Sheets["Recipes"] ? XLSX.utils.sheet_to_json(wb.Sheets["Recipes"]) : null; let id = wb.Sheets["Inventory"] ? XLSX.utils.sheet_to_json(wb.Sheets["Inventory"]) : null;
+                if(!ld && !rd && !id) throw new Error("Invalid format.");
                 if (rd) rd = rd.map(r => ({ ...r, components: typeof r.components === 'string' ? JSON.parse(r.components) : r.components }));
-                setSysProgress(60, 'working'); sysLog("Pushing restore data to Supabase...");
-                
-                if(ld && ld.length) await supabaseClient.from('full_landed_costs').upsert(ld);
-                if(rd && rd.length) await supabaseClient.from('product_recipes').upsert(rd);
-                if(id && id.length) await supabaseClient.from('inventory_consumption').upsert(id);
-                
-                sysLog("Restore Complete! Reloading..."); setSysProgress(100, 'success'); setMasterStatus("Restore Successful!", "mod-success");
-                fileInput.value = ""; await loadData(); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-            } catch(err) { sysLog("Restore failed: " + err.message, true); setSysProgress(100, 'error'); setMasterStatus("Restore Failed.", "mod-error"); }
-        }; reader.readAsArrayBuffer(file);
+                setSysProgress(60, 'working'); sysLog("Pushing...");
+                if(ld && ld.length) await supabaseClient.from('full_landed_costs').upsert(ld); if(rd && rd.length) await supabaseClient.from('product_recipes').upsert(rd); if(id && id.length) await supabaseClient.from('inventory_consumption').upsert(id);
+                sysLog("Complete!"); setSysProgress(100, 'success'); setMasterStatus("Success!", "mod-success"); fileInput.value = ""; await loadData(); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
+            } catch(err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
+        }; reader.readAsArrayBuffer(fileInput.files[0]);
     }
-</script>
-<script>
+
     // --- 6. SHARED RENDERERS & SORTING ---
     function renderColToggles() {
         if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return;
@@ -452,6 +517,7 @@
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderBothTables(); renderColToggles(); }
 
     function sortData(column, keepDirection = false) {
+        if(isResizing) return;
         if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' };
         finalResults.sort((a, b) => {
             let vA = a[column]; let vB = b[column];
@@ -477,6 +543,7 @@
             }).join('') + "</tr>";
         });
         document.getElementById(containerId).innerHTML = h + "</tbody></table>";
+        applyTableInteractivity(containerId);
     }
 
     let oldValTemp = ""; function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
@@ -508,40 +575,13 @@
             const name = document.getElementById('m_name').value.trim(); 
             const qty = parseFloat(document.getElementById('m_qty').value); 
             const cost = parseFloat(document.getElementById('m_cost').value);
-            
             if(!name || isNaN(cost) || isNaN(qty) || qty <= 0) return alert("Valid Name, Qty & Cost required.");
-            
             sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
-            
-            let payload = {};
-            const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification'];
-            
-            Object.values(colMap).forEach(dbCol => {
-                if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } 
-                else { payload[dbCol] = 0; }
-            });
-
-            payload.parcel_no = 'MANUAL';
-            payload.di_item_id = 'MANUAL-' + Date.now();
-            payload.order_no = 'MANUAL';
-            payload.alibaba_order = 'MANUAL';
-            payload.item_name = name;
-            payload.neogleamz_name = document.getElementById('m_neo_name').value.trim();
-            payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim();
-            payload.specification = document.getElementById('m_spec').value.trim();
-            payload.quantity = qty;
-            payload.order_unit_price = cost/qty;
-            payload.unit_china_landed_price = cost/qty;
-            payload.final_cost_weight = cost/qty;
-            payload.total_cost_weight = cost;
-            payload.order_total = cost;
-            payload.order_date = new Date().toISOString().split('T')[0];
-
-            const { error } = await supabaseClient.from('full_landed_costs').insert(payload);
-            if (error) throw new Error(error.message);
-            
-            ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; 
-            await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
+            let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification'];
+            Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } else { payload[dbCol] = 0; } });
+            payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_total = cost; payload.order_date = new Date().toISOString().split('T')[0];
+            const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message);
+            ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
         } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); }
     }
 
@@ -549,8 +589,7 @@
         if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return;
         sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; setSysProgress(20, 'working');
         try {
-            let dict = {};
-            finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; });
+            let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; });
             let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neo Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); });
             if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000); return; }
             sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working');
@@ -559,7 +598,7 @@
         } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
     }
 
-    // --- 7. CATALOG & INVENTORY ---
+    // --- 7. CATALOG, INVENTORY & WAC MATH ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
 
     function buildCatalogCache() {
@@ -567,56 +606,25 @@
             let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim();
             let k = `${nn}:::${np}:::${inam}:::${sp}`;
             if (k === "::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: inam, spec: sp, totalCostSum: 0, totalQty: 0 };
-            let qty = parseFloat(r['Quantity']) || 1; catalogCache[k].totalCostSum += (parseFloat(r['Final Landed Cost ($)']) || 0) * qty; catalogCache[k].totalQty += qty;
+            let qty = parseFloat(r['Quantity']) || 1; catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += qty;
         });
         Object.keys(catalogCache).forEach(k => catalogCache[k].avgUnitCost = catalogCache[k].totalCostSum / (catalogCache[k].totalQty || 1));
     }
 
     function calculateProductTotal(pName, visited = new Set()) {
         if (visited.has(pName)) return 0; visited.add(pName); let tot = 0;
-        (productsDB[pName] || []).forEach(part => {
-            let k = String(part.item_key || part.di_item_id || part.name || ""); let q = parseFloat(part.quantity || part.qty) || 1;
-            if (k.startsWith('RECIPE:::')) tot += (calculateProductTotal(k.replace('RECIPE:::', ''), new Set(visited)) * q); else if (catalogCache[k]) tot += (catalogCache[k].avgUnitCost * q);
-        }); return tot;
+        (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = parseFloat(part.quantity || part.qty) || 1; if (k.startsWith('RECIPE:::')) tot += (calculateProductTotal(k.replace('RECIPE:::', ''), new Set(visited)) * q); else if (catalogCache[k]) tot += (catalogCache[k].avgUnitCost * q); }); return tot;
     }
 
     function getRawMaterials(pName, mult = 1, map = {}, vis = new Set()) {
         if (vis.has(pName)) return map; vis.add(pName);
-        (productsDB[pName] || []).forEach(part => {
-            let k = String(part.item_key || part.di_item_id || part.name || ""); let q = (parseFloat(part.quantity || part.qty) || 1) * mult;
-            if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); else { map[k] = (map[k] || 0) + q; }
-        }); return map;
+        (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = (parseFloat(part.quantity || part.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); else { map[k] = (map[k] || 0) + q; } }); return map;
     }
 
-    // UPDATED: Structured Visual Dropdown with Emojis and Columns
     function populateDropdowns() {
         try {
-            let recipes = `<optgroup label="📦 SUB-ASSEMBLIES (Your Products)">` + Object.keys(productsDB).sort().map(p => {
-                let cost = calculateProductTotal(p).toFixed(2);
-                return `<option value="RECIPE:::${p}">🟢 [Product] ${p}   ━━━━   💰 $${cost}/unit</option>`;
-            }).join('') + `</optgroup>`;
-
-            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => {
-                let x = fmtKey(a), y = fmtKey(b); 
-                if (x.np && !y.np) return -1; if (!x.np && y.np) return 1;
-                if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1;
-                return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in);
-            }).map(k => {
-                let d = fmtKey(k);
-                let np = d.np ? `【${d.np}】` : `【Uncategorized】`;
-                let nn = d.nn ? `🔸 ${d.nn}` : ``;
-                let inam = `📦 ${truncText(d.in, 45)}`;
-                let sp = d.sp ? `⚙️ ${truncText(d.sp, 35)}` : ``;
-                
-                let textParts = [np];
-                if (nn) textParts.push(nn);
-                textParts.push(` |  ${inam}`);
-                if (sp) textParts.push(` |  ${sp}`);
-                
-                let cost = catalogCache[k].avgUnitCost.toFixed(4);
-                return `<option value="${k}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`;
-            }).join('') + `</optgroup>`;
-            
+            let recipes = `<optgroup label="📦 SUB-ASSEMBLIES (Your Products)">` + Object.keys(productsDB).sort().map(p => { let cost = calculateProductTotal(p).toFixed(2); return `<option value="RECIPE:::${p}">🟢 [Product] ${p}   ━━━━   💰 $${cost}/unit</option>`; }).join('') + `</optgroup>`;
+            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = fmtKey(k); let np = d.np ? `【${d.np}】` : `【Uncategorized】`; let nn = d.nn ? `🔸 ${d.nn}` : ``; let inam = `📦 ${truncText(d.in, 45)}`; let sp = d.sp ? `⚙️ ${truncText(d.sp, 35)}` : ``; let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = catalogCache[k].avgUnitCost.toFixed(4); return `<option value="${k}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
             const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipes + raws;
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📦 ${p}</option>`).join('');
         } catch(e) {}
@@ -665,6 +673,7 @@
             let ec = uc*q; gt+=ec; let sk = k.replace(/"/g,'&quot;');
             tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--text-heading);">${nn}</td><td style="color:var(--text-muted);">${np}</td><td>${n}</td><td>${sp}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${q}</td><td class="text-right">$${uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`;
         }); document.getElementById('bomTotalCost').innerText = `$${gt.toFixed(2)}`;
+        applyTableInteractivity('bomTableWrap');
     }
 
     function renderInventoryTable() {
@@ -685,9 +694,14 @@
             let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = x.k.replace(/'/g,"\\'");
             tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td style="color:var(--text-muted);">${x.np}</td><td style="font-weight:bold;">${truncText(x.n,50)}</td><td>${truncText(x.sp,50)}</td><td class="text-right">$${x.up.toFixed(4)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`;
         });
+        applyTableInteractivity('invTableWrap');
     }
 
-    function sortInventory(c) { currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
+    function sortInventory(c) { 
+        if(isResizing) return;
+        currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; 
+        renderInventoryTable(); 
+    }
 
     async function handleInvEdit(cell, key, p, c, a, mode) {
         try {
@@ -742,8 +756,27 @@
         for(let f of files) {
             const d = new DOMParser().parseFromString(await f.text(), 'text/html');
             Array.from(d.querySelectorAll('tbody, table, .order-list-item')).filter(el=>el.innerText.includes("Order No：")).forEach(b => {
-                let bt = b.innerText; let oNo = (bt.match(/DO\d+/)||["N/A"])[0]; let dt = (bt.match(/\d{4}-\d{2}-\d{2}/)||[""])[0]; let oTot = bt.match(/Total Amount:.*?[￥$]\s*([\d.]+)/i)?parseFloat(bt.match(/Total Amount:.*?[￥$]\s*([\d.]+)/i)[1]):0; let post = bt.match(/Postage Inclusive:.*?[￥$]\s*([\d.]+)/i)?parseFloat(bt.match(/Postage Inclusive:.*?[￥$]\s*([\d.]+)/i)[1]):0;
-                let trs = Array.from(b.querySelectorAll('tr')).filter(r=>r.innerText.match(/DI\d+/)); let tq=0; trs.forEach(r=>{ let cs=r.querySelectorAll('td'); if(cs.length>=3) tq+=parseInt(cs[2].innerText.replace(/[^0-9]/g,''))||0; });
+                let bt = b.innerText; let oNo = (bt.match(/DO\d+/)||["N/A"])[0]; let dt = (bt.match(/\d{4}-\d{2}-\d{2}/)||[""])[0]; 
+                let oTot = bt.match(/Total Amount:.*?[￥$]\s*([\d.]+)/i)?parseFloat(bt.match(/Total Amount:.*?[￥$]\s*([\d.]+)/i)[1]):0; 
+                let post = bt.match(/Postage Inclusive:.*?[￥$]\s*([\d.]+)/i)?parseFloat(bt.match(/Postage Inclusive:.*?[￥$]\s*([\d.]+)/i)[1]):0;
+                
+                let trs = Array.from(b.querySelectorAll('tr')).filter(r=>r.innerText.match(/DI\d+/)); 
+                let tq=0; let tBaseCost = 0;
+                
+                trs.forEach(r=>{ 
+                    let cs=r.querySelectorAll('td'); 
+                    if(cs.length>=3) {
+                        let q = parseInt(cs[2].innerText.replace(/[^0-9]/g,''))||1; 
+                        let upMatch = r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/);
+                        let up = upMatch ? parseFloat(upMatch[1]) : 0;
+                        tq += q; 
+                        tBaseCost += (up * q);
+                    }
+                });
+                
+                let hiddenFee = oTot - tBaseCost; if (hiddenFee < 0) hiddenFee = 0; 
+                let feePerItem = tq > 0 ? (hiddenFee / tq) : 0;
+
                 trs.forEach(r => {
                     let m = r.innerText.match(/DI\d+/); if(m && !r.innerText.includes("Order No：")){
                         let id = m[0], pn = ""; Array.from(r.querySelectorAll('a')).forEach(l=>{let t=l.getAttribute('title'),x=l.innerText.trim(); if(t&&t.length>10){pn=t;return;} if(x&&x.length>15&&!x.includes("DI26")){pn=x;return;}});
@@ -751,8 +784,13 @@
                         pn = pn.replace('代购商品','').trim(); let sm = r.innerText.match(/(?:Specification model|specification|Product specifications|model|Color|size|power|Light color|Applicable Model)[：:]\s*([^\n\t\r]+)/i);
                         let sp = sm ? sm[1].trim().replace(/(?:Specification model|specification|Product specifications|model|Color|size|power|Light color|Applicable Model)[：:]/gi,'').trim() : "";
                         pn = pn.replace(/(?:Specification model|specification|Product specifications|model|Color|size|power|Light color|Applicable Model)[：:].*/i,'').trim(); if(sp&&pn.includes(sp)) pn=pn.replace(sp,'').trim(); pn=pn.replace(/[-\s,：:]+$/,'').trim();
-                        let tId = r.innerText.match(/(?:ALIBABA|TB|Order):([\d-]+)/i)?r.innerText.match(/(?:ALIBABA|TB|Order):([\d-]+)/i)[1]:""; let up = r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/)?parseFloat(r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/)[1]):0; let q = parseInt(r.querySelectorAll('td')[2]?.innerText.replace(/[^0-9]/g,''))||1;
-                        a.push({di_item_id:id, order_date:dt, order_no:oNo, alibaba_order:tId, item_name:pn, specification:sp, unit_price:up, quantity:q, postage:post, order_total:oTot, unit_china_landed_price:tq>0?(oTot/tq):0});
+                        let tId = r.innerText.match(/(?:ALIBABA|TB|Order):([\d-]+)/i)?r.innerText.match(/(?:ALIBABA|TB|Order):([\d-]+)/i)[1]:""; 
+                        let up = r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/)?parseFloat(r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/)[1]):0; 
+                        let q = parseInt(r.querySelectorAll('td')[2]?.innerText.replace(/[^0-9]/g,''))||1;
+                        
+                        let uclp = up + feePerItem;
+                        
+                        a.push({di_item_id:id, order_date:dt, order_no:oNo, alibaba_order:tId, item_name:pn, specification:sp, unit_price:up, quantity:q, postage:post, order_total:oTot, unit_china_landed_price:uclp});
                     }
                 });
             });
@@ -799,9 +837,17 @@
             let dI=[];
             iR.data.forEach(i => {
                 let pN=i.parcel_no, d=i.di_item_id; let o=oM[d]||{}, s=sM[pN]||{}, e=eM[`${pN}_${d}`]||{};
-                let q=e.quantity||i.quantity||1; let up=Number(o.unit_price)||0; let tw=Number(i.total_dist_weight_g)||0; let psc=Number(s.actual_paid)||0; let ptw=pT[pN].w||1;
-                let uws=q>0?((tw/ptw)*psc/q):0; let fuc=up+uws;
-                dI.push({ parcel_no:pN, di_item_id:d, item_name:i.item_name||o.item_name||"", specification:i.specification||o.specification||"", quantity:q, neogleamz_name:e.neogleamz_name||'', neogleamz_product:e.neogleamz_product||'', total_dist_weight_g:tw, unit_weight_g:i.unit_weight_g, order_date:o.order_date, order_no:o.order_no, alibaba_order:o.alibaba_order, order_unit_price:up, order_postage:o.postage, order_total:o.order_total, unit_china_landed_price:o.unit_china_landed_price, actual_paid:s.actual_paid, actual_chargeable_weight_g:s.actual_chargeable_weight_g, actual_shipping_fee:s.actual_shipping_fee, first_tier_cost:s.first_tier_cost, second_tier_cost:s.second_tier_cost, custom_clearance_fee:s.custom_clearance_fee, remote_area_surcharge:s.remote_area_surcharge, fuel_surcharge:s.fuel_surcharge, operating_cost:s.operating_cost, tax:s.tax, insurance:s.insurance, storage_fee:s.storage_fee, epe_loose_filling:s.epe_loose_filling, corner_protector:s.corner_protector, moister_barrier_bag:s.moister_barrier_bag, packing_video:s.packing_video, one_percent_discount:s.one_percent_discount, points_discount:s.points_discount, coupon_discount:s.coupon_discount, discount_code:s.discount_code, unit_ship_weight:uws, final_cost_weight:fuc, total_cost_weight:fuc*q });
+                let q=e.quantity||i.quantity||1; 
+                let up=Number(o.unit_price)||0; 
+                let uclp=Number(o.unit_china_landed_price)||up; 
+                let tw=Number(i.total_dist_weight_g)||0; 
+                let psc=Number(s.actual_paid)||0; 
+                let ptw=pT[pN].w||1;
+                
+                let uws=q>0?((tw/ptw)*psc/q):0; 
+                let fuc=uclp+uws;
+                
+                dI.push({ parcel_no:pN, di_item_id:d, item_name:i.item_name||o.item_name||"", specification:i.specification||o.specification||"", quantity:q, neogleamz_name:e.neogleamz_name||'', neogleamz_product:e.neogleamz_product||'', total_dist_weight_g:tw, unit_weight_g:i.unit_weight_g, order_date:o.order_date, order_no:o.order_no, alibaba_order:o.alibaba_order, order_unit_price:up, order_postage:o.postage, order_total:o.order_total, unit_china_landed_price:uclp, actual_paid:s.actual_paid, actual_chargeable_weight_g:s.actual_chargeable_weight_g, actual_shipping_fee:s.actual_shipping_fee, first_tier_cost:s.first_tier_cost, second_tier_cost:s.second_tier_cost, custom_clearance_fee:s.custom_clearance_fee, remote_area_surcharge:s.remote_area_surcharge, fuel_surcharge:s.fuel_surcharge, operating_cost:s.operating_cost, tax:s.tax, insurance:s.insurance, storage_fee:s.storage_fee, epe_loose_filling:s.epe_loose_filling, corner_protector:s.corner_protector, moister_barrier_bag:s.moister_barrier_bag, packing_video:s.packing_video, one_percent_discount:s.one_percent_discount, points_discount:s.points_discount, coupon_discount:s.coupon_discount, discount_code:s.discount_code, unit_ship_weight:uws, final_cost_weight:fuc, total_cost_weight:fuc*q });
             });
             sysLog(`Pushing ${dI.length} rows...`); setSysProgress(80, 'working');
             const {error} = await supabaseClient.from('full_landed_costs').upsert(dI, {onConflict:'parcel_no, di_item_id'}); if(error) throw new Error(error.message);
