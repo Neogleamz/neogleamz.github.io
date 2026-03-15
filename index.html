@@ -31,6 +31,7 @@
             --tab-hover: #334155; --tab-active-bg: #1e293b;
         }
 
+        /* FLEXBOX FRAMEWORK */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-container); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px var(--shadow-color); transition: background-color 0.3s; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         
@@ -101,6 +102,7 @@
         .product-list li { padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-input); margin-bottom: 4px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; transition: all 0.2s; color: var(--text-main); font-size: 13px; }
         .product-list li:hover { border-color: #3b82f6; }
         .product-list li.selected { background: #3b82f6 !important; color: white !important; border-color: #2563eb; }
+        .product-list li .prod-cost { font-weight: normal; opacity: 0.9; }
         
         .bom-main { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px var(--shadow-color); display: flex; flex-direction: column; min-height: 0; }
         .bom-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; flex-shrink: 0; }
@@ -278,10 +280,12 @@
                                 <th onclick="sortInventory('np')">Neo Product <span class="inv-sort-arrow"></span></th>
                                 <th onclick="sortInventory('n')">Item Name <span class="inv-sort-arrow"></span></th>
                                 <th onclick="sortInventory('sp')">Spec <span class="inv-sort-arrow"></span></th>
+                                <th class="text-right" onclick="sortInventory('up')">Avg Unit Price <span class="inv-sort-arrow"></span></th>
                                 <th class="text-right" onclick="sortInventory('p')">Purchased <span class="inv-sort-arrow"></span></th>
                                 <th class="text-right" onclick="sortInventory('c')" style="border-bottom:3px solid #ef4444;">Consumed ✏️ <span class="inv-sort-arrow"></span></th>
                                 <th class="text-right" onclick="sortInventory('a')">Manual Adj. <span class="inv-sort-arrow"></span></th>
                                 <th class="text-right" onclick="sortInventory('s')" style="border-bottom:3px solid #f59e0b;">Current Stock ✏️ <span class="inv-sort-arrow"></span></th>
+                                <th class="text-right" onclick="sortInventory('tp')">Avg Total Price <span class="inv-sort-arrow"></span></th>
                             </tr>
                         </thead>
                         <tbody id="inventoryBody"></tbody>
@@ -298,14 +302,7 @@
     <div id="debugLog" style="display: none;"></div>
 </div>
 <script>
-    // --- 1. GLOBALS & INIT ---
-    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
-    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
-    let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
-    let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; let currentInvSort = { column: 'nn', direction: 'asc' }; 
-    const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Specification': 'specification', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
-
-    // --- 2. THEME & DIAGNOSTICS ---
+    // --- 1. THEME & DIAGNOSTICS ---
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; });
     function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️" : "🌙"; sysLog(`Theme switched to ${nt}.`); }
     function sysLog(msg, isError = false) { try { const b = document.getElementById('debugLog'); if(!b) return; const t = new Date().toLocaleTimeString(); const c = isError ? '#ef4444' : '#10b981'; b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; b.scrollTop = b.scrollHeight; if(isError) console.error(msg); else console.log(msg); } catch(e) { console.error(e); } }
@@ -313,7 +310,29 @@
     function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▼'; } else { b.style.display = 'none'; t.innerText = '▲'; } } catch(e) {} }
     function setMasterStatus(msg, type) { try { const e = document.getElementById('statusMaster'); if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } } catch(e) {} }
     function truncText(str, max = 50) { return !str ? "" : (String(str).length > max ? String(str).substring(0, max) + '...' : String(str)); }
-    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Specification': r.specification, 'Quantity': r.quantity, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Unit Price': r.order_unit_price, 'Order Postage': r.order_postage, 'Unit China Landed Price': r.unit_china_landed_price, 'Order Total': r.order_total, 'Actual Paid (Parcel)': r.actual_paid, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Total Landed Cost ($)': r.total_cost_weight, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
+
+    // --- 2. GLOBAL STATE & DB INIT ---
+    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
+    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
+    let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
+    let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; let currentInvSort = { column: 'nn', direction: 'asc' }; 
+
+    const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Specification': 'specification', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
+
+    function mapToUI(dbData) {
+        return dbData.map(r => ({
+            '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 
+            'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order,
+            'Item Name': r.item_name, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Specification': r.specification, 'Quantity': r.quantity, 
+            'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g,
+            'Order Unit Price': r.order_unit_price, 'Order Postage': r.order_postage, 'Unit China Landed Price': r.unit_china_landed_price, 'Order Total': r.order_total, 'Actual Paid (Parcel)': r.actual_paid,
+            'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Total Landed Cost ($)': r.total_cost_weight,
+            'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost,
+            'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost,
+            'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector,
+            'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code
+        }));
+    }
 
     // --- 3. AUTHENTICATION LOGIC ---
     window.onload = async () => { 
@@ -346,6 +365,7 @@
             setSysProgress(10, 'working');
             const [lR, pR, cR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*') ]);
             if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message);
+
             setSysProgress(40, 'working');
             if (lR.data && lR.data.length > 0) {
                 sysLog(`Ledger Loaded: ${lR.data.length} rows.`); finalResults = mapToUI(lR.data); 
@@ -353,10 +373,13 @@
                 buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true);
                 setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 3000);
             } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
+
             setSysProgress(60, 'working');
             inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
+            
             setSysProgress(80, 'working');
             if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); }
+
             renderInventoryTable(); populateDropdowns(); setSysProgress(100, 'success'); sysLog("Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
@@ -376,48 +399,66 @@
         try {
             const [lR, pR, cR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*'), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*') ]);
             if(lR.error) throw new Error("Ledger fetch failed");
+            
             const safeRecipes = (pR.data||[]).map(r => ({...r, components: JSON.stringify(r.components)}));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lR.data||[]), "Ledger"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRecipes), "Recipes"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cR.data||[]), "Inventory");
-            XLSX.writeFile(wb, `Neogleamz_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
-            sysLog("Exported."); setSysProgress(100, 'success'); setMasterStatus("Exported!", "mod-success"); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-        } catch (err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lR.data||[]), "Ledger");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRecipes), "Recipes");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cR.data||[]), "Inventory");
+            
+            let d = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `Neogleamz_Backup_${d}.xlsx`);
+            
+            sysLog("Backup exported."); setSysProgress(100, 'success'); setMasterStatus("Backup Exported!", "mod-success"); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
+        } catch (err) { sysLog("Backup failed: " + err.message, true); setSysProgress(100, 'error'); setMasterStatus("Backup Failed.", "mod-error"); }
     }
 
     async function restoreDatabaseBackup(fileInput) {
         if(!fileInput.files.length || typeof XLSX === 'undefined') return;
         if(!confirm("⚠️ DANGER: This will permanently OVERWRITE your entire database with the selected backup file. Continue?")) { fileInput.value = ""; return; }
-        sysLog("Starting restore..."); setSysProgress(20, 'working'); setMasterStatus("Restoring Database...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
-        const reader = new FileReader();
+        
+        sysLog("Starting database restore..."); setSysProgress(20, 'working'); setMasterStatus("Restoring Database...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
+        const file = fileInput.files[0]; const reader = new FileReader();
+        
         reader.onload = async (e) => {
             try {
-                const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
-                let ld = wb.Sheets["Ledger"] ? XLSX.utils.sheet_to_json(wb.Sheets["Ledger"]) : null; let rd = wb.Sheets["Recipes"] ? XLSX.utils.sheet_to_json(wb.Sheets["Recipes"]) : null; let id = wb.Sheets["Inventory"] ? XLSX.utils.sheet_to_json(wb.Sheets["Inventory"]) : null;
-                if(!ld && !rd && !id) throw new Error("Invalid format.");
+                const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, {type: 'array'});
+                let ld = wb.Sheets["Ledger"] ? XLSX.utils.sheet_to_json(wb.Sheets["Ledger"]) : null;
+                let rd = wb.Sheets["Recipes"] ? XLSX.utils.sheet_to_json(wb.Sheets["Recipes"]) : null;
+                let id = wb.Sheets["Inventory"] ? XLSX.utils.sheet_to_json(wb.Sheets["Inventory"]) : null;
+                if(!ld && !rd && !id) throw new Error("Invalid backup format.");
+                
                 if (rd) rd = rd.map(r => ({ ...r, components: typeof r.components === 'string' ? JSON.parse(r.components) : r.components }));
-                setSysProgress(60, 'working'); sysLog("Pushing...");
-                if(ld && ld.length) await supabaseClient.from('full_landed_costs').upsert(ld); if(rd && rd.length) await supabaseClient.from('product_recipes').upsert(rd); if(id && id.length) await supabaseClient.from('inventory_consumption').upsert(id);
-                sysLog("Complete!"); setSysProgress(100, 'success'); setMasterStatus("Success!", "mod-success"); fileInput.value = ""; await loadData(); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-            } catch(err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
-        }; reader.readAsArrayBuffer(fileInput.files[0]);
+                setSysProgress(60, 'working'); sysLog("Pushing restore data to Supabase...");
+                
+                if(ld && ld.length) await supabaseClient.from('full_landed_costs').upsert(ld);
+                if(rd && rd.length) await supabaseClient.from('product_recipes').upsert(rd);
+                if(id && id.length) await supabaseClient.from('inventory_consumption').upsert(id);
+                
+                sysLog("Restore Complete! Reloading..."); setSysProgress(100, 'success'); setMasterStatus("Restore Successful!", "mod-success");
+                fileInput.value = ""; await loadData(); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
+            } catch(err) { sysLog("Restore failed: " + err.message, true); setSysProgress(100, 'error'); setMasterStatus("Restore Failed.", "mod-error"); }
+        }; reader.readAsArrayBuffer(file);
     }
-
+</script>
+<script>
     // --- 6. SHARED RENDERERS & SORTING ---
     function renderColToggles() {
         if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return;
         c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => {
-            let b = hiddenSimpleCols.has(key) ? '#ef4444' : '#10b981';
-            return `<button onclick="toggleSimpleCol('${key.replace(/'/g, "\\'")}')" style="background-color: ${b}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`;
+            let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981';
+            return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`;
         }).join('');
     }
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderBothTables(); renderColToggles(); }
 
     function sortData(column, keepDirection = false) {
         if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' };
-        finalResults.sort((a, b) => { 
-            let vA = a[column]; let vB = b[column]; 
-            if (typeof vA === 'number' && typeof vB === 'number') return currentSort.direction === 'asc' ? vA - vB : vB - vA;
-            vA = (vA ?? "").toString().toLowerCase(); vB = (vB ?? "").toString().toLowerCase(); 
-            if (vA < vB) return currentSort.direction === 'asc' ? -1 : 1; if (vA > vB) return currentSort.direction === 'asc' ? 1 : -1; 
+        finalResults.sort((a, b) => {
+            let vA = a[column]; let vB = b[column];
+            if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; }
+            let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase();
+            if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; 
             return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); 
         }); renderBothTables();
     }
@@ -425,7 +466,8 @@
     function renderBothTables() { renderLedgerView(false, 'results'); renderLedgerView(true, 'simpleResults'); }
 
     function renderLedgerView(isSimple, containerId) {
-        if (finalResults.length === 0) return; let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
+        if (finalResults.length === 0) return;
+        let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
         let h = "<table><thead><tr>" + keys.map(k => `<th onclick="sortData('${k.replace(/'/g, "\\'")}')">${k} ✏️ <span class="sort-arrow">${currentSort.column === k ? (currentSort.direction === 'asc' ? "▲" : "▼") : ""}</span></th>`).join('') + "</tr></thead><tbody>";
         finalResults.forEach(r => {
             h += "<tr>" + keys.map(k => {
@@ -434,7 +476,8 @@
                 if (['Item Name', 'Specification', 'Alibaba Order', 'DI Item ID'].includes(k)) cls += ' trunc-col';
                 return `<td class="${cls}" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateDBCell(this, '${r._RowKey}', '${k.replace(/'/g, "\\'")}', ${isN})">${dVal}</td>`;
             }).join('') + "</tr>";
-        }); document.getElementById(containerId).innerHTML = h + "</tbody></table>";
+        });
+        document.getElementById(containerId).innerHTML = h + "</tbody></table>";
     }
 
     let oldValTemp = ""; function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
@@ -452,7 +495,9 @@
                 else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } 
                 else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; }
             }
-            let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message);
+            let [pNo, di] = rowKey.split(':::');
+            const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di);
+            if (error) throw new Error(error.message);
             setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000);
             if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderBothTables(); }
             setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
@@ -463,7 +508,7 @@
         try {
             const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value);
             if(!name || isNaN(cost) || isNaN(qty) || qty <= 0) return alert("Valid Name, Qty & Cost required.");
-            sysLog(`Add Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
+            sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
             const { error } = await supabaseClient.from('full_landed_costs').insert({ parcel_no: 'MANUAL', di_item_id: 'MANUAL-' + Date.now(), item_name: name, neogleamz_name: document.getElementById('m_neo_name').value.trim(), neogleamz_product: document.getElementById('m_neo_prod').value.trim(), specification: document.getElementById('m_spec').value.trim(), quantity: qty, order_unit_price: cost/qty, final_cost_weight: cost/qty, total_cost_weight: cost, unit_weight_g: 0, total_dist_weight_g: 0, order_postage: 0, order_total: cost, unit_china_landed_price: cost/qty, actual_paid: 0, actual_chargeable_weight_g: 0, actual_shipping_fee: 0, unit_ship_weight: 0, order_date: new Date().toISOString().split('T')[0] });
             if (error) throw new Error(error.message);
             ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
@@ -483,9 +528,8 @@
             sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000);
         } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
     }
-</script>
-<script>
-    // --- 7. CATALOG, BOM, INVENTORY ---
+
+    // --- 7. CATALOG & INVENTORY (DRY) ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
 
     function buildCatalogCache() {
@@ -577,10 +621,10 @@
     function renderInventoryTable() {
         const tb = document.getElementById('inventoryBody'); if(!tb) return; tb.innerHTML="";
         let a = Object.keys(catalogCache).map(k => {
-            let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed:0, adjustment:0};
-            return { k:k, nn:f.nn, np:f.np, n:f.in, sp:f.sp, p:c.totalQty, c:i.consumed, a:i.adjustment, s:c.totalQty-i.consumed+i.adjustment };
+            let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed:0, adjustment:0}; let s=c.totalQty-i.consumed+i.adjustment; let up=c.avgUnitCost||0; let tp=s*up;
+            return { k:k, nn:f.nn, np:f.np, n:f.in, sp:f.sp, p:c.totalQty, c:i.consumed, a:i.adjustment, s:s, up:up, tp:tp };
         });
-        if(a.length===0){ tb.innerHTML="<tr><td colspan='8' style='text-align:center;'>No inventory.</td></tr>"; return; }
+        if(a.length===0){ tb.innerHTML="<tr><td colspan='10' style='text-align:center;'>No inventory.</td></tr>"; return; }
         document.querySelectorAll('.inv-sort-arrow').forEach(e => e.innerText=""); let ah=document.querySelector(`th[onclick="sortInventory('${currentInvSort.column}')"] .inv-sort-arrow`); if(ah) ah.innerText = currentInvSort.direction==='asc'?"▲":"▼";
         a.sort((x,y) => { 
             let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; 
@@ -590,7 +634,7 @@
         });
         a.forEach(x => {
             let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = x.k.replace(/'/g,"\\'");
-            tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td style="color:var(--text-muted);">${x.np}</td><td style="font-weight:bold;">${truncText(x.n,50)}</td><td>${truncText(x.sp,50)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td></tr>`;
+            tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td style="color:var(--text-muted);">${x.np}</td><td style="font-weight:bold;">${truncText(x.n,50)}</td><td>${truncText(x.sp,50)}</td><td class="text-right">$${x.up.toFixed(4)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`;
         });
     }
 
