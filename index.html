@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     
     <script>
+        // Temporary local cache to prevent blinding flashes before cloud data loads
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
     </script>
@@ -344,7 +345,16 @@
 <script>
     // --- 1. THEME & DIAGNOSTICS ---
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; });
-    function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️" : "🌙"; sysLog(`Theme switched to ${nt}.`); }
+    
+    function toggleTheme() { 
+        const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; 
+        document.documentElement.setAttribute("data-theme", nt); 
+        localStorage.setItem("theme", nt); 
+        document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️" : "🌙"; 
+        sysLog(`Theme switched to ${nt}.`); 
+        saveCloudPrefs(); // Push to cloud!
+    }
+
     function sysLog(msg, isError = false) { try { const b = document.getElementById('debugLog'); if(!b) return; const t = new Date().toLocaleTimeString(); const c = isError ? '#ef4444' : '#10b981'; b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; b.scrollTop = b.scrollHeight; if(isError) console.error(msg); else console.log(msg); } catch(e) { console.error(e); } }
     function setSysProgress(val, state = 'working') { try { const b = document.getElementById('sysProgress'); if(b) { b.value = val; b.className = 'prog-' + state; } } catch(e) {} }
     function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▼'; } else { b.style.display = 'none'; t.innerText = '▲'; } } catch(e) {} }
@@ -357,7 +367,9 @@
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
     let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     
-    // UI SORTING STATES
+    // CLOUD PREFS
+    window.cloudTablePrefs = {};
+
     let currentInvSort = { column: 'nn', direction: 'asc' }; 
     let currentBOMSort = { column: 'nn', direction: 'asc' };
     let currentBulkSort = { column: 'nn', direction: 'asc' };
@@ -380,13 +392,41 @@
         }));
     }
 
-    // --- 3. CUSTOM DRAG AND RESIZE ENGINE ---
+    // --- 3. CLOUD PREFERENCES ENGINE ---
+    async function loadCloudPrefs() {
+        try {
+            const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs').single();
+            if (data && data.setting_value) {
+                let p = data.setting_value;
+                if (p.theme) {
+                    document.documentElement.setAttribute("data-theme", p.theme);
+                    document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️" : "🌙";
+                    localStorage.setItem("theme", p.theme); 
+                }
+                if (p.tables) window.cloudTablePrefs = p.tables;
+                sysLog("Cloud preferences loaded.");
+            }
+        } catch(e) { sysLog("No cloud prefs found. Using standard layout."); window.cloudTablePrefs = {}; }
+    }
+
+    async function saveCloudPrefs() {
+        try {
+            let theme = document.documentElement.getAttribute("data-theme");
+            let payload = { theme: theme, tables: window.cloudTablePrefs || {} };
+            sysLog("Saving layout to cloud...");
+            await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs', setting_value: payload });
+        } catch(e) { sysLog("Failed to save layout to cloud.", true); }
+    }
+
+    // --- 4. CUSTOM DRAG AND RESIZE ENGINE (Cloud Synced) ---
     let dragSrcTh = null; let isResizing = false;
     function applyTableInteractivity(containerId) {
         const container = document.getElementById(containerId); if(!container) return;
         const table = container.querySelector('table'); if(!table) return;
         
-        let prefs = JSON.parse(localStorage.getItem('neo_prefs_v3_' + containerId)) || { order: [], widths: {} };
+        if(!window.cloudTablePrefs[containerId]) window.cloudTablePrefs[containerId] = { order: [], widths: {} };
+        let prefs = window.cloudTablePrefs[containerId];
+        
         let headerRow = table.querySelector('thead tr'); if(!headerRow) return;
         let headers = Array.from(headerRow.children);
         
@@ -411,6 +451,7 @@
 
         headers.forEach((th, idx) => {
             let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
+            
             if(prefs.widths[cleanTitle]) {
                 th.style.width = prefs.widths[cleanTitle]; th.style.minWidth = prefs.widths[cleanTitle]; th.style.maxWidth = prefs.widths[cleanTitle];
                 table.querySelectorAll('tbody tr').forEach(tr => { let td = tr.children[idx]; if(td) { td.style.maxWidth = prefs.widths[cleanTitle]; td.style.minWidth = prefs.widths[cleanTitle]; } });
@@ -430,7 +471,8 @@
                     const up = () => { 
                         document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); 
                         rs.style.background = 'transparent'; setTimeout(()=>isResizing=false, 100);
-                        prefs.widths[cleanTitle] = th.style.width; localStorage.setItem('neo_prefs_v3_' + containerId, JSON.stringify(prefs));
+                        prefs.widths[cleanTitle] = th.style.width; 
+                        saveCloudPrefs(); // Push to cloud!
                     };
                     document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
                 });
@@ -444,15 +486,17 @@
                 if(dragSrcTh !== th && !isResizing) {
                     let allThs = Array.from(headerRow.children); let srcIdx = allThs.indexOf(dragSrcTh); let tgtIdx = allThs.indexOf(th);
                     if(srcIdx < tgtIdx) th.after(dragSrcTh); else th.before(dragSrcTh);
-                    prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); localStorage.setItem('neo_prefs_v3_' + containerId, JSON.stringify(prefs));
+                    prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); 
+                    
                     table.querySelectorAll('tbody tr').forEach(tr => { let c = Array.from(tr.children); if(c[srcIdx] && c[tgtIdx]) { if(srcIdx < tgtIdx) c[tgtIdx].after(c[srcIdx]); else c[tgtIdx].before(c[srcIdx]); } });
+                    saveCloudPrefs(); // Push to cloud!
                 }
             });
             th.addEventListener('dragend', () => { if(dragSrcTh) dragSrcTh.classList.remove('dragging'); });
         });
     }
 
-    // --- 4. AUTHENTICATION LOGIC ---
+    // --- 5. AUTHENTICATION & DATA LOADING ---
     window.onload = async () => { try { const { data: { session } } = await supabaseClient.auth.getSession(); if (session) await launchApp(); } catch(e) { console.error("Auth check failed", e); } };
 
     async function handleLogin() {
@@ -469,7 +513,9 @@
 
     async function launchApp() {
         document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; document.getElementById('terminal').style.display = 'block';
-        sysLog("Session Verified. Booting System..."); setMasterStatus("Fetching data...", "mod-working"); await loadData();
+        sysLog("Session Verified. Booting System..."); setMasterStatus("Fetching data...", "mod-working"); 
+        await loadCloudPrefs(); // Load UI settings before pulling data
+        await loadData();
     }
 
     async function loadData() {
@@ -501,7 +547,7 @@
     }
 </script>
 <script>
-    // --- 5. SHARED RENDERERS & DB SYNC ---
+    // --- 6. SHARED RENDERERS & SORTING ---
     function renderColToggles() {
         if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return;
         c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => {
@@ -592,10 +638,9 @@
         } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
     }
 
-    // --- 6. CATALOG, BOM & SMART GROUPING ---
+    // --- 7. CATALOG & GROUPING MATH ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
 
-    // SMART GROUPING ENGINE: Identifies unique vs mixed raw names behind the scenes.
     function buildCatalogCache() {
         catalogCache = {}; finalResults.forEach(r => {
             let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim();
@@ -610,12 +655,8 @@
             catalogCache[k]._rn.add(inam);
             if(sp) catalogCache[k]._rs.add(sp);
 
-            let rawQty = parseFloat(r['Quantity']) || 1; 
-            let mult = parseFloat(r['Lot Multiplier']) || 1;
-            let actualPieces = rawQty * mult; 
-            
-            catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); 
-            catalogCache[k].totalQty += actualPieces;
+            let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; 
+            catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces;
         });
         
         Object.keys(catalogCache).forEach(k => {
@@ -642,14 +683,9 @@
         try {
             let recipes = `<optgroup label="📦 SUB-ASSEMBLIES (Your Products)">` + Object.keys(productsDB).sort().map(p => { let cost = calculateProductTotal(p).toFixed(2); return `<option value="RECIPE:::${p}">🟢 [Product] ${p}   ━━━━   💰 $${cost}/unit</option>`; }).join('') + `</optgroup>`;
             let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { 
-                let d = catalogCache[k]; 
-                let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; 
-                let nn = d.neoName ? `🔸 ${d.neoName}` : ``; 
-                let inam = `📦 ${truncText(d.itemName, 45)}`; 
-                let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${truncText(d.spec, 35)}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); 
+                let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `📦 ${truncText(d.itemName, 45)}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${truncText(d.spec, 35)}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); 
                 let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); 
-                let cost = d.avgUnitCost.toFixed(4); 
-                return `<option value="${k}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; 
+                let cost = d.avgUnitCost.toFixed(4); return `<option value="${k}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; 
             }).join('') + `</optgroup>`;
             const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipes + raws;
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📦 ${p}</option>`).join('');
