@@ -34,7 +34,13 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-container); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px var(--shadow-color); transition: background-color 0.3s; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         
-        #loginUI { display: none; }
+        #loginUI { display: none; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-body); z-index: 10000; }
+        .login-box { background: var(--bg-container); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px var(--shadow-color); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border-color); }
+        .login-box h2 { color: var(--text-heading); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        .login-box button { width: 100%; padding: 12px; font-size: 16px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .login-box button:hover { background: #0284c7; }
+
         #appUI { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; }
 
         .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; gap: 15px; }
@@ -48,7 +54,6 @@
         .tab-btn.active { color: #0ea5e9; border-bottom: 3px solid #0ea5e9; background: var(--tab-active-bg); }
         
         .top-controls { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
-
         .top-action-btn { background: var(--bg-panel); border: 1px solid var(--border-input); color: var(--text-main); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: none; width: auto !important; }
         .top-action-btn:hover { background: var(--border-color); transform: translateY(-1px); }
         .logout-btn { color: #ef4444; border-color: #fca5a5; background: transparent; }
@@ -60,10 +65,9 @@
         button { color: white; border: none; padding: 10px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
         button:disabled { background-color: var(--text-muted) !important; cursor: not-allowed; box-shadow: none; transform: none !important; }
         button:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
-        .btn-orange { background-color: #f97316; } .btn-orange:hover { background-color: #ea580c; }
-        .btn-blue { background-color: #3b82f6; } .btn-blue:hover { background-color: #2563eb; }
-        .btn-green { background-color: #10b981; } .btn-green:hover { background-color: #059669; }
-        .btn-red { background-color: #ef4444; } .btn-red:hover { background-color: #dc2626; }
+        .btn-orange { background-color: #f97316; } .btn-blue { background-color: #3b82f6; } .btn-green { background-color: #10b981; } .btn-red { background-color: #ef4444; }
+        .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
+        .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
 
         .control-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; align-items: stretch; flex-shrink: 0; }
         .panel-card { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; transition: all 0.3s ease; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
@@ -105,6 +109,12 @@
         .bom-header h2 { margin: 0; font-size: 20px; color: var(--text-heading); }
         .bom-header .total-badge { background: #10b981; color: white; padding: 6px 12px; border-radius: 20px; font-size: 16px; font-weight: bold; }
         
+        .add-part-bar { display: flex; align-items: center; gap: 10px; background: var(--bg-bar); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; flex-shrink: 0; flex-wrap: nowrap; overflow-x: auto;}
+        .add-part-bar select { flex-grow: 1; min-width: 250px; padding: 8px; border-radius: 4px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); margin:0;}
+        .add-part-bar input { width: 100px; padding: 8px; border-radius: 4px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); text-align: center; margin:0;}
+        .add-part-bar button { width: auto; white-space: nowrap; padding: 8px 15px; font-size: 13px; margin:0;}
+        optgroup { font-weight: bold; font-style: normal; color: var(--text-heading); background: var(--bg-input); }
+        
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
         table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
         th { background-color: var(--bg-th); color: var(--text-th); padding: 8px 6px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: grab; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s, box-shadow 0.2s; }
@@ -126,9 +136,9 @@
         .st-production { background: #fefce8; color: #f59e0b; border: 1px solid #fde047; }
         .st-completed { background: #f0fdf4; color: #10b981; border: 1px solid #bbf7d0; }
         
-        .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 15px; border-bottom: 1px solid var(--border-color); font-size: 13px; transition: background 0.2s; }
+        .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 15px; transition: background 0.2s; line-height: 1.6; }
         .checklist-item:hover { background: var(--bg-panel); }
-        .checklist-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; margin-top: 1px; }
+        .checklist-item input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
         .checklist-item.done .chk-text { text-decoration: line-through; opacity: 0.5; transition: 0.3s; }
         
         .pipeline-bar { display: flex; gap: 10px; padding: 10px; background: var(--bg-panel); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; flex-shrink: 0;}
@@ -136,21 +146,34 @@
         .pipe-step.active { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; opacity: 1; box-shadow: 0 4px 10px rgba(14,165,233,0.15); }
         .pipe-step:hover:not(.active) { opacity: 0.8; }
         
-        .sop-step-row { display: flex; gap: 10px; margin-bottom: 8px; background: var(--bg-panel); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap; align-items:center; }
-        .sop-step-row input.sop-text { flex: 2; min-width: 150px; }
-        .sop-step-row select.sop-type { flex: 0.5; min-width: 90px; }
-        .sop-step-row input.sop-url { flex: 1.5; min-width: 120px; font-size: 11px; }
-
         .wo-section { display: none; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; animation: fadeIn 0.3s ease; }
         .wo-section.active { display: block; }
         
         .print-btn { background: transparent; color: #64748b; border: 1px solid #cbd5e1; width: auto; padding: 4px 10px; font-size: 12px; margin-left: auto; cursor: pointer; border-radius: 4px;}
         .print-btn:hover { background: #f8fafc; color: #334155; }
 
-        /* UPGRADED MASSIVE MODALS CSS */
-        #mediaModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px); }
-        #mediaContainer { width:98vw; height:98vh; border-radius:8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; display:flex; justify-content:center; align-items:center; }
+        /* THE 70/30 SPLIT RICH TEXT SOP EDITOR CSS */
+        .sop-step-row { display: flex; gap: 15px; margin-bottom: 15px; background: var(--bg-panel); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); align-items: stretch; box-shadow: 0 2px 4px var(--shadow-color); }
+        .sop-step-movers { display: flex; flex-direction: column; justify-content: center; gap: 8px; flex-shrink: 0; }
+        .sop-text-container { flex: 3; display: flex; flex-direction: column; min-width: 300px; }
+        .sop-text-rich { flex: 1; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; padding: 12px; font-family: inherit; font-size: 15px; min-height: 120px; overflow-y: auto; outline: none; line-height: 1.5; color: var(--text-main); }
+        .sop-text-rich:focus { border-color: #0ea5e9; box-shadow: inset 0 0 0 1px #0ea5e9; }
+        .sop-text-rich ul, .sop-text-rich ol { margin: 5px 0; padding-left: 25px; }
+        
+        .sop-controls-container { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-bar); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .rt-toolbar { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; justify-content: flex-start; border-bottom: 1px solid var(--border-input); padding-bottom: 6px;}
+        .rt-btn { background: var(--bg-input); border: 1px solid var(--border-input); color: var(--text-main); cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 13px; width: auto!important; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-family:serif; font-weight:bold; transition: 0.2s;}
+        .rt-btn:hover { background: #e0f2fe; border-color: #0ea5e9; color: #0369a1; transform: none;}
+        .rt-btn:active { background: #bae6fd; }
+        .media-row { display: flex; gap: 5px; align-items: center; }
+        .media-row select { width: 35%; padding: 6px; font-size: 11px; border-radius: 4px; }
+        .media-row input { width: 65%; padding: 6px; font-size: 11px; border-radius: 4px; }
 
+        /* MASSIVE MODALS */
+        #mediaModal, #bulkAddModal, #sopMasterModal, #newWOModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px); }
+        .massive-container { width:98vw; height:98vh; max-width:2000px; border-radius:8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display:flex; flex-direction:column; background:var(--bg-container); border:1px solid var(--border-color); padding: 20px;}
+
+        /* TERMINAL */
         .terminal-wrapper { position: relative; z-index: 10000; }
         #termHeader { background: #10b981; padding: 8px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: white; font-size: 12px; transition: all 0.3s ease; border-radius: 5px; width: 220px;}
         #termHeader.sys-error { background-color: #ef4444 !important; animation: pulseRed 2s infinite; }
@@ -244,6 +267,7 @@
             <div style="flex: 0.5;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
             <button class="btn-green" style="padding: 8px 20px; width: auto; font-size:14px;" onclick="addManualItem()">+ Add Row</button>
         </div>
+
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
             <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Database Ledger <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(Click ANY cell to edit)</span></h3>
         </div>
@@ -278,12 +302,14 @@
                     </div>
                     <div class="total-badge" id="bomTotalCost">$0.00</div>
                 </div>
+                
                 <div class="add-part-bar">
                     <select id="partSelector"></select>
-                    <input id="partQty" type="number" step="any" min="0.0001" value="1" style="width:100%;">
-                    <button class="btn-green" style="padding:8px 15px; width:auto; font-size:13px;" onclick="addPartToProduct()">Add Part</button>
-                    <button class="btn-blue" style="padding:8px 15px; width:auto; font-size:13px;" onclick="openBulkAddModal()">📑 Bulk Add</button>
+                    <input id="partQty" type="number" step="any" min="0.0001" value="1">
+                    <button class="btn-green" onclick="addPartToProduct()">Add Part</button>
+                    <button class="btn-blue" onclick="openBulkAddModal()">📑 Bulk Add</button>
                 </div>
+                
                 <div class="table-wrap" id="bomTableWrap"></div>
                 <div style="margin-top: 15px; text-align: right; flex-shrink:0;">
                     <button class="btn-red" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="deleteCurrentProduct()">Delete Recipe</button>
@@ -311,8 +337,7 @@
             </div>
         </div>
     </div>
-
-    <div id="production-tab" class="tab-content">
+<div id="production-tab" class="tab-content">
         <div class="bom-layout">
             <div class="bom-sidebar">
                 <h3>🏭 Work Orders</h3>
@@ -322,10 +347,8 @@
                 <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
                 
                 <h3>📝 SOP Editor</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Link to Docs, Excel, Videos, or Images!</p>
-                <select id="sopProductSelect" onchange="renderSOPEditor()" style="margin-bottom:10px;"></select>
-                <div id="sopEditorArea" style="display:flex; flex-direction:column; gap:8px;"></div>
-                <button class="btn-green" id="saveSOPBtn" onclick="saveSOP()" style="margin-top:10px; display:none;">Save SOPs</button>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Create rich-text instructions and link attachments.</p>
+                <button class="btn-blue" onclick="openSOPMasterModal()">📝 Open Master SOP Editor</button>
             </div>
             
             <div class="bom-main" id="woMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
@@ -362,10 +385,20 @@
                 <div id="sect-Production" class="wo-section">
                     <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                         <h3 style="margin:0; color:var(--text-heading);">🛠️ Build Instructions (SOP)</h3>
-                        <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
+                        <div style="display:flex; gap: 10px;">
+                            <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color);">🔒</button>
+                            <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
+                        </div>
                     </div>
-                    <div id="woSOPList" style="margin-bottom:25px;"></div>
-                    <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px;">
+                    
+                    <div id="inlineSOPContainer" style="display:flex; flex-direction:column; position:relative;">
+                        <div id="woSOPList" style="margin-bottom:20px;"></div>
+                        <div id="inlineSaveContainer" style="text-align:right; margin-top:10px; border-top:1px solid var(--border-color); padding-top:15px; display:none; position:sticky; bottom:0; background:var(--bg-container); z-index:100; padding-bottom:15px;">
+                            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveInlineSOP()">💾 Save Changes to Cloud</button>
+                        </div>
+                    </div>
+                    
+                    <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px; margin-top:30px;">
                         <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
                         <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly and permanently deduct all picked raw materials from your master inventory.</p>
                         <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Deduct Inventory</button>
@@ -385,50 +418,78 @@
     </div>
 </div>
 
-<div id="bulkAddModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:10001; justify-content:center; align-items:center; backdrop-filter: blur(4px);">
-    <div class="container" style="width:98vw; max-width:1800px; height:95vh; display:flex; flex-direction:column; background:var(--bg-container); box-shadow: 0 10px 40px rgba(0,0,0,0.3); border:1px solid var(--border-color);">
+<div id="bulkAddModal">
+    <div class="massive-container">
         <div class="header-area" style="flex-shrink:0;">
-            <h2 style="margin:0; font-size:20px;">📦 Bulk Add Components to <span id="bulkAddTitle" style="color:#0ea5e9;"></span></h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px; font-size:13px;" onclick="document.getElementById('bulkAddModal').style.display='none'">Close</button>
+            <h2 style="margin:0; font-size:20px;">📦 Bulk Add Components</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('bulkAddModal').style.display='none'">Close</button>
         </div>
-        <div style="margin-bottom:10px; flex-shrink:0;">
-            <input type="text" id="bulkSearch" placeholder="🔍 Search by Neogleamz Name, Product, or Spec..." onkeyup="filterBulkList()" style="width:100%; padding:10px; font-size:15px;">
-        </div>
-        <div class="table-wrap" id="bulkAddTableWrap" style="flex-grow:1; overflow-y:auto; border-radius:6px; border:1px solid var(--border-color);"></div>
-        <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
-            <span style="font-size:13px; color:var(--text-muted);">Enter quantities for any items you want to add, then hit Save.</span>
-            <button class="btn-green" style="width:auto; padding:12px 25px; font-size:16px;" onclick="saveBulkAdd()">➕ Save Additions to Product</button>
+        <input type="text" id="bulkSearch" placeholder="🔍 Search components..." onkeyup="filterBulkList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
+        <div class="table-wrap" id="bulkAddTableWrap"></div>
+        <div style="margin-top:15px; text-align:right; flex-shrink:0;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveBulkAdd()">➕ Save Additions to Product</button>
         </div>
     </div>
 </div>
 
-<div id="newWOModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:10001; justify-content:center; align-items:center; backdrop-filter: blur(4px);">
-    <div class="container" style="width:100%; max-width:500px; display:flex; flex-direction:column; background:var(--bg-container); box-shadow: 0 10px 40px rgba(0,0,0,0.3); border:1px solid var(--border-color);">
-        <h2 style="margin-top:0; color:var(--text-heading);">🏭 Start Production Batch</h2>
-        <label style="font-weight:bold; margin-bottom:5px;">Select Product to Build</label>
+<div id="newWOModal" style="z-index:10001;">
+    <div class="container" style="width:100%; max-width:500px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px;">
+        <h2 style="margin-top:0;">🏭 Start Production Batch</h2>
         <select id="newWOProduct" style="margin-bottom:15px; padding:10px; font-size:15px;"></select>
-        <label style="font-weight:bold; margin-bottom:5px;">Target Quantity</label>
-        <input type="number" id="newWOQty" value="1" min="1" step="any" style="margin-bottom:20px; padding:10px; font-size:15px;">
+        <input type="number" id="newWOQty" value="1" min="1" step="any" style="margin-bottom:20px; padding:10px;">
         <div id="woErrorBox" style="display:none; background:#fee2e2; border:1px solid #fecaca; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px;">
-            <h3 style="margin-top:0; margin-bottom:10px;">🛑 HARD STOP: Insufficient Inventory</h3>
-            <p style="margin-top:0; font-size:13px;">You do not have enough raw materials to build this quantity. Reduce the batch size or order more parts.</p>
+            <h3 style="margin-top:0; margin-bottom:10px;">🛑 Insufficient Inventory</h3>
             <ul id="woShortfallList" style="font-size:12px; margin-bottom:0; padding-left:20px;"></ul>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
             <button class="btn-red" style="width:auto;" onclick="document.getElementById('newWOModal').style.display='none'">Cancel</button>
-            <button class="btn-green" style="width:auto; padding:10px 20px;" onclick="validateAndCreateWO()">Verify Inventory & Create</button>
+            <button class="btn-green" style="width:auto;" onclick="validateAndCreateWO()">Verify Inventory & Create</button>
         </div>
     </div>
 </div>
 
-<div id="mediaModal">
-    <div id="mediaContainer"></div>
-    <div style="position:absolute; top:20px; right:30px; color:white; font-size:30px; font-weight:bold; cursor:pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index:10006;" onclick="closeMediaModal()">×</div>
+<div id="sopMasterModal">
+    <div class="massive-container">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:22px;">📝 Master SOP Editor</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('sopMasterModal').style.display='none'">Close</button>
+        </div>
+        <div style="margin-bottom:15px; flex-shrink:0; display:flex; gap:10px; align-items:center;">
+            <label style="font-weight:bold;">Select Product:</label>
+            <select id="sopMasterProductSelect" onchange="renderMasterSOP()" style="width:300px; padding:8px; font-size:15px;"></select>
+        </div>
+        <div id="sopMasterEditorArea" style="flex-grow:1; overflow-y:auto; padding-right:10px; display:flex; flex-direction:column; gap:10px;"></div>
+        <div style="margin-top:15px; flex-shrink:0; text-align:right;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveMasterSOP()">💾 Save SOP to Cloud</button>
+        </div>
+    </div>
+</div>
+
+<div id="mediaModal" style="z-index:10006;">
+    <div id="mediaContainer" style="width:98vw; height:98vh; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center;"></div>
+    <div style="position:absolute; top:20px; right:30px; color:white; font-size:45px; font-weight:bold; cursor:pointer;" onclick="closeMediaModal()">×</div>
 </div>
 
 </body>
 <script>
-    // --- 1. THEME & SAFETY NET ---
+    // --- 1. GLOBAL VARIABLES & SUPABASE ---
+    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
+    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
+    let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
+    
+    let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
+    let workOrdersDB = []; let currentWO = null; let sopsDB = {}; 
+    
+    window.cloudTablePrefs = {}; 
+    let currentInvSort = { column: 'nn', direction: 'asc' }; let currentBOMSort = { column: 'nn', direction: 'asc' }; 
+    let currentBulkSort = { column: 'nn', direction: 'asc' }; let bulkAddData = []; 
+    let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
+
+    const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Specification': 'specification', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Lot Multiplier': 'lot_multiplier', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
+
+    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
+
+    // --- 2. THEME & SAFETY NET ---
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; });
     function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); }
 
@@ -449,44 +510,11 @@
     function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); const h = document.getElementById('termHeader'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▲'; } else { b.style.display = 'none'; t.innerText = '▼'; } if(h) { h.className = 'sys-good'; h.querySelector('#termStatusIcon').innerText = '🟢 System Active'; } } catch(e) {} }
     function setMasterStatus(msg, type) { try { const e = document.getElementById('statusMaster'); if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } } catch(e) {} }
 
-    // --- 2. GLOBALS & SUPABASE ---
-    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
-    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
-    let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
-    let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
-    let workOrdersDB = []; let currentWO = null; let sopsDB = {}; 
-    window.cloudTablePrefs = {}; let currentInvSort = { column: 'nn', direction: 'asc' }; let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; let bulkAddData = []; let oldValTemp = "";
-    let dragSrcTh = null; let isResizing = false;
-    
-    const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Specification': 'specification', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Lot Multiplier': 'lot_multiplier', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
-
-    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
-    
-    // --- 3. CLOUD PREFS & DRAG ENGINE ---
+    // --- 3. PREFS & AUTH ENGINES ---
     async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; } } catch(e) { window.cloudTablePrefs = {}; } }
     async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {} }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
+    function saveWOOrderPrefs() { try { window.cloudTablePrefs.woOrder = workOrdersDB.map(w => w.wo_id); saveCloudPrefs(); } catch(e) {} }
 
-    function applyTableInteractivity(containerId) {
-        const container = document.getElementById(containerId); if(!container) return; const table = container.querySelector('table'); if(!table) return;
-        if(!window.cloudTablePrefs[containerId]) window.cloudTablePrefs[containerId] = { order: [], widths: {} }; let prefs = window.cloudTablePrefs[containerId];
-        let headerRow = table.querySelector('thead tr'); if(!headerRow) return; let headers = Array.from(headerRow.children);
-        if(prefs.order && prefs.order.length > 0) { let newHeaders = []; prefs.order.forEach(title => { let th = headers.find(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim() === title); if(th) newHeaders.push(th); }); headers.forEach(h => { if(!newHeaders.includes(h)) newHeaders.push(h); }); newHeaders.forEach(th => headerRow.appendChild(th)); let bodyRows = table.querySelectorAll('tbody tr'); bodyRows.forEach(tr => { let cells = Array.from(tr.children); newHeaders.forEach(th => { let originalIdx = headers.indexOf(th); if(cells[originalIdx]) tr.appendChild(cells[originalIdx]); }); }); headers = newHeaders; }
-        
-        table.style.tableLayout = 'auto';
-        headers.forEach((th) => { let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim(); let trueWidth = Math.max(th.scrollWidth, th.offsetWidth) + 5; let w = prefs.widths[cleanTitle] || trueWidth + 'px'; th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w; });
-        table.style.tableLayout = 'fixed'; 
-        
-        headers.forEach((th) => {
-            let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
-            if(!th.querySelector('.resizer')){
-                let rs = document.createElement('div'); rs.className = 'resizer'; th.appendChild(rs); let x=0, sw=0;
-                rs.addEventListener('mousedown', e => { e.stopPropagation(); isResizing = true; x = e.clientX; sw = th.offsetWidth; rs.style.background = '#0ea5e9'; const move = ev => { let nw = sw + (ev.clientX - x); if(nw < 30) nw = 30; let nwPx = nw + 'px'; th.style.width = nwPx; th.style.minWidth = nwPx; th.style.maxWidth = nwPx; }; const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); rs.style.background = 'transparent'; setTimeout(()=>isResizing=false, 100); prefs.widths[cleanTitle] = th.style.width; saveCloudPrefs(); }; document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); });
-            }
-            th.draggable = true; th.addEventListener('dragstart', e => { if(isResizing) { e.preventDefault(); return; } dragSrcTh = th; e.dataTransfer.effectAllowed = 'move'; th.classList.add('dragging'); }); th.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }); th.addEventListener('drop', e => { e.stopPropagation(); dragSrcTh.classList.remove('dragging'); if(dragSrcTh !== th && !isResizing) { let allThs = Array.from(headerRow.children); let srcIdx = allThs.indexOf(dragSrcTh); let tgtIdx = allThs.indexOf(th); if(srcIdx < tgtIdx) th.after(dragSrcTh); else th.before(dragSrcTh); prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); table.querySelectorAll('tbody tr').forEach(tr => { let c = Array.from(tr.children); if(c[srcIdx] && c[tgtIdx]) { if(srcIdx < tgtIdx) c[tgtIdx].after(c[srcIdx]); else c[tgtIdx].before(c[srcIdx]); } }); saveCloudPrefs(); } }); th.addEventListener('dragend', () => { if(dragSrcTh) dragSrcTh.classList.remove('dragging'); });
-        });
-    }
-
-    // --- AUTH & DATA LOADING ---
     window.onload = async () => { 
         try { 
             const { data: { session } } = await supabaseClient.auth.getSession(); 
@@ -502,7 +530,6 @@
         if (error) { btn.innerText = "Authenticate to Command Center"; btn.disabled = false; err.innerText = error.message; err.style.display = "block"; return; } 
         document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; await launchApp();
     }
-    
     async function handleLogout() { if(confirm("Securely log out?")) { await supabaseClient.auth.signOut(); location.reload(); } }
 
     async function launchApp() { sysLog("Booting System..."); setMasterStatus("Fetching data...", "mod-working"); await loadCloudPrefs(); await loadData(); }
@@ -517,7 +544,12 @@
             if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
             setSysProgress(60, 'working'); inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
             setSysProgress(80, 'working'); if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); }
+            
             workOrdersDB = wR.data || []; sopsDB = {}; if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = r.steps || []; } catch(e){} }); }
+
+            if(window.cloudTablePrefs.woOrder && window.cloudTablePrefs.woOrder.length > 0) {
+                workOrdersDB.sort((a,b) => { let iA = window.cloudTablePrefs.woOrder.indexOf(a.wo_id); let iB = window.cloudTablePrefs.woOrder.indexOf(b.wo_id); if(iA===-1) iA=9999; if(iB===-1) iB=9999; return iA - iB; });
+            }
 
             renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); setSysProgress(100, 'success'); sysLog("System Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
@@ -526,11 +558,27 @@
     function switchTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         if (event && event.target) event.target.classList.add('active'); document.getElementById(tabId + '-tab').classList.add('active'); sysLog(`Switched to ${tabId}.`);
-        if (tabId === 'pipeline') { renderLedgerView(false, 'results'); } if (tabId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); } if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); } if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); } if (tabId === 'production') { buildCatalogCache(); renderWOList(); renderSOPEditor(); }
+        if (tabId === 'pipeline') { renderLedgerView(false, 'results'); } if (tabId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); } if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); } if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); } if (tabId === 'production') { buildCatalogCache(); renderWOList(); }
     }
 </script>
 <script>
-    // --- 4. LEDGER RENDERERS & DB SYNC ---
+    // --- 4. DRAG ENGINE & LEDGERS ---
+    function applyTableInteractivity(containerId) {
+        const container = document.getElementById(containerId); if(!container) return; const table = container.querySelector('table'); if(!table) return;
+        if(!window.cloudTablePrefs[containerId]) window.cloudTablePrefs[containerId] = { order: [], widths: {} }; let prefs = window.cloudTablePrefs[containerId];
+        let headerRow = table.querySelector('thead tr'); if(!headerRow) return; let headers = Array.from(headerRow.children);
+        if(prefs.order && prefs.order.length > 0) { let newHeaders = []; prefs.order.forEach(title => { let th = headers.find(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim() === title); if(th) newHeaders.push(th); }); headers.forEach(h => { if(!newHeaders.includes(h)) newHeaders.push(h); }); newHeaders.forEach(th => headerRow.appendChild(th)); let bodyRows = table.querySelectorAll('tbody tr'); bodyRows.forEach(tr => { let cells = Array.from(tr.children); newHeaders.forEach(th => { let originalIdx = headers.indexOf(th); if(cells[originalIdx]) tr.appendChild(cells[originalIdx]); }); }); headers = newHeaders; }
+        table.style.tableLayout = 'auto'; headers.forEach((th) => { let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim(); let trueWidth = Math.max(th.scrollWidth, th.offsetWidth) + 5; let w = prefs.widths[cleanTitle] || trueWidth + 'px'; th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w; }); table.style.tableLayout = 'fixed'; 
+        headers.forEach((th) => {
+            let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
+            if(!th.querySelector('.resizer')){
+                let rs = document.createElement('div'); rs.className = 'resizer'; th.appendChild(rs); let x=0, sw=0;
+                rs.addEventListener('mousedown', e => { e.stopPropagation(); isResizing = true; x = e.clientX; sw = th.offsetWidth; rs.style.background = '#0ea5e9'; const move = ev => { let nw = sw + (ev.clientX - x); if(nw < 30) nw = 30; let nwPx = nw + 'px'; th.style.width = nwPx; th.style.minWidth = nwPx; th.style.maxWidth = nwPx; }; const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); rs.style.background = 'transparent'; setTimeout(()=>isResizing=false, 100); prefs.widths[cleanTitle] = th.style.width; saveCloudPrefs(); }; document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); });
+            }
+            th.draggable = true; th.addEventListener('dragstart', e => { if(isResizing) { e.preventDefault(); return; } dragSrcTh = th; e.dataTransfer.effectAllowed = 'move'; th.classList.add('dragging'); }); th.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }); th.addEventListener('drop', e => { e.stopPropagation(); dragSrcTh.classList.remove('dragging'); if(dragSrcTh !== th && !isResizing) { let allThs = Array.from(headerRow.children); let srcIdx = allThs.indexOf(dragSrcTh); let tgtIdx = allThs.indexOf(th); if(srcIdx < tgtIdx) th.after(dragSrcTh); else th.before(dragSrcTh); prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); table.querySelectorAll('tbody tr').forEach(tr => { let c = Array.from(tr.children); if(c[srcIdx] && c[tgtIdx]) { if(srcIdx < tgtIdx) c[tgtIdx].after(c[srcIdx]); else c[tgtIdx].before(c[srcIdx]); } }); saveCloudPrefs(); } }); th.addEventListener('dragend', () => { if(dragSrcTh) dragSrcTh.classList.remove('dragging'); });
+        });
+    }
+
     function renderColToggles() { if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return; c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => { let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981'; return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`; }).join(''); }
     function renderActiveTable() { if(document.getElementById('pipeline-tab').classList.contains('active')) renderLedgerView(false, 'results'); else if(document.getElementById('simple-tab').classList.contains('active')) renderLedgerView(true, 'simpleResults'); }
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderActiveTable(); renderColToggles(); }
@@ -557,7 +605,7 @@
         try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neo Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
     }
 
-    // --- 5. CATALOG, MATH & DROPDOWNS ---
+    // --- 5. CATALOG & MATH ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
     function buildCatalogCache() {
         catalogCache = {}; finalResults.forEach(r => { let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim(); let k = nn ? `${nn}:::${np}:::(Grouped Raw Items):::(Mixed Specs)` : `:::${np}:::${inam}:::${sp}`; if (k === ":::::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: nn ? "(Grouped Raw Items)" : inam, spec: nn ? "(Mixed Specs)" : sp, totalCostSum: 0, totalQty: 0, _rn: new Set(), _rs: new Set() }; catalogCache[k]._rn.add(inam); if(sp) catalogCache[k]._rs.add(sp); let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces; });
@@ -576,7 +624,7 @@
             const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipes + raws;
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join('');
             const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join('');
-            const sop = document.getElementById('sopProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`).join('');
+            const sop = document.getElementById('sopMasterProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`).join('');
         } catch(e) {}
     }
 
@@ -589,6 +637,7 @@
     }
     function sortBulk(c) { currentBulkSort = { column: c, direction: currentBulkSort.column===c && currentBulkSort.direction==='asc' ? 'desc' : 'asc' }; renderBulkAddBody(); }
     function updateBulkQty(k, v) { let i = bulkAddData.find(x => x.k === k); if(i) i.q = v; }
+    function filterBulkList() { renderBulkAddBody(); }
     function renderBulkAddBody() {
         let wrap = document.getElementById('bulkAddTableWrap'); if(!wrap) return;
         let ths = ` <th class="${currentBulkSort.column==='nn'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('nn')">Neogleamz Name</th> <th class="${currentBulkSort.column==='np'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('np')">Neo Product</th> <th class="${currentBulkSort.column==='n'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('n')">Item Name</th> <th class="${currentBulkSort.column==='sp'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('sp')">Spec</th> <th class="${currentBulkSort.column==='uc'?'sorted-'+currentBulkSort.direction:''} text-right" onclick="sortBulk('uc')">Unit Cost</th> <th style="width:120px; text-align:center; background:#0ea5e9; color:white;">Qty to Add</th> `;
@@ -603,7 +652,7 @@
     }
 </script>
 <script>
-    // --- 7. PRODUCT BUILDER ENGINES ---
+    // --- 7. PRODUCT BUILDER & INVENTORY MANAGER ---
     async function renameCurrentProduct() {
         if(!currentProduct) return; let n = prompt("Enter new name:", currentProduct); if(!n || !n.trim() || n.trim() === currentProduct) return; n = n.trim(); if(productsDB[n]) return alert("A product with this name already exists.");
         sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); let o = currentProduct; let c = productsDB[o]; productsDB[n] = c;
@@ -648,7 +697,6 @@
     async function deleteCurrentProduct() { try { if(!currentProduct) return; if(confirm(`Delete ${currentProduct}?`)){ sysLog(`Deleting ${currentProduct}`); await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct); delete productsDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').upsert({product_name: n, components: productsDB[n]})); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; populateDropdowns(); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
     async function nukeAllRecipes() { try { if(confirm("⚠️ DANGER: Delete ALL recipes?")){ sysLog("Nuking recipes..."); setMasterStatus("Nuking...", "mod-working"); const {error}=await supabaseClient.from('product_recipes').delete().neq('product_name','fake_key'); if(error) throw new Error(error.message); productsDB={}; currentProduct=null; renderProductList(); populateDropdowns(); document.getElementById('bomMainArea').style.display='none'; setMasterStatus("Nuked.", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),3000); } } catch(e) { sysLog(e.message, true); setMasterStatus("Fail.", "mod-error"); } }
 
-    // --- 8. INVENTORY MANAGER ---
     function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
     function renderInventoryTable() {
         const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
@@ -671,70 +719,122 @@
     async function resetInventoryConsumption() {
         try { if(!confirm("⚠️ DANGER: Reset ALL consumption AND manual adjustments?")) return; sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); if(error) throw new Error(error.message); inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
     }
-</script>
-<script>
-    // --- 9. PRODUCTION MANAGER ENGINES & UNIVERSAL MEDIA ---
+
+    // --- 8. PRODUCTION MANAGER, UNIVERSAL MEDIA, EXPORTS ---
+    
+    function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
     
     function openMediaModal(url, renderType) {
         try {
             const container = document.getElementById('mediaContainer');
-            if(renderType === 'img') {
-                container.style.background = 'transparent';
-                container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`;
-            } else {
-                container.style.background = '#ffffff'; 
-                container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`;
-            }
+            if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } 
+            else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; }
             document.getElementById('mediaModal').style.display = 'flex';
         } catch(e) { sysLog(e.message, true); }
     }
-
-    function closeMediaModal() { 
-        try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = ''; } 
-        catch(e) { sysLog(e.message, true); }
-    }
+    function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = ''; } catch(e) { sysLog(e.message, true); } }
     
-    function renderSOPEditor() {
+    function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
+    function getRTToolbar() {
+        return `<div class="rt-toolbar">
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button>
+            <span style="color:var(--border-input); margin:0 4px;">|</span>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button>
+            <span style="color:var(--border-input); margin:0 4px;">|</span>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button>
+            <button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button>
+            <span style="color:var(--border-input); margin:0 4px;">|</span>
+            <input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;">
+            <select onchange="execRT('fontSize', this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main);">
+                <option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option>
+            </select>
+        </div>`;
+    }
+
+    function generateEditableSOPRow(s, idx) {
+        let safeText = s.text || ''; 
+        let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
+
+        let rowGen = (m, n) => {
+            let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'");
+            return `<div class="media-row">
+                <select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);">
+                    <option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option>
+                    <option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option>
+                    <option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option>
+                </select>
+                <input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);">
+            </div>`;
+        };
+
+        return `<div class="sop-step-row">
+            <div class="sop-step-movers">
+                <button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button>
+                <button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button>
+                <button class="btn-red icon-btn" style="width:28px!important; height:28px; font-size:12px; margin-top:auto;" onclick="removeSOPRow(this)">X</button>
+            </div>
+            <div class="sop-text-container">
+                <div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div>
+            </div>
+            <div class="sop-controls-container">
+                ${getRTToolbar()}
+                <div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>
+                ${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}
+            </div>
+        </div>`;
+    }
+
+    function openSOPMasterModal() { document.getElementById('sopMasterModal').style.display = 'flex'; }
+    function renderMasterSOP() {
         try {
-            const p = document.getElementById('sopProductSelect').value; const area = document.getElementById('sopEditorArea'); const btn = document.getElementById('saveSOPBtn');
-            if(!p) { area.innerHTML = ""; btn.style.display = 'none'; return; }
-            let steps = sopsDB[p] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, url: "", type: "img"} : {text: s.text||"", url: s.url||s.img||"", type: s.type||"img"});
-            if(mappedSteps.length === 0) mappedSteps = [{text: "", url: "", type: "img"}]; 
-            
-            let h = "";
-            mappedSteps.forEach((s, idx) => {
-                let safeText = (s.text||'').replace(/"/g,'&quot;').replace(/'/g,"\\'"); let safeUrl = (s.url||'').replace(/"/g,'&quot;').replace(/'/g,"\\'");
-                h += `<div class="sop-step-row">
-                    <input type="text" class="sop-text" value="${safeText}" placeholder="Enter step instruction...">
-                    <select class="sop-type" style="padding:6px; border-radius:4px; font-size:12px;">
-                        <option value="img" ${s.type==='img'?'selected':''}>🖼️ Image</option>
-                        <option value="doc" ${s.type==='doc'?'selected':''}>📄 Document (.pdf, .xlsx, .txt)</option>
-                        <option value="vid" ${s.type==='vid'?'selected':''}>🎬 Video (.mp4)</option>
-                    </select>
-                    <input type="text" class="sop-url" value="${safeUrl}" placeholder="URL (Drive Link, etc)">
-                    <button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>
-                </div>`;
-            });
-            h += `<button class="btn-blue" style="width:auto; padding:6px; font-size:12px; margin-top:5px;" onclick="addSOPRow()">+ Add Step</button>`;
-            area.innerHTML = h; btn.style.display = 'block';
+            const p = document.getElementById('sopMasterProductSelect').value; const area = document.getElementById('sopMasterEditorArea');
+            if(!p) { area.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select a product above to start writing instructions.</div>"; return; }
+            let steps = sopsDB[p] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s);
+            if(mappedSteps.length === 0) mappedSteps = [{}]; 
+            let h = ""; mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); });
+            h += `<button class="btn-blue" style="width:auto; padding:10px 20px; font-size:14px; align-self:flex-start;" onclick="addSOPRow('sopMasterEditorArea')">+ Add New Step</button>`;
+            area.innerHTML = h;
         } catch(e) { sysLog(e.message, true); }
     }
     
-    function addSOPRow() {
-        try { const area = document.getElementById('sopEditorArea'); const btn = area.querySelector('.btn-blue'); const div = document.createElement('div'); div.className = "sop-step-row"; div.innerHTML = `<input type="text" class="sop-text" placeholder="Enter step instruction..."><select class="sop-type" style="padding:6px; border-radius:4px; font-size:12px;"><option value="img">🖼️ Image</option><option value="doc">📄 Document (.pdf, .xlsx, .txt)</option><option value="vid">🎬 Video (.mp4)</option></select><input type="text" class="sop-url" placeholder="URL (Drive Link, etc)"><button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>`; area.insertBefore(div, btn); } catch(e) { sysLog(e.message, true); }
+    function addSOPRow(areaId) { try { const area = document.getElementById(areaId); const btn = area.querySelector('.btn-blue'); const div = document.createElement('div'); div.outerHTML = generateEditableSOPRow({}, 999); area.insertBefore(document.createRange().createContextualFragment(div.outerHTML), btn); } catch(e) {} }
+    function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) {} }
+    function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) {} }
+    function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) {} }
+    
+    function extractSOPDataFromUI(containerId) {
+        let steps = [];
+        document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { 
+            let t = row.querySelector('.sop-text-rich'); 
+            let m1t = row.querySelector('.m1-type').value; let m1u = row.querySelector('.m1-url').value;
+            let m2t = row.querySelector('.m2-type').value; let m2u = row.querySelector('.m2-url').value;
+            let m3t = row.querySelector('.m3-type').value; let m3u = row.querySelector('.m3-url').value;
+            if(t && t.innerHTML.trim()) { steps.push({ text: t.innerHTML.trim(), m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u} }); }
+        });
+        return steps;
     }
-    
-    function removeSOPRow(btn) { try { btn.parentElement.remove(); } catch(e) { sysLog(e.message, true); } }
-    
-    async function saveSOP() {
+
+    async function saveMasterSOP() {
         try {
-            const p = document.getElementById('sopProductSelect').value; if(!p) return;
-            let steps = []; document.querySelectorAll('.sop-step-row').forEach(row => { 
-                let t = row.querySelector('.sop-text'); let type = row.querySelector('.sop-type'); let url = row.querySelector('.sop-url'); 
-                if(t && t.value.trim()) steps.push({ text: t.value.trim(), type: type.value, url: url ? url.value.trim() : "" }); 
-            });
-            sopsDB[p] = steps; sysLog(`Saving SOP for ${p}`); setMasterStatus("Saving...", "mod-working");
-            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); 
+            const p = document.getElementById('sopMasterProductSelect').value; if(!p) return;
+            let steps = extractSOPDataFromUI('sopMasterEditorArea'); sopsDB[p] = steps; sysLog(`Saving Master SOP for ${p}`); setMasterStatus("Saving...", "mod-working");
+            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}); if(error) throw new Error(error.message); 
+            setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); 
+            document.getElementById('sopMasterModal').style.display = 'none'; if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); 
+        } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    }
+
+    async function saveInlineSOP() {
+        try {
+            if(!currentWO) return; const p = currentWO.product_name;
+            let steps = extractSOPDataFromUI('inlineSOPContainer'); sopsDB[p] = steps; sysLog(`Saving Inline SOP for ${p}`); setMasterStatus("Saving...", "mod-working");
+            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}); if(error) throw new Error(error.message); 
+            setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); toggleSOPLock(); 
         } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
     }
 
@@ -747,19 +847,38 @@
             Object.keys(rawNeeded).forEach(k => { let req = rawNeeded[k]; let c = catalogCache[k] || {totalQty: 0}; let i = inventoryDB[k] || {consumed: 0, adjustment: 0}; let onHand = c.totalQty - i.consumed + i.adjustment; if(req > onHand) { let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); } });
             if(shortfalls.length > 0) { document.getElementById('woShortfallList').innerHTML = shortfalls.join(''); document.getElementById('woErrorBox').style.display = 'block'; return; }
             let woId = "WO-" + Date.now().toString().slice(-6); let wo = { wo_id: woId, product_name: p, qty: q, status: 'Queued', wip_state: {} }; sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
-            const {error} = await supabaseClient.from('work_orders').insert(wo); if(error) throw new Error(error.message); workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); 
+            const {error} = await supabaseClient.from('work_orders').insert(wo); if(error) throw new Error(error.message); workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
         } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    }
+
+    function moveWOUp(id, e) {
+        e.stopPropagation(); let idx = workOrdersDB.findIndex(w => w.wo_id === id); if (idx > 0) { let temp = workOrdersDB[idx]; workOrdersDB[idx] = workOrdersDB[idx - 1]; workOrdersDB[idx - 1] = temp; saveWOOrderPrefs(); renderWOList(); }
+    }
+    function moveWODown(id, e) {
+        e.stopPropagation(); let idx = workOrdersDB.findIndex(w => w.wo_id === id); if (idx < workOrdersDB.length - 1) { let temp = workOrdersDB[idx]; workOrdersDB[idx] = workOrdersDB[idx + 1]; workOrdersDB[idx + 1] = temp; saveWOOrderPrefs(); renderWOList(); }
     }
 
     function renderWOList() {
         try {
             const ui = document.getElementById('woListUI'); ui.innerHTML = "";
             if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
-            workOrdersDB.forEach(wo => { let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : ''; let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠')); ui.innerHTML += `<li class="${sel}" onclick="selectWO('${wo.wo_id}')"><span>${dot} <strong>${wo.wo_id}</strong>: ${wo.product_name}</span> <span style="font-weight:bold;">x${wo.qty}</span></li>`; });
-            if(!currentWO && workOrdersDB.length > 0) currentWO = workOrdersDB[0]; if(currentWO) renderActiveWO(currentWO.wo_id);
+            workOrdersDB.forEach(wo => { 
+                let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : ''; let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠')); 
+                ui.innerHTML += `<li class="${sel}" onclick="selectWO('${wo.wo_id}')" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="display:flex; flex-direction:column; gap:2px;">
+                            <button class="icon-btn" style="width:16px!important; height:16px; font-size:8px; border:none; background:transparent; color:inherit;" onclick="moveWOUp('${wo.wo_id}', event)">▲</button>
+                            <button class="icon-btn" style="width:16px!important; height:16px; font-size:8px; border:none; background:transparent; color:inherit;" onclick="moveWODown('${wo.wo_id}', event)">▼</button>
+                        </div>
+                        <span>${dot} <strong>${wo.wo_id}</strong>: ${wo.product_name}</span>
+                    </div>
+                    <span style="font-weight:bold;">x${wo.qty}</span>
+                </li>`; 
+            });
+            if(!currentWO && workOrdersDB.length > 0) currentWO = workOrdersDB[0]; if(currentWO) { isSOPLocked = true; renderActiveWO(currentWO.wo_id); }
         } catch(e) { sysLog(e.message, true); }
     }
-    function selectWO(id) { try { currentWO = workOrdersDB.find(w => w.wo_id === id); renderWOList(); } catch(e) { sysLog(e.message, true); } }
+    function selectWO(id) { try { currentWO = workOrdersDB.find(w => w.wo_id === id); isSOPLocked = true; renderWOList(); } catch(e) { sysLog(e.message, true); } }
 
     async function toggleWIPCheckbox(chk, key) {
         try {
@@ -777,6 +896,8 @@
             if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); }
         } catch(e) { sysLog("Failed to save group check.", true); }
     }
+    
+    function toggleSOPLock() { isSOPLocked = !isSOPLocked; const btn = document.getElementById('sopLockBtn'); if(btn) btn.innerText = isSOPLocked ? '🔒' : '🔓'; if(currentWO) renderActiveWO(currentWO.wo_id); }
 
     function renderActiveWO(id) {
         try {
@@ -786,6 +907,8 @@
             if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
             ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { document.getElementById('pipe-'+s).classList.remove('active'); document.getElementById('sect-'+s).classList.remove('active'); });
             let wip = wo.wip_state || {};
+            
+            const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
             
             if(wo.status === 'Queued') { document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); }
             else if(wo.status === 'Picking') { 
@@ -814,36 +937,49 @@
                 document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active'); 
                 
                 let steps = sopsDB[wo.product_name] || []; 
-                let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, url: "", type: "img"} : {text: s.text||"", url: s.url||s.img||"", type: s.type||"img"});
-                
                 let sList = document.getElementById('woSOPList'); sList.innerHTML = "";
-                if(mappedSteps.length === 0) sList.innerHTML = `<div style="padding:15px; color:var(--text-muted);">No SOPs written for this product yet.</div>`;
-                else {
-                    mappedSteps.forEach((s, idx) => {
-                        let chkKey = `sop_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                        let attachmentHtml = "";
-                        
-                        if (s.url) {
-                            let dMatch = s.url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/);
-                            let dId = dMatch ? dMatch[1] : null;
-                            let safeUrl = s.url.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                let saveContainer = document.getElementById('inlineSaveContainer');
+                
+                if(!isSOPLocked) {
+                    let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s);
+                    if(mappedSteps.length === 0) mappedSteps = [{}]; 
+                    let editHtml = `<div style="background:var(--bg-container); padding:15px; border-radius:8px; border:2px solid #0ea5e9; box-shadow:0 10px 30px rgba(14,165,233,0.1);">`;
+                    mappedSteps.forEach((s, idx) => { editHtml += generateEditableSOPRow(s, idx); });
+                    editHtml += `<button class="btn-blue" style="width:auto; padding:8px 15px; font-size:13px;" onclick="addSOPRow('woSOPList')">+ Add New Step</button></div>`;
+                    sList.innerHTML = editHtml;
+                    saveContainer.style.display = 'block';
+                } else {
+                    saveContainer.style.display = 'none';
+                    let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}} : s);
+                    if(mappedSteps.length === 0) sList.innerHTML = `<div style="padding:15px; color:var(--text-muted);">No SOPs written for this product yet. Click the 🔓 icon to create inline.</div>`;
+                    else {
+                        mappedSteps.forEach((s, idx) => {
+                            let chkKey = `sop_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                            let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">`;
                             
-                            let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
+                            [s.m1, s.m2, s.m3].forEach(m => {
+                                if(m && m.url) {
+                                    let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
+                                    
+                                    if (m.type === 'img') {
+                                        let imgThumbUrl = dId ? `https://lh3.googleusercontent.com/d/${dId}` : safeUrl;
+                                        attachmentHtml += `<img src="${imgThumbUrl}" style="max-width:300px; max-height:200px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit:contain;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`;
+                                    } else {
+                                        let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
+                                        let icon = m.type === 'vid' ? '🎬' : '📄';
+                                        attachmentHtml += `<div style="position:relative; display:inline-block; width: 300px; height: 200px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: zoom-in; background:var(--bg-container);" onclick="openMediaModal('${mediaUrl}', 'iframe')">
+                                            <iframe src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;" scrolling="no"></iframe>
+                                            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10; background: transparent;"></div>
+                                            <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.8); color:white; padding:4px 8px; border-radius:4px; font-size:11px; z-index:11;">${icon} Click to Enlarge</div>
+                                        </div>`;
+                                    }
+                                }
+                            });
+                            attachmentHtml += `</div>`;
                             
-                            if (s.type === 'img') {
-                                let imgThumbUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w1200` : safeUrl;
-                                attachmentHtml = `<br><img src="${imgThumbUrl}" style="max-width:100%; max-height:250px; margin-top:10px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="openMediaModal('${imgThumbUrl}', 'img')">`;
-                            } else {
-                                let icon = s.type === 'vid' ? '🎬' : '📄';
-                                attachmentHtml = `<br><div style="position:relative; display:inline-block; width: 350px; height: 220px; margin-top: 10px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: zoom-in; background:var(--bg-container);" onclick="openMediaModal('${mediaUrl}', 'iframe')">
-                                    <iframe src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;" scrolling="no"></iframe>
-                                    <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10; background: transparent;"></div>
-                                    <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.7); color:white; padding:4px 8px; border-radius:4px; font-size:11px; z-index:11;">${icon} Click to Enlarge</div>
-                                </div>`;
-                            }
-                        }
-                        sList.innerHTML += `<div class="checklist-item ${doneCls}"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%;"><strong style="color:#0ea5e9;">Step ${idx+1}:</strong> ${s.text} ${attachmentHtml}</div></div>`;
-                    });
+                            sList.innerHTML += `<div class="checklist-item ${doneCls}"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%;"><strong style="color:#0ea5e9; font-size:16px; margin-bottom:5px; display:inline-block;">Step ${idx+1}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
+                        });
+                    }
                 }
             }
             else if(wo.status === 'Completed') { document.getElementById('pipe-Completed').classList.add('active'); document.getElementById('sect-Completed').classList.add('active'); }
@@ -900,19 +1036,22 @@
     function printSOP() {
         try {
             if(!currentWO) return;
-            let steps = sopsDB[currentWO.product_name] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, url: "", type: "img"} : {text: s.text||"", url: s.url||s.img||"", type: s.type||"img"});
-            let html = `<html><head><title>SOP - ${currentWO.product_name}</title><style>body{font-family:sans-serif; padding:20px;} .step{margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:16px;} img{max-width:100%; max-height:400px; display:block; margin-top:10px;} a {color:#0ea5e9; font-weight:bold;}</style></head><body>`;
+            let steps = sopsDB[currentWO.product_name] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1:{url: "", type: "img"}, m2:{url: "", type: "img"}, m3:{url: "", type: "img"}} : s);
+            let html = `<html><head><title>SOP - ${currentWO.product_name}</title><style>body{font-family:sans-serif; padding:20px;} .step{margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:16px;} img{max-width:100%; max-height:400px; display:block; margin-top:10px;} a {color:#0ea5e9; font-weight:bold; margin-right:15px;}</style></head><body>`;
             html += `<h2>Standard Operating Procedure (SOP)</h2><h3>Product: ${currentWO.product_name}</h3><hr>`;
             if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
             else { 
                 mappedSteps.forEach((s, i) => { 
-                    let attachHtml = "";
-                    if(s.url) {
-                        let dMatch = s.url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); let dId = dMatch ? dMatch[1] : null;
-                        if(s.type === 'img') { let imgUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w1000` : s.url; attachHtml = `<br><img src="${imgUrl}">`; }
-                        else { let docUrl = dId ? `https://drive.google.com/file/d/${dId}/view` : s.url; attachHtml = `<br><a href="${docUrl}" target="_blank">🔗 View Attached Document / Video</a>`; }
-                    }
-                    html += `<div class="step"><strong>Step ${i+1}:</strong> ${s.text} ${attachHtml}</div>`; 
+                    let attachHtml = "<div style='margin-top:10px;'>";
+                    [s.m1, s.m2, s.m3].forEach(m => {
+                        if(m && m.url) {
+                            let dId = parseMediaUrl(m.url);
+                            if(m.type === 'img') { let imgUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w1000` : m.url; attachHtml += `<img src="${imgUrl}" style="margin-right:10px;">`; }
+                            else { let docUrl = dId ? `https://drive.google.com/file/d/${dId}/view` : m.url; attachHtml += `<a href="${docUrl}" target="_blank">🔗 View Attached ${m.type === 'vid' ? 'Video' : 'Document'}</a>`; }
+                        }
+                    });
+                    attachHtml += "</div>";
+                    html += `<div class="step"><strong style="color:#0ea5e9; font-size:18px;">Step ${i+1}:</strong><br> ${s.text} ${attachHtml}</div>`; 
                 }); 
             }
             html += `</body></html>`;
@@ -920,7 +1059,7 @@
         } catch(e) { sysLog(e.message, true); }
     }
 
-    // --- 10. PARSERS & FILE SYNC ---
+    // --- 11. PARSERS & FILE SYNC ---
     function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){} }
     document.getElementById('orderFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'orders');});
     document.getElementById('parcelFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'parcels');});
