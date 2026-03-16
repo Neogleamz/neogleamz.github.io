@@ -31,11 +31,9 @@
             --tab-hover: #334155; --tab-active-bg: #1e293b;
         }
 
-        /* FLEXBOX FRAMEWORK */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-container); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px var(--shadow-color); transition: background-color 0.3s; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         
-        /* LOGIN SCREEN STYLES */
         #loginUI { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-body); z-index: 10000; }
         .login-box { background: var(--bg-container); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px var(--shadow-color); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border-color); }
         .login-box h2 { color: var(--text-heading); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
@@ -55,8 +53,6 @@
         .tab-btn.active { color: #0ea5e9; border-bottom: 3px solid #0ea5e9; background: var(--tab-active-bg); }
         .tab-content { display: none; animation: fadeIn 0.2s ease; flex-direction: column; flex-grow: 1; min-height: 0; }
         .tab-content.active { display: flex; }
-        .tab-content > h3 { flex-shrink: 0; margin-top: 5px; margin-bottom: 5px; font-size: 16px; } 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
         
         button { color: white; border: none; padding: 10px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
         button:disabled { background-color: var(--text-muted) !important; cursor: not-allowed; box-shadow: none; transform: none !important; }
@@ -92,7 +88,6 @@
         .edited-success { animation: flashGreen 1s ease; }
         @keyframes flashGreen { 0% { background-color: #10b981; color: white; } 100% { background-color: transparent; color: inherit; } }
         
-        /* EXPANSION CSS */
         .trunc-col { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
         .trunc-col:focus, .trunc-col:active { max-width: none !important; white-space: normal; overflow: visible; position: relative; z-index: 100; background: var(--bg-container); box-shadow: 0 4px 12px var(--shadow-color); border-radius: 4px; outline: none; }
 
@@ -112,17 +107,13 @@
         .add-part-bar { display: grid; grid-template-columns: 1fr 90px 100px 110px; gap: 8px; background: var(--bg-bar); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; flex-shrink: 0; }
         optgroup { font-weight: bold; font-style: normal; color: var(--text-heading); background: var(--bg-input); }
         
-        /* TABLE STYLES & ZERO-WIDTH SORTING CSS */
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
         table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
         th { background-color: var(--bg-th); color: var(--text-th); padding: 8px 6px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: grab; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s, box-shadow 0.2s; }
         th:hover { opacity: 0.9; }
         td { padding: 6px 8px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        
-        /* Zero-width sorting feedback */
         th.sorted-asc { color: #10b981; box-shadow: inset 0 -4px 0 #10b981; }
         th.sorted-desc { color: #ef4444; box-shadow: inset 0 -4px 0 #ef4444; }
-
         .text-right { text-align: right; }
         .highlight-calc { background-color: var(--bg-highlight); color: var(--text-highlight); font-weight: bold; }
         .negative-stock { color: #ef4444; font-weight: bold; background-color: var(--bg-negative); }
@@ -131,8 +122,35 @@
         .resizer:hover { background-color: #0ea5e9; }
         .dragging { opacity: 0.4; background-color: #3b82f6 !important; }
 
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .st-queued { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+        .st-picking { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
+        .st-production { background: #fefce8; color: #f59e0b; border: 1px solid #fde047; }
+        .st-completed { background: #f0fdf4; color: #10b981; border: 1px solid #bbf7d0; }
+        
+        .checklist-item { display: flex; align-items: flex-start; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 15px; transition: background 0.2s; }
+        .checklist-item:hover { background: var(--bg-panel); }
+        .checklist-item input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+        .checklist-item.done .chk-text { text-decoration: line-through; opacity: 0.5; transition: 0.3s; }
+        
+        .pipeline-bar { display: flex; gap: 10px; padding: 15px; background: var(--bg-panel); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; flex-shrink: 0;}
+        .pipe-step { flex: 1; text-align: center; padding: 10px; border-radius: 6px; background: var(--bg-input); border: 2px solid var(--border-color); font-weight: bold; color: var(--text-muted); opacity: 0.6; cursor: pointer; transition: 0.2s;}
+        .pipe-step.active { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; opacity: 1; box-shadow: 0 4px 10px rgba(14,165,233,0.15); }
+        .pipe-step:hover:not(.active) { opacity: 0.8; }
+        
+        .sop-step-row { display: flex; gap: 10px; margin-bottom: 8px; background: var(--bg-panel); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap; }
+        .sop-step-row input.sop-text { flex: 2; min-width: 200px; }
+        .sop-step-row input.sop-img { flex: 1; min-width: 150px; font-size: 11px; }
+
+        .wo-section { display: none; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; animation: fadeIn 0.3s ease; }
+        .wo-section.active { display: block; }
+        
+        .print-btn { background: transparent; color: #64748b; border: 1px solid #cbd5e1; width: auto; padding: 4px 10px; font-size: 12px; margin-left: auto; cursor: pointer; border-radius: 4px;}
+        .print-btn:hover { background: #f8fafc; color: #334155; }
+
+        /* THE DIAGNOSTICS BAR: Green by default, Red on error */
         #terminal { position: fixed; bottom: 0; right: 20px; width: 450px; background: #0f172a; color: #10b981; font-family: monospace; border-radius: 8px 8px 0 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); border: 1px solid #334155; display: none; }
-        #termHeader { background: #1e293b; padding: 10px; cursor: pointer; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; color: white; font-size: 13px; }
+        #termHeader { background: #10b981; padding: 10px; cursor: pointer; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; color: white; font-size: 13px; transition: background-color 0.3s ease; }
         #debugLog { height: 150px; overflow-y: auto; padding: 10px; font-size: 11px; line-height: 1.5; background: #0f172a; }
         #sysProgress { width: 100%; height: 4px; border: none; background-color: #334155; display: block; }
         #sysProgress::-webkit-progress-bar { background-color: #334155; }
@@ -164,7 +182,8 @@
             <button class="tab-btn" onclick="switchTab('simple')">📋 Simple Inventory</button>
             <button class="tab-btn" onclick="switchTab('bom')">🛠️ Product Builder</button>
             <button class="tab-btn" onclick="switchTab('inventory')">📊 Inventory Manager</button>
-            <button id="themeToggle" class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+            <button class="tab-btn" onclick="switchTab('production')">🏭 Production Manager</button>
+            <button id="themeToggle" class="icon-btn" onclick="toggleTheme()" title="Toggle Theme" style="margin-left:auto;">🌙</button>
             <button class="icon-btn" onclick="handleLogout()" title="Secure Logout" style="color:#ef4444; border-color:#fca5a5;">🚪</button>
         </div>
     </div>
@@ -258,19 +277,92 @@
     <div id="inventory-tab" class="tab-content">
         <div class="bom-layout">
             <div class="bom-sidebar">
-                <h3>🛠️ Production Runs</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:15px; flex-shrink:0;">Run a batch to automatically deduct materials from inventory.</p>
+                <h3>🛠️ Quick Deduct</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:15px; flex-shrink:0;">(Skip the Production Tab and instantly deduct raw materials).</p>
                 <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Select Product</label>
                 <select id="batchProductSelect" style="margin-bottom:10px;"></select>
                 <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Quantity to Build</label>
                 <input type="number" id="batchQty" placeholder="10" value="1" min="1" step="any" style="margin-bottom:15px;">
-                <button class="btn-green" onclick="runProductionBatch()" style="padding:10px; font-size:14px; flex-shrink:0;">⚙️ Deduct Batch</button>
+                <button class="btn-green" onclick="runProductionBatch()" style="padding:10px; font-size:14px; flex-shrink:0;">⚙️ Force Deduct Inventory</button>
                 <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
                 <button class="btn-red" onclick="resetInventoryConsumption()" style="font-size:12px; padding:8px; flex-shrink:0;">⚠️ Reset Consumption to 0</button>
             </div>
             <div class="bom-main">
                 <div class="bom-header"><h2 style="font-size:18px;">Live Inventory Levels</h2></div>
                 <div class="table-wrap" id="invTableWrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="production-tab" class="tab-content">
+        <div class="bom-layout">
+            <div class="bom-sidebar">
+                <h3>🏭 Work Orders</h3>
+                <button class="btn-blue" onclick="openNewWOModal()" style="margin-bottom:15px; padding:10px;">+ New Production Batch</button>
+                <ul class="product-list" id="woListUI"></ul>
+                
+                <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
+                
+                <h3>📝 SOP Editor</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Edit build instructions. Paste image URLs (Imgur, Drive) to include pictures.</p>
+                <select id="sopProductSelect" onchange="renderSOPEditor()" style="margin-bottom:10px;"></select>
+                <div id="sopEditorArea" style="display:flex; flex-direction:column; gap:8px;"></div>
+                <button class="btn-green" id="saveSOPBtn" onclick="saveSOP()" style="margin-top:10px; display:none;">Save SOPs</button>
+            </div>
+            
+            <div class="bom-main" id="woMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
+                <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                        <h2 id="woTitle" style="margin:0; font-size:22px; color:var(--text-heading);">WO-1234: Product Name</h2>
+                        <span id="woBadge" class="status-badge st-queued">Queued</span>
+                    </div>
+                    <div style="font-size:14px; color:var(--text-muted);">Target Quantity: <strong id="woQtyTarget" style="color:var(--text-main);">0</strong> units</div>
+                </div>
+
+                <div class="pipeline-bar" id="woPipeline">
+                    <div class="pipe-step" id="pipe-Queued" onclick="advanceWO('Queued')">1. Queued</div>
+                    <div class="pipe-step" id="pipe-Picking" onclick="advanceWO('Picking')">2. Picking Parts</div>
+                    <div class="pipe-step" id="pipe-Production" onclick="advanceWO('In Production')">3. In Production</div>
+                    <div class="pipe-step" id="pipe-Completed" onclick="advanceWO('Completed')">4. Completed</div>
+                </div>
+
+                <div id="sect-Queued" class="wo-section">
+                    <h3 style="margin-top:0; color:var(--text-heading);">Work Order Created</h3>
+                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch is queued and waiting for an operator. Once you are ready to pull parts from the physical inventory shelves, begin the picking process.</p>
+                    <button class="btn-blue" style="width:auto; padding:12px 25px; margin-top:10px;" onclick="advanceWO('Picking')">📋 Start Picking Parts</button>
+                </div>
+
+                <div id="sect-Picking" class="wo-section">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                        <h3 style="margin:0; color:var(--text-heading);">🛒 Active Pick List</h3>
+                        <button class="print-btn" onclick="printPickList()">🖨️ Print List</button>
+                    </div>
+                    <div id="woPickList" style="margin-bottom:20px;"></div>
+                    <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('In Production')">✅ All Parts Picked -> Move to Production</button>
+                </div>
+
+                <div id="sect-Production" class="wo-section">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                        <h3 style="margin:0; color:var(--text-heading);">🛠️ Build Instructions (SOP)</h3>
+                        <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
+                    </div>
+                    <div id="woSOPList" style="margin-bottom:25px;"></div>
+                    
+                    <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px;">
+                        <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
+                        <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly and permanently deduct all picked raw materials from your master inventory.</p>
+                        <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Deduct Inventory</button>
+                    </div>
+                </div>
+
+                <div id="sect-Completed" class="wo-section">
+                    <h3 style="margin-top:0; color:#10b981;">✅ Production Complete</h3>
+                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch has been finalized. All raw materials have been successfully deducted from the Master Inventory Ledger.</p>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
+                    <button class="btn-red" style="width: auto; padding: 8px 15px; font-size: 13px;" onclick="deleteCurrentWO()">🗑️ Archive / Delete Work Order</button>
+                </div>
             </div>
         </div>
     </div>
@@ -293,26 +385,102 @@
     </div>
 </div>
 
+<div id="newWOModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:10001; justify-content:center; align-items:center; backdrop-filter: blur(4px);">
+    <div class="container" style="width:100%; max-width:500px; display:flex; flex-direction:column; background:var(--bg-container); box-shadow: 0 10px 40px rgba(0,0,0,0.3); border:1px solid var(--border-color);">
+        <h2 style="margin-top:0; color:var(--text-heading);">🏭 Start Production Batch</h2>
+        <label style="font-weight:bold; margin-bottom:5px;">Select Product to Build</label>
+        <select id="newWOProduct" style="margin-bottom:15px; padding:10px; font-size:15px;"></select>
+        
+        <label style="font-weight:bold; margin-bottom:5px;">Target Quantity</label>
+        <input type="number" id="newWOQty" value="1" min="1" step="any" style="margin-bottom:20px; padding:10px; font-size:15px;">
+        
+        <div id="woErrorBox" style="display:none; background:#fee2e2; border:1px solid #fecaca; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px;">
+            <h3 style="margin-top:0; margin-bottom:10px;">🛑 HARD STOP: Insufficient Inventory</h3>
+            <p style="margin-top:0; font-size:13px;">You do not have enough raw materials to build this quantity. Reduce the batch size or order more parts.</p>
+            <ul id="woShortfallList" style="font-size:12px; margin-bottom:0; padding-left:20px;"></ul>
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
+            <button class="btn-red" style="width:auto;" onclick="document.getElementById('newWOModal').style.display='none'">Cancel</button>
+            <button class="btn-green" style="width:auto; padding:10px 20px;" onclick="validateAndCreateWO()">Verify Inventory & Create</button>
+        </div>
+    </div>
+</div>
+
 <div id="terminal">
     <div id="termHeader" onclick="toggleTerminal()"><span>⚙️ Diagnostics</span><span id="termToggle">▲</span></div>
     <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
     <div id="debugLog" style="display: none;"></div>
 </div>
 <script>
-    // --- 1. THEME & DIAGNOSTICS ---
+    // --- 1. THEME & SMART DIAGNOSTICS LOGIC ---
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; });
-    function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️" : "🌙"; sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); }
-    function sysLog(msg, isError = false) { try { const b = document.getElementById('debugLog'); if(!b) return; const t = new Date().toLocaleTimeString(); const c = isError ? '#ef4444' : '#10b981'; b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; b.scrollTop = b.scrollHeight; if(isError) console.error(msg); else console.log(msg); } catch(e) { console.error(e); } }
-    function setSysProgress(val, state = 'working') { try { const b = document.getElementById('sysProgress'); if(b) { b.value = val; b.className = 'prog-' + state; } } catch(e) {} }
-    function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▼'; } else { b.style.display = 'none'; t.innerText = '▲'; } } catch(e) {} }
-    function setMasterStatus(msg, type) { try { const e = document.getElementById('statusMaster'); if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } } catch(e) {} }
+    
+    function toggleTheme() { 
+        const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; 
+        document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); 
+        document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️" : "🌙"; 
+        sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); 
+    }
+
+    function sysLog(msg, isError = false) { 
+        try { 
+            const b = document.getElementById('debugLog'); 
+            const h = document.getElementById('termHeader');
+            if(!b) return; 
+            const t = new Date().toLocaleTimeString(); 
+            const c = isError ? '#ef4444' : '#10b981'; 
+            b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; 
+            b.scrollTop = b.scrollHeight; 
+            if(isError) {
+                console.error(msg);
+                if(h) h.style.backgroundColor = '#ef4444'; // Snap to RED on error
+            } else {
+                console.log(msg);
+            }
+        } catch(e) { console.error(e); } 
+    }
+    
+    function setSysProgress(val, state = 'working') { 
+        try { 
+            const b = document.getElementById('sysProgress'); 
+            const h = document.getElementById('termHeader');
+            if(b) { b.value = val; b.className = 'prog-' + state; } 
+            
+            // Reset header to GREEN if successful, RED if error
+            if(h && state === 'success') h.style.backgroundColor = '#10b981';
+            else if(h && state === 'error') h.style.backgroundColor = '#ef4444';
+        } catch(e) {} 
+    }
+    
+    function toggleTerminal() { 
+        try { 
+            const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); 
+            if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▼'; } else { b.style.display = 'none'; t.innerText = '▲'; } 
+        } catch(e) {} 
+    }
+    
+    function setMasterStatus(msg, type) { 
+        try { 
+            const e = document.getElementById('statusMaster'); 
+            const h = document.getElementById('termHeader');
+            if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } 
+            
+            // Sync status bars to terminal header
+            if (h && type === 'mod-success') h.style.backgroundColor = '#10b981';
+            else if (h && type === 'mod-error') h.style.backgroundColor = '#ef4444';
+        } catch(e) {} 
+    }
+    
     function truncText(str, max = 50) { return !str ? "" : (String(str).length > max ? String(str).substring(0, max) + '...' : String(str)); }
 
     // --- 2. GLOBAL STATE & DB INIT ---
     const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
     let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
+    
     let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
+    let workOrdersDB = []; let currentWO = null; let sopsDB = {}; 
     
     window.cloudTablePrefs = {};
     let currentInvSort = { column: 'nn', direction: 'asc' }; 
@@ -324,7 +492,16 @@
 
     function mapToUI(dbData) {
         return dbData.map(r => ({
-            '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code
+            '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 
+            'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order,
+            'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 
+            'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 
+            'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight,
+            'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid,
+            'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost,
+            'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost,
+            'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector,
+            'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code
         }));
     }
 
@@ -336,19 +513,18 @@
                 let p = data.setting_value;
                 if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️" : "🌙"; localStorage.setItem("theme", p.theme); }
                 if (p.tables) window.cloudTablePrefs = p.tables;
-                sysLog("Cloud preferences loaded.");
             }
-        } catch(e) { sysLog("No cloud prefs found. Using standard layout."); window.cloudTablePrefs = {}; }
+        } catch(e) { window.cloudTablePrefs = {}; }
     }
 
     async function saveCloudPrefs() {
         try {
             let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {} };
             await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload });
-        } catch(e) { sysLog("Failed to save layout to cloud.", true); }
+        } catch(e) { }
     }
 
-    // --- 4. DRAG AND RESIZE ENGINE (TIGHT SHRINK-WRAP PHYSICS) ---
+    // --- 4. DRAG AND RESIZE ENGINE ---
     let dragSrcTh = null; let isResizing = false;
     function applyTableInteractivity(containerId) {
         const container = document.getElementById(containerId); if(!container) return;
@@ -372,8 +548,7 @@
         table.style.tableLayout = 'auto';
         headers.forEach((th) => {
             let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
-            // Perfectly shrink-wrap to the header text without the old emoji bloat
-            let trueWidth = th.scrollWidth; 
+            let trueWidth = Math.max(th.scrollWidth, th.offsetWidth) + 5; 
             let w = prefs.widths[cleanTitle] || trueWidth + 'px';
             th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w;
         });
@@ -436,17 +611,37 @@
     async function loadData() {
         try {
             setSysProgress(10, 'working');
-            const [lR, pR, cR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*') ]);
-            if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); setSysProgress(40, 'working');
-            if (lR.data && lR.data.length > 0) {
-                sysLog(`Ledger Loaded: ${lR.data.length} rows.`); finalResults = mapToUI(lR.data); 
-                if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; }
-                buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 3000);
-            } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
-            setSysProgress(60, 'working'); inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
-            setSysProgress(80, 'working'); if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); }
+            const [lR, pR, cR, wR, sR] = await Promise.all([ 
+                supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), 
+                supabaseClient.from('product_recipes').select('*'), 
+                supabaseClient.from('inventory_consumption').select('*'),
+                supabaseClient.from('work_orders').select('*'),
+                supabaseClient.from('production_sops').select('*')
+            ]);
+            if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); 
+            if (wR.error) throw new Error(wR.error.message); if (sR.error) throw new Error(sR.error.message);
             
-            renderActiveTable(); populateDropdowns(); setSysProgress(100, 'success'); sysLog("Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
+            setSysProgress(40, 'working');
+            if (lR.data && lR.data.length > 0) {
+                finalResults = mapToUI(lR.data); 
+                if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; }
+                buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); 
+                setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 3000);
+            } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
+            
+            setSysProgress(60, 'working'); 
+            inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
+            
+            setSysProgress(80, 'working'); 
+            if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); }
+            
+            workOrdersDB = wR.data || [];
+            sopsDB = {}; if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = r.steps || []; } catch(e){} }); }
+
+            renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList();
+            renderActiveTable(); 
+            
+            setSysProgress(100, 'success'); sysLog("Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
 
@@ -457,42 +652,11 @@
         if (tabId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
         if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); }
         if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); }
+        if (tabId === 'production') { buildCatalogCache(); renderWOList(); renderSOPEditor(); }
     }
 </script>
 <script>
-    // --- 5. EXPORT / RESTORE SYSTEM ---
-    async function exportDatabaseBackup() {
-        if(typeof XLSX === 'undefined') return alert("SheetJS not loaded. Check internet connection.");
-        sysLog("Starting database backup..."); setSysProgress(20, 'working'); setMasterStatus("Exporting Backup...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
-        try {
-            const [lR, pR, cR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*'), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*') ]);
-            if(lR.error) throw new Error("Ledger fetch failed");
-            const safeRecipes = (pR.data||[]).map(r => ({...r, components: JSON.stringify(r.components)}));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lR.data||[]), "Ledger"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(safeRecipes), "Recipes"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cR.data||[]), "Inventory");
-            XLSX.writeFile(wb, `Neogleamz_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
-            sysLog("Exported."); setSysProgress(100, 'success'); setMasterStatus("Exported!", "mod-success"); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-        } catch (err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
-    }
-
-    async function restoreDatabaseBackup(fileInput) {
-        if(!fileInput.files.length || typeof XLSX === 'undefined') return;
-        if(!confirm("⚠️ DANGER: This will permanently OVERWRITE your entire database with the selected backup file. Continue?")) { fileInput.value = ""; return; }
-        sysLog("Starting restore..."); setSysProgress(20, 'working'); setMasterStatus("Restoring Database...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
-                let ld = wb.Sheets["Ledger"] ? XLSX.utils.sheet_to_json(wb.Sheets["Ledger"]) : null; let rd = wb.Sheets["Recipes"] ? XLSX.utils.sheet_to_json(wb.Sheets["Recipes"]) : null; let id = wb.Sheets["Inventory"] ? XLSX.utils.sheet_to_json(wb.Sheets["Inventory"]) : null;
-                if(!ld && !rd && !id) throw new Error("Invalid format.");
-                if (rd) rd = rd.map(r => ({ ...r, components: typeof r.components === 'string' ? JSON.parse(r.components) : r.components }));
-                setSysProgress(60, 'working'); sysLog("Pushing...");
-                if(ld && ld.length) await supabaseClient.from('full_landed_costs').upsert(ld); if(rd && rd.length) await supabaseClient.from('product_recipes').upsert(rd); if(id && id.length) await supabaseClient.from('inventory_consumption').upsert(id);
-                sysLog("Complete!"); setSysProgress(100, 'success'); setMasterStatus("Success!", "mod-success"); fileInput.value = ""; await loadData(); setTimeout(()=>{setSysProgress(0,'working'); document.getElementById('statusMaster').style.display='none';}, 3000);
-            } catch(err) { sysLog(err.message, true); setSysProgress(100, 'error'); setMasterStatus("Failed.", "mod-error"); }
-        }; reader.readAsArrayBuffer(fileInput.files[0]);
-    }
-
-    // --- 6. SHARED RENDERERS & SORTING ---
+    // --- 6. SHARED RENDERERS & DB SYNC ---
     function renderColToggles() {
         if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return;
         c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => {
@@ -500,223 +664,77 @@
             return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`;
         }).join('');
     }
-    
-    function renderActiveTable() {
-        if(document.getElementById('pipeline-tab').classList.contains('active')) renderLedgerView(false, 'results');
-        else if(document.getElementById('simple-tab').classList.contains('active')) renderLedgerView(true, 'simpleResults');
-    }
-
+    function renderActiveTable() { if(document.getElementById('pipeline-tab').classList.contains('active')) renderLedgerView(false, 'results'); else if(document.getElementById('simple-tab').classList.contains('active')) renderLedgerView(true, 'simpleResults'); }
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderActiveTable(); renderColToggles(); }
-
     function sortData(column, keepDirection = false) {
         if(isResizing) return;
         if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' };
-        finalResults.sort((a, b) => {
-            let vA = a[column]; let vB = b[column];
-            if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; }
-            let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase();
-            if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; 
-            return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); 
-        }); renderActiveTable();
+        finalResults.sort((a, b) => { let vA = a[column]; let vB = b[column]; if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; } let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase(); if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); }); renderActiveTable();
     }
-
     function renderLedgerView(isSimple, containerId) {
         if (finalResults.length === 0) return;
         let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
-        
-        let h = "<table><thead><tr>" + keys.map(k => {
-            let sCls = currentSort.column === k ? (currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc') : '';
-            return `<th class="${sCls}" onclick="sortData('${k.replace(/'/g, "\\'")}')">${k}</th>`;
-        }).join('') + "</tr></thead><tbody>";
-
+        let h = "<table><thead><tr>" + keys.map(k => { let sCls = currentSort.column === k ? (currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''; return `<th class="${sCls}" onclick="sortData('${k.replace(/'/g, "\\'")}')">${k}</th>`; }).join('') + "</tr></thead><tbody>";
         finalResults.forEach(r => {
-            h += "<tr>" + keys.map(k => {
-                let v = r[k]; let cls = "editable"; let dVal = v; let isN = typeof v === 'number';
-                if (isN) { cls += ' text-right'; if (k.includes('Cost') || k.includes('Price') || k.includes('Surcharge') || k.includes('Paid') || k.includes('Shipping Cost ($)')) { dVal = "$" + v.toFixed(4); if (k === 'Final Landed Cost ($)') cls += ' highlight-calc'; } else dVal = v.toFixed(2); } else if (v == null) dVal = "";
-                if (['Item Name', 'Specification', 'Alibaba Order', 'DI Item ID', 'Neogleamz Name', 'Neo Product'].includes(k)) cls += ' trunc-col';
-                return `<td tabindex="0" class="${cls}" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateDBCell(this, '${r._RowKey}', '${k.replace(/'/g, "\\'")}', ${isN})">${dVal}</td>`;
-            }).join('') + "</tr>";
+            h += "<tr>" + keys.map(k => { let v = r[k]; let cls = "editable"; let dVal = v; let isN = typeof v === 'number'; if (isN) { cls += ' text-right'; if (k.includes('Cost') || k.includes('Price') || k.includes('Surcharge') || k.includes('Paid') || k.includes('Shipping Cost ($)')) { dVal = "$" + v.toFixed(4); if (k === 'Final Landed Cost ($)') cls += ' highlight-calc'; } else dVal = v.toFixed(2); } else if (v == null) dVal = ""; if (['Item Name', 'Specification', 'Alibaba Order', 'DI Item ID', 'Neogleamz Name', 'Neo Product'].includes(k)) cls += ' trunc-col'; return `<td tabindex="0" class="${cls}" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateDBCell(this, '${r._RowKey}', '${k.replace(/'/g, "\\'")}', ${isN})">${dVal}</td>`; }).join('') + "</tr>";
         });
-        document.getElementById(containerId).innerHTML = h + "</tbody></table>";
-        applyTableInteractivity(containerId);
+        document.getElementById(containerId).innerHTML = h + "</tbody></table>"; applyTableInteractivity(containerId);
     }
-
     let oldValTemp = ""; function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
-
     async function updateDBCell(cell, rowKey, uiCol, isN) {
-        try {
-            let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; 
-            let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } }
-            let dbCol = colMap[uiCol]; if(!dbCol) return;
-            sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
-            let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey);
-            if (r && isN) {
-                let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0;
-                if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } 
-                else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } 
-                else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; }
-            }
-            let [pNo, di] = rowKey.split(':::');
-            const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di);
-            if (error) throw new Error(error.message);
-            setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000);
-            if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); }
-            setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
-        } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
+        try { let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } } let dbCol = colMap[uiCol]; if(!dbCol) return; sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey); if (r && isN) { let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0; if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; } } let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000); if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); } setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
     }
-
     async function addManualItem() {
-        try {
-            const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); 
-            const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1;
-            if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required.");
-            sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block';
-            let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification'];
-            Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } else { payload[dbCol] = 0; } });
-            payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_total = cost; payload.order_date = new Date().toISOString().split('T')[0];
-            const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message);
-            ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000);
-        } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); }
+        try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } else { payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_total = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); }
     }
-
     async function autofillNeoNames() {
-        if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return;
-        sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; setSysProgress(20, 'working');
-        try {
-            let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; });
-            let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neo Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); });
-            if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000); return; }
-            sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working');
-            await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d)));
-            sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000);
-        } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
+        if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; setSysProgress(20, 'working');
+        try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neo Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
     }
 
-    // --- 7. CATALOG & GROUPING MATH ---
+    // --- 7. CATALOG, GROUPING MATH & BOM ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
-
     function buildCatalogCache() {
-        catalogCache = {}; finalResults.forEach(r => {
-            let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim();
-            let k = nn ? `${nn}:::${np}:::(Grouped Raw Items):::(Mixed Specs)` : `:::${np}:::${inam}:::${sp}`;
-            if (k === ":::::::::Unknown:::") return; 
-            
-            if(!catalogCache[k]) catalogCache[k] = { 
-                neoName: nn, neoProd: np, itemName: nn ? "(Grouped Raw Items)" : inam, spec: nn ? "(Mixed Specs)" : sp, 
-                totalCostSum: 0, totalQty: 0, _rn: new Set(), _rs: new Set() 
-            };
-            
-            catalogCache[k]._rn.add(inam);
-            if(sp) catalogCache[k]._rs.add(sp);
-
-            let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; 
-            catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces;
-        });
-        
-        Object.keys(catalogCache).forEach(k => {
-            catalogCache[k].avgUnitCost = catalogCache[k].totalCostSum / (catalogCache[k].totalQty || 1);
-            if(catalogCache[k]._rn && catalogCache[k]._rn.size === 1) catalogCache[k].itemName = Array.from(catalogCache[k]._rn)[0];
-            if(catalogCache[k]._rs) {
-                if(catalogCache[k]._rs.size === 1) catalogCache[k].spec = Array.from(catalogCache[k]._rs)[0];
-                else if(catalogCache[k]._rs.size === 0) catalogCache[k].spec = "";
-            }
-        });
+        catalogCache = {}; finalResults.forEach(r => { let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim(); let k = nn ? `${nn}:::${np}:::(Grouped Raw Items):::(Mixed Specs)` : `:::${np}:::${inam}:::${sp}`; if (k === ":::::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: nn ? "(Grouped Raw Items)" : inam, spec: nn ? "(Mixed Specs)" : sp, totalCostSum: 0, totalQty: 0, _rn: new Set(), _rs: new Set() }; catalogCache[k]._rn.add(inam); if(sp) catalogCache[k]._rs.add(sp); let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces; });
+        Object.keys(catalogCache).forEach(k => { catalogCache[k].avgUnitCost = catalogCache[k].totalCostSum / (catalogCache[k].totalQty || 1); if(catalogCache[k]._rn && catalogCache[k]._rn.size === 1) catalogCache[k].itemName = Array.from(catalogCache[k]._rn)[0]; if(catalogCache[k]._rs) { if(catalogCache[k]._rs.size === 1) catalogCache[k].spec = Array.from(catalogCache[k]._rs)[0]; else if(catalogCache[k]._rs.size === 0) catalogCache[k].spec = ""; } });
     }
-
     function calculateProductTotal(pName, visited = new Set()) {
-        if (visited.has(pName)) return 0; visited.add(pName); let tot = 0;
-        (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = parseFloat(part.quantity || part.qty) || 1; if (k.startsWith('RECIPE:::')) tot += (calculateProductTotal(k.replace('RECIPE:::', ''), new Set(visited)) * q); else if (catalogCache[k]) tot += (catalogCache[k].avgUnitCost * q); }); return tot;
+        if (visited.has(pName)) return 0; visited.add(pName); let tot = 0; (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = parseFloat(part.quantity || part.qty) || 1; if (k.startsWith('RECIPE:::')) tot += (calculateProductTotal(k.replace('RECIPE:::', ''), new Set(visited)) * q); else if (catalogCache[k]) tot += (catalogCache[k].avgUnitCost * q); }); return tot;
     }
-
     function getRawMaterials(pName, mult = 1, map = {}, vis = new Set()) {
-        if (vis.has(pName)) return map; vis.add(pName);
-        (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = (parseFloat(part.quantity || part.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); else { map[k] = (map[k] || 0) + q; } }); return map;
+        if (vis.has(pName)) return map; vis.add(pName); (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = (parseFloat(part.quantity || part.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); else { map[k] = (map[k] || 0) + q; } }); return map;
     }
-
     function populateDropdowns() {
         try {
             let recipes = `<optgroup label="📦 SUB-ASSEMBLIES (Your Products)">` + Object.keys(productsDB).sort().map(p => { let cost = calculateProductTotal(p).toFixed(2); return `<option value="RECIPE:::${p}">🟢 [Product] ${p}   ━━━━   💰 $${cost}/unit</option>`; }).join('') + `</optgroup>`;
-            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { 
-                let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `📦 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); 
-                let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); 
-                let cost = d.avgUnitCost.toFixed(4); return `<option value="${k}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; 
-            }).join('') + `</optgroup>`;
+            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `📦 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); return `<option value="${k}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
             const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipes + raws;
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📦 ${p}</option>`).join('');
+            const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📦 ${p}</option>`).join('');
+            const sop = document.getElementById('sopProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📝 ${p}</option>`).join('');
         } catch(e) {}
     }
-
-    // MODAL AND SORTING LOGIC
     function openBulkAddModal() {
-        if(!currentProduct) return alert("Please select a product from the sidebar first.");
-        document.getElementById('bulkAddTitle').innerText = currentProduct;
-        bulkAddData = [];
-        Object.keys(productsDB).sort().forEach(p => { 
-            if(p === currentProduct) return; 
-            bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: "📦", np: "Sub-Assembly", n: p, sp: "(Nested Recipe)", uc: calculateProductTotal(p), q: "" });
-        });
-        Object.keys(catalogCache).forEach(k => { 
-            let c = catalogCache[k]; 
-            bulkAddData.push({ k: k, isSub: false, nn: c.neoName||"", np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "" });
-        });
-        document.getElementById('bulkSearch').value = ""; document.getElementById('bulkAddModal').style.display = 'flex';
-        renderBulkAddBody();
+        if(!currentProduct) return alert("Please select a product from the sidebar first."); document.getElementById('bulkAddTitle').innerText = currentProduct; bulkAddData = [];
+        Object.keys(productsDB).sort().forEach(p => { if(p === currentProduct) return; bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: "📦", np: "Sub-Assembly", n: p, sp: "(Nested Recipe)", uc: calculateProductTotal(p), q: "" }); });
+        Object.keys(catalogCache).forEach(k => { let c = catalogCache[k]; bulkAddData.push({ k: k, isSub: false, nn: c.neoName||"", np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "" }); });
+        document.getElementById('bulkSearch').value = ""; document.getElementById('bulkAddModal').style.display = 'flex'; renderBulkAddBody();
     }
-
     function sortBulk(c) { currentBulkSort = { column: c, direction: currentBulkSort.column===c && currentBulkSort.direction==='asc' ? 'desc' : 'asc' }; renderBulkAddBody(); }
     function updateBulkQty(k, v) { let i = bulkAddData.find(x => x.k === k); if(i) i.q = v; }
-
     function renderBulkAddBody() {
         let wrap = document.getElementById('bulkAddTableWrap'); if(!wrap) return;
-        
-        let ths = `
-            <th class="${currentBulkSort.column==='nn'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('nn')">Neogleamz Name</th>
-            <th class="${currentBulkSort.column==='np'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('np')">Neo Product</th>
-            <th class="${currentBulkSort.column==='n'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('n')">Item Name</th>
-            <th class="${currentBulkSort.column==='sp'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('sp')">Spec</th>
-            <th class="${currentBulkSort.column==='uc'?'sorted-'+currentBulkSort.direction:''} text-right" onclick="sortBulk('uc')">Unit Cost</th>
-            <th style="width:120px; text-align:center; background:#0ea5e9; color:white;">Qty to Add</th>
-        `;
-        let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bulkAddBody">`;
-
-        let qStr = document.getElementById('bulkSearch').value.toLowerCase();
-        let filtered = bulkAddData.filter(x => x.nn.toLowerCase().includes(qStr) || x.np.toLowerCase().includes(qStr) || x.n.toLowerCase().includes(qStr) || x.sp.toLowerCase().includes(qStr));
-
-        filtered.sort((x,y) => {
-            let u = x[currentBulkSort.column]; let v = y[currentBulkSort.column]; 
-            if (typeof u === 'number' && typeof v === 'number') return currentBulkSort.direction === 'asc' ? u - v : v - u;
-            u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); 
-            if(u<v) return currentBulkSort.direction==='asc'?-1:1; if(u>v) return currentBulkSort.direction==='asc'?1:-1; return 0; 
-        });
-        
-        filtered.forEach(x => {
-            let sk = x.k.replace(/"/g,'&quot;');
-            let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp;
-            if(x.isSub) {
-                h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">📦</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`;
-            } else {
-                h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; 
-            }
-        });
-        wrap.innerHTML = h + `</tbody></table>`;
-        applyTableInteractivity('bulkAddTableWrap');
+        let ths = ` <th class="${currentBulkSort.column==='nn'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('nn')">Neogleamz Name</th> <th class="${currentBulkSort.column==='np'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('np')">Neo Product</th> <th class="${currentBulkSort.column==='n'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('n')">Item Name</th> <th class="${currentBulkSort.column==='sp'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('sp')">Spec</th> <th class="${currentBulkSort.column==='uc'?'sorted-'+currentBulkSort.direction:''} text-right" onclick="sortBulk('uc')">Unit Cost</th> <th style="width:120px; text-align:center; background:#0ea5e9; color:white;">Qty to Add</th> `;
+        let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bulkAddBody">`; let qStr = document.getElementById('bulkSearch').value.toLowerCase(); let filtered = bulkAddData.filter(x => x.nn.toLowerCase().includes(qStr) || x.np.toLowerCase().includes(qStr) || x.n.toLowerCase().includes(qStr) || x.sp.toLowerCase().includes(qStr));
+        filtered.sort((x,y) => { let u = x[currentBulkSort.column]; let v = y[currentBulkSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBulkSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBulkSort.direction==='asc'?-1:1; if(u>v) return currentBulkSort.direction==='asc'?1:-1; return 0; });
+        filtered.forEach(x => { let sk = x.k.replace(/"/g,'&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">📦</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
+        wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('bulkAddTableWrap');
     }
-
     function filterBulkList() { renderBulkAddBody(); }
-
     async function saveBulkAdd() {
-        let addedCount = 0; 
-        bulkAddData.forEach(i => { 
-            let v = parseFloat(i.q); 
-            if(v > 0) { 
-                let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); 
-                if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } 
-                addedCount++; 
-            } 
-        });
+        let addedCount = 0; bulkAddData.forEach(i => { let v = parseFloat(i.q); if(v > 0) { let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } addedCount++; } });
         if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>document.getElementById('statusMaster').style.display = 'none', 2000); } else { alert("No quantities greater than 0 were entered."); }
     }
-
     async function renameCurrentProduct() {
         if(!currentProduct) return; let n = prompt("Enter new name:", currentProduct); if(!n || !n.trim() || n.trim() === currentProduct) return; n = n.trim(); if(productsDB[n]) return alert("A product with this name already exists.");
         sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; let o = currentProduct; let c = productsDB[o]; productsDB[n] = c;
@@ -724,7 +742,6 @@
         let ups = []; Object.keys(productsDB).forEach(k => { let changed = false; productsDB[k].forEach(p => { if(String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + o) { p.item_key = 'RECIPE:::' + n; changed = true; } }); if(changed) ups.push(supabaseClient.from('product_recipes').upsert({product_name: k, components: productsDB[k]})); });
         if(ups.length > 0) await Promise.all(ups); currentProduct = n; populateDropdowns(); renderProductList(); setMasterStatus("Renamed!", "mod-success"); setTimeout(()=>document.getElementById('statusMaster').style.display = 'none', 3000);
     }
-
     async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const {error} = await supabaseClient.from('product_recipes').upsert({product_name: name, components: productsDB[name]}); if(error) throw new Error(error.message); populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
     async function createNewProduct() { let n = prompt("Recipe Name:"); if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; await syncRecipe(n); currentProduct = n; renderProductList(); renderProductBOM(); }
     function selectProduct(n) { currentProduct = n; renderProductList(); renderProductBOM(); }
@@ -763,65 +780,26 @@
         if(!currentProduct) return; document.getElementById('bomMainArea').style.display='block'; document.getElementById('bomTitle').innerText=currentProduct;
         let p = productsDB[currentProduct]||[]; let gt = 0; let wrap = document.getElementById('bomTableWrap');
         
-        let ths = `
-            <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th>
-            <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neo Product</th>
-            <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th>
-            <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th>
-            <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th>
-            <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th>
-            <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th>
-            <th style="width: 40px; text-align:center;">Action</th>
-        `;
+        let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neo Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
         let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
 
         if(p.length===0){ h += "<tr><td colspan='8' style='text-align:center;'>No components.</td></tr>"; }
         else {
             let a = [];
-            p.forEach(x => {
-                let k = String(x.item_key||x.di_item_id||x.name); let q = parseFloat(x.quantity||x.qty)||1; let nn="", np="", n="", sp="", uc=0;
-                if(k.startsWith('RECIPE:::')) { let s = k.replace('RECIPE:::', ''); nn="📦"; np="Sub-Assembly"; n=s; sp=""; uc=calculateProductTotal(s); }
-                else { let c = catalogCache[k]; if(c){ nn=c.neoName; np=c.neoProd; n=c.itemName; sp=c.spec; uc=c.avgUnitCost; } else { n="Unknown Item"; sp="N/A"; } }
-                let ec = uc*q; gt+=ec;
-                a.push({rawKey: k, nn: nn, np: np, n: n, sp: sp, q: q, uc: uc, ec: ec});
-            });
-
-            a.sort((x,y) => { 
-                let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; 
-                if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u;
-                u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); 
-                if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; 
-            });
+            p.forEach(x => { let k = String(x.item_key||x.di_item_id||x.name); let q = parseFloat(x.quantity||x.qty)||1; let nn="", np="", n="", sp="", uc=0; if(k.startsWith('RECIPE:::')) { let s = k.replace('RECIPE:::', ''); nn="📦"; np="Sub-Assembly"; n=s; sp=""; uc=calculateProductTotal(s); } else { let c = catalogCache[k]; if(c){ nn=c.neoName; np=c.neoProd; n=c.itemName; sp=c.spec; uc=c.avgUnitCost; } else { n="Unknown Item"; sp="N/A"; } } let ec = uc*q; gt+=ec; a.push({rawKey: k, nn: nn, np: np, n: n, sp: sp, q: q, uc: uc, ec: ec}); });
+            a.sort((x,y) => { let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; });
 
             a.forEach(x => {
-                let sk = x.rawKey.replace(/"/g,'&quot;');
-                let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp;
-                if(x.rawKey.startsWith('RECIPE:::')) {
-                    h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`;
-                } else {
-                    h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`;
-                }
+                let sk = x.rawKey.replace(/"/g,'&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp;
+                if(x.rawKey.startsWith('RECIPE:::')) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; }
             });
         }
-        wrap.innerHTML = h + `</tbody></table>`;
-        document.getElementById('bomTotalCost').innerText = `$${gt.toFixed(2)}`;
-        applyTableInteractivity('bomTableWrap');
+        wrap.innerHTML = h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${gt.toFixed(2)}`; applyTableInteractivity('bomTableWrap');
     }
 
     function renderInventoryTable() {
         const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
-        let ths = `
-            <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th>
-            <th class="${currentInvSort.column==='np'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('np')">Neo Product</th>
-            <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th>
-            <th class="${currentInvSort.column==='sp'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('sp')">Spec</th>
-            <th class="${currentInvSort.column==='up'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('up')">Avg Unit Cost</th>
-            <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Total Pcs Purchased</th>
-            <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:3px solid #ef4444;">Pcs Consumed</th>
-            <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')">Manual Adj.</th>
-            <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:3px solid #f59e0b;">Current Stock</th>
-            <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">Avg Total Value</th>
-        `;
+        let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='np'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('np')">Neo Product</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='sp'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('sp')">Spec</th> <th class="${currentInvSort.column==='up'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('up')">Avg Unit Cost</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Total Pcs Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:3px solid #ef4444;">Pcs Consumed</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')">Manual Adj.</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:3px solid #f59e0b;">Current Stock</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">Avg Total Value</th> `;
         let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="inventoryBody">`;
 
         let a = Object.keys(catalogCache).map(k => {
@@ -831,57 +809,293 @@
 
         if(a.length===0){ h += "<tr><td colspan='10' style='text-align:center;'>No inventory.</td></tr>"; }
         else {
-            a.sort((x,y) => { 
-                let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; 
-                if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u;
-                u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); 
-                if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; 
-            });
-            a.forEach(x => {
-                let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = x.k.replace(/'/g,"\\'");
-                let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp;
-                h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${x.n}</td><td tabindex="0" class="trunc-col" style="color:#64748b;">${displaySpec}</td><td class="text-right">$${x.up.toFixed(4)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`;
-            });
+            a.sort((x,y) => { let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
+            a.forEach(x => { let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = x.k.replace(/'/g,"\\'"); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${x.n}</td><td tabindex="0" class="trunc-col" style="color:#64748b;">${displaySpec}</td><td class="text-right">$${x.up.toFixed(4)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; });
         }
-        wrap.innerHTML = h + `</tbody></table>`;
-        applyTableInteractivity('invTableWrap');
+        wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('invTableWrap');
     }
 
-    function sortInventory(c) { 
-        if(isResizing) return;
-        currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; 
-        renderInventoryTable(); 
-    }
+    function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
 
     async function handleInvEdit(cell, key, p, c, a, mode) {
-        try {
-            let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v)) { cell.innerText = mode==='consumed'?c:(p-c+a); return alert("Valid number required."); }
-            let nc=c, na=a; if(mode==='consumed') { nc=Math.abs(v); if(nc===c) return; } else { na = v-(p-c); if(na===a) return; }
-            sysLog(`Inv Edit: [${key}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block';
-            const { error } = await supabaseClient.from('inventory_consumption').upsert({item_key: key, consumed_qty: nc, manual_adjustment: na}, {onConflict:'item_key'});
-            if(error) throw new Error(error.message);
-            if(!inventoryDB[key]) inventoryDB[key]={consumed:0, adjustment:0}; inventoryDB[key].consumed=nc; inventoryDB[key].adjustment=na;
-            setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>document.getElementById('statusMaster').style.display='none',2000); renderInventoryTable();
-        } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = mode==='consumed'?c:(p-c+a); }
+        try { let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v)) { cell.innerText = mode==='consumed'?c:(p-c+a); return alert("Valid number required."); } let nc=c, na=a; if(mode==='consumed') { nc=Math.abs(v); if(nc===c) return; } else { na = v-(p-c); if(na===a) return; } sysLog(`Inv Edit: [${key}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block'; const { error } = await supabaseClient.from('inventory_consumption').upsert({item_key: key, consumed_qty: nc, manual_adjustment: na}, {onConflict:'item_key'}); if(error) throw new Error(error.message); if(!inventoryDB[key]) inventoryDB[key]={consumed:0, adjustment:0}; inventoryDB[key].consumed=nc; inventoryDB[key].adjustment=na; setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>document.getElementById('statusMaster').style.display='none',2000); renderInventoryTable(); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = mode==='consumed'?c:(p-c+a); }
     }
 
     async function runProductionBatch() {
-        const n = document.getElementById('batchProductSelect').value; const q = parseFloat(document.getElementById('batchQty').value);
-        if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); sysLog(`Batch Run: ${q}x ${n}`); setSysProgress(20, 'working');
-        try {
-            let raw = getRawMaterials(n, q); let keys = Object.keys(raw); if(keys.length===0){ setSysProgress(0,'working'); return alert("Recipe empty."); }
-            let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; });
-            setSysProgress(60, 'working'); const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); if(error) throw new Error(error.message);
-            setSysProgress(100, 'success'); sysLog("Batch Complete."); alert(`Deducted ${q}x ${n}.`); document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000);
-        } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); alert("Batch Error."); }
+        const n = document.getElementById('batchProductSelect').value; const q = parseFloat(document.getElementById('batchQty').value); if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); sysLog(`Batch Run: ${q}x ${n}`); setSysProgress(20, 'working');
+        try { let raw = getRawMaterials(n, q); let keys = Object.keys(raw); if(keys.length===0){ setSysProgress(0,'working'); return alert("Recipe empty."); } let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; }); setSysProgress(60, 'working'); const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); if(error) throw new Error(error.message); setSysProgress(100, 'success'); sysLog("Batch Complete."); alert(`Deducted ${q}x ${n}.`); document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); alert("Batch Error."); }
     }
 
     async function resetInventoryConsumption() {
-        if(!confirm("⚠️ DANGER: Reset ALL consumption AND manual adjustments?")) return; sysLog("Resetting Inventory..."); setSysProgress(50, 'working');
-        try { const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); if(error) throw new Error(error.message); inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
+        if(!confirm("⚠️ DANGER: Reset ALL consumption AND manual adjustments?")) return; sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); try { const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); if(error) throw new Error(error.message); inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
     }
 
-    // --- 8. PARSERS & SYNC ---
+    // --- 9. NEW PRODUCTION MANAGER ENGINES ---
+    
+    function getDirectImageUrl(url) {
+        if (!url) return "";
+        let driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+        if (driveMatch && driveMatch[1]) return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+        return url; 
+    }
+    
+    function renderSOPEditor() {
+        const p = document.getElementById('sopProductSelect').value; const area = document.getElementById('sopEditorArea'); const btn = document.getElementById('saveSOPBtn');
+        if(!p) { area.innerHTML = ""; btn.style.display = 'none'; return; }
+        
+        let steps = sopsDB[p] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, img: ""} : s);
+        if(mappedSteps.length === 0) mappedSteps = [{text: "", img: ""}]; 
+        
+        let h = "";
+        mappedSteps.forEach((s, idx) => {
+            h += `<div class="sop-step-row">
+                <input type="text" class="sop-text" value="${(s.text||'').replace(/"/g,'&quot;')}" placeholder="Enter step instruction...">
+                <input type="text" class="sop-img" value="${(s.img||'').replace(/"/g,'&quot;')}" placeholder="Optional: Image URL (Imgur, Drive, etc)">
+                <button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>
+            </div>`;
+        });
+        h += `<button class="btn-blue" style="width:auto; padding:6px; font-size:12px; margin-top:5px;" onclick="addSOPRow()">+ Add Step</button>`;
+        area.innerHTML = h; btn.style.display = 'block';
+    }
+
+    function addSOPRow() {
+        const area = document.getElementById('sopEditorArea'); const btn = area.querySelector('.btn-blue');
+        const div = document.createElement('div'); div.className = "sop-step-row";
+        div.innerHTML = `<input type="text" class="sop-text" placeholder="Enter step instruction..."><input type="text" class="sop-img" placeholder="Optional: Image URL (Imgur, Drive, etc)"><button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>`;
+        area.insertBefore(div, btn);
+    }
+    function removeSOPRow(btn) { btn.parentElement.remove(); }
+
+    async function saveSOP() {
+        const p = document.getElementById('sopProductSelect').value; if(!p) return;
+        let steps = []; 
+        document.querySelectorAll('.sop-step-row').forEach(row => {
+            let t = row.querySelector('.sop-text'); let i = row.querySelector('.sop-img');
+            if(t && t.value.trim()) steps.push({ text: t.value.trim(), img: i ? i.value.trim() : "" });
+        });
+        sopsDB[p] = steps; sysLog(`Saving SOP for ${p}`); setMasterStatus("Saving...", "mod-working");
+        try {
+            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps});
+            if(error) throw new Error(error.message);
+            setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+            if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id);
+        } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    }
+
+    function openNewWOModal() { document.getElementById('woErrorBox').style.display = 'none'; document.getElementById('newWOQty').value = 1; document.getElementById('newWOModal').style.display = 'flex'; }
+
+    async function validateAndCreateWO() {
+        const p = document.getElementById('newWOProduct').value; const q = parseFloat(document.getElementById('newWOQty').value);
+        if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
+        
+        let rawNeeded = getRawMaterials(p, q); let shortfalls = [];
+        Object.keys(rawNeeded).forEach(k => {
+            let req = rawNeeded[k]; let c = catalogCache[k] || {totalQty: 0}; let i = inventoryDB[k] || {consumed: 0, adjustment: 0}; let onHand = c.totalQty - i.consumed + i.adjustment;
+            if(req > onHand) { let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); }
+        });
+
+        if(shortfalls.length > 0) {
+            document.getElementById('woShortfallList').innerHTML = shortfalls.join('');
+            document.getElementById('woErrorBox').style.display = 'block';
+            return; 
+        }
+
+        let woId = "WO-" + Date.now().toString().slice(-6); let wo = { wo_id: woId, product_name: p, qty: q, status: 'Queued', wip_state: {} };
+        sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
+        try {
+            const {error} = await supabaseClient.from('work_orders').insert(wo);
+            if(error) throw new Error(error.message);
+            workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none';
+            setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+            currentWO = wo; renderWOList();
+        } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    }
+
+    function renderWOList() {
+        const ui = document.getElementById('woListUI'); ui.innerHTML = "";
+        if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
+        workOrdersDB.forEach(wo => {
+            let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : '';
+            let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠'));
+            ui.innerHTML += `<li class="${sel}" onclick="selectWO('${wo.wo_id}')"><span>${dot} <strong>${wo.wo_id}</strong>: ${wo.product_name}</span> <span style="font-weight:bold;">x${wo.qty}</span></li>`;
+        });
+        if(!currentWO && workOrdersDB.length > 0) currentWO = workOrdersDB[0];
+        if(currentWO) renderActiveWO(currentWO.wo_id);
+    }
+
+    function selectWO(id) { currentWO = workOrdersDB.find(w => w.wo_id === id); renderWOList(); }
+
+    async function toggleWIPCheckbox(chk, key) {
+        if(!currentWO) return; let isChecked = chk.checked;
+        if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done');
+        
+        if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked;
+        try { await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } 
+        catch(e) { sysLog("Failed to save checkbox state.", true); }
+    }
+
+    function renderActiveWO(id) {
+        let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
+        document.getElementById('woMainArea').style.display = 'flex';
+        document.getElementById('woTitle').innerText = `${wo.wo_id}: ${wo.product_name}`;
+        document.getElementById('woQtyTarget').innerText = wo.qty;
+        
+        let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
+        if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
+
+        ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { 
+            document.getElementById('pipe-'+s).classList.remove('active'); 
+            document.getElementById('sect-'+s).classList.remove('active'); 
+        });
+        
+        let wip = wo.wip_state || {};
+        
+        if(wo.status === 'Queued') { 
+            document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); 
+        }
+        else if(wo.status === 'Picking') { 
+            document.getElementById('pipe-Picking').classList.add('active'); document.getElementById('sect-Picking').classList.add('active'); 
+            
+            // HIERARCHICAL PICK LIST BUILDER
+            let pList = document.getElementById('woPickList'); 
+            let html = ""; let chkIdx = 0;
+
+            function traverseBOM(pName, mult, depth, pathName) {
+                let parts = productsDB[pName] || [];
+                let rawGrp = {}; let subGroups = [];
+                
+                parts.forEach(p => {
+                    let k = String(p.item_key || p.di_item_id || p.name);
+                    let q = (parseFloat(p.quantity || p.qty) || 1) * mult;
+                    if (k.startsWith('RECIPE:::')) subGroups.push({name: k.replace('RECIPE:::', ''), q: q});
+                    else rawGrp[k] = (rawGrp[k] || 0) + q;
+                });
+
+                let rKeys = Object.keys(rawGrp);
+                if(rKeys.length > 0) {
+                    let grpTitle = depth > 0 ? `📦 Sub-Assembly: ${pathName} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">(Builds ${mult})</span>` : (subGroups.length > 0 ? `🔩 Direct Components` : `🔩 Parts`);
+                    html += `<div style="padding: 10px 15px; background: var(--bg-bar); border-bottom: 1px solid var(--border-color); color: var(--text-heading); font-weight: bold; font-size: 13px;">${grpTitle}</div>`;
+                    
+                    rKeys.forEach(k => {
+                        let req = rawGrp[k]; let f = fmtKey(k); let name = f.nn ? f.nn : f.in;
+                        let displaySpec = f.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : f.sp;
+                        let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                        
+                        html += `<div class="checklist-item ${doneCls}" style="padding-left: ${depth > 0 ? 25 : 15}px;"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:12px;">${displaySpec}</div></div></div>`;
+                    });
+                }
+                
+                subGroups.forEach(sg => traverseBOM(sg.name, sg.q, depth + 1, sg.name));
+            }
+            
+            traverseBOM(wo.product_name, wo.qty, 0, wo.product_name);
+            pList.innerHTML = html;
+        }
+        else if(wo.status === 'In Production') { 
+            document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active'); 
+            
+            let steps = sopsDB[wo.product_name] || [];
+            let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, img: ""} : s);
+            let sList = document.getElementById('woSOPList'); sList.innerHTML = "";
+            if(mappedSteps.length === 0) sList.innerHTML = `<div style="padding:15px; color:var(--text-muted);">No SOPs written for this product yet.</div>`;
+            else {
+                mappedSteps.forEach((s, idx) => {
+                    let chkKey = `sop_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                    let directImg = getDirectImageUrl(s.img);
+                    let imgHtml = directImg ? `<br><img src="${directImg}" style="max-width:100%; max-height:200px; margin-top:10px; border-radius:6px; border:1px solid var(--border-color);">` : "";
+                    sList.innerHTML += `<div class="checklist-item ${doneCls}"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text"><strong style="color:#0ea5e9;">Step ${idx+1}:</strong> ${s.text} ${imgHtml}</div></div>`;
+                });
+            }
+        }
+        else if(wo.status === 'Completed') { 
+            document.getElementById('pipe-Completed').classList.add('active'); document.getElementById('sect-Completed').classList.add('active'); 
+        }
+    }
+
+    async function advanceWO(newStatus) {
+        if(!currentWO) return; if(currentWO.status === 'Completed') return alert("This Work Order is already completed and archived.");
+        sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
+        
+        if(newStatus === 'Completed') {
+            if(!confirm("Marking this complete will permanently deduct the raw materials from your inventory. Proceed?")) { setMasterStatus("Ready.", "status-idle"); return; }
+            let raw = getRawMaterials(currentWO.product_name, currentWO.qty); let keys = Object.keys(raw); 
+            if(keys.length > 0){ 
+                let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; });
+                const {error: invErr} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
+                if(invErr) { sysLog(invErr.message, true); return; }
+                renderInventoryTable();
+            }
+        }
+        try {
+            const {error} = await supabaseClient.from('work_orders').update({status: newStatus}).eq('wo_id', currentWO.wo_id);
+            if(error) throw new Error(error.message);
+            currentWO.status = newStatus;
+            setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+            renderWOList();
+        } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    }
+
+    async function deleteCurrentWO() {
+        if(!currentWO) return;
+        if(confirm(`Are you sure you want to delete ${currentWO.wo_id}? (This will not reverse inventory deductions if it was already completed).`)) {
+            try { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB[0] || null; renderWOList(); } catch(e) {}
+        }
+    }
+
+    function printPickList() {
+        if(!currentWO) return;
+        
+        let html = `<html><head><title>Pick List - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;} th,td{border:1px solid #ccc; padding:10px; text-align:left;} th{background:#f1f5f9;} .group-header{background:#e0f2fe; font-weight:bold; font-size:16px;}</style></head><body>`;
+        html += `<h2>Pick List: ${currentWO.wo_id}</h2><h3>Product: ${currentWO.product_name} (Qty: ${currentWO.qty})</h3>`;
+        html += `<table><thead><tr><th style="width:50px;">Picked</th><th>Item Name</th><th>Spec</th><th>Qty Needed</th></tr></thead><tbody>`;
+        
+        function traversePrint(pName, mult, depth, pathName) {
+            let parts = productsDB[pName] || [];
+            let rawGrp = {}; let subGroups = [];
+            
+            parts.forEach(p => {
+                let k = String(p.item_key || p.di_item_id || p.name);
+                let q = (parseFloat(p.quantity || p.qty) || 1) * mult;
+                if (k.startsWith('RECIPE:::')) subGroups.push({name: k.replace('RECIPE:::', ''), q: q});
+                else rawGrp[k] = (rawGrp[k] || 0) + q;
+            });
+
+            let rKeys = Object.keys(rawGrp);
+            if(rKeys.length > 0) {
+                let grpTitle = depth > 0 ? `📦 Sub-Assembly: ${pathName} (Builds ${mult})` : (subGroups.length > 0 ? `🔩 Direct Components` : `🔩 Parts`);
+                html += `<tr><td colspan="4" class="group-header">${grpTitle}</td></tr>`;
+                
+                rKeys.forEach(k => { 
+                    let req = rawGrp[k]; let f = fmtKey(k); let name = f.nn ? f.nn : f.in; 
+                    html += `<tr><td>[ &nbsp;&nbsp;&nbsp;&nbsp; ]</td><td style="padding-left:${depth>0?'25px':'10px'}">${name}</td><td>${f.sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; 
+                });
+            }
+            subGroups.forEach(sg => traversePrint(sg.name, sg.q, depth + 1, sg.name));
+        }
+        
+        traversePrint(currentWO.product_name, currentWO.qty, 0, currentWO.product_name);
+        
+        html += `</tbody></table></body></html>`;
+        let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
+    }
+
+    function printSOP() {
+        if(!currentWO) return;
+        let steps = sopsDB[currentWO.product_name] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, img: ""} : s);
+        let html = `<html><head><title>SOP - ${currentWO.product_name}</title><style>body{font-family:sans-serif; padding:20px;} .step{margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:16px;} img{max-width:100%; max-height:400px; display:block; margin-top:10px;}</style></head><body>`;
+        html += `<h2>Standard Operating Procedure (SOP)</h2><h3>Product: ${currentWO.product_name}</h3><hr>`;
+        if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
+        else { 
+            mappedSteps.forEach((s, i) => { 
+                let dImg = getDirectImageUrl(s.img);
+                html += `<div class="step"><strong>Step ${i+1}:</strong> ${s.text} ${dImg ? `<br><img src="${dImg}">` : ''}</div>`; 
+            }); 
+        }
+        html += `</body></html>`;
+        let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500);
+    }
+
+    // --- 10. PARSERS & SYNC ---
     function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){} }
     document.getElementById('orderFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'orders');});
     document.getElementById('parcelFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'parcels');});
@@ -909,24 +1123,9 @@
                 let bt = b.innerText; let oNo = (bt.match(/DO\d+/)||["N/A"])[0]; let dt = (bt.match(/\d{4}-\d{2}-\d{2}/)||[""])[0]; 
                 let oTot = bt.match(/Total Amount:.*?[￥$]\s*([\d.]+)/i)?parseFloat(bt.match(/Total Amount:.*?[￥$]\s*([\d.]+)/i)[1]):0; 
                 let post = bt.match(/Postage Inclusive:.*?[￥$]\s*([\d.]+)/i)?parseFloat(bt.match(/Postage Inclusive:.*?[￥$]\s*([\d.]+)/i)[1]):0;
-                
-                let trs = Array.from(b.querySelectorAll('tr')).filter(r=>r.innerText.match(/DI\d+/)); 
-                let tq=0; let tBaseCost = 0;
-                
-                trs.forEach(r=>{ 
-                    let cs=r.querySelectorAll('td'); 
-                    if(cs.length>=3) {
-                        let q = parseInt(cs[2].innerText.replace(/[^0-9]/g,''))||1; 
-                        let upMatch = r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/);
-                        let up = upMatch ? parseFloat(upMatch[1]) : 0;
-                        tq += q; 
-                        tBaseCost += (up * q);
-                    }
-                });
-                
-                let hiddenFee = oTot - tBaseCost; if (hiddenFee < 0) hiddenFee = 0; 
-                let feePerItem = tq > 0 ? (hiddenFee / tq) : 0;
-
+                let trs = Array.from(b.querySelectorAll('tr')).filter(r=>r.innerText.match(/DI\d+/)); let tq=0; let tBaseCost = 0;
+                trs.forEach(r=>{ let cs=r.querySelectorAll('td'); if(cs.length>=3) { let q = parseInt(cs[2].innerText.replace(/[^0-9]/g,''))||1; let upMatch = r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/); let up = upMatch ? parseFloat(upMatch[1]) : 0; tq += q; tBaseCost += (up * q); } });
+                let hiddenFee = oTot - tBaseCost; if (hiddenFee < 0) hiddenFee = 0; let feePerItem = tq > 0 ? (hiddenFee / tq) : 0;
                 trs.forEach(r => {
                     let m = r.innerText.match(/DI\d+/); if(m && !r.innerText.includes("Order No：")){
                         let id = m[0], pn = ""; Array.from(r.querySelectorAll('a')).forEach(l=>{let t=l.getAttribute('title'),x=l.innerText.trim(); if(t&&t.length>10){pn=t;return;} if(x&&x.length>15&&!x.includes("DI26")){pn=x;return;}});
@@ -937,9 +1136,7 @@
                         let tId = r.innerText.match(/(?:ALIBABA|TB|Order):([\d-]+)/i)?r.innerText.match(/(?:ALIBABA|TB|Order):([\d-]+)/i)[1]:""; 
                         let up = r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/)?parseFloat(r.innerText.match(/(?:US \$|CN ￥)\s*([\d.]+)/)[1]):0; 
                         let q = parseInt(r.querySelectorAll('td')[2]?.innerText.replace(/[^0-9]/g,''))||1;
-                        
                         let uclp = up + feePerItem;
-                        
                         a.push({di_item_id:id, order_date:dt, order_no:oNo, alibaba_order:tId, item_name:pn, specification:sp, unit_price:up, quantity:q, postage:post, order_total:oTot, unit_china_landed_price:uclp});
                     }
                 });
