@@ -34,23 +34,26 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-container); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px var(--shadow-color); transition: background-color 0.3s; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         
-        #loginUI { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-body); z-index: 10000; }
-        .login-box { background: var(--bg-container); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px var(--shadow-color); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border-color); }
-        .login-box h2 { color: var(--text-heading); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px; }
-        .login-box button { width: 100%; padding: 12px; font-size: 16px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .login-box button:hover { background: #0284c7; }
+        #loginUI { display: none; }
+        #appUI { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; }
 
-        #appUI { display: none; flex-direction: column; flex-grow: 1; min-height: 0; }
-
-        .header-area { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; flex-shrink: 0; }
-        .title-block h1 { font-size: 24px; margin: 0 0 2px 0; color: var(--text-heading); }
-        .title-block .subtitle { font-size: 13px; color: var(--text-muted); margin: 0; }
+        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; gap: 15px; }
+        .title-block { flex: 1; min-width: max-content; }
+        .title-block h1 { font-size: 20px; margin: 0 0 2px 0; color: var(--text-heading); }
+        .title-block .subtitle { font-size: 12px; color: var(--text-muted); margin: 0; }
         
-        .tabs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .tab-btn { padding: 8px 16px; background: transparent; color: var(--text-muted); font-size: 15px; border: none; cursor: pointer; font-weight: bold; border-radius: 8px 8px 0 0; transition: all 0.2s; width: auto !important; white-space: nowrap; }
+        .tabs { flex: 2; display: flex; justify-content: center; gap: 6px; align-items: flex-end; align-self: flex-end; }
+        .tab-btn { padding: 10px 22px; background: transparent; color: var(--text-muted); font-size: 15px; border: none; cursor: pointer; font-weight: 800; letter-spacing: 0.3px; border-radius: 8px 8px 0 0; transition: all 0.2s; width: auto !important; white-space: nowrap; margin-bottom: -10px; border-bottom: 3px solid transparent;}
         .tab-btn:hover { color: var(--text-heading); background: var(--tab-hover); }
         .tab-btn.active { color: #0ea5e9; border-bottom: 3px solid #0ea5e9; background: var(--tab-active-bg); }
+        
+        .top-controls { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+
+        .top-action-btn { background: var(--bg-panel); border: 1px solid var(--border-input); color: var(--text-main); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: none; width: auto !important; }
+        .top-action-btn:hover { background: var(--border-color); transform: translateY(-1px); }
+        .logout-btn { color: #ef4444; border-color: #fca5a5; background: transparent; }
+        .logout-btn:hover { background: #fee2e2; border-color: #ef4444; }
+
         .tab-content { display: none; animation: fadeIn 0.2s ease; flex-direction: column; flex-grow: 1; min-height: 0; }
         .tab-content.active { display: flex; }
         
@@ -61,8 +64,6 @@
         .btn-blue { background-color: #3b82f6; } .btn-blue:hover { background-color: #2563eb; }
         .btn-green { background-color: #10b981; } .btn-green:hover { background-color: #059669; }
         .btn-red { background-color: #ef4444; } .btn-red:hover { background-color: #dc2626; }
-        .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
-        .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
 
         .control-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; align-items: stretch; flex-shrink: 0; }
         .panel-card { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; transition: all 0.3s ease; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
@@ -104,9 +105,6 @@
         .bom-header h2 { margin: 0; font-size: 20px; color: var(--text-heading); }
         .bom-header .total-badge { background: #10b981; color: white; padding: 6px 12px; border-radius: 20px; font-size: 16px; font-weight: bold; }
         
-        .add-part-bar { display: grid; grid-template-columns: 1fr 90px 100px 110px; gap: 8px; background: var(--bg-bar); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; flex-shrink: 0; }
-        optgroup { font-weight: bold; font-style: normal; color: var(--text-heading); background: var(--bg-input); }
-        
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
         table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
         th { background-color: var(--bg-th); color: var(--text-th); padding: 8px 6px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: grab; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s, box-shadow 0.2s; }
@@ -128,19 +126,20 @@
         .st-production { background: #fefce8; color: #f59e0b; border: 1px solid #fde047; }
         .st-completed { background: #f0fdf4; color: #10b981; border: 1px solid #bbf7d0; }
         
-        .checklist-item { display: flex; align-items: flex-start; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 15px; transition: background 0.2s; }
+        .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 15px; border-bottom: 1px solid var(--border-color); font-size: 13px; transition: background 0.2s; }
         .checklist-item:hover { background: var(--bg-panel); }
-        .checklist-item input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+        .checklist-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; margin-top: 1px; }
         .checklist-item.done .chk-text { text-decoration: line-through; opacity: 0.5; transition: 0.3s; }
         
-        .pipeline-bar { display: flex; gap: 10px; padding: 15px; background: var(--bg-panel); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; flex-shrink: 0;}
-        .pipe-step { flex: 1; text-align: center; padding: 10px; border-radius: 6px; background: var(--bg-input); border: 2px solid var(--border-color); font-weight: bold; color: var(--text-muted); opacity: 0.6; cursor: pointer; transition: 0.2s;}
+        .pipeline-bar { display: flex; gap: 10px; padding: 10px; background: var(--bg-panel); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; flex-shrink: 0;}
+        .pipe-step { flex: 1; text-align: center; padding: 8px; border-radius: 6px; background: var(--bg-input); border: 2px solid var(--border-color); font-weight: bold; color: var(--text-muted); opacity: 0.6; cursor: pointer; transition: 0.2s; font-size:13px;}
         .pipe-step.active { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; opacity: 1; box-shadow: 0 4px 10px rgba(14,165,233,0.15); }
         .pipe-step:hover:not(.active) { opacity: 0.8; }
         
-        .sop-step-row { display: flex; gap: 10px; margin-bottom: 8px; background: var(--bg-panel); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap; }
-        .sop-step-row input.sop-text { flex: 2; min-width: 200px; }
-        .sop-step-row input.sop-img { flex: 1; min-width: 150px; font-size: 11px; }
+        .sop-step-row { display: flex; gap: 10px; margin-bottom: 8px; background: var(--bg-panel); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap; align-items:center; }
+        .sop-step-row input.sop-text { flex: 2; min-width: 150px; }
+        .sop-step-row select.sop-type { flex: 0.5; min-width: 90px; }
+        .sop-step-row input.sop-url { flex: 1.5; min-width: 120px; font-size: 11px; }
 
         .wo-section { display: none; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; animation: fadeIn 0.3s ease; }
         .wo-section.active { display: block; }
@@ -148,15 +147,21 @@
         .print-btn { background: transparent; color: #64748b; border: 1px solid #cbd5e1; width: auto; padding: 4px 10px; font-size: 12px; margin-left: auto; cursor: pointer; border-radius: 4px;}
         .print-btn:hover { background: #f8fafc; color: #334155; }
 
-        /* THE DIAGNOSTICS BAR: Green by default, Red on error */
-        #terminal { position: fixed; bottom: 0; right: 20px; width: 450px; background: #0f172a; color: #10b981; font-family: monospace; border-radius: 8px 8px 0 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); border: 1px solid #334155; display: none; }
-        #termHeader { background: #10b981; padding: 10px; cursor: pointer; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; color: white; font-size: 13px; transition: background-color 0.3s ease; }
-        #debugLog { height: 150px; overflow-y: auto; padding: 10px; font-size: 11px; line-height: 1.5; background: #0f172a; }
-        #sysProgress { width: 100%; height: 4px; border: none; background-color: #334155; display: block; }
-        #sysProgress::-webkit-progress-bar { background-color: #334155; }
+        /* UPGRADED MASSIVE MODALS CSS */
+        #mediaModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px); }
+        #mediaContainer { width:98vw; height:98vh; border-radius:8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; display:flex; justify-content:center; align-items:center; }
+
+        .terminal-wrapper { position: relative; z-index: 10000; }
+        #termHeader { background: #10b981; padding: 8px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: white; font-size: 12px; transition: all 0.3s ease; border-radius: 5px; width: 220px;}
+        #termHeader.sys-error { background-color: #ef4444 !important; animation: pulseRed 2s infinite; }
+        #termHeader.sys-good { background-color: #10b981 !important; }
+        @keyframes pulseRed { 0% { background-color: #ef4444; } 50% { background-color: #991b1b; } 100% { background-color: #ef4444; } }
+        #debugLog { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 350px; max-height: 250px; overflow-y: auto; padding: 10px; font-size: 11px; line-height: 1.4; background: #0f172a; color: #10b981; border: 1px solid #334155; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #sysProgress { width: 100%; height: 3px; border: none; background-color: transparent; display: block; border-radius: 0 0 6px 6px; position:absolute; bottom:0; left:0; }
+        #sysProgress::-webkit-progress-bar { background-color: transparent; }
         #sysProgress.prog-working::-webkit-progress-value { background-color: #3b82f6; transition: width 0.3s; }
-        #sysProgress.prog-success::-webkit-progress-value { background-color: #10b981; transition: width 0.3s; }
-        #sysProgress.prog-error::-webkit-progress-value { background-color: #ef4444; transition: width 0.3s; }
+        #sysProgress.prog-success::-webkit-progress-value { background-color: rgba(255,255,255,0.5); transition: width 0.3s; }
+        #sysProgress.prog-error::-webkit-progress-value { background-color: #ffffff; transition: width 0.3s; }
     </style>
 </head>
 <body>
@@ -172,19 +177,33 @@
 </div>
 
 <div id="appUI" class="container">
+    
     <div class="header-area">
         <div class="title-block">
             <h1>Neogleamz Command Center</h1>
             <p class="subtitle">Cloud-Native Ledger, Full Editing, MRP Inventory & Product Builder</p>
         </div>
+        
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('pipeline')">📦 Master Ledger</button>
             <button class="tab-btn" onclick="switchTab('simple')">📋 Simple Inventory</button>
             <button class="tab-btn" onclick="switchTab('bom')">🛠️ Product Builder</button>
             <button class="tab-btn" onclick="switchTab('inventory')">📊 Inventory Manager</button>
             <button class="tab-btn" onclick="switchTab('production')">🏭 Production Manager</button>
-            <button id="themeToggle" class="icon-btn" onclick="toggleTheme()" title="Toggle Theme" style="margin-left:auto;">🌙</button>
-            <button class="icon-btn" onclick="handleLogout()" title="Secure Logout" style="color:#ef4444; border-color:#fca5a5;">🚪</button>
+        </div>
+        
+        <div class="top-controls">
+            <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <button class="top-action-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+            
+            <div class="terminal-wrapper">
+                <div id="termHeader" class="sys-good" onclick="toggleTerminal()">
+                    <span id="termStatusIcon" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right:10px;">🟢 System Ready</span>
+                    <span id="termToggle">▼</span>
+                    <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
+                </div>
+                <div id="debugLog"></div>
+            </div>
         </div>
     </div>
 
@@ -225,7 +244,6 @@
             <div style="flex: 0.5;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
             <button class="btn-green" style="padding: 8px 20px; width: auto; font-size:14px;" onclick="addManualItem()">+ Add Row</button>
         </div>
-
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
             <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Database Ledger <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(Click ANY cell to edit)</span></h3>
         </div>
@@ -304,7 +322,7 @@
                 <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
                 
                 <h3>📝 SOP Editor</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Edit build instructions. Paste image URLs (Imgur, Drive) to include pictures.</p>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Link to Docs, Excel, Videos, or Images!</p>
                 <select id="sopProductSelect" onchange="renderSOPEditor()" style="margin-bottom:10px;"></select>
                 <div id="sopEditorArea" style="display:flex; flex-direction:column; gap:8px;"></div>
                 <button class="btn-green" id="saveSOPBtn" onclick="saveSOP()" style="margin-top:10px; display:none;">Save SOPs</button>
@@ -347,7 +365,6 @@
                         <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
                     </div>
                     <div id="woSOPList" style="margin-bottom:25px;"></div>
-                    
                     <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px;">
                         <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
                         <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly and permanently deduct all picked raw materials from your master inventory.</p>
@@ -369,7 +386,7 @@
 </div>
 
 <div id="bulkAddModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:10001; justify-content:center; align-items:center; backdrop-filter: blur(4px);">
-    <div class="container" style="width:90%; max-width:1100px; height:85vh; display:flex; flex-direction:column; background:var(--bg-container); box-shadow: 0 10px 40px rgba(0,0,0,0.3); border:1px solid var(--border-color);">
+    <div class="container" style="width:98vw; max-width:1800px; height:95vh; display:flex; flex-direction:column; background:var(--bg-container); box-shadow: 0 10px 40px rgba(0,0,0,0.3); border:1px solid var(--border-color);">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:20px;">📦 Bulk Add Components to <span id="bulkAddTitle" style="color:#0ea5e9;"></span></h2>
             <button class="btn-red" style="width:auto; padding:6px 15px; font-size:13px;" onclick="document.getElementById('bulkAddModal').style.display='none'">Close</button>
@@ -390,16 +407,13 @@
         <h2 style="margin-top:0; color:var(--text-heading);">🏭 Start Production Batch</h2>
         <label style="font-weight:bold; margin-bottom:5px;">Select Product to Build</label>
         <select id="newWOProduct" style="margin-bottom:15px; padding:10px; font-size:15px;"></select>
-        
         <label style="font-weight:bold; margin-bottom:5px;">Target Quantity</label>
         <input type="number" id="newWOQty" value="1" min="1" step="any" style="margin-bottom:20px; padding:10px; font-size:15px;">
-        
         <div id="woErrorBox" style="display:none; background:#fee2e2; border:1px solid #fecaca; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px;">
             <h3 style="margin-top:0; margin-bottom:10px;">🛑 HARD STOP: Insufficient Inventory</h3>
             <p style="margin-top:0; font-size:13px;">You do not have enough raw materials to build this quantity. Reduce the batch size or order more parts.</p>
             <ul id="woShortfallList" style="font-size:12px; margin-bottom:0; padding-left:20px;"></ul>
         </div>
-        
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
             <button class="btn-red" style="width:auto;" onclick="document.getElementById('newWOModal').style.display='none'">Cancel</button>
             <button class="btn-green" style="width:auto; padding:10px 20px;" onclick="validateAndCreateWO()">Verify Inventory & Create</button>
@@ -407,292 +421,143 @@
     </div>
 </div>
 
-<div id="terminal">
-    <div id="termHeader" onclick="toggleTerminal()"><span>⚙️ Diagnostics</span><span id="termToggle">▲</span></div>
-    <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
-    <div id="debugLog" style="display: none;"></div>
+<div id="mediaModal">
+    <div id="mediaContainer"></div>
+    <div style="position:absolute; top:20px; right:30px; color:white; font-size:30px; font-weight:bold; cursor:pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index:10006;" onclick="closeMediaModal()">×</div>
 </div>
+
+</body>
 <script>
-    // --- 1. THEME & SMART DIAGNOSTICS LOGIC ---
-    window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; });
-    
-    function toggleTheme() { 
-        const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; 
-        document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); 
-        document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️" : "🌙"; 
-        sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); 
-    }
+    // --- 1. THEME & SAFETY NET ---
+    window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; });
+    function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); }
 
     function sysLog(msg, isError = false) { 
         try { 
-            const b = document.getElementById('debugLog'); 
-            const h = document.getElementById('termHeader');
-            if(!b) return; 
-            const t = new Date().toLocaleTimeString(); 
-            const c = isError ? '#ef4444' : '#10b981'; 
-            b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; 
-            b.scrollTop = b.scrollHeight; 
-            if(isError) {
-                console.error(msg);
-                if(h) h.style.backgroundColor = '#ef4444'; // Snap to RED on error
-            } else {
-                console.log(msg);
-            }
+            const b = document.getElementById('debugLog'); const h = document.getElementById('termHeader'); const i = document.getElementById('termStatusIcon');
+            if(!b) return; const t = new Date().toLocaleTimeString(); const c = isError ? '#ef4444' : '#10b981'; 
+            b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; b.scrollTop = b.scrollHeight; 
+            if(h && i) { h.className = isError ? 'sys-error' : 'sys-good'; i.innerText = (isError ? '🔴 ' : '🟢 ') + msg; }
+            if(isError) { console.error(msg); } else { console.log(msg); }
         } catch(e) { console.error(e); } 
     }
     
-    function setSysProgress(val, state = 'working') { 
-        try { 
-            const b = document.getElementById('sysProgress'); 
-            const h = document.getElementById('termHeader');
-            if(b) { b.value = val; b.className = 'prog-' + state; } 
-            
-            // Reset header to GREEN if successful, RED if error
-            if(h && state === 'success') h.style.backgroundColor = '#10b981';
-            else if(h && state === 'error') h.style.backgroundColor = '#ef4444';
-        } catch(e) {} 
-    }
-    
-    function toggleTerminal() { 
-        try { 
-            const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); 
-            if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▼'; } else { b.style.display = 'none'; t.innerText = '▲'; } 
-        } catch(e) {} 
-    }
-    
-    function setMasterStatus(msg, type) { 
-        try { 
-            const e = document.getElementById('statusMaster'); 
-            const h = document.getElementById('termHeader');
-            if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } 
-            
-            // Sync status bars to terminal header
-            if (h && type === 'mod-success') h.style.backgroundColor = '#10b981';
-            else if (h && type === 'mod-error') h.style.backgroundColor = '#ef4444';
-        } catch(e) {} 
-    }
-    
-    function truncText(str, max = 50) { return !str ? "" : (String(str).length > max ? String(str).substring(0, max) + '...' : String(str)); }
+    window.onerror = function(msg, url, lineNo) { sysLog(`Code Error: ${msg} (Line: ${lineNo})`, true); return false; };
+    window.addEventListener('unhandledrejection', function(event) { sysLog(`Async Error: ${event.reason}`, true); });
 
-    // --- 2. GLOBAL STATE & DB INIT ---
+    function setSysProgress(val, state = 'working') { try { const b = document.getElementById('sysProgress'); if(b) { b.value = val; b.className = 'prog-' + state; } } catch(e) {} }
+    function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); const h = document.getElementById('termHeader'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▲'; } else { b.style.display = 'none'; t.innerText = '▼'; } if(h) { h.className = 'sys-good'; h.querySelector('#termStatusIcon').innerText = '🟢 System Active'; } } catch(e) {} }
+    function setMasterStatus(msg, type) { try { const e = document.getElementById('statusMaster'); if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } } catch(e) {} }
+
+    // --- 2. GLOBALS & SUPABASE ---
     const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
     let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
-    
     let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; 
+    window.cloudTablePrefs = {}; let currentInvSort = { column: 'nn', direction: 'asc' }; let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; let bulkAddData = []; let oldValTemp = "";
+    let dragSrcTh = null; let isResizing = false;
     
-    window.cloudTablePrefs = {};
-    let currentInvSort = { column: 'nn', direction: 'asc' }; 
-    let currentBOMSort = { column: 'nn', direction: 'asc' };
-    let currentBulkSort = { column: 'nn', direction: 'asc' };
-    let bulkAddData = [];
-
     const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Specification': 'specification', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Lot Multiplier': 'lot_multiplier', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
 
-    function mapToUI(dbData) {
-        return dbData.map(r => ({
-            '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 
-            'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order,
-            'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 
-            'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 
-            'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight,
-            'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid,
-            'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost,
-            'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost,
-            'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector,
-            'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code
-        }));
-    }
+    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
+    
+    // --- 3. CLOUD PREFS & DRAG ENGINE ---
+    async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; } } catch(e) { window.cloudTablePrefs = {}; } }
+    async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {} }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
 
-    // --- 3. CLOUD PREFERENCES ENGINE ---
-    async function loadCloudPrefs() {
-        try {
-            const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single();
-            if (data && data.setting_value) {
-                let p = data.setting_value;
-                if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️" : "🌙"; localStorage.setItem("theme", p.theme); }
-                if (p.tables) window.cloudTablePrefs = p.tables;
-            }
-        } catch(e) { window.cloudTablePrefs = {}; }
-    }
-
-    async function saveCloudPrefs() {
-        try {
-            let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {} };
-            await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload });
-        } catch(e) { }
-    }
-
-    // --- 4. DRAG AND RESIZE ENGINE ---
-    let dragSrcTh = null; let isResizing = false;
     function applyTableInteractivity(containerId) {
-        const container = document.getElementById(containerId); if(!container) return;
-        const table = container.querySelector('table'); if(!table) return;
+        const container = document.getElementById(containerId); if(!container) return; const table = container.querySelector('table'); if(!table) return;
+        if(!window.cloudTablePrefs[containerId]) window.cloudTablePrefs[containerId] = { order: [], widths: {} }; let prefs = window.cloudTablePrefs[containerId];
+        let headerRow = table.querySelector('thead tr'); if(!headerRow) return; let headers = Array.from(headerRow.children);
+        if(prefs.order && prefs.order.length > 0) { let newHeaders = []; prefs.order.forEach(title => { let th = headers.find(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim() === title); if(th) newHeaders.push(th); }); headers.forEach(h => { if(!newHeaders.includes(h)) newHeaders.push(h); }); newHeaders.forEach(th => headerRow.appendChild(th)); let bodyRows = table.querySelectorAll('tbody tr'); bodyRows.forEach(tr => { let cells = Array.from(tr.children); newHeaders.forEach(th => { let originalIdx = headers.indexOf(th); if(cells[originalIdx]) tr.appendChild(cells[originalIdx]); }); }); headers = newHeaders; }
         
-        if(!window.cloudTablePrefs[containerId]) window.cloudTablePrefs[containerId] = { order: [], widths: {} };
-        let prefs = window.cloudTablePrefs[containerId];
-        let headerRow = table.querySelector('thead tr'); if(!headerRow) return;
-        let headers = Array.from(headerRow.children);
-        
-        if(prefs.order && prefs.order.length > 0) {
-            let newHeaders = [];
-            prefs.order.forEach(title => { let th = headers.find(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim() === title); if(th) newHeaders.push(th); });
-            headers.forEach(h => { if(!newHeaders.includes(h)) newHeaders.push(h); }); 
-            newHeaders.forEach(th => headerRow.appendChild(th)); 
-            let bodyRows = table.querySelectorAll('tbody tr');
-            bodyRows.forEach(tr => { let cells = Array.from(tr.children); newHeaders.forEach(th => { let originalIdx = headers.indexOf(th); if(cells[originalIdx]) tr.appendChild(cells[originalIdx]); }); });
-            headers = newHeaders; 
-        }
-
         table.style.tableLayout = 'auto';
-        headers.forEach((th) => {
-            let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
-            let trueWidth = Math.max(th.scrollWidth, th.offsetWidth) + 5; 
-            let w = prefs.widths[cleanTitle] || trueWidth + 'px';
-            th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w;
-        });
+        headers.forEach((th) => { let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim(); let trueWidth = Math.max(th.scrollWidth, th.offsetWidth) + 5; let w = prefs.widths[cleanTitle] || trueWidth + 'px'; th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w; });
         table.style.tableLayout = 'fixed'; 
-
+        
         headers.forEach((th) => {
             let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
-
             if(!th.querySelector('.resizer')){
                 let rs = document.createElement('div'); rs.className = 'resizer'; th.appendChild(rs); let x=0, sw=0;
-                rs.addEventListener('mousedown', e => {
-                    e.stopPropagation(); isResizing = true; x = e.clientX; sw = th.offsetWidth; rs.style.background = '#0ea5e9';
-                    const move = ev => { 
-                        let nw = sw + (ev.clientX - x); if(nw < 30) nw = 30; 
-                        let nwPx = nw + 'px';
-                        th.style.width = nwPx; th.style.minWidth = nwPx; th.style.maxWidth = nwPx; 
-                    };
-                    const up = () => { 
-                        document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); 
-                        rs.style.background = 'transparent'; setTimeout(()=>isResizing=false, 100); 
-                        prefs.widths[cleanTitle] = th.style.width; saveCloudPrefs(); 
-                    };
-                    document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
-                });
+                rs.addEventListener('mousedown', e => { e.stopPropagation(); isResizing = true; x = e.clientX; sw = th.offsetWidth; rs.style.background = '#0ea5e9'; const move = ev => { let nw = sw + (ev.clientX - x); if(nw < 30) nw = 30; let nwPx = nw + 'px'; th.style.width = nwPx; th.style.minWidth = nwPx; th.style.maxWidth = nwPx; }; const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); rs.style.background = 'transparent'; setTimeout(()=>isResizing=false, 100); prefs.widths[cleanTitle] = th.style.width; saveCloudPrefs(); }; document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); });
             }
-
-            th.draggable = true;
-            th.addEventListener('dragstart', e => { if(isResizing) { e.preventDefault(); return; } dragSrcTh = th; e.dataTransfer.effectAllowed = 'move'; th.classList.add('dragging'); });
-            th.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-            th.addEventListener('drop', e => {
-                e.stopPropagation(); dragSrcTh.classList.remove('dragging');
-                if(dragSrcTh !== th && !isResizing) {
-                    let allThs = Array.from(headerRow.children); let srcIdx = allThs.indexOf(dragSrcTh); let tgtIdx = allThs.indexOf(th);
-                    if(srcIdx < tgtIdx) th.after(dragSrcTh); else th.before(dragSrcTh);
-                    prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); 
-                    table.querySelectorAll('tbody tr').forEach(tr => { let c = Array.from(tr.children); if(c[srcIdx] && c[tgtIdx]) { if(srcIdx < tgtIdx) c[tgtIdx].after(c[srcIdx]); else c[tgtIdx].before(c[srcIdx]); } });
-                    saveCloudPrefs(); 
-                }
-            });
-            th.addEventListener('dragend', () => { if(dragSrcTh) dragSrcTh.classList.remove('dragging'); });
+            th.draggable = true; th.addEventListener('dragstart', e => { if(isResizing) { e.preventDefault(); return; } dragSrcTh = th; e.dataTransfer.effectAllowed = 'move'; th.classList.add('dragging'); }); th.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }); th.addEventListener('drop', e => { e.stopPropagation(); dragSrcTh.classList.remove('dragging'); if(dragSrcTh !== th && !isResizing) { let allThs = Array.from(headerRow.children); let srcIdx = allThs.indexOf(dragSrcTh); let tgtIdx = allThs.indexOf(th); if(srcIdx < tgtIdx) th.after(dragSrcTh); else th.before(dragSrcTh); prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); table.querySelectorAll('tbody tr').forEach(tr => { let c = Array.from(tr.children); if(c[srcIdx] && c[tgtIdx]) { if(srcIdx < tgtIdx) c[tgtIdx].after(c[srcIdx]); else c[tgtIdx].before(c[srcIdx]); } }); saveCloudPrefs(); } }); th.addEventListener('dragend', () => { if(dragSrcTh) dragSrcTh.classList.remove('dragging'); });
         });
     }
 
-    // --- 5. AUTH & DATA LOADING ---
-    window.onload = async () => { try { const { data: { session } } = await supabaseClient.auth.getSession(); if (session) await launchApp(); } catch(e) { console.error(e); } };
+    // --- AUTH & DATA LOADING ---
+    window.onload = async () => { 
+        try { 
+            const { data: { session } } = await supabaseClient.auth.getSession(); 
+            if (session) { document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; await launchApp(); } 
+            else { document.getElementById('loginUI').style.display = 'flex'; document.getElementById('appUI').style.display = 'none'; }
+        } catch(e) { sysLog(e.message, true); } 
+    };
 
     async function handleLogin() {
         const btn = document.getElementById('loginBtn'); const err = document.getElementById('loginError'); const email = document.getElementById('loginEmail').value.trim(); const pass = document.getElementById('loginPass').value.trim();
         if(!email || !pass) { err.innerText = "Enter email and password."; err.style.display = "block"; return; } btn.innerText = "Authenticating..."; btn.disabled = true; err.style.display = "none";
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
-        if (error) { btn.innerText = "Authenticate to Command Center"; btn.disabled = false; err.innerText = error.message; err.style.display = "block"; return; } await launchApp();
+        if (error) { btn.innerText = "Authenticate to Command Center"; btn.disabled = false; err.innerText = error.message; err.style.display = "block"; return; } 
+        document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; await launchApp();
     }
+    
     async function handleLogout() { if(confirm("Securely log out?")) { await supabaseClient.auth.signOut(); location.reload(); } }
 
-    async function launchApp() {
-        document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; document.getElementById('terminal').style.display = 'block';
-        sysLog("Booting System..."); setMasterStatus("Fetching data...", "mod-working"); await loadCloudPrefs(); await loadData();
-    }
+    async function launchApp() { sysLog("Booting System..."); setMasterStatus("Fetching data...", "mod-working"); await loadCloudPrefs(); await loadData(); }
 
     async function loadData() {
         try {
             setSysProgress(10, 'working');
-            const [lR, pR, cR, wR, sR] = await Promise.all([ 
-                supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), 
-                supabaseClient.from('product_recipes').select('*'), 
-                supabaseClient.from('inventory_consumption').select('*'),
-                supabaseClient.from('work_orders').select('*'),
-                supabaseClient.from('production_sops').select('*')
-            ]);
-            if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); 
-            if (wR.error) throw new Error(wR.error.message); if (sR.error) throw new Error(sR.error.message);
+            const [lR, pR, cR, wR, sR] = await Promise.all([ supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), supabaseClient.from('product_recipes').select('*'), supabaseClient.from('inventory_consumption').select('*'), supabaseClient.from('work_orders').select('*'), supabaseClient.from('production_sops').select('*') ]);
+            if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); if (wR.error) throw new Error(wR.error.message); if (sR.error) throw new Error(sR.error.message);
             
             setSysProgress(40, 'working');
-            if (lR.data && lR.data.length > 0) {
-                finalResults = mapToUI(lR.data); 
-                if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; }
-                buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); 
-                setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 3000);
-            } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
-            
-            setSysProgress(60, 'working'); 
-            inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
-            
-            setSysProgress(80, 'working'); 
-            if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); }
-            
-            workOrdersDB = wR.data || [];
-            sopsDB = {}; if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = r.steps || []; } catch(e){} }); }
+            if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
+            setSysProgress(60, 'working'); inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
+            setSysProgress(80, 'working'); if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); }
+            workOrdersDB = wR.data || []; sopsDB = {}; if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = r.steps || []; } catch(e){} }); }
 
-            renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList();
-            renderActiveTable(); 
-            
-            setSysProgress(100, 'success'); sysLog("Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
+            renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); setSysProgress(100, 'success'); sysLog("System Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
 
     function switchTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         if (event && event.target) event.target.classList.add('active'); document.getElementById(tabId + '-tab').classList.add('active'); sysLog(`Switched to ${tabId}.`);
-        if (tabId === 'pipeline') { renderLedgerView(false, 'results'); }
-        if (tabId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
-        if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); }
-        if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); }
-        if (tabId === 'production') { buildCatalogCache(); renderWOList(); renderSOPEditor(); }
+        if (tabId === 'pipeline') { renderLedgerView(false, 'results'); } if (tabId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); } if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); } if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); } if (tabId === 'production') { buildCatalogCache(); renderWOList(); renderSOPEditor(); }
     }
 </script>
 <script>
-    // --- 6. SHARED RENDERERS & DB SYNC ---
-    function renderColToggles() {
-        if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return;
-        c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => {
-            let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981';
-            return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`;
-        }).join('');
-    }
+    // --- 4. LEDGER RENDERERS & DB SYNC ---
+    function renderColToggles() { if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return; c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => { let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981'; return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`; }).join(''); }
     function renderActiveTable() { if(document.getElementById('pipeline-tab').classList.contains('active')) renderLedgerView(false, 'results'); else if(document.getElementById('simple-tab').classList.contains('active')) renderLedgerView(true, 'simpleResults'); }
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderActiveTable(); renderColToggles(); }
-    function sortData(column, keepDirection = false) {
-        if(isResizing) return;
-        if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' };
-        finalResults.sort((a, b) => { let vA = a[column]; let vB = b[column]; if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; } let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase(); if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); }); renderActiveTable();
-    }
+    function sortData(column, keepDirection = false) { if(isResizing) return; if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' }; finalResults.sort((a, b) => { let vA = a[column]; let vB = b[column]; if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; } let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase(); if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); }); renderActiveTable(); }
+    
     function renderLedgerView(isSimple, containerId) {
-        if (finalResults.length === 0) return;
-        let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
+        if (finalResults.length === 0) return; let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
         let h = "<table><thead><tr>" + keys.map(k => { let sCls = currentSort.column === k ? (currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''; return `<th class="${sCls}" onclick="sortData('${k.replace(/'/g, "\\'")}')">${k}</th>`; }).join('') + "</tr></thead><tbody>";
-        finalResults.forEach(r => {
-            h += "<tr>" + keys.map(k => { let v = r[k]; let cls = "editable"; let dVal = v; let isN = typeof v === 'number'; if (isN) { cls += ' text-right'; if (k.includes('Cost') || k.includes('Price') || k.includes('Surcharge') || k.includes('Paid') || k.includes('Shipping Cost ($)')) { dVal = "$" + v.toFixed(4); if (k === 'Final Landed Cost ($)') cls += ' highlight-calc'; } else dVal = v.toFixed(2); } else if (v == null) dVal = ""; if (['Item Name', 'Specification', 'Alibaba Order', 'DI Item ID', 'Neogleamz Name', 'Neo Product'].includes(k)) cls += ' trunc-col'; return `<td tabindex="0" class="${cls}" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateDBCell(this, '${r._RowKey}', '${k.replace(/'/g, "\\'")}', ${isN})">${dVal}</td>`; }).join('') + "</tr>";
-        });
+        finalResults.forEach(r => { h += "<tr>" + keys.map(k => { let v = r[k]; let cls = "editable"; let dVal = v; let isN = typeof v === 'number'; if (isN) { cls += ' text-right'; if (k.includes('Cost') || k.includes('Price') || k.includes('Surcharge') || k.includes('Paid') || k.includes('Shipping Cost ($)')) { dVal = "$" + v.toFixed(4); if (k === 'Final Landed Cost ($)') cls += ' highlight-calc'; } else dVal = v.toFixed(2); } else if (v == null) dVal = ""; if (['Item Name', 'Specification', 'Alibaba Order', 'DI Item ID', 'Neogleamz Name', 'Neo Product'].includes(k)) cls += ' trunc-col'; return `<td tabindex="0" class="${cls}" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateDBCell(this, '${r._RowKey}', '${k.replace(/'/g, "\\'")}', ${isN})">${dVal}</td>`; }).join('') + "</tr>"; });
         document.getElementById(containerId).innerHTML = h + "</tbody></table>"; applyTableInteractivity(containerId);
     }
-    let oldValTemp = ""; function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
+    
+    function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
     async function updateDBCell(cell, rowKey, uiCol, isN) {
-        try { let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } } let dbCol = colMap[uiCol]; if(!dbCol) return; sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey); if (r && isN) { let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0; if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; } } let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000); if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); } setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
+        try { let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } } let dbCol = colMap[uiCol]; if(!dbCol) return; sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey); if (r && isN) { let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0; if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; } } let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000); if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); } setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
     }
+    
     async function addManualItem() {
-        try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } else { payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_total = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => document.getElementById('statusMaster').style.display = 'none', 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); }
+        try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } else { payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_total = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); }
     }
+    
     async function autofillNeoNames() {
-        if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; setSysProgress(20, 'working');
-        try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neo Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { document.getElementById('statusMaster').style.display = 'none'; setSysProgress(0, 'working'); }, 3000); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
+        if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); setSysProgress(20, 'working');
+        try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neo Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); }
     }
 
-    // --- 7. CATALOG, GROUPING MATH & BOM ---
+    // --- 5. CATALOG, MATH & DROPDOWNS ---
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
     function buildCatalogCache() {
         catalogCache = {}; finalResults.forEach(r => { let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim(); let k = nn ? `${nn}:::${np}:::(Grouped Raw Items):::(Mixed Specs)` : `:::${np}:::${inam}:::${sp}`; if (k === ":::::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: nn ? "(Grouped Raw Items)" : inam, spec: nn ? "(Mixed Specs)" : sp, totalCostSum: 0, totalQty: 0, _rn: new Set(), _rs: new Set() }; catalogCache[k]._rn.add(inam); if(sp) catalogCache[k]._rs.add(sp); let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces; });
@@ -707,13 +572,15 @@
     function populateDropdowns() {
         try {
             let recipes = `<optgroup label="📦 SUB-ASSEMBLIES (Your Products)">` + Object.keys(productsDB).sort().map(p => { let cost = calculateProductTotal(p).toFixed(2); return `<option value="RECIPE:::${p}">🟢 [Product] ${p}   ━━━━   💰 $${cost}/unit</option>`; }).join('') + `</optgroup>`;
-            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `📦 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); return `<option value="${k}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
+            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `📦 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); return `<option value="${String(k).replace(/"/g, '&quot;')}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
             const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipes + raws;
-            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📦 ${p}</option>`).join('');
-            const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📦 ${p}</option>`).join('');
-            const sop = document.getElementById('sopProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${p}">📝 ${p}</option>`).join('');
+            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join('');
+            const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join('');
+            const sop = document.getElementById('sopProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`).join('');
         } catch(e) {}
     }
+
+    // --- 6. BULK MODAL ---
     function openBulkAddModal() {
         if(!currentProduct) return alert("Please select a product from the sidebar first."); document.getElementById('bulkAddTitle').innerText = currentProduct; bulkAddData = [];
         Object.keys(productsDB).sort().forEach(p => { if(p === currentProduct) return; bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: "📦", np: "Sub-Assembly", n: p, sp: "(Nested Recipe)", uc: calculateProductTotal(p), q: "" }); });
@@ -727,39 +594,24 @@
         let ths = ` <th class="${currentBulkSort.column==='nn'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('nn')">Neogleamz Name</th> <th class="${currentBulkSort.column==='np'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('np')">Neo Product</th> <th class="${currentBulkSort.column==='n'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('n')">Item Name</th> <th class="${currentBulkSort.column==='sp'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('sp')">Spec</th> <th class="${currentBulkSort.column==='uc'?'sorted-'+currentBulkSort.direction:''} text-right" onclick="sortBulk('uc')">Unit Cost</th> <th style="width:120px; text-align:center; background:#0ea5e9; color:white;">Qty to Add</th> `;
         let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bulkAddBody">`; let qStr = document.getElementById('bulkSearch').value.toLowerCase(); let filtered = bulkAddData.filter(x => x.nn.toLowerCase().includes(qStr) || x.np.toLowerCase().includes(qStr) || x.n.toLowerCase().includes(qStr) || x.sp.toLowerCase().includes(qStr));
         filtered.sort((x,y) => { let u = x[currentBulkSort.column]; let v = y[currentBulkSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBulkSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBulkSort.direction==='asc'?-1:1; if(u>v) return currentBulkSort.direction==='asc'?1:-1; return 0; });
-        filtered.forEach(x => { let sk = x.k.replace(/"/g,'&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">📦</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
+        filtered.forEach(x => { let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">📦</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
         wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('bulkAddTableWrap');
     }
-    function filterBulkList() { renderBulkAddBody(); }
     async function saveBulkAdd() {
         let addedCount = 0; bulkAddData.forEach(i => { let v = parseFloat(i.q); if(v > 0) { let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } addedCount++; } });
-        if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>document.getElementById('statusMaster').style.display = 'none', 2000); } else { alert("No quantities greater than 0 were entered."); }
+        if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); } else { alert("No quantities greater than 0 were entered."); }
     }
+</script>
+<script>
+    // --- 7. PRODUCT BUILDER ENGINES ---
     async function renameCurrentProduct() {
         if(!currentProduct) return; let n = prompt("Enter new name:", currentProduct); if(!n || !n.trim() || n.trim() === currentProduct) return; n = n.trim(); if(productsDB[n]) return alert("A product with this name already exists.");
-        sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; let o = currentProduct; let c = productsDB[o]; productsDB[n] = c;
+        sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); let o = currentProduct; let c = productsDB[o]; productsDB[n] = c;
         await supabaseClient.from('product_recipes').upsert({product_name: n, components: c}); await supabaseClient.from('product_recipes').delete().eq('product_name', o); delete productsDB[o];
         let ups = []; Object.keys(productsDB).forEach(k => { let changed = false; productsDB[k].forEach(p => { if(String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + o) { p.item_key = 'RECIPE:::' + n; changed = true; } }); if(changed) ups.push(supabaseClient.from('product_recipes').upsert({product_name: k, components: productsDB[k]})); });
-        if(ups.length > 0) await Promise.all(ups); currentProduct = n; populateDropdowns(); renderProductList(); setMasterStatus("Renamed!", "mod-success"); setTimeout(()=>document.getElementById('statusMaster').style.display = 'none', 3000);
+        if(ups.length > 0) await Promise.all(ups); currentProduct = n; populateDropdowns(); renderProductList(); setMasterStatus("Renamed!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 3000);
     }
     async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const {error} = await supabaseClient.from('product_recipes').upsert({product_name: name, components: productsDB[name]}); if(error) throw new Error(error.message); populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
-    async function createNewProduct() { let n = prompt("Recipe Name:"); if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; await syncRecipe(n); currentProduct = n; renderProductList(); renderProductBOM(); }
-    function selectProduct(n) { currentProduct = n; renderProductList(); renderProductBOM(); }
-    async function addPartToProduct() {
-        if(!currentProduct) return alert("Select product."); let k = document.getElementById('partSelector').value; let q = parseFloat(document.getElementById('partQty').value) || 0;
-        if(q<=0 || !k) return alert("Invalid inputs."); if(k === 'RECIPE:::' + currentProduct) return alert("No self nesting.");
-        let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + q; ex.qty = ex.quantity; } else productsDB[currentProduct].push({item_key: k, quantity: q});
-        await syncRecipe(currentProduct); renderProductBOM(); renderProductList();
-    }
-    async function removePart(btn) { if(!currentProduct) return; let k = btn.getAttribute('data-key'); productsDB[currentProduct] = productsDB[currentProduct].filter(p => String(p.item_key || p.di_item_id || p.name) !== k); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); }
-    async function updateBOMQty(cell) {
-        let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v) || v<=0) { cell.innerText=oldValTemp; return; } if(v.toString()===oldValTemp) return;
-        let k = cell.getAttribute('data-key'); let p = productsDB[currentProduct].find(x => String(x.item_key || x.di_item_id || x.name) === k);
-        if(p) { p.quantity = v; p.qty = v; cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); await syncRecipe(currentProduct); renderProductList(); }
-    }
-    async function deleteCurrentProduct() { if(!currentProduct) return; if(confirm(`Delete ${currentProduct}?`)){ sysLog(`Deleting ${currentProduct}`); await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct); delete productsDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').upsert({product_name: n, components: productsDB[n]})); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; populateDropdowns(); renderProductList(); } }
-    async function nukeAllRecipes() { if(confirm("⚠️ DANGER: Delete ALL recipes?")){ sysLog("Nuking recipes..."); setMasterStatus("Nuking...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block'; try{ const {error}=await supabaseClient.from('product_recipes').delete().neq('product_name','fake_key'); if(error) throw new Error(error.message); productsDB={}; currentProduct=null; renderProductList(); populateDropdowns(); document.getElementById('bomMainArea').style.display='none'; setMasterStatus("Nuked.", "mod-success"); setTimeout(()=>document.getElementById('statusMaster').style.display='none',3000); }catch(e){ sysLog(e.message, true); setMasterStatus("Fail.", "mod-error"); } } }
-
     function renderProductList() {
         const ui = document.getElementById('productListUI'); ui.innerHTML = ""; let prods = Object.keys(productsDB).sort();
         if(prods.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; }
@@ -768,334 +620,307 @@
         let top = prods.filter(p => !subs.has(p)); if(top.length===0 && prods.length > 0) top=prods;
         function buildTree(n, d, v) {
             if(v.has(n)) return ""; v.add(n); let sel = n===currentProduct ? 'selected' : '';
-            let h = `<li class="${sel}" style="margin-left:${d*15}px; font-weight:${d>0?'normal':'bold'}; font-size:${d>0?'12px':'14px'};" onclick="selectProduct('${n.replace(/'/g,"\\'")}')"><span>${d>0?'<span style="color:var(--text-muted); margin-right:4px;">↳</span>':''}${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span></li>`;
+            let safeName = String(n).replace(/'/g, "\\'"); let h = `<li class="${sel}" style="margin-left:${d*15}px; font-weight:${d>0?'normal':'bold'}; font-size:${d>0?'12px':'14px'};" onclick="selectProduct('${safeName}')"><span>${d>0?'<span style="color:var(--text-muted); margin-right:4px;">↳</span>':''}${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span></li>`;
             (productsDB[n]||[]).forEach(x => { let k=String(x.item_key||x.di_item_id||x.name); if(k.startsWith('RECIPE:::')) { let s=k.replace('RECIPE:::', ''); if(productsDB[s]) h+=buildTree(s, d+1, new Set(v)); } }); return h;
         }
         top.forEach(p => ui.innerHTML += buildTree(p, 0, new Set())); if(currentProduct) renderProductBOM();
     }
-
+    function selectProduct(n) { currentProduct = n; renderProductList(); renderProductBOM(); }
     function sortBOM(c) { currentBOMSort = { column: c, direction: currentBOMSort.column===c && currentBOMSort.direction==='asc' ? 'desc' : 'asc' }; renderProductBOM(); }
-
     function renderProductBOM() {
         if(!currentProduct) return; document.getElementById('bomMainArea').style.display='block'; document.getElementById('bomTitle').innerText=currentProduct;
         let p = productsDB[currentProduct]||[]; let gt = 0; let wrap = document.getElementById('bomTableWrap');
-        
         let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neo Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
         let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
-
         if(p.length===0){ h += "<tr><td colspan='8' style='text-align:center;'>No components.</td></tr>"; }
         else {
             let a = [];
             p.forEach(x => { let k = String(x.item_key||x.di_item_id||x.name); let q = parseFloat(x.quantity||x.qty)||1; let nn="", np="", n="", sp="", uc=0; if(k.startsWith('RECIPE:::')) { let s = k.replace('RECIPE:::', ''); nn="📦"; np="Sub-Assembly"; n=s; sp=""; uc=calculateProductTotal(s); } else { let c = catalogCache[k]; if(c){ nn=c.neoName; np=c.neoProd; n=c.itemName; sp=c.spec; uc=c.avgUnitCost; } else { n="Unknown Item"; sp="N/A"; } } let ec = uc*q; gt+=ec; a.push({rawKey: k, nn: nn, np: np, n: n, sp: sp, q: q, uc: uc, ec: ec}); });
             a.sort((x,y) => { let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; });
-
-            a.forEach(x => {
-                let sk = x.rawKey.replace(/"/g,'&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp;
-                if(x.rawKey.startsWith('RECIPE:::')) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; }
-            });
+            a.forEach(x => { let sk = String(x.rawKey).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.rawKey.startsWith('RECIPE:::')) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } });
         }
         wrap.innerHTML = h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${gt.toFixed(2)}`; applyTableInteractivity('bomTableWrap');
     }
+    async function updateBOMQty(cell) { try { let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v) || v<=0) { cell.innerText=oldValTemp; return; } if(v.toString()===oldValTemp) return; let k = cell.getAttribute('data-key').replace(/&quot;/g, '"').replace(/\\'/g, "'"); let p = productsDB[currentProduct].find(x => String(x.item_key || x.di_item_id || x.name) === k); if(p) { p.quantity = v; p.qty = v; cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); await syncRecipe(currentProduct); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
+    async function removePart(btn) { try { if(!currentProduct) return; let k = btn.getAttribute('data-key').replace(/&quot;/g, '"').replace(/\\'/g, "'"); productsDB[currentProduct] = productsDB[currentProduct].filter(p => String(p.item_key || p.di_item_id || p.name) !== k); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
+    async function addPartToProduct() { try { if(!currentProduct) return alert("Select product."); let k = document.getElementById('partSelector').value; let q = parseFloat(document.getElementById('partQty').value) || 0; if(q<=0 || !k) return alert("Invalid inputs."); if(k === 'RECIPE:::' + currentProduct) return alert("No self nesting."); let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + q; ex.qty = ex.quantity; } else productsDB[currentProduct].push({item_key: k, quantity: q}); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
+    async function createNewProduct() { try { let n = prompt("Recipe Name:"); if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; await syncRecipe(n); currentProduct = n; renderProductList(); renderProductBOM(); } catch(e) { sysLog(e.message, true); } }
+    async function deleteCurrentProduct() { try { if(!currentProduct) return; if(confirm(`Delete ${currentProduct}?`)){ sysLog(`Deleting ${currentProduct}`); await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct); delete productsDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').upsert({product_name: n, components: productsDB[n]})); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; populateDropdowns(); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
+    async function nukeAllRecipes() { try { if(confirm("⚠️ DANGER: Delete ALL recipes?")){ sysLog("Nuking recipes..."); setMasterStatus("Nuking...", "mod-working"); const {error}=await supabaseClient.from('product_recipes').delete().neq('product_name','fake_key'); if(error) throw new Error(error.message); productsDB={}; currentProduct=null; renderProductList(); populateDropdowns(); document.getElementById('bomMainArea').style.display='none'; setMasterStatus("Nuked.", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),3000); } } catch(e) { sysLog(e.message, true); setMasterStatus("Fail.", "mod-error"); } }
 
+    // --- 8. INVENTORY MANAGER ---
+    function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
     function renderInventoryTable() {
         const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
         let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='np'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('np')">Neo Product</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='sp'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('sp')">Spec</th> <th class="${currentInvSort.column==='up'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('up')">Avg Unit Cost</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Total Pcs Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:3px solid #ef4444;">Pcs Consumed</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')">Manual Adj.</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:3px solid #f59e0b;">Current Stock</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">Avg Total Value</th> `;
         let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="inventoryBody">`;
-
-        let a = Object.keys(catalogCache).map(k => {
-            let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed:0, adjustment:0}; let s=c.totalQty-i.consumed+i.adjustment; let up=c.avgUnitCost||0; let tp=s*up;
-            return { k:k, nn:c.neoName, np:c.neoProd, n:c.itemName, sp:c.spec, p:c.totalQty, c:i.consumed, a:i.adjustment, s:s, up:up, tp:tp };
-        });
-
+        let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed:0, adjustment:0}; let s=c.totalQty-i.consumed+i.adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, np:c.neoProd, n:c.itemName, sp:c.spec, p:c.totalQty, c:i.consumed, a:i.adjustment, s:s, up:up, tp:tp }; });
         if(a.length===0){ h += "<tr><td colspan='10' style='text-align:center;'>No inventory.</td></tr>"; }
         else {
             a.sort((x,y) => { let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
-            a.forEach(x => { let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = x.k.replace(/'/g,"\\'"); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${x.n}</td><td tabindex="0" class="trunc-col" style="color:#64748b;">${displaySpec}</td><td class="text-right">$${x.up.toFixed(4)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; });
+            a.forEach(x => { let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${x.n}</td><td tabindex="0" class="trunc-col" style="color:#64748b;">${displaySpec}</td><td class="text-right">$${x.up.toFixed(4)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; });
         }
         wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('invTableWrap');
     }
-
-    function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
-
     async function handleInvEdit(cell, key, p, c, a, mode) {
-        try { let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v)) { cell.innerText = mode==='consumed'?c:(p-c+a); return alert("Valid number required."); } let nc=c, na=a; if(mode==='consumed') { nc=Math.abs(v); if(nc===c) return; } else { na = v-(p-c); if(na===a) return; } sysLog(`Inv Edit: [${key}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); document.getElementById('statusMaster').style.display='inline-block'; const { error } = await supabaseClient.from('inventory_consumption').upsert({item_key: key, consumed_qty: nc, manual_adjustment: na}, {onConflict:'item_key'}); if(error) throw new Error(error.message); if(!inventoryDB[key]) inventoryDB[key]={consumed:0, adjustment:0}; inventoryDB[key].consumed=nc; inventoryDB[key].adjustment=na; setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>document.getElementById('statusMaster').style.display='none',2000); renderInventoryTable(); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = mode==='consumed'?c:(p-c+a); }
+        try { let rKey = key.replace(/&quot;/g, '"').replace(/\\'/g, "'"); let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v)) { cell.innerText = mode==='consumed'?c:(p-c+a); return alert("Valid number required."); } let nc=c, na=a; if(mode==='consumed') { nc=Math.abs(v); if(nc===c) return; } else { na = v-(p-c); if(na===a) return; } sysLog(`Inv Edit: [${rKey}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); const { error } = await supabaseClient.from('inventory_consumption').upsert({item_key: rKey, consumed_qty: nc, manual_adjustment: na}, {onConflict:'item_key'}); if(error) throw new Error(error.message); if(!inventoryDB[rKey]) inventoryDB[rKey]={consumed:0, adjustment:0}; inventoryDB[rKey].consumed=nc; inventoryDB[rKey].adjustment=na; setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),2000); renderInventoryTable(); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = mode==='consumed'?c:(p-c+a); }
     }
-
     async function runProductionBatch() {
-        const n = document.getElementById('batchProductSelect').value; const q = parseFloat(document.getElementById('batchQty').value); if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); sysLog(`Batch Run: ${q}x ${n}`); setSysProgress(20, 'working');
-        try { let raw = getRawMaterials(n, q); let keys = Object.keys(raw); if(keys.length===0){ setSysProgress(0,'working'); return alert("Recipe empty."); } let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; }); setSysProgress(60, 'working'); const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); if(error) throw new Error(error.message); setSysProgress(100, 'success'); sysLog("Batch Complete."); alert(`Deducted ${q}x ${n}.`); document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); alert("Batch Error."); }
+        try { const n = document.getElementById('batchProductSelect').value; const q = parseFloat(document.getElementById('batchQty').value); if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); sysLog(`Batch Run: ${q}x ${n}`); setSysProgress(20, 'working'); let raw = getRawMaterials(n, q); let keys = Object.keys(raw); if(keys.length===0){ setSysProgress(0,'working'); return alert("Recipe empty."); } let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; }); setSysProgress(60, 'working'); const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); if(error) throw new Error(error.message); setSysProgress(100, 'success'); sysLog("Batch Complete."); alert(`Deducted ${q}x ${n}.`); document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); alert("Batch Error."); }
     }
-
     async function resetInventoryConsumption() {
-        if(!confirm("⚠️ DANGER: Reset ALL consumption AND manual adjustments?")) return; sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); try { const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); if(error) throw new Error(error.message); inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
+        try { if(!confirm("⚠️ DANGER: Reset ALL consumption AND manual adjustments?")) return; sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); if(error) throw new Error(error.message); inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
+    }
+</script>
+<script>
+    // --- 9. PRODUCTION MANAGER ENGINES & UNIVERSAL MEDIA ---
+    
+    function openMediaModal(url, renderType) {
+        try {
+            const container = document.getElementById('mediaContainer');
+            if(renderType === 'img') {
+                container.style.background = 'transparent';
+                container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`;
+            } else {
+                container.style.background = '#ffffff'; 
+                container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`;
+            }
+            document.getElementById('mediaModal').style.display = 'flex';
+        } catch(e) { sysLog(e.message, true); }
     }
 
-    // --- 9. NEW PRODUCTION MANAGER ENGINES ---
-    
-    function getDirectImageUrl(url) {
-        if (!url) return "";
-        let driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-        if (driveMatch && driveMatch[1]) return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
-        return url; 
+    function closeMediaModal() { 
+        try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = ''; } 
+        catch(e) { sysLog(e.message, true); }
     }
     
     function renderSOPEditor() {
-        const p = document.getElementById('sopProductSelect').value; const area = document.getElementById('sopEditorArea'); const btn = document.getElementById('saveSOPBtn');
-        if(!p) { area.innerHTML = ""; btn.style.display = 'none'; return; }
-        
-        let steps = sopsDB[p] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, img: ""} : s);
-        if(mappedSteps.length === 0) mappedSteps = [{text: "", img: ""}]; 
-        
-        let h = "";
-        mappedSteps.forEach((s, idx) => {
-            h += `<div class="sop-step-row">
-                <input type="text" class="sop-text" value="${(s.text||'').replace(/"/g,'&quot;')}" placeholder="Enter step instruction...">
-                <input type="text" class="sop-img" value="${(s.img||'').replace(/"/g,'&quot;')}" placeholder="Optional: Image URL (Imgur, Drive, etc)">
-                <button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>
-            </div>`;
-        });
-        h += `<button class="btn-blue" style="width:auto; padding:6px; font-size:12px; margin-top:5px;" onclick="addSOPRow()">+ Add Step</button>`;
-        area.innerHTML = h; btn.style.display = 'block';
-    }
-
-    function addSOPRow() {
-        const area = document.getElementById('sopEditorArea'); const btn = area.querySelector('.btn-blue');
-        const div = document.createElement('div'); div.className = "sop-step-row";
-        div.innerHTML = `<input type="text" class="sop-text" placeholder="Enter step instruction..."><input type="text" class="sop-img" placeholder="Optional: Image URL (Imgur, Drive, etc)"><button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>`;
-        area.insertBefore(div, btn);
-    }
-    function removeSOPRow(btn) { btn.parentElement.remove(); }
-
-    async function saveSOP() {
-        const p = document.getElementById('sopProductSelect').value; if(!p) return;
-        let steps = []; 
-        document.querySelectorAll('.sop-step-row').forEach(row => {
-            let t = row.querySelector('.sop-text'); let i = row.querySelector('.sop-img');
-            if(t && t.value.trim()) steps.push({ text: t.value.trim(), img: i ? i.value.trim() : "" });
-        });
-        sopsDB[p] = steps; sysLog(`Saving SOP for ${p}`); setMasterStatus("Saving...", "mod-working");
         try {
-            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps});
-            if(error) throw new Error(error.message);
-            setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-            if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id);
+            const p = document.getElementById('sopProductSelect').value; const area = document.getElementById('sopEditorArea'); const btn = document.getElementById('saveSOPBtn');
+            if(!p) { area.innerHTML = ""; btn.style.display = 'none'; return; }
+            let steps = sopsDB[p] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, url: "", type: "img"} : {text: s.text||"", url: s.url||s.img||"", type: s.type||"img"});
+            if(mappedSteps.length === 0) mappedSteps = [{text: "", url: "", type: "img"}]; 
+            
+            let h = "";
+            mappedSteps.forEach((s, idx) => {
+                let safeText = (s.text||'').replace(/"/g,'&quot;').replace(/'/g,"\\'"); let safeUrl = (s.url||'').replace(/"/g,'&quot;').replace(/'/g,"\\'");
+                h += `<div class="sop-step-row">
+                    <input type="text" class="sop-text" value="${safeText}" placeholder="Enter step instruction...">
+                    <select class="sop-type" style="padding:6px; border-radius:4px; font-size:12px;">
+                        <option value="img" ${s.type==='img'?'selected':''}>🖼️ Image</option>
+                        <option value="doc" ${s.type==='doc'?'selected':''}>📄 Document (.pdf, .xlsx, .txt)</option>
+                        <option value="vid" ${s.type==='vid'?'selected':''}>🎬 Video (.mp4)</option>
+                    </select>
+                    <input type="text" class="sop-url" value="${safeUrl}" placeholder="URL (Drive Link, etc)">
+                    <button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>
+                </div>`;
+            });
+            h += `<button class="btn-blue" style="width:auto; padding:6px; font-size:12px; margin-top:5px;" onclick="addSOPRow()">+ Add Step</button>`;
+            area.innerHTML = h; btn.style.display = 'block';
+        } catch(e) { sysLog(e.message, true); }
+    }
+    
+    function addSOPRow() {
+        try { const area = document.getElementById('sopEditorArea'); const btn = area.querySelector('.btn-blue'); const div = document.createElement('div'); div.className = "sop-step-row"; div.innerHTML = `<input type="text" class="sop-text" placeholder="Enter step instruction..."><select class="sop-type" style="padding:6px; border-radius:4px; font-size:12px;"><option value="img">🖼️ Image</option><option value="doc">📄 Document (.pdf, .xlsx, .txt)</option><option value="vid">🎬 Video (.mp4)</option></select><input type="text" class="sop-url" placeholder="URL (Drive Link, etc)"><button class="btn-red icon-btn" onclick="removeSOPRow(this)">X</button>`; area.insertBefore(div, btn); } catch(e) { sysLog(e.message, true); }
+    }
+    
+    function removeSOPRow(btn) { try { btn.parentElement.remove(); } catch(e) { sysLog(e.message, true); } }
+    
+    async function saveSOP() {
+        try {
+            const p = document.getElementById('sopProductSelect').value; if(!p) return;
+            let steps = []; document.querySelectorAll('.sop-step-row').forEach(row => { 
+                let t = row.querySelector('.sop-text'); let type = row.querySelector('.sop-type'); let url = row.querySelector('.sop-url'); 
+                if(t && t.value.trim()) steps.push({ text: t.value.trim(), type: type.value, url: url ? url.value.trim() : "" }); 
+            });
+            sopsDB[p] = steps; sysLog(`Saving SOP for ${p}`); setMasterStatus("Saving...", "mod-working");
+            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); 
         } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
     }
 
     function openNewWOModal() { document.getElementById('woErrorBox').style.display = 'none'; document.getElementById('newWOQty').value = 1; document.getElementById('newWOModal').style.display = 'flex'; }
-
     async function validateAndCreateWO() {
-        const p = document.getElementById('newWOProduct').value; const q = parseFloat(document.getElementById('newWOQty').value);
-        if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
-        
-        let rawNeeded = getRawMaterials(p, q); let shortfalls = [];
-        Object.keys(rawNeeded).forEach(k => {
-            let req = rawNeeded[k]; let c = catalogCache[k] || {totalQty: 0}; let i = inventoryDB[k] || {consumed: 0, adjustment: 0}; let onHand = c.totalQty - i.consumed + i.adjustment;
-            if(req > onHand) { let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); }
-        });
-
-        if(shortfalls.length > 0) {
-            document.getElementById('woShortfallList').innerHTML = shortfalls.join('');
-            document.getElementById('woErrorBox').style.display = 'block';
-            return; 
-        }
-
-        let woId = "WO-" + Date.now().toString().slice(-6); let wo = { wo_id: woId, product_name: p, qty: q, status: 'Queued', wip_state: {} };
-        sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
         try {
-            const {error} = await supabaseClient.from('work_orders').insert(wo);
-            if(error) throw new Error(error.message);
-            workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none';
-            setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-            currentWO = wo; renderWOList();
+            const p = document.getElementById('newWOProduct').value; const q = parseFloat(document.getElementById('newWOQty').value);
+            if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
+            let rawNeeded = getRawMaterials(p, q); let shortfalls = [];
+            Object.keys(rawNeeded).forEach(k => { let req = rawNeeded[k]; let c = catalogCache[k] || {totalQty: 0}; let i = inventoryDB[k] || {consumed: 0, adjustment: 0}; let onHand = c.totalQty - i.consumed + i.adjustment; if(req > onHand) { let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); } });
+            if(shortfalls.length > 0) { document.getElementById('woShortfallList').innerHTML = shortfalls.join(''); document.getElementById('woErrorBox').style.display = 'block'; return; }
+            let woId = "WO-" + Date.now().toString().slice(-6); let wo = { wo_id: woId, product_name: p, qty: q, status: 'Queued', wip_state: {} }; sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
+            const {error} = await supabaseClient.from('work_orders').insert(wo); if(error) throw new Error(error.message); workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); 
         } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
     }
 
     function renderWOList() {
-        const ui = document.getElementById('woListUI'); ui.innerHTML = "";
-        if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
-        workOrdersDB.forEach(wo => {
-            let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : '';
-            let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠'));
-            ui.innerHTML += `<li class="${sel}" onclick="selectWO('${wo.wo_id}')"><span>${dot} <strong>${wo.wo_id}</strong>: ${wo.product_name}</span> <span style="font-weight:bold;">x${wo.qty}</span></li>`;
-        });
-        if(!currentWO && workOrdersDB.length > 0) currentWO = workOrdersDB[0];
-        if(currentWO) renderActiveWO(currentWO.wo_id);
+        try {
+            const ui = document.getElementById('woListUI'); ui.innerHTML = "";
+            if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
+            workOrdersDB.forEach(wo => { let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : ''; let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠')); ui.innerHTML += `<li class="${sel}" onclick="selectWO('${wo.wo_id}')"><span>${dot} <strong>${wo.wo_id}</strong>: ${wo.product_name}</span> <span style="font-weight:bold;">x${wo.qty}</span></li>`; });
+            if(!currentWO && workOrdersDB.length > 0) currentWO = workOrdersDB[0]; if(currentWO) renderActiveWO(currentWO.wo_id);
+        } catch(e) { sysLog(e.message, true); }
     }
-
-    function selectWO(id) { currentWO = workOrdersDB.find(w => w.wo_id === id); renderWOList(); }
+    function selectWO(id) { try { currentWO = workOrdersDB.find(w => w.wo_id === id); renderWOList(); } catch(e) { sysLog(e.message, true); } }
 
     async function toggleWIPCheckbox(chk, key) {
-        if(!currentWO) return; let isChecked = chk.checked;
-        if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done');
-        
-        if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked;
-        try { await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } 
-        catch(e) { sysLog("Failed to save checkbox state.", true); }
+        try {
+            if(!currentWO) return; let isChecked = chk.checked;
+            if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done');
+            if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked;
+            await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); 
+        } catch(e) { sysLog("Failed to save checkbox state.", true); }
+    }
+    
+    async function checkAllInGroup(grpId) {
+        try {
+            if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {};
+            chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } });
+            if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); }
+        } catch(e) { sysLog("Failed to save group check.", true); }
     }
 
     function renderActiveWO(id) {
-        let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
-        document.getElementById('woMainArea').style.display = 'flex';
-        document.getElementById('woTitle').innerText = `${wo.wo_id}: ${wo.product_name}`;
-        document.getElementById('woQtyTarget').innerText = wo.qty;
-        
-        let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
-        if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
-
-        ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { 
-            document.getElementById('pipe-'+s).classList.remove('active'); 
-            document.getElementById('sect-'+s).classList.remove('active'); 
-        });
-        
-        let wip = wo.wip_state || {};
-        
-        if(wo.status === 'Queued') { 
-            document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); 
-        }
-        else if(wo.status === 'Picking') { 
-            document.getElementById('pipe-Picking').classList.add('active'); document.getElementById('sect-Picking').classList.add('active'); 
+        try {
+            let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
+            document.getElementById('woMainArea').style.display = 'flex'; document.getElementById('woTitle').innerText = `${wo.wo_id}: ${wo.product_name}`; document.getElementById('woQtyTarget').innerText = wo.qty;
+            let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
+            if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
+            ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { document.getElementById('pipe-'+s).classList.remove('active'); document.getElementById('sect-'+s).classList.remove('active'); });
+            let wip = wo.wip_state || {};
             
-            // HIERARCHICAL PICK LIST BUILDER
-            let pList = document.getElementById('woPickList'); 
-            let html = ""; let chkIdx = 0;
-
-            function traverseBOM(pName, mult, depth, pathName) {
-                let parts = productsDB[pName] || [];
-                let rawGrp = {}; let subGroups = [];
+            if(wo.status === 'Queued') { document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); }
+            else if(wo.status === 'Picking') { 
+                document.getElementById('pipe-Picking').classList.add('active'); document.getElementById('sect-Picking').classList.add('active'); 
                 
-                parts.forEach(p => {
-                    let k = String(p.item_key || p.di_item_id || p.name);
-                    let q = (parseFloat(p.quantity || p.qty) || 1) * mult;
-                    if (k.startsWith('RECIPE:::')) subGroups.push({name: k.replace('RECIPE:::', ''), q: q});
-                    else rawGrp[k] = (rawGrp[k] || 0) + q;
-                });
-
-                let rKeys = Object.keys(rawGrp);
-                if(rKeys.length > 0) {
-                    let grpTitle = depth > 0 ? `📦 Sub-Assembly: ${pathName} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">(Builds ${mult})</span>` : (subGroups.length > 0 ? `🔩 Direct Components` : `🔩 Parts`);
-                    html += `<div style="padding: 10px 15px; background: var(--bg-bar); border-bottom: 1px solid var(--border-color); color: var(--text-heading); font-weight: bold; font-size: 13px;">${grpTitle}</div>`;
-                    
-                    rKeys.forEach(k => {
-                        let req = rawGrp[k]; let f = fmtKey(k); let name = f.nn ? f.nn : f.in;
-                        let displaySpec = f.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : f.sp;
-                        let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                let pList = document.getElementById('woPickList'); let html = ""; let chkIdx = 0; let grpCounter = 0;
+                function traverseBOM(pName, mult, depth, pathName) {
+                    let parts = productsDB[pName] || []; let rawGrp = {}; let subGroups = [];
+                    parts.forEach(p => { let k = String(p.item_key || p.di_item_id || p.name); let q = (parseFloat(p.quantity || p.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) subGroups.push({name: k.replace('RECIPE:::', ''), q: q}); else rawGrp[k] = (rawGrp[k] || 0) + q; });
+                    let rKeys = Object.keys(rawGrp);
+                    if(rKeys.length > 0) {
+                        let grpTitle = depth > 0 ? `📦 Sub-Assembly: ${pathName} <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Builds ${mult})</span>` : (subGroups.length > 0 ? `🔩 Direct Components` : `🔩 Parts`);
+                        let currentGrpId = `pickgrp_${grpCounter++}`;
+                        html += `<div style="padding: 6px 15px; background: var(--bg-bar); border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;"><span style="color: var(--text-heading); font-weight: bold; font-size: 13px;">${grpTitle}</span><button class="btn-blue" style="width:auto; padding:2px 8px; font-size:11px;" onclick="checkAllInGroup('${currentGrpId}')">✓ Check All</button></div>`;
+                        rKeys.forEach(k => {
+                            let req = rawGrp[k]; let f = fmtKey(k); let c = catalogCache[k] || {}; let name = f.nn ? f.nn : (c.itemName || f.in); let actualSpec = c.spec !== undefined ? c.spec : f.sp; let displaySpec = actualSpec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (actualSpec ? `⚙️ ${actualSpec}` : "");
+                            let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                            html += `<div class="checklist-item ${doneCls}" style="padding-left: ${depth > 0 ? 25 : 15}px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:11px;">${displaySpec}</div></div></div>`;
+                        });
+                    }
+                    subGroups.forEach(sg => traverseBOM(sg.name, sg.q, depth + 1, sg.name));
+                }
+                traverseBOM(wo.product_name, wo.qty, 0, wo.product_name); pList.innerHTML = html;
+            }
+            else if(wo.status === 'In Production') { 
+                document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active'); 
+                
+                let steps = sopsDB[wo.product_name] || []; 
+                let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, url: "", type: "img"} : {text: s.text||"", url: s.url||s.img||"", type: s.type||"img"});
+                
+                let sList = document.getElementById('woSOPList'); sList.innerHTML = "";
+                if(mappedSteps.length === 0) sList.innerHTML = `<div style="padding:15px; color:var(--text-muted);">No SOPs written for this product yet.</div>`;
+                else {
+                    mappedSteps.forEach((s, idx) => {
+                        let chkKey = `sop_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                        let attachmentHtml = "";
                         
-                        html += `<div class="checklist-item ${doneCls}" style="padding-left: ${depth > 0 ? 25 : 15}px;"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:12px;">${displaySpec}</div></div></div>`;
+                        if (s.url) {
+                            let dMatch = s.url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/);
+                            let dId = dMatch ? dMatch[1] : null;
+                            let safeUrl = s.url.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                            
+                            let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
+                            
+                            if (s.type === 'img') {
+                                let imgThumbUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w1200` : safeUrl;
+                                attachmentHtml = `<br><img src="${imgThumbUrl}" style="max-width:100%; max-height:250px; margin-top:10px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="openMediaModal('${imgThumbUrl}', 'img')">`;
+                            } else {
+                                let icon = s.type === 'vid' ? '🎬' : '📄';
+                                attachmentHtml = `<br><div style="position:relative; display:inline-block; width: 350px; height: 220px; margin-top: 10px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: zoom-in; background:var(--bg-container);" onclick="openMediaModal('${mediaUrl}', 'iframe')">
+                                    <iframe src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;" scrolling="no"></iframe>
+                                    <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10; background: transparent;"></div>
+                                    <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.7); color:white; padding:4px 8px; border-radius:4px; font-size:11px; z-index:11;">${icon} Click to Enlarge</div>
+                                </div>`;
+                            }
+                        }
+                        sList.innerHTML += `<div class="checklist-item ${doneCls}"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%;"><strong style="color:#0ea5e9;">Step ${idx+1}:</strong> ${s.text} ${attachmentHtml}</div></div>`;
                     });
                 }
-                
-                subGroups.forEach(sg => traverseBOM(sg.name, sg.q, depth + 1, sg.name));
             }
-            
-            traverseBOM(wo.product_name, wo.qty, 0, wo.product_name);
-            pList.innerHTML = html;
-        }
-        else if(wo.status === 'In Production') { 
-            document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active'); 
-            
-            let steps = sopsDB[wo.product_name] || [];
-            let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, img: ""} : s);
-            let sList = document.getElementById('woSOPList'); sList.innerHTML = "";
-            if(mappedSteps.length === 0) sList.innerHTML = `<div style="padding:15px; color:var(--text-muted);">No SOPs written for this product yet.</div>`;
-            else {
-                mappedSteps.forEach((s, idx) => {
-                    let chkKey = `sop_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                    let directImg = getDirectImageUrl(s.img);
-                    let imgHtml = directImg ? `<br><img src="${directImg}" style="max-width:100%; max-height:200px; margin-top:10px; border-radius:6px; border:1px solid var(--border-color);">` : "";
-                    sList.innerHTML += `<div class="checklist-item ${doneCls}"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text"><strong style="color:#0ea5e9;">Step ${idx+1}:</strong> ${s.text} ${imgHtml}</div></div>`;
-                });
-            }
-        }
-        else if(wo.status === 'Completed') { 
-            document.getElementById('pipe-Completed').classList.add('active'); document.getElementById('sect-Completed').classList.add('active'); 
-        }
+            else if(wo.status === 'Completed') { document.getElementById('pipe-Completed').classList.add('active'); document.getElementById('sect-Completed').classList.add('active'); }
+        } catch(e) { sysLog(e.message, true); }
     }
 
     async function advanceWO(newStatus) {
-        if(!currentWO) return; if(currentWO.status === 'Completed') return alert("This Work Order is already completed and archived.");
-        sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
-        
-        if(newStatus === 'Completed') {
-            if(!confirm("Marking this complete will permanently deduct the raw materials from your inventory. Proceed?")) { setMasterStatus("Ready.", "status-idle"); return; }
-            let raw = getRawMaterials(currentWO.product_name, currentWO.qty); let keys = Object.keys(raw); 
-            if(keys.length > 0){ 
-                let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; });
-                const {error: invErr} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
-                if(invErr) { sysLog(invErr.message, true); return; }
-                renderInventoryTable();
-            }
-        }
         try {
-            const {error} = await supabaseClient.from('work_orders').update({status: newStatus}).eq('wo_id', currentWO.wo_id);
-            if(error) throw new Error(error.message);
-            currentWO.status = newStatus;
-            setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-            renderWOList();
+            if(!currentWO) return; if(currentWO.status === 'Completed') return alert("This Work Order is already completed and archived.");
+            sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
+            if(newStatus === 'Completed') {
+                if(!confirm("Marking this complete will permanently deduct the raw materials from your inventory. Proceed?")) { setMasterStatus("Ready.", "status-idle"); return; }
+                let raw = getRawMaterials(currentWO.product_name, currentWO.qty); let keys = Object.keys(raw); 
+                if(keys.length > 0){ 
+                    let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; });
+                    const {error: invErr} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
+                    if(invErr) { sysLog(invErr.message, true); return; } renderInventoryTable();
+                }
+            }
+            const {error} = await supabaseClient.from('work_orders').update({status: newStatus}).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); currentWO.status = newStatus; setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList(); 
         } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
     }
 
     async function deleteCurrentWO() {
-        if(!currentWO) return;
-        if(confirm(`Are you sure you want to delete ${currentWO.wo_id}? (This will not reverse inventory deductions if it was already completed).`)) {
-            try { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB[0] || null; renderWOList(); } catch(e) {}
-        }
+        try { if(!currentWO) return; if(confirm(`Are you sure you want to delete ${currentWO.wo_id}? (This will not reverse inventory deductions if it was already completed).`)) { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB[0] || null; renderWOList(); } } catch(e) { sysLog(e.message, true); }
     }
 
     function printPickList() {
-        if(!currentWO) return;
-        
-        let html = `<html><head><title>Pick List - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;} th,td{border:1px solid #ccc; padding:10px; text-align:left;} th{background:#f1f5f9;} .group-header{background:#e0f2fe; font-weight:bold; font-size:16px;}</style></head><body>`;
-        html += `<h2>Pick List: ${currentWO.wo_id}</h2><h3>Product: ${currentWO.product_name} (Qty: ${currentWO.qty})</h3>`;
-        html += `<table><thead><tr><th style="width:50px;">Picked</th><th>Item Name</th><th>Spec</th><th>Qty Needed</th></tr></thead><tbody>`;
-        
-        function traversePrint(pName, mult, depth, pathName) {
-            let parts = productsDB[pName] || [];
-            let rawGrp = {}; let subGroups = [];
-            
-            parts.forEach(p => {
-                let k = String(p.item_key || p.di_item_id || p.name);
-                let q = (parseFloat(p.quantity || p.qty) || 1) * mult;
-                if (k.startsWith('RECIPE:::')) subGroups.push({name: k.replace('RECIPE:::', ''), q: q});
-                else rawGrp[k] = (rawGrp[k] || 0) + q;
-            });
-
-            let rKeys = Object.keys(rawGrp);
-            if(rKeys.length > 0) {
-                let grpTitle = depth > 0 ? `📦 Sub-Assembly: ${pathName} (Builds ${mult})` : (subGroups.length > 0 ? `🔩 Direct Components` : `🔩 Parts`);
-                html += `<tr><td colspan="4" class="group-header">${grpTitle}</td></tr>`;
-                
-                rKeys.forEach(k => { 
-                    let req = rawGrp[k]; let f = fmtKey(k); let name = f.nn ? f.nn : f.in; 
-                    html += `<tr><td>[ &nbsp;&nbsp;&nbsp;&nbsp; ]</td><td style="padding-left:${depth>0?'25px':'10px'}">${name}</td><td>${f.sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; 
-                });
+        try {
+            if(!currentWO) return;
+            let html = `<html><head><title>Pick List - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;} th,td{border:1px solid #ccc; padding:10px; text-align:left;} th{background:#f1f5f9;} .group-header{background:#e0f2fe; font-weight:bold; font-size:16px;}</style></head><body>`;
+            html += `<h2>Pick List: ${currentWO.wo_id}</h2><h3>Product: ${currentWO.product_name} (Qty: ${currentWO.qty})</h3>`;
+            html += `<table><thead><tr><th style="width:50px;">Picked</th><th>Item Name</th><th>Spec</th><th>Qty Needed</th></tr></thead><tbody>`;
+            function traversePrint(pName, mult, depth, pathName) {
+                let parts = productsDB[pName] || []; let rawGrp = {}; let subGroups = [];
+                parts.forEach(p => { let k = String(p.item_key || p.di_item_id || p.name); let q = (parseFloat(p.quantity || p.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) subGroups.push({name: k.replace('RECIPE:::', ''), q: q}); else rawGrp[k] = (rawGrp[k] || 0) + q; });
+                let rKeys = Object.keys(rawGrp);
+                if(rKeys.length > 0) {
+                    let grpTitle = depth > 0 ? `📦 Sub-Assembly: ${pathName} (Builds ${mult})` : (subGroups.length > 0 ? `🔩 Direct Components` : `🔩 Parts`);
+                    html += `<tr><td colspan="4" class="group-header">${grpTitle}</td></tr>`;
+                    rKeys.forEach(k => { 
+                        let req = rawGrp[k]; let f = fmtKey(k); let c = catalogCache[k] || {}; let name = f.nn ? f.nn : (c.itemName || f.in); 
+                        let actualSpec = c.spec !== undefined ? c.spec : f.sp; let displaySpec = actualSpec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (actualSpec || "");
+                        html += `<tr><td>[      ]</td><td style="padding-left:${depth>0?'25px':'10px'}">${name}</td><td>${displaySpec}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; 
+                    });
+                }
+                subGroups.forEach(sg => traversePrint(sg.name, sg.q, depth + 1, sg.name));
             }
-            subGroups.forEach(sg => traversePrint(sg.name, sg.q, depth + 1, sg.name));
-        }
-        
-        traversePrint(currentWO.product_name, currentWO.qty, 0, currentWO.product_name);
-        
-        html += `</tbody></table></body></html>`;
-        let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
+            traversePrint(currentWO.product_name, currentWO.qty, 0, currentWO.product_name); html += `</tbody></table></body></html>`;
+            let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
+        } catch(e) { sysLog(e.message, true); }
     }
 
     function printSOP() {
-        if(!currentWO) return;
-        let steps = sopsDB[currentWO.product_name] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, img: ""} : s);
-        let html = `<html><head><title>SOP - ${currentWO.product_name}</title><style>body{font-family:sans-serif; padding:20px;} .step{margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:16px;} img{max-width:100%; max-height:400px; display:block; margin-top:10px;}</style></head><body>`;
-        html += `<h2>Standard Operating Procedure (SOP)</h2><h3>Product: ${currentWO.product_name}</h3><hr>`;
-        if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
-        else { 
-            mappedSteps.forEach((s, i) => { 
-                let dImg = getDirectImageUrl(s.img);
-                html += `<div class="step"><strong>Step ${i+1}:</strong> ${s.text} ${dImg ? `<br><img src="${dImg}">` : ''}</div>`; 
-            }); 
-        }
-        html += `</body></html>`;
-        let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500);
+        try {
+            if(!currentWO) return;
+            let steps = sopsDB[currentWO.product_name] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, url: "", type: "img"} : {text: s.text||"", url: s.url||s.img||"", type: s.type||"img"});
+            let html = `<html><head><title>SOP - ${currentWO.product_name}</title><style>body{font-family:sans-serif; padding:20px;} .step{margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:16px;} img{max-width:100%; max-height:400px; display:block; margin-top:10px;} a {color:#0ea5e9; font-weight:bold;}</style></head><body>`;
+            html += `<h2>Standard Operating Procedure (SOP)</h2><h3>Product: ${currentWO.product_name}</h3><hr>`;
+            if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
+            else { 
+                mappedSteps.forEach((s, i) => { 
+                    let attachHtml = "";
+                    if(s.url) {
+                        let dMatch = s.url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); let dId = dMatch ? dMatch[1] : null;
+                        if(s.type === 'img') { let imgUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w1000` : s.url; attachHtml = `<br><img src="${imgUrl}">`; }
+                        else { let docUrl = dId ? `https://drive.google.com/file/d/${dId}/view` : s.url; attachHtml = `<br><a href="${docUrl}" target="_blank">🔗 View Attached Document / Video</a>`; }
+                    }
+                    html += `<div class="step"><strong>Step ${i+1}:</strong> ${s.text} ${attachHtml}</div>`; 
+                }); 
+            }
+            html += `</body></html>`;
+            let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500);
+        } catch(e) { sysLog(e.message, true); }
     }
 
-    // --- 10. PARSERS & SYNC ---
+    // --- 10. PARSERS & FILE SYNC ---
     function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){} }
     document.getElementById('orderFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'orders');});
     document.getElementById('parcelFiles').addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'parcels');});
@@ -1172,7 +997,7 @@
 
     async function syncAndCalculate() {
         const btnCalc = document.getElementById('btnCalc'); btnCalc.disabled = true;
-        setMasterStatus("⚙️ Downloading data...", "mod-working"); document.getElementById('statusMaster').style.display = 'inline-block'; sysLog("Sync/Calc..."); setSysProgress(20, 'working');
+        setMasterStatus("⚙️ Downloading data...", "mod-working"); sysLog("Sync/Calc..."); setSysProgress(20, 'working');
         try {
             const [oR, sR, iR, eR] = await Promise.all([ supabaseClient.from('raw_orders').select('*'), supabaseClient.from('raw_parcel_summary').select('*'), supabaseClient.from('raw_parcel_items').select('*'), supabaseClient.from('full_landed_costs').select('parcel_no, di_item_id, neogleamz_name, neogleamz_product, quantity, lot_multiplier') ]);
             if(oR.error) throw new Error(oR.error.message); if(sR.error) throw new Error(sR.error.message); if(iR.error) throw new Error(iR.error.message);
@@ -1184,22 +1009,13 @@
             let dI=[];
             iR.data.forEach(i => {
                 let pN=i.parcel_no, d=i.di_item_id; let o=oM[d]||{}, s=sM[pN]||{}, e=eM[`${pN}_${d}`]||{};
-                let q=e.quantity||i.quantity||1; 
-                let mult = e.lot_multiplier || 1; 
-                let up=Number(o.unit_price)||0; 
-                let uclp=Number(o.unit_china_landed_price)||up; 
-                let tw=Number(i.total_dist_weight_g)||0; 
-                let psc=Number(s.actual_paid)||0; 
-                let ptw=pT[pN].w||1;
-                
-                let uws=q>0?((tw/ptw)*psc/q):0; 
-                let fuc=uclp+uws;
-                
+                let q=e.quantity||i.quantity||1; let mult = e.lot_multiplier || 1; let up=Number(o.unit_price)||0; let uclp=Number(o.unit_china_landed_price)||up; let tw=Number(i.total_dist_weight_g)||0; let psc=Number(s.actual_paid)||0; let ptw=pT[pN].w||1;
+                let uws=q>0?((tw/ptw)*psc/q):0; let fuc=uclp+uws;
                 dI.push({ parcel_no:pN, di_item_id:d, item_name:i.item_name||o.item_name||"", specification:i.specification||o.specification||"", quantity:q, lot_multiplier:mult, neogleamz_name:e.neogleamz_name||'', neogleamz_product:e.neogleamz_product||'', total_dist_weight_g:tw, unit_weight_g:i.unit_weight_g, order_date:o.order_date, order_no:o.order_no, alibaba_order:o.alibaba_order, order_unit_price:up, order_postage:o.postage, order_total:o.order_total, unit_china_landed_price:uclp, actual_paid:s.actual_paid, actual_chargeable_weight_g:s.actual_chargeable_weight_g, actual_shipping_fee:s.actual_shipping_fee, first_tier_cost:s.first_tier_cost, second_tier_cost:s.second_tier_cost, custom_clearance_fee:s.custom_clearance_fee, remote_area_surcharge:s.remote_area_surcharge, fuel_surcharge:s.fuel_surcharge, operating_cost:s.operating_cost, tax:s.tax, insurance:s.insurance, storage_fee:s.storage_fee, epe_loose_filling:s.epe_loose_filling, corner_protector:s.corner_protector, moister_barrier_bag:s.moister_barrier_bag, packing_video:s.packing_video, one_percent_discount:s.one_percent_discount, points_discount:s.points_discount, coupon_discount:s.coupon_discount, discount_code:s.discount_code, unit_ship_weight:uws, final_cost_weight:fuc, total_cost_weight:fuc*q });
             });
             sysLog(`Pushing ${dI.length} rows...`); setSysProgress(80, 'working');
             const {error} = await supabaseClient.from('full_landed_costs').upsert(dI, {onConflict:'parcel_no, di_item_id'}); if(error) throw new Error(error.message);
-            await loadData(); setSysProgress(100, 'success'); setMasterStatus(`✅ Calculated!`, "mod-success"); setTimeout(()=>{document.getElementById('statusMaster').style.display='none'; setSysProgress(0,'working');}, 3000);
+            await loadData(); setSysProgress(100, 'success'); setMasterStatus(`✅ Calculated!`, "mod-success"); setTimeout(()=>{setSysProgress(0,'working');}, 3000);
         } catch (error) { setSysProgress(100, 'error'); sysLog(error.message, true); setMasterStatus("❌ Calc Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'), 3000); }
         btnCalc.disabled = false;
     }
