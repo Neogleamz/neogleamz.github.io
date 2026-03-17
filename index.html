@@ -6,6 +6,8 @@
     <title>Neogleamz Command Center</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -244,6 +246,7 @@
             <button class="tab-btn" onclick="switchTab('production')">🏭 Production</button>
             <button class="tab-btn" onclick="switchTab('sales')">🛒 Sales Sync</button>
             <button class="tab-btn" onclick="switchTab('analytics')">📈 Analytics</button>
+			<button class="tab-btn" onclick="switchTab('ceo')">📈 CEO Terminal</button>
         </div>
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
