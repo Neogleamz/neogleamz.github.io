@@ -120,11 +120,15 @@
         th { background-color: var(--bg-th); color: var(--text-th); padding: 8px 6px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: grab; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s, box-shadow 0.2s; }
         th:hover { opacity: 0.9; }
         td { padding: 6px 8px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        th.sorted-asc { color: #10b981; box-shadow: inset 0 -4px 0 #10b981; }
-        th.sorted-desc { color: #ef4444; box-shadow: inset 0 -4px 0 #ef4444; }
+        
+        /* Updated Sorting Colors to Sky Blue and Golden Yellow */
+        th.sorted-asc { color: #0ea5e9; box-shadow: inset 0 -4px 0 #0ea5e9; }
+        th.sorted-desc { color: #eab308; box-shadow: inset 0 -4px 0 #eab308; }
+        
         .text-right { text-align: right; }
         .highlight-calc { background-color: var(--bg-highlight); color: var(--text-highlight); font-weight: bold; }
         .negative-stock { color: #ef4444; font-weight: bold; background-color: var(--bg-negative); }
+        .low-stock { color: #f97316; font-weight: bold; background-color: #fff7ed; } /* Orange warning for low stock */
 
         .resizer { position: absolute; right: 0; top: 0; width: 5px; height: 100%; cursor: col-resize; user-select: none; transition: background 0.2s; z-index: 15; }
         .resizer:hover { background-color: #0ea5e9; }
@@ -285,14 +289,24 @@
                 <button class="btn-red" onclick="nukeAllRecipes()" style="font-size: 12px; padding: 8px; flex-shrink:0;">⚠️ Nuke All (Reset)</button>
             </div>
             <div class="bom-main" id="bomMainArea" style="display:none;">
-                <div class="bom-header">
+                <div class="bom-header" style="flex-wrap: wrap;">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <h2 id="bomTitle" style="margin:0; font-size:20px; color:var(--text-heading);">Product Name</h2>
                         <button class="icon-btn" onclick="renameCurrentProduct()" title="Rename Product" style="width:28px!important; height:28px; font-size:14px; border-color:var(--border-input);">✏️</button>
                     </div>
-                    <div class="total-badge" id="bomTotalCost">$0.00</div>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Labor Time (Mins)</label>
+                            <input type="number" id="laborTimeInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Shop Rate ($/Hr)</label>
+                            <input type="number" id="laborRateInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                        </div>
+                        <div class="total-badge" id="bomTotalCost">$0.00</div>
+                    </div>
                 </div>
-                <div class="add-part-bar">
+                <div class="add-part-bar" style="margin-top: 15px;">
                     <select id="partSelector"></select>
                     <input id="partQty" type="number" step="any" min="0.0001" value="1">
                     <button class="btn-green" onclick="addPartToProduct()">Add Part</button>
@@ -307,20 +321,31 @@
     </div>
 
     <div id="inventory-tab" class="tab-content">
-        <div class="bom-layout">
-            <div class="bom-sidebar">
-                <h3>🛠️ Quick Deduct</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:15px; flex-shrink:0;">(Skip the Production Tab and instantly deduct raw materials).</p>
-                <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Select Product</label>
-                <select id="batchProductSelect" style="margin-bottom:10px;"></select>
-                <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Quantity to Build</label>
-                <input type="number" id="batchQty" placeholder="10" value="1" min="1" step="any" style="margin-bottom:15px;">
-                <button class="btn-green" onclick="runProductionBatch()" style="padding:10px; font-size:14px; flex-shrink:0;">⚙️ Force Deduct Inventory</button>
-                <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
-                <button class="btn-red" onclick="resetInventoryConsumption()" style="font-size:12px; padding:8px; flex-shrink:0;">⚠️ Reset Consumption to 0</button>
+        <div class="add-part-bar" style="justify-content: space-between;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-weight:bold; font-size:14px; color:var(--text-heading);">⚡ Quick Build:</span>
+                <select id="batchProductSelect" style="min-width: 200px; padding: 6px;"></select>
+                <input type="number" id="batchQty" placeholder="Qty" value="1" min="1" step="any" style="width:80px; padding: 6px;">
+                <button class="btn-green" onclick="runProductionBatch()" style="padding: 6px 15px;">⚙️ Force Build & Deduct</button>
             </div>
-            <div class="bom-main">
-                <div class="bom-header"><h2 style="font-size:18px;">Live Inventory Levels</h2></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-orange" onclick="printReorderReport()" style="font-size:13px; padding:6px 15px; font-weight:bold;">🚨 Run Reorder Report</button>
+                <button class="btn-red" onclick="resetInventoryConsumption()" style="font-size:12px; padding:6px 10px;">⚠️ Reset DB</button>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; flex-grow: 1; min-height: 0; align-items: stretch;">
+            <div class="bom-main" style="padding: 10px; border-color: #0ea5e9; border-width: 2px;">
+                <div class="bom-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 5px;">
+                    <h3 style="margin:0; font-size:15px; color:#0ea5e9;">📦 Retail Finished Goods</h3>
+                </div>
+                <div class="table-wrap" id="fgiTableWrap"></div>
+            </div>
+            
+            <div class="bom-main" style="padding: 10px;">
+                <div class="bom-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 5px;">
+                    <h3 style="margin:0; font-size:15px; color:var(--text-muted);">🔩 Raw Components Ledger</h3>
+                </div>
                 <div class="table-wrap" id="invTableWrap"></div>
             </div>
         </div>
@@ -384,14 +409,14 @@
                     </div>
                     <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px; margin-top:30px;">
                         <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
-                        <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly and permanently deduct all picked raw materials from your master inventory.</p>
-                        <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Deduct Inventory</button>
+                        <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly deduct all picked raw materials and log the finished goods to your inventory ledger.</p>
+                        <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Process Inventory</button>
                     </div>
                 </div>
 
                 <div id="sect-Completed" class="wo-section">
                     <h3 style="margin-top:0; color:#10b981;">✅ Production Complete</h3>
-                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch has been finalized. All raw materials have been successfully deducted from the Master Inventory Ledger.</p>
+                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch has been finalized. All raw materials have been deducted and the finished goods have been recorded in the ledger.</p>
                 </div>
                 
                 <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
@@ -485,15 +510,15 @@
     const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
     let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
-    let productsDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
+    let productsDB = {}; let laborDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
-    let currentInvSort = { column: 'nn', direction: 'asc' }; let currentBOMSort = { column: 'nn', direction: 'asc' }; 
-    let currentBulkSort = { column: 'nn', direction: 'asc' }; let bulkAddData = []; 
-    let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
+    let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
+    let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
+    let bulkAddData = []; let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
 
     const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Specification': 'specification', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Lot Multiplier': 'lot_multiplier', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
 
-    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
+    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
 
     // --- 2. THEME & SAFETY NET ---
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; });
@@ -530,8 +555,19 @@
             
             setSysProgress(40, 'working');
             if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
-            setSysProgress(60, 'working'); inventoryDB = {}; if (cR.data) { cR.data.forEach(r => inventoryDB[r.item_key] = { consumed: parseFloat(r.consumed_qty) || 0, adjustment: parseFloat(r.manual_adjustment) || 0 }); }
-            setSysProgress(80, 'working'); if (pR.data) { productsDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; } catch(e){} }); }
+            
+            setSysProgress(60, 'working'); inventoryDB = {}; 
+            if (cR.data) { 
+                cR.data.forEach(r => inventoryDB[r.item_key] = { 
+                    consumed_qty: parseFloat(r.consumed_qty) || 0, 
+                    manual_adjustment: parseFloat(r.manual_adjustment) || 0,
+                    produced_qty: parseFloat(r.produced_qty) || 0,
+                    sold_qty: parseFloat(r.sold_qty) || 0,
+                    min_stock: parseFloat(r.min_stock) || 0
+                }); 
+            }
+
+            setSysProgress(80, 'working'); if (pR.data) { productsDB = {}; laborDB = {}; pR.data.forEach(r => { try { productsDB[r.product_name] = r.components || []; laborDB[r.product_name] = { time: parseFloat(r.labor_time_mins) || 0, rate: parseFloat(r.labor_rate_hr) || 0 }; } catch(e){} }); }
             
             workOrdersDB = wR.data || []; sopsDB = {}; if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = r.steps || []; } catch(e){} }); }
             if(window.cloudTablePrefs.woOrder && window.cloudTablePrefs.woOrder.length > 0) { workOrdersDB.sort((a,b) => { let iA = window.cloudTablePrefs.woOrder.indexOf(a.wo_id); let iB = window.cloudTablePrefs.woOrder.indexOf(b.wo_id); if(iA===-1) iA=9999; if(iB===-1) iB=9999; return iA - iB; }); }
@@ -574,7 +610,26 @@
 
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
     function buildCatalogCache() { catalogCache = {}; finalResults.forEach(r => { let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim(); let k = nn ? `${nn}:::${np}:::(Grouped Raw Items):::(Mixed Specs)` : `:::${np}:::${inam}:::${sp}`; if (k === ":::::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: nn ? "(Grouped Raw Items)" : inam, spec: nn ? "(Mixed Specs)" : sp, totalCostSum: 0, totalQty: 0, _rn: new Set(), _rs: new Set() }; catalogCache[k]._rn.add(inam); if(sp) catalogCache[k]._rs.add(sp); let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces; }); Object.keys(catalogCache).forEach(k => { catalogCache[k].avgUnitCost = catalogCache[k].totalCostSum / (catalogCache[k].totalQty || 1); if(catalogCache[k]._rn && catalogCache[k]._rn.size === 1) catalogCache[k].itemName = Array.from(catalogCache[k]._rn)[0]; if(catalogCache[k]._rs) { if(catalogCache[k]._rs.size === 1) catalogCache[k].spec = Array.from(catalogCache[k]._rs)[0]; else if(catalogCache[k]._rs.size === 0) catalogCache[k].spec = ""; } }); }
-    function calculateProductTotal(pName, visited = new Set()) { if (visited.has(pName)) return 0; visited.add(pName); let tot = 0; (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = parseFloat(part.quantity || part.qty) || 1; if (k.startsWith('RECIPE:::')) tot += (calculateProductTotal(k.replace('RECIPE:::', ''), new Set(visited)) * q); else if (catalogCache[k]) tot += (catalogCache[k].avgUnitCost * q); }); return tot; }
+    
+    // Updated Math to inject Labor & Overhead
+    function calculateProductTotal(pName, visited = new Set()) { 
+        if (visited.has(pName)) return 0; visited.add(pName); let tot = 0; 
+        (productsDB[pName] || []).forEach(part => { 
+            let k = String(part.item_key || part.di_item_id || part.name || ""); 
+            let q = parseFloat(part.quantity || part.qty) || 1; 
+            if (k.startsWith('RECIPE:::')) tot += (calculateProductTotal(k.replace('RECIPE:::', ''), new Set(visited)) * q); 
+            else if (catalogCache[k]) tot += (catalogCache[k].avgUnitCost * q); 
+        }); 
+        
+        // Add Labor Cost
+        if (laborDB[pName]) {
+            let laborCost = (laborDB[pName].time / 60) * laborDB[pName].rate;
+            tot += laborCost;
+        }
+        
+        return tot; 
+    }
+    
     function getRawMaterials(pName, mult = 1, map = {}, vis = new Set()) { if (vis.has(pName)) return map; vis.add(pName); (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = (parseFloat(part.quantity || part.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); else { map[k] = (map[k] || 0) + q; } }); return map; }
     function populateDropdowns() { try { let recipes = `<optgroup label="📦 SUB-ASSEMBLIES (Your Products)">` + Object.keys(productsDB).sort().map(p => { let cost = calculateProductTotal(p).toFixed(2); return `<option value="RECIPE:::${p}">🟢 [Product] ${p}   ━━━━   💰 $${cost}/unit</option>`; }).join('') + `</optgroup>`; let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `📦 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); return `<option value="${String(k).replace(/"/g, '&quot;')}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`; const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipes + raws; const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join(''); const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join(''); const sop = document.getElementById('sopMasterProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`).join(''); } catch(e) {} }
 </script>
@@ -594,19 +649,38 @@
         let ths = ` <th class="${currentBulkSort.column==='nn'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('nn')">Neogleamz Name</th> <th class="${currentBulkSort.column==='np'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('np')">Neo Product</th> <th class="${currentBulkSort.column==='n'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('n')">Item Name</th> <th class="${currentBulkSort.column==='sp'?'sorted-'+currentBulkSort.direction:''}" onclick="sortBulk('sp')">Spec</th> <th class="${currentBulkSort.column==='uc'?'sorted-'+currentBulkSort.direction:''} text-right" onclick="sortBulk('uc')">Unit Cost</th> <th style="width:120px; text-align:center; background:#0ea5e9; color:white;">Qty to Add</th> `;
         let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bulkAddBody">`; let qStr = document.getElementById('bulkSearch').value.toLowerCase(); let filtered = bulkAddData.filter(x => x.nn.toLowerCase().includes(qStr) || x.np.toLowerCase().includes(qStr) || x.n.toLowerCase().includes(qStr) || x.sp.toLowerCase().includes(qStr));
         filtered.sort((x,y) => { let u = x[currentBulkSort.column]; let v = y[currentBulkSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBulkSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBulkSort.direction==='asc'?-1:1; if(u>v) return currentBulkSort.direction==='asc'?1:-1; return 0; });
-        filtered.forEach(x => { let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">📦</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
+        filtered.forEach(x => { let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">📦</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
         wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('bulkAddTableWrap');
     }
     async function saveBulkAdd() { let addedCount = 0; bulkAddData.forEach(i => { let v = parseFloat(i.q); if(v > 0) { let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } addedCount++; } }); if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); } else { alert("No quantities greater than 0 were entered."); } }
 
-    // --- 7. PRODUCT BUILDER & INVENTORY MANAGER ---
-    async function renameCurrentProduct() { if(!currentProduct) return; let n = prompt("Enter new name:", currentProduct); if(!n || !n.trim() || n.trim() === currentProduct) return; n = n.trim(); if(productsDB[n]) return alert("A product with this name already exists."); sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); let o = currentProduct; let c = productsDB[o]; productsDB[n] = c; await supabaseClient.from('product_recipes').upsert({product_name: n, components: c}); await supabaseClient.from('product_recipes').delete().eq('product_name', o); delete productsDB[o]; let ups = []; Object.keys(productsDB).forEach(k => { let changed = false; productsDB[k].forEach(p => { if(String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + o) { p.item_key = 'RECIPE:::' + n; changed = true; } }); if(changed) ups.push(supabaseClient.from('product_recipes').upsert({product_name: k, components: productsDB[k]})); }); if(ups.length > 0) await Promise.all(ups); currentProduct = n; populateDropdowns(); renderProductList(); setMasterStatus("Renamed!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 3000); }
-    async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const {error} = await supabaseClient.from('product_recipes').upsert({product_name: name, components: productsDB[name]}); if(error) throw new Error(error.message); populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
+    // --- 7. PRODUCT BUILDER & LABOR LOGIC ---
+    async function updateLaborCosts() {
+        try {
+            if(!currentProduct) return;
+            let t = parseFloat(document.getElementById('laborTimeInput').value) || 0;
+            let r = parseFloat(document.getElementById('laborRateInput').value) || 0;
+            laborDB[currentProduct] = { time: t, rate: r };
+            sysLog(`Updating labor for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
+            const { error } = await supabaseClient.from('product_recipes').update({ labor_time_mins: t, labor_rate_hr: r }).eq('product_name', currentProduct);
+            if (error) throw new Error(error.message);
+            setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+            populateDropdowns(); renderProductList(); renderProductBOM(); renderFgiTable(); // Refresh everything that relies on unit cost
+        } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    }
+
+    async function renameCurrentProduct() { if(!currentProduct) return; let n = prompt("Enter new name:", currentProduct); if(!n || !n.trim() || n.trim() === currentProduct) return; n = n.trim(); if(productsDB[n]) return alert("A product with this name already exists."); sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); let o = currentProduct; let c = productsDB[o]; let l = laborDB[o] || {time:0, rate:0}; productsDB[n] = c; laborDB[n] = l; await supabaseClient.from('product_recipes').upsert({product_name: n, components: c, labor_time_mins: l.time, labor_rate_hr: l.rate}); await supabaseClient.from('product_recipes').delete().eq('product_name', o); delete productsDB[o]; delete laborDB[o]; let ups = []; Object.keys(productsDB).forEach(k => { let changed = false; productsDB[k].forEach(p => { if(String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + o) { p.item_key = 'RECIPE:::' + n; changed = true; } }); if(changed) ups.push(supabaseClient.from('product_recipes').update({components: productsDB[k]}).eq('product_name', k)); }); if(ups.length > 0) await Promise.all(ups); currentProduct = n; populateDropdowns(); renderProductList(); setMasterStatus("Renamed!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 3000); }
+    async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const {error} = await supabaseClient.from('product_recipes').update({components: productsDB[name]}).eq('product_name', name); if(error) throw new Error(error.message); populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
     function renderProductList() { const ui = document.getElementById('productListUI'); ui.innerHTML = ""; let prods = Object.keys(productsDB).sort(); if(prods.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; } if(!currentProduct && prods.length > 0) currentProduct = prods[0]; let subs = new Set(); prods.forEach(p => (productsDB[p]||[]).forEach(x => { let k=String(x.item_key||x.di_item_id||x.name); if(k.startsWith('RECIPE:::')) subs.add(k.replace('RECIPE:::', '')); })); let top = prods.filter(p => !subs.has(p)); if(top.length===0 && prods.length > 0) top=prods; function buildTree(n, d, v) { if(v.has(n)) return ""; v.add(n); let sel = n===currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'"); let h = `<li class="${sel}" style="margin-left:${d*15}px; font-weight:${d>0?'normal':'bold'}; font-size:${d>0?'12px':'14px'};" onclick="selectProduct('${safeName}')"><span>${d>0?'<span style="color:var(--text-muted); margin-right:4px;">↳</span>':''}${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span></li>`; (productsDB[n]||[]).forEach(x => { let k=String(x.item_key||x.di_item_id||x.name); if(k.startsWith('RECIPE:::')) { let s=k.replace('RECIPE:::', ''); if(productsDB[s]) h+=buildTree(s, d+1, new Set(v)); } }); return h; } top.forEach(p => ui.innerHTML += buildTree(p, 0, new Set())); if(currentProduct) renderProductBOM(); }
     function selectProduct(n) { currentProduct = n; renderProductList(); renderProductBOM(); }
     function sortBOM(c) { currentBOMSort = { column: c, direction: currentBOMSort.column===c && currentBOMSort.direction==='asc' ? 'desc' : 'asc' }; renderProductBOM(); }
     function renderProductBOM() {
         if(!currentProduct) return; document.getElementById('bomMainArea').style.display='block'; document.getElementById('bomTitle').innerText=currentProduct;
+        
+        let lData = laborDB[currentProduct] || {time:0, rate:0};
+        document.getElementById('laborTimeInput').value = lData.time;
+        document.getElementById('laborRateInput').value = lData.rate;
+
         let p = productsDB[currentProduct]||[]; let gt = 0; let wrap = document.getElementById('bomTableWrap');
         let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neo Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
         let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
@@ -617,36 +691,156 @@
             a.sort((x,y) => { let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; });
             a.forEach(x => { let sk = String(x.rawKey).replace(/'/g, "\\'").replace(/"/g, '"'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.rawKey.startsWith('RECIPE:::')) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } });
         }
-        wrap.innerHTML = h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${gt.toFixed(2)}`; applyTableInteractivity('bomTableWrap');
+        wrap.innerHTML = h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${calculateProductTotal(currentProduct).toFixed(2)}`; applyTableInteractivity('bomTableWrap');
     }
     async function updateBOMQty(cell) { try { let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v) || v<=0) { cell.innerText=oldValTemp; return; } if(v.toString()===oldValTemp) return; let k = cell.getAttribute('data-key').replace(/"/g, '"').replace(/\\'/g, "'"); let p = productsDB[currentProduct].find(x => String(x.item_key || x.di_item_id || x.name) === k); if(p) { p.quantity = v; p.qty = v; cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); await syncRecipe(currentProduct); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
     async function removePart(btn) { try { if(!currentProduct) return; let k = btn.getAttribute('data-key').replace(/"/g, '"').replace(/\\'/g, "'"); productsDB[currentProduct] = productsDB[currentProduct].filter(p => String(p.item_key || p.di_item_id || p.name) !== k); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
     async function addPartToProduct() { try { if(!currentProduct) return alert("Select product."); let k = document.getElementById('partSelector').value; let q = parseFloat(document.getElementById('partQty').value) || 0; if(q<=0 || !k) return alert("Invalid inputs."); if(k === 'RECIPE:::' + currentProduct) return alert("No self nesting."); let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + q; ex.qty = ex.quantity; } else productsDB[currentProduct].push({item_key: k, quantity: q}); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
-    async function createNewProduct() { try { let n = prompt("Recipe Name:"); if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; await syncRecipe(n); currentProduct = n; renderProductList(); renderProductBOM(); } catch(e) { sysLog(e.message, true); } }
-    async function deleteCurrentProduct() { try { if(!currentProduct) return; if(confirm(`Delete ${currentProduct}?`)){ sysLog(`Deleting ${currentProduct}`); await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct); delete productsDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').upsert({product_name: n, components: productsDB[n]})); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; populateDropdowns(); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
-    async function nukeAllRecipes() { try { if(confirm("⚠️ DANGER: Delete ALL recipes?")){ sysLog("Nuking recipes..."); setMasterStatus("Nuking...", "mod-working"); const {error}=await supabaseClient.from('product_recipes').delete().neq('product_name','fake_key'); if(error) throw new Error(error.message); productsDB={}; currentProduct=null; renderProductList(); populateDropdowns(); document.getElementById('bomMainArea').style.display='none'; setMasterStatus("Nuked.", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),3000); } } catch(e) { sysLog(e.message, true); setMasterStatus("Fail.", "mod-error"); } }
+    async function createNewProduct() { try { let n = prompt("Recipe Name:"); if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; laborDB[n] = {time:0, rate:0}; await supabaseClient.from('product_recipes').insert({product_name: n, components: [], labor_time_mins: 0, labor_rate_hr: 0}); currentProduct = n; renderProductList(); renderProductBOM(); } catch(e) { sysLog(e.message, true); } }
+    async function deleteCurrentProduct() { try { if(!currentProduct) return; if(confirm(`Delete ${currentProduct}?`)){ sysLog(`Deleting ${currentProduct}`); await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct); delete productsDB[currentProduct]; delete laborDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').update({components: productsDB[n]}).eq('product_name', n)); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; populateDropdowns(); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
+    async function nukeAllRecipes() { try { if(confirm("⚠️ DANGER: Delete ALL recipes?")){ sysLog("Nuking recipes..."); setMasterStatus("Nuking...", "mod-working"); const {error}=await supabaseClient.from('product_recipes').delete().neq('product_name','fake_key'); if(error) throw new Error(error.message); productsDB={}; laborDB={}; currentProduct=null; renderProductList(); populateDropdowns(); document.getElementById('bomMainArea').style.display='none'; setMasterStatus("Nuked.", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),3000); } } catch(e) { sysLog(e.message, true); setMasterStatus("Fail.", "mod-error"); } }
 
+    // --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
+    function sortFGI(c) { if(isResizing) return; currentFgiSort = { column: c, direction: currentFgiSort.column===c && currentFgiSort.direction==='asc' ? 'desc' : 'asc' }; renderFgiTable(); }
     function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
+
+    function renderFgiTable() {
+        const wrap = document.getElementById('fgiTableWrap'); if(!wrap) return;
+        let ths = ` <th class="${currentFgiSort.column==='n'?'sorted-'+currentFgiSort.direction:''}" onclick="sortFGI('n')">Product Name</th> <th class="${currentFgiSort.column==='b'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('b')">Total Built</th> <th class="${currentFgiSort.column==='sold'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('sold')" style="border-bottom:2px solid #ef4444;">Total Sold</th> <th class="${currentFgiSort.column==='s'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('s')" style="border-bottom:2px solid #10b981;">Current Stock</th> <th class="${currentFgiSort.column==='uc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('uc')">True COGS</th> <th class="${currentFgiSort.column==='tv'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tv')">Total Value</th> `;
+        let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
+        let a = Object.keys(productsDB).map(p => { 
+            let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0}; 
+            let b = parseFloat(i.produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; 
+            let s = b - sold; let uc = calculateProductTotal(p); let tv = s * uc;
+            return { k: k, n: p, b: b, sold: sold, s: s, uc: uc, tv: tv }; 
+        });
+        if(a.length===0){ h += "<tr><td colspan='6' style='text-align:center;'>No finished goods.</td></tr>"; }
+        else {
+            a.sort((x,y) => { let u = x[currentFgiSort.column]; let v = y[currentFgiSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentFgiSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentFgiSort.direction==='asc'?-1:1; if(u>v) return currentFgiSort.direction==='asc'?1:-1; return 0; });
+            a.forEach(x => { let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${x.n}</td><td class="text-right" style="color:var(--text-muted);">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right">$${x.uc.toFixed(2)}</td><td class="text-right" style="font-weight:bold;">$${x.tv.toFixed(2)}</td></tr>`; });
+        }
+        wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('fgiTableWrap');
+    }
+
     function renderInventoryTable() {
         const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
-        let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='np'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('np')">Neo Product</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='sp'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('sp')">Spec</th> <th class="${currentInvSort.column==='up'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('up')">Avg Unit Cost</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Total Pcs Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:3px solid #ef4444;">Pcs Consumed</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')">Manual Adj.</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:3px solid #f59e0b;">Current Stock</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">Avg Total Value</th> `;
-        let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="inventoryBody">`;
-        let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed:0, adjustment:0}; let s=c.totalQty-i.consumed+i.adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, np:c.neoProd, n:c.itemName, sp:c.spec, p:c.totalQty, c:i.consumed, a:i.adjustment, s:s, up:up, tp:tp }; });
-        if(a.length===0){ h += "<tr><td colspan='10' style='text-align:center;'>No inventory.</td></tr>"; }
+        renderFgiTable(); // Syncs them together
+        let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='np'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('np')">Neo Product</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='sp'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('sp')">Spec</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:2px solid #ef4444;">Consumed</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('ms')" style="border-bottom:2px solid #f97316;">Min Stock</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:2px solid #f59e0b;">Current Stock</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">Total Value</th> `;
+        let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
+        let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0}; let s=c.totalQty-i.consumed_qty+i.manual_adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, np:c.neoProd, n:c.itemName, sp:c.spec, p:c.totalQty, c:i.consumed_qty, a:i.manual_adjustment, ms:i.min_stock, s:s, up:up, tp:tp }; });
+        if(a.length===0){ h += "<tr><td colspan='9' style='text-align:center;'>No raw inventory.</td></tr>"; }
         else {
             a.sort((x,y) => { let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
-            a.forEach(x => { let sc = x.s<0 ? 'negative-stock' : 'highlight-calc'; let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${x.n}</td><td tabindex="0" class="trunc-col" style="color:#64748b;">${displaySpec}</td><td class="text-right">$${x.up.toFixed(4)}</td><td class="text-right">${x.p.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed')">${x.c.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:#0ea5e9;">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(4).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(4).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; });
+            a.forEach(x => { let isLow = x.ms > 0 && x.s < x.ms; let sc = x.s<0 ? 'negative-stock' : (isLow ? 'low-stock' : 'highlight-calc'); let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td><td tabindex="0" class="trunc-col" style="color:#64748b;">${displaySpec}</td><td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'consumed_qty')">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#f97316;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},'stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; });
         }
         wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('invTableWrap');
     }
+
     async function handleInvEdit(cell, key, p, c, a, mode) {
-        try { let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v)) { cell.innerText = mode==='consumed'?c:(p-c+a); return alert("Valid number required."); } let nc=c, na=a; if(mode==='consumed') { nc=Math.abs(v); if(nc===c) return; } else { na = v-(p-c); if(na===a) return; } sysLog(`Inv Edit: [${rKey}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); const { error } = await supabaseClient.from('inventory_consumption').upsert({item_key: rKey, consumed_qty: nc, manual_adjustment: na}, {onConflict:'item_key'}); if(error) throw new Error(error.message); if(!inventoryDB[rKey]) inventoryDB[rKey]={consumed:0, adjustment:0}; inventoryDB[rKey].consumed=nc; inventoryDB[rKey].adjustment=na; setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),2000); renderInventoryTable(); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = mode==='consumed'?c:(p-c+a); }
+        try { 
+            let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); 
+            if(isNaN(v)) { cell.innerText = oldValTemp; return alert("Valid number required."); } 
+            
+            if(!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0};
+            let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock };
+            
+            if(mode === 'consumed_qty') { payload.consumed_qty = Math.abs(v); if(payload.consumed_qty === c) return; } 
+            else if(mode === 'stock') { payload.manual_adjustment = v - (p - c); if(payload.manual_adjustment === a) return; }
+            else if(mode === 'sold_qty') { payload.sold_qty = Math.abs(v); if(payload.sold_qty === inventoryDB[rKey].sold_qty) return; }
+            else if(mode === 'min_stock') { payload.min_stock = Math.abs(v); if(payload.min_stock === inventoryDB[rKey].min_stock) return; }
+
+            sysLog(`Inv Edit: [${rKey}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); 
+            const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
+            if(error) throw new Error(error.message); 
+            
+            inventoryDB[rKey] = payload;
+            setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); 
+            setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),2000); 
+            renderInventoryTable(); 
+        } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
     }
-    async function runProductionBatch() { try { const n = document.getElementById('batchProductSelect').value; const q = parseFloat(document.getElementById('batchQty').value); if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); sysLog(`Batch Run: ${q}x ${n}`); setSysProgress(20, 'working'); let raw = getRawMaterials(n, q); let keys = Object.keys(raw); if(keys.length===0){ setSysProgress(0,'working'); return alert("Recipe empty."); } let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; }); setSysProgress(60, 'working'); const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); if(error) throw new Error(error.message); setSysProgress(100, 'success'); sysLog("Batch Complete."); alert(`Deducted ${q}x ${n}.`); document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); alert("Batch Error."); } }
-    async function resetInventoryConsumption() { try { if(!confirm("⚠️ DANGER: Reset ALL consumption AND manual adjustments?")) return; sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); if(error) throw new Error(error.message); inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); } }
+
+    async function runProductionBatch() {
+        try { 
+            const n = document.getElementById('batchProductSelect').value; const q = parseFloat(document.getElementById('batchQty').value); 
+            if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); 
+            sysLog(`Batch Run: ${q}x ${n}`); setSysProgress(20, 'working'); 
+            
+            let raw = getRawMaterials(n, q); let keys = Object.keys(raw); 
+            if(keys.length===0){ setSysProgress(0,'working'); return alert("Recipe empty."); } 
+            
+            // Action A: Deduct raw materials
+            let ups = keys.map(k => { 
+                if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0};
+                inventoryDB[k].consumed_qty += raw[k];
+                return {item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock}; 
+            }); 
+            
+            // Action B: Add to Finished Goods
+            let fgiKey = `RECIPE:::${n}`;
+            if(!inventoryDB[fgiKey]) inventoryDB[fgiKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0};
+            inventoryDB[fgiKey].produced_qty += q;
+            ups.push({item_key: fgiKey, consumed_qty: inventoryDB[fgiKey].consumed_qty, manual_adjustment: inventoryDB[fgiKey].manual_adjustment, produced_qty: inventoryDB[fgiKey].produced_qty, sold_qty: inventoryDB[fgiKey].sold_qty, min_stock: inventoryDB[fgiKey].min_stock});
+
+            setSysProgress(60, 'working'); 
+            const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
+            if(error) throw new Error(error.message); 
+            
+            setSysProgress(100, 'success'); sysLog("Batch Complete."); alert(`Built ${q}x ${n} and deducted materials.`); 
+            document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); alert("Batch Error."); }
+    }
+
+    async function resetInventoryConsumption() {
+        try { 
+            if(!confirm("⚠️ DANGER: Reset ALL consumption, adjustments, min stocks, built, and sold quantities to zero?")) return; 
+            sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); 
+            const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); 
+            if(error) throw new Error(error.message); 
+            inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
+    }
+
+    function printReorderReport() {
+        try {
+            let html = `<html><head><title>Neogleamz Reorder Report</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; font-size:14px; margin-top: 15px;} th,td{border:1px solid #ccc; padding:8px; text-align:left;} th{background:#f1f5f9;}</style></head><body>`;
+            html += `<h2>🚨 Low Stock Reorder Report</h2><p style="color:#64748b; font-size:14px;">Date: ${new Date().toLocaleDateString()}</p>`;
+            html += `<table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
+            
+            let items = [];
+            Object.keys(catalogCache).forEach(k => {
+                let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k] || {};
+                let s = c.totalQty - (i.consumed_qty || 0) + (i.manual_adjustment || 0);
+                let ms = i.min_stock || 0;
+                if(ms > 0 && s < ms) {
+                    let short = ms - s;
+                    items.push({nn: c.neoName, n: c.itemName, sp: c.spec, s: s, ms: ms, short: short, cost: short * (c.avgUnitCost || 0)});
+                }
+            });
+
+            if(items.length === 0) {
+                html += `<tr><td colspan="7" style="text-align:center; padding: 20px;">All monitored stock levels are currently optimal.</td></tr>`;
+            } else {
+                let grandTotal = 0;
+                // Sort by highest capital required first
+                items.sort((a,b) => b.cost - a.cost).forEach(x => {
+                    grandTotal += x.cost;
+                    let displaySpec = x.sp === '(Mixed Specs)' ? '' : x.sp;
+                    html += `<tr><td>${x.nn || ''}</td><td>${x.n}</td><td>${displaySpec}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td><td>$${x.cost.toFixed(2)}</td></tr>`;
+                });
+                html += `<tr><td colspan="6" style="text-align:right; font-weight:bold; padding-top: 15px;">Total Estimated Capital Required:</td><td style="font-weight:bold; padding-top: 15px;">$${grandTotal.toFixed(2)}</td></tr>`;
+            }
+            html += `</tbody></table></body></html>`;
+            
+            let win = window.open('', '', 'width=900,height=700');
+            win.document.write(html);
+            win.document.close();
+            setTimeout(() => win.print(), 250);
+        } catch (e) { sysLog(e.message, true); }
+    }
 </script>
 <script>
-    // --- 8. PRODUCTION MANAGER, UNIVERSAL MEDIA, EXPORTS ---
+    // --- 9. PRODUCTION MANAGER, UNIVERSAL MEDIA, EXPORTS ---
     function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
     
     function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
@@ -681,7 +875,7 @@
         try {
             const p = document.getElementById('newWOProduct').value; const q = parseFloat(document.getElementById('newWOQty').value); if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
             let rawNeeded = getRawMaterials(p, q); let shortfalls = [];
-            Object.keys(rawNeeded).forEach(k => { let req = rawNeeded[k]; let c = catalogCache[k] || {totalQty: 0}; let i = inventoryDB[k] || {consumed: 0, adjustment: 0}; let onHand = c.totalQty - i.consumed + i.adjustment; if(req > onHand) { let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); } });
+            Object.keys(rawNeeded).forEach(k => { let req = rawNeeded[k]; let c = catalogCache[k] || {totalQty: 0}; let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0}; let onHand = c.totalQty - i.consumed_qty + i.manual_adjustment; if(req > onHand) { let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); } });
             if(shortfalls.length > 0) { document.getElementById('woShortfallList').innerHTML = shortfalls.join(''); document.getElementById('woErrorBox').style.display = 'block'; return; }
             let woId = "WO-" + Date.now().toString().slice(-6); let wo = { wo_id: woId, product_name: p, qty: q, status: 'Queued', wip_state: {} }; sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
             const {error} = await supabaseClient.from('work_orders').insert(wo); if(error) throw new Error(error.message); workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
@@ -768,14 +962,32 @@
         } catch(e) { sysLog(e.message, true); }
     }
 
+    // --- TWO-WAY LEDGER ADVANCE WO FUNCTION (PRESERVES MIN STOCK) ---
     async function advanceWO(newStatus) {
         try {
             if(!currentWO) return; if(currentWO.status === 'Completed') return alert("This Work Order is already completed and archived.");
             sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
             if(newStatus === 'Completed') {
-                if(!confirm("Marking this complete will permanently deduct the raw materials from your inventory. Proceed?")) { setMasterStatus("Ready.", "status-idle"); return; }
+                if(!confirm("Marking this complete will permanently deduct raw materials and add the finished goods to your inventory. Proceed?")) { setMasterStatus("Ready.", "status-idle"); return; }
                 let raw = getRawMaterials(currentWO.product_name, currentWO.qty); let keys = Object.keys(raw); 
-                if(keys.length > 0){ let ups = keys.map(k => { let i = inventoryDB[k]||{consumed:0, adjustment:0}; let nc = i.consumed + raw[k]; if(!inventoryDB[k]) inventoryDB[k]={consumed:0, adjustment:0}; inventoryDB[k].consumed=nc; return {item_key:k, consumed_qty:nc, manual_adjustment:i.adjustment}; }); const {error: invErr} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); if(invErr) { sysLog(invErr.message, true); return; } renderInventoryTable(); }
+                let ups = [];
+                if(keys.length > 0){ 
+                    // Action A: Deduct Raw Materials (Preserves min_stock)
+                    ups = keys.map(k => { 
+                        if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0}; 
+                        inventoryDB[k].consumed_qty += raw[k]; 
+                        return {item_key:k, consumed_qty:inventoryDB[k].consumed_qty, manual_adjustment:inventoryDB[k].manual_adjustment, produced_qty:inventoryDB[k].produced_qty, sold_qty:inventoryDB[k].sold_qty, min_stock:inventoryDB[k].min_stock}; 
+                    });
+                }
+                // Action B: Add Finished Goods
+                let fgiKey = `RECIPE:::${currentWO.product_name}`;
+                if(!inventoryDB[fgiKey]) inventoryDB[fgiKey]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0};
+                inventoryDB[fgiKey].produced_qty += currentWO.qty;
+                ups.push({item_key:fgiKey, consumed_qty:inventoryDB[fgiKey].consumed_qty, manual_adjustment:inventoryDB[fgiKey].manual_adjustment, produced_qty:inventoryDB[fgiKey].produced_qty, sold_qty:inventoryDB[fgiKey].sold_qty, min_stock:inventoryDB[fgiKey].min_stock});
+                
+                const {error: invErr} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
+                if(invErr) { sysLog(invErr.message, true); return; } 
+                renderInventoryTable();
             }
             const {error} = await supabaseClient.from('work_orders').update({status: newStatus}).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); currentWO.status = newStatus; setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList(); 
         } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
@@ -933,7 +1145,7 @@
                 
                 // Flatten JSON objects to raw strings so Excel doesn't break
                 if (tableName === 'product_recipes') {
-                    exportData = data.map(r => ({ product_name: r.product_name, components: JSON.stringify(r.components) }));
+                    exportData = data.map(r => ({ product_name: r.product_name, components: JSON.stringify(r.components), labor_time_mins: r.labor_time_mins, labor_rate_hr: r.labor_rate_hr }));
                 } else if (tableName === 'production_sops') {
                     exportData = data.map(r => ({ product_name: r.product_name, steps: JSON.stringify(r.steps) }));
                 } else if (tableName === 'work_orders') {
@@ -951,7 +1163,7 @@
             await addSheet('work_orders', 'Work_Orders');
             await addSheet('production_sops', 'SOPs');
 
-            // Trigger the download
+            // Trigger the download with the updated timestamp logic
             const now = new Date();
             const dateStr = now.toISOString().split('T')[0];
             const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
@@ -1018,8 +1230,13 @@
                 } else if (sheetName === 'Recipes') {
                     tableName = 'product_recipes';
                     conflictKey = 'product_name';
-                    // Un-flatten the recipes array
-                    parsedData = rawData.map(r => ({ product_name: r.product_name, components: JSON.parse(r.components || '[]') }));
+                    // Un-flatten the recipes array and ensure labor cols exist
+                    parsedData = rawData.map(r => ({ 
+                        product_name: r.product_name, 
+                        components: JSON.parse(r.components || '[]'),
+                        labor_time_mins: parseFloat(r.labor_time_mins) || 0,
+                        labor_rate_hr: parseFloat(r.labor_rate_hr) || 0
+                    }));
                 } else if (sheetName === 'Inventory') {
                     tableName = 'inventory_consumption';
                     conflictKey = 'item_key';
