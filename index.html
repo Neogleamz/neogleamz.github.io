@@ -859,6 +859,96 @@
     // --- 12. PARSERS & FILE SYNC ---
     // --- 13. NEW BACKUP & RESTORE SYSTEM ---
 </script>
+	<div id="ceo-tab" class="tab-content" style="display:none; height: calc(100vh - 80px); overflow: hidden;">
+        <style>
+            #ceo-tab { --neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00; font-family: 'Inter', sans-serif; }
+            .ceo-terminal-grid { height: 100%; display: grid; grid-template-columns: 320px 1fr; gap: 20px; padding-bottom: 20px;}
+            .ceo-control-panel { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; height: 100%; overflow-y: auto; display: flex; flex-direction: column;}
+            .ceo-control-header { font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px; letter-spacing: 1px; }
+            .ceo-slider-group { margin-bottom: 15px; }
+            .ceo-slider-label { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px; }
+            .ceo-sync-input { background: transparent; border: 1px solid #333; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; width: 70px; text-align: right; padding: 2px 6px; border-radius: 4px; }
+            .ceo-sync-input:focus { outline: none; border-color: var(--neon-cyan); }
+            .ceo-global-slider .ceo-sync-input { color: var(--neon-purple); border-color: #444; }
+            .ceo-control-panel input[type=range] { width: 100%; accent-color: var(--neon-cyan); height: 4px; background: #333; outline: none; border-radius: 2px; cursor: pointer; }
+            .ceo-global-slider input[type=range] { accent-color: var(--neon-purple); }
+            .ceo-cac-toggle { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; cursor: pointer; margin-left: 8px; font-weight: 600; padding: 2px 6px; background: rgba(255,0,51,0.1); border-radius: 3px; border: 1px solid rgba(255,0,51,0.2); }
+            .ceo-cac-toggle input { width: 11px; height: 11px; cursor: pointer; accent-color: var(--neon-red); margin: 0; }
+            .ceo-main-content { display: flex; flex-direction: column; height: 100%; gap: 20px; min-height: 0; }
+            .ceo-kpi-row { flex-shrink: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+            .ceo-kpi-card { background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
+            .ceo-kpi-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
+            .ceo-kpi-value { font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+            .ceo-kpi-sub { font-size: 0.8rem; text-transform: uppercase; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin-top: 6px; }
+            .ceo-charts-row { flex-grow: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; }
+            .ceo-chart-box { background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+            .ceo-canvas-wrapper { position: relative; flex: 1 1 0%; min-height: 0; width: 100%; }
+            .ceo-canvas-wrapper canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
+            .span-2 { grid-column: span 2; } .span-3 { grid-column: span 3; }
+            .ceo-table-container { flex-shrink: 0; background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 6px; overflow-x: auto; padding: 15px; }
+            .ceo-table-container table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; white-space: nowrap; }
+            .ceo-table-container th, .ceo-table-container td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--border-color); } 
+            .ceo-table-container th:first-child, .ceo-table-container td:first-child { text-align: left; font-family: 'Inter', sans-serif; font-weight: 700; background: var(--bg-container); border-right: 1px solid var(--border-color); }
+            .ceo-table-container th { color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border-color); padding-bottom: 8px;}
+            .ceo-table-input { background: rgba(255,255,255,0.05); border: 1px dashed var(--text-muted); color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; width: 75px; text-align: right; padding: 2px 4px; border-radius: 4px; }
+            .val-red { color: var(--neon-red); } .val-green { color: var(--neon-green); text-shadow: 0 0 10px rgba(0,255,102,0.2); } .val-yellow { color: var(--neon-yellow); }
+        </style>
+
+        <div class="ceo-terminal-grid">
+            <div class="ceo-control-panel">
+                <div class="ceo-control-header">Global Marketing Spend</div>
+                <div class="ceo-slider-group ceo-global-slider">
+                    <div class="ceo-slider-label"><span>Blended CAC ($)</span> <input type="number" id="cacNum" class="ceo-sync-input" value="10"></div>
+                    <input type="range" id="cacSlider" min="0" max="50" step="1" value="10">
+                </div>
+                <div class="ceo-control-header" style="margin-top: 30px;">Last 30 Days Vol (Dynamic)</div>
+                <div id="ceo-dynamic-sliders">
+                    <!-- Sliders injected by JS -->
+                </div>
+            </div>
+
+            <div class="ceo-main-content">
+                <div class="ceo-kpi-row">
+                    <div class="ceo-kpi-card"><div class="ceo-kpi-title">Gross Monthly Revenue</div><div class="ceo-kpi-value" id="kpiGross">$0</div><div class="ceo-kpi-sub" style="color: var(--text-muted);">100% Core Base</div></div>
+                    <div class="ceo-kpi-card"><div class="ceo-kpi-title">Old Model Net (Baseline)</div><div class="ceo-kpi-value val-red" id="kpiOldNet">$0</div><div class="ceo-kpi-sub" id="kpiOldNetPct">0% Margin</div></div>
+                    <div class="ceo-kpi-card" style="border-color: var(--neon-green);"><div class="ceo-kpi-title">Live Final Net Profit</div><div class="ceo-kpi-value val-green" id="kpiNewNet">$0</div><div class="ceo-kpi-sub" id="kpiNewNetPct">0% Margin</div></div>
+                    <div class="ceo-kpi-card"><div class="ceo-kpi-title">Company Cash Reclaimed</div><div class="ceo-kpi-value val-green" id="kpiSaved" style="color: var(--neon-cyan); text-shadow: none;">$0</div><div class="ceo-kpi-sub" id="kpiSavedPct" style="color: var(--neon-cyan);">+0% vs Old</div></div>
+                </div>
+
+                <div class="ceo-charts-row">
+                    <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">1. Total Company Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
+                    <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">2. Profit Contribution</div><div class="ceo-canvas-wrapper"><canvas id="profitChart"></canvas></div></div>
+                    <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">3. Unit Net Profit</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
+                    <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">4. Margin Squeeze (% of Dollar Kept)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
+                    <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">5. Velocity Trajectory</div><div class="ceo-canvas-wrapper"><canvas id="lineChart"></canvas></div></div>
+                </div>
+
+                <div class="ceo-table-container">
+                    <div class="ceo-kpi-title" style="margin-bottom:5px;">Live Dynamic Ledger</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th style="color:var(--neon-cyan);">MSRP (Live)</th>
+                                <th style="color:var(--neon-red);">Old Model OOP</th>
+                                <th class="val-green">Apex Model OOP</th>
+                                <th>COGS (Live)</th>
+                                <th style="color:#888;">Labor (Live)</th>
+                                <th style="color:#888;">Stripe</th>
+                                <th style="color:#888;">Shipping</th>
+                                <th style="color:#888;">CAC Applied</th>
+                                <th style="color:var(--neon-red);">Old Net Profit</th>
+                                <th class="val-green" style="font-weight:900;">Apex Net Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ceo-dynamic-table">
+                            <!-- Table rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 <script src="system-tools-module.js?v=1"></script>
 <script src="bom-module.js?v=1"></script>
 <script src="inventory-module.js?v=1"></script>
