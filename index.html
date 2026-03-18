@@ -1,391 +1,1009 @@
-// --- CEO TERMINAL: OPERATION APEX 2.1 ---
-
-let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;
-const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
-// Global Drag & Drop + Sorting State
-let ceoDraggedIndex = null;
-let ceoSortKey = null;
-let ceoSortAsc = true;
-
-function ceoDragStart(e, idx) { ceoDraggedIndex = idx; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => e.target.style.opacity = '0.4', 0); }
-function ceoDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-function ceoDrop(e, targetIdx) {
-    e.preventDefault(); e.currentTarget.style.opacity = '1';
-    if(ceoDraggedIndex === null || ceoDraggedIndex === targetIdx) return;
-    const moved = ceoActiveProducts.splice(ceoDraggedIndex, 1)[0];
-    ceoActiveProducts.splice(targetIdx, 0, moved);
-    renderCeoTerminal();
-}
-function ceoDragEnd(e) { e.target.style.opacity = '1'; ceoDraggedIndex = null; }
-
-function sortCeoTable(key) {
-    if(ceoSortKey === key) ceoSortAsc = !ceoSortAsc;
-    else { ceoSortKey = key; ceoSortAsc = true; }
-    updateCeoEngine();
-}
-
-// State Management
-if (typeof ceoActiveProducts === 'undefined') window.ceoActiveProducts = [];
-
-function saveCeoBoard() { if (typeof saveCloudPrefs === 'function') saveCloudPrefs(); }
-
-function get30DayVolume(productName) {
-    try {
-        if(typeof salesDB === 'undefined' || !salesDB || !Array.isArray(salesDB)) return 0; 
-        let thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        let vol = 0;
-        let searchName = productName.toUpperCase().trim();
-        salesDB.forEach(sale => {
-            if (new Date(sale.sale_date) >= thirtyDaysAgo) {
-                if(sale.internal_recipe_name && sale.internal_recipe_name.toUpperCase() === searchName) {
-                    vol += (parseFloat(sale.qty_sold) || 0);
-                }
-            }
-        });
-        return vol; 
-    } catch (e) { return 0; }
-}
-
-function autoPopulateCeoBoard() {
-    if (ceoActiveProducts.length > 0) return; 
-    let prods = Object.keys(productsDB).filter(p => !isSubassemblyDB[p]);
-    prods.forEach(pName => {
-        let vol = get30DayVolume(pName);
-        if (vol > 0) {
-            let liveMsrp = getEngineLiveMsrp(pName);
-            ceoActiveProducts.push({
-                name: pName, isBundle: false, applyCac: false, applyAff: false, applyWarr: false,
-                currentMsrp: liveMsrp, testMsrp: liveMsrp, cogs: getEngineTrueCogs(pName), vol: vol
-            });
-        }
-    });
-}
-
-function initCeoCharts() {
-    Chart.defaults.color = '#e0e0e0'; Chart.defaults.font.family = "'JetBrains Mono', monospace";
-    if(ceoExpenseChart) ceoExpenseChart.destroy();
-    if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoCurEfficiencyChart) ceoCurEfficiencyChart.destroy();
-
-    ceoExpenseChart = new Chart(document.getElementById('expenseChart'), {
-        type: 'bar', plugins: [ChartDataLabels],
-        data: { 
-            labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Net Profit'], 
-            datasets: [
-                { label: 'Current MSRP', data: [0,0,0,0,0,0,0], backgroundColor: '#555555', borderRadius: 4 },
-                { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }
-            ] 
-        },
-        options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
-    });
-
-    ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
-    const efficiencyOptions = (isCurrent) => ({
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        scales: { 
-            x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, 
-            y: { stacked: true, grid: {display: false} } 
-        },
-        plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-                callbacks: {
-                    label: function(ctx) {
-                        let pc = ctx.raw;
-                        let activeP = ceoActiveProducts[ctx.dataIndex];
-                        if(!activeP) return `${ctx.dataset.label}: ${pc.toFixed(1)}%`;
-                        let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
-                        let SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-                        let curOOP = (activeP.currentMsrp || 1) + SHIP_COST;
-                        let testOOP = (activeP.testMsrp || 1) >= fsThreshold ? (activeP.testMsrp || 1) : ((activeP.testMsrp || 1) + SHIP_COST);
-                        let b = isCurrent ? curOOP : testOOP;
-                        let dol = (pc / 100) * b;
-                        return `${ctx.dataset.label}: ${ceoFmt.format(dol)} (${pc.toFixed(1)}%)`;
-                    }
-                }
-            },
-            datalabels: {
-                display: 'auto',
-                color: '#fff',
-                textStrokeColor: '#000',
-                textStrokeWidth: 2,
-                font: { weight: 'bold', size: 10, family: "'JetBrains Mono', monospace" },
-                formatter: function(value, ctx) {
-                    if (value < 5) return '';
-                    let activeP = ceoActiveProducts[ctx.dataIndex];
-                    if(!activeP) return `${value.toFixed(1)}%`;
-                    let isCurrent = ctx.chart.canvas.id === 'curEfficiencyChart';
-                    let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
-                    let SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-                    let curOOP = (activeP.currentMsrp || 1) + SHIP_COST;
-                    let testOOP = (activeP.testMsrp || 1) >= fsThreshold ? (activeP.testMsrp || 1) : ((activeP.testMsrp || 1) + SHIP_COST);
-                    let b = isCurrent ? curOOP : testOOP;
-                    let dol = (value / 100) * b;
-                    return `${ceoFmt.format(dol)}\n(${value.toFixed(1)}%)`;
-                },
-                align: 'center', 
-                anchor: 'center', 
-                textAlign: 'center'
-            }
-        }
-    });
-
-    ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(false) });
-    ceoCurEfficiencyChart = new Chart(document.getElementById('curEfficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(true) });
-}
-
-function renderCeoTerminal() {
-    sysLog("Booting CEO Terminal...");
-    autoPopulateCeoBoard();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neogleamz Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
-    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
-    
-    let controlHtml = `
-        <div style="background: var(--bg-surface-light); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border: 1px solid var(--border-color);">
-            <select id="ceo-product-select" style="flex-grow: 1; min-width: 200px; padding: 8px; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); border-radius: 4px;">
-                <option value="">-- Select Retail Product to Add --</option>
-                ${availableRetail.sort().map(k => `<option value="${k}">${k}</option>`).join('')}
-            </select>
-            <button class="btn-blue" onclick="addCeoProductToBoard()" style="width:auto; padding: 8px 15px;">+ Add to Board</button>
-            <button class="btn-orange" onclick="openCeoBundleModal()" style="width:auto; padding: 8px 15px;">+ Build Bundle</button>
-        </div>
-    `;
+    <script>
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    </script>
 
-    let slidersHtml = controlHtml;
-    ceoActiveProducts.forEach((p, index) => {
-        const toggleStyle = (active) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; background: ${active ? 'rgba(0,255,102,0.1)' : 'rgba(255,0,51,0.1)'}; color: ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; margin-right: 4px;`;
+    <style>
+        :root {
+            --bg-body: #f0f4f8; --bg-container: #ffffff; --text-main: #333333; --text-heading: #1e293b;
+            --text-muted: #64748b; --border-color: #e2e8f0; --border-input: #cbd5e1; --bg-panel: #f8fafc;
+            --bg-bar: #f1f5f9; --bg-input: #ffffff; --bg-th: #1e293b; --text-th: #ffffff;
+            --bg-edit-hover: #fef08a; --border-edit-focus: #0ea5e9; --bg-highlight: #f0fdf4;
+            --text-highlight: #15803d; --bg-negative: #fef2f2; --shadow-color: rgba(0,0,0,0.08);
+            --tab-hover: #f8fafc; --tab-active-bg: #f0f9ff;
+            /* Dynamic Kitting Tray Colors */
+            --kitting-pull-bg: #f0fdf4; --kitting-pull-border: #10b981; --kitting-pull-text: #15803d;
+            --kitting-build-bg: #fffbeb; --kitting-build-border: #f59e0b; --kitting-build-text: #b45309;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a; --bg-container: #1e293b; --text-main: #e2e8f0; --text-heading: #f8fafc;
+            --text-muted: #94a3b8; --border-color: #334155; --border-input: #475569; --bg-panel: #0f172a;
+            --bg-bar: #334155; --bg-input: #0f172a; --bg-th: #020617; --text-th: #f8fafc;
+            --bg-edit-hover: #854d0e; --border-edit-focus: #38bdf8; --bg-highlight: #064e3b;
+            --text-highlight: #4ade80; --bg-negative: #7f1d1d; --shadow-color: rgba(0,0,0,0.5);
+            --tab-hover: #334155; --tab-active-bg: #1e293b;
+            /* Dynamic Kitting Tray Colors */
+            --kitting-pull-bg: rgba(16, 185, 129, 0.1); --kitting-pull-border: #059669; --kitting-pull-text: #34d399;
+            --kitting-build-bg: rgba(245, 158, 11, 0.1); --kitting-build-border: #d97706; --kitting-build-text: #fbbf24;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-container); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px var(--shadow-color); transition: background-color 0.3s; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         
-        slidersHtml += `
-        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px; cursor:grab;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
-            <div class="ceo-slider-label">
-                <span title="Drag to reorder">☰ ${p.name}</span>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
-                    <button onclick="removeCeoProduct(${index})" title="Remove Product" style="background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold; font-size: 20px; padding: 0; line-height: 1;">×</button>
+        #loginUI { display: none; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-body); z-index: 10000; }
+        .login-box { background: var(--bg-container); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px var(--shadow-color); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border-color); }
+        .login-box h2 { color: var(--text-heading); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        .login-box button { width: 100%; padding: 12px; font-size: 16px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .login-box button:hover { background: #0284c7; }
+
+        #appUI { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; }
+
+        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; gap: 15px; }
+        .title-block { flex: 1; min-width: max-content; }
+        .title-block h1 { font-size: 20px; margin: 0 0 2px 0; color: var(--text-heading); }
+        .title-block .subtitle { font-size: 12px; color: var(--text-muted); margin: 0; }
+        
+        .tabs { flex: 2; display: flex; justify-content: center; gap: 4px; align-items: flex-end; align-self: flex-end; flex-wrap: wrap; }
+        .tab-btn { padding: 8px 16px; background: transparent; color: var(--text-muted); font-size: 13px; border: none; cursor: pointer; font-weight: 800; letter-spacing: 0.3px; border-radius: 8px 8px 0 0; transition: all 0.2s; width: auto !important; white-space: nowrap; margin-bottom: -10px; border-bottom: 3px solid transparent;}
+        .tab-btn:hover { color: var(--text-heading); background: var(--tab-hover); }
+        .tab-btn.active { color: #0ea5e9; border-bottom: 3px solid #0ea5e9; background: var(--tab-active-bg); }
+        
+        .top-controls { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+        .top-action-btn { background: var(--bg-panel); border: 1px solid var(--border-input); color: var(--text-main); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: none; width: auto !important; }
+        .top-action-btn:hover { background: var(--border-color); transform: translateY(-1px); }
+        .logout-btn { color: #ef4444; border-color: #fca5a5; background: transparent; }
+        .logout-btn:hover { background: #fee2e2; border-color: #ef4444; }
+
+        .tab-content { display: none; animation: fadeIn 0.2s ease; flex-direction: column; flex-grow: 1; min-height: 0; }
+        .tab-content.active { display: flex; }
+        
+        button { color: white; border: none; padding: 10px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
+        button:disabled { background-color: var(--text-muted) !important; cursor: not-allowed; box-shadow: none; transform: none !important; }
+        button:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+        .btn-orange { background-color: #f97316; } .btn-blue { background-color: #3b82f6; } .btn-green { background-color: #10b981; } .btn-red { background-color: #ef4444; }
+        .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
+        .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
+
+        .control-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; align-items: stretch; flex-shrink: 0; }
+        .panel-card { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; transition: all 0.3s ease; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
+        .panel-card h3 { margin-top: 0; color: var(--text-heading); font-size: 14px; margin-bottom: 8px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; text-align: center; }
+        .master-card { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; }
+        .master-card h3 { color: white; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        input[type="file"] { display: block; width: 100%; padding: 6px; background: var(--bg-input); border: 2px dashed var(--border-input); color: var(--text-main); border-radius: 6px; cursor: pointer; transition: all 0.3s; box-sizing: border-box; font-size: 12px; }
+        
+        .mod-status, .status-bar { font-size: 12px; font-weight: bold; padding: 6px; border-radius: 6px; text-align: center; margin-top: auto; }
+        .mod-working { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; display: block; }
+        .mod-success { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; display: block; }
+        .mod-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; display: block; }
+        .status-idle { background-color: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+        .manual-entry-bar { background: var(--bg-bar); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; flex-shrink: 0; }
+        .manual-entry-bar div { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 90px; }
+        .manual-entry-bar label { font-size: 11px; font-weight: bold; color: var(--text-muted); }
+        input, select { background: var(--bg-input); border: 1px solid var(--border-input); color: var(--text-main); padding: 8px; border-radius: 4px; font-size: 13px; box-sizing: border-box; width: 100%; }
+
+        .editable { transition: background 0.2s; border: 1px solid transparent; }
+        .editable:hover { background-color: var(--bg-edit-hover); cursor: pointer; border-color: var(--border-edit-focus); }
+        .editable:focus { background-color: var(--bg-input); outline: none; border-color: var(--border-edit-focus); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
+        .edited-success { animation: flashGreen 1s ease; }
+        @keyframes flashGreen { 0% { background-color: #10b981; color: white; } 100% { background-color: transparent; color: inherit; } }
+        
+        .trunc-col { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+        .trunc-col:focus, .trunc-col:active { max-width: none !important; white-space: normal; overflow: visible; position: relative; z-index: 100; background: var(--bg-container); box-shadow: 0 4px 12px var(--shadow-color); border-radius: 4px; outline: none; }
+
+        .bom-layout { display: grid; grid-template-columns: 300px 1fr; gap: 15px; align-items: stretch; flex-grow: 1; min-height: 0; }
+        .bom-sidebar { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
+        .bom-sidebar h3 { margin-top: 0; margin-bottom: 10px; color: var(--text-heading); flex-shrink: 0; font-size: 16px; }
+        .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; }
+        .product-list li { padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-input); margin-bottom: 4px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; transition: all 0.2s; color: var(--text-main); font-size: 13px; }
+        .product-list li:hover { border-color: #3b82f6; }
+        .product-list li.selected { background: #3b82f6 !important; color: white !important; border-color: #2563eb; }
+        
+        .bom-main { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px var(--shadow-color); display: flex; flex-direction: column; min-height: 0; }
+        .bom-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; flex-shrink: 0; }
+        .bom-header h2 { margin: 0; font-size: 20px; color: var(--text-heading); }
+        .bom-header .total-badge { background: #10b981; color: white; padding: 6px 12px; border-radius: 20px; font-size: 16px; font-weight: bold; }
+        
+        .add-part-bar { display: flex; align-items: center; gap: 10px; background: var(--bg-bar); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; flex-shrink: 0; flex-wrap: nowrap; overflow-x: auto;}
+        .add-part-bar select { flex-grow: 1; min-width: 250px; padding: 8px; border-radius: 4px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); margin:0;}
+        .add-part-bar input { width: 100px; padding: 8px; border-radius: 4px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); text-align: center; margin:0;}
+        .add-part-bar button { width: auto; white-space: nowrap; padding: 8px 15px; font-size: 13px; margin:0;}
+        optgroup { font-weight: bold; font-style: normal; color: var(--text-heading); background: var(--bg-input); }
+        
+        .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
+        table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
+        th { background-color: var(--bg-th); color: var(--text-th); padding: 8px 6px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: grab; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s, box-shadow 0.2s; }
+        th:hover { opacity: 0.9; }
+        td { padding: 6px 8px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        th.sorted-asc { color: #0ea5e9; box-shadow: inset 0 -4px 0 #0ea5e9; }
+        th.sorted-desc { color: #eab308; box-shadow: inset 0 -4px 0 #eab308; }
+        
+        .text-right { text-align: right; }
+        .highlight-calc { background-color: var(--bg-highlight); color: var(--text-highlight); font-weight: bold; }
+        .negative-stock { color: #ef4444; font-weight: bold; background-color: var(--bg-negative); }
+        .low-stock { color: #f97316; font-weight: bold; background-color: #fff7ed; } 
+
+        .resizer { position: absolute; right: 0; top: 0; width: 5px; height: 100%; cursor: col-resize; user-select: none; transition: background 0.2s; z-index: 15; }
+        .resizer:hover { background-color: #0ea5e9; }
+        .dragging { opacity: 0.4; background-color: #3b82f6 !important; }
+
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .st-queued { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+        .st-picking { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
+        .st-production { background: #fefce8; color: #f59e0b; border: 1px solid #fde047; }
+        .st-completed { background: #f0fdf4; color: #10b981; border: 1px solid #bbf7d0; }
+        
+        .analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; flex-shrink: 0; }
+        .kpi-card { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 4px 6px var(--shadow-color); position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+        .kpi-raw::before { background: #8b5cf6; } .kpi-built::before { background: #f59e0b; } .kpi-rev::before { background: #10b981; } .kpi-profit::before { background: #0ea5e9; }
+        .kpi-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .kpi-value { font-size: 28px; font-weight: 800; color: var(--text-heading); margin: 0; }
+        .margin-badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 10px; vertical-align: middle; }
+        .margin-good { background: #d1fae5; color: #047857; } .margin-ok { background: #fef3c7; color: #b45309; } .margin-bad { background: #fee2e2; color: #b91c1c; }
+
+        .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 15px; transition: background 0.2s; line-height: 1.6; }
+        .checklist-item:hover { background: var(--bg-panel); }
+        .checklist-item input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+        .checklist-item.done .chk-text { text-decoration: line-through; opacity: 0.5; transition: 0.3s; }
+        
+        .pipeline-bar { display: flex; gap: 10px; padding: 10px; background: var(--bg-panel); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; flex-shrink: 0;}
+        .pipe-step { flex: 1; text-align: center; padding: 8px; border-radius: 6px; background: var(--bg-input); border: 2px solid var(--border-color); font-weight: bold; color: var(--text-muted); opacity: 0.6; cursor: pointer; transition: 0.2s; font-size:13px;}
+        .pipe-step.active { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; opacity: 1; box-shadow: 0 4px 10px rgba(14,165,233,0.15); }
+        .pipe-step:hover:not(.active) { opacity: 0.8; }
+        
+        .wo-section { display: none; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; animation: fadeIn 0.3s ease; }
+        .wo-section.active { display: block; }
+        
+        .print-btn { background: transparent; color: #64748b; border: 1px solid #cbd5e1; width: auto; padding: 4px 10px; font-size: 12px; margin-left: auto; cursor: pointer; border-radius: 4px;}
+        .print-btn:hover { background: #f8fafc; color: #334155; }
+
+        /* KITTING TRAY STYLES */
+        .kitting-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; align-items: start; }
+        .kitting-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px var(--shadow-color); }
+        .kitting-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 14px; color: var(--text-heading); border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
+        
+        /* Dynamic Theme Colors for Kitting Cards */
+        .route-card-pull { background: var(--kitting-pull-bg); border-color: var(--kitting-pull-border); }
+        .route-card-pull h4, .route-card-pull .chk-text { color: var(--kitting-pull-text) !important; }
+        .route-card-build { background: var(--kitting-build-bg); border-color: var(--kitting-build-border); }
+        
+        .route-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+        .route-row:last-child { border-bottom: none; }
+        .route-inputs { display: flex; gap: 10px; align-items: center; }
+        .route-inputs input { width: 60px; padding: 4px; text-align: center; border: 1px solid var(--border-input); border-radius: 4px; background: var(--bg-input); color: var(--text-main); }
+        .route-label { font-size: 11px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
+
+        .sop-step-row { display: flex; gap: 15px; margin-bottom: 15px; background: var(--bg-panel); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); align-items: stretch; box-shadow: 0 2px 4px var(--shadow-color); }
+        .sop-step-movers { display: flex; flex-direction: column; justify-content: center; gap: 8px; flex-shrink: 0; }
+        .sop-text-container { flex: 3; display: flex; flex-direction: column; min-width: 300px; }
+        .sop-text-rich { flex: 1; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; padding: 12px; font-family: inherit; font-size: 15px; min-height: 120px; overflow-y: auto; outline: none; line-height: 1.5; color: var(--text-main); }
+        .sop-text-rich:focus { border-color: #0ea5e9; box-shadow: inset 0 0 0 1px #0ea5e9; }
+        .sop-text-rich ul, .sop-text-rich ol { margin: 5px 0; padding-left: 25px; }
+        
+        .sop-controls-container { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-bar); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .rt-toolbar { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; justify-content: flex-start; border-bottom: 1px solid var(--border-input); padding-bottom: 6px;}
+        .rt-btn { background: var(--bg-input); border: 1px solid var(--border-input); color: var(--text-main); cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 13px; width: auto!important; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-family:serif; font-weight:bold; transition: 0.2s;}
+        .rt-btn:hover { background: #e0f2fe; border-color: #0ea5e9; color: #0369a1; transform: none;}
+        .rt-btn:active { background: #bae6fd; }
+        .media-row { display: flex; gap: 5px; align-items: center; }
+        .media-row select { width: 35%; padding: 6px; font-size: 11px; border-radius: 4px; }
+        .media-row input { width: 65%; padding: 6px; font-size: 11px; border-radius: 4px; }
+
+        #mediaModal, #bulkAddModal, #sopMasterModal, #newWOModal, #backupModal, #aliasModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px); }
+        .massive-container { width:98vw; height:98vh; max-width:2000px; border-radius:8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display:flex; flex-direction:column; background:var(--bg-container); border:1px solid var(--border-color); padding: 20px;}
+
+        .terminal-wrapper { position: relative; z-index: 10000; }
+        #termHeader { background: #10b981; padding: 8px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: white; font-size: 12px; transition: all 0.3s ease; border-radius: 5px; width: 220px;}
+        #termHeader.sys-error { background-color: #ef4444 !important; animation: pulseRed 2s infinite; }
+        #termHeader.sys-good { background-color: #10b981 !important; }
+        @keyframes pulseRed { 0% { background-color: #ef4444; } 50% { background-color: #991b1b; } 100% { background-color: #ef4444; } }
+        #debugLog { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 350px; max-height: 250px; overflow-y: auto; padding: 10px; font-size: 11px; line-height: 1.4; background: #0f172a; color: #10b981; border: 1px solid #334155; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #sysProgress { width: 100%; height: 3px; border: none; background-color: transparent; display: block; border-radius: 0 0 6px 6px; position:absolute; bottom:0; left:0; }
+        #sysProgress::-webkit-progress-bar { background-color: transparent; }
+        #sysProgress.prog-working::-webkit-progress-value { background-color: #3b82f6; transition: width 0.3s; }
+        #sysProgress.prog-success::-webkit-progress-value { background-color: rgba(255,255,255,0.5); transition: width 0.3s; }
+        #sysProgress.prog-error::-webkit-progress-value { background-color: #ffffff; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+
+<div id="loginUI">
+    <div class="login-box">
+        <h2>🔒 Neogleamz Secure Login</h2>
+        <input type="email" id="loginEmail" placeholder="Enterprise Email">
+        <input type="password" id="loginPass" placeholder="Master Password" onkeydown="if(event.key === 'Enter') handleLogin()">
+        <button onclick="handleLogin()" id="loginBtn">Authenticate to Command Center</button>
+        <p id="loginError" style="color:#ef4444; font-size:13px; margin-top:15px; display:none;"></p>
+    </div>
+</div>
+
+<div id="appUI" class="container">
+    <div class="header-area">
+        <div class="title-block">
+            <h1>Neogleamz Command Center</h1>
+            <p class="subtitle">Cloud-Native Ledger, Full Editing, MRP Inventory & Product Builder</p>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('pipeline')">📦 Master Ledger</button>
+            <button class="tab-btn" onclick="switchTab('simple')">📋 Simple Inventory</button>
+            <button class="tab-btn" onclick="switchTab('bom')">🛠️ Product Builder</button>
+            <button class="tab-btn" onclick="switchTab('inventory')">📊 Inventory</button>
+            <button class="tab-btn" onclick="switchTab('production')">🏭 Production</button>
+            <button class="tab-btn" onclick="switchTab('sales')">🛒 Sales Sync</button>
+            <button class="tab-btn" onclick="switchTab('analytics')">📈 Analytics</button>
+			<button class="tab-btn" onclick="switchTab('ceo')">📈 CEO Terminal</button>
+        </div>
+        <div class="top-controls">
+            <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <button class="top-action-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+            <div class="terminal-wrapper">
+                <div id="termHeader" class="sys-good" onclick="toggleTerminal()">
+                    <span id="termStatusIcon" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right:10px;">🟢 System Ready</span>
+                    <span id="termToggle">▼</span>
+                    <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
+                </div>
+                <div id="debugLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pipeline-tab" class="tab-content active">
+        <div class="control-panel">
+            <div class="panel-card">
+                <h3>1. Sync Orders</h3>
+                <input type="file" id="orderFiles" multiple accept=".html">
+                <div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div>
+            </div>
+            <div class="panel-card">
+                <h3>2. Sync Parcels</h3>
+                <input type="file" id="parcelFiles" multiple accept=".html">
+                <div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div>
+            </div>
+            <div class="panel-card master-card">
+                <h3>3. Master Engine</h3>
+                <div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div>
+                <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button>
+            </div>
+            <div class="panel-card" style="grid-column: span 2;">
+                <h3>💾 Database Backup & Restore</h3>
+                <p style="font-size:11px; margin-top:0; margin-bottom: 8px; text-align:center; color:var(--text-muted);">Granular cloud export & import</p>
+                <button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Launch Backup Manager</button>
+            </div>
+        </div>
+
+        <div class="manual-entry-bar">
+            <div><label>Item Name</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
+            <div><label>Neogleamz Name</label><input id="m_neo_name" type="text" placeholder="Internal Name"></div>
+            <div><label>Specification</label><input id="m_spec" type="text" placeholder="e.g., 22AWG"></div>
+            <div><label>Neo Product Tag</label><input id="m_neo_prod" type="text" placeholder="e.g., Soulz"></div>
+            <div style="flex: 0.5;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
+            <div style="flex: 0.5;"><label>Lot Multiplier</label><input id="m_mult" type="number" step="any" min="1" value="1" title="How many items are in 1 purchased unit?"></div>
+            <div style="flex: 0.5;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
+            <button class="btn-green" style="padding: 8px 20px; width: auto; font-size:14px;" onclick="addManualItem()">+ Add Row</button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
+            <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Database Ledger <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(Click ANY cell to edit)</span></h3>
+        </div>
+        <div class="table-wrap" id="results"></div>
+    </div>
+
+    <div id="simple-tab" class="tab-content">
+        <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;">
+            <h3 style="margin: 0; font-size: 13px; color: var(--text-muted); border: none; padding: 0; white-space:nowrap;">Toggles (Green = Show):</h3>
+            <div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
+            <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Editable Filtered View</h3>
+            <button class="btn-blue" onclick="autofillNeoNames()" style="width: auto; padding: 6px 12px; font-size: 12px;">✨ Auto-Fill Missing Names</button>
+        </div>
+        <div class="table-wrap" id="simpleResults"></div>
+    </div>
+
+    <div id="bom-tab" class="tab-content">
+        <div class="bom-layout">
+            <div class="bom-sidebar">
+                <h3>Your Products</h3>
+                <ul class="product-list" id="productListUI"></ul>
+                <button class="btn-blue" onclick="createNewProduct()" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
+                <button class="btn-red" onclick="nukeAllRecipes()" style="font-size: 12px; padding: 8px; flex-shrink:0;">⚠️ Nuke All (Reset)</button>
+            </div>
+            <div class="bom-main" id="bomMainArea" style="display:none;">
+                <div class="bom-header" style="flex-wrap: wrap;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <h2 id="bomTitle" style="margin:0; font-size:20px; color:var(--text-heading);">Product Name</h2>
+                        <button class="icon-btn" onclick="renameCurrentProduct()" title="Rename Product" style="width:28px!important; height:28px; font-size:14px; border-color:var(--border-input);">✏️</button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; justify-content:flex-end;">
+                        <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
+                            <label style="font-size:11px; font-weight:bold; color:#f59e0b; cursor:pointer;" for="isSubassemblyInput">⚙️ Sub-Assembly</label>
+                            <input type="checkbox" id="isSubassemblyInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Labor Time (Mins)</label>
+                            <input type="number" id="laborTimeInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Shop Rate ($/Hr)</label>
+                            <input type="number" id="laborRateInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <label style="font-size:11px; font-weight:bold; color:#0ea5e9;">MSRP ($)</label>
+                            <input type="number" id="msrpInput" style="width:80px; padding:4px; border-color:#0ea5e9;" min="0" step="any" onchange="updateLaborCosts()">
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Wholesale ($)</label>
+                            <input type="number" id="wholesaleInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                        </div>
+                        <div class="total-badge" id="bomTotalCost">$0.00</div>
+                    </div>
+                </div>
+                <div class="add-part-bar" style="margin-top: 15px;">
+                    <select id="partSelector"></select>
+                    <input id="partQty" type="number" step="any" min="0.0001" value="1">
+                    <button class="btn-green" onclick="addPartToProduct()">Add Part</button>
+                    <button class="btn-blue" onclick="openBulkAddModal()">📑 Bulk Add</button>
+                </div>
+                <div class="table-wrap" id="bomTableWrap"></div>
+                <div style="margin-top: 15px; text-align: right; flex-shrink:0;">
+                    <button class="btn-red" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="deleteCurrentProduct()">Delete Recipe</button>
                 </div>
             </div>
-            <div style="display:flex; margin-bottom: 8px;">
-                <span style="${toggleStyle(p.applyCac)}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
-                <span style="${toggleStyle(p.applyAff)}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
-                <span style="${toggleStyle(p.applyWarr)}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
+        </div>
+    </div>
+
+    <div id="inventory-tab" class="tab-content">
+        <div class="add-part-bar" style="justify-content: space-between;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-weight:bold; font-size:14px; color:var(--text-heading);">⚡ Quick Build:</span>
+                <select id="batchProductSelect" style="min-width: 200px; padding: 6px;"></select>
+                <input type="number" id="batchQty" placeholder="Qty" value="1" min="1" step="any" style="width:80px; padding: 6px;">
+                <button class="btn-green" onclick="runProductionBatch()" style="padding: 6px 15px;">⚙️ Force Build & Deduct</button>
             </div>
-            <input type="range" id="ceo-vol-${index}" min="0" max="2000" step="1" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}-num').value=this.value; updateCeoEngine();">
-        </div>`;
-    });
-    
-    document.getElementById('ceo-dynamic-sliders').innerHTML = slidersHtml;
-    if(!ceoExpenseChart) initCeoCharts();
-    updateCeoEngine();
-}
-
-function toggleCeoBtn(idx, key) {
-    ceoActiveProducts[idx][key] = !ceoActiveProducts[idx][key];
-    renderCeoTerminal();
-}
-
-function updateCeoEngine() {
-    try {
-        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00; 
-        let gCac = parseFloat(document.getElementById('globalCacNum').value) || 0;
-        let gAff = parseFloat(document.getElementById('globalAffNum').value) || 0;
-        let gWarr = parseFloat(document.getElementById('globalWarrNum').value) || 0;
+            <div style="display:flex; gap:10px;">
+                <button class="btn-orange" onclick="printReorderReport()" style="font-size:13px; padding:6px 15px; font-weight:bold;">🚨 Run Reorder Report</button>
+                <button class="btn-red" onclick="resetInventoryConsumption()" style="font-size:12px; padding:6px 10px;">⚠️ Reset DB</button>
+            </div>
+        </div>
         
-        let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, curStripe:0, aff:0, curAff:0, warr:0, curWarr:0, ship:0, cac:0 };
-        let charts = { labels:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
-
-        let tableRows = [];
-        ceoActiveProducts.forEach((p, index) => {
-            p.vol = parseInt(document.getElementById(`ceo-vol-${index}-num`)?.value) || 0;
-            p.testMsrp = parseFloat(document.getElementById(`ceo-testmsrp-${index}`)?.value) || p.testMsrp;
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; flex-grow: 1; min-height: 0; align-items: stretch;">
+            <div class="bom-main" style="padding: 10px; border-color: #0ea5e9; border-width: 2px;">
+                <div class="bom-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 5px;">
+                    <h3 style="margin:0; font-size:15px; color:#0ea5e9;">📦 Retail Finished Goods</h3>
+                </div>
+                <div class="table-wrap" id="fgiTableWrap"></div>
+            </div>
             
-            let effCac = p.applyCac ? gCac : 0; 
-            let effAff = p.applyAff ? gAff : 0;
-            let effWarr = p.applyWarr ? gWarr : 0;
+            <div class="bom-main" style="padding: 10px;">
+                <div class="bom-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 5px;">
+                    <h3 style="margin:0; font-size:15px; color:var(--text-muted);">🔩 Raw Components Ledger</h3>
+                </div>
+                <div class="table-wrap" id="invTableWrap"></div>
+            </div>
+        </div>
+    </div>
 
-            let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
+    <div id="production-tab" class="tab-content">
+        <div class="bom-layout">
+            <div class="bom-sidebar">
+                <h3>🏭 Work Orders</h3>
+                <button class="btn-blue" onclick="openNewWOModal()" style="margin-bottom:15px; padding:10px;">+ New Production Batch</button>
+                <ul class="product-list" id="woListUI"></ul>
+                <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
+                <h3>📝 SOP Editor</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Create rich-text instructions and link attachments.</p>
+                <button class="btn-blue" onclick="openSOPMasterModal()">📝 Open Master SOP Editor</button>
+            </div>
+            <div class="bom-main" id="woMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
+                <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                        <h2 id="woTitle" style="margin:0; font-size:22px; color:var(--text-heading);">WO-1234: Product Name</h2>
+                        <span id="woBadge" class="status-badge st-queued">Queued</span>
+                    </div>
+                    <div style="font-size:14px; color:var(--text-muted);">Target Quantity: <strong id="woQtyTarget" style="color:var(--text-main);">0</strong> units</div>
+                </div>
 
-            // Math: Current (Customer ALWAYS pays shipping)
-            let curOOP = p.currentMsrp + SHIP_COST;
-            let curStripe = getEngineStripeFee(curOOP);
-            let curAffAmt = p.currentMsrp * (effAff / 100);
-            let curWarrAmt = p.currentMsrp * (effWarr / 100);
-            let curNet = curOOP - p.cogs - curStripe - SHIP_COST - curAffAmt - curWarrAmt - effCac;
+                <div class="pipeline-bar" id="woPipeline">
+                    <div class="pipe-step" id="pipe-Queued" onclick="advanceWO('Queued')">1. Queued</div>
+                    <div class="pipe-step" id="pipe-Picking" onclick="advanceWO('Picking')">2. Picking Parts</div>
+                    <div class="pipe-step" id="pipe-Production" onclick="advanceWO('In Production')">3. In Production</div>
+                    <div class="pipe-step" id="pipe-Completed" onclick="advanceWO('Completed')">4. Completed</div>
+                </div>
 
-            // Math: Test (Free Shipping Threshold)
-            let appliesTestFs = p.testMsrp >= fsThreshold;
-            let testOOP = appliesTestFs ? p.testMsrp : (p.testMsrp + SHIP_COST);
-            let testStripe = getEngineStripeFee(testOOP);
-            let testAffAmt = p.testMsrp * (effAff / 100);
-            let testWarrAmt = p.testMsrp * (effWarr / 100);
-            let testNet = testOOP - p.cogs - testStripe - SHIP_COST - testAffAmt - testWarrAmt - effCac;
+                <div id="sect-Queued" class="wo-section">
+                    <h3 style="margin-top:0; color:var(--text-heading);">Work Order Created</h3>
+                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch is queued and waiting for an operator. Once you are ready to pull parts from the physical inventory shelves, begin the picking process.</p>
+                    <button class="btn-blue" style="width:auto; padding:12px 25px; margin-top:10px;" onclick="advanceWO('Picking')">📋 Start Picking Parts</button>
+                </div>
 
-            totals.gross += (p.testMsrp * p.vol); totals.curNet += (curNet * p.vol); totals.testNet += (testNet * p.vol);
-            totals.cogs += (p.cogs * p.vol); totals.stripe += (testStripe * p.vol); totals.curStripe += (curStripe * p.vol);
-            totals.aff += (testAffAmt * p.vol); totals.curAff += (curAffAmt * p.vol);
-            totals.warr += (testWarrAmt * p.vol); totals.curWarr += (curWarrAmt * p.vol);
-            totals.ship += (SHIP_COST * p.vol); totals.cac += (effCac * p.vol);
+                <div id="sect-Picking" class="wo-section">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                        <h3 style="margin:0; color:var(--text-heading);">🛒 Active Pick List</h3>
+                        <button class="print-btn" onclick="printPickList()">🖨️ Print List</button>
+                    </div>
+                    <div id="woPickList" style="margin-bottom:20px;"></div>
+                    <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('In Production')">✅ All Parts Picked -> Move to Production</button>
+                </div>
 
-            charts.labels.push(p.name);
-            charts.curNetData.push(curNet); 
-            charts.testNetData.push(testNet);
+                <div id="sect-Production" class="wo-section">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                        <h3 style="margin:0; color:var(--text-heading);">🛠️ Build Instructions (SOP)</h3>
+                        <div style="display:flex; gap: 10px;">
+                            <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color);">🔒</button>
+                            <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
+                        </div>
+                    </div>
+                    <div id="inlineSOPContainer" style="display:flex; flex-direction:column; position:relative;">
+                        <div id="woSOPList" style="margin-bottom:20px;"></div>
+                        <div id="inlineSaveContainer" style="text-align:right; margin-top:10px; border-top:1px solid var(--border-color); padding-top:15px; display:none; position:sticky; bottom:0; background:var(--bg-container); z-index:100; padding-bottom:15px;">
+                            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveInlineSOP()">💾 Save Changes to Cloud</button>
+                        </div>
+                    </div>
+                    <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px; margin-top:30px;">
+                        <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
+                        <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly deduct all picked raw materials and log the finished goods to your inventory ledger.</p>
+                        <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Process Inventory</button>
+                    </div>
+                </div>
+
+                <div id="sect-Completed" class="wo-section">
+                    <h3 style="margin-top:0; color:#10b981;">✅ Production Complete</h3>
+                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch has been finalized. All raw materials have been deducted and the finished goods have been recorded in the ledger.</p>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
+                    <button class="btn-red" style="width: auto; padding: 8px 15px; font-size: 13px;" onclick="deleteCurrentWO()">🗑️ Archive / Delete Work Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sales-tab" class="tab-content">
+        <div class="control-panel" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="panel-card master-card" style="grid-column: span 2;">
+                <h3>🛒 Upload Sales CSV</h3>
+                <p style="font-size:11px; margin-top:0; margin-bottom:8px; text-align:center; color:white;">Shopify, Etsy, etc. (.csv format)</p>
+                <input type="file" id="salesCsvFile" accept=".csv" style="margin-bottom:10px; color:black; background:white;">
+                <button class="btn-green" onclick="processSalesCSV()">Sync Sales & Deduct Inventory</button>
+            </div>
+            <div class="panel-card" style="grid-column: span 2; justify-content:flex-start;">
+                <h3 style="color:#ef4444; margin-top:0; margin-bottom:10px;">⚠️ Action Required: Unmapped SKUs</h3>
+                <div id="unmappedSkusList" style="max-height:90px; overflow-y:auto; font-size:12px; color:var(--text-muted); display:flex; flex-direction:column; gap:5px;">
+                    All storefront SKUs are currently mapped and recognized.
+                </div>
+            </div>
+        </div>
+
+        <div class="manual-entry-bar" style="border-color: #10b981; border-width: 2px;">
+            <div style="flex: 1; min-width: 90px;"><label>Order ID</label><input id="manualSaleId" type="text" placeholder="#1001"></div>
+            <div style="flex: 1; min-width: 100px;"><label>Sale Date</label><input id="manualSaleDate" type="date"></div>
+            <div style="flex: 1.5; min-width: 120px;"><label>Recipe Sold</label><select id="manualSaleRecipe"></select></div>
+            <div style="flex: 0.5; min-width: 60px;"><label>Qty</label><input id="manualSaleQty" type="number" step="any" min="1" value="1"></div>
+            <div style="flex: 0.5; min-width: 70px;"><label>Price ($)</label><input id="manualSalePrice" type="number" step="any" placeholder="0.00"></div>
+            <div style="flex: 0.5; min-width: 70px;"><label>Subtot ($)</label><input id="manualSaleSubtot" type="number" step="any" placeholder="0.00" title="Leave blank to auto-calculate"></div>
+            <div style="flex: 0.5; min-width: 60px;"><label>Ship ($)</label><input id="manualSaleShip" type="number" step="any" placeholder="0.00"></div>
+            <div style="flex: 0.5; min-width: 60px;"><label>Tax ($)</label><input id="manualSaleTax" type="number" step="any" placeholder="0.00"></div>
+            <div style="flex: 0.5; min-width: 70px;"><label>Disc Code</label><input id="manualSaleDiscCode" type="text" placeholder="CODE"></div>
+            <div style="flex: 0.5; min-width: 60px;"><label>Disc ($)</label><input id="manualSaleDisc" type="number" step="any" placeholder="0.00"></div>
+            <div style="flex: 0.5; min-width: 70px;"><label>Total ($)</label><input id="manualSaleTotal" type="number" step="any" placeholder="0.00" title="Leave blank to auto-calculate"></div>
+            <button class="btn-green" style="padding: 8px 15px; width: auto; font-size:13px;" onclick="addManualSale()">+ Add Entry</button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
+            <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Recent Sales Ledger <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(Click ANY cell to edit)</span></h3>
+        </div>
+        <div class="table-wrap" id="salesTableWrap"></div>
+    </div>
+
+    <div id="analytics-tab" class="tab-content">
+        <div class="analytics-grid">
+            <div class="kpi-card kpi-raw">
+                <div class="kpi-title">Raw Material Value</div>
+                <div class="kpi-value" id="kpiRawInv">$0.00</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">Sunk capital in unbuilt components</div>
+            </div>
+            <div class="kpi-card kpi-built">
+                <div class="kpi-title">Built Goods Value</div>
+                <div class="kpi-value" id="kpiBuiltInv">$0.00</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">Finished products & sub-assemblies</div>
+            </div>
+            <div class="kpi-card kpi-rev">
+                <div class="kpi-title">All-Time Revenue</div>
+                <div class="kpi-value" id="kpiTotalRev">$0.00</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">Total gross retail sales</div>
+            </div>
+            <div class="kpi-card kpi-profit">
+                <div class="kpi-title">All-Time Gross Profit</div>
+                <div class="kpi-value" id="kpiTotalProfit">$0.00</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">Revenue minus True COGS</div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
+            <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Product Profitability Matrix</h3>
+        </div>
+        <div class="table-wrap" id="analyticsTableWrap"></div>
+    </div>
+</div>
+
+<div id="bulkAddModal">
+    <div class="massive-container">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:20px;">📦 Bulk Add to: <span id="bulkAddTitle" style="color:#0ea5e9;"></span></h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('bulkAddModal').style.display='none'">Close</button>
+        </div>
+        <input type="text" id="bulkSearch" placeholder="🔍 Search components..." onkeyup="filterBulkList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
+        <div class="table-wrap" id="bulkAddTableWrap"></div>
+        <div style="margin-top:15px; text-align:right; flex-shrink:0;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveBulkAdd()">➕ Save Additions to Product</button>
+        </div>
+    </div>
+</div>
+
+<div id="newWOModal" style="z-index:10001;">
+    <div class="container" style="width:100%; max-width:650px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px;">
+        <h2 style="margin-top:0;">🏭 Start Production Batch</h2>
+        <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+            <select id="newWOProduct" style="flex:1; padding:10px; font-size:15px;" onchange="checkWORouting()"></select>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <label style="font-weight:bold; font-size:14px;">Target Qty:</label>
+                <input type="number" id="newWOQty" value="1" min="1" step="any" style="padding:10px; width:90px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;" oninput="checkWORouting()">
+            </div>
+        </div>
+        
+        <div id="woRoutingArea" style="display:none; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:15px; margin-bottom:20px;">
+            <h3 style="margin-top:0; font-size:15px; color:var(--text-heading); border-bottom:2px solid var(--border-color); padding-bottom:5px;">🔀 Sub-Assembly Routing</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:0; margin-bottom:15px;">Allocate how many required sub-assemblies to pull from the shelf versus build from scratch.</p>
+            <div id="woRoutingList" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+
+        <div id="woErrorBox" style="display:none; background:#fee2e2; border:1px solid #fecaca; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px;">
+            <h3 style="margin-top:0; margin-bottom:10px;">🛑 Insufficient Inventory</h3>
+            <ul id="woShortfallList" style="font-size:12px; margin-bottom:0; padding-left:20px;"></ul>
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
+            <button class="btn-red" style="width:auto;" onclick="document.getElementById('newWOModal').style.display='none'">Cancel</button>
+            <button class="btn-green" style="width:auto;" onclick="validateAndCreateWO()">Verify Inventory & Create</button>
+        </div>
+    </div>
+</div>
+
+<div id="sopMasterModal">
+    <div class="massive-container">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:22px;">📝 Master SOP Editor</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('sopMasterModal').style.display='none'">Close</button>
+        </div>
+        <div style="margin-bottom:15px; flex-shrink:0; display:flex; gap:10px; align-items:center;">
+            <label style="font-weight:bold;">Select Product:</label>
+            <select id="sopMasterProductSelect" onchange="renderMasterSOP()" style="width:300px; padding:8px; font-size:15px;"></select>
+        </div>
+        <div id="sopMasterEditorArea" style="flex-grow:1; overflow-y:auto; padding-right:10px; display:flex; flex-direction:column; gap:10px;"></div>
+        <div style="margin-top:15px; flex-shrink:0; text-align:right;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveMasterSOP()">💾 Save SOP to Cloud</button>
+        </div>
+    </div>
+</div>
+
+<div id="mediaModal" style="z-index:10006;">
+    <div id="mediaContainer" style="width:98vw; height:98vh; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center;"></div>
+    <div style="position:absolute; top:20px; right:30px; color:white; font-size:45px; font-weight:bold; cursor:pointer;" onclick="closeMediaModal()">×</div>
+</div>
+
+<div id="backupModal">
+    <div class="massive-container" style="max-width: 900px; height: auto;">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:20px;">💾 Backup & Restore Manager</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="closeBackupModal()">Close</button>
+        </div>
+        <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap:wrap;">
+            <div style="flex: 1; min-width:300px; background: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <h3 style="margin-top:0; color: var(--text-heading);">⬇️ Export to Excel</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Generates a complete snapshot of your Master Ledger, Recipes, Inventory, Work Orders, and SOPs.</p>
+                <button class="btn-blue" style="padding: 12px 24px; font-size: 15px;" onclick="executeExport()">Download Full System Backup</button>
+            </div>
+            <div style="flex: 1; min-width:300px; background: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <h3 style="margin-top:0; color: var(--text-heading);">⬆️ Restore from Backup</h3>
+                <input type="file" id="importBackupFile" accept=".xlsx" onchange="handleFileSelect(this)">
+                <div id="restorePreview" style="margin-top: 15px; display: none;">
+                    <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">Select Sheets to Restore:</label>
+                    <div id="restoreCheckboxes" style="display:flex; flex-direction:column; gap:8px; margin-top:8px; margin-bottom: 15px;"></div>
+                    <button class="btn-red" id="executeRestoreBtn" onclick="executeRestore()">⚠️ Confirm & Overwrite Cloud</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="aliasModal" style="z-index:10002;">
+    <div class="container" style="width:100%; max-width:500px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px;">
+        <h2 style="margin-top:0;">🔗 Map Unknown SKU</h2>
+        <p style="font-size:13px; color:var(--text-muted);">The CSV contained a SKU the system doesn't recognize. Link it to an internal recipe so inventory can be deducted properly.</p>
+        <div style="margin-bottom:15px; padding:10px; background:var(--bg-bar); border-radius:6px; border:1px solid var(--border-color); font-family:monospace; font-weight:bold; color:var(--text-main);" id="aliasUnknownSku">UNKNOWN_SKU</div>
+        <select id="aliasRecipeSelect" style="margin-bottom:20px; padding:10px; font-size:15px;"></select>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
+            <button class="btn-red" style="width:auto;" onclick="document.getElementById('aliasModal').style.display='none'">Cancel Sync</button>
+            <button class="btn-green" style="width:auto;" onclick="saveAliasMapping()">Save Link & Resume</button>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    // --- 1. GLOBAL VARIABLES & SUPABASE ---
+    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
+    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
+    let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
+    let productsDB = {}; let laborDB = {}; let pricingDB = {}; let isSubassemblyDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
+    let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
+    let salesDB = []; let aliasDB = {};
+    let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
+    let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
+    let currentSalesSort = { column: 'd', direction: 'desc' }; let currentAnalyticsSort = { column: 'n', direction: 'asc' };
+    let bulkAddData = []; let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
+    let pendingSalesRows = []; 
+
+    const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Specification': 'specification', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Lot Multiplier': 'lot_multiplier', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code' };
+
+    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
+
+    // --- 2. THEME & SAFETY NET ---
+    window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; });
+    function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); }
+
+    function sysLog(msg, isError = false) { 
+        try { const b = document.getElementById('debugLog'); const h = document.getElementById('termHeader'); const i = document.getElementById('termStatusIcon'); if(!b) return; const t = new Date().toLocaleTimeString(); const c = isError ? '#ef4444' : '#10b981'; b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; b.scrollTop = b.scrollHeight; if(h && i) { h.className = isError ? 'sys-error' : 'sys-good'; i.innerText = (isError ? '🔴 ' : '🟢 ') + msg; } if(isError) { console.error(msg); } else { console.log(msg); } } catch(e) { console.error(e); } 
+    }
+    
+    window.onerror = function(msg, url, lineNo) { sysLog(`Code Error: ${msg} (Line: ${lineNo})`, true); return false; };
+    window.addEventListener('unhandledrejection', function(event) { sysLog(`Async Error: ${event.reason}`, true); });
+
+    function setSysProgress(val, state = 'working') { try { const b = document.getElementById('sysProgress'); if(b) { b.value = val; b.className = 'prog-' + state; } } catch(e) {} }
+    function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); const h = document.getElementById('termHeader'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▲'; } else { b.style.display = 'none'; t.innerText = '▼'; } if(h) { h.className = 'sys-good'; h.querySelector('#termStatusIcon').innerText = '🟢 System Active'; } } catch(e) {} }
+    function setMasterStatus(msg, type) { try { const e = document.getElementById('statusMaster'); if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } } catch(e) {} }
+
+    // --- 3. PREFS & AUTH ENGINES ---
+    async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; } } catch(e) { window.cloudTablePrefs = {}; } }
+    async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {} }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
+    function saveWOOrderPrefs() { try { window.cloudTablePrefs.woOrder = workOrdersDB.map(w => w.wo_id); saveCloudPrefs(); } catch(e) {} }
+
+    window.onload = async () => { try { const { data: { session } } = await supabaseClient.auth.getSession(); if (session) { document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; await launchApp(); } else { document.getElementById('loginUI').style.display = 'flex'; document.getElementById('appUI').style.display = 'none'; } } catch(e) { sysLog(e.message, true); } };
+
+    async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; if (p.ceoBoard && typeof ceoActiveProducts !== 'undefined') ceoActiveProducts = p.ceoBoard; } } catch(e) { window.cloudTablePrefs = {}; } }
+    async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {}, ceoBoard: typeof ceoActiveProducts !== 'undefined' ? ceoActiveProducts : [] }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
+
+    async function launchApp() { sysLog("Booting System..."); setMasterStatus("Fetching data...", "mod-working"); await loadCloudPrefs(); await loadData(); }
+
+    async function loadData() {
+        try {
+            setSysProgress(10, 'working');
+            const [lR, pR, cR, wR, sR, saleR, aliasR] = await Promise.all([ 
+                supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), 
+                supabaseClient.from('product_recipes').select('*'), 
+                supabaseClient.from('inventory_consumption').select('*'), 
+                supabaseClient.from('work_orders').select('*'), 
+                supabaseClient.from('production_sops').select('*'),
+                supabaseClient.from('sales_ledger').select('*').order('sale_date', { ascending: false }),
+                supabaseClient.from('storefront_aliases').select('*')
+            ]);
             
-            let b = testOOP || 1;
-            charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (SHIP_COST/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
+            if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); 
+            if (wR.error) throw new Error(wR.error.message); if (sR.error) throw new Error(sR.error.message);
+            if (saleR.error) throw new Error(saleR.error.message); if (aliasR.error) throw new Error(aliasR.error.message);
+            
+            setSysProgress(30, 'working');
+            if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
+            
+            setSysProgress(50, 'working'); inventoryDB = {}; 
+            if (cR.data) { 
+                cR.data.forEach(r => inventoryDB[r.item_key] = { 
+                    consumed_qty: parseFloat(r.consumed_qty) || 0, 
+                    manual_adjustment: parseFloat(r.manual_adjustment) || 0,
+                    produced_qty: parseFloat(r.produced_qty) || 0,
+                    sold_qty: parseFloat(r.sold_qty) || 0,
+                    min_stock: parseFloat(r.min_stock) || 0,
+                    scrap_qty: parseFloat(r.scrap_qty) || 0
+                }); 
+            }
 
-            let curB = curOOP || 1;
-            charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curAffAmt/curB)*100, (curWarrAmt/curB)*100, (SHIP_COST/curB)*100, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
+            setSysProgress(70, 'working'); 
+            if (pR.data) { 
+                productsDB = {}; laborDB = {}; pricingDB = {}; isSubassemblyDB = {};
+                pR.data.forEach(r => { 
+                    try { 
+                        // Attach the new columns directly to the components array object
+                        // so the Master Engine can find them!
+                        let comps = r.components || [];
+                        comps.msrp = parseFloat(r.msrp) || 0;
+                        comps.is_subassembly = !!r.is_subassembly;
+                        comps.affiliate_pct = parseFloat(r.affiliate_pct) || 0;
+                        comps.warranty_pct = parseFloat(r.warranty_pct) || 0;
+                        
+                        productsDB[r.product_name] = comps; 
+                        
+                        laborDB[r.product_name] = { time: parseFloat(r.labor_time_mins) || 0, rate: parseFloat(r.labor_rate_hr) || 0 }; 
+                        pricingDB[r.product_name] = { msrp: parseFloat(r.msrp) || 0, wholesale: parseFloat(r.wholesale_price) || 0 };
+                        isSubassemblyDB[r.product_name] = !!r.is_subassembly;
+                    } catch(e){} 
+                }); 
+            }
+            
+            workOrdersDB = wR.data || []; sopsDB = {}; 
+            if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = r.steps || []; } catch(e){} }); }
+            if(window.cloudTablePrefs.woOrder && window.cloudTablePrefs.woOrder.length > 0) { workOrdersDB.sort((a,b) => { let iA = window.cloudTablePrefs.woOrder.indexOf(a.wo_id); let iB = window.cloudTablePrefs.woOrder.indexOf(b.wo_id); if(iA===-1) iA=9999; if(iB===-1) iB=9999; return iA - iB; }); }
 
-            tableRows.push({
-                index: index, name: p.name, cogs: p.cogs, currentMsrp: p.currentMsrp, curShip: SHIP_COST, curStripe: curStripe, curOOP: curOOP, curNet: curNet, testMsrp: p.testMsrp, testShip: SHIP_COST, testStripe: testStripe, testOOP: testOOP, testNet: testNet
-            });
+            salesDB = saleR.data || [];
+            aliasDB = {};
+            if (aliasR.data) { aliasR.data.forEach(a => { aliasDB[a.storefront_sku] = a.internal_recipe_name; }); }
+
+            renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); renderSalesTable(); renderAnalyticsDashboard(); 
+            setSysProgress(100, 'success'); sysLog("System Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
+        } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
+    }
+
+    function switchTab(tabId) { 
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); 
+    	document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active')); 
+    	if (event && event.target) event.target.classList.add('active'); 
+    	document.getElementById(tabId + '-tab').classList.add('active'); sysLog(`Switched to ${tabId}.`); 
+    	if (tabId === 'pipeline') { renderLedgerView(false, 'results'); } 
+    	if (tabId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); } 
+    	if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); } 
+    	if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); } 
+    	if (tabId === 'production') { buildCatalogCache(); renderWOList(); } 
+    	if (tabId === 'sales') { renderSalesTable(); }
+    	if (tabId === 'analytics') { renderAnalyticsDashboard(); }
+    	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
+    }
+
+    function applyTableInteractivity(containerId) {
+        const container = document.getElementById(containerId); if(!container) return; const table = container.querySelector('table'); if(!table) return;
+        if(!window.cloudTablePrefs[containerId]) window.cloudTablePrefs[containerId] = { order: [], widths: {} }; let prefs = window.cloudTablePrefs[containerId];
+        let headerRow = table.querySelector('thead tr'); if(!headerRow) return; let headers = Array.from(headerRow.children);
+        if(prefs.order && prefs.order.length > 0) { let newHeaders = []; prefs.order.forEach(title => { let th = headers.find(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim() === title); if(th) newHeaders.push(th); }); headers.forEach(h => { if(!newHeaders.includes(h)) newHeaders.push(h); }); newHeaders.forEach(th => headerRow.appendChild(th)); let bodyRows = table.querySelectorAll('tbody tr'); bodyRows.forEach(tr => { let cells = Array.from(tr.children); newHeaders.forEach(th => { let originalIdx = headers.indexOf(th); if(cells[originalIdx]) tr.appendChild(cells[originalIdx]); }); }); headers = newHeaders; }
+        table.style.tableLayout = 'auto'; headers.forEach((th) => { let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim(); let trueWidth = Math.max(th.scrollWidth, th.offsetWidth) + 5; let w = prefs.widths[cleanTitle] || trueWidth + 'px'; th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w; }); table.style.tableLayout = 'fixed'; 
+        headers.forEach((th) => {
+            let cleanTitle = th.innerText.replace(/[\n▲▼✏️]/g,'').trim();
+            if(!th.querySelector('.resizer')){ let rs = document.createElement('div'); rs.className = 'resizer'; th.appendChild(rs); let x=0, sw=0; rs.addEventListener('mousedown', e => { e.stopPropagation(); isResizing = true; x = e.clientX; sw = th.offsetWidth; rs.style.background = '#0ea5e9'; const move = ev => { let nw = sw + (ev.clientX - x); if(nw < 30) nw = 30; let nwPx = nw + 'px'; th.style.width = nwPx; th.style.minWidth = nwPx; th.style.maxWidth = nwPx; }; const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); rs.style.background = 'transparent'; setTimeout(()=>isResizing=false, 100); prefs.widths[cleanTitle] = th.style.width; saveCloudPrefs(); }; document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); }); }
+            th.draggable = true; th.addEventListener('dragstart', e => { if(isResizing) { e.preventDefault(); return; } dragSrcTh = th; e.dataTransfer.effectAllowed = 'move'; th.classList.add('dragging'); }); th.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }); th.addEventListener('drop', e => { e.stopPropagation(); dragSrcTh.classList.remove('dragging'); if(dragSrcTh !== th && !isResizing) { let allThs = Array.from(headerRow.children); let srcIdx = allThs.indexOf(dragSrcTh); let tgtIdx = allThs.indexOf(th); if(srcIdx < tgtIdx) th.after(dragSrcTh); else th.before(dragSrcTh); prefs.order = Array.from(headerRow.children).map(h => h.innerText.replace(/[\n▲▼✏️]/g,'').trim()); table.querySelectorAll('tbody tr').forEach(tr => { let c = Array.from(tr.children); if(c[srcIdx] && c[tgtIdx]) { if(srcIdx < tgtIdx) c[tgtIdx].after(c[srcIdx]); else c[tgtIdx].before(c[srcIdx]); } }); saveCloudPrefs(); } }); th.addEventListener('dragend', () => { if(dragSrcTh) dragSrcTh.classList.remove('dragging'); });
         });
+    }
+	function renderColToggles() { if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return; c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => { let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981'; return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`; }).join(''); }
+    function renderActiveTable() { if(document.getElementById('pipeline-tab').classList.contains('active')) renderLedgerView(false, 'results'); else if(document.getElementById('simple-tab').classList.contains('active')) renderLedgerView(true, 'simpleResults'); }
+    function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderActiveTable(); renderColToggles(); }
+    function sortData(column, keepDirection = false) { if(isResizing) return; if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' }; finalResults.sort((a, b) => { let vA = a[column]; let vB = b[column]; if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; } let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase(); if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); }); renderActiveTable(); }
+    
+    function renderLedgerView(isSimple, containerId) {
+        if (finalResults.length === 0) return; let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
+        let h = "<table><thead><tr>" + keys.map(k => { let sCls = currentSort.column === k ? (currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''; return `<th class="${sCls}" onclick="sortData('${k.replace(/'/g, "\\'")}')">${k}</th>`; }).join('') + "</tr></thead><tbody>";
+        finalResults.forEach(r => { h += "<tr>" + keys.map(k => { let v = r[k]; let cls = "editable"; let dVal = v; let isN = typeof v === 'number'; if (isN) { cls += ' text-right'; if (k.includes('Cost') || k.includes('Price') || k.includes('Surcharge') || k.includes('Paid') || k.includes('Shipping Cost ($)')) { dVal = "$" + v.toFixed(4); if (k === 'Final Landed Cost ($)') cls += ' highlight-calc'; } else dVal = v.toFixed(2); } else if (v == null) dVal = ""; if (['Item Name', 'Specification', 'Alibaba Order', 'DI Item ID', 'Neogleamz Name', 'Neo Product'].includes(k)) cls += ' trunc-col'; return `<td tabindex="0" class="${cls}" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateDBCell(this, '${r._RowKey}', '${k.replace(/'/g, "\\'")}', ${isN})">${dVal}</td>`; }).join('') + "</tr>"; });
+        document.getElementById(containerId).innerHTML = h + "</tbody></table>"; applyTableInteractivity(containerId);
+    }
+    
+    function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
+    async function updateDBCell(cell, rowKey, uiCol, isN) { try { let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } } let dbCol = colMap[uiCol]; if(!dbCol) return; sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey); if (r && isN) { let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0; if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; } } let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000); if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); } setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; } }
+    async function addManualItem() { try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = ""; } else { payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_total = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); } }
+    async function autofillNeoNames() { if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); setSysProgress(20, 'working'); try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neo Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neo Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); } }
 
-        if(ceoSortKey) {
-            tableRows.sort((a,b) => {
-                let valA = a[ceoSortKey]; let valB = b[ceoSortKey];
-                if(typeof valA === 'string') return ceoSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                return ceoSortAsc ? valA - valB : valB - valA;
-            });
-        }
-
-        let tableHtml = '';
-        tableRows.forEach(r => {
-            tableHtml += `
-            <tr>
-                <td>${r.name}</td>
-                <td style="font-weight:700;">${ceoFmt.format(r.cogs)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.currentMsrp)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.curShip)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.curStripe)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.curOOP)}</td>
-                <td style="color:#ccc;">${ceoFmt.format(r.curNet)}</td>
-                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${r.index}" class="ceo-table-input" value="${r.testMsrp.toFixed(2)}" onchange="updateCeoEngine()"></td>
-                <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testShip)}</td>
-                <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testStripe)}</td>
-                <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(r.testOOP)}</td>
-                <td class="${r.testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(r.testNet)}</td>
-            </tr>`;
+    function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
+    function buildCatalogCache() { catalogCache = {}; finalResults.forEach(r => { let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim(); let k = nn ? `${nn}:::${np}:::(Grouped Raw Items):::(Mixed Specs)` : `:::${np}:::${inam}:::${sp}`; if (k === ":::::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: nn ? "(Grouped Raw Items)" : inam, spec: nn ? "(Mixed Specs)" : sp, totalCostSum: 0, totalQty: 0, _rn: new Set(), _rs: new Set() }; catalogCache[k]._rn.add(inam); if(sp) catalogCache[k]._rs.add(sp); let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces; }); Object.keys(catalogCache).forEach(k => { catalogCache[k].avgUnitCost = catalogCache[k].totalCostSum / (catalogCache[k].totalQty || 1); if(catalogCache[k]._rn && catalogCache[k]._rn.size === 1) catalogCache[k].itemName = Array.from(catalogCache[k]._rn)[0]; if(catalogCache[k]._rs) { if(catalogCache[k]._rs.size === 1) catalogCache[k].spec = Array.from(catalogCache[k]._rs)[0]; else if(catalogCache[k]._rs.size === 0) catalogCache[k].spec = ""; } }); }
+    
+    function calculateProductBreakdown(pName, visited = new Set()) {
+        if (visited.has(pName)) return { raw: 0, labor: 0, total: 0 };
+        visited.add(pName);
+        let rawCost = 0;
+        (productsDB[pName] || []).forEach(part => {
+            let k = String(part.item_key || part.di_item_id || part.name || "");
+            let q = parseFloat(part.quantity || part.qty) || 1;
+            if (k.startsWith('RECIPE:::')) {
+                let subBreakdown = calculateProductBreakdown(k.replace('RECIPE:::', ''), new Set(visited));
+                rawCost += (subBreakdown.total * q); 
+            } else if (catalogCache[k]) {
+                rawCost += (catalogCache[k].avgUnitCost * q);
+            }
         });
-
-        document.getElementById('ceo-dynamic-table').innerHTML = tableHtml || '<tr><td colspan="10" style="text-align:center;">No products active.</td></tr>';
-        
-        // Update KPIs
-        document.getElementById('kpiGross').innerText = ceoFmt.format(totals.gross).split('.')[0];
-        document.getElementById('kpiOldNet').innerText = ceoFmt.format(totals.curNet).split('.')[0];
-        document.getElementById('kpiNewNet').innerText = ceoFmt.format(totals.testNet).split('.')[0];
-        document.getElementById('kpiSaved').innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
-        
-        // Update Charts
-        ceoExpenseChart.data.datasets[0].data = [totals.cogs, totals.cac, totals.curAff, totals.curWarr, totals.ship, totals.curStripe, Math.max(0, totals.curNet)];
-        ceoExpenseChart.data.datasets[1].data = [totals.cogs, totals.cac, totals.aff, totals.warr, totals.ship, totals.stripe, Math.max(0, totals.testNet)];
-        ceoExpenseChart.update();
-
-        ceoUnitChart.data.labels = charts.labels; 
-        ceoUnitChart.data.datasets[0].data = charts.curNetData; 
-        ceoUnitChart.data.datasets[1].data = charts.testNetData; 
-        ceoUnitChart.update();
-
-        const colors = ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'];
-        const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
-        ceoEfficiencyChart.data.labels = charts.labels;
-        ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i] }));
-        ceoEfficiencyChart.update();
-
-        ceoCurEfficiencyChart.data.labels = charts.labels;
-        ceoCurEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.curEff.map(row => row[i]), backgroundColor: colors[i] }));
-        ceoCurEfficiencyChart.update();
-
-        saveCeoBoard();
-    } catch (e) { console.error(e); }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    ['globalCac', 'globalAff', 'globalWarr'].forEach(id => {
-        const s = document.getElementById(id + 'Slider');
-        const n = document.getElementById(id + 'Num');
-        if(s && n) {
-            s.value = 0; n.value = 0; 
-            s.addEventListener('input', () => { n.value = s.value; updateCeoEngine(); });
-            n.addEventListener('input', () => { s.value = n.value; updateCeoEngine(); });
+        let laborCost = 0;
+        if (laborDB[pName]) {
+            laborCost = (laborDB[pName].time / 60) * laborDB[pName].rate;
         }
-    });
-});
+        return { raw: rawCost, labor: laborCost, total: rawCost + laborCost };
+    }
 
-function addCeoProductToBoard() {
-    let pName = document.getElementById('ceo-product-select').value;
-    if(!pName || ceoActiveProducts.some(p => p.name === pName)) return;
-    ceoActiveProducts.push({ name:pName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:getEngineLiveMsrp(pName), testMsrp:getEngineLiveMsrp(pName), cogs:getEngineTrueCogs(pName), vol:0 });
-    renderCeoTerminal();
-}
+    function calculateProductTotal(pName) { 
+        return calculateProductBreakdown(pName).total; 
+    }
+    
+    function getRawMaterials(pName, mult = 1, map = {}, vis = new Set()) { if (vis.has(pName)) return map; vis.add(pName); (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = (parseFloat(part.quantity || part.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); else { map[k] = (map[k] || 0) + q; } }); return map; }
+    
+    function populateDropdowns() { 
+        try { 
+            let retailRecipes = []; let subRecipes = [];
+            Object.keys(productsDB).sort().forEach(p => {
+                let cost = calculateProductTotal(p).toFixed(2);
+                let htmlStr = `<option value="RECIPE:::${p}">[Product] ${p}   ━━━━   💰 $${cost}/unit</option>`;
+                if(isSubassemblyDB[p]) subRecipes.push(htmlStr.replace('[Product]', '⚙️'));
+                else retailRecipes.push(htmlStr.replace('[Product]', '📦'));
+            });
 
-function openCeoBundleModal() {
-    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
-    let html = `
-    <table id="ceoBundleTable">
-        <thead>
-            <tr>
-                <th style="width:70px; text-align:center;">Qty</th>
-                <th>Retail Product Component</th>
-                <th>True COGS</th>
-                <th>Live MSRP</th>
-            </tr>
-        </thead>
-        <tbody>
-    `;
-    availableRetail.forEach(k => {
-        let cogs = getEngineTrueCogs(k);
-        let msrp = getEngineLiveMsrp(k);
-        html += `
-            <tr class="ceo-bundle-row">
-                <td style="text-align:center;"><input type="number" class="bundle-qty" data-name="${k}" data-cogs="${cogs}" data-msrp="${msrp}" min="0" step="1" value="0" style="width:60px; text-align:center; padding:5px; font-size:15px; border:1px solid #444; background:#111; color:#fff;"></td>
-                <td class="bundle-name" style="font-weight:bold; color:var(--text-main);">${k}</td>
-                <td style="color:#aaa;">${ceoFmt.format(cogs)}</td>
-                <td style="color:var(--neon-green);">${ceoFmt.format(msrp)}</td>
-            </tr>
-        `;
-    });
-    html += `</tbody></table>`;
-    
-    document.getElementById('ceoBundleTableWrap').innerHTML = html;
-    document.getElementById('ceoBundleName').value = '';
-    document.getElementById('ceoBundleSearch').value = '';
-    document.getElementById('ceoBundleModal').style.display = 'flex';
-}
+            let recipesHtml = `<optgroup label="📦 RETAIL PRODUCTS">${retailRecipes.join('')}</optgroup>`;
+            if(subRecipes.length > 0) recipesHtml += `<optgroup label="⚙️ SUB-ASSEMBLIES">${subRecipes.join('')}</optgroup>`;
 
-function filterCeoBundleList() {
-    let filter = document.getElementById('ceoBundleSearch').value.toLowerCase();
-    document.querySelectorAll('.ceo-bundle-row').forEach(r => {
-        let name = r.querySelector('.bundle-name').innerText.toLowerCase();
-        r.style.display = name.includes(filter) ? '' : 'none';
-    });
-}
+            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `🔩 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); return `<option value="${String(k).replace(/"/g, '&quot;')}">${textParts.join('   ')}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`; 
+            
+            const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipesHtml + raws; 
+            
+            // Batch builds and routing can use all products
+            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
+            const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
+            const sop = document.getElementById('sopMasterProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`).join(''); 
+            
+            // Aliases can link to anything
+            const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = '<option value="">-- Select Neogleamz Recipe --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
+            
+            // Manual sale SHOULD NOT show sub-assemblies
+            const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = '<option value="">-- Select Product Sold --</option>' + Object.keys(productsDB).filter(p => !isSubassemblyDB[p]).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join(''); 
+        } catch(e) {} 
+    }
 
-function saveCeoBundle() {
-    let nameRaw = document.getElementById('ceoBundleName').value.trim();
-    if (!nameRaw) return alert("Please enter a Bundle Name.");
-    let bName = "📦 " + nameRaw;
-    
-    if (ceoActiveProducts.some(p => p.name === bName)) return alert("A bundle with this name already exists on the board.");
-    
-    let totalCogs = 0; let totalMsrp = 0; let itemsAdded = 0;
-    document.querySelectorAll('.bundle-qty').forEach(input => {
-        let q = parseInt(input.value) || 0;
-        if (q > 0) {
-            totalCogs += q * parseFloat(input.dataset.cogs);
-            totalMsrp += q * parseFloat(input.dataset.msrp);
-            itemsAdded++;
-        }
-    });
-    
-    if (itemsAdded === 0) return alert("Please specify a quantity greater than 0 for at least one component.");
-    
-    ceoActiveProducts.push({
-        name: bName, isBundle: true, applyCac: false, applyAff: false, applyWarr: false,
-        currentMsrp: totalMsrp, testMsrp: totalMsrp, cogs: totalCogs, vol: 0
-    });
-    
-    document.getElementById('ceoBundleModal').style.display = 'none';
-    renderCeoTerminal();
-}
+    // --- 6. BULK MODAL ---
+	// --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
+    // --- 9. SALES SYNC ENGINE ---
+    // --- 10. PROFITABILITY DASHBOARD ---
+    // --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
+    // --- 12. PARSERS & FILE SYNC ---
+    // --- 13. NEW BACKUP & RESTORE SYSTEM ---
+</script>
+	<div id="ceo-tab" class="tab-content" style="height: calc(100vh - 80px); overflow: hidden;">
+    <style>
+        #ceo-tab { --neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00; font-family: 'Inter', sans-serif; }
+        .ceo-terminal-grid { height: 100%; display: grid; grid-template-columns: 320px 1fr; gap: 20px; padding-bottom: 20px;}
+        .ceo-control-panel { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; height: 100%; overflow-y: auto; display: flex; flex-direction: column;}
+        .ceo-control-header { font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px; letter-spacing: 1px; }
+        .ceo-slider-group { margin-bottom: 15px; }
+        .ceo-slider-label { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px; }
+        .ceo-sync-input { background: transparent; border: 1px solid #333; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; width: 70px; text-align: right; padding: 2px 6px; border-radius: 4px; }
+        .ceo-sync-input:focus { outline: none; border-color: var(--neon-cyan); }
+        .ceo-global-slider .ceo-sync-input { color: var(--neon-purple); border-color: #444; }
+        .ceo-control-panel input[type=range] { width: 100%; accent-color: var(--neon-cyan); height: 4px; background: #333; outline: none; border-radius: 2px; cursor: pointer; }
+        .ceo-global-slider input[type=range] { accent-color: var(--neon-purple); }
+        .ceo-cac-toggle { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; cursor: pointer; margin-left: 8px; font-weight: 600; padding: 2px 6px; background: rgba(255,0,51,0.1); border-radius: 3px; border: 1px solid rgba(255,0,51,0.2); }
+        .ceo-cac-toggle input { width: 11px; height: 11px; cursor: pointer; accent-color: var(--neon-cyan); margin: 0; }
+        .ceo-main-content { display: flex; flex-direction: column; height: 100%; gap: 20px; overflow-y: auto; padding-right: 5px; }
+        .ceo-kpi-row { flex-shrink: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .ceo-kpi-card { background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
+        .ceo-kpi-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
+        .ceo-kpi-value { font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+        .ceo-kpi-sub { font-size: 0.8rem; text-transform: uppercase; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin-top: 6px; }
+        .ceo-charts-row { flex-grow: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; }
+        .ceo-chart-box { background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+        .ceo-canvas-wrapper { position: relative; flex: 1 1 0%; min-height: 0; width: 100%; }
+        .ceo-canvas-wrapper canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
+        .span-2 { grid-column: span 2; } .span-3 { grid-column: span 3; }
+        .ceo-table-container { flex-shrink: 0; background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 6px; overflow-x: auto; padding: 15px; }
+        .ceo-table-container table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; white-space: nowrap; }
+        .ceo-table-container th, .ceo-table-container td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--border-color); } 
+        .ceo-table-container th:first-child, .ceo-table-container td:first-child { text-align: left; font-family: 'Inter', sans-serif; font-weight: 700; background: var(--bg-container); border-right: 1px solid var(--border-color); }
+        .ceo-table-container th { color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border-color); padding-bottom: 8px;}
+        .ceo-table-input { background: rgba(255,255,255,0.05); border: 1px dashed #555; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; width: 70px; text-align: right; padding: 2px 4px; border-radius: 4px; }
+        .val-red { color: var(--neon-red); } .val-green { color: var(--neon-green); text-shadow: 0 0 10px rgba(0,255,102,0.2); } .val-yellow { color: var(--neon-yellow); }
+    </style>
 
-function removeCeoProduct(idx) { ceoActiveProducts.splice(idx, 1); renderCeoTerminal(); }
+    <div class="ceo-terminal-grid">
+        <div class="ceo-control-panel">
+            <div class="ceo-control-header">Global Master Levers</div>
+            <div class="ceo-slider-group ceo-global-slider">
+                <div class="ceo-slider-label"><span>Blended CAC ($)</span> <input type="number" id="globalCacNum" class="ceo-sync-input" value="10"></div>
+                <input type="range" id="globalCacSlider" min="0" max="50" step="1" value="10">
+            </div>
+            <div class="ceo-slider-group ceo-global-slider">
+                <div class="ceo-slider-label"><span>Global Affiliate (%)</span> <input type="number" id="globalAffNum" class="ceo-sync-input" value="0"></div>
+                <input type="range" id="globalAffSlider" min="0" max="30" step="1" value="0">
+            </div>
+            <div class="ceo-slider-group ceo-global-slider">
+                <div class="ceo-slider-label"><span>Global Warranty (%)</span> <input type="number" id="globalWarrNum" class="ceo-sync-input" value="0"></div>
+                <input type="range" id="globalWarrSlider" min="0" max="15" step="1" value="0">
+            </div>
+            
+            <div class="ceo-slider-group ceo-global-slider" style="background: rgba(0, 229, 255, 0.05); border-color: rgba(0, 229, 255, 0.2);">
+                <div class="ceo-slider-label" style="justify-content: space-between; align-items: center; margin-bottom:0;">
+                    <span style="color:var(--neon-cyan)">Free Ship Threshold</span> 
+                    <div style="display:flex; align-items:center;">
+                        <span style="color:var(--neon-cyan); margin-right:4px;">$</span>
+                        <input type="number" id="ceo-fs-threshold" value="50" style="width: 50px; background: var(--bg-input); border: 1px solid var(--border-color); color: #fff; text-align: center; border-radius: 4px; padding: 2px;" onchange="updateCeoEngine()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="ceo-control-header" style="margin-top: 30px;">Last 30 Days Vol (Dynamic)</div>
+            <div id="ceo-dynamic-sliders">
+                <!-- Sliders injected by JS -->
+            </div>
+        </div>
+
+        <div class="ceo-main-content">
+            <div class="ceo-kpi-row">
+                <div class="ceo-kpi-card"><div class="ceo-kpi-title">Gross Monthly Revenue</div><div class="ceo-kpi-value" id="kpiGross">$0</div><div class="ceo-kpi-sub" style="color: var(--text-muted);">Test Scenario Volume</div></div>
+                <div class="ceo-kpi-card"><div class="ceo-kpi-title">Current Net (Baseline)</div><div class="ceo-kpi-value val-yellow" id="kpiOldNet" style="color:#aaa;">$0</div><div class="ceo-kpi-sub" id="kpiOldNetPct" style="color:#888;">0% Margin</div></div>
+                <div class="ceo-kpi-card" style="border-color: var(--neon-green);"><div class="ceo-kpi-title">Test Scenario Net Profit</div><div class="ceo-kpi-value val-green" id="kpiNewNet">$0</div><div class="ceo-kpi-sub" id="kpiNewNetPct">0% Margin</div></div>
+                <div class="ceo-kpi-card"><div class="ceo-kpi-title">Net Delta (Cash Gained)</div><div class="ceo-kpi-value val-green" id="kpiSaved" style="color: var(--neon-cyan); text-shadow: none;">$0</div><div class="ceo-kpi-sub" id="kpiSavedPct" style="color: var(--neon-cyan);">+0% vs Current</div></div>
+            </div>
+
+            <div class="ceo-charts-row">
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper"><canvas id="curEfficiencyChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
+            </div>
+
+            <div class="ceo-table-container">
+                <div class="ceo-kpi-title" style="margin-bottom:5px;">Current vs. Test Scenario Ledger</div>
+                <table>
+                    <thead>
+    					<tr>
+        					<th onclick="sortCeoTable('name')" style="cursor:pointer;" title="Sort Name">Product Name ↕️</th>
+        					<th onclick="sortCeoTable('cogs')" style="font-weight:900; cursor:pointer;" title="Sort COGS">True COGS (Live) ↕️</th>
+        					<th onclick="sortCeoTable('currentMsrp')" style="color:#888; cursor:pointer;" title="Sort Current MSRP">Current MSRP ↕️</th>
+        					<th onclick="sortCeoTable('curShip')" style="color:#888; cursor:pointer;" title="Sort Cur. Ship">Cur. Ship ↕️</th>
+        					<th onclick="sortCeoTable('curStripe')" style="color:#888; cursor:pointer;" title="Sort Cur. Stripe">Cur. Stripe ↕️</th>
+        					<th onclick="sortCeoTable('curOOP')" style="color:#888; cursor:pointer;" title="Sort Cur. OOP">Cust OOP ↕️</th>
+        					<th onclick="sortCeoTable('curNet')" style="color:#ccc; cursor:pointer;" title="Sort Cur. Net">Current Net ↕️</th>
+        					<th onclick="sortCeoTable('testMsrp')" style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px; cursor:pointer;" title="Sort Test MSRP">Test MSRP ✏️ ↕️</th>
+        					<th onclick="sortCeoTable('testShip')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test Ship">Test Ship ↕️</th>
+        					<th onclick="sortCeoTable('testStripe')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test Stripe">Test Stripe ↕️</th>
+        					<th onclick="sortCeoTable('testOOP')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test OOP">Cust OOP ↕️</th>
+        					<th onclick="sortCeoTable('testNet')" class="val-green" style="font-weight:900; cursor:pointer;" title="Sort Test Net">Test Net ↕️</th>
+    					</tr>
+					</thead>
+
+
+                    <tbody id="ceo-dynamic-table">
+                        <!-- Table rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ceoBundleModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div class="massive-container">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:20px;">📦 Build Custom CEO Bundle</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoBundleModal').style.display='none'">Close</button>
+        </div>
+        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
+            <label style="font-weight:bold;">Bundle Name:</label>
+            <input type="text" id="ceoBundleName" placeholder="e.g. Starter Kit" style="flex:1; padding:8px; font-size:15px;">
+        </div>
+        <input type="text" id="ceoBundleSearch" placeholder="🔍 Search retail products..." onkeyup="filterCeoBundleList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
+        <div class="table-wrap" id="ceoBundleTableWrap" style="overflow-y:auto; max-height:400px; padding-right:10px;"></div>
+        <div style="margin-top:15px; text-align:right; flex-shrink:0;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoBundle()">➕ Create Bundle & Add to Board</button>
+        </div>
+    </div>
+</div>
+<script src="neogleamz-engine.js"></script>
+<script src="system-tools-module.js?v=1"></script>
+<script src="bom-module.js?v=1"></script>
+<script src="inventory-module.js?v=1"></script>
+<script src="production-module.js?v=1"></script>
+<script src="sales-module.js?v=1"></script>
+<script src="analytics-module.js?v=1"></script>
+<script src="ceo-module.js?v=2"></script>
+</body>
+</html>
