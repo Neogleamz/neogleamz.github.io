@@ -195,6 +195,50 @@ function renderSalesTable() {
         a.sort((x,y) => { let map = {d:'sale_date', o:'order_id', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'cogs_at_sale', sub:'subtotal', ship:'shipping', tax:'taxes', dcode:'discount_code', disc:'discount_amount', tot:'total'}; let col = map[currentSalesSort.column]; let u = x[col]; let v = y[col]; if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentSalesSort.direction==='asc'?-1:1; if(u>v) return currentSalesSort.direction==='asc'?1:-1; return 0; });
         a.forEach(x => { 
             let safeSku = String(x.storefront_sku).replace(/'/g, "\\'");
+            
+            // --- DYNAMIC LIVE COGS OVERRIDE START ---
+            let liveCogs = parseFloat(x.cogs_at_sale) || 0; 
+            let searchName = (x.internal_recipe_name || "").toUpperCase().replace(" ONLY", "");
+
+            if (typeof productsDB !== 'undefined' && productsDB && searchName) {
+                let allKeys = Object.keys(productsDB);
+                
+                // 1. Exact match
+                let matchedKey = allKeys.find(k => k.toUpperCase() === searchName);
+                
+                // 2. Smart match (Ignore raw parts)
+                if (!matchedKey) {
+                    matchedKey = allKeys.find(k => {
+                        let upK = k.toUpperCase();
+                        return upK.includes(searchName) && 
+                               !upK.includes("BOX") && 
+                               !upK.includes("ACCESSOR") && 
+                               !upK.includes("BUNDLE") && 
+                               !upK.includes("PART");
+                    });
+                }
+                
+                // 3. Fallback match
+                if (!matchedKey) {
+                    matchedKey = allKeys.find(k => k.toUpperCase().includes(searchName));
+                }
+
+                // 4. Calculate True Live COGS
+                if (matchedKey) {
+                    if (productsDB[matchedKey].cogs) {
+                        liveCogs = parseFloat(productsDB[matchedKey].cogs);
+                    } else if (typeof calculateProductTotal === 'function') {
+                        let rawCost = calculateProductTotal(matchedKey);
+                        let labCost = 0;
+                        if (typeof laborDB !== 'undefined' && laborDB[matchedKey]) {
+                            labCost = (parseFloat(laborDB[matchedKey].time)/60) * parseFloat(laborDB[matchedKey].rate);
+                        }
+                        liveCogs = rawCost + labCost;
+                    }
+                }
+            }
+            // --- DYNAMIC LIVE COGS OVERRIDE END ---
+
             h += `<tr>
             <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'sale_date', false)" style="color:var(--text-muted);">${x.sale_date}</td>
             <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'order_id', false)" style="font-weight:bold;">${x.order_id}</td>
@@ -208,10 +252,9 @@ function renderSalesTable() {
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_code', false)" style="color:#f59e0b;">${x.discount_code || ''}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_amount', true)" style="color:#ef4444;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'total', true)" style="font-weight:bold;">$${parseFloat(x.total || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'cogs_at_sale', true)" style="color:#ef4444;">$${parseFloat(x.cogs_at_sale).toFixed(2)}</td>
+            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'cogs_at_sale', true)" style="color:#ef4444;">$${liveCogs.toFixed(2)}</td>
             </tr>`; 
         });
-    }
     wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('salesTableWrap');
 }
 
