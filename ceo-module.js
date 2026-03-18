@@ -53,8 +53,46 @@ function initCeoCharts() {
 
     ceoProfitChart = new Chart(document.getElementById('profitChart'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#00ff66', '#00e5ff', '#ffcc00', '#b000ff', '#ff0033', '#ffffff'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } } });
     ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
-    ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, y: { stacked: true, grid: {display: false} } }, plugins: { legend: { position: 'bottom' } } } });
-    ceoCurEfficiencyChart = new Chart(document.getElementById('curEfficiencyChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, y: { stacked: true, grid: {display: false} } }, plugins: { legend: { position: 'bottom' } } } });
+    const efficiencyOptions = (isCurrent) => ({
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        scales: { 
+            x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, 
+            y: { stacked: true, grid: {display: false} } 
+        },
+        plugins: {
+            legend: { position: 'bottom' },
+            tooltip: {
+                callbacks: {
+                    label: function(ctx) {
+                        let pc = ctx.raw;
+                        let activeP = ceoActiveProducts[ctx.dataIndex];
+                        if(!activeP) return `${ctx.dataset.label}: ${pc.toFixed(1)}%`;
+                        let b = isCurrent ? (activeP.currentMsrp || 1) : (activeP.testMsrp || 1);
+                        let dol = (pc / 100) * b;
+                        return `${ctx.dataset.label}: ${ceoFmt.format(dol)} (${pc.toFixed(1)}%)`;
+                    }
+                }
+            },
+            datalabels: {
+                color: '#fff',
+                textStrokeColor: '#000',
+                textStrokeWidth: 2,
+                font: { weight: 'bold', size: 10, family: "'JetBrains Mono', monospace" },
+                formatter: function(value, ctx) {
+                    if (value < 3) return '';
+                    let activeP = ceoActiveProducts[ctx.dataIndex];
+                    if(!activeP) return `${value.toFixed(1)}%`;
+                    let b = isCurrent ? (activeP.currentMsrp || 1) : (activeP.testMsrp || 1);
+                    let dol = (value / 100) * b;
+                    return `${ceoFmt.format(dol)}\n(${value.toFixed(1)}%)`;
+                },
+                align: 'center', anchor: 'center', textAlign: 'center'
+            }
+        }
+    });
+
+    ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(false) });
+    ceoCurEfficiencyChart = new Chart(document.getElementById('curEfficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(true) });
     ceoLineChart = new Chart(document.getElementById('lineChart'), { type: 'line', data: { labels: ['Current Vol', '2x Scale', '5x Scale', '10x Scale'], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
 }
 
@@ -129,7 +167,9 @@ function updateCeoEngine() {
             // Math: Current
             let curOOP = p.currentMsrp + SHIP_COST;
             let curStripe = getEngineStripeFee(curOOP);
-            let curNet = p.currentMsrp - p.cogs - curStripe;
+            let curAffAmt = p.currentMsrp * (effAff / 100);
+            let curWarrAmt = p.currentMsrp * (effWarr / 100);
+            let curNet = p.currentMsrp - p.cogs - curStripe - SHIP_COST - curAffAmt - curWarrAmt - effCac;
 
             // Math: Test
             let testOOP = p.testMsrp + SHIP_COST;
@@ -149,7 +189,7 @@ function updateCeoEngine() {
             charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (SHIP_COST/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
 
             let curB = p.currentMsrp || 1;
-            charts.curEff.push([(p.cogs/curB)*100, 0, 0, 0, 0, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
+            charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curAffAmt/curB)*100, (curWarrAmt/curB)*100, (SHIP_COST/curB)*100, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
 
             tableHtml += `
             <tr>
