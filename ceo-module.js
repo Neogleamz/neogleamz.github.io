@@ -140,6 +140,7 @@ function renderCeoTerminal() {
             </select>
             <button class="btn-blue" onclick="addCeoProductToBoard()" style="width:auto; padding: 8px 15px;">+ Add to Board</button>
             <button class="btn-orange" onclick="openCeoBundleModal()" style="width:auto; padding: 8px 15px;">+ Build Bundle</button>
+            <button class="btn-green" onclick="openCeoCustomModal()" style="width:auto; padding: 8px 15px;">+ Custom Item</button>
         </div>
     `;
 
@@ -375,6 +376,32 @@ function saveCeoBundle() {
     });
     
     document.getElementById('ceoBundleModal').style.display = 'none';
+    renderCeoTerminal();
+}
+
+function openCeoCustomModal() {
+    document.getElementById('ceoCustomName').value = '';
+    document.getElementById('ceoCustomCogs').value = '';
+    document.getElementById('ceoCustomMsrp').value = '';
+    document.getElementById('ceoCustomModal').style.display = 'flex';
+}
+
+function saveCeoCustomItem() {
+    let nameRaw = document.getElementById('ceoCustomName').value.trim();
+    if (!nameRaw) return alert("Please enter an Item Name.");
+    let iName = "🧪 " + nameRaw;
+    
+    if (ceoActiveProducts.some(p => p.name === iName)) return alert("An item with this name already exists on the board.");
+    
+    let cogs = parseFloat(document.getElementById('ceoCustomCogs').value) || 0;
+    let msrp = parseFloat(document.getElementById('ceoCustomMsrp').value) || 0;
+    
+    ceoActiveProducts.push({
+        name: iName, isBundle: false, applyCac: false, applyAff: false, applyWarr: false,
+        currentMsrp: msrp, testMsrp: msrp, cogs: cogs, vol: 0
+    });
+    
+    document.getElementById('ceoCustomModal').style.display = 'none';
     renderCeoTerminal();
 }
 
