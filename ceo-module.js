@@ -16,12 +16,8 @@ let ceoActiveProducts = [];
 
 function get30DayVolume(productName) {
     try {
-        // Bulletproof check: Is salesDB an array we can loop through?
         if(typeof salesDB === 'undefined' || !salesDB || !Array.isArray(salesDB)) return 30; 
-        
-        let thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
+        let thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         let vol = 0;
         salesDB.forEach(sale => {
             let saleDate = new Date(sale.sale_date);
@@ -32,22 +28,13 @@ function get30DayVolume(productName) {
             }
         });
         return vol > 0 ? vol : 30; 
-    } catch (e) {
-        sysLog("Vol Calc Error: " + e.message, true);
-        return 30; // Safe fallback
-    }
+    } catch (e) { return 30; }
 }
 
 function initCeoCharts() {
-    Chart.defaults.color = '#e0e0e0';
-    Chart.defaults.font.family = "'JetBrains Mono', monospace";
-    Chart.defaults.font.size = 11; 
-
-    if(ceoExpenseChart) ceoExpenseChart.destroy();
-    if(ceoProfitChart) ceoProfitChart.destroy();
-    if(ceoUnitChart) ceoUnitChart.destroy();
-    if(ceoEfficiencyChart) ceoEfficiencyChart.destroy();
-    if(ceoLineChart) ceoLineChart.destroy();
+    Chart.defaults.color = '#e0e0e0'; Chart.defaults.font.family = "'JetBrains Mono', monospace"; Chart.defaults.font.size = 11; 
+    if(ceoExpenseChart) ceoExpenseChart.destroy(); if(ceoProfitChart) ceoProfitChart.destroy();
+    if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoLineChart) ceoLineChart.destroy();
 
     ceoExpenseChart = new Chart(document.getElementById('expenseChart'), {
         type: 'bar', plugins: [ChartDataLabels],
@@ -63,22 +50,17 @@ function initCeoCharts() {
 
 function renderCeoTerminal() {
     sysLog("Booting CEO Terminal...");
-    
     try {
         ceoActiveProducts = ceoBaseMatrix.map(base => {
             let searchName = base.name.replace(" Only", "").toUpperCase();
-            let liveCogs = 0; let liveLabor = 0;
+            let liveCogs = 0; let liveLabor = 0; let liveMsrp = base.newPrice;
             
-            // Bulletproof check for productsDB
             if (typeof productsDB !== 'undefined' && productsDB) {
                 let matchedKey = Object.keys(productsDB).find(k => k.toUpperCase().includes(searchName));
                 
                 if (matchedKey) {
-                    // Check if calculator exists
-                    if (typeof calculateProductTotal === 'function') {
-                        liveCogs = calculateProductTotal(matchedKey);
-                    }
-                    // Check if laborDB exists
+                    if (productsDB[matchedKey].msrp) liveMsrp = parseFloat(productsDB[matchedKey].msrp) || liveMsrp;
+                    if (typeof calculateProductTotal === 'function') liveCogs = calculateProductTotal(matchedKey);
                     if (typeof laborDB !== 'undefined' && laborDB[matchedKey]) {
                         let lData = laborDB[matchedKey];
                         liveLabor = (lData.time / 60) * lData.rate;
@@ -86,14 +68,16 @@ function renderCeoTerminal() {
                 } else if (base.id === 'trap') {
                     let bKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("BEAMZ"));
                     let cKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("CLIPZ"));
+                    if(bKey && productsDB[bKey].msrp && cKey && productsDB[cKey].msrp) {
+                        liveMsrp = parseFloat(productsDB[bKey].msrp) + parseFloat(productsDB[cKey].msrp);
+                    }
                     if(bKey && typeof calculateProductTotal === 'function') liveCogs += calculateProductTotal(bKey);
                     if(cKey && typeof calculateProductTotal === 'function') liveCogs += calculateProductTotal(cKey);
                 } else {
                     liveCogs = base.cogs || 10;
                 }
             }
-            
-            return { ...base, cogs: liveCogs, labor: liveLabor, vol: get30DayVolume(base.name) };
+            return { ...base, newPrice: liveMsrp, cogs: liveCogs, labor: liveLabor, vol: get30DayVolume(base.name) };
         });
 
         let slidersHtml = '';
@@ -112,20 +96,12 @@ function renderCeoTerminal() {
             </div>`;
         });
         
-        let sliderContainer = document.getElementById('ceo-dynamic-sliders');
-        if(!sliderContainer) throw new Error("Could not find HTML element 'ceo-dynamic-sliders'");
-        sliderContainer.innerHTML = slidersHtml;
+        document.getElementById('ceo-dynamic-sliders').innerHTML = slidersHtml;
 
         initCeoCharts();
         updateCeoEngine();
-        
         sysLog("CEO Terminal Active.");
-        
-    } catch (error) {
-        // THIS WILL CATCH THE GHOST
-        sysLog("CEO ERROR: " + error.message, true);
-        console.error(error);
-    }
+    } catch (error) { sysLog("CEO ERROR: " + error.message, true); }
 }
 
 function updateCeoEngine() {
@@ -142,11 +118,14 @@ function updateCeoEngine() {
         let tableHtml = '';
 
         ceoActiveProducts.forEach(p => {
-            let volInput = document.getElementById(`ceo-vol-${p.id}-num`);
-            let vol = volInput ? (parseInt(volInput.value) || 0) : 0;
-            
-            let cb = document.getElementById(`ceo-cb-${p.id}`);
-            p.applyCac = cb ? cb.checked : p.applyCac;
+            // Read Dynamic Overrides from DOM if they exist
+            let volInput = document.getElementById(`ceo-vol-${p.id}-num`); let vol = volInput ? (parseInt(volInput.value) || 0) : 0;
+            let cb = document.getElementById(`ceo-cb-${p.id}`); p.applyCac = cb ? cb.checked : p.applyCac;
+            let oldPriceInput = document.getElementById(`ceo-oldmsrp-${p.id}`); p.oldPrice = oldPriceInput ? parseFloat(oldPriceInput.value) || 0 : p.oldPrice;
+            let msrpInput = document.getElementById(`ceo-msrp-${p.id}`); p.newPrice = msrpInput ? parseFloat(msrpInput.value) || 0 : p.newPrice;
+            let affInput = document.getElementById(`ceo-aff-${p.id}`); p.aff = affInput ? parseFloat(affInput.value) || 0 : p.aff;
+            let warrInput = document.getElementById(`ceo-warr-${p.id}`); p.warranty = warrInput ? parseFloat(warrInput.value) || 0 : p.warranty;
+
             let effectiveCac = p.applyCac ? globalCac : 0; 
 
             let oldCustPays = p.oldPrice + (p.wePayShipOld ? 0 : SHIP_COST);
@@ -169,44 +148,32 @@ function updateCeoEngine() {
             totalGross += (p.newPrice * vol);
             totalOldNet += (oldNet * vol);
             totalNewNet += (newNet * vol);
-            aggCogs += (p.cogs * vol);
-            aggStripe += (ccFeeNew * vol);
-            aggAff += (affFeeNew * vol);
-            aggLabor += (p.labor * vol);
-            aggWarranty += (warrantyNew * vol);
-            aggShip += (shipFeeNew * vol);
-            aggCac += (effectiveCac * vol);
+            aggCogs += (p.cogs * vol); aggStripe += (ccFeeNew * vol); aggAff += (affFeeNew * vol); aggLabor += (p.labor * vol);
+            aggWarranty += (warrantyNew * vol); aggShip += (shipFeeNew * vol); aggCac += (effectiveCac * vol);
 
             if(vol > 0 && newNet > 0) { pLabels.push(p.name); pData.push(newNet * vol); }
             uLabels.push(p.name.split(' ')[0]); uOld.push(oldNet); uNew.push(newNet);
 
-            effLabels.push(p.name);
-            let base = p.newPrice || 1; // Prevent division by zero
-            effCogs.push((p.cogs / base) * 100);
-            effCac.push((effectiveCac / base) * 100);
-            effAff.push((affFeeNew / base) * 100);
-            effLabor.push((p.labor / base) * 100);
-            effWarr.push((warrantyNew / base) * 100);
-            effLog.push((shipFeeNew / base) * 100);
-            effStripe.push((ccFeeNew / base) * 100);
-            effNet.push((Math.max(0, newNet) / base) * 100);
+            effLabels.push(p.name); let base = p.newPrice || 1; 
+            effCogs.push((p.cogs / base) * 100); effCac.push((effectiveCac / base) * 100); effAff.push((affFeeNew / base) * 100);
+            effLabor.push((p.labor / base) * 100); effWarr.push((warrantyNew / base) * 100); effLog.push((shipFeeNew / base) * 100);
+            effStripe.push((ccFeeNew / base) * 100); effNet.push((Math.max(0, newNet) / base) * 100);
 
             let isTrap = p.id === 'trap';
             let rowStyle = isTrap ? 'background: rgba(0, 229, 255, 0.05);' : (newNet < oldNet ? 'background: rgba(255, 0, 51, 0.1);' : '');
-            let oldNetCls = oldNet < 0 ? 'val-red' : '';
-            let newNetCls = newNet < 0 ? 'val-red' : 'val-green';
+            let oldNetCls = oldNet < 0 ? 'val-red' : ''; let newNetCls = newNet < 0 ? 'val-red' : 'val-green';
             
+            // Note the new editable input classes
             tableHtml += `
             <tr style="${rowStyle}">
                 <td style="font-weight:bold;">${p.name}</td>
-                <td style="color:var(--neon-cyan);">${ceoFmt.format(p.newPrice)}</td>
-                <td style="color:var(--neon-red);">${ceoFmt.format(oldCustPays)}</td>
+                <td><input type="number" id="ceo-msrp-${p.id}" class="ceo-table-input" value="${p.newPrice.toFixed(2)}" step="0.01" onchange="updateCeoEngine()"></td>
+                <td><input type="number" id="ceo-oldmsrp-${p.id}" class="ceo-table-input" style="color:var(--neon-red); border-color:var(--neon-red);" value="${p.oldPrice.toFixed(2)}" step="0.01" onchange="updateCeoEngine()"></td>
                 <td class="val-green">${ceoFmt.format(newCustPays)}</td>
                 <td>${ceoFmt.format(p.cogs)}</td>
                 <td style="color:#888;">${ceoFmt.format(p.labor)}</td>
-                <td style="color:#888;">-${ceoFmt.format(ccFeeNew)}</td>
-                <td style="color:#888;">-${ceoFmt.format(shipFeeNew)}</td>
-                <td style="color:#888;">-${ceoFmt.format(effectiveCac)}</td>
+                <td><input type="number" id="ceo-aff-${p.id}" class="ceo-table-input" value="${p.aff}" step="1" title="Affiliate %" onchange="updateCeoEngine()"></td>
+                <td><input type="number" id="ceo-warr-${p.id}" class="ceo-table-input" value="${p.warranty}" step="0.5" title="Warranty Reserve %" onchange="updateCeoEngine()"></td>
                 <td class="${oldNetCls}">${ceoFmt.format(oldNet)}</td>
                 <td class="${newNetCls}" style="font-weight:900; font-size:0.9rem;">${ceoFmt.format(newNet)}</td>
             </tr>`;
@@ -214,6 +181,7 @@ function updateCeoEngine() {
 
         document.getElementById('ceo-dynamic-table').innerHTML = tableHtml;
 
+        // --- THE REST OF YOUR CHART UPDATES REMAIN IDENTICAL ---
         document.getElementById('kpiGross').innerText = ceoFmt.format(totalGross).split('.')[0];
         document.getElementById('kpiOldNet').innerText = ceoFmt.format(totalOldNet).split('.')[0];
         document.getElementById('kpiOldNet').className = totalOldNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
@@ -258,9 +226,7 @@ function updateCeoEngine() {
             { label: 'New Trajectory', borderColor: '#00ff66', data: [totalNewNet, totalNewNet*2, totalNewNet*5, totalNewNet*10], tension: 0.3 }
         ];
         ceoLineChart.update();
-    } catch (e) {
-        sysLog("Engine Update Error: " + e.message, true);
-    }
+    } catch (e) { sysLog("Engine Update Error: " + e.message, true); }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
