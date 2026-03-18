@@ -42,16 +42,21 @@ function autoPopulateCeoBoard() {
 
 function initCeoCharts() {
     Chart.defaults.color = '#e0e0e0'; Chart.defaults.font.family = "'JetBrains Mono', monospace";
-    if(ceoExpenseChart) ceoExpenseChart.destroy(); if(ceoProfitChart) ceoProfitChart.destroy();
-    if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoCurEfficiencyChart) ceoCurEfficiencyChart.destroy(); if(ceoLineChart) ceoLineChart.destroy();
+    if(ceoExpenseChart) ceoExpenseChart.destroy();
+    if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoCurEfficiencyChart) ceoCurEfficiencyChart.destroy();
 
     ceoExpenseChart = new Chart(document.getElementById('expenseChart'), {
         type: 'bar', plugins: [ChartDataLabels],
-        data: { labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Test Net'], datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v, c) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { x: { grid: { display: false } }, y: { display: false } } }
+        data: { 
+            labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Net Profit'], 
+            datasets: [
+                { label: 'Current MSRP', data: [0,0,0,0,0,0,0], backgroundColor: '#555555', borderRadius: 4 },
+                { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }
+            ] 
+        },
+        options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
     });
 
-    ceoProfitChart = new Chart(document.getElementById('profitChart'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#00ff66', '#00e5ff', '#ffcc00', '#b000ff', '#ff0033', '#ffffff'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } } });
     ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
     const efficiencyOptions = (isCurrent) => ({
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
@@ -92,7 +97,7 @@ function initCeoCharts() {
                 },
                 align: 'top', 
                 anchor: 'center', 
-                offset: 2,
+                offset: 14,
                 textAlign: 'center'
             }
         }
@@ -100,7 +105,6 @@ function initCeoCharts() {
 
     ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(false) });
     ceoCurEfficiencyChart = new Chart(document.getElementById('curEfficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(true) });
-    ceoLineChart = new Chart(document.getElementById('lineChart'), { type: 'line', data: { labels: ['Current Vol', '2x Scale', '5x Scale', '10x Scale'], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
 }
 
 function renderCeoTerminal() {
@@ -159,8 +163,8 @@ function updateCeoEngine() {
         let gAff = parseFloat(document.getElementById('globalAffNum').value) || 0;
         let gWarr = parseFloat(document.getElementById('globalWarrNum').value) || 0;
         
-        let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, aff:0, warr:0, ship:0, cac:0 };
-        let charts = { labels:[], pData:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
+        let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, curStripe:0, aff:0, curAff:0, warr:0, curWarr:0, ship:0, cac:0 };
+        let charts = { labels:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
 
         let tableHtml = '';
         ceoActiveProducts.forEach((p, index) => {
@@ -186,11 +190,14 @@ function updateCeoEngine() {
             let testNet = p.testMsrp - p.cogs - testStripe - SHIP_COST - testAffAmt - testWarrAmt - effCac;
 
             totals.gross += (p.testMsrp * p.vol); totals.curNet += (curNet * p.vol); totals.testNet += (testNet * p.vol);
-            totals.cogs += (p.cogs * p.vol); totals.stripe += (testStripe * p.vol); totals.aff += (testAffAmt * p.vol);
-            totals.warr += (testWarrAmt * p.vol); totals.ship += (SHIP_COST * p.vol); totals.cac += (effCac * p.vol);
+            totals.cogs += (p.cogs * p.vol); totals.stripe += (testStripe * p.vol); totals.curStripe += (curStripe * p.vol);
+            totals.aff += (testAffAmt * p.vol); totals.curAff += (curAffAmt * p.vol);
+            totals.warr += (testWarrAmt * p.vol); totals.curWarr += (curWarrAmt * p.vol);
+            totals.ship += (SHIP_COST * p.vol); totals.cac += (effCac * p.vol);
 
-            if(p.vol > 0 && testNet > 0) { charts.labels.push(p.name.split(' ')[0]); charts.pData.push(testNet * p.vol); }
-            charts.curNetData.push(curNet); charts.testNetData.push(testNet);
+            charts.labels.push(p.name);
+            charts.curNetData.push(curNet); 
+            charts.testNetData.push(testNet);
             
             let b = p.testMsrp || 1;
             charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (SHIP_COST/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
@@ -222,27 +229,24 @@ function updateCeoEngine() {
         document.getElementById('kpiSaved').innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
         
         // Update Charts
-        ceoExpenseChart.data.datasets[0].data = [totals.cogs, totals.cac, totals.aff, totals.warr, totals.ship, totals.stripe, Math.max(0, totals.testNet)];
+        ceoExpenseChart.data.datasets[0].data = [totals.cogs, totals.cac, totals.curAff, totals.curWarr, totals.ship, totals.curStripe, Math.max(0, totals.curNet)];
+        ceoExpenseChart.data.datasets[1].data = [totals.cogs, totals.cac, totals.aff, totals.warr, totals.ship, totals.stripe, Math.max(0, totals.testNet)];
         ceoExpenseChart.update();
 
-        ceoProfitChart.data.labels = charts.labels; ceoProfitChart.data.datasets[0].data = charts.pData; ceoProfitChart.update();
-        ceoUnitChart.data.labels = charts.labels; ceoUnitChart.data.datasets[0].data = charts.curNetData; ceoUnitChart.data.datasets[1].data = charts.testNetData; ceoUnitChart.update();
+        ceoUnitChart.data.labels = charts.labels; 
+        ceoUnitChart.data.datasets[0].data = charts.curNetData; 
+        ceoUnitChart.data.datasets[1].data = charts.testNetData; 
+        ceoUnitChart.update();
 
         const colors = ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'];
         const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
         ceoEfficiencyChart.data.labels = charts.labels;
-        ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i], barPercentage: 0.5 }));
+        ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i], barPercentage: 0.40 }));
         ceoEfficiencyChart.update();
 
         ceoCurEfficiencyChart.data.labels = charts.labels;
-        ceoCurEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.curEff.map(row => row[i]), backgroundColor: colors[i], barPercentage: 0.5 }));
+        ceoCurEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.curEff.map(row => row[i]), backgroundColor: colors[i], barPercentage: 0.40 }));
         ceoCurEfficiencyChart.update();
-
-        ceoLineChart.data.datasets = [
-            { label: 'Current Trajectory', borderColor: '#aaaaaa', data: [totals.curNet, totals.curNet*2, totals.curNet*5, totals.curNet*10], tension: 0.3 },
-            { label: 'Test Trajectory', borderColor: '#00ff66', data: [totals.testNet, totals.testNet*2, totals.testNet*5, totals.testNet*10], tension: 0.3 }
-        ];
-        ceoLineChart.update();
 
         saveCeoBoard();
     } catch (e) { console.error(e); }
