@@ -1,12 +1,8 @@
 // --- CEO TERMINAL: OPERATION APEX ---
 
-// Global Chart Instances
 let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoLineChart;
-
-// Formatters
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-// Base Product Matrix (Matches the Apex Pitch)
 const ceoBaseMatrix = [
     { id: 'soulz', name: "SOULZ", oldPrice: 129.99, newPrice: 149.99, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: true, applyCac: true },
     { id: 'railz', name: "RAILZ", oldPrice: 99.99, newPrice: 119.99, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: true, applyCac: true },
@@ -19,22 +15,27 @@ const ceoBaseMatrix = [
 let ceoActiveProducts = [];
 
 function get30DayVolume(productName) {
-    if(typeof salesDB === 'undefined' || !salesDB) return 0;
-    let thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    let vol = 0;
-    salesDB.forEach(sale => {
-        let saleDate = new Date(sale.sale_date);
-        if (saleDate >= thirtyDaysAgo) {
-            // Fuzzy match the product name from the sales ledger
-            if(sale.internal_recipe_name && sale.internal_recipe_name.toUpperCase().includes(productName.toUpperCase().replace(" ONLY", ""))) {
-                vol += (parseFloat(sale.qty_sold) || 0);
+    try {
+        // Bulletproof check: Is salesDB an array we can loop through?
+        if(typeof salesDB === 'undefined' || !salesDB || !Array.isArray(salesDB)) return 30; 
+        
+        let thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        let vol = 0;
+        salesDB.forEach(sale => {
+            let saleDate = new Date(sale.sale_date);
+            if (saleDate >= thirtyDaysAgo) {
+                if(sale.internal_recipe_name && sale.internal_recipe_name.toUpperCase().includes(productName.toUpperCase().replace(" ONLY", ""))) {
+                    vol += (parseFloat(sale.qty_sold) || 0);
+                }
             }
-        }
-    });
-    // Fallback to 30 if no sales found so the charts aren't completely empty
-    return vol > 0 ? vol : 30; 
+        });
+        return vol > 0 ? vol : 30; 
+    } catch (e) {
+        sysLog("Vol Calc Error: " + e.message, true);
+        return 30; // Safe fallback
+    }
 }
 
 function initCeoCharts() {
@@ -63,189 +64,205 @@ function initCeoCharts() {
 function renderCeoTerminal() {
     sysLog("Booting CEO Terminal...");
     
-    // 1. Build Live Products Array from Database
-    ceoActiveProducts = ceoBaseMatrix.map(base => {
-        // Find matching live product to pull COGS and Labor
-        let searchName = base.name.replace(" Only", "").toUpperCase();
-        let liveCogs = 0; let liveLabor = 0;
-        
-        if (typeof productsDB !== 'undefined') {
-            let matchedKey = Object.keys(productsDB).find(k => k.toUpperCase().includes(searchName));
-            if (matchedKey) {
-                liveCogs = calculateProductTotal(matchedKey);
-                let lData = laborDB[matchedKey];
-                if(lData) liveLabor = (lData.time / 60) * lData.rate;
-            } else if (base.id === 'trap') {
-                // Trap is Beamz + Clipz
-                let bKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("BEAMZ"));
-                let cKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("CLIPZ"));
-                if(bKey) liveCogs += calculateProductTotal(bKey);
-                if(cKey) liveCogs += calculateProductTotal(cKey);
-            } else {
-                liveCogs = base.cogs || 10; // Failsafe
+    try {
+        ceoActiveProducts = ceoBaseMatrix.map(base => {
+            let searchName = base.name.replace(" Only", "").toUpperCase();
+            let liveCogs = 0; let liveLabor = 0;
+            
+            // Bulletproof check for productsDB
+            if (typeof productsDB !== 'undefined' && productsDB) {
+                let matchedKey = Object.keys(productsDB).find(k => k.toUpperCase().includes(searchName));
+                
+                if (matchedKey) {
+                    // Check if calculator exists
+                    if (typeof calculateProductTotal === 'function') {
+                        liveCogs = calculateProductTotal(matchedKey);
+                    }
+                    // Check if laborDB exists
+                    if (typeof laborDB !== 'undefined' && laborDB[matchedKey]) {
+                        let lData = laborDB[matchedKey];
+                        liveLabor = (lData.time / 60) * lData.rate;
+                    }
+                } else if (base.id === 'trap') {
+                    let bKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("BEAMZ"));
+                    let cKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("CLIPZ"));
+                    if(bKey && typeof calculateProductTotal === 'function') liveCogs += calculateProductTotal(bKey);
+                    if(cKey && typeof calculateProductTotal === 'function') liveCogs += calculateProductTotal(cKey);
+                } else {
+                    liveCogs = base.cogs || 10;
+                }
             }
-        }
-        
-        return { ...base, cogs: liveCogs, labor: liveLabor, vol: get30DayVolume(base.name) };
-    });
+            
+            return { ...base, cogs: liveCogs, labor: liveLabor, vol: get30DayVolume(base.name) };
+        });
 
-    // 2. Build Sliders UI
-    let slidersHtml = '';
-    ceoActiveProducts.forEach(p => {
-        let isTrap = p.id === 'trap';
-        let bgStyle = isTrap ? 'padding: 10px; border-radius: 4px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0, 229, 255, 0.05);' : '';
-        let titleColor = isTrap ? 'color: var(--neon-cyan);' : '';
+        let slidersHtml = '';
+        ceoActiveProducts.forEach(p => {
+            let isTrap = p.id === 'trap';
+            let bgStyle = isTrap ? 'padding: 10px; border-radius: 4px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0, 229, 255, 0.05);' : '';
+            let titleColor = isTrap ? 'color: var(--neon-cyan);' : '';
+            
+            slidersHtml += `
+            <div class="ceo-slider-group" style="${bgStyle}">
+                <div class="ceo-slider-label">
+                    <span style="display:flex; align-items:center; ${titleColor}">${p.name} <label class="ceo-cac-toggle"><input type="checkbox" id="ceo-cb-${p.id}" ${p.applyCac ? 'checked' : ''} onchange="updateCeoEngine()"> Ads</label></span>
+                    <input type="number" id="ceo-vol-${p.id}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${p.id}').value=this.value; updateCeoEngine();">
+                </div>
+                <input type="range" id="ceo-vol-${p.id}" min="0" max="2000" step="1" value="${p.vol}" oninput="document.getElementById('ceo-vol-${p.id}-num').value=this.value; updateCeoEngine();">
+            </div>`;
+        });
         
-        slidersHtml += `
-        <div class="ceo-slider-group" style="${bgStyle}">
-            <div class="ceo-slider-label">
-                <span style="display:flex; align-items:center; ${titleColor}">${p.name} <label class="ceo-cac-toggle"><input type="checkbox" id="ceo-cb-${p.id}" ${p.applyCac ? 'checked' : ''} onchange="updateCeoEngine()"> Ads</label></span>
-                <input type="number" id="ceo-vol-${p.id}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${p.id}').value=this.value; updateCeoEngine();">
-            </div>
-            <input type="range" id="ceo-vol-${p.id}" min="0" max="2000" step="1" value="${p.vol}" oninput="document.getElementById('ceo-vol-${p.id}-num').value=this.value; updateCeoEngine();">
-        </div>`;
-    });
-    document.getElementById('ceo-dynamic-sliders').innerHTML = slidersHtml;
+        let sliderContainer = document.getElementById('ceo-dynamic-sliders');
+        if(!sliderContainer) throw new Error("Could not find HTML element 'ceo-dynamic-sliders'");
+        sliderContainer.innerHTML = slidersHtml;
 
-    initCeoCharts();
-    updateCeoEngine();
+        initCeoCharts();
+        updateCeoEngine();
+        
+        sysLog("CEO Terminal Active.");
+        
+    } catch (error) {
+        // THIS WILL CATCH THE GHOST
+        sysLog("CEO ERROR: " + error.message, true);
+        console.error(error);
+    }
 }
 
 function updateCeoEngine() {
-    const CC_RATE = 0.029, CC_FLAT = 0.30, SHIP_COST = 8.00;
-    let globalCac = parseFloat(document.getElementById('cacNum').value) || 0;
-    
-    let totalGross = 0, totalOldNet = 0, totalNewNet = 0;
-    let aggCogs = 0, aggStripe = 0, aggAff = 0, aggLabor = 0, aggWarranty = 0, aggShip = 0, aggCac = 0;
-    
-    let pLabels = [], pData = [], uLabels = [], uOld = [], uNew = [];
-    let effLabels=[], effCogs=[], effCac=[], effAff=[], effLabor=[], effWarr=[], effLog=[], effStripe=[], effNet=[];
-
-    let tableHtml = '';
-
-    ceoActiveProducts.forEach(p => {
-        let volInput = document.getElementById(`ceo-vol-${p.id}-num`);
-        let vol = volInput ? (parseInt(volInput.value) || 0) : 0;
+    try {
+        const CC_RATE = 0.029, CC_FLAT = 0.30, SHIP_COST = 8.00;
+        let globalCac = parseFloat(document.getElementById('cacNum').value) || 0;
         
-        let cb = document.getElementById(`ceo-cb-${p.id}`);
-        p.applyCac = cb ? cb.checked : p.applyCac;
-        let effectiveCac = p.applyCac ? globalCac : 0; 
-
-        let oldCustPays = p.oldPrice + (p.wePayShipOld ? 0 : SHIP_COST);
-        let newCustPays = p.newPrice + (p.wePayShipNew ? 0 : SHIP_COST);
-
-        let ccBaseNew = p.wePayShipNew ? p.newPrice : p.newPrice + SHIP_COST;
-        let ccFeeNew = (ccBaseNew * CC_RATE) + CC_FLAT;
-        let affFeeNew = p.newPrice * (p.aff / 100);
-        let shipFeeNew = p.wePayShipNew ? SHIP_COST : 0;
-        let warrantyNew = p.newPrice * (p.warranty / 100);
-        let newNet = p.newPrice - p.cogs - ccFeeNew - affFeeNew - shipFeeNew - p.labor - warrantyNew - effectiveCac;
-
-        let ccBaseOld = p.wePayShipOld ? p.oldPrice : p.oldPrice + SHIP_COST;
-        let ccFeeOld = (ccBaseOld * CC_RATE) + CC_FLAT;
-        let affFeeOld = p.oldPrice * (p.aff / 100);
-        let shipFeeOld = p.wePayShipOld ? SHIP_COST : 0;
-        let warrantyOld = p.oldPrice * (p.warranty / 100);
-        let oldNet = p.oldPrice - p.cogs - ccFeeOld - affFeeOld - shipFeeOld - p.labor - warrantyOld - effectiveCac;
-
-        totalGross += (p.newPrice * vol);
-        totalOldNet += (oldNet * vol);
-        totalNewNet += (newNet * vol);
-        aggCogs += (p.cogs * vol);
-        aggStripe += (ccFeeNew * vol);
-        aggAff += (affFeeNew * vol);
-        aggLabor += (p.labor * vol);
-        aggWarranty += (warrantyNew * vol);
-        aggShip += (shipFeeNew * vol);
-        aggCac += (effectiveCac * vol);
-
-        if(vol > 0 && newNet > 0) { pLabels.push(p.name); pData.push(newNet * vol); }
-        uLabels.push(p.name.split(' ')[0]); uOld.push(oldNet); uNew.push(newNet);
-
-        effLabels.push(p.name);
-        let base = p.newPrice;
-        effCogs.push((p.cogs / base) * 100);
-        effCac.push((effectiveCac / base) * 100);
-        effAff.push((affFeeNew / base) * 100);
-        effLabor.push((p.labor / base) * 100);
-        effWarr.push((warrantyNew / base) * 100);
-        effLog.push((shipFeeNew / base) * 100);
-        effStripe.push((ccFeeNew / base) * 100);
-        effNet.push((Math.max(0, newNet) / base) * 100);
-
-        // Build Table Row
-        let isTrap = p.id === 'trap';
-        let rowStyle = isTrap ? 'background: rgba(0, 229, 255, 0.05);' : (newNet < oldNet ? 'background: rgba(255, 0, 51, 0.1);' : '');
-        let oldNetCls = oldNet < 0 ? 'val-red' : '';
-        let newNetCls = newNet < 0 ? 'val-red' : 'val-green';
+        let totalGross = 0, totalOldNet = 0, totalNewNet = 0;
+        let aggCogs = 0, aggStripe = 0, aggAff = 0, aggLabor = 0, aggWarranty = 0, aggShip = 0, aggCac = 0;
         
-        tableHtml += `
-        <tr style="${rowStyle}">
-            <td style="font-weight:bold;">${p.name}</td>
-            <td style="color:var(--neon-cyan);">${ceoFmt.format(p.newPrice)}</td>
-            <td style="color:var(--neon-red);">${ceoFmt.format(oldCustPays)}</td>
-            <td class="val-green">${ceoFmt.format(newCustPays)}</td>
-            <td>${ceoFmt.format(p.cogs)}</td>
-            <td style="color:#888;">${ceoFmt.format(p.labor)}</td>
-            <td style="color:#888;">-${ceoFmt.format(ccFeeNew)}</td>
-            <td style="color:#888;">-${ceoFmt.format(shipFeeNew)}</td>
-            <td style="color:#888;">-${ceoFmt.format(effectiveCac)}</td>
-            <td class="${oldNetCls}">${ceoFmt.format(oldNet)}</td>
-            <td class="${newNetCls}" style="font-weight:900; font-size:0.9rem;">${ceoFmt.format(newNet)}</td>
-        </tr>`;
-    });
+        let pLabels = [], pData = [], uLabels = [], uOld = [], uNew = [];
+        let effLabels=[], effCogs=[], effCac=[], effAff=[], effLabor=[], effWarr=[], effLog=[], effStripe=[], effNet=[];
 
-    document.getElementById('ceo-dynamic-table').innerHTML = tableHtml;
+        let tableHtml = '';
 
-    // KPI LOGIC
-    document.getElementById('kpiGross').innerText = ceoFmt.format(totalGross).split('.')[0];
-    document.getElementById('kpiOldNet').innerText = ceoFmt.format(totalOldNet).split('.')[0];
-    document.getElementById('kpiOldNet').className = totalOldNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
-    document.getElementById('kpiNewNet').innerText = ceoFmt.format(totalNewNet).split('.')[0];
-    document.getElementById('kpiNewNet').className = totalNewNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
+        ceoActiveProducts.forEach(p => {
+            let volInput = document.getElementById(`ceo-vol-${p.id}-num`);
+            let vol = volInput ? (parseInt(volInput.value) || 0) : 0;
+            
+            let cb = document.getElementById(`ceo-cb-${p.id}`);
+            p.applyCac = cb ? cb.checked : p.applyCac;
+            let effectiveCac = p.applyCac ? globalCac : 0; 
 
-    let totalSaved = totalNewNet - totalOldNet;
-    document.getElementById('kpiSaved').innerText = (totalSaved >= 0 ? "+" : "") + ceoFmt.format(totalSaved).split('.')[0];
-    document.getElementById('kpiSaved').className = totalSaved < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
+            let oldCustPays = p.oldPrice + (p.wePayShipOld ? 0 : SHIP_COST);
+            let newCustPays = p.newPrice + (p.wePayShipNew ? 0 : SHIP_COST);
 
-    let oldMargin = totalGross > 0 ? (totalOldNet / totalGross) * 100 : 0;
-    let newMargin = totalGross > 0 ? (totalNewNet / totalGross) * 100 : 0;
-    let savedPct = totalOldNet !== 0 ? (totalSaved / Math.abs(totalOldNet)) * 100 : (totalSaved > 0 ? Infinity : 0);
+            let ccBaseNew = p.wePayShipNew ? p.newPrice : p.newPrice + SHIP_COST;
+            let ccFeeNew = (ccBaseNew * CC_RATE) + CC_FLAT;
+            let affFeeNew = p.newPrice * (p.aff / 100);
+            let shipFeeNew = p.wePayShipNew ? SHIP_COST : 0;
+            let warrantyNew = p.newPrice * (p.warranty / 100);
+            let newNet = p.newPrice - p.cogs - ccFeeNew - affFeeNew - shipFeeNew - p.labor - warrantyNew - effectiveCac;
 
-    document.getElementById('kpiOldNetPct').innerText = oldMargin.toFixed(1) + "% Margin";
-    document.getElementById('kpiOldNetPct').style.color = oldMargin < 0 ? 'var(--neon-red)' : 'var(--neon-yellow)';
-    document.getElementById('kpiNewNetPct').innerText = newMargin.toFixed(1) + "% Margin";
-    document.getElementById('kpiNewNetPct').style.color = newMargin < 0 ? 'var(--neon-red)' : 'var(--neon-green)';
-    document.getElementById('kpiSavedPct').innerText = (savedPct > 0 ? '+' : '') + (savedPct === Infinity ? '∞' : savedPct.toFixed(1)) + "% vs Old";
-    document.getElementById('kpiSavedPct').style.color = savedPct >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+            let ccBaseOld = p.wePayShipOld ? p.oldPrice : p.oldPrice + SHIP_COST;
+            let ccFeeOld = (ccBaseOld * CC_RATE) + CC_FLAT;
+            let affFeeOld = p.oldPrice * (p.aff / 100);
+            let shipFeeOld = p.wePayShipOld ? SHIP_COST : 0;
+            let warrantyOld = p.oldPrice * (p.warranty / 100);
+            let oldNet = p.oldPrice - p.cogs - ccFeeOld - affFeeOld - shipFeeOld - p.labor - warrantyOld - effectiveCac;
 
-    // UPDATE CHARTS
-    let expData = [aggCogs, aggCac, aggAff, aggLabor, aggWarranty, aggShip, aggStripe, Math.max(0, totalNewNet)];
-    ceoExpenseChart.data.datasets[0].data = expData;
-    ceoExpenseChart.data.totalGross = totalGross > 0 ? totalGross : 1;
-    ceoExpenseChart.options.scales.y.suggestedMax = Math.max(...expData) * 1.30; 
-    ceoExpenseChart.update();
+            totalGross += (p.newPrice * vol);
+            totalOldNet += (oldNet * vol);
+            totalNewNet += (newNet * vol);
+            aggCogs += (p.cogs * vol);
+            aggStripe += (ccFeeNew * vol);
+            aggAff += (affFeeNew * vol);
+            aggLabor += (p.labor * vol);
+            aggWarranty += (warrantyNew * vol);
+            aggShip += (shipFeeNew * vol);
+            aggCac += (effectiveCac * vol);
 
-    ceoProfitChart.data.labels = pLabels; ceoProfitChart.data.datasets[0].data = pData; ceoProfitChart.update();
-    ceoUnitChart.data.labels = uLabels; ceoUnitChart.data.datasets[0].data = uOld; ceoUnitChart.data.datasets[1].data = uNew; ceoUnitChart.update();
-    
-    ceoEfficiencyChart.data.labels = effLabels;
-    ceoEfficiencyChart.data.datasets = [
-        { label: 'COGS', data: effCogs, backgroundColor: '#333' }, { label: 'Market', data: effCac, backgroundColor: '#ff0033' },
-        { label: 'Affil', data: effAff, backgroundColor: '#ffcc00' }, { label: 'Labor', data: effLabor, backgroundColor: '#b000ff' },
-        { label: 'Warr', data: effWarr, backgroundColor: '#ff9900' }, { label: 'Logis', data: effLog, backgroundColor: '#00e5ff' },
-        { label: 'Fees', data: effStripe, backgroundColor: '#aaaaaa' }, { label: 'Net Profit', data: effNet, backgroundColor: '#00ff66' }
-    ];
-    ceoEfficiencyChart.update();
+            if(vol > 0 && newNet > 0) { pLabels.push(p.name); pData.push(newNet * vol); }
+            uLabels.push(p.name.split(' ')[0]); uOld.push(oldNet); uNew.push(newNet);
 
-    ceoLineChart.data.datasets = [
-        { label: 'Old Trajectory', borderColor: '#ff0033', data: [totalOldNet, totalOldNet*2, totalOldNet*5, totalOldNet*10], tension: 0.3 },
-        { label: 'New Trajectory', borderColor: '#00ff66', data: [totalNewNet, totalNewNet*2, totalNewNet*5, totalNewNet*10], tension: 0.3 }
-    ];
-    ceoLineChart.update();
+            effLabels.push(p.name);
+            let base = p.newPrice || 1; // Prevent division by zero
+            effCogs.push((p.cogs / base) * 100);
+            effCac.push((effectiveCac / base) * 100);
+            effAff.push((affFeeNew / base) * 100);
+            effLabor.push((p.labor / base) * 100);
+            effWarr.push((warrantyNew / base) * 100);
+            effLog.push((shipFeeNew / base) * 100);
+            effStripe.push((ccFeeNew / base) * 100);
+            effNet.push((Math.max(0, newNet) / base) * 100);
+
+            let isTrap = p.id === 'trap';
+            let rowStyle = isTrap ? 'background: rgba(0, 229, 255, 0.05);' : (newNet < oldNet ? 'background: rgba(255, 0, 51, 0.1);' : '');
+            let oldNetCls = oldNet < 0 ? 'val-red' : '';
+            let newNetCls = newNet < 0 ? 'val-red' : 'val-green';
+            
+            tableHtml += `
+            <tr style="${rowStyle}">
+                <td style="font-weight:bold;">${p.name}</td>
+                <td style="color:var(--neon-cyan);">${ceoFmt.format(p.newPrice)}</td>
+                <td style="color:var(--neon-red);">${ceoFmt.format(oldCustPays)}</td>
+                <td class="val-green">${ceoFmt.format(newCustPays)}</td>
+                <td>${ceoFmt.format(p.cogs)}</td>
+                <td style="color:#888;">${ceoFmt.format(p.labor)}</td>
+                <td style="color:#888;">-${ceoFmt.format(ccFeeNew)}</td>
+                <td style="color:#888;">-${ceoFmt.format(shipFeeNew)}</td>
+                <td style="color:#888;">-${ceoFmt.format(effectiveCac)}</td>
+                <td class="${oldNetCls}">${ceoFmt.format(oldNet)}</td>
+                <td class="${newNetCls}" style="font-weight:900; font-size:0.9rem;">${ceoFmt.format(newNet)}</td>
+            </tr>`;
+        });
+
+        document.getElementById('ceo-dynamic-table').innerHTML = tableHtml;
+
+        document.getElementById('kpiGross').innerText = ceoFmt.format(totalGross).split('.')[0];
+        document.getElementById('kpiOldNet').innerText = ceoFmt.format(totalOldNet).split('.')[0];
+        document.getElementById('kpiOldNet').className = totalOldNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
+        document.getElementById('kpiNewNet').innerText = ceoFmt.format(totalNewNet).split('.')[0];
+        document.getElementById('kpiNewNet').className = totalNewNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
+
+        let totalSaved = totalNewNet - totalOldNet;
+        document.getElementById('kpiSaved').innerText = (totalSaved >= 0 ? "+" : "") + ceoFmt.format(totalSaved).split('.')[0];
+        document.getElementById('kpiSaved').className = totalSaved < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
+
+        let oldMargin = totalGross > 0 ? (totalOldNet / totalGross) * 100 : 0;
+        let newMargin = totalGross > 0 ? (totalNewNet / totalGross) * 100 : 0;
+        let savedPct = totalOldNet !== 0 ? (totalSaved / Math.abs(totalOldNet)) * 100 : (totalSaved > 0 ? Infinity : 0);
+
+        document.getElementById('kpiOldNetPct').innerText = oldMargin.toFixed(1) + "% Margin";
+        document.getElementById('kpiOldNetPct').style.color = oldMargin < 0 ? 'var(--neon-red)' : 'var(--neon-yellow)';
+        document.getElementById('kpiNewNetPct').innerText = newMargin.toFixed(1) + "% Margin";
+        document.getElementById('kpiNewNetPct').style.color = newMargin < 0 ? 'var(--neon-red)' : 'var(--neon-green)';
+        document.getElementById('kpiSavedPct').innerText = (savedPct > 0 ? '+' : '') + (savedPct === Infinity ? '∞' : savedPct.toFixed(1)) + "% vs Old";
+        document.getElementById('kpiSavedPct').style.color = savedPct >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+
+        let expData = [aggCogs, aggCac, aggAff, aggLabor, aggWarranty, aggShip, aggStripe, Math.max(0, totalNewNet)];
+        ceoExpenseChart.data.datasets[0].data = expData;
+        ceoExpenseChart.data.totalGross = totalGross > 0 ? totalGross : 1;
+        ceoExpenseChart.options.scales.y.suggestedMax = Math.max(...expData) * 1.30; 
+        ceoExpenseChart.update();
+
+        ceoProfitChart.data.labels = pLabels; ceoProfitChart.data.datasets[0].data = pData; ceoProfitChart.update();
+        ceoUnitChart.data.labels = uLabels; ceoUnitChart.data.datasets[0].data = uOld; ceoUnitChart.data.datasets[1].data = uNew; ceoUnitChart.update();
+        
+        ceoEfficiencyChart.data.labels = effLabels;
+        ceoEfficiencyChart.data.datasets = [
+            { label: 'COGS', data: effCogs, backgroundColor: '#333' }, { label: 'Market', data: effCac, backgroundColor: '#ff0033' },
+            { label: 'Affil', data: effAff, backgroundColor: '#ffcc00' }, { label: 'Labor', data: effLabor, backgroundColor: '#b000ff' },
+            { label: 'Warr', data: effWarr, backgroundColor: '#ff9900' }, { label: 'Logis', data: effLog, backgroundColor: '#00e5ff' },
+            { label: 'Fees', data: effStripe, backgroundColor: '#aaaaaa' }, { label: 'Net Profit', data: effNet, backgroundColor: '#00ff66' }
+        ];
+        ceoEfficiencyChart.update();
+
+        ceoLineChart.data.datasets = [
+            { label: 'Old Trajectory', borderColor: '#ff0033', data: [totalOldNet, totalOldNet*2, totalOldNet*5, totalOldNet*10], tension: 0.3 },
+            { label: 'New Trajectory', borderColor: '#00ff66', data: [totalNewNet, totalNewNet*2, totalNewNet*5, totalNewNet*10], tension: 0.3 }
+        ];
+        ceoLineChart.update();
+    } catch (e) {
+        sysLog("Engine Update Error: " + e.message, true);
+    }
 }
 
-// Attach listeners to global inputs
 document.addEventListener('DOMContentLoaded', () => {
     const cacSlider = document.getElementById('cacSlider');
     const cacNum = document.getElementById('cacNum');
