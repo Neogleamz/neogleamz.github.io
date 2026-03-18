@@ -3,7 +3,6 @@
 let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-// We only need the base names and whether to apply CAC. Everything else is pulled from DB or Sandbox.
 const ceoBaseMatrix = [
     { id: 'soulz', name: "SOULZ", applyCac: true },
     { id: 'railz', name: "RAILZ", applyCac: true },
@@ -53,31 +52,19 @@ function renderCeoTerminal() {
     sysLog("Booting CEO Terminal...");
     try {
         ceoActiveProducts = ceoBaseMatrix.map(base => {
-            let searchName = base.name.replace(" Only", "").toUpperCase();
-            let liveCogs = 0; let liveMsrp = 0; 
-            
-            // STRICT DB LOOKUP ONLY
-            if (typeof productsDB !== 'undefined' && productsDB) {
-                let matchedKey = Object.keys(productsDB).find(k => k.toUpperCase().includes(searchName));
-                if (matchedKey) {
-                    if (productsDB[matchedKey].msrp) liveMsrp = parseFloat(productsDB[matchedKey].msrp) || 0;
-                    if (productsDB[matchedKey].cogs) {
-                        liveCogs = parseFloat(productsDB[matchedKey].cogs) || 0;
-                    } else if (typeof calculateProductTotal === 'function') {
-                        liveCogs = calculateProductTotal(matchedKey);
-                    }
-                } else if (base.id === 'trap') {
-                    let bKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("BEAMZ"));
-                    let cKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("CLIPZ"));
-                    if(bKey && productsDB[bKey].msrp && cKey && productsDB[cKey].msrp) {
-                        liveMsrp = parseFloat(productsDB[bKey].msrp) + parseFloat(productsDB[cKey].msrp);
-                    }
-                    if(bKey && productsDB[bKey].cogs) liveCogs += parseFloat(productsDB[bKey].cogs);
-                    if(cKey && productsDB[cKey].cogs) liveCogs += parseFloat(productsDB[cKey].cogs);
-                }
+            let liveCogs = 0; 
+            let liveMsrp = 0; 
+
+            // --- POWERED BY THE MASTER ENGINE ---
+            if (base.id === 'trap') {
+                liveMsrp = getEngineLiveMsrp("BEAMZ") + getEngineLiveMsrp("CLIPZ");
+                liveCogs = getEngineTrueCogs("BEAMZ") + getEngineTrueCogs("CLIPZ");
+            } else {
+                liveMsrp = getEngineLiveMsrp(base.name);
+                liveCogs = getEngineTrueCogs(base.name);
             }
+            // ------------------------------------
             
-            // testMsrp starts by inheriting liveMsrp
             return { ...base, currentMsrp: liveMsrp, testMsrp: liveMsrp, cogs: liveCogs, vol: get30DayVolume(base.name), aff: 0, warr: 0 };
         });
 
@@ -107,7 +94,8 @@ function renderCeoTerminal() {
 
 function updateCeoEngine() {
     try {
-        const CC_RATE = 0.029, CC_FLAT = 0.30, SHIP_COST = 8.00;
+        // Asks the Master Engine for your global shipping cost!
+        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00; 
         
         let globalCac = parseFloat(document.getElementById('globalCacNum').value) || 0;
         
@@ -120,7 +108,6 @@ function updateCeoEngine() {
         let tableHtml = '';
 
         ceoActiveProducts.forEach(p => {
-            // Read UI Overrides
             let volInput = document.getElementById(`ceo-vol-${p.id}-num`); let vol = volInput ? (parseInt(volInput.value) || 0) : 0;
             let cb = document.getElementById(`ceo-cb-${p.id}`); p.applyCac = cb ? cb.checked : p.applyCac;
             let testMsrpInput = document.getElementById(`ceo-testmsrp-${p.id}`); p.testMsrp = testMsrpInput ? parseFloat(testMsrpInput.value) || 0 : p.testMsrp;
@@ -129,22 +116,20 @@ function updateCeoEngine() {
 
             let effectiveCac = p.applyCac ? globalCac : 0; 
 
-            // --- CURRENT REALITY MATH (Customer pays $8 ship) ---
+            // --- CURRENT REALITY MATH (Powered by Engine) ---
             let curCustPays = p.currentMsrp + SHIP_COST; 
-            let curStripeFee = (curCustPays * CC_RATE) + CC_FLAT;
-            // Company does not pay shipping or aff/warr in the old baseline calculation
+            let curStripeFee = getEngineStripeFee(curCustPays); 
             let curNet = p.currentMsrp - p.cogs - curStripeFee;
 
-            // --- TEST SCENARIO MATH (Free Shipping out of Test MSRP) ---
-            let testCustPays = p.testMsrp; 
-            let testStripeFee = (testCustPays * CC_RATE) + CC_FLAT;
+            // --- TEST SCENARIO MATH (Powered by Engine) ---
+            let testCustPays = p.testMsrp + SHIP_COST; 
+            let testStripeFee = getEngineStripeFee(testCustPays); 
             let testAffFee = p.testMsrp * (p.aff / 100);
             let testWarrFee = p.testMsrp * (p.warr / 100);
             let testNet = p.testMsrp - p.cogs - testStripeFee - SHIP_COST - testAffFee - testWarrFee - effectiveCac;
 
             let profitDelta = testNet - curNet;
 
-            // Aggregates based on TEST scenario (since that is what we are projecting)
             totalGross += (p.testMsrp * vol);
             totalCurrentNet += (curNet * vol);
             totalTestNet += (testNet * vol);
@@ -206,7 +191,6 @@ function updateCeoEngine() {
         document.getElementById('kpiNewNetPct').innerText = newMargin.toFixed(1) + "% Margin";
         document.getElementById('kpiNewNetPct').style.color = newMargin < 0 ? 'var(--neon-red)' : 'var(--neon-green)';
 
-        // Chart 1: The 7 true metrics
         let expData = [aggCogs, aggCac, aggAff, aggWarranty, aggShip, aggStripe, Math.max(0, totalTestNet)];
         ceoExpenseChart.data.datasets[0].data = expData;
         ceoExpenseChart.data.totalGross = totalGross > 0 ? totalGross : 1;
@@ -216,7 +200,6 @@ function updateCeoEngine() {
         ceoProfitChart.data.labels = pLabels; ceoProfitChart.data.datasets[0].data = pData; ceoProfitChart.update();
         ceoUnitChart.data.labels = uLabels; ceoUnitChart.data.datasets[0].data = uOld; ceoUnitChart.data.datasets[1].data = uNew; ceoUnitChart.update();
         
-        // Chart 4: 100% Stacked Bar
         ceoEfficiencyChart.data.labels = effLabels;
         ceoEfficiencyChart.data.datasets = [
             { label: 'True COGS', data: effCogs, backgroundColor: '#333' }, { label: 'Ads (CAC)', data: effCac, backgroundColor: '#ff0033' },
@@ -234,7 +217,6 @@ function updateCeoEngine() {
     } catch (e) { sysLog("Engine Update Error: " + e.message, true); }
 }
 
-// Global Sliders Wiring
 document.addEventListener('DOMContentLoaded', () => {
     const bindSync = (sliderId, numId, callback) => {
         const slider = document.getElementById(sliderId);
@@ -247,14 +229,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindSync('globalCacSlider', 'globalCacNum', updateCeoEngine);
     
-    // Global Affiliate Sync
     bindSync('globalAffSlider', 'globalAffNum', () => {
         let val = document.getElementById('globalAffNum').value;
         ceoActiveProducts.forEach(p => { let el = document.getElementById(`ceo-aff-${p.id}`); if(el) el.value = val; });
         updateCeoEngine();
     });
 
-    // Global Warranty Sync
     bindSync('globalWarrSlider', 'globalWarrNum', () => {
         let val = document.getElementById('globalWarrNum').value;
         ceoActiveProducts.forEach(p => { let el = document.getElementById(`ceo-warr-${p.id}`); if(el) el.value = val; });
