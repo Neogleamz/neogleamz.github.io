@@ -871,10 +871,10 @@
 	<div id="ceo-tab" class="tab-content" style="height: calc(100vh - 80px); overflow: hidden;">
     <style>
         #ceo-tab { --neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00; font-family: 'Inter', sans-serif; }
-        .ceo-terminal-grid { height: 100%; display: grid; grid-template-columns: 300px 1fr; gap: 15px; padding-bottom: 15px;}
-        .ceo-control-panel { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; height: 100%; overflow-y: auto; display: flex; flex-direction: column;}
-        .ceo-control-header { font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 12px; letter-spacing: 1px; }
-        .ceo-slider-group { margin-bottom: 10px; }
+        .ceo-terminal-grid { height: 100%; display: grid; grid-template-columns: 320px 1fr; gap: 20px; padding-bottom: 20px;}
+        .ceo-control-panel { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; height: 100%; overflow-y: auto; display: flex; flex-direction: column;}
+        .ceo-control-header { font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px; letter-spacing: 1px; }
+        .ceo-slider-group { margin-bottom: 15px; }
         .ceo-slider-label { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px; }
         .ceo-sync-input { background: transparent; border: 1px solid #333; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; width: 70px; text-align: right; padding: 2px 6px; border-radius: 4px; }
         .ceo-sync-input:focus { outline: none; border-color: var(--neon-cyan); }
@@ -883,7 +883,7 @@
         .ceo-global-slider input[type=range] { accent-color: var(--neon-purple); }
         .ceo-cac-toggle { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; cursor: pointer; margin-left: 8px; font-weight: 600; padding: 2px 6px; background: rgba(255,0,51,0.1); border-radius: 3px; border: 1px solid rgba(255,0,51,0.2); }
         .ceo-cac-toggle input { width: 11px; height: 11px; cursor: pointer; accent-color: var(--neon-cyan); margin: 0; }
-        .ceo-main-content { display: flex; flex-direction: column; height: 100%; gap: 20px; overflow-y: auto; padding-right: 5px; }
+        .ceo-main-content { display: flex; flex-direction: column; height: 100%; gap: 20px; min-height: 0; }
         .ceo-kpi-row { flex-shrink: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .ceo-kpi-card { background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
         .ceo-kpi-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
@@ -918,18 +918,8 @@
                 <div class="ceo-slider-label"><span>Global Warranty (%)</span> <input type="number" id="globalWarrNum" class="ceo-sync-input" value="0"></div>
                 <input type="range" id="globalWarrSlider" min="0" max="15" step="1" value="0">
             </div>
-            
-            <div class="ceo-slider-group ceo-global-slider" style="background: rgba(0, 229, 255, 0.05); border-color: rgba(0, 229, 255, 0.2);">
-                <div class="ceo-slider-label" style="justify-content: space-between; align-items: center; margin-bottom:0;">
-                    <span style="color:var(--neon-cyan)">Free Ship Threshold</span> 
-                    <div style="display:flex; align-items:center;">
-                        <span style="color:var(--neon-cyan); margin-right:4px;">$</span>
-                        <input type="number" id="ceo-fs-threshold" value="50" style="width: 50px; background: var(--bg-input); border: 1px solid var(--border-color); color: #fff; text-align: center; border-radius: 4px; padding: 2px;" onchange="updateCeoEngine()">
-                    </div>
-                </div>
-            </div>
 
-            <div class="ceo-control-header" style="margin-top: 15px;">Last 30 Days Vol (Dynamic)</div>
+            <div class="ceo-control-header" style="margin-top: 30px;">Last 30 Days Vol (Dynamic)</div>
             <div id="ceo-dynamic-sliders">
                 <!-- Sliders injected by JS -->
             </div>
@@ -944,10 +934,11 @@
             </div>
 
             <div class="ceo-charts-row">
-                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper"><canvas id="curEfficiencyChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
+                <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">1. Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
+                <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">2. Profit Contribution</div><div class="ceo-canvas-wrapper"><canvas id="profitChart"></canvas></div></div>
+                <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">3. Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">4. Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">5. Volume Trajectory</div><div class="ceo-canvas-wrapper"><canvas id="lineChart"></canvas></div></div>
             </div>
 
             <div class="ceo-table-container">
@@ -955,73 +946,31 @@
                 <table>
                     <thead>
     					<tr>
-        					<th onclick="sortCeoTable('name')" style="cursor:pointer;" title="Sort Name">Product Name ↕️</th>
-        					<th onclick="sortCeoTable('cogs')" style="font-weight:900; cursor:pointer;" title="Sort COGS">True COGS (Live) ↕️</th>
-        					<th onclick="sortCeoTable('currentMsrp')" style="color:#888; cursor:pointer;" title="Sort Current MSRP">Current MSRP ↕️</th>
-        					<th onclick="sortCeoTable('curShip')" style="color:#888; cursor:pointer;" title="Sort Cur. Ship">Cur. Ship ↕️</th>
-        					<th onclick="sortCeoTable('curStripe')" style="color:#888; cursor:pointer;" title="Sort Cur. Stripe">Cur. Stripe ↕️</th>
-        					<th onclick="sortCeoTable('curOOP')" style="color:#888; cursor:pointer;" title="Sort Cur. OOP">Cust OOP ↕️</th>
-        					<th onclick="sortCeoTable('curNet')" style="color:#ccc; cursor:pointer;" title="Sort Cur. Net">Current Net ↕️</th>
-        					<th onclick="sortCeoTable('testMsrp')" style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px; cursor:pointer;" title="Sort Test MSRP">Test MSRP ✏️ ↕️</th>
-        					<th onclick="sortCeoTable('testShip')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test Ship">Test Ship ↕️</th>
-        					<th onclick="sortCeoTable('testStripe')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test Stripe">Test Stripe ↕️</th>
-        					<th onclick="sortCeoTable('testOOP')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test OOP">Cust OOP ↕️</th>
-        					<th onclick="sortCeoTable('testNet')" class="val-green" style="font-weight:900; cursor:pointer;" title="Sort Test Net">Test Net ↕️</th>
+        					<th>Product Name</th>
+        					<th style="font-weight:900;">True COGS (Live)</th>
+        					<th style="color:#888;">Current MSRP</th>
+        					<th style="color:#888;">Cur. Stripe</th>
+        					<th style="color:#888;">Current OOP</th>
+        					<th style="color:#ccc;">Current Net</th>
+        					<th style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px;">Test MSRP ✏️</th>
+        					<th style="color:var(--neon-cyan);">Test Stripe</th>
+        					<th style="color:var(--neon-cyan);">Test OOP</th>
+        					<th class="val-green" style="font-weight:900;">Test Net</th>
     					</tr>
 					</thead>
 
-
+<div class="ceo-charts-row">
+    <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">1. Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
+    <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">2. Profit Contribution</div><div class="ceo-canvas-wrapper"><canvas id="profitChart"></canvas></div></div>
+    <div class="ceo-chart-box span-2"><div class="ceo-kpi-title">3. Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
+    <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">4. Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
+    <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">5. Volume Trajectory</div><div class="ceo-canvas-wrapper"><canvas id="lineChart"></canvas></div></div>
+</div>
                     <tbody id="ceo-dynamic-table">
                         <!-- Table rows injected by JS -->
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</div>
-
-<div id="ceoBundleModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
-    <div class="massive-container">
-        <div class="header-area" style="flex-shrink:0;">
-            <h2 style="margin:0; font-size:20px;">📦 Build Custom CEO Bundle</h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoBundleModal').style.display='none'">Close</button>
-        </div>
-        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
-            <label style="font-weight:bold;">Bundle Name:</label>
-            <input type="text" id="ceoBundleName" placeholder="e.g. Starter Kit" style="flex:1; padding:8px; font-size:15px;">
-        </div>
-        <input type="text" id="ceoBundleSearch" placeholder="🔍 Search retail products..." onkeyup="filterCeoBundleList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
-        <div class="table-wrap" id="ceoBundleTableWrap" style="overflow-y:auto; max-height:400px; padding-right:10px;"></div>
-        <div style="margin-top:15px; text-align:right; flex-shrink:0;">
-            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoBundle()">➕ Create Bundle & Add to Board</button>
-        </div>
-    </div>
-</div>
-
-<div id="ceoCustomModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
-    <div class="massive-container" style="max-width: 500px;">
-        <div class="header-area" style="flex-shrink:0;">
-            <h2 style="margin:0; font-size:20px;">🧪 Add Custom Test Item</h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoCustomModal').style.display='none'">Close</button>
-        </div>
-        <div style="margin-bottom:15px; display:flex; flex-direction:column; gap:15px;">
-            <div>
-                <label style="font-weight:bold; display:block; margin-bottom:5px;">Item Name:</label>
-                <input type="text" id="ceoCustomName" placeholder="e.g. Mystery Box" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
-            </div>
-            <div style="display:flex; gap:15px;">
-                <div style="flex:1;">
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">True COGS ($):</label>
-                    <input type="number" id="ceoCustomCogs" placeholder="0.00" min="0" step="0.01" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
-                </div>
-                <div style="flex:1;">
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Live MSRP ($):</label>
-                    <input type="number" id="ceoCustomMsrp" placeholder="0.00" min="0" step="0.01" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
-                </div>
-            </div>
-        </div>
-        <div style="margin-top:20px; text-align:right; flex-shrink:0;">
-            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoCustomItem()">➕ Add to Board</button>
         </div>
     </div>
 </div>
