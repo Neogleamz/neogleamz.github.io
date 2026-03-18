@@ -1,17 +1,9 @@
-// --- CEO TERMINAL: OPERATION APEX (CURRENT VS TEST) ---
+// --- CEO TERMINAL: OPERATION APEX (DYNAMIC CONTROL BOARD) ---
 
 let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-const ceoBaseMatrix = [
-    { id: 'soulz', name: "SOULZ", applyCac: true },
-    { id: 'railz', name: "RAILZ", applyCac: true },
-    { id: 'haloz', name: "HALOZ", applyCac: true },
-    { id: 'beamz', name: "BEAMZ Only", applyCac: false },
-    { id: 'clipz', name: "CLIPZ Only", applyCac: false },
-    { id: 'trap', name: "98¢ TRAP", applyCac: true }
-];
-
+// This array holds the products currently active on the CEO board
 let ceoActiveProducts = [];
 
 function get30DayVolume(productName) {
@@ -19,10 +11,11 @@ function get30DayVolume(productName) {
         if(typeof salesDB === 'undefined' || !salesDB || !Array.isArray(salesDB)) return 30; 
         let thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         let vol = 0;
+        let searchName = productName.toUpperCase().replace(" ONLY", "");
         salesDB.forEach(sale => {
             let saleDate = new Date(sale.sale_date);
             if (saleDate >= thirtyDaysAgo) {
-                if(sale.internal_recipe_name && sale.internal_recipe_name.toUpperCase().includes(productName.toUpperCase().replace(" ONLY", ""))) {
+                if(sale.internal_recipe_name && sale.internal_recipe_name.toUpperCase().includes(searchName)) {
                     vol += (parseFloat(sale.qty_sold) || 0);
                 }
             }
@@ -49,54 +42,127 @@ function initCeoCharts() {
 }
 
 function renderCeoTerminal() {
-    sysLog("Booting CEO Terminal...");
+    sysLog("Booting Dynamic CEO Terminal...");
     try {
-        ceoActiveProducts = ceoBaseMatrix.map(base => {
-            let liveCogs = 0; 
-            let liveMsrp = 0; 
-
-            // --- POWERED BY THE MASTER ENGINE ---
-            if (base.id === 'trap') {
-                liveMsrp = getEngineLiveMsrp("BEAMZ") + getEngineLiveMsrp("CLIPZ");
-                liveCogs = getEngineTrueCogs("BEAMZ") + getEngineTrueCogs("CLIPZ");
-            } else {
-                liveMsrp = getEngineLiveMsrp(base.name);
-                liveCogs = getEngineTrueCogs(base.name);
+        // 1. Build the Control Bar (Dropdown to add products)
+        let availableRetail = [];
+        let allKeys = Object.keys(productsDB || {});
+        
+        allKeys.forEach(k => {
+            let p = productsDB[k];
+            // Filter out sub-assemblies based on your database column
+            let isSub = p.is_subassembly === true || p.is_subassembly === "true" || p.is_subassembly === "TRUE";
+            if (!isSub) {
+                availableRetail.push(k);
             }
-            // ------------------------------------
-            
-            return { ...base, currentMsrp: liveMsrp, testMsrp: liveMsrp, cogs: liveCogs, vol: get30DayVolume(base.name), aff: 0, warr: 0 };
         });
 
-        let slidersHtml = '';
-        ceoActiveProducts.forEach(p => {
-            let isTrap = p.id === 'trap';
-            let bgStyle = isTrap ? 'padding: 10px; border-radius: 4px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0, 229, 255, 0.05);' : '';
-            let titleColor = isTrap ? 'color: var(--neon-cyan);' : '';
+        let controlHtml = `
+            <div style="background: var(--bg-surface-light); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <select id="ceo-product-select" class="ceo-sync-input" style="flex-grow: 1; min-width: 200px; padding: 8px;">
+                    <option value="">-- Select Retail Product to Add --</option>
+                    ${availableRetail.map(k => `<option value="${k}">${k}</option>`).join('')}
+                </select>
+                <button class="btn-blue" onclick="addCeoProductToBoard()" style="padding: 8px 15px;">+ Add to Board</button>
+                <div style="border-left: 1px solid #444; margin: 0 10px; height: 30px;"></div>
+                <button class="btn-yellow" onclick="addCustomBundleToBoard()" style="padding: 8px 15px;">+ Build Custom Bundle</button>
+            </div>
+        `;
+
+        // 2. Build the Sliders for Active Products
+        let slidersHtml = controlHtml;
+        
+        ceoActiveProducts.forEach((p, index) => {
+            let bgStyle = p.isBundle ? 'padding: 10px; border-radius: 4px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0, 229, 255, 0.05); position: relative;' : 'position: relative;';
+            let titleColor = p.isBundle ? 'color: var(--neon-cyan);' : '';
             
             slidersHtml += `
             <div class="ceo-slider-group" style="${bgStyle}">
+                <button onclick="removeCeoProduct(${index})" style="position: absolute; top: 0px; right: 0px; background: none; border: none; color: #ff0033; cursor: pointer; font-size: 16px; font-weight: bold;" title="Remove from board">×</button>
                 <div class="ceo-slider-label">
-                    <span style="display:flex; align-items:center; ${titleColor}">${p.name} <label class="ceo-cac-toggle"><input type="checkbox" id="ceo-cb-${p.id}" ${p.applyCac ? 'checked' : ''} onchange="updateCeoEngine()"> Ads</label></span>
-                    <input type="number" id="ceo-vol-${p.id}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${p.id}').value=this.value; updateCeoEngine();">
+                    <span style="display:flex; align-items:center; ${titleColor}">${p.name} <label class="ceo-cac-toggle" style="margin-left: 10px;"><input type="checkbox" id="ceo-cb-${index}" ${p.applyCac ? 'checked' : ''} onchange="updateCeoEngine()"> Ads</label></span>
+                    <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
                 </div>
-                <input type="range" id="ceo-vol-${p.id}" min="0" max="2000" step="1" value="${p.vol}" oninput="document.getElementById('ceo-vol-${p.id}-num').value=this.value; updateCeoEngine();">
+                <input type="range" id="ceo-vol-${index}" min="0" max="2000" step="1" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}-num').value=this.value; updateCeoEngine();">
             </div>`;
         });
         
         document.getElementById('ceo-dynamic-sliders').innerHTML = slidersHtml;
 
-        initCeoCharts();
+        if(!ceoExpenseChart) initCeoCharts();
         updateCeoEngine();
         sysLog("CEO Terminal Active.");
     } catch (error) { sysLog("CEO ERROR: " + error.message, true); }
 }
 
+function addCeoProductToBoard() {
+    let select = document.getElementById('ceo-product-select');
+    let pName = select.value;
+    if(!pName) return alert("Please select a product from the dropdown first.");
+    
+    // Prevent duplicates on the board
+    if(ceoActiveProducts.some(p => p.name === pName)) return alert("This product is already on the board.");
+
+    let liveMsrp = getEngineLiveMsrp(pName);
+    let liveCogs = getEngineTrueCogs(pName);
+    
+    // Pull your real defaults straight from Supabase!
+    let pData = productsDB[pName] || {};
+    let defAff = parseFloat(pData.affiliate_pct) || 0;
+    let defWarr = parseFloat(pData.warranty_pct) || 0;
+
+    ceoActiveProducts.push({
+        name: pName,
+        isBundle: false,
+        applyCac: true,
+        currentMsrp: liveMsrp,
+        testMsrp: liveMsrp,
+        cogs: liveCogs,
+        vol: get30DayVolume(pName),
+        aff: defAff,
+        warr: defWarr
+    });
+    
+    renderCeoTerminal();
+}
+
+function addCustomBundleToBoard() {
+    let bundleName = prompt("Enter a name for this custom bundle (e.g., '98¢ Trap'):");
+    if(!bundleName) return;
+    
+    let part1 = prompt("Enter the exact name of the first product in the bundle (e.g., 'Beamz'):");
+    let part2 = prompt("Enter the exact name of the second product in the bundle (e.g., 'Clipz'):");
+    
+    if(!part1 || !part2) return alert("You must provide two product names to build a bundle.");
+
+    let msrp1 = getEngineLiveMsrp(part1);
+    let msrp2 = getEngineLiveMsrp(part2);
+    let cogs1 = getEngineTrueCogs(part1);
+    let cogs2 = getEngineTrueCogs(part2);
+
+    ceoActiveProducts.push({
+        name: bundleName,
+        isBundle: true,
+        applyCac: true,
+        currentMsrp: msrp1 + msrp2,
+        testMsrp: msrp1 + msrp2,
+        cogs: cogs1 + cogs2,
+        vol: 30, // Default baseline for a new bundle test
+        aff: 0,
+        warr: 0
+    });
+    
+    renderCeoTerminal();
+}
+
+function removeCeoProduct(index) {
+    ceoActiveProducts.splice(index, 1);
+    renderCeoTerminal();
+}
+
 function updateCeoEngine() {
     try {
-        // Asks the Master Engine for your global shipping cost!
         const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00; 
-        
         let globalCac = parseFloat(document.getElementById('globalCacNum').value) || 0;
         
         let totalGross = 0, totalCurrentNet = 0, totalTestNet = 0;
@@ -107,21 +173,22 @@ function updateCeoEngine() {
 
         let tableHtml = '';
 
-        ceoActiveProducts.forEach(p => {
-            let volInput = document.getElementById(`ceo-vol-${p.id}-num`); let vol = volInput ? (parseInt(volInput.value) || 0) : 0;
-            let cb = document.getElementById(`ceo-cb-${p.id}`); p.applyCac = cb ? cb.checked : p.applyCac;
-            let testMsrpInput = document.getElementById(`ceo-testmsrp-${p.id}`); p.testMsrp = testMsrpInput ? parseFloat(testMsrpInput.value) || 0 : p.testMsrp;
-            let affInput = document.getElementById(`ceo-aff-${p.id}`); p.aff = affInput ? parseFloat(affInput.value) || 0 : p.aff;
-            let warrInput = document.getElementById(`ceo-warr-${p.id}`); p.warr = warrInput ? parseFloat(warrInput.value) || 0 : p.warr;
+        ceoActiveProducts.forEach((p, index) => {
+            let volInput = document.getElementById(`ceo-vol-${index}-num`); let vol = volInput ? (parseInt(volInput.value) || 0) : p.vol;
+            let cb = document.getElementById(`ceo-cb-${index}`); p.applyCac = cb ? cb.checked : p.applyCac;
+            let testMsrpInput = document.getElementById(`ceo-testmsrp-${index}`); p.testMsrp = testMsrpInput ? parseFloat(testMsrpInput.value) || 0 : p.testMsrp;
+            let affInput = document.getElementById(`ceo-aff-${index}`); p.aff = affInput ? parseFloat(affInput.value) || 0 : p.aff;
+            let warrInput = document.getElementById(`ceo-warr-${index}`); p.warr = warrInput ? parseFloat(warrInput.value) || 0 : p.warr;
+            
+            p.vol = vol; // Save back to state
 
             let effectiveCac = p.applyCac ? globalCac : 0; 
 
-            // --- CURRENT REALITY MATH (Powered by Engine) ---
+            // --- ENGINE POWERED MATH ---
             let curCustPays = p.currentMsrp + SHIP_COST; 
             let curStripeFee = getEngineStripeFee(curCustPays); 
             let curNet = p.currentMsrp - p.cogs - curStripeFee;
 
-            // --- TEST SCENARIO MATH (Powered by Engine) ---
             let testCustPays = p.testMsrp + SHIP_COST; 
             let testStripeFee = getEngineStripeFee(testCustPays); 
             let testAffFee = p.testMsrp * (p.aff / 100);
@@ -149,8 +216,7 @@ function updateCeoEngine() {
             effWarr.push((testWarrFee / base) * 100); effLog.push((SHIP_COST / base) * 100);
             effStripe.push((testStripeFee / base) * 100); effNet.push((Math.max(0, testNet) / base) * 100);
 
-            let isTrap = p.id === 'trap';
-            let rowStyle = isTrap ? 'background: rgba(0, 229, 255, 0.05);' : (testNet < curNet ? 'background: rgba(255, 0, 51, 0.1);' : '');
+            let rowStyle = p.isBundle ? 'background: rgba(0, 229, 255, 0.05);' : (testNet < curNet ? 'background: rgba(255, 0, 51, 0.1);' : '');
             let deltaCls = profitDelta < 0 ? 'val-red' : 'val-green';
             let testNetCls = testNet < 0 ? 'val-red' : 'val-green';
             
@@ -162,15 +228,19 @@ function updateCeoEngine() {
                 <td style="color:#888;">-${ceoFmt.format(curStripeFee)}</td>
                 <td style="color:#ccc;">${ceoFmt.format(curNet)}</td>
                 
-                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${p.id}" class="ceo-table-input" style="color:var(--neon-cyan); border-color:var(--neon-cyan);" value="${p.testMsrp.toFixed(2)}" step="0.01" onchange="updateCeoEngine()"></td>
+                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${index}" class="ceo-table-input" style="color:var(--neon-cyan); border-color:var(--neon-cyan);" value="${p.testMsrp.toFixed(2)}" step="0.01" onchange="updateCeoEngine()"></td>
                 <td style="color:#888;">-${ceoFmt.format(testStripeFee)}</td>
                 <td style="color:#888;">-${ceoFmt.format(SHIP_COST)}</td>
-                <td><input type="number" id="ceo-aff-${p.id}" class="ceo-table-input" style="width:50px;" value="${p.aff}" step="1" onchange="updateCeoEngine()"></td>
-                <td><input type="number" id="ceo-warr-${p.id}" class="ceo-table-input" style="width:50px;" value="${p.warr}" step="0.5" onchange="updateCeoEngine()"></td>
+                <td><input type="number" id="ceo-aff-${index}" class="ceo-table-input" style="width:50px;" value="${p.aff}" step="1" onchange="updateCeoEngine()"></td>
+                <td><input type="number" id="ceo-warr-${index}" class="ceo-table-input" style="width:50px;" value="${p.warr}" step="0.5" onchange="updateCeoEngine()"></td>
                 <td class="${testNetCls}" style="font-weight:900; font-size:0.9rem;">${ceoFmt.format(testNet)}</td>
                 <td class="${deltaCls}" style="font-weight:bold;">${profitDelta > 0 ? '+' : ''}${ceoFmt.format(profitDelta)}</td>
             </tr>`;
         });
+
+        if (ceoActiveProducts.length === 0) {
+            tableHtml = `<tr><td colspan="12" style="text-align:center; padding: 20px; color: #888;">No products on the board. Select a product from the dropdown to start simulating!</td></tr>`;
+        }
 
         document.getElementById('ceo-dynamic-table').innerHTML = tableHtml;
 
@@ -231,13 +301,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     bindSync('globalAffSlider', 'globalAffNum', () => {
         let val = document.getElementById('globalAffNum').value;
-        ceoActiveProducts.forEach(p => { let el = document.getElementById(`ceo-aff-${p.id}`); if(el) el.value = val; });
+        ceoActiveProducts.forEach((p, index) => { let el = document.getElementById(`ceo-aff-${index}`); if(el) el.value = val; });
         updateCeoEngine();
     });
 
     bindSync('globalWarrSlider', 'globalWarrNum', () => {
         let val = document.getElementById('globalWarrNum').value;
-        ceoActiveProducts.forEach(p => { let el = document.getElementById(`ceo-warr-${p.id}`); if(el) el.value = val; });
+        ceoActiveProducts.forEach((p, index) => { let el = document.getElementById(`ceo-warr-${index}`); if(el) el.value = val; });
         updateCeoEngine();
     });
 });
