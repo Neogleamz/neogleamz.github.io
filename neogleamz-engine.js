@@ -52,12 +52,10 @@ function getEngineTrueCogs(productName) {
 
     let cogs = 0;
     
-    // If a pre-calculated True COGS is hardcoded in the DB, use it
     if (productsDB[matchedKey].cogs) {
-        cogs = parseFloat(productsDB[matchedKey].cogs);
-    } 
-    // Otherwise, dynamically calculate Materials + Labor
-    else {
+        // Strip $ just in case
+        cogs = parseFloat(String(productsDB[matchedKey].cogs).replace(/[^0-9.-]+/g,""));
+    } else {
         let rawCost = typeof calculateProductTotal === 'function' ? calculateProductTotal(matchedKey) : 0;
         let labCost = 0;
         if (typeof laborDB !== 'undefined' && laborDB[matchedKey]) {
@@ -66,20 +64,26 @@ function getEngineTrueCogs(productName) {
         cogs = rawCost + labCost;
     }
     
-    return cogs;
+    return isNaN(cogs) ? 0.00 : cogs;
 }
 
 /**
  * 2. THE STICKER PRICE: LIVE MSRP
- * Hunts the database for the active website price.
+ * Hunts the database and strips out dollar signs/commas.
  */
 function getEngineLiveMsrp(productName) {
     let matchedKey = findMasterRecipeKey(productName);
     if (!matchedKey) return 0.00;
 
     let pData = productsDB[matchedKey];
-    // Hunts for any variation of the price column name
-    return parseFloat(pData.msrp || pData.price || pData.retail_price || pData.retailPrice || pData.MSRP) || 0.00;
+    
+    // Cast a wide net for whatever your Supabase column is actually called
+    let rawPrice = pData.msrp || pData.MSRP || pData.price || pData.retail_price || pData.retailPrice || pData.sale_price || 0;
+    
+    // Strip out any accidental $ or commas from the database string so JS can do math on it
+    let cleanPrice = parseFloat(String(rawPrice).replace(/[^0-9.-]+/g,""));
+    
+    return isNaN(cleanPrice) ? 0.00 : cleanPrice;
 }
 
 /**
@@ -103,7 +107,7 @@ function getEngineGrossMargin(productName) {
 }
 
 /**
- * 5. HISTORICAL ACTUALS: NET PROFIT (For Analytics/Sales)
+ * 5. HISTORICAL ACTUALS: NET PROFIT
  * The exact cash kept on a real, historical order.
  */
 function getHistoricalNetProfit(actualSalePrice, shippingCollected, taxCollected, totalDiscount, actualPostage, productName) {
@@ -111,6 +115,5 @@ function getHistoricalNetProfit(actualSalePrice, shippingCollected, taxCollected
     let stripeFee = getEngineStripeFee(totalCaptured);
     let cogs = getEngineTrueCogs(productName);
     
-    // Tax is subtracted because it is a liability pass-through, not kept revenue.
     return totalCaptured - taxCollected - stripeFee - actualPostage - cogs;
 }
