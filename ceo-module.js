@@ -1,6 +1,6 @@
-// --- CEO TERMINAL: OPERATION APEX 2.0 ---
+// --- CEO TERMINAL: OPERATION APEX 2.1 ---
 
-let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurrentEfficiencyChart;
+let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 // State Management
@@ -25,17 +25,15 @@ function get30DayVolume(productName) {
     } catch (e) { return 0; }
 }
 
-// Auto-populate board on first boot
 function autoPopulateCeoBoard() {
-    if (ceoActiveProducts.length > 0) return; // Don't overwrite if already set
-    
+    if (ceoActiveProducts.length > 0) return; 
     let prods = Object.keys(productsDB).filter(p => !isSubassemblyDB[p]);
     prods.forEach(pName => {
         let vol = get30DayVolume(pName);
         if (vol > 0) {
             let liveMsrp = getEngineLiveMsrp(pName);
             ceoActiveProducts.push({
-                name: pName, isBundle: false, applyCac: true, applyAff: true, applyWarr: true,
+                name: pName, isBundle: false, applyCac: false, applyAff: false, applyWarr: false,
                 currentMsrp: liveMsrp, testMsrp: liveMsrp, cogs: getEngineTrueCogs(pName), vol: vol
             });
         }
@@ -44,27 +42,23 @@ function autoPopulateCeoBoard() {
 
 function initCeoCharts() {
     Chart.defaults.color = '#e0e0e0'; Chart.defaults.font.family = "'JetBrains Mono', monospace";
-    const chartIds = ['expenseChart', 'profitChart', 'unitChart', 'efficiencyChart', 'currentEffChart'];
-    chartIds.forEach(id => { 
-        let chartVar = window['ceo' + id.charAt(0).toUpperCase() + id.slice(1)];
-        if(chartVar) chartVar.destroy(); 
-    });
-
-    const stackOptions = { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, y: { stacked: true, grid: {display: false} } }, plugins: { legend: { position: 'bottom' } } };
+    if(ceoExpenseChart) ceoExpenseChart.destroy(); if(ceoProfitChart) ceoProfitChart.destroy();
+    if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoLineChart) ceoLineChart.destroy();
 
     ceoExpenseChart = new Chart(document.getElementById('expenseChart'), {
         type: 'bar', plugins: [ChartDataLabels],
-        data: { labels: ['COGS', 'Ads', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'], datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'top', formatter: (v, c) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        data: { labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Test Net'], datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v, c) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { x: { grid: { display: false } }, y: { display: false } } }
     });
 
-    ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } } } });
-    ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: stackOptions });
-    ceoCurrentEfficiencyChart = new Chart(document.getElementById('currentEffChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: stackOptions });
+    ceoProfitChart = new Chart(document.getElementById('profitChart'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#00ff66', '#00e5ff', '#ffcc00', '#b000ff', '#ff0033', '#ffffff'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } } });
+    ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
+    ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, y: { stacked: true, grid: {display: false} } }, plugins: { legend: { position: 'bottom' } } } });
+    ceoLineChart = new Chart(document.getElementById('lineChart'), { type: 'line', data: { labels: ['Current Vol', '2x Scale', '5x Scale', '10x Scale'], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
 }
 
 function renderCeoTerminal() {
-    sysLog("Booting CEO Terminal 2.0...");
+    sysLog("Booting CEO Terminal...");
     autoPopulateCeoBoard();
     
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
@@ -85,9 +79,9 @@ function renderCeoTerminal() {
         const toggleStyle = (active) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; background: ${active ? 'rgba(0,255,102,0.1)' : 'rgba(255,0,51,0.1)'}; color: ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; margin-right: 4px;`;
         
         slidersHtml += `
-        <div class="ceo-slider-group" style="position: relative; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <button onclick="removeCeoProduct(${index})" style="position: absolute; top: 0px; right: 0px; background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold;">×</button>
-            <div class="ceo-slider-label">
+        <div class="ceo-slider-group" style="position: relative; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px;">
+            <button onclick="removeCeoProduct(${index})" style="position: absolute; top: -5px; right: 0px; background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold; font-size: 18px;">×</button>
+            <div class="ceo-slider-label" style="padding-right:20px;">
                 <span>${p.name}</span>
                 <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
             </div>
@@ -118,7 +112,7 @@ function updateCeoEngine() {
         let gWarr = parseFloat(document.getElementById('globalWarrNum').value) || 0;
         
         let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, aff:0, warr:0, ship:0, cac:0 };
-        let charts = { labels:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
+        let charts = { labels:[], pData:[], curNetData:[], testNetData:[], eff:[] };
 
         let tableHtml = '';
         ceoActiveProducts.forEach((p, index) => {
@@ -145,29 +139,28 @@ function updateCeoEngine() {
             totals.cogs += (p.cogs * p.vol); totals.stripe += (testStripe * p.vol); totals.aff += (testAffAmt * p.vol);
             totals.warr += (testWarrAmt * p.vol); totals.ship += (SHIP_COST * p.vol); totals.cac += (effCac * p.vol);
 
-            charts.labels.push(p.name.split(' ')[0]); charts.curNetData.push(curNet); charts.testNetData.push(testNet);
+            if(p.vol > 0 && testNet > 0) { charts.labels.push(p.name.split(' ')[0]); charts.pData.push(testNet * p.vol); }
+            charts.curNetData.push(curNet); charts.testNetData.push(testNet);
             
-            const calcEff = (msrp, cogs, cac, aff, warr, stripe, ship, net) => {
-                let b = msrp || 1;
-                return [(cogs/b)*100, (cac/b)*100, (aff/b)*100, (warr/b)*100, (ship/b)*100, (stripe/b)*100, (Math.max(0,net)/b)*100];
-            };
-            charts.eff.push(calcEff(p.testMsrp, p.cogs, effCac, testAffAmt, testWarrAmt, testStripe, SHIP_COST, testNet));
-            charts.curEff.push(calcEff(p.currentMsrp, p.cogs, 0, 0, 0, curStripe, 0, curNet));
+            let b = p.testMsrp || 1;
+            charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (SHIP_COST/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
 
             tableHtml += `
             <tr>
                 <td>${p.name}</td>
-                <td>${ceoFmt.format(p.cogs)}</td>
+                <td style="font-weight:700;">${ceoFmt.format(p.cogs)}</td>
+                <td style="color:#888;">${ceoFmt.format(p.currentMsrp)}</td>
+                <td style="color:#888;">${ceoFmt.format(curStripe)}</td>
                 <td style="color:#888;">${ceoFmt.format(curOOP)}</td>
                 <td style="color:#ccc;">${ceoFmt.format(curNet)}</td>
                 <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${index}" class="ceo-table-input" value="${p.testMsrp.toFixed(2)}" onchange="updateCeoEngine()"></td>
-                <td style="font-weight:bold; color:var(--neon-cyan);">${ceoFmt.format(testOOP)}</td>
+                <td style="color:var(--neon-cyan);">${ceoFmt.format(testStripe)}</td>
+                <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(testOOP)}</td>
                 <td class="${testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(testNet)}</td>
-                <td class="${testNet - curNet < 0 ? 'val-red' : 'val-green'}">${ceoFmt.format(testNet - curNet)}</td>
             </tr>`;
         });
 
-        document.getElementById('ceo-dynamic-table').innerHTML = tableHtml || '<tr><td colspan="8">No products active.</td></tr>';
+        document.getElementById('ceo-dynamic-table').innerHTML = tableHtml || '<tr><td colspan="10" style="text-align:center;">No products active.</td></tr>';
         
         // Update KPIs
         document.getElementById('kpiGross').innerText = ceoFmt.format(totals.gross).split('.')[0];
@@ -179,32 +172,31 @@ function updateCeoEngine() {
         ceoExpenseChart.data.datasets[0].data = [totals.cogs, totals.cac, totals.aff, totals.warr, totals.ship, totals.stripe, Math.max(0, totals.testNet)];
         ceoExpenseChart.update();
 
-        ceoUnitChart.data.labels = charts.labels;
-        ceoUnitChart.data.datasets[0].data = charts.curNetData;
-        ceoUnitChart.data.datasets[1].data = charts.testNetData;
-        ceoUnitChart.update();
+        ceoProfitChart.data.labels = charts.labels; ceoProfitChart.data.datasets[0].data = charts.pData; ceoProfitChart.update();
+        ceoUnitChart.data.labels = charts.labels; ceoUnitChart.data.datasets[0].data = charts.curNetData; ceoUnitChart.data.datasets[1].data = charts.testNetData; ceoUnitChart.update();
 
-        const updateStack = (chart, dataRows) => {
-            const colors = ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'];
-            const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
-            chart.data.labels = charts.labels;
-            chart.data.datasets = labels.map((l, i) => ({ label: l, data: dataRows.map(row => row[i]), backgroundColor: colors[i] }));
-            chart.update();
-        };
-        updateStack(ceoEfficiencyChart, charts.eff);
-        updateStack(ceoCurrentEfficiencyChart, charts.curEff);
+        const colors = ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'];
+        const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
+        ceoEfficiencyChart.data.labels = charts.labels;
+        ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i] }));
+        ceoEfficiencyChart.update();
+
+        ceoLineChart.data.datasets = [
+            { label: 'Current Trajectory', borderColor: '#aaaaaa', data: [totals.curNet, totals.curNet*2, totals.curNet*5, totals.curNet*10], tension: 0.3 },
+            { label: 'Test Trajectory', borderColor: '#00ff66', data: [totals.testNet, totals.testNet*2, totals.testNet*5, totals.testNet*10], tension: 0.3 }
+        ];
+        ceoLineChart.update();
 
         saveCeoBoard();
     } catch (e) { console.error(e); }
 }
 
-// Global Slider Listeners
 document.addEventListener('DOMContentLoaded', () => {
     ['globalCac', 'globalAff', 'globalWarr'].forEach(id => {
         const s = document.getElementById(id + 'Slider');
         const n = document.getElementById(id + 'Num');
         if(s && n) {
-            s.value = 0; n.value = 0; // Default to 0
+            s.value = 0; n.value = 0; 
             s.addEventListener('input', () => { n.value = s.value; updateCeoEngine(); });
             n.addEventListener('input', () => { s.value = n.value; updateCeoEngine(); });
         }
@@ -214,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function addCeoProductToBoard() {
     let pName = document.getElementById('ceo-product-select').value;
     if(!pName || ceoActiveProducts.some(p => p.name === pName)) return;
-    ceoActiveProducts.push({ name:pName, isBundle:false, applyCac:true, applyAff:true, applyWarr:true, currentMsrp:getEngineLiveMsrp(pName), testMsrp:getEngineLiveMsrp(pName), cogs:getEngineTrueCogs(pName), vol:30 });
+    ceoActiveProducts.push({ name:pName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:getEngineLiveMsrp(pName), testMsrp:getEngineLiveMsrp(pName), cogs:getEngineTrueCogs(pName), vol:0 });
     renderCeoTerminal();
 }
 
