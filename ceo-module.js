@@ -94,12 +94,8 @@ function initCeoCharts() {
                         let pc = ctx.raw;
                         let activeP = ceoActiveProducts[ctx.dataIndex];
                         if(!activeP) return `${ctx.dataset.label}: ${pc.toFixed(1)}%`;
-                        let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
-                        let SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-                        let curOOP = (activeP.currentMsrp || 1) + SHIP_COST;
-                        let testOOP = (activeP.testMsrp || 1) >= fsThreshold ? (activeP.testMsrp || 1) : ((activeP.testMsrp || 1) + SHIP_COST);
-                        let b = isCurrent ? curOOP : testOOP;
-                        let dol = (pc / 100) * b;
+                        let bs = isCurrent ? (activeP.currentMsrp || 1) : (activeP.testMsrp || 1);
+                        let dol = (pc / 100) * bs;
                         return `${ctx.dataset.label}: ${ceoFmt.format(dol)} (${pc.toFixed(1)}%)`;
                     }
                 }
@@ -115,12 +111,8 @@ function initCeoCharts() {
                     let activeP = ceoActiveProducts[ctx.dataIndex];
                     if(!activeP) return `${value.toFixed(1)}%`;
                     let isCurrent = ctx.chart.canvas.id === 'curEfficiencyChart';
-                    let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
-                    let SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-                    let curOOP = (activeP.currentMsrp || 1) + SHIP_COST;
-                    let testOOP = (activeP.testMsrp || 1) >= fsThreshold ? (activeP.testMsrp || 1) : ((activeP.testMsrp || 1) + SHIP_COST);
-                    let b = isCurrent ? curOOP : testOOP;
-                    let dol = (value / 100) * b;
+                    let bs = isCurrent ? (activeP.currentMsrp || 1) : (activeP.testMsrp || 1);
+                    let dol = (value / 100) * bs;
                     return `${ceoFmt.format(dol)}\n(${value.toFixed(1)}%)`;
                 },
                 align: 'center', 
@@ -229,11 +221,13 @@ function updateCeoEngine() {
             charts.curNetData.push(curNet); 
             charts.testNetData.push(testNet);
             
-            let b = testOOP || 1;
-            charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (SHIP_COST/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
+            let merchantShipTest = appliesTestFs ? SHIP_COST : 0;
+            let b = p.testMsrp || 1;
+            charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (merchantShipTest/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
 
-            let curB = curOOP || 1;
-            charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curAffAmt/curB)*100, (curWarrAmt/curB)*100, (SHIP_COST/curB)*100, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
+            let merchantShipCur = 0; // Customer always pays shipping in baseline
+            let curB = p.currentMsrp || 1;
+            charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curAffAmt/curB)*100, (curWarrAmt/curB)*100, (merchantShipCur/curB)*100, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
 
             tableRows.push({
                 index: index, name: p.name, cogs: p.cogs, currentMsrp: p.currentMsrp, curShip: SHIP_COST, curStripe: curStripe, curOOP: curOOP, curNet: curNet, testMsrp: p.testMsrp, testShip: SHIP_COST, testStripe: testStripe, testOOP: testOOP, testNet: testNet
