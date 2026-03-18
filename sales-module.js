@@ -42,80 +42,9 @@ async function addManualSale() {
         ['manualSaleId', 'manualSalePrice', 'manualSaleSubtot', 'manualSaleShip', 'manualSaleTax', 'manualSaleDiscCode', 'manualSaleDisc', 'manualSaleTotal'].forEach(el => document.getElementById(el).value = "");
         setMasterStatus("Sale Added!", "mod-success"); 
         
-        function renderSalesTable() {
-    let wrap = document.getElementById('salesTableWrap'); if(!wrap) return;
-    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty Sold</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='sub'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('sub')">Subtotal</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax</th> <th class="${currentSalesSort.column==='dcode'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('dcode')">Disc Code</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Disc Amt</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS (Live)</th> `;
-    let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
-    let a = [...salesDB];
-    if(a.length===0){ h += "<tr><td colspan='13' style='text-align:center;'>No sales synced yet.</td></tr>"; }
-    else {
-        a.sort((x,y) => { let map = {d:'sale_date', o:'order_id', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'cogs_at_sale', sub:'subtotal', ship:'shipping', tax:'taxes', dcode:'discount_code', disc:'discount_amount', tot:'total'}; let col = map[currentSalesSort.column]; let u = x[col]; let v = y[col]; if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentSalesSort.direction==='asc'?-1:1; if(u>v) return currentSalesSort.direction==='asc'?1:-1; return 0; });
-        
-        a.forEach(x => { 
-            let safeSku = String(x.storefront_sku).replace(/'/g, "\\'");
-            
-            // --- DYNAMIC LIVE COGS OVERRIDE START ---
-            let liveCogs = parseFloat(x.cogs_at_sale) || 0; 
-            let searchName = (x.internal_recipe_name || "").toUpperCase().replace(" ONLY", "");
-
-            if (typeof productsDB !== 'undefined' && productsDB && searchName) {
-                let allKeys = Object.keys(productsDB);
-                
-                // 1. Exact match
-                let matchedKey = allKeys.find(k => k.toUpperCase() === searchName);
-                
-                // 2. Smart match (Ignore raw parts)
-                if (!matchedKey) {
-                    matchedKey = allKeys.find(k => {
-                        let upK = k.toUpperCase();
-                        return upK.includes(searchName) && 
-                               !upK.includes("BOX") && 
-                               !upK.includes("ACCESSOR") && 
-                               !upK.includes("BUNDLE") && 
-                               !upK.includes("PART");
-                    });
-                }
-                
-                // 3. Fallback match
-                if (!matchedKey) {
-                    matchedKey = allKeys.find(k => k.toUpperCase().includes(searchName));
-                }
-
-                // 4. Calculate True Live COGS
-                if (matchedKey) {
-                    if (productsDB[matchedKey].cogs) {
-                        liveCogs = parseFloat(productsDB[matchedKey].cogs);
-                    } else if (typeof calculateProductTotal === 'function') {
-                        let rawCost = calculateProductTotal(matchedKey);
-                        let labCost = 0;
-                        if (typeof laborDB !== 'undefined' && laborDB[matchedKey]) {
-                            labCost = (parseFloat(laborDB[matchedKey].time)/60) * parseFloat(laborDB[matchedKey].rate);
-                        }
-                        liveCogs = rawCost + labCost;
-                    }
-                }
-            }
-            // --- DYNAMIC LIVE COGS OVERRIDE END ---
-
-            h += `<tr>
-            <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'sale_date', false)" style="color:var(--text-muted);">${x.sale_date}</td>
-            <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'order_id', false)" style="font-weight:bold;">${x.order_id}</td>
-            <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'storefront_sku', false)">${x.storefront_sku}</td>
-            <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'qty_sold', true)" style="font-weight:bold;">${x.qty_sold}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'actual_sale_price', true)" style="color:#10b981;">$${parseFloat(x.actual_sale_price).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'subtotal', true)" style="color:var(--text-muted);">$${parseFloat(x.subtotal || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'shipping', true)" style="color:var(--text-muted);">$${parseFloat(x.shipping || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'taxes', true)" style="color:var(--text-muted);">$${parseFloat(x.taxes || 0).toFixed(2)}</td>
-            <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_code', false)" style="color:#f59e0b;">${x.discount_code || ''}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_amount', true)" style="color:#ef4444;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'total', true)" style="font-weight:bold;">$${parseFloat(x.total || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'cogs_at_sale', true)" style="color:#ef4444; font-weight:bold;">$${liveCogs.toFixed(2)}</td>
-            </tr>`; 
-        });
-    }
-    wrap.innerHTML = h + `</tbody></table>`; 
-    if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
+        renderSalesTable(); renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('analytics-tab').classList.contains('active')) renderAnalyticsDashboard();
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); alert("Error adding manual sale: \n" + e.message); }
 }
 
 async function processSalesCSV() {
@@ -261,9 +190,12 @@ function renderSalesTable() {
     let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty Sold</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='sub'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('sub')">Subtotal</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax</th> <th class="${currentSalesSort.column==='dcode'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('dcode')">Disc Code</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Disc Amt</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS (Live)</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     let a = [...salesDB];
-    if(a.length===0){ h += "<tr><td colspan='13' style='text-align:center;'>No sales synced yet.</td></tr>"; }
-    else {
+    
+    if(a.length===0){ 
+        h += "<tr><td colspan='13' style='text-align:center;'>No sales synced yet.</td></tr>"; 
+    } else {
         a.sort((x,y) => { let map = {d:'sale_date', o:'order_id', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'cogs_at_sale', sub:'subtotal', ship:'shipping', tax:'taxes', dcode:'discount_code', disc:'discount_amount', tot:'total'}; let col = map[currentSalesSort.column]; let u = x[col]; let v = y[col]; if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentSalesSort.direction==='asc'?-1:1; if(u>v) return currentSalesSort.direction==='asc'?1:-1; return 0; });
+        
         a.forEach(x => { 
             let safeSku = String(x.storefront_sku).replace(/'/g, "\\'");
             
@@ -323,10 +255,13 @@ function renderSalesTable() {
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_code', false)" style="color:#f59e0b;">${x.discount_code || ''}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_amount', true)" style="color:#ef4444;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'total', true)" style="font-weight:bold;">$${parseFloat(x.total || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'cogs_at_sale', true)" style="color:#ef4444;">$${liveCogs.toFixed(2)}</td>
+            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'cogs_at_sale', true)" style="color:#ef4444; font-weight:bold;">$${liveCogs.toFixed(2)}</td>
             </tr>`; 
         });
-    wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('salesTableWrap');
+    }
+    
+    wrap.innerHTML = h + `</tbody></table>`; 
+    if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
 }
 
 async function updateSaleCell(cell, orderId, sku, col, isNum) {
