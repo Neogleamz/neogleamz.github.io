@@ -196,41 +196,37 @@ function updateCeoEngine() {
 
             let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
 
-            // Math: Current (Customer ALWAYS pays shipping)
-            let curOOP = p.currentMsrp + SHIP_COST;
-            let curStripe = getEngineStripeFee(curOOP);
-            let curAffAmt = p.currentMsrp * (effAff / 100);
-            let curWarrAmt = p.currentMsrp * (effWarr / 100);
-            let curNet = curOOP - p.cogs - curStripe - SHIP_COST - curAffAmt - curWarrAmt - effCac;
+            // Math: Current (Customer ALWAYS pays shipping - infinite threshold)
+            let curMetrics = getEnginePredictiveMetrics(p.currentMsrp, p.cogs, 999999, effCac, effAff, effWarr);
 
             // Math: Test (Free Shipping Threshold)
-            let appliesTestFs = p.testMsrp >= fsThreshold;
-            let testOOP = appliesTestFs ? p.testMsrp : (p.testMsrp + SHIP_COST);
-            let testStripe = getEngineStripeFee(testOOP);
-            let testAffAmt = p.testMsrp * (effAff / 100);
-            let testWarrAmt = p.testMsrp * (effWarr / 100);
-            let testNet = testOOP - p.cogs - testStripe - SHIP_COST - testAffAmt - testWarrAmt - effCac;
+            let testMetrics = getEnginePredictiveMetrics(p.testMsrp, p.cogs, fsThreshold, effCac, effAff, effWarr);
 
-            totals.gross += (p.testMsrp * p.vol); totals.curNet += (curNet * p.vol); totals.testNet += (testNet * p.vol);
-            totals.cogs += (p.cogs * p.vol); totals.stripe += (testStripe * p.vol); totals.curStripe += (curStripe * p.vol);
-            totals.aff += (testAffAmt * p.vol); totals.curAff += (curAffAmt * p.vol);
-            totals.warr += (testWarrAmt * p.vol); totals.curWarr += (curWarrAmt * p.vol);
-            totals.ship += (SHIP_COST * p.vol); totals.cac += (effCac * p.vol);
+            totals.gross += (p.testMsrp * p.vol); 
+            totals.curNet += (curMetrics.net * p.vol); 
+            totals.testNet += (testMetrics.net * p.vol);
+            totals.cogs += (p.cogs * p.vol); 
+            totals.stripe += (testMetrics.stripe * p.vol); 
+            totals.curStripe += (curMetrics.stripe * p.vol);
+            totals.aff += (testMetrics.aff * p.vol); 
+            totals.curAff += (curMetrics.aff * p.vol);
+            totals.warr += (testMetrics.warr * p.vol); 
+            totals.curWarr += (curMetrics.warr * p.vol);
+            totals.ship += (testMetrics.ship * p.vol); 
+            totals.cac += (effCac * p.vol);
 
             charts.labels.push(p.name);
-            charts.curNetData.push(curNet); 
-            charts.testNetData.push(testNet);
+            charts.curNetData.push(curMetrics.net); 
+            charts.testNetData.push(testMetrics.net);
             
-            let merchantShipTest = appliesTestFs ? SHIP_COST : 0;
             let b = p.testMsrp || 1;
-            charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (merchantShipTest/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
+            charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testMetrics.aff/b)*100, (testMetrics.warr/b)*100, (testMetrics.merchantShipMargin/b)*100, (testMetrics.stripe/b)*100, (Math.max(0,testMetrics.net)/b)*100]);
 
-            let merchantShipCur = 0; // Customer always pays shipping in baseline
             let curB = p.currentMsrp || 1;
-            charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curAffAmt/curB)*100, (curWarrAmt/curB)*100, (merchantShipCur/curB)*100, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
+            charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curMetrics.aff/curB)*100, (curMetrics.warr/curB)*100, (curMetrics.merchantShipMargin/curB)*100, (curMetrics.stripe/curB)*100, (Math.max(0,curMetrics.net)/curB)*100]);
 
             tableRows.push({
-                index: index, name: p.name, cogs: p.cogs, currentMsrp: p.currentMsrp, curShip: SHIP_COST, curStripe: curStripe, curOOP: curOOP, curNet: curNet, testMsrp: p.testMsrp, testShip: SHIP_COST, testStripe: testStripe, testOOP: testOOP, testNet: testNet
+                index: index, name: p.name, cogs: p.cogs, currentMsrp: p.currentMsrp, curShip: curMetrics.ship, curStripe: curMetrics.stripe, curOOP: curMetrics.oop, curNet: curMetrics.net, testMsrp: p.testMsrp, testShip: testMetrics.ship, testStripe: testMetrics.stripe, testOOP: testMetrics.oop, testNet: testMetrics.net
             });
         });
 
