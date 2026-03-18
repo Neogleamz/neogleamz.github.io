@@ -305,4 +305,26 @@ function addCeoProductToBoard() {
     renderCeoTerminal();
 }
 
+function addCustomBundleToBoard() {
+    let bName = prompt("Enter a name for this Custom Bundle:");
+    if (!bName) return;
+    bName = "📦 " + bName.trim();
+    
+    if (ceoActiveProducts.some(p => p.name === bName)) {
+        alert("A bundle with this name already exists on the board.");
+        return;
+    }
+    
+    let cogsInput = prompt(`Enter True COGS for ${bName}:`, "0.00");
+    if (cogsInput === null) return;
+    let cogs = parseFloat(cogsInput) || 0;
+    
+    let msrpInput = prompt(`Enter Current MSRP for ${bName}:`, "0.00");
+    if (msrpInput === null) return;
+    let msrp = parseFloat(msrpInput) || 0;
+    
+    ceoActiveProducts.push({ name: bName, isBundle: true, applyCac: false, applyAff: false, applyWarr: false, currentMsrp: msrp, testMsrp: msrp, cogs: cogs, vol: 0 });
+    renderCeoTerminal();
+}
+
 function removeCeoProduct(idx) { ceoActiveProducts.splice(idx, 1); renderCeoTerminal(); }
