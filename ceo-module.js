@@ -3,6 +3,28 @@
 let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
+// Global Drag & Drop + Sorting State
+let ceoDraggedIndex = null;
+let ceoSortKey = null;
+let ceoSortAsc = true;
+
+function ceoDragStart(e, idx) { ceoDraggedIndex = idx; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => e.target.style.opacity = '0.4', 0); }
+function ceoDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function ceoDrop(e, targetIdx) {
+    e.preventDefault(); e.currentTarget.style.opacity = '1';
+    if(ceoDraggedIndex === null || ceoDraggedIndex === targetIdx) return;
+    const moved = ceoActiveProducts.splice(ceoDraggedIndex, 1)[0];
+    ceoActiveProducts.splice(targetIdx, 0, moved);
+    renderCeoTerminal();
+}
+function ceoDragEnd(e) { e.target.style.opacity = '1'; ceoDraggedIndex = null; }
+
+function sortCeoTable(key) {
+    if(ceoSortKey === key) ceoSortAsc = !ceoSortAsc;
+    else { ceoSortKey = key; ceoSortAsc = true; }
+    updateCeoEngine();
+}
+
 // State Management
 if (typeof ceoActiveProducts === 'undefined') window.ceoActiveProducts = [];
 
@@ -129,9 +151,9 @@ function renderCeoTerminal() {
         const toggleStyle = (active) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; background: ${active ? 'rgba(0,255,102,0.1)' : 'rgba(255,0,51,0.1)'}; color: ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; margin-right: 4px;`;
         
         slidersHtml += `
-        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px;">
+        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px; cursor:grab;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
             <div class="ceo-slider-label">
-                <span>${p.name}</span>
+                <span title="Drag to reorder">☰ ${p.name}</span>
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
                     <button onclick="removeCeoProduct(${index})" title="Remove Product" style="background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold; font-size: 20px; padding: 0; line-height: 1;">×</button>
@@ -166,7 +188,7 @@ function updateCeoEngine() {
         let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, curStripe:0, aff:0, curAff:0, warr:0, curWarr:0, ship:0, cac:0 };
         let charts = { labels:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
 
-        let tableHtml = '';
+        let tableRows = [];
         ceoActiveProducts.forEach((p, index) => {
             p.vol = parseInt(document.getElementById(`ceo-vol-${index}-num`)?.value) || 0;
             p.testMsrp = parseFloat(document.getElementById(`ceo-testmsrp-${index}`)?.value) || p.testMsrp;
@@ -205,18 +227,33 @@ function updateCeoEngine() {
             let curB = p.currentMsrp || 1;
             charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curAffAmt/curB)*100, (curWarrAmt/curB)*100, (SHIP_COST/curB)*100, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
 
+            tableRows.push({
+                index: index, name: p.name, cogs: p.cogs, currentMsrp: p.currentMsrp, curStripe: curStripe, curOOP: curOOP, curNet: curNet, testMsrp: p.testMsrp, testStripe: testStripe, testOOP: testOOP, testNet: testNet
+            });
+        });
+
+        if(ceoSortKey) {
+            tableRows.sort((a,b) => {
+                let valA = a[ceoSortKey]; let valB = b[ceoSortKey];
+                if(typeof valA === 'string') return ceoSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                return ceoSortAsc ? valA - valB : valB - valA;
+            });
+        }
+
+        let tableHtml = '';
+        tableRows.forEach(r => {
             tableHtml += `
             <tr>
-                <td>${p.name}</td>
-                <td style="font-weight:700;">${ceoFmt.format(p.cogs)}</td>
-                <td style="color:#888;">${ceoFmt.format(p.currentMsrp)}</td>
-                <td style="color:#888;">${ceoFmt.format(curStripe)}</td>
-                <td style="color:#888;">${ceoFmt.format(curOOP)}</td>
-                <td style="color:#ccc;">${ceoFmt.format(curNet)}</td>
-                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${index}" class="ceo-table-input" value="${p.testMsrp.toFixed(2)}" onchange="updateCeoEngine()"></td>
-                <td style="color:var(--neon-cyan);">${ceoFmt.format(testStripe)}</td>
-                <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(testOOP)}</td>
-                <td class="${testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(testNet)}</td>
+                <td>${r.name}</td>
+                <td style="font-weight:700;">${ceoFmt.format(r.cogs)}</td>
+                <td style="color:#888;">${ceoFmt.format(r.currentMsrp)}</td>
+                <td style="color:#888;">${ceoFmt.format(r.curStripe)}</td>
+                <td style="color:#888;">${ceoFmt.format(r.curOOP)}</td>
+                <td style="color:#ccc;">${ceoFmt.format(r.curNet)}</td>
+                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${r.index}" class="ceo-table-input" value="${r.testMsrp.toFixed(2)}" onchange="updateCeoEngine()"></td>
+                <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testStripe)}</td>
+                <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(r.testOOP)}</td>
+                <td class="${r.testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(r.testNet)}</td>
             </tr>`;
         });
 
