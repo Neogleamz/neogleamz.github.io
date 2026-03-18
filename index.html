@@ -883,7 +883,7 @@
         .ceo-global-slider input[type=range] { accent-color: var(--neon-purple); }
         .ceo-cac-toggle { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; cursor: pointer; margin-left: 8px; font-weight: 600; padding: 2px 6px; background: rgba(255,0,51,0.1); border-radius: 3px; border: 1px solid rgba(255,0,51,0.2); }
         .ceo-cac-toggle input { width: 11px; height: 11px; cursor: pointer; accent-color: var(--neon-cyan); margin: 0; }
-        .ceo-main-content { display: flex; flex-direction: column; height: 100%; gap: 20px; min-height: 0; }
+        .ceo-main-content { display: flex; flex-direction: column; height: 100%; gap: 20px; overflow-y: auto; padding-right: 5px; }
         .ceo-kpi-row { flex-shrink: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .ceo-kpi-card { background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
         .ceo-kpi-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
@@ -934,10 +934,10 @@
             </div>
 
             <div class="ceo-charts-row">
-                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper"><canvas id="curEfficiencyChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper"><canvas id="curEfficiencyChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 300px;"><div class="ceo-kpi-title">Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
             </div>
 
             <div class="ceo-table-container">
