@@ -997,6 +997,34 @@
         </div>
     </div>
 </div>
+
+<div id="ceoCustomModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div class="massive-container" style="max-width: 500px;">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:20px;">🧪 Add Custom Test Item</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoCustomModal').style.display='none'">Close</button>
+        </div>
+        <div style="margin-bottom:15px; display:flex; flex-direction:column; gap:15px;">
+            <div>
+                <label style="font-weight:bold; display:block; margin-bottom:5px;">Item Name:</label>
+                <input type="text" id="ceoCustomName" placeholder="e.g. Mystery Box" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
+            </div>
+            <div style="display:flex; gap:15px;">
+                <div style="flex:1;">
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">True COGS ($):</label>
+                    <input type="number" id="ceoCustomCogs" placeholder="0.00" min="0" step="0.01" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Live MSRP ($):</label>
+                    <input type="number" id="ceoCustomMsrp" placeholder="0.00" min="0" step="0.01" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:20px; text-align:right; flex-shrink:0;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoCustomItem()">➕ Add to Board</button>
+        </div>
+    </div>
+</div>
 <script src="neogleamz-engine.js"></script>
 <script src="system-tools-module.js?v=1"></script>
 <script src="bom-module.js?v=1"></script>
