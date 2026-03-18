@@ -74,19 +74,26 @@ function initCeoCharts() {
                 }
             },
             datalabels: {
-                color: '#fff',
-                textStrokeColor: '#000',
-                textStrokeWidth: 2,
-                font: { weight: 'bold', size: 10, family: "'JetBrains Mono', monospace" },
+                color: function(ctx) { return ctx.dataset.backgroundColor; },
+                backgroundColor: 'rgba(20,20,20,0.95)',
+                borderColor: function(ctx) { return ctx.dataset.backgroundColor; },
+                borderWidth: 1,
+                borderRadius: 4,
+                padding: { top: 3, bottom: 3, left: 4, right: 4 },
+                font: { weight: 'bold', size: 9, family: "'JetBrains Mono', monospace" },
                 formatter: function(value, ctx) {
-                    if (value < 3) return '';
+                    if (value < 2) return '';
                     let activeP = ceoActiveProducts[ctx.dataIndex];
                     if(!activeP) return `${value.toFixed(1)}%`;
+                    let isCurrent = ctx.chart.canvas.id === 'curEfficiencyChart';
                     let b = isCurrent ? (activeP.currentMsrp || 1) : (activeP.testMsrp || 1);
                     let dol = (value / 100) * b;
-                    return `${ceoFmt.format(dol)}\n(${value.toFixed(1)}%)`;
+                    return `${ceoFmt.format(dol)}\n${value.toFixed(1)}%`;
                 },
-                align: 'center', anchor: 'center', textAlign: 'center'
+                align: 'top', 
+                anchor: 'center', 
+                offset: 2,
+                textAlign: 'center'
             }
         }
     });
@@ -224,11 +231,11 @@ function updateCeoEngine() {
         const colors = ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'];
         const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
         ceoEfficiencyChart.data.labels = charts.labels;
-        ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i] }));
+        ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i], barPercentage: 0.5 }));
         ceoEfficiencyChart.update();
 
         ceoCurEfficiencyChart.data.labels = charts.labels;
-        ceoCurEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.curEff.map(row => row[i]), backgroundColor: colors[i] }));
+        ceoCurEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.curEff.map(row => row[i]), backgroundColor: colors[i], barPercentage: 0.5 }));
         ceoCurEfficiencyChart.update();
 
         ceoLineChart.data.datasets = [
