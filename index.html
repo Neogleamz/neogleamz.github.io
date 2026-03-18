@@ -726,7 +726,16 @@
                 productsDB = {}; laborDB = {}; pricingDB = {}; isSubassemblyDB = {};
                 pR.data.forEach(r => { 
                     try { 
-                        productsDB[r.product_name] = r.components || []; 
+                        // Attach the new columns directly to the components array object
+                        // so the Master Engine can find them!
+                        let comps = r.components || [];
+                        comps.msrp = parseFloat(r.msrp) || 0;
+                        comps.is_subassembly = !!r.is_subassembly;
+                        comps.affiliate_pct = parseFloat(r.affiliate_pct) || 0;
+                        comps.warranty_pct = parseFloat(r.warranty_pct) || 0;
+                        
+                        productsDB[r.product_name] = comps; 
+                        
                         laborDB[r.product_name] = { time: parseFloat(r.labor_time_mins) || 0, rate: parseFloat(r.labor_rate_hr) || 0 }; 
                         pricingDB[r.product_name] = { msrp: parseFloat(r.msrp) || 0, wholesale: parseFloat(r.wholesale_price) || 0 };
                         isSubassemblyDB[r.product_name] = !!r.is_subassembly;
