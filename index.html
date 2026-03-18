@@ -979,6 +979,24 @@
         </div>
     </div>
 </div>
+
+<div id="ceoBundleModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div class="massive-container">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:20px;">📦 Build Custom CEO Bundle</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoBundleModal').style.display='none'">Close</button>
+        </div>
+        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
+            <label style="font-weight:bold;">Bundle Name:</label>
+            <input type="text" id="ceoBundleName" placeholder="e.g. Starter Kit" style="flex:1; padding:8px; font-size:15px;">
+        </div>
+        <input type="text" id="ceoBundleSearch" placeholder="🔍 Search retail products..." onkeyup="filterCeoBundleList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
+        <div class="table-wrap" id="ceoBundleTableWrap" style="overflow-y:auto; max-height:400px; padding-right:10px;"></div>
+        <div style="margin-top:15px; text-align:right; flex-shrink:0;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoBundle()">➕ Create Bundle & Add to Board</button>
+        </div>
+    </div>
+</div>
 <script src="neogleamz-engine.js"></script>
 <script src="system-tools-module.js?v=1"></script>
 <script src="bom-module.js?v=1"></script>
