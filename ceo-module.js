@@ -147,7 +147,7 @@ function renderCeoTerminal() {
                 ${availableRetail.sort().map(k => `<option value="${k}">${k}</option>`).join('')}
             </select>
             <button class="btn-blue" onclick="addCeoProductToBoard()" style="width:auto; padding: 8px 15px;">+ Add to Board</button>
-            <button class="btn-orange" onclick="addCustomBundleToBoard()" style="width:auto; padding: 8px 15px;">+ Build Bundle</button>
+            <button class="btn-orange" onclick="openCeoBundleModal()" style="width:auto; padding: 8px 15px;">+ Build Bundle</button>
         </div>
     `;
 
@@ -318,25 +318,73 @@ function addCeoProductToBoard() {
     renderCeoTerminal();
 }
 
-function addCustomBundleToBoard() {
-    let bName = prompt("Enter a name for this Custom Bundle:");
-    if (!bName) return;
-    bName = "📦 " + bName.trim();
+function openCeoBundleModal() {
+    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
+    let html = `
+    <table id="ceoBundleTable">
+        <thead>
+            <tr>
+                <th style="width:70px; text-align:center;">Qty</th>
+                <th>Retail Product Component</th>
+                <th>True COGS</th>
+                <th>Live MSRP</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+    availableRetail.forEach(k => {
+        let cogs = getEngineTrueCogs(k);
+        let msrp = getEngineLiveMsrp(k);
+        html += `
+            <tr class="ceo-bundle-row">
+                <td style="text-align:center;"><input type="number" class="bundle-qty" data-name="${k}" data-cogs="${cogs}" data-msrp="${msrp}" min="0" step="1" value="0" style="width:60px; text-align:center; padding:5px; font-size:15px; border:1px solid #444; background:#111; color:#fff;"></td>
+                <td class="bundle-name" style="font-weight:bold; color:var(--text-main);">${k}</td>
+                <td style="color:#aaa;">${ceoFmt.format(cogs)}</td>
+                <td style="color:var(--neon-green);">${ceoFmt.format(msrp)}</td>
+            </tr>
+        `;
+    });
+    html += `</tbody></table>`;
     
-    if (ceoActiveProducts.some(p => p.name === bName)) {
-        alert("A bundle with this name already exists on the board.");
-        return;
-    }
+    document.getElementById('ceoBundleTableWrap').innerHTML = html;
+    document.getElementById('ceoBundleName').value = '';
+    document.getElementById('ceoBundleSearch').value = '';
+    document.getElementById('ceoBundleModal').style.display = 'flex';
+}
+
+function filterCeoBundleList() {
+    let filter = document.getElementById('ceoBundleSearch').value.toLowerCase();
+    document.querySelectorAll('.ceo-bundle-row').forEach(r => {
+        let name = r.querySelector('.bundle-name').innerText.toLowerCase();
+        r.style.display = name.includes(filter) ? '' : 'none';
+    });
+}
+
+function saveCeoBundle() {
+    let nameRaw = document.getElementById('ceoBundleName').value.trim();
+    if (!nameRaw) return alert("Please enter a Bundle Name.");
+    let bName = "📦 " + nameRaw;
     
-    let cogsInput = prompt(`Enter True COGS for ${bName}:`, "0.00");
-    if (cogsInput === null) return;
-    let cogs = parseFloat(cogsInput) || 0;
+    if (ceoActiveProducts.some(p => p.name === bName)) return alert("A bundle with this name already exists on the board.");
     
-    let msrpInput = prompt(`Enter Current MSRP for ${bName}:`, "0.00");
-    if (msrpInput === null) return;
-    let msrp = parseFloat(msrpInput) || 0;
+    let totalCogs = 0; let totalMsrp = 0; let itemsAdded = 0;
+    document.querySelectorAll('.bundle-qty').forEach(input => {
+        let q = parseInt(input.value) || 0;
+        if (q > 0) {
+            totalCogs += q * parseFloat(input.dataset.cogs);
+            totalMsrp += q * parseFloat(input.dataset.msrp);
+            itemsAdded++;
+        }
+    });
     
-    ceoActiveProducts.push({ name: bName, isBundle: true, applyCac: false, applyAff: false, applyWarr: false, currentMsrp: msrp, testMsrp: msrp, cogs: cogs, vol: 0 });
+    if (itemsAdded === 0) return alert("Please specify a quantity greater than 0 for at least one component.");
+    
+    ceoActiveProducts.push({
+        name: bName, isBundle: true, applyCac: false, applyAff: false, applyWarr: false,
+        currentMsrp: totalMsrp, testMsrp: totalMsrp, cogs: totalCogs, vol: 0
+    });
+    
+    document.getElementById('ceoBundleModal').style.display = 'none';
     renderCeoTerminal();
 }
 
