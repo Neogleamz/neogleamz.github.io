@@ -80,11 +80,13 @@ function renderCeoTerminal() {
         const toggleStyle = (active) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; background: ${active ? 'rgba(0,255,102,0.1)' : 'rgba(255,0,51,0.1)'}; color: ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; margin-right: 4px;`;
         
         slidersHtml += `
-        <div class="ceo-slider-group" style="position: relative; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px;">
-            <button onclick="removeCeoProduct(${index})" style="position: absolute; top: -5px; right: 0px; background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold; font-size: 18px;">×</button>
-            <div class="ceo-slider-label" style="padding-right:20px;">
+        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px;">
+            <div class="ceo-slider-label">
                 <span>${p.name}</span>
-                <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
+                    <button onclick="removeCeoProduct(${index})" title="Remove Product" style="background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold; font-size: 20px; padding: 0; line-height: 1;">×</button>
+                </div>
             </div>
             <div style="display:flex; margin-bottom: 8px;">
                 <span style="${toggleStyle(p.applyCac)}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
