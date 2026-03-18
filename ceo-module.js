@@ -1,15 +1,16 @@
-// --- CEO TERMINAL: OPERATION APEX ---
+// --- CEO TERMINAL: OPERATION APEX (CURRENT VS TEST) ---
 
 let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
+// We only need the base names and whether to apply CAC. Everything else is pulled from DB or Sandbox.
 const ceoBaseMatrix = [
-    { id: 'soulz', name: "SOULZ", oldPrice: 129.99, newPrice: 149.99, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: true, applyCac: true },
-    { id: 'railz', name: "RAILZ", oldPrice: 99.99, newPrice: 119.99, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: true, applyCac: true },
-    { id: 'haloz', name: "HALOZ", oldPrice: 79.99, newPrice: 89.99, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: true, applyCac: true },
-    { id: 'beamz', name: "BEAMZ Only", oldPrice: 29.99, newPrice: 34.99, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: false, applyCac: false },
-    { id: 'clipz', name: "CLIPZ Only", oldPrice: 11.99, newPrice: 15.99, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: false, applyCac: false },
-    { id: 'trap', name: "98¢ TRAP", oldPrice: 41.98, newPrice: 50.98, aff: 0, warranty: 0, wePayShipOld: false, wePayShipNew: true, applyCac: true }
+    { id: 'soulz', name: "SOULZ", applyCac: true },
+    { id: 'railz', name: "RAILZ", applyCac: true },
+    { id: 'haloz', name: "HALOZ", applyCac: true },
+    { id: 'beamz', name: "BEAMZ Only", applyCac: false },
+    { id: 'clipz', name: "CLIPZ Only", applyCac: false },
+    { id: 'trap', name: "98¢ TRAP", applyCac: true }
 ];
 
 let ceoActiveProducts = [];
@@ -38,12 +39,12 @@ function initCeoCharts() {
 
     ceoExpenseChart = new Chart(document.getElementById('expenseChart'), {
         type: 'bar', plugins: [ChartDataLabels],
-        data: { labels: ['True COGS', 'Market', 'Affil', 'Warr', 'Logis', 'Fees', 'Net'], datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }] },
+        data: { labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Test Net'], datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }] },
         options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: function(v, c) { let t = c.chart.data.totalGross || 1; if (v <= 0) return ''; return ceoFmt.format(v).split('.')[0] + '\n(' + ((v/t)*100).toFixed(1) + '%)'; }, textAlign: 'center' } }, scales: { x: { grid: { display: false } }, y: { display: false } } }
     });
 
-    ceoProfitChart = new Chart(document.getElementById('profitChart'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#00ff66', '#00e5ff', '#ffcc00', '#ff0033', '#ffffff'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } } });
-    ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Old Net', backgroundColor: '#ff0033', data: []}, {label: 'Final Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
+    ceoProfitChart = new Chart(document.getElementById('profitChart'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#00ff66', '#00e5ff', '#ffcc00', '#b000ff', '#ff0033', '#ffffff'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } } });
+    ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
     ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, y: { stacked: true, grid: {display: false} } }, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.raw.toFixed(1) + '%' } } } } });
     ceoLineChart = new Chart(document.getElementById('lineChart'), { type: 'line', data: { labels: ['Current Vol', '2x Scale', '5x Scale', '10x Scale'], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
 }
@@ -53,36 +54,31 @@ function renderCeoTerminal() {
     try {
         ceoActiveProducts = ceoBaseMatrix.map(base => {
             let searchName = base.name.replace(" Only", "").toUpperCase();
-            let liveCogs = 0; let liveMsrp = base.newPrice;
+            let liveCogs = 0; let liveMsrp = 0; 
             
+            // STRICT DB LOOKUP ONLY
             if (typeof productsDB !== 'undefined' && productsDB) {
                 let matchedKey = Object.keys(productsDB).find(k => k.toUpperCase().includes(searchName));
-                
                 if (matchedKey) {
-                    // Pull Live MSRP directly from Database
-                    if (productsDB[matchedKey].msrp) liveMsrp = parseFloat(productsDB[matchedKey].msrp) || liveMsrp;
-                    
-                    // Pull TRUE COGS from Database
+                    if (productsDB[matchedKey].msrp) liveMsrp = parseFloat(productsDB[matchedKey].msrp) || 0;
                     if (productsDB[matchedKey].cogs) {
-                        liveCogs = parseFloat(productsDB[matchedKey].cogs);
+                        liveCogs = parseFloat(productsDB[matchedKey].cogs) || 0;
                     } else if (typeof calculateProductTotal === 'function') {
                         liveCogs = calculateProductTotal(matchedKey);
                     }
                 } else if (base.id === 'trap') {
-                    // Logic for the Trap
                     let bKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("BEAMZ"));
                     let cKey = Object.keys(productsDB).find(k => k.toUpperCase().includes("CLIPZ"));
-                    
                     if(bKey && productsDB[bKey].msrp && cKey && productsDB[cKey].msrp) {
                         liveMsrp = parseFloat(productsDB[bKey].msrp) + parseFloat(productsDB[cKey].msrp);
                     }
                     if(bKey && productsDB[bKey].cogs) liveCogs += parseFloat(productsDB[bKey].cogs);
                     if(cKey && productsDB[cKey].cogs) liveCogs += parseFloat(productsDB[cKey].cogs);
-                } else {
-                    liveCogs = base.cogs || 10;
                 }
             }
-            return { ...base, newPrice: liveMsrp, cogs: liveCogs, vol: get30DayVolume(base.name) };
+            
+            // testMsrp starts by inheriting liveMsrp
+            return { ...base, currentMsrp: liveMsrp, testMsrp: liveMsrp, cogs: liveCogs, vol: get30DayVolume(base.name), aff: 0, warr: 0 };
         });
 
         let slidersHtml = '';
@@ -112,9 +108,10 @@ function renderCeoTerminal() {
 function updateCeoEngine() {
     try {
         const CC_RATE = 0.029, CC_FLAT = 0.30, SHIP_COST = 8.00;
-        let globalCac = parseFloat(document.getElementById('cacNum').value) || 0;
         
-        let totalGross = 0, totalOldNet = 0, totalNewNet = 0;
+        let globalCac = parseFloat(document.getElementById('globalCacNum').value) || 0;
+        
+        let totalGross = 0, totalCurrentNet = 0, totalTestNet = 0;
         let aggCogs = 0, aggStripe = 0, aggAff = 0, aggWarranty = 0, aggShip = 0, aggCac = 0;
         
         let pLabels = [], pData = [], uLabels = [], uOld = [], uNew = [];
@@ -123,90 +120,94 @@ function updateCeoEngine() {
         let tableHtml = '';
 
         ceoActiveProducts.forEach(p => {
+            // Read UI Overrides
             let volInput = document.getElementById(`ceo-vol-${p.id}-num`); let vol = volInput ? (parseInt(volInput.value) || 0) : 0;
             let cb = document.getElementById(`ceo-cb-${p.id}`); p.applyCac = cb ? cb.checked : p.applyCac;
-            let oldPriceInput = document.getElementById(`ceo-oldmsrp-${p.id}`); p.oldPrice = oldPriceInput ? parseFloat(oldPriceInput.value) || 0 : p.oldPrice;
-            let msrpInput = document.getElementById(`ceo-msrp-${p.id}`); p.newPrice = msrpInput ? parseFloat(msrpInput.value) || 0 : p.newPrice;
+            let testMsrpInput = document.getElementById(`ceo-testmsrp-${p.id}`); p.testMsrp = testMsrpInput ? parseFloat(testMsrpInput.value) || 0 : p.testMsrp;
             let affInput = document.getElementById(`ceo-aff-${p.id}`); p.aff = affInput ? parseFloat(affInput.value) || 0 : p.aff;
-            let warrInput = document.getElementById(`ceo-warr-${p.id}`); p.warranty = warrInput ? parseFloat(warrInput.value) || 0 : p.warranty;
+            let warrInput = document.getElementById(`ceo-warr-${p.id}`); p.warr = warrInput ? parseFloat(warrInput.value) || 0 : p.warr;
 
             let effectiveCac = p.applyCac ? globalCac : 0; 
-            let oldCustPays = p.oldPrice + (p.wePayShipOld ? 0 : SHIP_COST);
-            let newCustPays = p.newPrice + (p.wePayShipNew ? 0 : SHIP_COST);
 
-            let ccBaseNew = p.wePayShipNew ? p.newPrice : p.newPrice + SHIP_COST;
-            let ccFeeNew = (ccBaseNew * CC_RATE) + CC_FLAT;
-            let affFeeNew = p.newPrice * (p.aff / 100);
-            let shipFeeNew = p.wePayShipNew ? SHIP_COST : 0;
-            let warrantyNew = p.newPrice * (p.warranty / 100);
+            // --- CURRENT REALITY MATH (Customer pays $8 ship) ---
+            let curCustPays = p.currentMsrp + SHIP_COST; 
+            let curStripeFee = (curCustPays * CC_RATE) + CC_FLAT;
+            // Company does not pay shipping or aff/warr in the old baseline calculation
+            let curNet = p.currentMsrp - p.cogs - curStripeFee;
+
+            // --- TEST SCENARIO MATH (Free Shipping out of Test MSRP) ---
+            let testCustPays = p.testMsrp; 
+            let testStripeFee = (testCustPays * CC_RATE) + CC_FLAT;
+            let testAffFee = p.testMsrp * (p.aff / 100);
+            let testWarrFee = p.testMsrp * (p.warr / 100);
+            let testNet = p.testMsrp - p.cogs - testStripeFee - SHIP_COST - testAffFee - testWarrFee - effectiveCac;
+
+            let profitDelta = testNet - curNet;
+
+            // Aggregates based on TEST scenario (since that is what we are projecting)
+            totalGross += (p.testMsrp * vol);
+            totalCurrentNet += (curNet * vol);
+            totalTestNet += (testNet * vol);
             
-            // Labor completely removed from math
-            let newNet = p.newPrice - p.cogs - ccFeeNew - affFeeNew - shipFeeNew - warrantyNew - effectiveCac;
+            aggCogs += (p.cogs * vol); 
+            aggStripe += (testStripeFee * vol); 
+            aggAff += (testAffFee * vol); 
+            aggWarranty += (testWarrFee * vol); 
+            aggShip += (SHIP_COST * vol); 
+            aggCac += (effectiveCac * vol);
 
-            let ccBaseOld = p.wePayShipOld ? p.oldPrice : p.oldPrice + SHIP_COST;
-            let ccFeeOld = (ccBaseOld * CC_RATE) + CC_FLAT;
-            let affFeeOld = p.oldPrice * (p.aff / 100);
-            let shipFeeOld = p.wePayShipOld ? SHIP_COST : 0;
-            let warrantyOld = p.oldPrice * (p.warranty / 100);
-            let oldNet = p.oldPrice - p.cogs - ccFeeOld - affFeeOld - shipFeeOld - warrantyOld - effectiveCac;
+            if(vol > 0 && testNet > 0) { pLabels.push(p.name); pData.push(testNet * vol); }
+            uLabels.push(p.name.split(' ')[0]); uOld.push(curNet); uNew.push(testNet);
 
-            totalGross += (p.newPrice * vol);
-            totalOldNet += (oldNet * vol);
-            totalNewNet += (newNet * vol);
-            aggCogs += (p.cogs * vol); aggStripe += (ccFeeNew * vol); aggAff += (affFeeNew * vol); 
-            aggWarranty += (warrantyNew * vol); aggShip += (shipFeeNew * vol); aggCac += (effectiveCac * vol);
-
-            if(vol > 0 && newNet > 0) { pLabels.push(p.name); pData.push(newNet * vol); }
-            uLabels.push(p.name.split(' ')[0]); uOld.push(oldNet); uNew.push(newNet);
-
-            effLabels.push(p.name); let base = p.newPrice || 1; 
-            effCogs.push((p.cogs / base) * 100); effCac.push((effectiveCac / base) * 100); effAff.push((affFeeNew / base) * 100);
-            effWarr.push((warrantyNew / base) * 100); effLog.push((shipFeeNew / base) * 100);
-            effStripe.push((ccFeeNew / base) * 100); effNet.push((Math.max(0, newNet) / base) * 100);
+            effLabels.push(p.name); let base = p.testMsrp || 1; 
+            effCogs.push((p.cogs / base) * 100); effCac.push((effectiveCac / base) * 100); effAff.push((testAffFee / base) * 100);
+            effWarr.push((testWarrFee / base) * 100); effLog.push((SHIP_COST / base) * 100);
+            effStripe.push((testStripeFee / base) * 100); effNet.push((Math.max(0, testNet) / base) * 100);
 
             let isTrap = p.id === 'trap';
-            let rowStyle = isTrap ? 'background: rgba(0, 229, 255, 0.05);' : (newNet < oldNet ? 'background: rgba(255, 0, 51, 0.1);' : '');
-            let oldNetCls = oldNet < 0 ? 'val-red' : ''; let newNetCls = newNet < 0 ? 'val-red' : 'val-green';
+            let rowStyle = isTrap ? 'background: rgba(0, 229, 255, 0.05);' : (testNet < curNet ? 'background: rgba(255, 0, 51, 0.1);' : '');
+            let deltaCls = profitDelta < 0 ? 'val-red' : 'val-green';
+            let testNetCls = testNet < 0 ? 'val-red' : 'val-green';
             
-            // Labor column completely deleted
             tableHtml += `
             <tr style="${rowStyle}">
                 <td style="font-weight:bold;">${p.name}</td>
-                <td><input type="number" id="ceo-msrp-${p.id}" class="ceo-table-input" value="${p.newPrice.toFixed(2)}" step="0.01" onchange="updateCeoEngine()"></td>
-                <td><input type="number" id="ceo-oldmsrp-${p.id}" class="ceo-table-input" style="color:var(--neon-red); border-color:var(--neon-red);" value="${p.oldPrice.toFixed(2)}" step="0.01" onchange="updateCeoEngine()"></td>
-                <td class="val-green">${ceoFmt.format(newCustPays)}</td>
                 <td style="font-weight:700;">${ceoFmt.format(p.cogs)}</td>
-                <td><input type="number" id="ceo-aff-${p.id}" class="ceo-table-input" value="${p.aff}" step="1" title="Affiliate %" onchange="updateCeoEngine()"></td>
-                <td><input type="number" id="ceo-warr-${p.id}" class="ceo-table-input" value="${p.warranty}" step="0.5" title="Warranty Reserve %" onchange="updateCeoEngine()"></td>
-                <td class="${oldNetCls}">${ceoFmt.format(oldNet)}</td>
-                <td class="${newNetCls}" style="font-weight:900; font-size:0.9rem;">${ceoFmt.format(newNet)}</td>
+                <td style="color:#888;">${ceoFmt.format(p.currentMsrp)}</td>
+                <td style="color:#888;">-${ceoFmt.format(curStripeFee)}</td>
+                <td style="color:#ccc;">${ceoFmt.format(curNet)}</td>
+                
+                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${p.id}" class="ceo-table-input" style="color:var(--neon-cyan); border-color:var(--neon-cyan);" value="${p.testMsrp.toFixed(2)}" step="0.01" onchange="updateCeoEngine()"></td>
+                <td style="color:#888;">-${ceoFmt.format(testStripeFee)}</td>
+                <td style="color:#888;">-${ceoFmt.format(SHIP_COST)}</td>
+                <td><input type="number" id="ceo-aff-${p.id}" class="ceo-table-input" style="width:50px;" value="${p.aff}" step="1" onchange="updateCeoEngine()"></td>
+                <td><input type="number" id="ceo-warr-${p.id}" class="ceo-table-input" style="width:50px;" value="${p.warr}" step="0.5" onchange="updateCeoEngine()"></td>
+                <td class="${testNetCls}" style="font-weight:900; font-size:0.9rem;">${ceoFmt.format(testNet)}</td>
+                <td class="${deltaCls}" style="font-weight:bold;">${profitDelta > 0 ? '+' : ''}${ceoFmt.format(profitDelta)}</td>
             </tr>`;
         });
 
         document.getElementById('ceo-dynamic-table').innerHTML = tableHtml;
 
         document.getElementById('kpiGross').innerText = ceoFmt.format(totalGross).split('.')[0];
-        document.getElementById('kpiOldNet').innerText = ceoFmt.format(totalOldNet).split('.')[0];
-        document.getElementById('kpiOldNet').className = totalOldNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
-        document.getElementById('kpiNewNet').innerText = ceoFmt.format(totalNewNet).split('.')[0];
-        document.getElementById('kpiNewNet').className = totalNewNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
+        document.getElementById('kpiOldNet').innerText = ceoFmt.format(totalCurrentNet).split('.')[0];
+        document.getElementById('kpiOldNet').className = totalCurrentNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-yellow";
+        document.getElementById('kpiNewNet').innerText = ceoFmt.format(totalTestNet).split('.')[0];
+        document.getElementById('kpiNewNet').className = totalTestNet < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
 
-        let totalSaved = totalNewNet - totalOldNet;
+        let totalSaved = totalTestNet - totalCurrentNet;
         document.getElementById('kpiSaved').innerText = (totalSaved >= 0 ? "+" : "") + ceoFmt.format(totalSaved).split('.')[0];
         document.getElementById('kpiSaved').className = totalSaved < 0 ? "ceo-kpi-value val-red" : "ceo-kpi-value val-green";
 
-        let oldMargin = totalGross > 0 ? (totalOldNet / totalGross) * 100 : 0;
-        let newMargin = totalGross > 0 ? (totalNewNet / totalGross) * 100 : 0;
-        let savedPct = totalOldNet !== 0 ? (totalSaved / Math.abs(totalOldNet)) * 100 : (totalSaved > 0 ? Infinity : 0);
-
+        let oldMargin = totalGross > 0 ? (totalCurrentNet / totalGross) * 100 : 0;
+        let newMargin = totalGross > 0 ? (totalTestNet / totalGross) * 100 : 0;
+        
         document.getElementById('kpiOldNetPct').innerText = oldMargin.toFixed(1) + "% Margin";
-        document.getElementById('kpiOldNetPct').style.color = oldMargin < 0 ? 'var(--neon-red)' : 'var(--neon-yellow)';
         document.getElementById('kpiNewNetPct').innerText = newMargin.toFixed(1) + "% Margin";
         document.getElementById('kpiNewNetPct').style.color = newMargin < 0 ? 'var(--neon-red)' : 'var(--neon-green)';
-        document.getElementById('kpiSavedPct').innerText = (savedPct > 0 ? '+' : '') + (savedPct === Infinity ? '∞' : savedPct.toFixed(1)) + "% vs Old";
-        document.getElementById('kpiSavedPct').style.color = savedPct >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
 
-        let expData = [aggCogs, aggCac, aggAff, aggWarranty, aggShip, aggStripe, Math.max(0, totalNewNet)];
+        // Chart 1: The 7 true metrics
+        let expData = [aggCogs, aggCac, aggAff, aggWarranty, aggShip, aggStripe, Math.max(0, totalTestNet)];
         ceoExpenseChart.data.datasets[0].data = expData;
         ceoExpenseChart.data.totalGross = totalGross > 0 ? totalGross : 1;
         ceoExpenseChart.options.scales.y.suggestedMax = Math.max(...expData) * 1.30; 
@@ -215,28 +216,48 @@ function updateCeoEngine() {
         ceoProfitChart.data.labels = pLabels; ceoProfitChart.data.datasets[0].data = pData; ceoProfitChart.update();
         ceoUnitChart.data.labels = uLabels; ceoUnitChart.data.datasets[0].data = uOld; ceoUnitChart.data.datasets[1].data = uNew; ceoUnitChart.update();
         
+        // Chart 4: 100% Stacked Bar
         ceoEfficiencyChart.data.labels = effLabels;
         ceoEfficiencyChart.data.datasets = [
-            { label: 'True COGS', data: effCogs, backgroundColor: '#333' }, { label: 'Market', data: effCac, backgroundColor: '#ff0033' },
+            { label: 'True COGS', data: effCogs, backgroundColor: '#333' }, { label: 'Ads (CAC)', data: effCac, backgroundColor: '#ff0033' },
             { label: 'Affil', data: effAff, backgroundColor: '#ffcc00' }, { label: 'Warr', data: effWarr, backgroundColor: '#ff9900' }, 
-            { label: 'Logis', data: effLog, backgroundColor: '#00e5ff' }, { label: 'Fees', data: effStripe, backgroundColor: '#aaaaaa' }, 
-            { label: 'Net Profit', data: effNet, backgroundColor: '#00ff66' }
+            { label: 'Shipping', data: effLog, backgroundColor: '#00e5ff' }, { label: 'Stripe', data: effStripe, backgroundColor: '#aaaaaa' }, 
+            { label: 'Test Net', data: effNet, backgroundColor: '#00ff66' }
         ];
         ceoEfficiencyChart.update();
 
         ceoLineChart.data.datasets = [
-            { label: 'Old Trajectory', borderColor: '#ff0033', data: [totalOldNet, totalOldNet*2, totalOldNet*5, totalOldNet*10], tension: 0.3 },
-            { label: 'New Trajectory', borderColor: '#00ff66', data: [totalNewNet, totalNewNet*2, totalNewNet*5, totalNewNet*10], tension: 0.3 }
+            { label: 'Current Trajectory', borderColor: '#aaaaaa', data: [totalCurrentNet, totalCurrentNet*2, totalCurrentNet*5, totalCurrentNet*10], tension: 0.3 },
+            { label: 'Test Trajectory', borderColor: '#00ff66', data: [totalTestNet, totalTestNet*2, totalTestNet*5, totalTestNet*10], tension: 0.3 }
         ];
         ceoLineChart.update();
     } catch (e) { sysLog("Engine Update Error: " + e.message, true); }
 }
 
+// Global Sliders Wiring
 document.addEventListener('DOMContentLoaded', () => {
-    const cacSlider = document.getElementById('cacSlider');
-    const cacNum = document.getElementById('cacNum');
-    if(cacSlider && cacNum) {
-        cacSlider.addEventListener('input', () => { cacNum.value = cacSlider.value; updateCeoEngine(); });
-        cacNum.addEventListener('input', () => { cacSlider.value = cacNum.value; updateCeoEngine(); });
-    }
+    const bindSync = (sliderId, numId, callback) => {
+        const slider = document.getElementById(sliderId);
+        const num = document.getElementById(numId);
+        if(slider && num) {
+            slider.addEventListener('input', () => { num.value = slider.value; callback(); });
+            num.addEventListener('input', () => { slider.value = num.value; callback(); });
+        }
+    };
+
+    bindSync('globalCacSlider', 'globalCacNum', updateCeoEngine);
+    
+    // Global Affiliate Sync
+    bindSync('globalAffSlider', 'globalAffNum', () => {
+        let val = document.getElementById('globalAffNum').value;
+        ceoActiveProducts.forEach(p => { let el = document.getElementById(`ceo-aff-${p.id}`); if(el) el.value = val; });
+        updateCeoEngine();
+    });
+
+    // Global Warranty Sync
+    bindSync('globalWarrSlider', 'globalWarrNum', () => {
+        let val = document.getElementById('globalWarrNum').value;
+        ceoActiveProducts.forEach(p => { let el = document.getElementById(`ceo-warr-${p.id}`); if(el) el.value = val; });
+        updateCeoEngine();
+    });
 });
