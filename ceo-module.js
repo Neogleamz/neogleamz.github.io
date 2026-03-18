@@ -1,6 +1,6 @@
 // --- CEO TERMINAL: OPERATION APEX 2.1 ---
 
-let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoLineChart;
+let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 // State Management
@@ -43,7 +43,7 @@ function autoPopulateCeoBoard() {
 function initCeoCharts() {
     Chart.defaults.color = '#e0e0e0'; Chart.defaults.font.family = "'JetBrains Mono', monospace";
     if(ceoExpenseChart) ceoExpenseChart.destroy(); if(ceoProfitChart) ceoProfitChart.destroy();
-    if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoLineChart) ceoLineChart.destroy();
+    if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoCurEfficiencyChart) ceoCurEfficiencyChart.destroy(); if(ceoLineChart) ceoLineChart.destroy();
 
     ceoExpenseChart = new Chart(document.getElementById('expenseChart'), {
         type: 'bar', plugins: [ChartDataLabels],
@@ -54,6 +54,7 @@ function initCeoCharts() {
     ceoProfitChart = new Chart(document.getElementById('profitChart'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#00ff66', '#00e5ff', '#ffcc00', '#b000ff', '#ff0033', '#ffffff'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } } });
     ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
     ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, y: { stacked: true, grid: {display: false} } }, plugins: { legend: { position: 'bottom' } } } });
+    ceoCurEfficiencyChart = new Chart(document.getElementById('curEfficiencyChart'), { type: 'bar', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, y: { stacked: true, grid: {display: false} } }, plugins: { legend: { position: 'bottom' } } } });
     ceoLineChart = new Chart(document.getElementById('lineChart'), { type: 'line', data: { labels: ['Current Vol', '2x Scale', '5x Scale', '10x Scale'], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
 }
 
@@ -112,7 +113,7 @@ function updateCeoEngine() {
         let gWarr = parseFloat(document.getElementById('globalWarrNum').value) || 0;
         
         let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, aff:0, warr:0, ship:0, cac:0 };
-        let charts = { labels:[], pData:[], curNetData:[], testNetData:[], eff:[] };
+        let charts = { labels:[], pData:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
 
         let tableHtml = '';
         ceoActiveProducts.forEach((p, index) => {
@@ -144,6 +145,9 @@ function updateCeoEngine() {
             
             let b = p.testMsrp || 1;
             charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testAffAmt/b)*100, (testWarrAmt/b)*100, (SHIP_COST/b)*100, (testStripe/b)*100, (Math.max(0,testNet)/b)*100]);
+
+            let curB = p.currentMsrp || 1;
+            charts.curEff.push([(p.cogs/curB)*100, 0, 0, 0, 0, (curStripe/curB)*100, (Math.max(0,curNet)/curB)*100]);
 
             tableHtml += `
             <tr>
@@ -180,6 +184,10 @@ function updateCeoEngine() {
         ceoEfficiencyChart.data.labels = charts.labels;
         ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i] }));
         ceoEfficiencyChart.update();
+
+        ceoCurEfficiencyChart.data.labels = charts.labels;
+        ceoCurEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.curEff.map(row => row[i]), backgroundColor: colors[i] }));
+        ceoCurEfficiencyChart.update();
 
         ceoLineChart.data.datasets = [
             { label: 'Current Trajectory', borderColor: '#aaaaaa', data: [totals.curNet, totals.curNet*2, totals.curNet*5, totals.curNet*10], tension: 0.3 },
