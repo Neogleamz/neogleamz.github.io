@@ -21,7 +21,10 @@ async function addManualSale() {
         
         sysLog(`Adding Manual Sale: ${id}`); setMasterStatus("Saving...", "mod-working");
         
-        let cogs = calculateProductTotal(rec);
+        // --- POWERED BY MASTER ENGINE ---
+        let cogs = getEngineTrueCogs(rec);
+        // --------------------------------
+        
         let uniqueManualSku = "MANUAL_ENTRY_" + rec;
         
         let sRow = { 
@@ -148,7 +151,9 @@ async function executeSalesSync() {
     try {
         sysLog(`Pushing ${pendingSalesRows.length} sales...`); setMasterStatus("Syncing Sales...", "mod-working"); setSysProgress(60, 'working');
 
-        let salesPayload = pendingSalesRows.map(r => { return { ...r, cogs_at_sale: calculateProductTotal(r.internal_recipe_name) }; });
+        // --- POWERED BY MASTER ENGINE ---
+        let salesPayload = pendingSalesRows.map(r => { return { ...r, cogs_at_sale: getEngineTrueCogs(r.internal_recipe_name) }; });
+        // --------------------------------
 
         let invMap = {};
         pendingSalesRows.forEach(r => { let k = `RECIPE:::${r.internal_recipe_name}`; if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); invMap[k] += r.qty_sold; });
@@ -199,48 +204,9 @@ function renderSalesTable() {
         a.forEach(x => { 
             let safeSku = String(x.storefront_sku).replace(/'/g, "\\'");
             
-            // --- DYNAMIC LIVE COGS OVERRIDE START ---
-            let liveCogs = parseFloat(x.cogs_at_sale) || 0; 
-            let searchName = (x.internal_recipe_name || "").toUpperCase().replace(" ONLY", "");
-
-            if (typeof productsDB !== 'undefined' && productsDB && searchName) {
-                let allKeys = Object.keys(productsDB);
-                
-                // 1. Exact match
-                let matchedKey = allKeys.find(k => k.toUpperCase() === searchName);
-                
-                // 2. Smart match (Ignore raw parts)
-                if (!matchedKey) {
-                    matchedKey = allKeys.find(k => {
-                        let upK = k.toUpperCase();
-                        return upK.includes(searchName) && 
-                               !upK.includes("BOX") && 
-                               !upK.includes("ACCESSOR") && 
-                               !upK.includes("BUNDLE") && 
-                               !upK.includes("PART");
-                    });
-                }
-                
-                // 3. Fallback match
-                if (!matchedKey) {
-                    matchedKey = allKeys.find(k => k.toUpperCase().includes(searchName));
-                }
-
-                // 4. Calculate True Live COGS
-                if (matchedKey) {
-                    if (productsDB[matchedKey].cogs) {
-                        liveCogs = parseFloat(productsDB[matchedKey].cogs);
-                    } else if (typeof calculateProductTotal === 'function') {
-                        let rawCost = calculateProductTotal(matchedKey);
-                        let labCost = 0;
-                        if (typeof laborDB !== 'undefined' && laborDB[matchedKey]) {
-                            labCost = (parseFloat(laborDB[matchedKey].time)/60) * parseFloat(laborDB[matchedKey].rate);
-                        }
-                        liveCogs = rawCost + labCost;
-                    }
-                }
-            }
-            // --- DYNAMIC LIVE COGS OVERRIDE END ---
+            // --- POWERED BY MASTER ENGINE ---
+            let liveCogs = getEngineTrueCogs(x.internal_recipe_name);
+            // --------------------------------
 
             h += `<tr>
             <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'sale_date', false)" style="color:var(--text-muted);">${x.sale_date}</td>
