@@ -117,38 +117,3 @@ function getHistoricalNetProfit(actualSalePrice, shippingCollected, taxCollected
     
     return totalCaptured - taxCollected - stripeFee - actualPostage - cogs;
 }
-
-/**
- * 6. CUSTOMER OUT OF POCKET (OOP)
- * Calculates what the customer actually pays based on shipping threshold.
- */
-function getEngineOOP(msrp, freeShipThreshold) {
-    if (typeof freeShipThreshold !== 'number' || isNaN(freeShipThreshold)) freeShipThreshold = 999999;
-    return msrp >= freeShipThreshold ? msrp : (msrp + ENGINE_CONFIG.flatShipping);
-}
-
-/**
- * 7. PREDICTIVE METRICS (CEO TERMINAL)
- * Returns the exact mathematical breakdown of a projected retail sale.
- */
-function getEnginePredictiveMetrics(msrp, cogs, freeShipThreshold, cacFlat, affPercent, warrPercent) {
-    let oop = getEngineOOP(msrp, freeShipThreshold);
-    let stripeFee = getEngineStripeFee(oop);
-    let affAmt = msrp * (affPercent / 100);
-    let warrAmt = msrp * (warrPercent / 100);
-    
-    // Determines if shipping appears as a margin reduction visually
-    let merchantShipCost = (oop > msrp) ? 0 : ENGINE_CONFIG.flatShipping;
-    
-    let netProfit = oop - cogs - ENGINE_CONFIG.flatShipping - stripeFee - affAmt - warrAmt - cacFlat;
-
-    return {
-        oop: oop,
-        stripe: stripeFee,
-        aff: affAmt,
-        warr: warrAmt,
-        ship: ENGINE_CONFIG.flatShipping,
-        merchantShipMargin: merchantShipCost,
-        net: netProfit
-    };
-}
