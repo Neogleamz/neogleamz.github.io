@@ -133,14 +133,16 @@ function renderCeoTerminal() {
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
     
     let controlHtml = `
-        <div style="background: var(--bg-surface-light); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border: 1px solid var(--border-color);">
-            <select id="ceo-product-select" style="flex-grow: 1; min-width: 200px; padding: 8px; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); border-radius: 4px;">
+        <div style="background: var(--bg-surface-light); padding: 10px; border-radius: 8px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--border-color);">
+            <select id="ceo-product-select" style="width: 100%; padding: 8px; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); border-radius: 4px;">
                 <option value="">-- Select Retail Product to Add --</option>
                 ${availableRetail.sort().map(k => `<option value="${k}">${k}</option>`).join('')}
             </select>
-            <button class="btn-blue" onclick="addCeoProductToBoard()" style="width:auto; padding: 8px 15px;">+ Add to Board</button>
-            <button class="btn-orange" onclick="openCeoBundleModal()" style="width:auto; padding: 8px 15px;">+ Build Bundle</button>
-            <button class="btn-green" onclick="openCeoCustomModal()" style="width:auto; padding: 8px 15px;">+ Custom Item</button>
+            <div style="display:flex; gap:6px; width:100%;">
+                <button class="btn-blue" onclick="addCeoProductToBoard()" style="flex:1; padding: 6px 2px; font-size:12px; white-space:nowrap;">+ Item</button>
+                <button class="btn-orange" onclick="openCeoBundleModal()" style="flex:1; padding: 6px 2px; font-size:12px; white-space:nowrap;">+ Bundle</button>
+                <button class="btn-green" onclick="openCeoCustomModal()" style="flex:1; padding: 6px 2px; font-size:12px; white-space:nowrap;">+ Custom</button>
+            </div>
         </div>
     `;
 
