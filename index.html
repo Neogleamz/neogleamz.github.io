@@ -934,10 +934,10 @@
             </div>
 
             <div class="ceo-charts-row">
-                <div class="ceo-chart-box" style="grid-column: span 6;"><div class="ceo-kpi-title">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
-                <div class="ceo-chart-box" style="grid-column: span 6;"><div class="ceo-kpi-title">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper"><canvas id="curEfficiencyChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
-                <div class="ceo-chart-box span-3"><div class="ceo-kpi-title">Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper"><canvas id="efficiencyChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Total Burn Autopsy</div><div class="ceo-canvas-wrapper"><canvas id="expenseChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper"><canvas id="curEfficiencyChart"></canvas></div></div>
+                <div class="ceo-chart-box span-3" style="min-height: 480px;"><div class="ceo-kpi-title">Unit Net Comparison</div><div class="ceo-canvas-wrapper"><canvas id="unitChart"></canvas></div></div>
             </div>
 
             <div class="ceo-table-container">
@@ -945,16 +945,16 @@
                 <table>
                     <thead>
     					<tr>
-        					<th>Product Name</th>
-        					<th style="font-weight:900;">True COGS (Live)</th>
-        					<th style="color:#888;">Current MSRP</th>
-        					<th style="color:#888;">Cur. Stripe</th>
-        					<th style="color:#888;">Current OOP</th>
-        					<th style="color:#ccc;">Current Net</th>
-        					<th style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px;">Test MSRP ✏️</th>
-        					<th style="color:var(--neon-cyan);">Test Stripe</th>
-        					<th style="color:var(--neon-cyan);">Test OOP</th>
-        					<th class="val-green" style="font-weight:900;">Test Net</th>
+        					<th onclick="sortCeoTable('name')" style="cursor:pointer;" title="Sort Name">Product Name ↕️</th>
+        					<th onclick="sortCeoTable('cogs')" style="font-weight:900; cursor:pointer;" title="Sort COGS">True COGS (Live) ↕️</th>
+        					<th onclick="sortCeoTable('currentMsrp')" style="color:#888; cursor:pointer;" title="Sort Current MSRP">Current MSRP ↕️</th>
+        					<th onclick="sortCeoTable('curStripe')" style="color:#888; cursor:pointer;" title="Sort Cur. Stripe">Cur. Stripe ↕️</th>
+        					<th onclick="sortCeoTable('curOOP')" style="color:#888; cursor:pointer;" title="Sort Cur. OOP">Current OOP ↕️</th>
+        					<th onclick="sortCeoTable('curNet')" style="color:#ccc; cursor:pointer;" title="Sort Cur. Net">Current Net ↕️</th>
+        					<th onclick="sortCeoTable('testMsrp')" style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px; cursor:pointer;" title="Sort Test MSRP">Test MSRP ✏️ ↕️</th>
+        					<th onclick="sortCeoTable('testStripe')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test Stripe">Test Stripe ↕️</th>
+        					<th onclick="sortCeoTable('testOOP')" style="color:var(--neon-cyan); cursor:pointer;" title="Sort Test OOP">Test OOP ↕️</th>
+        					<th onclick="sortCeoTable('testNet')" class="val-green" style="font-weight:900; cursor:pointer;" title="Sort Test Net">Test Net ↕️</th>
     					</tr>
 					</thead>
 
