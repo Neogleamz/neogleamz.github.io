@@ -3,8 +3,17 @@
 let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-// This array holds the products currently active on the CEO board
-let ceoActiveProducts = [];
+// Note: ceoActiveProducts is initialized as empty, but index.html's loadCloudPrefs will populate it on boot.
+if (typeof ceoActiveProducts === 'undefined') {
+    window.ceoActiveProducts = [];
+}
+
+// We just call the global saveCloudPrefs() from index.html!
+function saveCeoBoard() {
+    if (typeof saveCloudPrefs === 'function') {
+        saveCloudPrefs();
+    }
+}
 
 function get30DayVolume(productName) {
     try {
@@ -51,7 +60,7 @@ function renderCeoTerminal() {
         allKeys.forEach(k => {
             let p = productsDB[k];
             // Filter out sub-assemblies based on your database column
-            let isSub = p.is_subassembly === true || p.is_subassembly === "true" || p.is_subassembly === "TRUE";
+            let isSub = p.is_subassembly === true || String(p.is_subassembly).toLowerCase() === "true";
             if (!isSub) {
                 availableRetail.push(k);
             }
@@ -61,7 +70,7 @@ function renderCeoTerminal() {
             <div style="background: var(--bg-surface-light); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <select id="ceo-product-select" class="ceo-sync-input" style="flex-grow: 1; min-width: 200px; padding: 8px;">
                     <option value="">-- Select Retail Product to Add --</option>
-                    ${availableRetail.map(k => `<option value="${k}">${k}</option>`).join('')}
+                    ${availableRetail.sort().map(k => `<option value="${k}">${k}</option>`).join('')}
                 </select>
                 <button class="btn-blue" onclick="addCeoProductToBoard()" style="padding: 8px 15px;">+ Add to Board</button>
                 <div style="border-left: 1px solid #444; margin: 0 10px; height: 30px;"></div>
@@ -76,6 +85,10 @@ function renderCeoTerminal() {
             let bgStyle = p.isBundle ? 'padding: 10px; border-radius: 4px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0, 229, 255, 0.05); position: relative;' : 'position: relative;';
             let titleColor = p.isBundle ? 'color: var(--neon-cyan);' : '';
             
+            // Refresh live baseline stats constantly
+            p.currentMsrp = p.isBundle ? p.currentMsrp : getEngineLiveMsrp(p.name);
+            p.cogs = p.isBundle ? p.cogs : getEngineTrueCogs(p.name);
+
             slidersHtml += `
             <div class="ceo-slider-group" style="${bgStyle}">
                 <button onclick="removeCeoProduct(${index})" style="position: absolute; top: 0px; right: 0px; background: none; border: none; color: #ff0033; cursor: pointer; font-size: 16px; font-weight: bold;" title="Remove from board">×</button>
@@ -100,13 +113,11 @@ function addCeoProductToBoard() {
     let pName = select.value;
     if(!pName) return alert("Please select a product from the dropdown first.");
     
-    // Prevent duplicates on the board
-    if(ceoActiveProducts.some(p => p.name === pName)) return alert("This product is already on the board.");
+    if(ceoActiveProducts.some(p => p.name === pName && !p.isBundle)) return alert("This product is already on the board.");
 
     let liveMsrp = getEngineLiveMsrp(pName);
     let liveCogs = getEngineTrueCogs(pName);
     
-    // Pull your real defaults straight from Supabase!
     let pData = productsDB[pName] || {};
     let defAff = parseFloat(pData.affiliate_pct) || 0;
     let defWarr = parseFloat(pData.warranty_pct) || 0;
@@ -116,13 +127,14 @@ function addCeoProductToBoard() {
         isBundle: false,
         applyCac: true,
         currentMsrp: liveMsrp,
-        testMsrp: liveMsrp,
+        testMsrp: liveMsrp, 
         cogs: liveCogs,
         vol: get30DayVolume(pName),
         aff: defAff,
         warr: defWarr
     });
     
+    saveCeoBoard();
     renderCeoTerminal();
 }
 
@@ -147,16 +159,18 @@ function addCustomBundleToBoard() {
         currentMsrp: msrp1 + msrp2,
         testMsrp: msrp1 + msrp2,
         cogs: cogs1 + cogs2,
-        vol: 30, // Default baseline for a new bundle test
+        vol: 30, 
         aff: 0,
         warr: 0
     });
     
+    saveCeoBoard();
     renderCeoTerminal();
 }
 
 function removeCeoProduct(index) {
     ceoActiveProducts.splice(index, 1);
+    saveCeoBoard();
     renderCeoTerminal();
 }
 
@@ -180,7 +194,7 @@ function updateCeoEngine() {
             let affInput = document.getElementById(`ceo-aff-${index}`); p.aff = affInput ? parseFloat(affInput.value) || 0 : p.aff;
             let warrInput = document.getElementById(`ceo-warr-${index}`); p.warr = warrInput ? parseFloat(warrInput.value) || 0 : p.warr;
             
-            p.vol = vol; // Save back to state
+            p.vol = vol; 
 
             let effectiveCac = p.applyCac ? globalCac : 0; 
 
@@ -284,6 +298,10 @@ function updateCeoEngine() {
             { label: 'Test Trajectory', borderColor: '#00ff66', data: [totalTestNet, totalTestNet*2, totalTestNet*5, totalTestNet*10], tension: 0.3 }
         ];
         ceoLineChart.update();
+
+        // Save state at the end of every update!
+        saveCeoBoard();
+
     } catch (e) { sysLog("Engine Update Error: " + e.message, true); }
 }
 
