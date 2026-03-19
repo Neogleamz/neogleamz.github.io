@@ -621,11 +621,11 @@
             <h3 style="margin:20px 0 10px 0; font-size:16px; color:#10b981;">📦 Finished Goods Inventory</h3>
             <div class="table-wrap" id="fgiTableWrap" style="margin-bottom:30px;"></div>
 
-            <h3 style="margin:0 0 10px 0; font-size:16px; color:#3b82f6;">🧵 Raw Material Stock</h3>
             <div class="table-wrap" id="invTableWrap" style="flex-grow:1;"></div>
         </div>
-    </div>
+    </div> <!-- End of invhub-tab -->
 
+    <!-- Product Builder Section -->
     <div id="bom-tab" class="tab-content">
         <div class="bom-layout">
             <div class="bom-sidebar">
@@ -678,37 +678,7 @@
         </div>
     </div>
 
-    <div id="inventory-tab" class="tab-content">
-        <div class="add-part-bar" style="justify-content: space-between;">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-weight:bold; font-size:14px; color:var(--text-heading);">⚡ Quick Build:</span>
-                <select id="batchProductSelect" style="min-width: 200px; padding: 6px;"></select>
-                <input type="number" id="batchQty" placeholder="Qty" value="1" min="1" step="any" style="width:80px; padding: 6px;">
-                <button class="btn-green" onclick="runProductionBatch()" style="padding: 6px 15px;">⚙️ Force Build & Deduct</button>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-orange" onclick="printReorderReport()" style="font-size:13px; padding:6px 15px; font-weight:bold;">🚨 Run Reorder Report</button>
-                <button class="btn-red" onclick="resetInventoryConsumption()" style="font-size:12px; padding:6px 10px;">⚠️ Reset DB</button>
-            </div>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; flex-grow: 1; min-height: 0; align-items: stretch;">
-            <div class="bom-main" style="padding: 10px; border-color: #0ea5e9; border-width: 2px;">
-                <div class="bom-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 5px;">
-                    <h3 style="margin:0; font-size:15px; color:#0ea5e9;">📦 Retail Finished Goods</h3>
-                </div>
-                <div class="table-wrap" id="fgiTableWrap"></div>
-            </div>
-            
-            <div class="bom-main" style="padding: 10px;">
-                <div class="bom-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 5px;">
-                    <h3 style="margin:0; font-size:15px; color:var(--text-muted);">🔩 Raw Components Ledger</h3>
-                </div>
-                <div class="table-wrap" id="invTableWrap"></div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Production Section -->
     <div id="production-tab" class="tab-content">
         <div class="bom-layout">
             <div class="bom-sidebar">
