@@ -965,8 +965,51 @@
                 <button class="sub-nav-btn active" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('commandz')">COMMANDZ</button>
             </div>
-            <!-- Contents of Analytics Dashboard -->
-            <div id="analyticsContent" style="flex-grow:1; display:flex; flex-direction:column;"></div>
+            
+            <div id="analyticsContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px;">
+                <div class="analytics-grid" style="grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom: 20px;">
+                    <div class="kpi-card kpi-rev" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">All-Time Captured (Gross)</div>
+                        <div class="kpi-value" id="kpiTotalRev" style="font-size: 28px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                    </div>
+                     <div class="kpi-card kpi-profit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Estimated Profit (Net)</div>
+                        <div class="kpi-value" id="kpiTotalProfit" style="font-size: 28px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                    </div>
+                    <div class="kpi-card kpi-raw" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Raw Component Value</div>
+                        <div class="kpi-value" id="kpiRawInv" style="font-size: 28px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                    </div>
+                    <div class="kpi-card kpi-built" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border: none; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Built Product Assets</div>
+                        <div class="kpi-value" id="kpiBuiltInv" style="font-size: 28px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="analytics-charts" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 25px; height: 350px;">
+                    <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px;">
+                        <h4 style="margin:0 0 15px 0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Profit Waterfall Analysis</h4>
+                        <canvas id="waterfallChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px;">
+                        <h4 style="margin:0 0 15px 0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Expense Distribution</h4>
+                        <canvas id="expenseDoughnut"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; height: 350px; margin-bottom: 25px;">
+                    <h4 style="margin:0 0 15px 0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Revenue vs. Profit Trends</h4>
+                    <canvas id="trendsChart"></canvas>
+                </div>
+
+                <div class="matrix-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                        <h4 style="margin:0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Sku Profitability Matrix</h4>
+                        <button class="btn-blue" onclick="backfillFinancials()" style="font-size:11px; padding:6px 12px;">↻ BACKFILL FINANCIALS</button>
+                    </div>
+                    <div class="table-wrap" id="analyticsTableWrap"></div>
+                </div>
+            </div>
         </div>
 
         <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
@@ -983,48 +1026,7 @@
         </div>
     </div> <!-- End of sales-tab -->
 
-    <div id="analytics-tab" class="tab-content" style="padding:0;">
-        <div id="analyticsHubLanding" class="hub-container">
-            <div class="hub-card" onclick="showAnalyticsPane('dashboard')">
-                <i>📈</i>
-                <h2>Financial Trends</h2>
-                <p>Track Revenue vs. Profit performance cycles.</p>
-                <div class="card-stat" id="hubStatGrowth">+0% GROWTH</div>
-            </div>
-            <div class="hub-card" onclick="showAnalyticsPane('waterfall')">
-                <i>🌊</i>
-                <h2>The Waterfall</h2>
-                <p>Visual Profit Derivation: Where the money goes.</p>
-                <div class="card-stat" id="hubStatNetP">$0 NET</div>
-            </div>
-            <div class="hub-card" onclick="showAnalyticsPane('matrix')">
-                <i>🎯</i>
-                <h2>Product Matrix</h2>
-                <p>Heat-map of SKU profitability and margins.</p>
-                <div class="card-stat" id="hubStatHighMargin">0 TOP PERFORMERS</div>
-            </div>
-        </div>
-
-        <!-- Detailed Panes (Wrapped) -->
-        <div id="paneAnalyticsDashboard" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
-            <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showAnalyticsPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn active" onclick="showAnalyticsPane('dashboard')">Financial Trends</button>
-                <button class="sub-nav-btn" onclick="showAnalyticsPane('waterfall')">The Waterfall</button>
-                <button class="sub-nav-btn" onclick="showAnalyticsPane('matrix')">Product Matrix</button>
-            </div>
-            
-            <div class="analytics-grid" style="grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom: 20px;">
-                <div class="kpi-card kpi-rev" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-                    <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">All-Time Captured (Gross)</div>
-                    <div class="kpi-value" id="kpiTotalRev" style="font-size: 28px; font-weight: 900; margin: 5px 0;">$0.00</div>
-                    <div style="font-size:11px; opacity: 0.8;">Total gross retail sales</div>
-                </div>
-                <!-- ... other KPI cards ... -->
-            </div>
-            <!-- ... charts ... -->
-        </div>
-    </div> <!-- End of analytics-tab -->
+    <!-- DECOMMISSIONED LEGACY TABS: Contents moved into Trinity Hubz -->
     <div id="print-tab" class="tab-content">
         <div class="bom-layout">
             <div class="bom-sidebar">
