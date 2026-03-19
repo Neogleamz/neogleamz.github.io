@@ -138,6 +138,16 @@
             50% { box-shadow: 0 0 40px 10px rgba(247, 147, 32, 0.2); border-color: rgba(247, 147, 32, 0.4); }
             100% { box-shadow: 0 0 0 0 rgba(247, 147, 32, 0); border-color: transparent; }
         }
+        .tab-content { 
+            display: none; 
+            flex-direction: column; 
+            flex-grow: 1; 
+            min-height: 0;
+            width: 100%;
+        }
+        .tab-content.active { 
+            display: flex !important; 
+        }
         .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; }
         .sub-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: var(--bg-glass); padding: 6px; border-radius: 12px; border: 1px solid var(--border-input); align-self: flex-start; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
         .sub-nav::-webkit-scrollbar { display: none; }
@@ -521,10 +531,10 @@
             <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 32px; width: auto; filter: brightness(0) invert(1);">
             <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
         </div>
-        <div class="nav-tabs" style="justify-content: center; width: 100%;">
-            <div class="nav-tab active" onclick="switchTab('invhub')">📊 INVENTORY HUBZ</div>
-            <div class="nav-tab" onclick="switchTab('prodhub')">🏭 PRODUCTZ HUB</div>
-            <div class="nav-tab" onclick="switchTab('salezhub')">🛒 SALEZ HUB</div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('invhub')">📊 INVENTORY HUBZ</button>
+            <button class="tab-btn" onclick="switchTab('prodhub')">🏭 PRODUCTZ HUB</button>
+            <button class="tab-btn" onclick="switchTab('salezhub')">🛒 SALEZ HUB</button>
         </div>
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
@@ -1589,10 +1599,9 @@
 
     	target.classList.add('active'); sysLog(`Switched to ${tabId}.`); 
         
-        if (tabId === 'invhub') showInventoryPane('hub');
-        if (tabId === 'prodhub') showProductionPane('hub');
-        if (tabId === 'sales') showSalesPane('hub');
-        if (tabId === 'analytics') showAnalyticsPane('hub');
+        if (tabId === 'invhub') { if(typeof showInventoryPane === 'function') showInventoryPane('hub'); }
+        if (tabId === 'prodhub') { if(typeof showProductionPane === 'function') showProductionPane('hub'); }
+        if (tabId === 'salezhub') { if(typeof showSalezPane === 'function') showSalezPane('hub'); }
 
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
     }
