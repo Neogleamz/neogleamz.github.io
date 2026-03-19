@@ -59,7 +59,7 @@ function renderPrintQueue() {
             let sel = (currentPrintJob && currentPrintJob.id === job.id) ? 'selected' : '';
             let dot = job.status === 'Queued' ? '🟡' : (job.status === 'Completed' ? '🟢' : (job.status === 'Printing' ? '🖨️' : '🧹'));
             
-            // Format: "Neogleamz Name - qty - print time"
+            // Format: "Neogleamz Name - amount to print - time"
             const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : job.part_name;
             const timeStr = totalTime > 0 ? ` - ${totalTime.toFixed(0)}m` : "";
 
@@ -70,7 +70,7 @@ function renderPrintQueue() {
                 ondrop="printDrop(event, ${index})" 
                 ondragend="printDragEnd(event)"
                 onclick="selectPrintJob('${job.id}')" 
-                style="display:flex; justify-content:space-between; align-items:center; cursor:grab;">
+                style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:14px; font-weight:700;">☰ ${dot} ${displayName} - ${job.qty}${timeStr}</span>
                 </div>
@@ -119,12 +119,23 @@ function renderActivePrintJob(id) {
     document.getElementById('printJobSource').innerText = job.wo_id || 'Manual Entry';
 
     const b = document.getElementById('printJobBadge');
+    const stEl = document.getElementById('printJobStartTime');
     b.innerText = job.status;
     b.className = "status-badge";
     if (job.status === 'Queued') b.classList.add('st-queued');
     else if (job.status === 'Printing') b.classList.add('st-picking');
     else if (job.status === 'Cleaned') b.classList.add('st-production');
     else if (job.status === 'Completed') b.classList.add('st-completed');
+
+    if (stEl) {
+        if (job.started_at) {
+            let d = new Date(job.started_at);
+            stEl.innerText = `START: ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            stEl.style.display = 'inline-block';
+        } else {
+            stEl.style.display = 'none';
+        }
+    }
 
     // Pipeline highlights
     ['Queued', 'Printing', 'Cleaned', 'Completed'].forEach(s => {
