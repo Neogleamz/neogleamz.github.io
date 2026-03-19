@@ -190,6 +190,8 @@
             flex-shrink: 0; 
             gap: 24px; 
             flex-wrap: nowrap;
+            position: relative;
+            z-index: 2000; /* Authority over page content */
         }
         .title-block { flex: 1 1 280px; min-width: 0; }
         .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -234,10 +236,10 @@
             transform: translateY(-1px);
         }
         .tab-btn.active { 
-            background: rgba(247, 147, 32, 0.2);
-            color: #FF9F2D; /* More vibrant orange */
-            border-color: #FF9F2D;
-            box-shadow: 0 0 20px rgba(247, 147, 32, 0.5);
+            background: rgba(255, 140, 0, 0.25);
+            color: #FF8C00; /* Vibrant Neon Orange */
+            border-color: #FF8C00;
+            box-shadow: 0 0 25px rgba(255, 140, 0, 0.6);
             font-weight: 900;
             transform: translateY(-1px);
         }
@@ -251,17 +253,18 @@
         
         .pane-title {
             position: absolute;
-            top: 10px;
+            top: 5px; /* Moved up slightly */
             left: 50%;
             transform: translateX(-50%);
-            font-size: 18px;
+            font-size: 22px; /* Slightly larger */
             font-weight: 900;
-            color: var(--primary-color);
+            color: #FF8C00; /* Signature Vibrant Orange */
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 5px; /* Increased executive spacing */
             pointer-events: none;
-            opacity: 0.9;
+            opacity: 1; /* Full visibility */
             z-index: 50;
+            text-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
         }
 
         /* Full-Page Margin Navigation Zones */
@@ -654,7 +657,7 @@
         </div>
 
         <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
-            <div class="pane-title">SIMPLEZ</div>
+            <div class="pane-title" style="color:#FF8C00; font-size:24px; top:5px; text-shadow: 0 0 20px rgba(255, 140, 0, 0.4);">SIMPLEZ</div>
             <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
             <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
@@ -1009,7 +1012,7 @@
                     </div>
                 </div>
 
-                <div class="analytics-charts" style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px; min-height: 300px;">
+                <div class="analytics-charts" style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px; flex-grow: 1; min-height: 220px;">
                     <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; position: relative; height: 100%;">
                         <h4 style="margin:0 0 10px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Profit Waterfall Analysis</h4>
                         <div style="position:relative; height:calc(100% - 30px); width:100%;"><canvas id="waterfallChart"></canvas></div>
@@ -1020,7 +1023,7 @@
                     </div>
                 </div>
                 
-                <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; min-height: 280px; margin-bottom: 20px; position: relative;">
+                <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; min-height: 200px; margin-bottom: 20px; position: relative; flex-grow: 1;">
                     <h4 style="margin:0 0 10px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Revenue vs. Profit Trends</h4>
                     <div style="position:relative; height:calc(100% - 30px); width:100%;"><canvas id="trendsChart"></canvas></div>
                 </div>
@@ -1401,9 +1404,12 @@
             if (b.style.display === 'none') { 
                 b.style.display = 'block'; 
                 t.innerText = '▲'; 
+                // Authority Check: Bring wrapper to front when expanded
+                document.querySelector('.terminal-wrapper').style.zIndex = "100000";
             } else { 
                 b.style.display = 'none'; 
                 t.innerText = '▼'; 
+                document.querySelector('.terminal-wrapper').style.zIndex = "2000";
             } 
         } catch(e) {} 
     }
@@ -1595,7 +1601,8 @@
 
     function showInventoryPane(paneId) {
         document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        // Global Purge: Hide ALL detail panes across all hubs to prevent stacking
+        
+        // Global Purge: Hide ALL detail panes across all hubs to ensure NO GHOSTS (like LEDGEZ) appear
         document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
         
         if (paneId !== 'hub') {
@@ -1603,10 +1610,13 @@
             const pane = document.getElementById(paneName);
             if (pane) {
                 pane.style.display = 'flex';
+                // Ensure specific pane children (like title) are also managed if needed
+                if (paneId === 'pipeline') renderLedgerView(false, 'results');
+                if (paneId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
+                if (paneId === 'inventory') renderInventoryTable();
             }
         }
         if (typeof updateHubStats === 'function') updateHubStats();
-        if (typeof renderActiveTable === 'function') renderActiveTable();
     }
 
     function showSalezPane(paneId) {
