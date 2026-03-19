@@ -49,16 +49,9 @@ function findMasterRecipeKey(searchName) {
 function getEngineTrueCogs(productName) {
     let matchedKey = findMasterRecipeKey(productName);
     if (!matchedKey) return 0.00;
-
-    let cogs = 0;
     
-    if (productsDB[matchedKey] && productsDB[matchedKey].cogs) {
-        // Strip $ just in case
-        cogs = parseFloat(String(productsDB[matchedKey].cogs).replace(/[^0-9.-]+/g,""));
-    } else {
-        cogs = calculateProductTotal(matchedKey);
-    }
-    
+    // Always calculate "Live" from the BOM + Labor
+    let cogs = calculateProductTotal(matchedKey);
     return isNaN(cogs) ? 0.00 : cogs;
 }
 
