@@ -276,7 +276,7 @@
             cursor: pointer;
             z-index: 100;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1;
+            opacity: 0.3; /* Persistent visibility as requested */
             pointer-events: auto;
         }
         .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.05) 0%, transparent 100%); }
@@ -630,8 +630,8 @@
         <!-- Detailed Panez -->
         <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">LEDGERZ</div>
-            <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showInventoryPane('inventory')"></div>
+            <div class="nav-zone right" onclick="showInventoryPane('simple')"></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn active" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('simple')">SIMPLEZ</button>
@@ -648,8 +648,8 @@
 
         <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">SIMPLEZ</div>
-            <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showInventoryPane('pipeline')"></div>
+            <div class="nav-zone right" onclick="showInventoryPane('inventory')"></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
                 <button class="sub-nav-btn active" onclick="showInventoryPane('simple')">SIMPLEZ</button>
@@ -668,8 +668,8 @@
 
         <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">STOCKZ</div>
-            <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showInventoryPane('pipeline')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showInventoryPane('simple')"></div>
+            <div class="nav-zone right" onclick="showInventoryPane('pipeline')"></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('simple')">SIMPLEZ</button>
@@ -708,8 +708,8 @@
         <!-- Detailed Panez -->
         <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">BUILDERZ</div>
-            <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showProductionPane('print')"></div>
+            <div class="nav-zone right" onclick="showProductionPane('production')"></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn active" onclick="showProductionPane('builder')">BUILDERZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('production')">CONTROLZ</button>
@@ -768,8 +768,8 @@
 
         <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">CONTROLZ</div>
-            <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showProductionPane('builder')"></div>
+            <div class="nav-zone right" onclick="showProductionPane('print')"></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn" onclick="showProductionPane('builder')">BUILDERZ</button>
                 <button class="sub-nav-btn active" onclick="showProductionPane('production')">CONTROLZ</button>
@@ -867,8 +867,8 @@
 
         <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">PRINTZ</div>
-            <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showProductionPane('production')"></div>
+            <div class="nav-zone right" onclick="showProductionPane('builder')"></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn" onclick="showProductionPane('builder')">BUILDERZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('production')">CONTROLZ</button>
@@ -988,8 +988,8 @@
         <!-- Detailed Panez -->
         <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">BRIDGEZ</div>
-            <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showSalezPane('commandz')"></div>
+            <div class="nav-zone right" onclick="showSalezPane('analyticz')"></div>
             <div class="sub-nav">
                 <button class="sub-nav-btn active" onclick="showSalezPane('bridge')">BRIDGEZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
@@ -1009,8 +1009,8 @@
 
         <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">ANALYTICZ</div>
-            <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showSalezPane('bridge')"></div>
+            <div class="nav-zone right" onclick="showSalezPane('commandz')"></div>
             <div class="sub-nav">
                 <button class="sub-nav-btn" onclick="showSalezPane('bridge')">BRIDGEZ</button>
                 <button class="sub-nav-btn active" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
@@ -1065,8 +1065,8 @@
 
         <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="pane-title">COMMANDZ</div>
-            <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showSalezPane('analyticz')"></div>
+            <div class="nav-zone right" onclick="showSalezPane('bridge')"></div>
             <div class="sub-nav">
                 <button class="sub-nav-btn" onclick="showSalezPane('bridge')">BRIDGEZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
