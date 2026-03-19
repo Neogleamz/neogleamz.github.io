@@ -297,7 +297,7 @@ function toggleSOPLock() { isSOPLocked = !isSOPLocked; const btn = document.getE
 function renderActiveWO(id) {
     try {
         let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
-        document.getElementById('woMainArea').style.display = 'flex'; document.getElementById('woTitle').innerText = `${wo.wo_id}: ${wo.product_name}`; document.getElementById('woQtyTarget').innerText = wo.qty;
+        document.getElementById('woMainArea').style.display = 'flex'; document.getElementById('woTitle').innerText = `${wo.wo_id}: ${wo.product_name} - [ ${wo.qty} UNITS ]`; document.getElementById('woQtyTarget').innerText = wo.qty;
         let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
         if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
         
