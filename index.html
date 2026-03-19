@@ -1253,6 +1253,9 @@
             aliasDB = {};
             if (aliasR.data) { aliasR.data.forEach(a => { aliasDB[a.storefront_sku] = a.internal_recipe_name; }); }
 
+            sopsDB = {};
+            if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = (typeof r.steps === 'string') ? JSON.parse(r.steps) : (r.steps || []); } catch(e) { sopsDB[r.product_name] = []; } }); }
+
             renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); renderSalesTable(); renderAnalyticsDashboard(); 
             setSysProgress(100, 'success'); sysLog("System Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
