@@ -1,4 +1,7 @@
 // --- PROFITABILITY DASHBOARD MODULE ---
+let waterfallChart = null;
+let expenseDoughnut = null;
+let trendsChart = null;
 
 function sortAnalytics(c) { 
     if(isResizing) return; 
@@ -7,81 +10,230 @@ function sortAnalytics(c) {
 }
 
 function renderAnalyticsDashboard() {
-    // 1. Raw Material Value (Sunk Capital)
-    let rawInvValue = 0;
-    Object.keys(catalogCache).forEach(k => { 
-        let s = catalogCache[k].totalQty - (inventoryDB[k]?.consumed_qty||0) - (inventoryDB[k]?.scrap_qty||0) + (inventoryDB[k]?.manual_adjustment||0); 
-        rawInvValue += (s * catalogCache[k].avgUnitCost); 
-    });
-    
-    // 2. Built Goods Value (Retail Products + Sub-Assemblies on shelf)
-    let builtInvValue = 0;
-    Object.keys(productsDB).forEach(p => { 
-        let k = `RECIPE:::${p}`; let s = (inventoryDB[k]?.produced_qty||0) - (inventoryDB[k]?.sold_qty||0); 
-        // POWERED BY MASTER ENGINE
-        builtInvValue += (s * getEngineTrueCogs(p)); 
-    });
-
-    // 3 & 4. Revenue and Gross Profit (Strict CFO Math)
-    let totalCaptured = 0; 
-    let totalNetProfit = 0;
-    
-    // Pull shipping baseline from Engine config
-    const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-
-    salesDB.forEach(s => { 
-        let qty = parseFloat(s.qty_sold) || 0;
-        let captured = parseFloat(s.total) || 0;
-        let tax = parseFloat(s.taxes) || 0;
+    try {
+        // 1. Raw Material Value (Sunk Capital)
+        let rawInvValue = 0;
+        Object.keys(catalogCache).forEach(k => { 
+            let s = catalogCache[k].totalQty - (inventoryDB[k]?.consumed_qty||0) - (inventoryDB[k]?.scrap_qty||0) + (inventoryDB[k]?.manual_adjustment||0); 
+            rawInvValue += (s * catalogCache[k].avgUnitCost); 
+        });
         
-        // --- POWERED BY MASTER ENGINE ---
-        let actualShipCost = SHIP_COST * qty; 
-        let net = getHistoricalNetProfit(parseFloat(s.actual_sale_price || 0) * qty, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), parseFloat(s.discount_amount || 0), actualShipCost, s.internal_recipe_name);
-        // --------------------------------
+        // 2. Built Goods Value (Retail Products + Sub-Assemblies on shelf)
+        let builtInvValue = 0;
+        Object.keys(productsDB).forEach(p => { 
+            let k = `RECIPE:::${p}`; let s = (inventoryDB[k]?.produced_qty||0) - (inventoryDB[k]?.sold_qty||0); 
+            builtInvValue += (s * getEngineTrueCogs(p)); 
+        });
 
-        totalCaptured += captured; 
-        totalNetProfit += net; 
+        // 3. Aggregated Financials for Charts
+        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+        
+        let totals = {
+            gross: 0,
+            discounts: 0,
+            captured: 0,
+            cogs: 0,
+            shipping: 0,
+            stripe: 0,
+            net: 0
+        };
+
+        let trendData = {}; // { 'YYYY-MM-DD': { gross: 0, net: 0 } }
+
+        salesDB.forEach(s => { 
+            let qty = parseFloat(s.qty_sold) || 0;
+            let captured = parseFloat(s.total) || 0;
+            let p = parseFloat(s.actual_sale_price || 0);
+            let d = parseFloat(s.discount_amount || 0);
+            let dt = s.sale_date || 'Unknown';
+            
+            let lineGross = p * qty;
+            let lineNet = s.net_profit !== undefined && s.net_profit !== null ? parseFloat(s.net_profit) : getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name);
+            let lineStripe = s.transaction_fees !== undefined && s.transaction_fees !== null ? parseFloat(s.transaction_fees) : getEngineStripeFee(captured);
+
+            totals.gross += lineGross;
+            totals.discounts += d;
+            totals.captured += captured;
+            totals.cogs += lineCogs;
+            totals.shipping += actualShipCost;
+            totals.stripe += lineStripe;
+            totals.net += lineNet;
+
+            if(!trendData[dt]) trendData[dt] = { gross: 0, net: 0 };
+            trendData[dt].gross += lineGross;
+            trendData[dt].net += lineNet;
+        });
+
+        // Update KPI Cards
+        document.getElementById('kpiRawInv').innerText = `$${rawInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        document.getElementById('kpiBuiltInv').innerText = `$${builtInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        document.getElementById('kpiTotalRev').innerText = `$${totals.captured.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        document.getElementById('kpiTotalProfit').innerText = `$${totals.net.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+
+        // --- CHART 1: WATERFALL (PROFIT DERIVATION) ---
+        renderWaterfallChart(totals);
+
+        // --- CHART 2: DOUGHNUT (EXPENSE DISTRIBUTION) ---
+        renderExpenseDoughnut(totals);
+
+        // --- CHART 3: TRENDS (REVENUE VS PROFIT) ---
+        renderTrendsChart(trendData);
+
+        // 4. Matrix (FILTERED to hide Sub-Assemblies)
+        renderProfitabilityMatrix(SHIP_COST);
+
+    } catch(e) { console.error("Analytics Error:", e); sysLog(e.message, true); }
+}
+
+function renderWaterfallChart(t) {
+    const ctx = document.getElementById('waterfallChart');
+    if (!ctx) return;
+    if (waterfallChart) waterfallChart.destroy();
+
+    const netSales = t.gross - t.discounts;
+    
+    const data = [
+        [0, t.gross],                       // Gross Sales
+        [t.gross, netSales],                // Discounts
+        [netSales, netSales - t.cogs],      // COGS
+        [netSales - t.cogs, netSales - t.cogs - t.shipping], // Shipping
+        [netSales - t.cogs - t.shipping, netSales - t.cogs - t.shipping - t.stripe], // Stripe Fees
+        [0, t.net]                          // Net Profit (Final)
+    ];
+
+    waterfallChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Gross Sales', 'Discounts', 'True COGS', 'Shipping', 'Fees', 'NET PROFIT'],
+            datasets: [{
+                label: 'Financial Flow',
+                data: data,
+                backgroundColor: [
+                    '#6366f1', // Indigo
+                    '#fb7185', // Rose (Loss)
+                    '#f43f5e', // Red (Loss)
+                    '#fbbf24', // Amber (Loss)
+                    '#94a3b8', // Blue Gray (Loss)
+                    '#10b981'  // Emerald (Profit)
+                ],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const val = context.raw;
+                            const diff = Math.abs(val[1] - val[0]);
+                            return `$${diff.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } }
+            }
+        }
     });
+}
 
-    document.getElementById('kpiRawInv').innerText = `$${rawInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-    document.getElementById('kpiBuiltInv').innerText = `$${builtInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-    
-    // Update labels to reflect the strict accounting reality
-    document.getElementById('kpiTotalRev').previousElementSibling.innerText = "All-Time Captured (Gross)";
-    document.getElementById('kpiTotalRev').innerText = `$${totalCaptured.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-    
-    document.getElementById('kpiTotalProfit').previousElementSibling.innerText = "All-Time Actual Net Profit";
-    document.getElementById('kpiTotalProfit').innerText = `$${totalNetProfit.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+function renderExpenseDoughnut(t) {
+    const ctx = document.getElementById('expenseDoughnut');
+    if (!ctx) return;
+    if (expenseDoughnut) expenseDoughnut.destroy();
 
-    // Matrix (FILTERED to hide Sub-Assemblies)
+    expenseDoughnut = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['COGS', 'Shipping', 'Fees', 'Net Profit'],
+            datasets: [{
+                data: [t.cogs, t.shipping, t.stripe, Math.max(0, t.net)],
+                backgroundColor: ['#f43f5e', '#fbbf24', '#94a3b8', '#10b981'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 }, color: '#94a3b8' } }
+            }
+        }
+    });
+}
+
+function renderTrendsChart(trendData) {
+    const ctx = document.getElementById('trendsChart');
+    if (!ctx) return;
+    if (trendsChart) trendsChart.destroy();
+
+    const sortedDates = Object.keys(trendData).sort();
+    const grossVals = sortedDates.map(d => trendData[d].gross);
+    const netVals = sortedDates.map(d => trendData[d].net);
+
+    trendsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sortedDates,
+            datasets: [
+                {
+                    label: 'Gross Sales',
+                    data: grossVals,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Net Profit',
+                    data: netVals,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', align: 'end', labels: { boxWidth: 15, font: { size: 11 } } }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } }
+            }
+        }
+    });
+}
+
+function renderProfitabilityMatrix(SHIP_COST) {
     let wrap = document.getElementById('analyticsTableWrap'); if(!wrap) return;
-    
-    // Updated Headers based on System Standard
     let ths = ` <th class="${currentAnalyticsSort.column==='n'?'sorted-'+currentAnalyticsSort.direction:''}" onclick="sortAnalytics('n')">Retail Product</th> <th class="${currentAnalyticsSort.column==='tc'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tc')">True COGS</th> <th class="${currentAnalyticsSort.column==='ms'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ms')">Live MSRP</th> <th class="${currentAnalyticsSort.column==='mg'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('mg')">Gross Margin %</th> <th class="${currentAnalyticsSort.column==='ts'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ts')">Total Units Sold</th> <th class="${currentAnalyticsSort.column==='tp'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tp')">Actual Net Profit</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
 
     let a = Object.keys(productsDB).filter(p => !isSubassemblyDB[p]).map(p => {
-        // --- POWERED BY MASTER ENGINE ---
         let tc = getEngineTrueCogs(p); 
         let ms = getEngineLiveMsrp(p); 
         let mg = ms > 0 ? ((ms - tc) / ms) * 100 : 0;
-        
         let ts = 0; let tp = 0;
         
         salesDB.filter(s => s.internal_recipe_name === p).forEach(s => { 
             let qty = parseFloat(s.qty_sold) || 0;
             let captured = parseFloat(s.total) || 0;
-            let tax = parseFloat(s.taxes) || 0;
-            
-            // --- POWERED BY MASTER ENGINE ---
             let actualShipCost = SHIP_COST * qty;
-            let net = getHistoricalNetProfit(parseFloat(s.actual_sale_price || 0) * qty, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), parseFloat(s.discount_amount || 0), actualShipCost, s.internal_recipe_name);
-            // --------------------------------
-            
+            let net = s.net_profit !== undefined && s.net_profit !== null ? parseFloat(s.net_profit) : getHistoricalNetProfit(parseFloat(s.actual_sale_price || 0) * qty, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), parseFloat(s.discount_amount || 0), actualShipCost, s.internal_recipe_name);
+            tp += net;
             ts += qty; 
-            tp += net; 
         });
-        
         return { n: p, tc: tc, ms: ms, mg: mg, ts: ts, tp: tp };
     });
 

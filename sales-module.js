@@ -25,6 +25,9 @@ async function addManualSale() {
         
         // --- POWERED BY MASTER ENGINE ---
         let cogs = getEngineTrueCogs(rec);
+        let stripeFee = getEngineStripeFee(total);
+        let actualShipCost = (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty;
+        let lineNet = getHistoricalNetProfit(pr * qty, ship, tax, discAmt, actualShipCost, rec);
         // --------------------------------
         
         let uniqueManualSku = "MANUAL_ENTRY_" + rec;
@@ -33,7 +36,8 @@ async function addManualSale() {
             order_id: id, sale_date: dt, storefront_sku: uniqueManualSku, internal_recipe_name: rec, 
             qty_sold: qty, actual_sale_price: pr, cogs_at_sale: cogs, 
             subtotal: subtot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: total,
-            "Source": source, "Outstanding Balance": balance
+            "Source": source, "Outstanding Balance": balance,
+            transaction_fees: stripeFee, net_profit: lineNet
         };
         
         let invK = `RECIPE:::${rec}`;
@@ -161,7 +165,15 @@ async function executeSalesSync() {
         sysLog(`Pushing ${pendingSalesRows.length} sales...`); setMasterStatus("Syncing Sales...", "mod-working"); setSysProgress(60, 'working');
 
         // --- POWERED BY MASTER ENGINE ---
-        let salesPayload = pendingSalesRows.map(r => { return { ...r, cogs_at_sale: getEngineTrueCogs(r.internal_recipe_name) }; });
+        let salesPayload = pendingSalesRows.map(r => { 
+            let cogs = getEngineTrueCogs(r.internal_recipe_name);
+            let fee = getEngineStripeFee(r.total);
+            const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+            let actualShipCost = SHIP_COST * r.qty_sold;
+            let net = getHistoricalNetProfit(r.actual_sale_price * r.qty_sold, r.shipping, r.taxes, r.discount_amount, actualShipCost, r.internal_recipe_name);
+            
+            return { ...r, cogs_at_sale: cogs, transaction_fees: fee, net_profit: net }; 
+        });
         // --------------------------------
 
         let invMap = {};
@@ -263,7 +275,7 @@ function renderSalesTable() {
         totals.net += x.net;
     });
 
-    renderSalesTotals(totals);
+    // Totals logic removed - moving to Analytics tab
     // -----------------------------------------------
     
     if(a.length===0){ 
@@ -308,26 +320,6 @@ function renderSalesTable() {
     if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
 }
 
-function renderSalesTotals(t) {
-    let wrap = document.getElementById('salesTotalsWrap'); if(!wrap) return;
-    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-    
-    let cards = [
-        { label: 'GROSS SALES', val: fmt.format(t.gross), color: '#38bdf8' },
-        { label: 'TOTAL CAPTURED', val: fmt.format(t.captured), color: '#10b981' },
-        { label: 'TRUE COGS', val: fmt.format(t.cogs), color: '#ef4444' },
-        { label: 'SHIP EXPENSE', val: fmt.format(t.shipping), color: '#f59e0b' },
-        { label: 'STRIPE FEES', val: fmt.format(t.stripe), color: '#888' },
-        { label: 'NET PROFIT', val: fmt.format(t.net), color: t.net < 0 ? '#ef4444' : '#10b981', bold: true }
-    ];
-
-    wrap.innerHTML = cards.map(c => `
-        <div class="panel-card" style="padding:12px; border:1px solid var(--border-color); display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-panel);">
-            <div style="font-size:10px; color:var(--text-muted); font-weight:900; letter-spacing:1px; margin-bottom:4px;">${c.label}</div>
-            <div style="font-size:18px; color:${c.color}; font-weight:${c.bold ? '900' : 'bold'};">${c.val}</div>
-        </div>
-    `).join('');
-}
 
 async function updateSaleCell(cell, orderId, sku, col, isNum) {
     try {
