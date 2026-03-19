@@ -21,7 +21,10 @@
             --bg-bar: #f1f5f9; --bg-input: #ffffff; --bg-th: #1e293b; --text-th: #ffffff;
             --bg-edit-hover: #fef08a; --border-edit-focus: #0ea5e9; --bg-highlight: #f0fdf4;
             --text-highlight: #15803d; --bg-negative: #fef2f2; --shadow-color: rgba(0,0,0,0.08);
-            --tab-hover: #f8fafc; --tab-active-bg: #f0f9ff;
+            --tab-hover: rgba(14, 165, 233, 0.05); --tab-active-bg: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(226, 232, 240, 0.8);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
             /* Dynamic Kitting Tray Colors */
             --kitting-pull-bg: #f0fdf4; --kitting-pull-border: #10b981; --kitting-pull-text: #15803d;
             --kitting-build-bg: #fffbeb; --kitting-build-border: #f59e0b; --kitting-build-text: #b45309;
@@ -33,7 +36,10 @@
             --bg-bar: #334155; --bg-input: #0f172a; --bg-th: #020617; --text-th: #f8fafc;
             --bg-edit-hover: #854d0e; --border-edit-focus: #38bdf8; --bg-highlight: #064e3b;
             --text-highlight: #4ade80; --bg-negative: #7f1d1d; --shadow-color: rgba(0,0,0,0.5);
-            --tab-hover: #334155; --tab-active-bg: #1e293b;
+            --tab-hover: rgba(56, 189, 248, 0.1); --tab-active-bg: #1e293b;
+            --bg-glass: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(51, 65, 85, 0.8);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
             /* Dynamic Kitting Tray Colors */
             --kitting-pull-bg: rgba(16, 185, 129, 0.1); --kitting-pull-border: #059669; --kitting-pull-text: #34d399;
             --kitting-build-bg: rgba(245, 158, 11, 0.1); --kitting-build-border: #d97706; --kitting-build-text: #fbbf24;
@@ -51,21 +57,109 @@
 
         #appUI { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; }
 
-        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; gap: 15px; }
-        .title-block { flex: 1; min-width: max-content; }
-        .title-block h1 { font-size: 20px; margin: 0 0 2px 0; color: var(--text-heading); }
-        .title-block .subtitle { font-size: 12px; color: var(--text-muted); margin: 0; }
+        .header-area { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            padding: 15px 25px; 
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
+            flex-shrink: 0; 
+            gap: 20px; 
+        }
+        .title-block { flex: 0 1 auto; }
+        .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; }
+        .title-block .subtitle { font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; }
         
-        .tabs { flex: 2; display: flex; justify-content: center; gap: 4px; align-items: flex-end; align-self: flex-end; flex-wrap: wrap; }
-        .tab-btn { padding: 8px 16px; background: transparent; color: var(--text-muted); font-size: 13px; border: none; cursor: pointer; font-weight: 800; letter-spacing: 0.3px; border-radius: 8px 8px 0 0; transition: all 0.2s; width: auto !important; white-space: nowrap; margin-bottom: -10px; border-bottom: 3px solid transparent;}
-        .tab-btn:hover { color: var(--text-heading); background: var(--tab-hover); }
-        .tab-btn.active { color: #0ea5e9; border-bottom: 3px solid #0ea5e9; background: var(--tab-active-bg); }
+        .tabs { 
+            flex: 1; 
+            display: flex; 
+            justify-content: center; 
+            gap: 6px; 
+            align-items: center; 
+            flex-wrap: nowrap; 
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 4px;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn { 
+            padding: 10px 18px; 
+            background: transparent; 
+            color: var(--text-muted); 
+            font-size: 13px; 
+            border: 1px solid transparent; 
+            cursor: pointer; 
+            font-weight: 700; 
+            letter-spacing: 0.2px; 
+            border-radius: 50px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            white-space: nowrap; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: none;
+            width: auto !important;
+        }
+        .tab-btn:hover { 
+            background: var(--tab-hover); 
+            color: var(--text-heading);
+            transform: translateY(-1px);
+        }
+        .tab-btn.active { 
+            background: var(--bg-container);
+            color: var(--text-heading);
+            border-color: var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+        }
         
-        .top-controls { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
-        .top-action-btn { background: var(--bg-panel); border: 1px solid var(--border-input); color: var(--text-main); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: none; width: auto !important; }
-        .top-action-btn:hover { background: var(--border-color); transform: translateY(-1px); }
-        .logout-btn { color: #ef4444; border-color: #fca5a5; background: transparent; }
-        .logout-btn:hover { background: #fee2e2; border-color: #ef4444; }
+        /* Tab Accent Colors */
+        .tab-btn.active[onclick*="pipeline"] { border-bottom: 3px solid #f97316; }
+        .tab-btn.active[onclick*="simple"]   { border-bottom: 3px solid #10b981; }
+        .tab-btn.active[onclick*="bom"]      { border-bottom: 3px solid #3b82f6; }
+        .tab-btn.active[onclick*="inventory"] { border-bottom: 3px solid #0ea5e9; }
+        .tab-btn.active[onclick*="production"] { border-bottom: 3px solid #8b5cf6; }
+        .tab-btn.active[onclick*="sales"]     { border-bottom: 3px solid #ec4899; }
+        .tab-btn.active[onclick*="analytics"] { border-bottom: 3px solid #6366f1; }
+        .tab-btn.active[onclick*="ceo"]       { border-bottom: 3px solid #eab308; }
+        .tab-btn.active[onclick*="print"]     { border-bottom: 3px solid #06b6d4; }
+        
+        .tab-btn span { font-size: 16px; transition: transform 0.2s ease; display: inline-block; }
+        .tab-btn:hover span { transform: scale(1.2) rotate(5deg); }
+
+        .top-controls { flex: 0 1 auto; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+        .top-action-btn { 
+            background: var(--bg-container); 
+            border: 1px solid var(--border-color); 
+            color: var(--text-main); 
+            padding: 10px 18px; 
+            border-radius: 50px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            width: auto !important; 
+        }
+        .top-action-btn:hover { 
+            background: var(--tab-hover); 
+            border-color: var(--border-edit-focus);
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 12px rgba(14,165,233,0.1);
+        }
+        .logout-btn { color: #ef4444; border-color: #fca5a5; }
+        .logout-btn:hover { background: #fee2e2; border-color: #ef4444; box-shadow: 0 4px 12px rgba(239,68,68,0.1); }
 
         .tab-content { display: none; animation: fadeIn 0.2s ease; flex-direction: column; flex-grow: 1; min-height: 0; }
         .tab-content.active { display: flex; }
@@ -308,15 +402,15 @@
             <p class="subtitle">Cloud-Native Ledger, Full Editing, MRP Inventory & Product Builder</p>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('pipeline')">📦 Master Ledger</button>
-            <button class="tab-btn" onclick="switchTab('simple')">📋 Simple Inventory</button>
-            <button class="tab-btn" onclick="switchTab('bom')">🛠️ Product Builder</button>
-            <button class="tab-btn" onclick="switchTab('inventory')">📊 Inventory</button>
-            <button class="tab-btn" onclick="switchTab('production')">🏭 Production</button>
-            <button class="tab-btn" onclick="switchTab('sales')">🛒 Sales Sync</button>
-            <button class="tab-btn" onclick="switchTab('analytics')">📈 Analytics</button>
-			<button class="tab-btn" onclick="switchTab('ceo')">📈 CEO Terminal</button>
-            <button class="tab-btn" onclick="switchTab('print')">🖨️ 3D Print Queue</button>
+            <button class="tab-btn active" onclick="switchTab('pipeline')"><span>📦</span> Master Ledger</button>
+            <button class="tab-btn" onclick="switchTab('simple')"><span>📋</span> Simple Inventory</button>
+            <button class="tab-btn" onclick="switchTab('bom')"><span>🛠️</span> Product Builder</button>
+            <button class="tab-btn" onclick="switchTab('inventory')"><span>📊</span> Inventory</button>
+            <button class="tab-btn" onclick="switchTab('production')"><span>🏭</span> Production</button>
+            <button class="tab-btn" onclick="switchTab('sales')"><span>🛒</span> Sales Sync</button>
+            <button class="tab-btn" onclick="switchTab('analytics')"><span>📈</span> Analytics</button>
+            <button class="tab-btn" onclick="switchTab('ceo')"><span>🚀</span> CEO Terminal</button>
+            <button class="tab-btn" onclick="switchTab('print')"><span>🖨️</span> 3D Print Queue</button>
         </div>
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
