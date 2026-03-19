@@ -71,13 +71,15 @@
             box-shadow: var(--glass-shadow);
             flex-shrink: 0; 
             gap: 20px; 
+            flex-wrap: wrap; /* Added to prevent horizontal overflow */
         }
-        .title-block { flex: 0 1 auto; }
-        .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; }
-        .title-block .subtitle { font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; }
+        .title-block { flex: 0 0 auto; min-width: 0; }
+        .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .title-block .subtitle { font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .tabs { 
-            flex: 1; 
+            flex: 1 1 auto; 
+            min-width: 0; /* Important for flex-shrink/ellipsis */
             display: flex; 
             justify-content: center; 
             gap: 6px; 

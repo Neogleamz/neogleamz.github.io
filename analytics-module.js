@@ -48,6 +48,9 @@ function renderAnalyticsDashboard() {
             let dt = s.sale_date || 'Unknown';
             
             let lineGross = p * qty;
+            let actualShipCost = SHIP_COST * qty;
+            let lineCogs = getEngineTrueCogs(s.internal_recipe_name) * qty;
+            
             let lineNet = s.net_profit !== undefined && s.net_profit !== null ? parseFloat(s.net_profit) : getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name);
             let lineStripe = s.transaction_fees !== undefined && s.transaction_fees !== null ? parseFloat(s.transaction_fees) : getEngineStripeFee(captured);
 
