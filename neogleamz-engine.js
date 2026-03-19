@@ -80,7 +80,7 @@ function calculateProductBreakdown(pName, visited = new Set()) {
         if (q <= 0) return;
 
         const cleanK = k.replace("RECIPE:::", "");
-        const catalogItem = catalogCache[k] || catalogCache[cleanK];
+        const catalogItem = catalogByName[k] || catalogByName[cleanK];
 
         // 1. 3D PRINT METADATA (Recursion on Raw Goods level)
         if (catalogItem && catalogItem.is_3d_print) {

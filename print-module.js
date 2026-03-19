@@ -111,13 +111,13 @@ async function updatePrintStatus(id, newStatus) {
 }
 
 function openPrintSOP(pName) {
-    // Reuse the Master SOP Editor but filter/focus on the product
-    const modal = document.getElementById('sopMasterModal');
-    const select = document.getElementById('sopMasterProductSelect');
-    if (modal && select) {
-        select.value = pName;
-        modal.style.display = 'flex';
-        renderMasterSOP();
+    if (typeof openSOPMasterModal === 'function') {
+        openSOPMasterModal('3d');
+        const select = document.getElementById('sopMasterProductSelect');
+        if (select) {
+            select.value = pName;
+            renderMasterSOP();
+        }
     }
 }
 

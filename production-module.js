@@ -28,11 +28,13 @@ function populateSOPDropdown() {
     
     let options = '<option value="">-- Select Item to Edit SOP --</option>';
     if (currentSopMode === '3d') {
-        // Show only 3D Printed Raw Goods
+        // Show only 3D Printed Raw Goods (iterate catalogCache which now has flags)
         Object.keys(catalogCache).forEach(k => {
             let c = catalogCache[k];
             if (c && c.is_3d_print) {
-                options += `<option value="${String(k).replace(/"/g, '&quot;')}">🖨️ ${c.neoName || c.itemName}</option>`;
+                let name = c.neoName || c.itemName;
+                let time = c.print_time_mins || 0;
+                options += `<option value="${String(k).replace(/"/g, '&quot;')}">🖨️ ${name} (${time}m)</option>`;
             }
         });
     } else {
@@ -487,17 +489,19 @@ function find3DPrintedComponents(productName, qty, jobs = {}) {
     let comps = productsDB[productName] || [];
     comps.forEach(c => {
         let k = c.item_key || c.di_item_id || c.name;
-        let q = (parseFloat(c.qty) || 1) * qty;
+        let q = (parseFloat(c.qty) || parseFloat(c.quantity) || 1) * qty;
         
+        const cleanK = k.replace("RECIPE:::", "");
+        const catalogItem = catalogByName[k] || catalogByName[cleanK];
+
         // 1. Check if this component itself is a 3D print (Raw Good Classification)
-        const catalogItem = catalogCache[k];
         if (catalogItem && catalogItem.is_3d_print) {
             jobs[k] = (jobs[k] || 0) + q;
         }
         
         // 2. Recursively check sub-assemblies for more 3D prints
-        if (productsDB[k]) {
-            find3DPrintedComponents(k, q, jobs);
+        if (productsDB[cleanK]) {
+            find3DPrintedComponents(cleanK, q, jobs);
         }
     });
     return jobs;
