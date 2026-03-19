@@ -163,23 +163,39 @@ function calculateExactWODeductions(wo) {
 function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
     let prints = {};
     const recipe = productsDB[rootProduct] || [];
+    
     recipe.forEach(part => {
-        let k = String(part.item_key || part.di_item_id || part.name);
+        let k = String(part.item_key || part.di_item_id || part.name || "");
         let q = (parseFloat(part.quantity || part.qty) || 1) * rootQty;
+        const cleanK = k.replace('RECIPE:::', '');
+        const catalogItem = catalogByName[k] || catalogByName[cleanK];
+
+        // 1. 3D PRINTED RAW MATERIAL
+        if (catalogItem && catalogItem.is_3d_print) {
+            prints[cleanK] = (prints[cleanK] || 0) + q;
+        }
+
+        // 2. 3D PRINTED SUB-ASSEMBLY (RECIPE)
         if (k.startsWith('RECIPE:::')) {
-            let subName = k.replace('RECIPE:::', '');
-            // Check if this sub-assembly itself is a 3D print
-            if (productsDB[subName] && productsDB[subName].is_3d_print) {
-                let buildQty = q;
-                if (routingMap && routingMap[subName]) buildQty = routingMap[subName].build || 0;
-                if (buildQty > 0) prints[subName] = (prints[subName] || 0) + buildQty;
-            } else {
-                // Not a 3D print, but check its children if we are building it
-                let buildQty = q;
-                if (routingMap && routingMap[subName]) buildQty = routingMap[subName].build || 0;
-                if (buildQty > 0) {
-                    let subPrints = find3DPrintedComponents(subName, buildQty, null);
-                    for (let s in subPrints) prints[s] = (prints[s] || 0) + subPrints[s];
+            const subName = cleanK;
+            
+            // Check if we are building or pulling this sub-assembly
+            let buildQty = q;
+            if (routingMap && routingMap[subName]) {
+                // IMPORTANT: routingMap[subName] is an object {pull, build}
+                buildQty = parseFloat(routingMap[subName].build || 0);
+            }
+
+            if (buildQty > 0) {
+                // If the sub-assembly itself is marked as 3D print, add it
+                if (productsDB[subName] && productsDB[subName].is_3d_print) {
+                    prints[subName] = (prints[subName] || 0) + buildQty;
+                } else {
+                    // Otherwise, recurse to find its 3D printed components
+                    const subPrints = find3DPrintedComponents(subName, buildQty, null);
+                    for (let s in subPrints) {
+                        prints[s] = (prints[s] || 0) + (parseFloat(subPrints[s]) || 0);
+                    }
                 }
             }
         }
@@ -228,7 +244,7 @@ async function validateAndCreateWO() {
         if(error) throw new Error(error.message); 
 
         // 🖨️ AUTO-SPAWN 3D PRINT JOBS
-        const printsToSpawn = find3DPrintedComponents(p, q, {});
+        const printsToSpawn = find3DPrintedComponents(p, q, routingMap);
         const printPromises = Object.keys(printsToSpawn).map(part => {
             if (typeof addPrintJob === 'function') return addPrintJob(part, printsToSpawn[part], woId);
         });
@@ -549,29 +565,3 @@ function printSOP() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-/**
- * Recursively finds all 3D printable components in a product's BOM.
- * Uses the catalogCache (Master Ledger) for classification.
- * Returns an OBJECT: { "Item Name": total_qty }
- */
-function find3DPrintedComponents(productName, qty, jobs = {}) {
-    let comps = productsDB[productName] || [];
-    comps.forEach(c => {
-        let k = c.item_key || c.di_item_id || c.name;
-        let q = (parseFloat(c.qty) || parseFloat(c.quantity) || 1) * qty;
-        
-        const cleanK = k.replace("RECIPE:::", "");
-        const catalogItem = catalogByName[k] || catalogByName[cleanK];
-
-        // 1. Check if this component itself is a 3D print (Raw Good Classification)
-        if (catalogItem && catalogItem.is_3d_print) {
-            jobs[k] = (jobs[k] || 0) + q;
-        }
-        
-        // 2. Recursively check sub-assemblies for more 3D prints
-        if (productsDB[cleanK]) {
-            find3DPrintedComponents(cleanK, q, jobs);
-        }
-    });
-    return jobs;
-}
