@@ -53,18 +53,42 @@ async function updateLaborCosts() {
 async function renameCurrentProduct() { if(!currentProduct) return; let n = prompt("Enter new name:", currentProduct); if(!n || !n.trim() || n.trim() === currentProduct) return; n = n.trim(); if(productsDB[n]) return alert("A product with this name already exists."); sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); let o = currentProduct; let c = productsDB[o]; let l = laborDB[o] || {time:0, rate:0}; let pR = pricingDB[o] || {msrp:0, wholesale:0}; let isSub = isSubassemblyDB[o] || false; let is3D = c.is_3d_print || false; let pt = c.print_time_mins || 0; productsDB[n] = c; laborDB[n] = l; pricingDB[n] = pR; isSubassemblyDB[n] = isSub; await supabaseClient.from('product_recipes').upsert({product_name: n, components: c, labor_time_mins: l.time, labor_rate_hr: l.rate, msrp: pR.msrp, wholesale_price: pR.wholesale, is_subassembly: isSub, is_3d_print: is3D, print_time_mins: pt}); await supabaseClient.from('product_recipes').delete().eq('product_name', o); delete productsDB[o]; delete laborDB[o]; delete pricingDB[o]; delete isSubassemblyDB[o]; let ups = []; Object.keys(productsDB).forEach(k => { let changed = false; productsDB[k].forEach(p => { if(String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + o) { p.item_key = 'RECIPE:::' + n; changed = true; } }); if(changed) ups.push(supabaseClient.from('product_recipes').update({components: productsDB[k]}).eq('product_name', k)); }); if(ups.length > 0) await Promise.all(ups); currentProduct = n; if(typeof populateDropdowns === 'function') populateDropdowns(); renderProductList(); setMasterStatus("Renamed!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 3000); }
 async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const {error} = await supabaseClient.from('product_recipes').update({components: productsDB[name]}).eq('product_name', name); if(error) throw new Error(error.message); if(typeof populateDropdowns === 'function') populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
 
+let productDraggedName = null;
+
 function renderProductList() { 
     const ui = document.getElementById('productListUI'); ui.innerHTML = ""; 
-    let prods = Object.keys(productsDB).sort(); 
-    if(prods.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; } 
-    if(!currentProduct && prods.length > 0) currentProduct = prods[0]; 
+    let allProds = Object.keys(productsDB);
     
-    let retailProds = prods.filter(p => !isSubassemblyDB[p]);
-    let subProds = prods.filter(p => isSubassemblyDB[p]);
+    // Sort based on saved preference if available
+    if (window.cloudTablePrefs && window.cloudTablePrefs.productOrder) {
+        allProds.sort((a,b) => {
+            let iA = window.cloudTablePrefs.productOrder.indexOf(a);
+            let iB = window.cloudTablePrefs.productOrder.indexOf(b);
+            if(iA===-1) iA=9999; if(iB===-1) iB=9999;
+            return iA - iB;
+        });
+    } else {
+        allProds.sort();
+    }
+
+    if(allProds.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; } 
+    if(!currentProduct && allProds.length > 0) currentProduct = allProds[0]; 
+    
+    let retailProds = allProds.filter(p => !isSubassemblyDB[p]);
+    let subProds = allProds.filter(p => isSubassemblyDB[p]);
 
     function buildItem(n) {
         let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'"); let icon = isSubassemblyDB[n] ? '⚙️' : '📦';
-        return `<li class="${sel}" style="font-weight:bold; font-size:14px;" onclick="selectProduct('${safeName}')"><span>${icon} ${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span></li>`;
+        return `<li class="${sel}" 
+            draggable="true" 
+            ondragstart="productDragStart(event, '${safeName}')" 
+            ondragover="productDragOver(event)" 
+            ondrop="productDrop(event, '${safeName}')" 
+            ondragend="productDragEnd(event)"
+            onclick="selectProduct('${safeName}')" 
+            style="font-weight:bold; font-size:14px; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px; display:flex; justify-content:space-between; align-items:center;">
+            <span>☰ ${icon} ${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span>
+        </li>`;
     }
 
     let html = "";
@@ -79,6 +103,31 @@ function renderProductList() {
 
     ui.innerHTML = html;
     if(currentProduct) renderProductBOM(); 
+}
+
+function productDragStart(e, name) { 
+    productDraggedName = name; 
+    e.target.style.opacity = '0.5'; 
+    e.dataTransfer.effectAllowed = 'move';
+}
+function productDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function productDragEnd(e) { e.target.style.opacity = '1'; }
+function productDrop(e, targetName) {
+    e.preventDefault();
+    if (productDraggedName && productDraggedName !== targetName) {
+        // We reorder the preference list
+        let currentOrder = window.cloudTablePrefs.productOrder || Object.keys(productsDB).sort();
+        let srcIdx = currentOrder.indexOf(productDraggedName);
+        let tgtIdx = currentOrder.indexOf(targetName);
+        
+        if (srcIdx !== -1 && tgtIdx !== -1) {
+            currentOrder.splice(srcIdx, 1);
+            currentOrder.splice(tgtIdx, 0, productDraggedName);
+            window.cloudTablePrefs.productOrder = currentOrder;
+            renderProductList();
+            if (typeof saveCloudPrefs === 'function') saveCloudPrefs();
+        }
+    }
 }
 function selectProduct(n) { currentProduct = n; renderProductList(); renderProductBOM(); }
 function sortBOM(c) { currentBOMSort = { column: c, direction: currentBOMSort.column===c && currentBOMSort.direction==='asc' ? 'desc' : 'asc' }; renderProductBOM(); }
