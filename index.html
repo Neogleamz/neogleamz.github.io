@@ -618,18 +618,82 @@
         <div class="table-wrap" id="analyticsTableWrap"></div>
     </div>
     <div id="print-tab" class="tab-content">
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; flex-shrink:0;">
-            <h2 style="margin:0; font-size:22px; color:var(--text-heading);">🖨️ 3D Print Queue</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="width:auto; padding:8px 20px;">🖨️ 3D Print SOP Editor</button>
-                <button class="btn-blue" onclick="refreshPrintQueue()" style="width:auto; padding:8px 15px;">↻ Refresh Queue</button>
-                <div id="printQueueStats" style="background:var(--bg-bar); padding:4px 15px; border-radius:6px; border:1px solid var(--border-color); font-size:13px; display:flex; gap:15px; align-items:center;">
-                    <span>Total Tasks: <b id="totalPrintTasks">0</b></span>
-                    <span>Total Printing: <b id="totalPrintingTime">0</b> min</span>
+        <div class="bom-layout">
+            <div class="bom-sidebar">
+                <h3>🖨️ Print Tasks</h3>
+                <button class="btn-blue" onclick="refreshPrintQueue()" style="margin-bottom:15px; padding:10px;">↻ Refresh Queue</button>
+                <ul class="product-list" id="printListUI"></ul>
+                <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
+                <h3>📝 SOP Editor</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Access 3D print specialized instructions.</p>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-blue" onclick="openSOPMasterModal('3d')">🖨️ 3D Print SOP Editor</button>
+                </div>
+                <div id="printQueueStats" style="margin-top:15px; background:var(--bg-bar); padding:10px; border-radius:6px; border:1px solid var(--border-color); font-size:12px;">
+                    <div style="margin-bottom:5px;">Total Tasks: <b id="totalPrintTasks" style="color:#8b5cf6;">0</b></div>
+                    <div>Total Printing: <b id="totalPrintingTime" style="color:#8b5cf6;">0</b> min</div>
+                </div>
+            </div>
+            
+            <div class="bom-main" id="printMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
+                <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                        <h2 id="printJobTitle" style="margin:0; font-size:22px; color:var(--text-heading);">Item Name</h2>
+                        <span id="printJobBadge" class="status-badge st-queued">Queued</span>
+                    </div>
+                    <div style="font-size:14px; color:var(--text-muted);">Quantity: <strong id="printJobQty" style="color:var(--text-main);">0</strong> | Source: <strong id="printJobSource" style="font-family:monospace;">Manual</strong></div>
+                </div>
+
+                <div class="pipeline-bar" id="printPipeline">
+                    <div class="pipe-step" id="pipe-P-Queued" onclick="advancePrintStatus('Queued')">1. Queued</div>
+                    <div class="pipe-step" id="pipe-P-Printing" onclick="advancePrintStatus('Printing')">2. Printing</div>
+                    <div class="pipe-step" id="pipe-P-Cleaned" onclick="advancePrintStatus('Cleaned')">3. Cleaned</div>
+                    <div class="pipe-step" id="pipe-P-Completed" onclick="advancePrintStatus('Completed')">4. Completed</div>
+                </div>
+
+                <!-- Sections for each stage -->
+                <div id="sect-P-Queued" class="wo-section">
+                    <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:20px; border-radius:10px; text-align:center;">
+                        <h3 style="margin-top:0; color:var(--text-heading);">⏳ Waiting in Queue</h3>
+                        <p style="color:var(--text-muted); margin-bottom:20px;">This job is queued and ready for printing. Please ensure the printer is loaded with the correct filament.</p>
+                        <button class="btn-blue" style="width:auto; padding:12px 35px; font-size:15px;" onclick="advancePrintStatus('Printing')">▶ Start Print Job</button>
+                    </div>
+                </div>
+
+                <div id="sect-P-Printing" class="wo-section">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                        <h3 style="margin:0; color:var(--text-heading);">🖨️ Printing Instructions (SOP)</h3>
+                        <button class="print-btn" onclick="openPrintSOP(currentPrintJob.part_name)">🖨️ Full View</button>
+                    </div>
+                    <div id="printSOPList" style="margin-bottom:20px;"></div>
+                    <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:15px; border-radius:8px; border-left:4px solid #f97316;">
+                        <h4 style="margin:0 0- 10px 0; color:#f97316;">Next Step: Post-Processing</h4>
+                        <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Once the print finishes, remove it from the plate and mark it as cleaned.</p>
+                        <button class="btn-orange" style="width:auto; padding:12px 25px;" onclick="advancePrintStatus('Cleaned')">🧹 Mark as Cleaned</button>
+                    </div>
+                </div>
+
+                <div id="sect-P-Cleaned" class="wo-section">
+                    <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:20px; border-radius:10px; border-left:4px solid #10b981;">
+                        <h3 style="margin-top:0; color:#10b981;">✨ Part Cleaned & Cured</h3>
+                        <p style="color:var(--text-muted); margin-bottom:20px;">The part has been removed, cleaned, and is ready for use. Marking complete will add it to the inventory shelf.</p>
+                        <button class="btn-green" style="width:auto; padding:12px 35px; font-size:15px;" onclick="advancePrintStatus('Completed')">✅ Mark Completed & Add to Inventory</button>
+                    </div>
+                </div>
+
+                <div id="sect-P-Completed" class="wo-section">
+                    <div style="background:var(--bg-panel); border:2px solid #10b981; padding:30px; border-radius:10px; text-align:center;">
+                        <h1 style="margin:0; font-size:40px;">🏁</h1>
+                        <h3 style="color:#10b981; margin:10px 0;">Job Finished</h3>
+                        <p style="color:var(--text-muted); max-width:400px; margin:0 auto;">This 3D print job is fully processed. The quantity has been recorded in the inventory ledger for future assembly.</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
+                    <button class="btn-red" style="width: auto; padding: 8px 15px; font-size: 13px;" onclick="deletePrintJob()">🗑️ Remove Print Job</button>
                 </div>
             </div>
         </div>
-        <div class="table-wrap" id="printQueueWrap"></div>
     </div>
 </div>
 

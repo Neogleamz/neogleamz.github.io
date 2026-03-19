@@ -1,5 +1,7 @@
 // --- 10. 3D PRINT QUEUE MODULE ---
 
+let currentPrintJob = null;
+
 async function refreshPrintQueue() {
     try {
         sysLog("Refreshing 3D Print Queue...");
@@ -8,6 +10,19 @@ async function refreshPrintQueue() {
         if (error) throw error;
         printQueueDB = data;
         renderPrintQueue();
+        
+        // Auto-select first job if none selected
+        if (!currentPrintJob && printQueueDB.length > 0) {
+            selectPrintJob(printQueueDB[0].id);
+        } else if (currentPrintJob) {
+            // Refresh the active job data
+            const updated = printQueueDB.find(j => j.id === currentPrintJob.id);
+            if (updated) {
+                currentPrintJob = updated;
+                renderActivePrintJob(updated.id);
+            }
+        }
+
         setMasterStatus("Queue Updated", "mod-success");
         setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) {
@@ -17,31 +32,19 @@ async function refreshPrintQueue() {
 }
 
 function renderPrintQueue() {
-    const wrap = document.getElementById('printQueueWrap');
-    if (!wrap) return;
-
-    let h = `<table style="width:100%;">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>3D Printed Component</th>
-                <th class="text-right">Qty</th>
-                <th class="text-right">Total Print Time</th>
-                <th>Source WO</th>
-                <th>Status</th>
-                <th style="text-align:center;">Queue Control</th>
-            </tr>
-        </thead>
-        <tbody>`;
+    const ui = document.getElementById('printListUI');
+    if (!ui) return;
+    ui.innerHTML = "";
 
     let totalWaitTime = 0;
     let totalTasks = 0;
 
     if (printQueueDB.length === 0) {
-        h += "<tr><td colspan='7' style='text-align:center; padding:30px; color:var(--text-muted);'>No 3D print jobs currently in the pipeline.</td></tr>";
+        ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>";
+        document.getElementById('printMainArea').style.display = 'none';
     } else {
         printQueueDB.forEach(job => {
-            const catalogItem = catalogCache[job.part_name];
+            const catalogItem = catalogByName[job.part_name];
             const printTimePer = catalogItem ? (parseFloat(catalogItem.print_time_mins) || 0) : 0;
             const totalTime = printTimePer * job.qty;
             const isActive = job.status !== 'Completed';
@@ -51,63 +54,142 @@ function renderPrintQueue() {
                 totalWaitTime += totalTime;
             }
 
-            const statusMap = {
-                'Queued': { label: '⏳ Queued', class: 'badge-queued', next: 'Printing', btn: '▶ Start Print', btnClass: 'btn-blue' },
-                'Printing': { label: '🖨️ Printing', class: 'badge-printing', next: 'Cleaned', btn: '🧹 Mark Cleaned', btnClass: 'btn-orange' },
-                'Cleaned': { label: '✨ Cleaned', class: 'badge-cleaned', next: 'Completed', btn: '✅ Complete', btnClass: 'btn-green' },
-                'Completed': { label: '🏁 Completed', class: 'badge-completed', next: null, btn: null }
-            };
-
-            const sInfo = statusMap[job.status] || { label: job.status, class: '', next: null, btn: null };
-            const rowOpacity = job.status === 'Completed' ? 'opacity: 0.5;' : '';
-
-            h += `<tr style="${rowOpacity}">
-                <td style="color:var(--text-muted); font-size:11px;">${new Date(job.created_at).toLocaleDateString()}</td>
-                <td>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-weight:bold; color:#8b5cf6; cursor:pointer;" onclick="openPrintSOP('${job.part_name.replace(/'/g, "\\'")}')">🖨️ ${job.part_name}</span>
-                    </div>
-                </td>
-                <td class="text-right" style="font-weight:bold;">${job.qty}</td>
-                <td class="text-right" style="color:var(--text-muted);">${totalTime.toFixed(0)} min <span style="font-size:10px;">(${printTimePer}m ea)</span></td>
-                <td style="font-family:monospace; font-size:12px;">${job.wo_id || 'Manual'}</td>
-                <td><span class="status-badge ${sInfo.class}">${sInfo.label}</span></td>
-                <td style="text-align:center;">
-                    ${sInfo.btn ? `<button class="${sInfo.btnClass}" style="padding:5px 12px; font-size:11px; width:auto;" onclick="updatePrintStatus('${job.id}', '${sInfo.next}')">${sInfo.btn}</button>` : '<span style="color:#10b981; font-weight:bold;">COMPLETED</span>'}
-                </td>
-            </tr>`;
+            let sel = (currentPrintJob && currentPrintJob.id === job.id) ? 'selected' : '';
+            let dot = job.status === 'Queued' ? '🟡' : (job.status === 'Completed' ? '🟢' : (job.status === 'Printing' ? '🖨️' : '🧹'));
+            
+            ui.innerHTML += `<li class="${sel}" onclick="selectPrintJob('${job.id}')" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span>${dot} <strong>${job.part_name}</strong></span>
+                </div>
+                <span style="font-weight:bold;">x${job.qty}</span>
+            </li>`;
         });
     }
 
-    wrap.innerHTML = h + "</tbody></table>";
-    document.getElementById('totalPrintTasks').innerText = totalTasks;
-    document.getElementById('totalPrintingTime').innerText = totalWaitTime.toFixed(0);
+    const tasksEl = document.getElementById('totalPrintTasks');
+    const timeEl = document.getElementById('totalPrintingTime');
+    if (tasksEl) tasksEl.innerText = totalTasks;
+    if (timeEl) timeEl.innerText = totalWaitTime.toFixed(0);
+}
+
+function selectPrintJob(id) {
+    currentPrintJob = printQueueDB.find(j => j.id === id);
+    renderPrintQueue();
+    if (currentPrintJob) {
+        renderActivePrintJob(currentPrintJob.id);
+    }
+}
+
+function renderActivePrintJob(id) {
+    const job = printQueueDB.find(j => j.id === id);
+    if (!job) return;
+
+    document.getElementById('printMainArea').style.display = 'block';
+    document.getElementById('printJobTitle').innerText = job.part_name;
+    document.getElementById('printJobQty').innerText = job.qty;
+    document.getElementById('printJobSource').innerText = job.wo_id || 'Manual Entry';
+
+    const b = document.getElementById('printJobBadge');
+    b.innerText = job.status;
+    b.className = "status-badge";
+    if (job.status === 'Queued') b.classList.add('st-queued');
+    else if (job.status === 'Printing') b.classList.add('st-picking');
+    else if (job.status === 'Cleaned') b.classList.add('st-production');
+    else if (job.status === 'Completed') b.classList.add('st-completed');
+
+    // Pipeline highlights
+    ['Queued', 'Printing', 'Cleaned', 'Completed'].forEach(s => {
+        const pEl = document.getElementById('pipe-P-' + s);
+        const sEl = document.getElementById('sect-P-' + s);
+        if (pEl) pEl.classList.remove('active');
+        if (sEl) sEl.style.display = 'none';
+    });
+
+    const activePipe = document.getElementById('pipe-P-' + job.status);
+    const activeSect = document.getElementById('sect-P-' + job.status);
+    if (activePipe) activePipe.classList.add('active');
+    if (activeSect) activeSect.style.display = 'block';
+
+    // SOP logic for Printing stage
+    if (job.status === 'Printing' || job.status === 'Cleaned') {
+        const sopList = document.getElementById('printSOPList');
+        const steps = sopsDB[job.part_name] || [];
+        if (steps.length === 0) {
+            sopList.innerHTML = `<div style="padding:15px; color:var(--text-muted); border:1px dashed var(--border-color); border-radius:6px;">No specific 3D Print SOP found for this item.</div>`;
+        } else {
+            let html = "";
+            let stepCounter = 1;
+            steps.forEach((s, idx) => {
+                if (typeof s === 'string') s = { text: s };
+                html += `<div class="checklist-item" style="background:var(--bg-container); border:1px solid var(--border-color); margin-bottom:8px;">
+                    <div class="chk-text" style="width:100%;">
+                        <strong style="color:#8b5cf6;">Step ${stepCounter++}:</strong> ${s.text}
+                    </div>
+                </div>`;
+            });
+            sopList.innerHTML = html;
+        }
+    }
+}
+
+async function advancePrintStatus(newStatus) {
+    if (!currentPrintJob) return;
+    try {
+        sysLog(`Print Job ${currentPrintJob.id} -> ${newStatus}`);
+        setMasterStatus("Updating Status...", "mod-working");
+
+        const updatePayload = { status: newStatus };
+        if (newStatus === 'Printing') updatePayload.started_at = new Date().toISOString();
+        if (newStatus === 'Completed') {
+            updatePayload.completed_at = new Date().toISOString();
+            
+            // 📦 INVENTORY INTEGRATION: Add the finished raw material to shelf
+            // We increment produced_qty for this raw material. 
+            // The item_key is the part_name.
+            const k = currentPrintJob.part_name;
+            if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+            
+            inventoryDB[k].produced_qty += (parseFloat(currentPrintJob.qty) || 0);
+            
+            const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert({
+                item_key: k,
+                ...inventoryDB[k]
+            }, { onConflict: 'item_key' });
+            
+            if (invErr) throw new Error("Inventory update failed: " + invErr.message);
+        }
+
+        const { error } = await supabaseClient.from('print_queue').update(updatePayload).eq('id', currentPrintJob.id);
+        if (error) throw error;
+
+        setMasterStatus("Job Updated!", "mod-success");
+        await refreshPrintQueue();
+    } catch (e) {
+        sysLog(e.message, true);
+        setMasterStatus("Update Error", "mod-error");
+    }
+}
+
+async function deletePrintJob() {
+    if (!currentPrintJob) return;
+    if (!confirm(`Permanently remove this print job for ${currentPrintJob.part_name}?`)) return;
+    try {
+        setMasterStatus("Deleting...", "mod-working");
+        const { error } = await supabaseClient.from('print_queue').delete().eq('id', currentPrintJob.id);
+        if (error) throw error;
+        
+        currentPrintJob = null;
+        await refreshPrintQueue();
+        setMasterStatus("Deleted", "mod-success");
+    } catch (e) {
+        sysLog(e.message, true);
+    }
 }
 
 function getPrintTime(partName) {
-    const matchedKey = findMasterRecipeKey(partName);
-    if (matchedKey && productsDB[matchedKey]) {
-        return parseFloat(productsDB[matchedKey].print_time_mins) || 0;
-    }
+    const catalogItem = catalogByName[partName];
+    if (catalogItem) return parseFloat(catalogItem.print_time_mins) || 0;
     return 0;
-}
-
-async function updatePrintStatus(id, newStatus) {
-    try {
-        setMasterStatus("Updating Print Job...", "mod-working");
-        const updatePayload = { status: newStatus };
-        if (newStatus === 'Printing') updatePayload.started_at = new Date().toISOString();
-        if (newStatus === 'Completed') updatePayload.completed_at = new Date().toISOString();
-
-        const { error } = await supabaseClient.from('print_queue').update(updatePayload).eq('id', id);
-        if (error) throw error;
-
-        setMasterStatus("Job Updated", "mod-success");
-        refreshPrintQueue();
-    } catch (e) {
-        sysLog("Update Status Error: " + e.message, true);
-        setMasterStatus("Error", "mod-error");
-    }
 }
 
 function openPrintSOP(pName) {
@@ -131,4 +213,5 @@ async function addPrintJob(partName, qty, woId = null) {
     };
     const { error } = await supabaseClient.from('print_queue').insert([payload]);
     if (error) sysLog("Add Print Job Error: " + error.message, true);
+    else refreshPrintQueue();
 }
