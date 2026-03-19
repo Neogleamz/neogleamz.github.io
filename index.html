@@ -365,10 +365,49 @@
         .trunc-col { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
         .trunc-col:focus, .trunc-col:active { max-width: none !important; white-space: normal; overflow: visible; position: relative; z-index: 100; background: var(--bg-container); box-shadow: 0 4px 12px var(--shadow-color); border-radius: 4px; outline: none; }
 
-        .bom-layout { display: grid; grid-template-columns: 300px 1fr; gap: 15px; align-items: stretch; flex-grow: 1; min-height: 0; }
-        .bom-sidebar { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
+        .executive-pane {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            padding: 40px 40px 10px 40px;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+        }
+        .executive-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
+            padding-right: 15px;
+        }
+        .bom-layout { display: flex; gap: 25px; flex-grow: 1; min-height: 0; width: 100%; }
+        .bom-sidebar { 
+            width: 320px !important; 
+            flex-shrink: 0; 
+            display: flex; 
+            flex-direction: column; 
+            background: var(--bg-panel); 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            height: 100%;
+            overflow-y: auto;
+        }
         .bom-sidebar h3 { margin-top: 0; margin-bottom: 10px; color: var(--text-heading); flex-shrink: 0; font-size: 16px; }
-        .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; }
+        .bom-main { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+        .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; flex-grow: 1; overflow-y: auto; }
+        
+        #analyticsContent, #ceoContent, #paneSalezBridge .table-wrap {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            width: 100%;
+        }
         .product-list li { padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-input); margin-bottom: 4px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; transition: all 0.2s; color: var(--text-main); font-size: 13px; }
         .product-list li:hover { border-color: #3b82f6; }
         .product-list li.selected { background: #3b82f6 !important; color: white !important; border-color: #2563eb; }
@@ -635,7 +674,7 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="panePipeline" class="executive-pane">
             <div class="pane-title">LEDGERZ</div>
             <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
@@ -656,7 +695,7 @@
             <div class="table-wrap" id="results" style="flex-grow:1;"></div>
         </div>
 
-        <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneSimple" class="executive-pane">
             <div class="pane-title" style="color:#FF8C00; font-size:24px; top:5px; text-shadow: 0 0 20px rgba(255, 140, 0, 0.4);">SIMPLEZ</div>
             <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
@@ -706,7 +745,7 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneProdBuilder" class="executive-pane">
             <div class="pane-title">BUILDERZ</div>
             <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
@@ -761,7 +800,7 @@
             </div>
         </div>
 
-        <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneProdControl" class="executive-pane">
             <div class="pane-title">CONTROLZ</div>
             <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
@@ -855,7 +894,7 @@
             </div>
         </div>
 
-        <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneProdPrint" class="executive-pane">
             <div class="pane-title">PRINTZ</div>
             <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
@@ -971,7 +1010,7 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneSalezBridge" class="executive-pane">
             <div class="pane-title">BRIDGEZ</div>
             <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
@@ -987,26 +1026,26 @@
             <div class="table-wrap" id="salesTableWrap"></div>
         </div>
 
-        <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneSalezAnalyticz" class="executive-pane">
             <div class="pane-title">ANALYTICZ</div>
             <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
             
-            <div id="analyticsContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px;">
-                <div class="analytics-grid" style="grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom: 20px;">
-                    <div class="kpi-card kpi-rev" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+            <div id="analyticsContent" class="executive-content">
+                <div class="analytics-grid" style="display: flex; gap:12px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div class="kpi-card kpi-rev" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                         <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">All-Time Captured (Gross)</div>
                         <div class="kpi-value" id="kpiTotalRev" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
                     </div>
-                     <div class="kpi-card kpi-profit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                     <div class="kpi-card kpi-profit" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                         <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Estimated Profit (Net)</div>
                         <div class="kpi-value" id="kpiTotalProfit" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
                     </div>
-                    <div class="kpi-card kpi-raw" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                    <div class="kpi-card kpi-raw" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                         <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Raw Component Value</div>
                         <div class="kpi-value" id="kpiRawInv" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
                     </div>
-                    <div class="kpi-card kpi-built" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                    <div class="kpi-card kpi-built" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                         <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Built Product Assets</div>
                         <div class="kpi-value" id="kpiBuiltInv" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
                     </div>
@@ -1038,12 +1077,12 @@
             </div>
         </div>
 
-        <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneSalezCommandz" class="executive-pane">
             <div class="pane-title">COMMANDZ</div>
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
             <!-- Contents of CEO Terminal -->
-            <div id="ceoContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px; background:var(--bg-body);">
+            <div id="ceoContent" class="executive-content">
                 <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00;">
                     <div class="ceo-terminal-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 15px; padding-bottom: 15px;">
                         <div class="ceo-control-panel" style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; flex-direction: column;">
@@ -1603,7 +1642,7 @@
         document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
         
         // Global Purge: Hide ALL detail panes across all hubs to ensure NO GHOSTS (like LEDGEZ) appear
-        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
         
         if (paneId !== 'hub') {
             const paneName = (paneId === 'pipeline' ? 'panePipeline' : 'pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
@@ -1621,8 +1660,8 @@
 
     function showSalezPane(paneId) {
         document.getElementById('salezHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        // Global Purge: Hide ALL detail panes across all hubs to prevent stacking
-        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
+        // Global Purge: Hide ALL detail panes across all hubs to ensure NO GHOSTS appear
+        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
         
         if (paneId !== 'hub') {
             const paneName = 'paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1);
@@ -1640,7 +1679,7 @@
     function showProductionPane(paneId) {
         document.getElementById('prodHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
         // Global Purge: Hide ALL detail panes across all hubs to prevent stacking
-        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
         
         if (paneId !== 'hub') {
             const pMapping = { 'builder': 'paneProdBuilder', 'production': 'paneProdControl', 'print': 'paneProdPrint' };
