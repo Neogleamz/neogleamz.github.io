@@ -179,7 +179,7 @@ async function validateAndCreateWO() {
         if(error) throw new Error(error.message); 
 
         // 🖨️ AUTO-SPAWN 3D PRINT JOBS
-        const printsToSpawn = find3DPrintedComponents(p, q, routingMap);
+        const printsToSpawn = find3DPrintedComponents(p, q, {});
         const printPromises = Object.keys(printsToSpawn).map(part => {
             if (typeof addPrintJob === 'function') return addPrintJob(part, printsToSpawn[part], woId);
         });
