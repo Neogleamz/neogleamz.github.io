@@ -27,6 +27,7 @@ function sortCeoTable(key) {
 
 // State Management
 if (typeof ceoActiveProducts === 'undefined') window.ceoActiveProducts = [];
+window.ceoSessionTestItems = []; // Temporary items created in the builder modal
 
 function saveCeoBoard() { if (typeof saveCloudPrefs === 'function') saveCloudPrefs(); }
 
@@ -403,77 +404,116 @@ function saveCeoCustomItem() {
 
 function removeCeoProduct(idx) { ceoActiveProducts.splice(idx, 1); renderCeoTerminal(); }
 
-// --- UNIFIED MODAL HANDLERS ---
+// --- UNIFIED ANALYSIS BUILDER MODAL ---
 function openCeoAddModal() {
-    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
-    let sel = document.getElementById('ceo-unified-select');
-    sel.innerHTML = `<option value="">-- Choose Catalog Product --</option>` + availableRetail.map(k => `<option value="${k}">${k}</option>`).join('');
-    
-    document.getElementById('ceoUnifiedBundleBuilder').style.display = 'none';
+    // Clear inputs
+    document.getElementById('ceo-u-custom-name').value = '';
+    document.getElementById('ceo-u-custom-cogs').value = '';
+    document.getElementById('ceo-u-custom-msrp').value = '';
+    document.getElementById('ceo-u-bundle-name').value = '';
+    document.getElementById('ceo-u-search').value = '';
+
+    renderUnifiedBuilderTable();
     document.getElementById('ceoAddModal').style.display = 'flex';
 }
 
-function addCeoRealProduct() {
-    let pName = document.getElementById('ceo-unified-select').value;
-    if(!pName) return alert("Select a product.");
-    if(ceoActiveProducts.some(p => p.name === pName)) return alert("Item already on board.");
-    ceoActiveProducts.push({ name:pName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:getEngineLiveMsrp(pName), testMsrp:getEngineLiveMsrp(pName), vol:0 });
-    document.getElementById('ceoAddModal').style.display = 'none';
-    renderCeoTerminal();
-}
-
-function addCeoCustomProduct() {
-    let nameRaw = document.getElementById('ceo-unified-custom-name').value.trim();
-    if(!nameRaw) return alert("Enter item name.");
-    let iName = "🧪 " + nameRaw;
-    if(ceoActiveProducts.some(p => p.name === iName)) return alert("Name exists.");
-    let cogs = parseFloat(document.getElementById('ceo-unified-custom-cogs').value) || 0;
-    let msrp = parseFloat(document.getElementById('ceo-unified-custom-msrp').value) || 0;
-    ceoActiveProducts.push({ name:iName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:msrp, testMsrp:msrp, cogs:cogs, vol:0 });
-    document.getElementById('ceoAddModal').style.display = 'none';
-    renderCeoTerminal();
-}
-
-function switchToBundleView() {
+function renderUnifiedBuilderTable() {
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
-    let customs = ceoActiveProducts.filter(p => p.name.startsWith('🧪'));
-    
-    let html = `<table id="ceoUnifiedBundleTable"><thead><tr><th>Qty</th><th>Product / Test Item</th><th>COGS</th><th>MSRP</th></tr></thead><tbody>`;
-    
-    // Catalog Products
+    let html = `<table id="ceoUnifiedBuilderTable" style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead style="position:sticky; top:0; background:var(--bg-panel); z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5);">
+            <tr>
+                <th style="padding:10px; text-align:left; border-bottom:1px solid var(--border-color);">QTY</th>
+                <th style="padding:10px; text-align:left; border-bottom:1px solid var(--border-color);">PRODUCT NAME</th>
+                <th style="padding:10px; text-align:left; border-bottom:1px solid var(--border-color);">BASE COGS</th>
+                <th style="padding:10px; text-align:left; border-bottom:1px solid var(--border-color);">LIVE MSRP</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    // 1. Session Test Items (Highest priority)
+    window.ceoSessionTestItems.forEach((p, idx) => {
+        html += `<tr class="u-builder-row" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05);">
+            <td style="padding:8px;"><input type="number" class="u-qty" data-name="${p.name}" data-cogs="${p.cogs}" data-msrp="${p.msrp}" min="0" step="1" value="0" style="width:50px; padding:4px;"></td>
+            <td class="u-name" style="padding:8px; color:#a78bfa; font-weight:bold;">${p.name}</td>
+            <td style="padding:8px;">${ceoFmt.format(p.cogs)}</td>
+            <td style="padding:8px;">${ceoFmt.format(p.msrp)}</td>
+        </tr>`;
+    });
+
+    // 2. Catalog Products
     availableRetail.forEach(k => {
         let c = getEngineTrueCogs(k); let m = getEngineLiveMsrp(k);
-        html += `<tr class="unified-bundle-row"><td><input type="number" class="u-bundle-qty" data-name="${k}" data-cogs="${c}" data-msrp="${m}" min="0" step="1" value="0" style="width:50px;"></td><td class="u-bundle-name">${k}</td><td>${ceoFmt.format(c)}</td><td>${ceoFmt.format(m)}</td></tr>`;
+        html += `<tr class="u-builder-row" style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:8px;"><input type="number" class="u-qty" data-name="${k}" data-cogs="${c}" data-msrp="${m}" min="0" step="1" value="0" style="width:50px; padding:4px;"></td>
+            <td class="u-name" style="padding:8px;">${k}</td>
+            <td style="padding:8px;">${ceoFmt.format(c)}</td>
+            <td style="padding:8px;">${ceoFmt.format(m)}</td>
+        </tr>`;
     });
-    
-    // Active Custom Items
-    customs.forEach(p => {
-        html += `<tr class="unified-bundle-row"><td><input type="number" class="u-bundle-qty" data-name="${p.name}" data-cogs="${p.cogs || 0}" data-msrp="${p.currentMsrp || 0}" min="0" step="1" value="0" style="width:50px;"></td><td class="u-bundle-name" style="color:#8b5cf6;">${p.name}</td><td>${ceoFmt.format(p.cogs || 0)}</td><td>${ceoFmt.format(p.currentMsrp || 0)}</td></tr>`;
-    });
-    
-    document.getElementById('ceoUnifiedBundleTableWrap').innerHTML = html + `</tbody></table>`;
-    document.getElementById('ceoUnifiedBundleBuilder').style.display = 'block';
+
+    html += `</tbody></table>`;
+    document.getElementById('ceoUnifiedTableWrap').innerHTML = html;
 }
 
-function filterUnifiedBundleList() {
-    let f = document.getElementById('ceoUnifiedBundleSearch').value.toLowerCase();
-    document.querySelectorAll('.unified-bundle-row').forEach(r => {
-        let n = r.querySelector('.u-bundle-name').innerText.toLowerCase();
+function addCeoSessionTestItem() {
+    let raw = document.getElementById('ceo-u-custom-name').value.trim();
+    if(!raw) return alert("Enter item name.");
+    let iName = "🧪 " + raw;
+    if(window.ceoSessionTestItems.some(p => p.name === iName)) return alert("Test item name taken.");
+    
+    let c = parseFloat(document.getElementById('ceo-u-custom-cogs').value) || 0;
+    let m = parseFloat(document.getElementById('ceo-u-custom-msrp').value) || 0;
+    
+    window.ceoSessionTestItems.unshift({ name: iName, cogs: c, msrp: m });
+    renderUnifiedBuilderTable();
+    
+    // Clear custom inputs
+    document.getElementById('ceo-u-custom-name').value = '';
+    document.getElementById('ceo-u-custom-cogs').value = '';
+    document.getElementById('ceo-u-custom-msrp').value = '';
+}
+
+function filterUnifiedBuilderList() {
+    let f = document.getElementById('ceo-u-search').value.toLowerCase();
+    document.querySelectorAll('.u-builder-row').forEach(r => {
+        let n = r.querySelector('.u-name').innerText.toLowerCase();
         r.style.display = n.includes(f) ? '' : 'none';
     });
 }
 
-function addCeoBundleProduct() {
-    let n = document.getElementById('ceoUnifiedBundleName').value.trim();
-    if(!n) return alert("Bundle Name required.");
-    let bName = "📦 " + n;
-    if(ceoActiveProducts.some(p => p.name === bName)) return alert("Bundle exists.");
-    let tCogs = 0, tMsrp = 0, count = 0;
-    document.querySelectorAll('.u-bundle-qty').forEach(i => {
-        let q = parseInt(i.value) || 0; if(q > 0) { tCogs += q * parseFloat(i.dataset.cogs); tMsrp += q * parseFloat(i.dataset.msrp); count++; }
+function addCeoUnifiedSelection() {
+    let selections = [];
+    document.querySelectorAll('.u-qty').forEach(btn => {
+        let q = parseInt(btn.value) || 0;
+        if(q > 0) {
+            selections.push({ name: btn.dataset.name, qty: q, cogs: parseFloat(btn.dataset.cogs), msrp: parseFloat(btn.dataset.msrp) });
+        }
     });
-    if(count === 0) return alert("Add items to bundle.");
-    ceoActiveProducts.push({ name:bName, isBundle:true, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:tMsrp, testMsrp:tMsrp, cogs:tCogs, vol:0 });
+
+    if(selections.length === 0) return alert("Please select quantities for at least one item.");
+
+    let bNameRaw = document.getElementById('ceo-u-bundle-name').value.trim();
+    
+    if(bNameRaw) {
+        // Create as BUNDLE
+        let finalName = "📦 " + bNameRaw;
+        let tCogs = 0; let tMsrp = 0;
+        selections.forEach(s => { tCogs += s.qty * s.cogs; tMsrp += s.qty * s.msrp; });
+        
+        ceoActiveProducts.push({ name: finalName, isBundle:true, applyCac:false, applyAff:false, applyWarr:false, currentMsrp: tMsrp, testMsrp: tMsrp, cogs: tCogs, vol: 0 });
+    } else {
+        // Add INDIVIDUALLY
+        selections.forEach(s => {
+            // If already on board, maybe skip or alert? I'll allow duplicates for now or use unique naming
+            let baseName = s.name;
+            if(ceoActiveProducts.some(p => p.name === baseName)) {
+                alert(`Note: ${baseName} is already on the board. Skipping duplicate add.`);
+                return;
+            }
+            ceoActiveProducts.push({ name: baseName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp: s.msrp, testMsrp: s.msrp, cogs: s.cogs, vol: 0 });
+        });
+    }
+
     document.getElementById('ceoAddModal').style.display = 'none';
     renderCeoTerminal();
 }
