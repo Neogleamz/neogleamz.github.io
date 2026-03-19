@@ -145,7 +145,8 @@ function renderWaterfallChart(t) {
                 }
             },
             scales: {
-                y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } }
+                y: { beginAtZero: true, ticks: { font: { size: 9 }, callback: v => '$' + v.toLocaleString() } },
+                x: { ticks: { font: { size: 9 } } }
             }
         }
     });
@@ -172,7 +173,7 @@ function renderExpenseDoughnut(t) {
             maintainAspectRatio: false,
             cutout: '70%',
             plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 }, color: '#94a3b8' } }
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, color: '#94a3b8', padding: 10 } }
             }
         }
     });
@@ -215,11 +216,11 @@ function renderTrendsChart(trendData) {
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { position: 'top', align: 'end', labels: { boxWidth: 15, font: { size: 11 } } }
+                legend: { position: 'top', align: 'end', labels: { boxWidth: 12, font: { size: 10 }, padding: 8 } }
             },
             scales: {
-                x: { grid: { display: false } },
-                y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } }
+                x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                y: { beginAtZero: true, ticks: { font: { size: 9 }, callback: v => '$' + v.toLocaleString() } }
             }
         }
     });
