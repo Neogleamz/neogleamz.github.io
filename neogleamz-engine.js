@@ -66,39 +66,42 @@ function getEngineTrueCogs(productName) {
  * CORE BOM MATH: Recursively calculates the raw and labor breakdown of any product or sub-assembly.
  */
 function calculateProductBreakdown(pName, visited = new Set()) {
-    if (visited.has(pName)) return { raw: 0, labor: 0, print: 0, total: 0 };
+    if (!pName || visited.has(pName)) return { raw: 0, labor: 0, print: 0, total: 0 };
     visited.add(pName);
 
     let totalRaw = 0;
     let totalLabor = 0;
     let totalPrintTime = 0;
 
-    (productsDB[pName] || []).forEach(part => {
-        let k = String(part.item_key || part.di_item_id || part.name || "").replace('RECIPE:::', '');
-        let q = parseFloat(part.qty) || 1;
+    const components = productsDB[pName] || [];
+    components.forEach(part => {
+        let rawKey = String(part.item_key || part.di_item_id || part.name || "");
+        let q = parseFloat(part.quantity || part.qty) || 0;
+        if (q <= 0) return;
 
-        // --- 1. 3D PRINT RECURSION (Raw Goods level) ---
-        const catalogItem = catalogCache[k];
-        if (catalogItem && catalogItem.is_3d_print) {
-            totalPrintTime += (catalogItem.print_time_mins || 0) * q;
-        }
-
-        // --- 2. SUB-ASSEMBLY RECURSION ---
-        if (productsDB[k]) {
-            let sub = calculateProductBreakdown(k, new Set(visited));
+        // --- 1. SUB-ASSEMBLY RECURSION ---
+        if (rawKey.startsWith('RECIPE:::')) {
+            let subName = rawKey.replace('RECIPE:::', '');
+            let sub = calculateProductBreakdown(subName, new Set(visited));
             totalRaw += (sub.raw * q);
             totalLabor += (sub.labor * q);
             totalPrintTime += (sub.print * q);
         } else {
-            // Raw Material from Catalog
-            totalRaw += (catalogItem ? (catalogItem.avgUnitCost || 0) : 0) * q;
+            // --- 2. RAW MATERIAL ---
+            const catalogItem = catalogCache[rawKey];
+            if (catalogItem) {
+                totalRaw += (catalogItem.avgUnitCost || 0) * q;
+                if (catalogItem.is_3d_print) {
+                    totalPrintTime += (catalogItem.print_time_mins || 0) * q;
+                }
+            }
         }
     });
 
     // Add this product's own labor
     if (laborDB[pName]) {
-        let ownLabor = (laborDB[pName].time / 60) * laborDB[pName].rate;
-        totalLabor += ownLabor;
+        let ownLabor = (parseFloat(laborDB[pName].time) / 60) * parseFloat(laborDB[pName].rate || 0);
+        if (!isNaN(ownLabor)) totalLabor += ownLabor;
     }
 
     return { 
