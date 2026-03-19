@@ -430,3 +430,28 @@ function printSOP() {
         html += `</body></html>`; let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500);
     } catch(e) { sysLog(e.message, true); }
 }
+
+/**
+ * Recursively finds all 3D printable components in a product's BOM.
+ * Uses the catalogCache (Master Ledger) for classification.
+ * Returns an OBJECT: { "Item Name": total_qty }
+ */
+function find3DPrintedComponents(productName, qty, jobs = {}) {
+    let comps = productsDB[productName] || [];
+    comps.forEach(c => {
+        let k = c.item_key || c.di_item_id || c.name;
+        let q = (parseFloat(c.qty) || 1) * qty;
+        
+        // 1. Check if this component itself is a 3D print (Raw Good Classification)
+        const catalogItem = catalogCache[k];
+        if (catalogItem && catalogItem.is_3d_print) {
+            jobs[k] = (jobs[k] || 0) + q;
+        }
+        
+        // 2. Recursively check sub-assemblies for more 3D prints
+        if (productsDB[k]) {
+            find3DPrintedComponents(k, q, jobs);
+        }
+    });
+    return jobs;
+}
