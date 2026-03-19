@@ -236,12 +236,12 @@
             transform: translateY(-1px);
         }
         .tab-btn.active { 
-            background: rgba(255, 140, 0, 0.25);
-            color: #FF8C00; /* Vibrant Neon Orange */
+            background: rgba(255, 140, 0, 0.35); /* Deeper Orange Glass */
+            color: #FF8C00; 
             border-color: #FF8C00;
-            box-shadow: 0 0 25px rgba(255, 140, 0, 0.6);
+            box-shadow: 0 0 35px rgba(255, 140, 0, 0.8), inset 0 0 15px rgba(255, 140, 0, 0.3); /* Stronger Executive Glow */
             font-weight: 900;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
         
         /* Unified Tab Accent - All Hubs Glow Orange when Active */
@@ -292,15 +292,19 @@
         .nav-zone.left:hover { --dir: right; }
         .nav-zone.right:hover { --dir: left; }
         .nav-zone i {
-            font-size: 24px; /* Slightly smaller */
-            color: #F79320;
-            text-shadow: 0 0 10px rgba(247, 147, 32, 0.4);
+            font-size: 28px; /* High-Visibility Command Arrow */
+            color: #FF8C00;
+            text-shadow: 0 0 15px rgba(255, 140, 0, 0.6);
             font-style: normal;
             font-weight: 900;
-            opacity: 0.3; /* Twice as visible! */
-            transition: all 0.3s ease;
+            opacity: 0.8; /* Persistent 80% visibility as requested */
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
         }
-        .nav-zone:hover i { opacity: 1; transform: scale(1.3); text-shadow: 0 0 20px rgba(247, 147, 32, 0.8); }
+        .nav-zone:hover i { 
+            opacity: 1.0; 
+            transform: scale(1.4); 
+            text-shadow: 0 0 25px rgba(255, 140, 0, 0.9); 
+        }
         .inventory-pane { position: relative; } 
 
         .top-action-btn { 
@@ -383,12 +387,22 @@
             min-height: 0;
             padding-right: 15px;
         }
-        .bom-layout { display: flex; gap: 25px; flex-grow: 1; min-height: 0; width: 100%; }
-        .bom-sidebar { 
-            width: 320px !important; 
-            flex-shrink: 0; 
-            display: flex; 
-            flex-direction: column; 
+        .bom-layout {
+            display: flex;
+            gap: 25px;
+            height: 100%;
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            flex-grow: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .bom-sidebar {
+            flex: 0 0 320px !important;
+            width: 320px !important;
+            min-width: 320px !important;
+            max-width: 320px !important;
             background: var(--bg-panel); 
             border: 1px solid var(--border-color); 
             border-radius: 12px; 
@@ -396,9 +410,23 @@
             box-sizing: border-box; 
             height: 100%;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         .bom-sidebar h3 { margin-top: 0; margin-bottom: 10px; color: var(--text-heading); flex-shrink: 0; font-size: 16px; }
-        .bom-main { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+        .bom-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            background: var(--bg-container); 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            padding: 15px; 
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
         .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; flex-grow: 1; overflow-y: auto; }
         
         #analyticsContent, #ceoContent, #paneSalezBridge .table-wrap {
@@ -531,7 +559,7 @@
         #termHeader.sys-error { background-color: #ef4444 !important; animation: pulseRed 2s infinite; }
         #termHeader.sys-good { background-color: #10b981 !important; }
         @keyframes pulseRed { 0% { background-color: #ef4444; } 50% { background-color: #991b1b; } 100% { background-color: #ef4444; } }
-        #debugLog { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 350px; max-height: 250px; overflow-y: auto; padding: 10px; font-size: 11px; line-height: 1.4; background: #0f172a; color: #10b981; border: 1px solid #334155; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99999; }
+        #debugLog { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 450px; max-height: 400px; overflow-y: auto; padding: 10px; font-size: 11px; line-height: 1.4; background: #0f172a; color: #10b981; border: 1px solid #334155; border-radius: 6px; box-shadow: 0 10px 50px rgba(0,0,0,0.8); z-index: 999999; }
         #sysProgress { width: 100%; height: 3px; border: none; background-color: transparent; display: block; border-radius: 0 0 6px 6px; position:absolute; bottom:0; left:0; }
         #sysProgress::-webkit-progress-bar { background-color: transparent; }
         #sysProgress.prog-working::-webkit-progress-value { background-color: #3b82f6; transition: width 0.3s; }
@@ -609,18 +637,39 @@
     </style>
 </head>
 <body>
-
-<div id="loginUI">
-    <div class="login-box">
-        <h2>🔒 Neogleamz Secure Login</h2>
-        <input type="email" id="loginEmail" placeholder="Enterprise Email">
-        <input type="password" id="loginPass" placeholder="Master Password">
-        <button id="loginBtn">Authenticate to Command Center</button>
-        <p id="loginError" style="color:#ef4444; font-size:13px; margin-top:15px; display:none;"></p>
+<!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
+<div class="terminal-wrapper" style="position: fixed; top: 12px; right: 25px; z-index: 2147483647;">
+    <div id="termHeader" class="sys-good" onclick="toggleTerminal()" style="width: auto; min-width: 180px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border-radius: 8px;">
+        <span id="termStatusIcon" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right:10px;">🟢 System Online</span>
+        <span id="termToggle">▼</span>
+        <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
+    </div>
+    <div id="debugLog" style="display:none; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; width: 400px; max-height: 500px; overflow-y: auto; box-shadow: var(--glass-shadow); margin-top: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
+            <span style="font-weight:bold; color:var(--text-muted); font-size:10px; text-transform:uppercase;">Command Center Diagnostics</span>
+            <button onclick="clearLog()" style="width:auto; padding:2px 8px; font-size:10px; background:var(--bg-surface-light); color:var(--text-main); border-radius:4px; border:1px solid var(--border-color); cursor:pointer;">Clear Log</button>
+        </div>
     </div>
 </div>
 
-<div id="appUI" class="container">
+<div id="loginUI" class="login-container" style="display: flex;">
+    <div class="login-card">
+        <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" class="login-logo">
+        <h1 style="margin-bottom: 30px; font-weight: 300; letter-spacing: 2px;">AUTHORITY ACCESS</h1>
+        <div class="login-field">
+            <label>Enterprise Email</label>
+            <input type="email" id="loginEmail" placeholder="services@neogleamz.com">
+        </div>
+        <div class="login-field">
+            <label>Master Password</label>
+            <input type="password" id="loginPass" placeholder="••••••••">
+        </div>
+        <div id="loginError" class="login-error">Invalid credentials. Access denied.</div>
+        <button id="loginBtn" class="login-btn">Authenticate to Command Center</button>
+    </div>
+</div>
+
+<div id="appUI" class="container" style="display: none;">
     <div class="header-area">
         <div class="title-block">
             <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 32px; width: auto; filter: brightness(0) invert(1);">
@@ -634,25 +683,12 @@
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
             <button class="top-action-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
-            <div class="terminal-wrapper">
-                <div id="termHeader" class="sys-good" onclick="toggleTerminal()">
-                    <span id="termStatusIcon" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right:10px;">🟢 System Ready</span>
-                    <span id="termToggle">▼</span>
-                    <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
-                </div>
-                <div id="debugLog">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #334155; padding-bottom:5px;">
-                        <span style="font-weight:bold; color:var(--text-muted); font-size:10px; text-transform:uppercase;">System Diagnostics</span>
-                        <button onclick="clearLog()" style="width:auto; padding:2px 8px; font-size:10px; background:#334155; color:#fff; border-radius:4px; border:none; cursor:pointer;">Clear Log</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
     <!-- INVENTORY HUBZ -->
     <div id="invhub-tab" class="tab-content active" style="padding:0;">
-        <div id="invHubLanding" class="hub-container">
+        <div id="invHubLanding" class="hub-landing hub-container" style="display:flex; flex-direction:column; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
             <div class="hub-card" onclick="showInventoryPane('pipeline')">
                 <i>📖</i>
                 <h2>LEDGERZ</h2>
@@ -676,54 +712,68 @@
         <!-- Detailed Panez -->
         <div id="panePipeline" class="executive-pane">
             <div class="pane-title">LEDGERZ</div>
-            <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
+            <div class="nav-zone left" onclick="showInventoryPane('hub')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
-            <div class="control-panel">
-                <div class="panel-card">
-                    <label style="font-size:11px; font-weight:900; color:var(--primary-color); margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">📦 Orders Sync</label>
-                    <input type="file" id="orderFiles" multiple accept=".html">
-                    <div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-main" style="padding:25px;">
+                    <div class="control-panel">
+                        <div class="panel-card">
+                            <label style="font-size:11px; font-weight:900; color:var(--primary-color); margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">📦 Orders Sync</label>
+                            <input type="file" id="orderFiles" multiple accept=".html">
+                            <div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div>
+                        </div>
+                        <div class="panel-card" style="border-left: 4px solid #f59e0b;">
+                            <label style="font-size:11px; font-weight:900; color:#f59e0b; margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">🚚 Parcels Sync</label>
+                            <input type="file" id="parcelFiles" multiple accept=".html">
+                            <div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div>
+                        </div>
+                        <div class="panel-card master-card"><div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div><button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button></div>
+                        <div class="panel-card" style="grid-column: span 2;"><p style="font-size:11px; margin:0 0 8px 0; text-align:center; color:var(--text-muted);">Launch Backup Manager</p><button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Cloud Backup / Restore</button></div>
+                    </div>
+                    <div class="table-wrap" id="results" style="flex-grow:1;"></div>
                 </div>
-                <div class="panel-card">
-                    <label style="font-size:11px; font-weight:900; color:var(--primary-color); margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">🚚 Parcels Sync</label>
-                    <input type="file" id="parcelFiles" multiple accept=".html">
-                    <div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div>
-                </div>
-                <div class="panel-card master-card"><div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div><button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button></div>
-                <div class="panel-card" style="grid-column: span 2;"><p style="font-size:11px; margin:0 0 8px 0; text-align:center; color:var(--text-muted);">Launch Backup Manager</p><button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Cloud Backup / Restore</button></div>
             </div>
-            <div class="table-wrap" id="results" style="flex-grow:1;"></div>
         </div>
 
         <div id="paneSimple" class="executive-pane">
-            <div class="pane-title" style="color:#FF8C00; font-size:24px; top:5px; text-shadow: 0 0 20px rgba(255, 140, 0, 0.4);">SIMPLEZ</div>
+            <div class="pane-title">SIMPLEZ</div>
             <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
-            <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
-            <div class="manual-entry-bar">
-                <div><label>Item Name</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
-                <div><label>Neo Product Tag</label><input id="m_neo_prod" type="text" placeholder="e.g., Soulz"></div>
-                <div style="flex: 0.5;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
-                <div style="flex: 0.5;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
-                <button class="btn-green" style="padding: 8px 15px; width: auto; font-size: 13px; font-weight: bold;" onclick="addManualItem()">+ Add Row</button>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-main" style="padding:25px;">
+                    <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
+                    <div class="manual-entry-bar">
+                        <div><label>Item Name</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
+                        <div><label>Neo Product Tag</label><input id="m_neo_prod" type="text" placeholder="e.g., Soulz"></div>
+                        <div style="flex: 0.5;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
+                        <div style="flex: 0.5;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
+                        <button class="btn-green" style="padding: 8px 15px; width: auto; font-size: 13px; font-weight: bold;" onclick="addManualItem()">+ Add Row</button>
+                    </div>
+                    <div class="table-wrap" id="simpleResults" style="flex-grow:1;"></div>
+                </div>
             </div>
-            <div class="table-wrap" id="simpleResults" style="flex-grow:1;"></div>
         </div>
 
-        <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
+        <div id="paneInventory" class="executive-pane">
             <div class="pane-title">STOCKZ</div>
             <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('pipeline')"><i>›</i></div>
-            <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
-            <div class="table-wrap" id="fgiTableWrap" style="margin-bottom:30px;"></div>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-main" style="padding:25px;">
+                    <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
+                    <div class="table-wrap" id="fgiTableWrap" style="margin-bottom:30px;"></div>
 
-            <div class="table-wrap" id="invTableWrap" style="flex-grow:1;"></div>
+                    <div class="table-wrap" id="invTableWrap" style="flex-grow:1;"></div>
+                </div>
+            </div>
         </div>
-    </div> <!-- End of invhub-tab -->
-
+    </div>
     <!-- PRODUCTZ HUB -->
     <div id="prodhub-tab" class="tab-content" style="padding:0;">
-        <div id="prodHubLanding" class="hub-container">
+        <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-direction:column; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
             <div class="hub-card" onclick="showProductionPane('builder')">
                 <i>🔨</i>
                 <h2>BUILDERZ</h2>
@@ -807,18 +857,14 @@
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
-                    <div id="productionStats" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; gap:20px; align-items:center; box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">
-                            <div style="display:flex; align-items:flex-end; gap:15px;">
-                                <div style="display:flex; flex-direction:column;">
-                                    <span style="font-size:24px; font-weight:900; color:var(--primary-color);" id="activeBatchCount">0</span>
-                                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">BATCHES</span>
-                                </div>
-                                <div style="width:1px; height:30px; background:var(--border-color);"></div>
-                                <div style="display:flex; flex-direction:column;">
-                                    <span style="font-size:24px; font-weight:900; color:#10b981;" id="activeUnitCount">0</span>
-                                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">UNITS</span>
-                                </div>
-                            </div>
+                    <div id="productionStats" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:center; box-shadow:var(--glass-shadow); border-left: 4px solid var(--primary-color);">
+                        <div style="display:flex; flex-direction:column; align-items:center; border-right: 1px solid var(--border-color);">
+                            <span style="font-size:20px; font-weight:900; color:var(--primary-color);" id="activeBatchCount">0</span>
+                            <span style="font-size:9px; font-weight:900; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Active Batches</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <span style="font-size:20px; font-weight:900; color:var(--secondary-color);" id="activePrintCount">0</span>
+                            <span style="font-size:9px; font-weight:900; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Active Prints</span>
                         </div>
                     </div>
 
@@ -988,7 +1034,7 @@
 
     <!-- SALEZ HUB -->
     <div id="salezhub-tab" class="tab-content" style="padding:0;">
-        <div id="salezHubLanding" class="hub-container">
+        <div id="salezHubLanding" class="hub-landing hub-container" style="display:none; flex-direction:column; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
             <div class="hub-card" onclick="showSalezPane('bridge')">
                 <i>📊</i>
                 <h2>BRIDGEZ</h2>
@@ -1026,66 +1072,68 @@
             <div class="table-wrap" id="salesTableWrap"></div>
         </div>
 
-        <div id="paneSalezAnalyticz" class="executive-pane">
-            <div class="pane-title">ANALYTICZ</div>
-            <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
-            
-            <div id="analyticsContent" class="executive-content">
-                <div class="analytics-grid" style="display: flex; gap:12px; margin-bottom: 20px; flex-wrap: wrap;">
-                    <div class="kpi-card kpi-rev" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">All-Time Captured (Gross)</div>
-                        <div class="kpi-value" id="kpiTotalRev" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
-                    </div>
-                     <div class="kpi-card kpi-profit" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Estimated Profit (Net)</div>
-                        <div class="kpi-value" id="kpiTotalProfit" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
-                    </div>
-                    <div class="kpi-card kpi-raw" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Raw Component Value</div>
-                        <div class="kpi-value" id="kpiRawInv" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
-                    </div>
-                    <div class="kpi-card kpi-built" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border: none; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-                        <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Built Product Assets</div>
-                        <div class="kpi-value" id="kpiBuiltInv" style="font-size: 20px; font-weight: 900; margin: 5px 0;">$0.00</div>
-                    </div>
-                </div>
-
-                <div class="analytics-charts" style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px; flex-grow: 1; min-height: 220px;">
-                    <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; position: relative; height: 100%;">
-                        <h4 style="margin:0 0 10px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Profit Waterfall Analysis</h4>
-                        <div style="position:relative; height:calc(100% - 30px); width:100%;"><canvas id="waterfallChart"></canvas></div>
-                    </div>
-                    <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; position: relative; height: 100%;">
-                        <h4 style="margin:0 0 10px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Expense Distribution</h4>
-                        <div style="position:relative; height:calc(100% - 30px); width:100%;"><canvas id="expenseDoughnut"></canvas></div>
-                    </div>
-                </div>
+            <div id="paneSalezAnalyticz" class="executive-pane">
+                <div class="pane-title">ANALYTICZ</div>
+                <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
+                <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
                 
-                <div class="chart-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; min-height: 200px; margin-bottom: 20px; position: relative; flex-grow: 1;">
-                    <h4 style="margin:0 0 10px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Revenue vs. Profit Trends</h4>
-                    <div style="position:relative; height:calc(100% - 30px); width:100%;"><canvas id="trendsChart"></canvas></div>
-                </div>
+                <div class="bom-layout" style="flex-grow:1; min-height:0; overflow: hidden;">
+                    <div class="bom-main" id="analyticsContent" style="display:flex; flex-direction:column; padding:20px; height: 100%; overflow-x: hidden; overflow-y: auto;">
+                        <div class="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px; margin-bottom: 25px; flex-shrink:0;">
+                            <div class="kpi-card kpi-rev" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                                <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">All-Time Captured (Gross)</div>
+                                <div class="kpi-value" id="kpiTotalRev" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                            </div>
+                            <div class="kpi-card kpi-profit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                                <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Estimated Profit (Net)</div>
+                                <div class="kpi-value" id="kpiTotalProfit" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                            </div>
+                            <div class="kpi-card kpi-raw" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                                <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Raw Component Value</div>
+                                <div class="kpi-value" id="kpiRawInv" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                            </div>
+                            <div class="kpi-card kpi-built" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                                <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Built Product Assets</div>
+                                <div class="kpi-value" id="kpiBuiltInv" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
+                            </div>
+                        </div>
 
-                <div class="matrix-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; flex-grow: 1; min-height: 250px; display: flex; flex-direction: column;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; flex-shrink: 0;">
-                        <h4 style="margin:0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Sku Profitability Matrix</h4>
-                        <button class="btn-blue" onclick="backfillFinancials()" style="font-size:11px; padding:6px 12px;">↻ BACKFILL FINANCIALS</button>
+                        <div class="analytics-charts" style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 20px; margin-bottom: 25px; min-height: 400px; flex-shrink:0;">
+                            <div class="chart-container" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-shadow: var(--glass-shadow);">
+                                <h4 style="margin:0 0 15px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Revenue vs. Profit Trends</h4>
+                                <div style="position:relative; flex:1; width:100%; min-height: 250px;"><canvas id="trendsChart"></canvas></div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 20px;">
+                                <div class="chart-container" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; flex: 1; display: flex; flex-direction: column; box-shadow: var(--glass-shadow);">
+                                    <h4 style="margin:0 0 10px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Profit Waterfall Analysis</h4>
+                                    <div style="position:relative; flex:1; width:100%; min-height: 120px;"><canvas id="waterfallChart"></canvas></div>
+                                </div>
+                                <div class="chart-container" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; flex: 1; display: flex; flex-direction: column; box-shadow: var(--glass-shadow);">
+                                    <h4 style="margin:0 0 10px 0; color:var(--text-heading); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Expense Distribution</h4>
+                                    <div style="position:relative; flex:1; width:100%; min-height: 120px;"><canvas id="expenseDoughnut"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="matrix-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; flex-grow: 1; min-height: 350px; display: flex; flex-direction: column;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; flex-shrink: 0;">
+                                <h4 style="margin:0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Sku Profitability Matrix</h4>
+                                <button class="btn-blue" onclick="backfillFinancials()" style="font-size:11px; padding:6px 12px;">↻ BACKFILL FINANCIALS</button>
+                            </div>
+                            <div class="table-wrap" id="analyticsTableWrap" style="flex-grow: 1; overflow-y: auto; min-height: 0;"></div>
+                        </div>
                     </div>
-                    <div class="table-wrap" id="analyticsTableWrap" style="flex-grow: 1; overflow-y: auto; min-height: 0;"></div>
                 </div>
             </div>
-        </div>
-
         <div id="paneSalezCommandz" class="executive-pane">
             <div class="pane-title">COMMANDZ</div>
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
             <!-- Contents of CEO Terminal -->
             <div id="ceoContent" class="executive-content">
-                <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00;">
-                    <div class="ceo-terminal-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 15px; padding-bottom: 15px;">
-                        <div class="ceo-control-panel" style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; flex-direction: column;">
+                <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00; display:flex; flex-direction:column; height:100%;">
+                    <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                        <div class="bom-sidebar" id="ceo-sidebar" style="width:320px; min-width:320px; max-width:320px;">
                             <div class="ceo-control-header" style="font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 12px; letter-spacing: 1px;">Global Master Levers</div>
                             <div class="ceo-slider-group ceo-global-slider">
                                 <div class="ceo-slider-label" style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px;"><span>Blended CAC ($)</span> <input type="number" id="globalCacNum" class="ceo-sync-input" value="10" style="background: transparent; border: 1px solid #333; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; width: 70px; text-align: right; padding: 2px 6px; border-radius: 4px;"></div>
@@ -1114,22 +1162,22 @@
                             <div id="ceo-dynamic-sliders"></div>
                         </div>
 
-                        <div class="ceo-main-content" style="display: flex; flex-direction: column; gap: 20px;">
-                            <div class="ceo-kpi-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
-                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Gross Monthly Revenue</div><div class="ceo-kpi-value" id="kpiGross" style="font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Test Scenario Volume</div></div>
-                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Current Net (Baseline)</div><div class="ceo-kpi-value val-yellow" id="kpiOldNet" style="color:#aaa; font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiOldNetPct" style="color:#888; font-size: 0.8rem;">0% Margin</div></div>
-                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--neon-green); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Test Scenario Net Profit</div><div class="ceo-kpi-value val-green" id="kpiNewNet" style="color:var(--neon-green); font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiNewNetPct" style="font-size: 0.8rem;">0% Margin</div></div>
-                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Net Delta (Cash Gained)</div><div class="ceo-kpi-value val-green" id="kpiSaved" style="color: var(--neon-cyan); font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiSavedPct" style="color: var(--neon-cyan); font-size: 0.8rem;">+0% vs Current</div></div>
+                        <div class="bom-main" id="ceo-viewport" style="display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; padding: 20px;">
+                            <div class="ceo-kpi-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-shrink: 0;">
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Gross Monthly Revenue</div><div class="ceo-kpi-value" id="kpiGross" style="font-size: 1.8rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Test Scenario Volume</div></div>
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Current Net (Baseline)</div><div class="ceo-kpi-value val-yellow" id="kpiOldNet" style="color:#aaa; font-size: 1.8rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiOldNetPct" style="color:#888; font-size: 0.7rem;">0% Margin</div></div>
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--neon-green); padding: 15px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Test Scenario Net Profit</div><div class="ceo-kpi-value val-green" id="kpiNewNet" style="color:var(--neon-green); font-size: 1.8rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiNewNetPct" style="font-size: 0.7rem;">0% Margin</div></div>
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Net Delta (Cash Gained)</div><div class="ceo-kpi-value val-green" id="kpiSaved" style="color: var(--neon-cyan); font-size: 1.8rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiSavedPct" style="color: var(--neon-cyan); font-size: 0.7rem;">+0% vs Current</div></div>
                             </div>
 
-                            <div class="ceo-charts-row" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px;">
-                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="efficiencyChart"></canvas></div></div>
-                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Total Burn Autopsy</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="expenseChart"></canvas></div></div>
-                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="curEfficiencyChart"></canvas></div></div>
-                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Unit Net Comparison</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="unitChart"></canvas></div></div>
+                            <div class="ceo-charts-row" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; flex-grow: 1; min-height: 250px;">
+                                <div class="ceo-chart-box" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; display: flex; flex-direction: column;"><div class="ceo-kpi-title" style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Margin Squeeze (Test Scenario)</div><div style="position: relative; flex: 1;"><canvas id="efficiencyChart"></canvas></div></div>
+                                <div class="ceo-chart-box" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; display: flex; flex-direction: column;"><div class="ceo-kpi-title" style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Total Burn Autopsy</div><div style="position: relative; flex: 1;"><canvas id="expenseChart"></canvas></div></div>
+                                <div class="ceo-chart-box" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; display: flex; flex-direction: column;"><div class="ceo-kpi-title" style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Margin Squeeze (Current MSRP)</div><div style="position: relative; flex: 1;"><canvas id="curEfficiencyChart"></canvas></div></div>
+                                <div class="ceo-chart-box" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; display: flex; flex-direction: column;"><div class="ceo-kpi-title" style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Unit Net Comparison</div><div style="position: relative; flex: 1;"><canvas id="unitChart"></canvas></div></div>
                             </div>
 
-                            <div id="ceoTableWrap" class="ceo-table-container" style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; overflow-x: auto;"></div>
+                            <div id="ceoTableWrap" class="ceo-table-container" style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; flex-grow: 1; min-height: 200px; overflow: auto; max-width: 100%;"></div>
                         </div>
                     </div>
                 </div>
@@ -1296,28 +1344,18 @@
     let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
     let prefs = { widths: {}, order: [] };
     
-    function showInventoryPane(paneId) {
-        document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        
-        // Hide all panes
-        document.querySelectorAll('#invhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
-        
-        if (paneId !== 'hub') {
-            const paneName = 'pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1);
-            const pane = document.getElementById(paneName);
-            if (pane) {
-                pane.style.display = 'flex';
-                pane.querySelectorAll('.sub-nav-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId));
-                });
-            }
-            // Trigger specific renders
-            if (paneId === 'pipeline') renderLedgerView(false, 'results');
-            if (paneId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
-            if (paneId === 'inventory') renderInventoryTable();
-            if (typeof updateHubStats === 'function') updateHubStats();
-        }
+    function hideAllExecutivePanes() {
+        // Universal Master Killswitch: Clears the viewport 100% before transitions
+        document.getElementById('invHubLanding').style.display = 'none';
+        document.getElementById('prodHubLanding').style.display = 'none';
+        document.getElementById('salezHubLanding').style.display = 'none';
+        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none'); // Legacy cleanup
+        document.querySelectorAll('.production-pane').forEach(p => p.style.display = 'none'); // Legacy cleanup
+        document.querySelectorAll('.sales-pane').forEach(p => p.style.display = 'none'); // Legacy cleanup
     }
+    
+    // --- GHOST LOGIC VAPORIZED ---
 
     function updateHubStats() {
         try {
@@ -1638,37 +1676,36 @@
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
     }
 
+    // --- AUTHORITATIVE HUB TRANSITIONS (UEV 2.1) ---
+    // --- LEGACY HUB LOGIC VAPORIZED ---
+    function hideAllExecutivePanes() {
+        document.querySelectorAll('.executive-pane').forEach(p => p.setAttribute('style', 'display: none !important'));
+        document.querySelectorAll('.hub-landing').forEach(p => p.setAttribute('style', 'display: none !important'));
+        sysLog("Global Visibility Reset (Hardened) Triggered.");
+    }
+
     function showInventoryPane(paneId) {
-        document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        
-        // Global Purge: Hide ALL detail panes across all hubs to ensure NO GHOSTS (like LEDGEZ) appear
-        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
-        
-        if (paneId !== 'hub') {
-            const paneName = (paneId === 'pipeline' ? 'panePipeline' : 'pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
-            const pane = document.getElementById(paneName);
-            if (pane) {
-                pane.style.display = 'flex';
-                // Ensure specific pane children (like title) are also managed if needed
-                if (paneId === 'pipeline') renderLedgerView(false, 'results');
-                if (paneId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
-                if (paneId === 'inventory') renderInventoryTable();
-            }
+        hideAllExecutivePanes();
+        if (paneId === 'hub') {
+            document.getElementById('invHubLanding').style.display = 'flex';
+        } else {
+            const mapper = { 'pipeline': 'panePipeline', 'simple': 'paneSimple', 'inventory': 'paneInventory' };
+            const pane = document.getElementById(mapper[paneId]);
+            if (pane) pane.style.display = 'flex';
+            if (paneId == 'pipeline') renderLedgerView(false, 'results');
+            if (paneId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
+            if (paneId === 'inventory') renderInventoryTable();
         }
         if (typeof updateHubStats === 'function') updateHubStats();
     }
 
     function showSalezPane(paneId) {
-        document.getElementById('salezHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        // Global Purge: Hide ALL detail panes across all hubs to ensure NO GHOSTS appear
-        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
-        
-        if (paneId !== 'hub') {
-            const paneName = 'paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1);
-            const pane = document.getElementById(paneName);
-            if (pane) {
-                pane.style.display = 'flex';
-            }
+        hideAllExecutivePanes();
+        if (paneId === 'hub') {
+            document.getElementById('salezHubLanding').style.display = 'flex';
+        } else {
+            const pane = document.getElementById('paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            if (pane) pane.style.display = 'flex';
             if (paneId === 'bridge') renderSalesTable();
             if (paneId === 'analyticz') renderAnalyticsDashboard();
             if (paneId === 'commandz') renderCeoTerminal();
@@ -1677,17 +1714,13 @@
     }
 
     function showProductionPane(paneId) {
-        document.getElementById('prodHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        // Global Purge: Hide ALL detail panes across all hubs to prevent stacking
-        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
-        
-        if (paneId !== 'hub') {
-            const pMapping = { 'builder': 'paneProdBuilder', 'production': 'paneProdControl', 'print': 'paneProdPrint' };
-            const paneName = pMapping[paneId] || ('pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
-            const pane = document.getElementById(paneName);
-            if (pane) {
-                pane.style.display = 'flex';
-            }
+        hideAllExecutivePanes();
+        if (paneId === 'hub') {
+            document.getElementById('prodHubLanding').style.display = 'flex';
+        } else {
+            const mapping = { 'builder': 'paneProdBuilder', 'production': 'paneProdControl', 'print': 'paneProdPrint' };
+            const pane = document.getElementById(mapping[paneId]);
+            if (pane) pane.style.display = 'flex';
             if (paneId === 'builder') { if(typeof renderBomBuilder === 'function') renderBomBuilder(); }
             if (paneId === 'production') { if(typeof renderProductionDashboard === 'function') renderProductionDashboard(); }
             if (paneId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
