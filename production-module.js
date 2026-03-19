@@ -12,8 +12,55 @@ function generateEditableSOPRow(s, idx) {
     return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="btn-red icon-btn" style="width:28px!important; height:28px; font-size:12px; margin-top:auto;" onclick="removeSOPRow(this)">X</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
 }
 
-function openSOPMasterModal() { document.getElementById('sopMasterModal').style.display = 'flex'; }
-function renderMasterSOP() { try { const p = document.getElementById('sopMasterProductSelect').value; const area = document.getElementById('sopMasterEditorArea'); if(!p) { area.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select a product above to start writing instructions.</div>"; return; } let steps = sopsDB[p] || []; let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s); if(mappedSteps.length === 0) mappedSteps = [{}]; let h = ""; mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); }); h += `<button class="btn-blue" style="width:auto; padding:10px 20px; font-size:14px; align-self:flex-start;" onclick="addSOPRow('sopMasterEditorArea')">+ Add New Step</button>`; area.innerHTML = h; } catch(e) { sysLog(e.message, true); } }
+let currentSopMode = 'production'; // 'production' or '3d'
+
+function openSOPMasterModal(mode = 'production') { 
+    currentSopMode = mode;
+    document.getElementById('sopMasterTitle').innerText = (mode === '3d') ? '📝 3D Print SOP Editor' : '📝 Production SOP Editor';
+    populateSOPDropdown();
+    document.getElementById('sopMasterModal').style.display = 'flex'; 
+    renderMasterSOP();
+}
+
+function populateSOPDropdown() {
+    const sopSelect = document.getElementById('sopMasterProductSelect');
+    if (!sopSelect) return;
+    
+    let options = '<option value="">-- Select Item to Edit SOP --</option>';
+    if (currentSopMode === '3d') {
+        // Show only 3D Printed Raw Goods
+        Object.keys(catalogCache).forEach(k => {
+            let c = catalogCache[k];
+            if (c && c.is_3d_print) {
+                options += `<option value="${String(k).replace(/"/g, '&quot;')}">🖨️ ${c.neoName || c.itemName}</option>`;
+            }
+        });
+    } else {
+        // Show all Products (Retail and Sub-assemblies)
+        Object.keys(productsDB).sort().forEach(p => {
+            options += `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`;
+        });
+    }
+    sopSelect.innerHTML = options;
+}
+
+function renderMasterSOP() { 
+    try { 
+        const p = document.getElementById('sopMasterProductSelect').value; 
+        const area = document.getElementById('sopMasterEditorArea'); 
+        if(!p) { 
+            area.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select an item above to start writing instructions.</div>"; 
+            return; 
+        } 
+        let steps = sopsDB[p] || []; 
+        let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s); 
+        if(mappedSteps.length === 0) mappedSteps = [{}]; 
+        let h = ""; 
+        mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); }); 
+        h += `<button class="btn-blue" style="width:auto; padding:10px 20px; font-size:14px; align-self:flex-start;" onclick="addSOPRow('sopMasterEditorArea')">+ Add New Step</button>`; 
+        area.innerHTML = h; 
+    } catch(e) { sysLog(e.message, true); } 
+}
 
 function addSOPRow(areaId) { try { const area = document.getElementById(areaId); const btn = area.querySelector('.btn-blue'); const div = document.createElement('div'); div.outerHTML = generateEditableSOPRow({}, 999); area.insertBefore(document.createRange().createContextualFragment(div.outerHTML), btn); } catch(e) {} }
 function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) {} }

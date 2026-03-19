@@ -482,7 +482,10 @@
                 <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
                 <h3>📝 SOP Editor</h3>
                 <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Create rich-text instructions and link attachments.</p>
-                <button class="btn-blue" onclick="openSOPMasterModal()">📝 Open Master SOP Editor</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-blue" onclick="openSOPMasterModal('3d')">🖨️ 3D Print SOP Editor</button>
+                    <button class="btn-blue" onclick="openSOPMasterModal('production')">📝 Production SOP Editor</button>
+                </div>
             </div>
             <div class="bom-main" id="woMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
                 <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
@@ -1019,7 +1022,7 @@
             // Batch builds and routing can use all products
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
             const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
-            const sop = document.getElementById('sopMasterProductSelect'); if(sop) sop.innerHTML = '<option value="">-- Select Product to Edit SOP --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`).join(''); 
+            // (SOP dropdown now handled in openSOPMasterModal)
             
             // Aliases can link to anything
             const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = '<option value="">-- Select Neogleamz Recipe --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
