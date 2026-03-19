@@ -1444,7 +1444,13 @@
         });
     }
 	function renderColToggles() { if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return; c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => { let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981'; return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`; }).join(''); }
-    function renderActiveTable() { if(document.getElementById('pipeline-tab').classList.contains('active')) renderLedgerView(false, 'results'); else if(document.getElementById('simple-tab').classList.contains('active')) renderLedgerView(true, 'simpleResults'); }
+    function renderActiveTable() { 
+        if (!document.getElementById('invhub-tab')?.classList.contains('active')) return;
+        const pP = document.getElementById('panePipeline');
+        const pS = document.getElementById('paneSimple');
+        if (pP && pP.style.display === 'flex') renderLedgerView(false, 'results'); 
+        else if (pS && pS.style.display === 'flex') renderLedgerView(true, 'simpleResults'); 
+    }
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderActiveTable(); renderColToggles(); }
     function sortData(column, keepDirection = false) { if(isResizing) return; if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' }; finalResults.sort((a, b) => { let vA = a[column]; let vB = b[column]; if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; } let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase(); if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); }); renderActiveTable(); }
     
