@@ -68,19 +68,25 @@ function initCeoCharts() {
     if(ceoExpenseChart) ceoExpenseChart.destroy();
     if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoCurEfficiencyChart) ceoCurEfficiencyChart.destroy();
 
-    ceoExpenseChart = new Chart(document.getElementById('expenseChart'), {
-        type: 'bar', plugins: [ChartDataLabels],
-        data: { 
-            labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Net Profit'], 
-            datasets: [
-                { label: 'Current MSRP', data: [0,0,0,0,0,0,0], backgroundColor: '#555555', borderRadius: 4 },
-                { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }
-            ] 
-        },
-        options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
-    });
+    let elExpense = document.getElementById('expenseChart');
+    if (elExpense) {
+        ceoExpenseChart = new Chart(elExpense.getContext('2d'), {
+            type: 'bar', plugins: [ChartDataLabels],
+            data: { 
+                labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Net Profit'], 
+                datasets: [
+                    { label: 'Current MSRP', data: [0,0,0,0,0,0,0], backgroundColor: '#555555', borderRadius: 4 },
+                    { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }
+                ] 
+            },
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
+        });
+    }
 
-    ceoUnitChart = new Chart(document.getElementById('unitChart'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
+    let elUnit = document.getElementById('unitChart');
+    if (elUnit) {
+        ceoUnitChart = new Chart(elUnit.getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
+    }
     const efficiencyOptions = (isCurrent) => ({
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         scales: { 
@@ -123,8 +129,11 @@ function initCeoCharts() {
         }
     });
 
-    ceoEfficiencyChart = new Chart(document.getElementById('efficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(false) });
-    ceoCurEfficiencyChart = new Chart(document.getElementById('curEfficiencyChart'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(true) });
+    let elEff = document.getElementById('efficiencyChart');
+    if (elEff) ceoEfficiencyChart = new Chart(elEff.getContext('2d'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(false) });
+    
+    let elCurEff = document.getElementById('curEfficiencyChart');
+    if (elCurEff) ceoCurEfficiencyChart = new Chart(elCurEff.getContext('2d'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(true) });
 }
 
 function renderCeoTerminal() {
@@ -162,7 +171,8 @@ function renderCeoTerminal() {
         </div>`;
     });
     
-    document.getElementById('ceo-dynamic-sliders').innerHTML = slidersHtml;
+    let elSliders = document.getElementById('ceo-dynamic-sliders');
+    if (elSliders) elSliders.innerHTML = slidersHtml;
     if(!ceoExpenseChart) initCeoCharts();
     updateCeoEngine();
 }
@@ -289,10 +299,17 @@ function updateCeoEngine() {
         }
         
         // Update KPIs
-        document.getElementById('kpiGross').innerText = ceoFmt.format(totals.gross).split('.')[0];
-        document.getElementById('kpiOldNet').innerText = ceoFmt.format(totals.curNet).split('.')[0];
-        document.getElementById('kpiNewNet').innerText = ceoFmt.format(totals.testNet).split('.')[0];
-        document.getElementById('kpiSaved').innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
+        let elKpiGross = document.getElementById('kpiGross');
+        if (elKpiGross) elKpiGross.innerText = ceoFmt.format(totals.gross).split('.')[0];
+        
+        let elKpiOldNet = document.getElementById('kpiOldNet');
+        if (elKpiOldNet) elKpiOldNet.innerText = ceoFmt.format(totals.curNet).split('.')[0];
+        
+        let elKpiNewNet = document.getElementById('kpiNewNet');
+        if (elKpiNewNet) elKpiNewNet.innerText = ceoFmt.format(totals.testNet).split('.')[0];
+        
+        let elKpiSaved = document.getElementById('kpiSaved');
+        if (elKpiSaved) elKpiSaved.innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
         
         // Update Charts
         ceoExpenseChart.data.datasets[0].data = [totals.cogs, totals.cac, totals.curAff, totals.curWarr, totals.ship, totals.curStripe, Math.max(0, totals.curNet)];
