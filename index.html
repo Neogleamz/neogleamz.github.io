@@ -442,7 +442,12 @@
                     <span id="termToggle">▼</span>
                     <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
                 </div>
-                <div id="debugLog"></div>
+                <div id="debugLog">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #334155; padding-bottom:5px;">
+                        <span style="font-weight:bold; color:var(--text-muted); font-size:10px; text-transform:uppercase;">System Diagnostics</span>
+                        <button onclick="clearLog()" style="width:auto; padding:2px 8px; font-size:10px; background:#334155; color:#fff; border-radius:4px; border:none; cursor:pointer;">Clear Log</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1041,15 +1046,61 @@
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; });
     function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); }
 
+    let systemErrorState = false;
+
     function sysLog(msg, isError = false) { 
-        try { const b = document.getElementById('debugLog'); const h = document.getElementById('termHeader'); const i = document.getElementById('termStatusIcon'); if(!b) return; const t = new Date().toLocaleTimeString(); const c = isError ? '#ef4444' : '#10b981'; b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; b.scrollTop = b.scrollHeight; if(h && i) { h.className = isError ? 'sys-error' : 'sys-good'; i.innerText = (isError ? '🔴 ' : '🟢 ') + msg; } if(isError) { console.error(msg); } else { console.log(msg); } } catch(e) { console.error(e); } 
+        try { 
+            const b = document.getElementById('debugLog'); 
+            const h = document.getElementById('termHeader'); 
+            const i = document.getElementById('termStatusIcon'); 
+            if(!b) return; 
+
+            if (isError) systemErrorState = true;
+
+            const t = new Date().toLocaleTimeString(); 
+            const c = isError ? '#ef4444' : '#10b981'; 
+            b.innerHTML += `<div style="color: ${c}; margin-bottom: 4px;">[${t}] ${msg}</div>`; 
+            b.scrollTop = b.scrollHeight; 
+
+            if(h && i) { 
+                if (systemErrorState) {
+                    h.className = 'sys-error';
+                    // We keep the icon red if sticky error is active, even for green messages
+                    i.innerText = (isError ? '🔴 ' : '⚠️ ') + msg;
+                } else {
+                    h.className = 'sys-good';
+                    i.innerText = '🟢 ' + msg;
+                }
+            } 
+            if(isError) console.error(msg); else console.log(msg); 
+        } catch(e) { console.error(e); } 
     }
     
     window.onerror = function(msg, url, lineNo) { sysLog(`Code Error: ${msg} (Line: ${lineNo})`, true); return false; };
     window.addEventListener('unhandledrejection', function(event) { sysLog(`Async Error: ${event.reason}`, true); });
 
     function setSysProgress(val, state = 'working') { try { const b = document.getElementById('sysProgress'); if(b) { b.value = val; b.className = 'prog-' + state; } } catch(e) {} }
-    function toggleTerminal() { try { const b = document.getElementById('debugLog'); const t = document.getElementById('termToggle'); const h = document.getElementById('termHeader'); if (b.style.display === 'none') { b.style.display = 'block'; t.innerText = '▲'; } else { b.style.display = 'none'; t.innerText = '▼'; } if(h) { h.className = 'sys-good'; h.querySelector('#termStatusIcon').innerText = '🟢 System Active'; } } catch(e) {} }
+    function clearLog() { 
+        document.getElementById('debugLog').innerHTML = ''; 
+        systemErrorState = false; 
+        sysLog("Log Cleared. System Monitoring Resumed."); 
+        const h = document.getElementById('termHeader');
+        if(h) h.className = 'sys-good';
+    }
+    function toggleTerminal() { 
+        try { 
+            const b = document.getElementById('debugLog'); 
+            const t = document.getElementById('termToggle'); 
+            const h = document.getElementById('termHeader'); 
+            if (b.style.display === 'none') { 
+                b.style.display = 'block'; 
+                t.innerText = '▲'; 
+            } else { 
+                b.style.display = 'none'; 
+                t.innerText = '▼'; 
+            } 
+        } catch(e) {} 
+    }
     function setMasterStatus(msg, type) { try { const e = document.getElementById('statusMaster'); if (e) { e.innerText = msg; e.className = `status-bar ${type}`; } } catch(e) {} }
 
     // --- 3. PREFS & AUTH ENGINES ---
