@@ -74,7 +74,7 @@ function calculateProductBreakdown(pName, visited = new Set()) {
     let totalPrintTime = 0;
 
     (productsDB[pName] || []).forEach(part => {
-        let k = String(part.item_key || part.di_item_id || part.name || "");
+        let k = String(part.item_key || part.di_item_id || part.name || "").replace('RECIPE:::', '');
         let q = parseFloat(part.qty) || 1;
 
         // --- 1. 3D PRINT RECURSION (Raw Goods level) ---
