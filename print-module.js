@@ -130,10 +130,24 @@ function renderActivePrintJob(id) {
     if (stEl) {
         if (job.started_at) {
             let d = new Date(job.started_at);
-            stEl.innerText = `START: ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            let dateStr = d.toLocaleDateString([], { month: 'numeric', day: 'numeric' });
+            let timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            stEl.innerText = `START: ${dateStr} ${timeStr}`;
             stEl.style.display = 'inline-block';
         } else {
             stEl.style.display = 'none';
+        }
+    }
+    const enEl = document.getElementById('printJobEndTime');
+    if (enEl) {
+        if (job.completed_at) {
+            let d = new Date(job.completed_at);
+            let dateStr = d.toLocaleDateString([], { month: 'numeric', day: 'numeric' });
+            let timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            enEl.innerText = `FINISH: ${dateStr} ${timeStr}`;
+            enEl.style.display = 'inline-block';
+        } else {
+            enEl.style.display = 'none';
         }
     }
 

@@ -300,6 +300,19 @@ function renderActiveWO(id) {
         document.getElementById('woMainArea').style.display = 'flex'; document.getElementById('woTitle').innerText = `${wo.wo_id}: ${wo.product_name}`; document.getElementById('woQtyTarget').innerText = wo.qty;
         let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
         if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
+        
+        const stEl = document.getElementById('woStartTime');
+        const enEl = document.getElementById('woEndTime');
+        const fmtDT = (iso) => { if(!iso) return ""; let d = new Date(iso); return d.toLocaleDateString([], {month:'numeric', day:'numeric'}) + " " + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); };
+        
+        if(stEl) {
+            if(wo.started_at) { stEl.innerText = `START: ${fmtDT(wo.started_at)}`; stEl.style.display = 'inline-block'; }
+            else stEl.style.display = 'none';
+        }
+        if(enEl) {
+            if(wo.completed_at) { enEl.innerText = `FINISH: ${fmtDT(wo.completed_at)}`; enEl.style.display = 'inline-block'; }
+            else enEl.style.display = 'none';
+        }
         ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { document.getElementById('pipe-'+s).classList.remove('active'); document.getElementById('sect-'+s).classList.remove('active'); });
         let wip = wo.wip_state || {};
         const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
@@ -431,7 +444,18 @@ async function advanceWO(newStatus) {
             ups.push({item_key:fgiKey, ...inventoryDB[fgiKey]});
             await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
         }
-        const {error} = await supabaseClient.from('work_orders').update({status: newStatus}).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); 
+        
+        const updateData = {status: newStatus};
+        if(newStatus !== 'Queued' && !currentWO.started_at) {
+            currentWO.started_at = new Date().toISOString();
+            updateData.started_at = currentWO.started_at;
+        }
+        if(newStatus === 'Completed') {
+            currentWO.completed_at = new Date().toISOString();
+            updateData.completed_at = currentWO.completed_at;
+        }
+
+        const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); 
         
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
