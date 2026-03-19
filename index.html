@@ -260,20 +260,24 @@
             cursor: pointer;
             z-index: 100;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
+            opacity: 1; /* Always show a bit */
             pointer-events: auto;
         }
-        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
-        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
-        .nav-zone:hover { opacity: 1; width: 100px; }
+        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.03) 0%, transparent 100%); }
+        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.03) 0%, transparent 100%); }
+        .nav-zone:hover { width: 100px; background: linear-gradient(to var(--dir, right), rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
+        .nav-zone.left:hover { --dir: right; }
+        .nav-zone.right:hover { --dir: left; }
         .nav-zone i {
-            font-size: 40px;
+            font-size: 32px;
             color: #F79320;
-            text-shadow: 0 0 20px rgba(247, 147, 32, 0.5);
+            text-shadow: 0 0 15px rgba(247, 147, 32, 0.3);
             font-style: normal;
             font-weight: 900;
+            opacity: 0.15; /* Subtle ghost state */
+            transition: all 0.3s ease;
         }
-        .nav-zone:hover i { transform: scale(1.2); }
+        .nav-zone:hover i { opacity: 1; transform: scale(1.3); text-shadow: 0 0 25px rgba(247, 147, 32, 0.8); }
         .inventory-pane { position: relative; } /* Ensure absolute nesting works */
 
         .top-action-btn { 
@@ -983,8 +987,7 @@
             </div>
             <!-- Contents of Sales Sync -->
             <div class="control-panel" style="grid-template-columns: 1fr; margin-bottom: 20px;">
-                <div class="panel-card master-card" style="padding: 35px;">
-                    <h3>🚀 BRIDGEZ ENGINE: Sync New Sales</h3>
+                <div class="panel-card master-card" style="padding: 25px;">
                     <div style="display:flex; gap:15px; align-items:center;">
                         <input type="file" id="salesCsvFile" accept=".csv" style="flex:1; padding:8px; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:6px;">
                         <button class="btn-green" onclick="processSalesCSV()" style="width:auto; padding:10px 25px;">🚀 START SYNCZ</button>
