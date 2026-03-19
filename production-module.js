@@ -351,7 +351,19 @@ async function advanceWO(newStatus) {
             ups.push({item_key:fgiKey, ...inventoryDB[fgiKey]});
             await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
         }
-        const {error} = await supabaseClient.from('work_orders').update({status: newStatus}).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); currentWO.status = newStatus; setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList(); 
+        const {error} = await supabaseClient.from('work_orders').update({status: newStatus}).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); 
+        
+        // Auto-spawn 3D Print Jobs (Raw Goods based)
+        try {
+            const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
+            for(let job of Object.keys(printJobs)) {
+                if(typeof addPrintJob === 'function') {
+                    await addPrintJob(job, printJobs[job], currentWO.wo_id);
+                }
+            }
+        } catch(pe) { sysLog("Print Spawn Error: " + pe.message, true); }
+
+        currentWO.status = newStatus; setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList(); 
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
