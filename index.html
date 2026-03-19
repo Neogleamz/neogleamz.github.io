@@ -225,12 +225,12 @@
             body { padding: 5px; height: auto; overflow: auto; min-height: 100vh; }
             .container { padding: 10px; box-shadow: none; border-radius: 6px; height: auto; min-height: 100%; flex-grow: 1; }
             
-            .header-area { flex-direction: column; align-items: stretch; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; }
+            .header-area { flex-direction: column; align-items: stretch; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0px; margin-bottom: 12px; }
             .title-block { text-align: center; }
             .title-block h1 { font-size: 18px; }
             .title-block .subtitle { font-size: 11px; margin-top: 4px; }
             
-            .tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding-bottom: 2px; }
+            .tabs { width: 100vw; max-width: 100%; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding-bottom: 2px; }
             .tab-btn { flex: 0 0 auto; padding: 10px 12px; font-size: 12px; }
             
             .top-controls { justify-content: space-between; flex-wrap: wrap; margin-top: 5px; }
@@ -262,7 +262,8 @@
             .pipeline-bar { flex-wrap: wrap; }
             .pipe-step { flex: 1 1 45%; }
             
-            .massive-container { width: 100vw; height: 100vh; max-width: none; border-radius: 0; padding: 10px; }
+            [id$="Modal"] .container { width: 95vw !important; max-width: 95vw !important; max-height: 90vh !important; overflow-y: auto; border-radius: 8px; padding: 15px; }
+            .massive-container { width: 100vw; height: 100vh; max-width: none; border-radius: 0; padding: 10px; overflow-y: auto; }
             .login-box { padding: 20px; width: 90%; }
             
             .terminal-wrapper { width: 100%; display: flex; flex-direction: column; }
