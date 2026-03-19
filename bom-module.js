@@ -26,6 +26,7 @@ async function updateLaborCosts() {
         let r = parseFloat(document.getElementById('laborRateInput').value) || 0;
         let m = parseFloat(document.getElementById('msrpInput').value) || 0;
         let w = parseFloat(document.getElementById('wholesaleInput').value) || 0;
+        let isSub = document.getElementById('isSubassemblyInput').checked;
         let is3D = document.getElementById('is3DPrintInput').checked;
         let pt = parseFloat(document.getElementById('printTimeInput').value) || 0;
         
