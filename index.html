@@ -1258,16 +1258,16 @@
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
     
     function showInventoryPane(paneId) {
-        document.getElementById('hubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
+        document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
         
         // Hide all panes
-        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('#invhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
         
         if (paneId !== 'hub') {
-            const pane = document.getElementById('pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            const paneName = 'pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1);
+            const pane = document.getElementById(paneName);
             if (pane) {
                 pane.style.display = 'flex';
-                // Update active sub-nav button
                 pane.querySelectorAll('.sub-nav-btn').forEach(btn => {
                     btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId));
                 });
@@ -1283,12 +1283,17 @@
     function updateHubStats() {
         try {
             // Inventory Stats
-            if (typeof finalResults !== 'undefined') document.getElementById('hubStatLedger').innerText = `${finalResults.length} RECORDS`;
-            if (typeof catalogCache !== 'undefined') {
+            let elLedger = document.getElementById('hubStatLedger');
+            if (elLedger && typeof finalResults !== 'undefined') elLedger.innerText = `${finalResults.length} RECORDS`;
+            
+            let elSimple = document.getElementById('hubStatSimple');
+            if (elSimple && typeof catalogCache !== 'undefined') {
                 let printedCount = Object.keys(catalogCache).filter(k => catalogCache[k].is_3d_print).length;
-                document.getElementById('hubStatSimple').innerText = `${printedCount} PRINTED ITEMS`;
+                elSimple.innerText = `${printedCount} PRINTED ITEMS`;
             }
-            if (typeof catalogCache !== 'undefined' && typeof inventoryDB !== 'undefined') {
+            
+            let elStock = document.getElementById('hubStatStock');
+            if (elStock && typeof catalogCache !== 'undefined' && typeof inventoryDB !== 'undefined') {
                 let totalValue = 0;
                 Object.keys(catalogCache).forEach(k => {
                     let c = catalogCache[k], i = inventoryDB[k] || {};
@@ -1303,21 +1308,38 @@
                         totalValue += Math.max(0, s) * cost;
                     });
                 }
-                document.getElementById('hubStatStock').innerText = `$${Math.round(totalValue).toLocaleString()} ASSETS`;
+                elStock.innerText = `$${Math.round(totalValue).toLocaleString()} ASSETS`;
             }
 
             // Production Stats
-            if (typeof productsDB !== 'undefined') document.getElementById('hubStatRecipes').innerText = `${Object.keys(productsDB).length} RECIPES`;
-            if (typeof workOrdersDB !== 'undefined') {
+            let elRecipes = document.getElementById('hubStatRecipes');
+            if (elRecipes && typeof productsDB !== 'undefined') elRecipes.innerText = `${Object.keys(productsDB).length} RECIPES`;
+            
+            let elBatches = document.getElementById('hubStatBatches');
+            if (elBatches && typeof workOrdersDB !== 'undefined') {
                 let activeBatches = workOrdersDB.filter(w => w.status !== 'Completed').length;
-                document.getElementById('hubStatBatches').innerText = `${activeBatches} ACTIVE BATCHES`;
+                elBatches.innerText = `${activeBatches} BATCHES`;
             }
-            if (typeof printQueueDB !== 'undefined') {
-                let queuedPrints = printQueueDB.filter(p => p.status !== 'Completed').length;
-                document.getElementById('hubStatPrints').innerText = `${queuedPrints} QUEUED PRINTS`;
+            
+            let elPrints = document.getElementById('hubStatPrintQueue');
+            if (elPrints && typeof printQueueDB !== 'undefined') {
+                let queuedPrints = printQueueDB.filter(p => !p.completed && !p.failed).length;
+                elPrints.innerText = `${queuedPrints} ACTIVE`;
             }
+
+            // Salez Stats
+            let elSalez = document.getElementById('hubStatSalezBridge');
+            if (elSalez && typeof salesDB !== 'undefined') elSalez.innerText = `${salesDB.length} TOTAL SALEZ`;
+            
+            let elMargin = document.getElementById('hubStatMargin');
+            if (elMargin && typeof finalResults !== 'undefined') {
+                // Placeholder for margin calculation logic
+                elMargin.innerText = "OPTIMIZING..."; 
+            }
+
         } catch(e) { console.warn("Hub Stats Sync Error:", e); }
-    }    let salesDB = []; let aliasDB = {}; let printQueueDB = [];
+    }
+    let salesDB = []; let aliasDB = {}; let printQueueDB = [];
     let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
     let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
     let currentSalesSort = { column: 'd', direction: 'desc' }; let currentAnalyticsSort = { column: 'n', direction: 'asc' };
@@ -1596,15 +1618,14 @@
         document.querySelectorAll('#prodhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
         
         if (paneId !== 'hub') {
-            const pane = document.getElementById('pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            const paneName = (paneId === 'builder' ? 'paneProdBuilder' : 'pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            const pane = document.getElementById(paneName);
             if (pane) {
                 pane.style.display = 'flex';
-                pane.querySelectorAll('.sub-nav-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId));
-                });
+                pane.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId)));
             }
-            if (paneId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); } 
-            if (paneId === 'production') { buildCatalogCache(); renderWOList(); } 
+            if (paneId === 'builder') { if(typeof renderBomBuilder === 'function') renderBomBuilder(); }
+            if (paneId === 'production') { if(typeof renderProductionDashboard === 'function') renderProductionDashboard(); }
             if (paneId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
         }
         if (typeof updateHubStats === 'function') updateHubStats();
