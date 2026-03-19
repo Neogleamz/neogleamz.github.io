@@ -572,6 +572,24 @@
     <div id="production-tab" class="tab-content">
         <div class="bom-layout">
             <div class="bom-sidebar">
+                <!-- Visual Consistency: Production Stats Card -->
+                <div id="productionStats" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; gap:20px; align-items:center; box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">
+                    <div style="display:flex; flex-direction:column;">
+                        <div style="font-size:11px; color:var(--text-muted); font-weight:bold; letter-spacing:0.05em; margin-bottom:4px; text-transform:uppercase;">Production Overview</div>
+                        <div style="display:flex; align-items:flex-end; gap:15px;">
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:24px; font-weight:900; color:var(--primary-color);" id="activeBatchCount">0</span>
+                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">BATCHES</span>
+                            </div>
+                            <div style="width:1px; height:30px; background:var(--border-color);"></div>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:24px; font-weight:900; color:#10b981;" id="activeUnitCount">0</span>
+                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">UNITS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <h3>🏭 Work Orders</h3>
                 <button class="btn-blue" onclick="openNewWOModal()" style="margin-bottom:15px; padding:10px;">+ New Production Batch</button>
                 <ul class="product-list" id="woListUI"></ul>

@@ -246,6 +246,20 @@ let woDraggedIndex = null;
 function renderWOList() {
     try {
         const ui = document.getElementById('woListUI'); ui.innerHTML = "";
+        
+        let activeBatches = 0;
+        let totalUnits = 0;
+        workOrdersDB.forEach(wo => {
+            if (wo.status !== 'Completed') {
+                activeBatches++;
+                totalUnits += (parseFloat(wo.qty) || 0);
+            }
+        });
+        const batchEl = document.getElementById('activeBatchCount');
+        const unitEl = document.getElementById('activeUnitCount');
+        if (batchEl) batchEl.innerText = activeBatches;
+        if (unitEl) unitEl.innerText = totalUnits;
+
         if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
         
         workOrdersDB.forEach((wo, index) => { 
