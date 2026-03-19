@@ -55,8 +55,13 @@ async function addManualSale() {
         });
         setMasterStatus("Sale Added!", "mod-success"); 
         
-        renderSalesTable(); renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('analytics-tab').classList.contains('active')) renderAnalyticsDashboard();
-        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        renderSalesTable(); 
+        renderInventoryTable(); 
+        if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
+        setTimeout(()=> {
+            let sm = document.getElementById('statusMaster');
+            if (sm) setMasterStatus("Ready.", "status-idle");
+        }, 2000);
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); alert("Error adding manual sale: \n" + e.message); }
 }
 
@@ -130,8 +135,12 @@ function processParsedSales(rows) {
 
     if(pendingSalesRows.length === 0) {
         alert("No new sales found in this file! All orders are already in the ledger or the file contained invalid rows.");
-        document.getElementById('unmappedSkusList').innerHTML = "All storefront SKUs are currently mapped and recognized.";
-        setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); document.getElementById('salesCsvFile').value = ""; return;
+        let elUnmapped = document.getElementById('unmappedSkusList');
+        if (elUnmapped) elUnmapped.innerHTML = "All storefront SKUs are currently mapped and recognized.";
+        setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); 
+        let elFile = document.getElementById('salesCsvFile');
+        if (elFile) elFile.value = ""; 
+        return;
     }
 
     executeSalesSync();
@@ -156,7 +165,8 @@ async function saveAliasMapping() {
     else {
         let uList = Array.from(stillUnmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
         uList.forEach(u => h += `<button class="btn-blue" style="padding:6px 10px; font-size:12px; width:100%; margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
-        document.getElementById('unmappedSkusList').innerHTML = h;
+        let elUnmapped = document.getElementById('unmappedSkusList');
+        if (elUnmapped) elUnmapped.innerHTML = h;
     }
 }
 
@@ -197,11 +207,16 @@ async function executeSalesSync() {
         salesPayload.forEach(s => salesDB.unshift(s)); 
         let count = pendingSalesRows.length;
         pendingSalesRows = [];
-        document.getElementById('unmappedSkusList').innerHTML = "All storefront SKUs are currently mapped and recognized.";
-        document.getElementById('salesCsvFile').value = "";
+        let elUnmapped = document.getElementById('unmappedSkusList');
+        if (elUnmapped) elUnmapped.innerHTML = "All storefront SKUs are currently mapped and recognized.";
+        
+        let elFile = document.getElementById('salesCsvFile');
+        if (elFile) elFile.value = "";
 
         setSysProgress(100, 'success'); setMasterStatus("Sales Synced!", "mod-success");
-        renderSalesTable(); renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('analytics-tab').classList.contains('active')) renderAnalyticsDashboard();
+        renderSalesTable(); 
+        renderInventoryTable(); 
+        if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         
         alert(`Success! ${count} sales were synced and inventory was updated.`);
         setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000);
@@ -216,7 +231,8 @@ async function executeSalesSync() {
 function sortSales(c) { if(isResizing) return; currentSalesSort = { column: c, direction: currentSalesSort.column===c && currentSalesSort.direction==='asc' ? 'desc' : 'asc' }; renderSalesTable(); }
 
 function renderSalesTable() {
-    let wrap = document.getElementById('salesTableWrap'); if(!wrap) return;
+    let wrap = document.getElementById('salesTableWrap'); 
+    if(!wrap) return;
     
     // Updated Headers based on System Standard
     let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='adj'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('adj')">Exch. Adj.</th> <th class="${currentSalesSort.column==='bal'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('bal')">Balance</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe Fee</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
@@ -365,7 +381,9 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
         }
         
         setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000);
-        renderSalesTable(); renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('analytics-tab').classList.contains('active')) renderAnalyticsDashboard();
+        renderSalesTable(); 
+        renderInventoryTable(); 
+        if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; alert("Error updating cell: \n" + e.message); }
 }
