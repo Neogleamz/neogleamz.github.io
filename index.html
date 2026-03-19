@@ -247,6 +247,35 @@
         .tab-btn:hover span { transform: scale(1.2) rotate(5deg); }
 
         .top-controls { flex: 0 1 auto; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+
+        /* Full-Page Margin Navigation Zones */
+        .nav-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: auto;
+        }
+        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
+        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
+        .nav-zone:hover { opacity: 1; width: 100px; }
+        .nav-zone i {
+            font-size: 40px;
+            color: #F79320;
+            text-shadow: 0 0 20px rgba(247, 147, 32, 0.5);
+            font-style: normal;
+            font-weight: 900;
+        }
+        .nav-zone:hover i { transform: scale(1.2); }
+        .inventory-pane { position: relative; } /* Ensure absolute nesting works */
+
         .top-action-btn { 
             background: var(--bg-container); 
             border: 1px solid var(--border-color); 
@@ -579,9 +608,10 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showInventoryPane('hub')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn active" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('simple')">SIMPLEZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">STOCKZ</button>
@@ -596,9 +626,10 @@
             <div class="table-wrap" id="results" style="flex-grow:1;"></div>
         </div>
 
-        <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
                 <button class="sub-nav-btn active" onclick="showInventoryPane('simple')">SIMPLEZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">STOCKZ</button>
@@ -614,9 +645,10 @@
             <div class="table-wrap" id="simpleResults" style="flex-grow:1;"></div>
         </div>
 
-        <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showInventoryPane('hub')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('simple')">SIMPLEZ</button>
                 <button class="sub-nav-btn active" onclick="showInventoryPane('inventory')">STOCKZ</button>
@@ -654,9 +686,10 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showProductionPane('hub')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn active" onclick="showProductionPane('builder')">BUILDERZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('production')">CONTROLZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('print')">PRINTZ</button>
@@ -713,9 +746,10 @@
             </div>
         </div>
 
-        <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('builder')">BUILDERZ</button>
                 <button class="sub-nav-btn active" onclick="showProductionPane('production')">CONTROLZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('print')">PRINTZ</button>
@@ -818,9 +852,10 @@
             </div>
         </div>
 
-        <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showProductionPane('hub')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('builder')">BUILDERZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('production')">CONTROLZ</button>
                 <button class="sub-nav-btn active" onclick="showProductionPane('print')">PRINTZ</button>
@@ -938,9 +973,10 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showSalezPane('hub')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
             <div class="sub-nav">
-                <button class="sub-nav-btn" onclick="showSalezPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn active" onclick="showSalezPane('bridge')">BRIDGEZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('commandz')">COMMANDZ</button>
@@ -958,9 +994,10 @@
             <div class="table-wrap" id="salesTableWrap"></div>
         </div>
 
-        <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
             <div class="sub-nav">
-                <button class="sub-nav-btn" onclick="showSalezPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('bridge')">BRIDGEZ</button>
                 <button class="sub-nav-btn active" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('commandz')">COMMANDZ</button>
@@ -1012,9 +1049,10 @@
             </div>
         </div>
 
-        <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+            <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showSalezPane('hub')"><i>›</i></div>
             <div class="sub-nav">
-                <button class="sub-nav-btn" onclick="showSalezPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('bridge')">BRIDGEZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
                 <button class="sub-nav-btn active" onclick="showSalezPane('commandz')">COMMANDZ</button>
