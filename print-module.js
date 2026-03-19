@@ -157,6 +157,10 @@ async function advancePrintStatus(newStatus) {
             }, { onConflict: 'item_key' });
             
             if (invErr) throw new Error("Inventory update failed: " + invErr.message);
+
+            // 🔄 REFRESH UI: Make sure inventory tab reflects the new stock
+            if (typeof renderInventoryTable === 'function') renderInventoryTable();
+            if (typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         }
 
         const { error } = await supabaseClient.from('print_queue').update(updatePayload).eq('id', currentPrintJob.id);
