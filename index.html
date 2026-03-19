@@ -253,32 +253,32 @@
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 80px;
+            width: 40px; /* Halved */
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 100;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1; /* Always show a bit */
+            opacity: 1;
             pointer-events: auto;
         }
-        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.03) 0%, transparent 100%); }
-        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.03) 0%, transparent 100%); }
-        .nav-zone:hover { width: 100px; background: linear-gradient(to var(--dir, right), rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
+        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.05) 0%, transparent 100%); }
+        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.05) 0%, transparent 100%); }
+        .nav-zone:hover { width: 60px; background: linear-gradient(to var(--dir, right), rgba(247, 147, 32, 0.15) 0%, transparent 100%); }
         .nav-zone.left:hover { --dir: right; }
         .nav-zone.right:hover { --dir: left; }
         .nav-zone i {
-            font-size: 32px;
+            font-size: 24px; /* Slightly smaller */
             color: #F79320;
-            text-shadow: 0 0 15px rgba(247, 147, 32, 0.3);
+            text-shadow: 0 0 10px rgba(247, 147, 32, 0.4);
             font-style: normal;
             font-weight: 900;
-            opacity: 0.15; /* Subtle ghost state */
+            opacity: 0.3; /* Twice as visible! */
             transition: all 0.3s ease;
         }
-        .nav-zone:hover i { opacity: 1; transform: scale(1.3); text-shadow: 0 0 25px rgba(247, 147, 32, 0.8); }
-        .inventory-pane { position: relative; } /* Ensure absolute nesting works */
+        .nav-zone:hover i { opacity: 1; transform: scale(1.3); text-shadow: 0 0 20px rgba(247, 147, 32, 0.8); }
+        .inventory-pane { position: relative; } 
 
         .top-action-btn { 
             background: var(--bg-container); 
@@ -612,7 +612,7 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showInventoryPane('hub')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
@@ -629,7 +629,7 @@
             <div class="table-wrap" id="results" style="flex-grow:1;"></div>
         </div>
 
-        <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
@@ -648,7 +648,7 @@
             <div class="table-wrap" id="simpleResults" style="flex-grow:1;"></div>
         </div>
 
-        <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('hub')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
@@ -687,7 +687,7 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showProductionPane('hub')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
@@ -746,7 +746,7 @@
             </div>
         </div>
 
-        <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
@@ -844,7 +844,7 @@
             </div>
         </div>
 
-        <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('hub')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
@@ -964,7 +964,7 @@
         </div>
 
         <!-- Detailed Panez -->
-        <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showSalezPane('hub')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
             <div class="sub-nav">
@@ -984,7 +984,7 @@
             <div class="table-wrap" id="salesTableWrap"></div>
         </div>
 
-        <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
             <div class="sub-nav">
@@ -1039,7 +1039,7 @@
             </div>
         </div>
 
-        <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px 80px;">
+        <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('hub')"><i>›</i></div>
             <div class="sub-nav">
@@ -1259,6 +1259,9 @@
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
     let productsDB = {}; let laborDB = {}; let pricingDB = {}; let isSubassemblyDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
+    let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
+    let prefs = { widths: {}, order: [] };
+    const ENGINE_CONFIG = { stripePercent: 0.029, stripeFlat: 0.30, flatShipping: 8.00 }; 
     
     function showInventoryPane(paneId) {
         document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
@@ -1346,7 +1349,7 @@
     let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
     let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
     let currentSalesSort = { column: 'd', direction: 'desc' }; let currentAnalyticsSort = { column: 'n', direction: 'asc' };
-    let bulkAddData = []; let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
+    let bulkAddData = []; 
     let catalogByName = {}; 
     let pendingSalesRows = []; 
 
@@ -1663,7 +1666,7 @@
     }
 	function renderColToggles() { if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return; c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => { let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981'; return `<button onclick="toggleSimpleCol('${safeKey}')" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`; }).join(''); }
     function renderActiveTable() { 
-        if (!document.getElementById('invhub-tab')?.classList.contains('active')) return;
+        if (document.getElementById('appUI').style.display === 'none') return;
         const pP = document.getElementById('panePipeline');
         const pS = document.getElementById('paneSimple');
         if (pP && pP.style.display === 'flex') renderLedgerView(false, 'results'); 
