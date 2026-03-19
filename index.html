@@ -621,12 +621,11 @@
                 <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">STOCKZ</button>
             </div>
             <div class="control-panel">
-                <div class="panel-card"><h3>1. Sync Orders</h3><input type="file" id="orderFiles" multiple accept=".html"><div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div></div>
-                <div class="panel-card"><h3>2. Sync Parcels</h3><input type="file" id="parcelFiles" multiple accept=".html"><div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div></div>
-                <div class="panel-card master-card"><h3>3. Master Engine</h3><div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div><button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button></div>
-                <div class="panel-card" style="grid-column: span 2;"><h3>💾 Database Backup & Restore</h3><p style="font-size:11px; margin:0 0 8px 0; text-align:center; color:var(--text-muted);">Cloud export & import</p><button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Launch Backup Manager</button></div>
+                <div class="panel-card"><input type="file" id="orderFiles" multiple accept=".html"><div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div></div>
+                <div class="panel-card"><input type="file" id="parcelFiles" multiple accept=".html"><div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div></div>
+                <div class="panel-card master-card"><div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div><button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button></div>
+                <div class="panel-card" style="grid-column: span 2;"><p style="font-size:11px; margin:0 0 8px 0; text-align:center; color:var(--text-muted);">Launch Backup Manager</p><button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Cloud Backup / Restore</button></div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;"><h3 style="margin:0; font-size:15px; color: var(--text-heading);">Database Ledger</h3></div>
             <div class="table-wrap" id="results" style="flex-grow:1;"></div>
         </div>
 
@@ -638,7 +637,7 @@
                 <button class="sub-nav-btn active" onclick="showInventoryPane('simple')">SIMPLEZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">STOCKZ</button>
             </div>
-            <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><h3 style="margin: 0; font-size: 13px; color: var(--text-muted); border: none; padding: 0; white-space:nowrap;">Toggles:</h3><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
+            <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
             <div class="manual-entry-bar">
                 <div><label>Item Name</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
                 <div><label>Neo Product Tag</label><input id="m_neo_prod" type="text" placeholder="e.g., Soulz"></div>
@@ -658,8 +657,6 @@
                 <button class="sub-nav-btn active" onclick="showInventoryPane('inventory')">STOCKZ</button>
             </div>
             <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
-            
-            <h3 style="margin:20px 0 10px 0; font-size:16px; color:#10b981;">📦 Finished Goods Inventory</h3>
             <div class="table-wrap" id="fgiTableWrap" style="margin-bottom:30px;"></div>
 
             <div class="table-wrap" id="invTableWrap" style="flex-grow:1;"></div>
@@ -701,7 +698,6 @@
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
-                    <h3>Your Products</h3>
                     <ul class="product-list" id="productListUI"></ul>
                     <button class="btn-blue" onclick="createNewProduct()" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
                     <button class="btn-red" onclick="nukeAllRecipes()" style="font-size: 12px; padding: 8px; flex-shrink:0;">⚠️ Nuke All (Reset)</button>
@@ -762,8 +758,6 @@
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
                     <div id="productionStats" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; gap:20px; align-items:center; box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">
-                        <div style="display:flex; flex-direction:column;">
-                            <div style="font-size:11px; color:var(--text-muted); font-weight:bold; letter-spacing:0.05em; margin-bottom:4px; text-transform:uppercase;">Production Overview</div>
                             <div style="display:flex; align-items:flex-end; gap:15px;">
                                 <div style="display:flex; flex-direction:column;">
                                     <span style="font-size:24px; font-weight:900; color:var(--primary-color);" id="activeBatchCount">0</span>
@@ -778,11 +772,9 @@
                         </div>
                     </div>
 
-                    <h3>🏭 Work Orders</h3>
                     <button class="btn-blue" onclick="openNewWOModal()" style="margin-bottom:15px; padding:10px;">+ New Production Batch</button>
                     <ul class="product-list" id="woListUI"></ul>
                     <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
-                    <h3>📝 SOP Editor</h3>
                     <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Create rich-text instructions and link attachments.</p>
                     <div style="display:flex; gap:10px;">
                         <button class="btn-blue" onclick="openSOPMasterModal('production')">📝 Production SOP Editor</button>
@@ -809,14 +801,12 @@
                     </div>
 
                     <div id="sect-Queued" class="wo-section">
-                        <h3 style="margin-top:0; color:var(--text-heading);">Work Order Created</h3>
                         <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch is queued and waiting for an operator. Once you are ready to pull parts from the physical inventory shelves, begin the picking process.</p>
                         <button class="btn-blue" style="width:auto; padding:12px 25px; margin-top:10px;" onclick="advanceWO('Picking')">📋 Start Picking Parts</button>
                     </div>
 
                     <div id="sect-Picking" class="wo-section">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
-                            <h3 style="margin:0; color:var(--text-heading);">🛒 Active Pick List</h3>
                             <button class="print-btn" onclick="printPickList()">🖨️ Print List</button>
                         </div>
                         <div id="woPickList" style="margin-bottom:20px;"></div>
@@ -825,7 +815,6 @@
 
                     <div id="sect-Production" class="wo-section">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
-                            <h3 style="margin:0; color:var(--text-heading);">🛠️ Build Instructions (SOP)</h3>
                             <div style="display:flex; gap: 10px;">
                                 <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color);">🔒</button>
                                 <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
@@ -845,7 +834,6 @@
                     </div>
 
                     <div id="sect-Completed" class="wo-section">
-                        <h3 style="margin-top:0; color:#10b981;">✅ Production Complete</h3>
                         <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch has been finalized. All raw materials have been deducted and the finished goods have been recorded in the ledger.</p>
                     </div>
                     
@@ -868,7 +856,6 @@
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
                     <div id="printQueueStats" style="margin-top:0; margin-bottom:15px; background:var(--bg-bar); padding:15px; border-radius:10px; border:2px solid var(--border-color); text-align:center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                        <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:bold; letter-spacing:1px; margin-bottom:5px;">System Capacity</div>
                         <div style="display:flex; justify-content:space-around; align-items:center; gap:10px;">
                             <div style="display:flex; flex-direction:column;">
                                 <span style="font-size:24px; font-weight:900; color:#8b5cf6;" id="totalPrintTasks">0</span>
