@@ -139,8 +139,9 @@
             100% { box-shadow: 0 0 0 0 rgba(247, 147, 32, 0); }
         }
         .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; }
-        .sub-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: var(--bg-glass); padding: 8px; border-radius: 10px; border: 1px solid var(--border-input); align-self: flex-start; flex-wrap: wrap; }
-        .sub-nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: all 0.2s; white-space: nowrap; }
+        .sub-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: var(--bg-glass); padding: 6px; border-radius: 12px; border: 1px solid var(--border-input); align-self: flex-start; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+        .sub-nav::-webkit-scrollbar { display: none; }
+        .sub-nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 800; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
         .sub-nav-btn:hover { background: var(--bg-input); color: var(--text-main); }
         .sub-nav-btn.active { background: #F79320; color: white !important; box-shadow: 0 4px 12px rgba(247, 147, 32, 0.3); }
         .back-hub-btn { background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid #F79320; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin-right: 15px; transition: 0.2s; }
