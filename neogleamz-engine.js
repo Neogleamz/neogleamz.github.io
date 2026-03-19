@@ -75,33 +75,36 @@ function calculateProductBreakdown(pName, visited = new Set()) {
 
     const components = productsDB[pName] || [];
     components.forEach(part => {
-        let rawKey = String(part.item_key || part.di_item_id || part.name || "");
-        let q = parseFloat(part.quantity || part.qty) || 0;
+        const k = String(part.item_key || part.di_item_id || part.name || "");
+        const q = parseFloat(part.qty || part.quantity) || 0;
         if (q <= 0) return;
 
-        // --- 1. SUB-ASSEMBLY ---
-        if (rawKey.startsWith('RECIPE:::')) {
-            let subName = rawKey.replace('RECIPE:::', '').trim();
-            // Call without passing 'visited' to restart the circularity check for this branch
-            let sub = calculateProductBreakdown(subName, new Set()); 
+        const cleanK = k.replace("RECIPE:::", "");
+        const catalogItem = catalogCache[k] || catalogCache[cleanK];
+
+        // 1. 3D PRINT METADATA (Recursion on Raw Goods level)
+        if (catalogItem && catalogItem.is_3d_print) {
+            totalPrintTime += (parseFloat(catalogItem.print_time_mins) || 0) * q;
+        }
+
+        // 2. SUB-ASSEMBLY RECURSION
+        if (productsDB[cleanK]) {
+            const sub = calculateProductBreakdown(cleanK, new Set(visited));
             totalRaw += (sub.raw * q);
             totalLabor += (sub.labor * q);
             totalPrintTime += (sub.print * q);
         } else {
-            // --- 2. RAW MATERIAL ---
-            const catalogItem = catalogCache[rawKey];
+            // 3. RAW MATERIAL COST
             if (catalogItem) {
-                totalRaw += (catalogItem.avgUnitCost || 0) * q;
-                if (catalogItem.is_3d_print) {
-                    totalPrintTime += (catalogItem.print_time_mins || 0) * q;
-                }
+                totalRaw += (parseFloat(catalogItem.avgUnitCost) || 0) * q;
             }
         }
     });
 
-    // Add this product's own labor
+    // 4. ADD LOCAL LABOR
     if (laborDB[pName]) {
-        let ownLabor = (parseFloat(laborDB[pName].time) / 60) * parseFloat(laborDB[pName].rate || 0);
+        const l = laborDB[pName];
+        const ownLabor = (parseFloat(l.time || 0) / 60) * parseFloat(l.rate || 0);
         if (!isNaN(ownLabor)) totalLabor += ownLabor;
     }
 
