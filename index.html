@@ -70,25 +70,25 @@
         
         /* Hub Grid System */
         .hub-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 60px; 
-            padding: 50px; 
-            width: 100%;
-            height: 100%;
+            display: flex; 
+            flex-direction: row;
             box-sizing: border-box;
+            padding: 150px; 
+            gap: 150px; 
+            width: 100%;
+            height: calc(100vh - 127px);
+            max-height: calc(100vh - 127px);
             margin: 0;
             justify-content: center; 
-            align-content: stretch;
+            align-items: center;
             flex-grow: 1;
-            overflow-y: auto; 
-            overflow-x: hidden;
+            overflow: hidden; 
         }
         .hub-card { 
             background: var(--bg-glass); 
-            border: 2px solid transparent; 
+            border: 1px solid var(--border-input); 
             border-radius: 24px; 
-            padding: 60px 30px; 
+            padding: 40px; 
             text-align: center; 
             cursor: pointer; 
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
@@ -100,8 +100,8 @@
             box-shadow: 0 15px 50px rgba(0,0,0,0.2); 
             width: 100%;
             flex: 1;
-            min-height: 300px;
-            max-height: calc(90vh - 120px);
+            height: 100%;
+            max-height: 100%;
             position: relative;
         }
 
@@ -522,13 +522,11 @@
             <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('invhub')"><span>📦</span> Inventory Hub</button>
-            <button class="tab-btn" onclick="switchTab('bom')"><span>🛠️</span> Product Builder</button>
-            <button class="tab-btn" onclick="switchTab('production')"><span>🏭</span> Production</button>
-            <button class="tab-btn" onclick="switchTab('sales')"><span>🛒</span> Sales Sync</button>
-            <button class="tab-btn" onclick="switchTab('analytics')"><span>📈</span> Analytics</button>
-            <button class="tab-btn" onclick="switchTab('ceo')"><span>🚀</span> CEO Terminal</button>
-            <button class="tab-btn" onclick="switchTab('print')"><span>🖨️</span> 3D Print Queue</button>
+            <button class="tab-btn active" onclick="switchTab('invhub')">📊 INVENTORY HUB</button>
+            <button class="tab-btn" onclick="switchTab('prodhub')">🏭 PRODUCTION HUB</button>
+            <button class="tab-btn" onclick="switchTab('sales')">🛒 SALES SYNC</button>
+            <button class="tab-btn" onclick="switchTab('analytics')">📈 ANALYTICS</button>
+            <button class="tab-btn" id="ceoTabAction" onclick="switchTab('ceo')">🏢 CEO</button>
         </div>
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
@@ -623,158 +621,289 @@
         </div>
     </div> <!-- End of invhub-tab -->
 
-    <!-- Product Builder Section -->
-    <div id="bom-tab" class="tab-content">
-        <div class="bom-layout">
-            <div class="bom-sidebar">
-                <h3>Your Products</h3>
-                <ul class="product-list" id="productListUI"></ul>
-                <button class="btn-blue" onclick="createNewProduct()" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
-                <button class="btn-red" onclick="nukeAllRecipes()" style="font-size: 12px; padding: 8px; flex-shrink:0;">⚠️ Nuke All (Reset)</button>
+    <!-- Production Hub Section -->
+    <div id="prodhub-tab" class="tab-content" style="padding:0;">
+        <div id="prodHubLanding" class="hub-container">
+            <div class="hub-card" onclick="showProductionPane('bom')">
+                <i>🛠️</i>
+                <h2>Product Builder</h2>
+                <p>Define recipes, labor, and BOM structures.</p>
+                <div class="card-stat" id="hubStatRecipes">0 RECIPES</div>
             </div>
-            <div class="bom-main" id="bomMainArea" style="display:none;">
-                <div class="bom-header" style="flex-wrap: wrap;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <h2 id="bomTitle" style="margin:0; font-size:20px; color:var(--text-heading);">Product Name</h2>
-                        <button class="icon-btn" onclick="renameCurrentProduct()" title="Rename Product" style="width:28px!important; height:28px; font-size:14px; border-color:var(--border-input);">✏️</button>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; justify-content:flex-end;">
-                        <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
-                            <label style="font-size:11px; font-weight:bold; color:#f59e0b; cursor:pointer;" for="isSubassemblyInput">⚙️ Sub-Assembly</label>
-                            <input type="checkbox" id="isSubassemblyInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Labor Time (Mins)</label>
-                            <input type="number" id="laborTimeInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Shop Rate ($/Hr)</label>
-                            <input type="number" id="laborRateInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                            <label style="font-size:11px; font-weight:bold; color:#0ea5e9;">MSRP ($)</label>
-                            <input type="number" id="msrpInput" style="width:80px; padding:4px; border-color:#0ea5e9;" min="0" step="any" onchange="updateLaborCosts()">
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Wholesale ($)</label>
-                            <input type="number" id="wholesaleInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
-                        </div>
-                        <div class="total-badge" id="bomTotalCost">$0.00</div>
-                    </div>
+            <div class="hub-card pulse-orange" onclick="showProductionPane('production')">
+                <i>🏭</i>
+                <h2>Production Control</h2>
+                <p>Active Work Orders, SOPs, and Batching.</p>
+                <div class="card-stat" id="hubStatBatches">0 ACTIVE BATCHES</div>
+            </div>
+            <div class="hub-card" onclick="showProductionPane('print')">
+                <i>🖨️</i>
+                <h2>Print Command</h2>
+                <p>3D Print Queue, status tracking, and reprints.</p>
+                <div class="card-stat" id="hubStatPrints">0 QUEUED PRINTS</div>
+            </div>
+        </div>
+
+        <!-- Detailed Panes (Wrapped) -->
+        <div id="paneBom" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div class="sub-nav" style="margin-bottom: 20px;">
+                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
+                <button class="sub-nav-btn active" onclick="showProductionPane('bom')">Product Builder</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('production')">Production Control</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('print')">Print Command</button>
+            </div>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-sidebar">
+                    <h3>Your Products</h3>
+                    <ul class="product-list" id="productListUI"></ul>
+                    <button class="btn-blue" onclick="createNewProduct()" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
+                    <button class="btn-red" onclick="nukeAllRecipes()" style="font-size: 12px; padding: 8px; flex-shrink:0;">⚠️ Nuke All (Reset)</button>
                 </div>
-                <div class="add-part-bar" style="margin-top: 15px;">
-                    <select id="partSelector"></select>
-                    <input id="partQty" type="number" step="any" min="0.0001" value="1">
-                    <button class="btn-green" onclick="addPartToProduct()">Add Part</button>
-                    <button class="btn-blue" onclick="openBulkAddModal()">📑 Bulk Add</button>
-                </div>
-                <div class="table-wrap" id="bomTableWrap"></div>
-                <div style="margin-top: 15px; text-align: right; flex-shrink:0;">
-                    <button class="btn-red" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="deleteCurrentProduct()">Delete Recipe</button>
+                <div class="bom-main" id="bomMainArea" style="display:none;">
+                    <div class="bom-header" style="flex-wrap: wrap;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <h2 id="bomTitle" style="margin:0; font-size:20px; color:var(--text-heading);">Product Name</h2>
+                            <button class="icon-btn" onclick="renameCurrentProduct()" title="Rename Product" style="width:28px!important; height:28px; font-size:14px; border-color:var(--border-input);">✏️</button>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; justify-content:flex-end;">
+                            <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
+                                <label style="font-size:11px; font-weight:bold; color:#f59e0b; cursor:pointer;" for="isSubassemblyInput">⚙️ Sub-Assembly</label>
+                                <input type="checkbox" id="isSubassemblyInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Labor Time (Mins)</label>
+                                <input type="number" id="laborTimeInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Shop Rate ($/Hr)</label>
+                                <input type="number" id="laborRateInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <label style="font-size:11px; font-weight:bold; color:#0ea5e9;">MSRP ($)</label>
+                                <input type="number" id="msrpInput" style="width:80px; padding:4px; border-color:#0ea5e9;" min="0" step="any" onchange="updateLaborCosts()">
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Wholesale ($)</label>
+                                <input type="number" id="wholesaleInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                            </div>
+                            <div class="total-badge" id="bomTotalCost">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="add-part-bar" style="margin-top: 15px;">
+                        <select id="partSelector"></select>
+                        <input id="partQty" type="number" step="any" min="0.0001" value="1">
+                        <button class="btn-green" onclick="addPartToProduct()">Add Part</button>
+                        <button class="btn-blue" onclick="openBulkAddModal()">📑 Bulk Add</button>
+                    </div>
+                    <div class="table-wrap" id="bomTableWrap"></div>
+                    <div style="margin-top: 15px; text-align: right; flex-shrink:0;">
+                        <button class="btn-red" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="deleteCurrentProduct()">Delete Recipe</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Production Section -->
-    <div id="production-tab" class="tab-content">
-        <div class="bom-layout">
-            <div class="bom-sidebar">
-                <!-- Visual Consistency: Production Stats Card -->
-                <div id="productionStats" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; gap:20px; align-items:center; box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">
-                    <div style="display:flex; flex-direction:column;">
-                        <div style="font-size:11px; color:var(--text-muted); font-weight:bold; letter-spacing:0.05em; margin-bottom:4px; text-transform:uppercase;">Production Overview</div>
-                        <div style="display:flex; align-items:flex-end; gap:15px;">
+        <div id="paneProduction" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div class="sub-nav" style="margin-bottom: 20px;">
+                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('bom')">Product Builder</button>
+                <button class="sub-nav-btn active" onclick="showProductionPane('production')">Production Control</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('print')">Print Command</button>
+            </div>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-sidebar">
+                    <div id="productionStats" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; gap:20px; align-items:center; box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">
+                        <div style="display:flex; flex-direction:column;">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:bold; letter-spacing:0.05em; margin-bottom:4px; text-transform:uppercase;">Production Overview</div>
+                            <div style="display:flex; align-items:flex-end; gap:15px;">
+                                <div style="display:flex; flex-direction:column;">
+                                    <span style="font-size:24px; font-weight:900; color:var(--primary-color);" id="activeBatchCount">0</span>
+                                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">BATCHES</span>
+                                </div>
+                                <div style="width:1px; height:30px; background:var(--border-color);"></div>
+                                <div style="display:flex; flex-direction:column;">
+                                    <span style="font-size:24px; font-weight:900; color:#10b981;" id="activeUnitCount">0</span>
+                                    <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">UNITS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>🏭 Work Orders</h3>
+                    <button class="btn-blue" onclick="openNewWOModal()" style="margin-bottom:15px; padding:10px;">+ New Production Batch</button>
+                    <ul class="product-list" id="woListUI"></ul>
+                    <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
+                    <h3>📝 SOP Editor</h3>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Create rich-text instructions and link attachments.</p>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-blue" onclick="openSOPMasterModal('production')">📝 Production SOP Editor</button>
+                    </div>
+                </div>
+                <div class="bom-main" id="woMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
+                    <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                            <h2 id="woTitle" style="margin:0; font-size:22px; color:var(--text-heading);">WO-1234: Product Name</h2>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="woStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none;">START: --/-- --:--</span>
+                                <span id="woEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none;">FINISH: --/-- --:--</span>
+                                <span id="woBadge" class="status-badge st-queued">Queued</span>
+                            </div>
+                        </div>
+                        <div style="font-size:14px; color:var(--text-muted);">Target Quantity: <strong id="woQtyTarget" style="color:var(--text-main);">0</strong> units</div>
+                    </div>
+
+                    <div class="pipeline-bar" id="woPipeline">
+                        <div class="pipe-step" id="pipe-Queued" onclick="advanceWO('Queued')">1. Queued</div>
+                        <div class="pipe-step" id="pipe-Picking" onclick="advanceWO('Picking')">2. Picking Parts</div>
+                        <div class="pipe-step" id="pipe-Production" onclick="advanceWO('In Production')">3. In Production</div>
+                        <div class="pipe-step" id="pipe-Completed" onclick="advanceWO('Completed')">4. Completed</div>
+                    </div>
+
+                    <div id="sect-Queued" class="wo-section">
+                        <h3 style="margin-top:0; color:var(--text-heading);">Work Order Created</h3>
+                        <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch is queued and waiting for an operator. Once you are ready to pull parts from the physical inventory shelves, begin the picking process.</p>
+                        <button class="btn-blue" style="width:auto; padding:12px 25px; margin-top:10px;" onclick="advanceWO('Picking')">📋 Start Picking Parts</button>
+                    </div>
+
+                    <div id="sect-Picking" class="wo-section">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                            <h3 style="margin:0; color:var(--text-heading);">🛒 Active Pick List</h3>
+                            <button class="print-btn" onclick="printPickList()">🖨️ Print List</button>
+                        </div>
+                        <div id="woPickList" style="margin-bottom:20px;"></div>
+                        <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('In Production')">✅ All Parts Picked -> Move to Production</button>
+                    </div>
+
+                    <div id="sect-Production" class="wo-section">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                            <h3 style="margin:0; color:var(--text-heading);">🛠️ Build Instructions (SOP)</h3>
+                            <div style="display:flex; gap: 10px;">
+                                <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color);">🔒</button>
+                                <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
+                            </div>
+                        </div>
+                        <div id="inlineSOPContainer" style="display:flex; flex-direction:column; position:relative;">
+                            <div id="woSOPList" style="margin-bottom:20px;"></div>
+                            <div id="inlineSaveContainer" style="text-align:right; margin-top:10px; border-top:1px solid var(--border-color); padding-top:15px; display:none; position:sticky; bottom:0; background:var(--bg-container); z-index:100; padding-bottom:15px;">
+                                <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveInlineSOP()">💾 Save Changes to Cloud</button>
+                            </div>
+                        </div>
+                        <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px; margin-top:30px;">
+                            <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
+                            <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly deduct all picked raw materials and log the finished goods to your inventory ledger.</p>
+                            <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Process Inventory</button>
+                        </div>
+                    </div>
+
+                    <div id="sect-Completed" class="wo-section">
+                        <h3 style="margin-top:0; color:#10b981;">✅ Production Complete</h3>
+                        <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch has been finalized. All raw materials have been deducted and the finished goods have been recorded in the ledger.</p>
+                    </div>
+                    
+                    <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
+                        <button class="btn-red" style="width: auto; padding: 8px 15px; font-size: 13px;" onclick="deleteCurrentWO()">🗑️ Archive / Delete Work Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panePrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div class="sub-nav" style="margin-bottom: 20px;">
+                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('bom')">Product Builder</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('production')">Production Control</button>
+                <button class="sub-nav-btn active" onclick="showProductionPane('print')">Print Command</button>
+            </div>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-sidebar">
+                    <div id="printQueueStats" style="margin-top:0; margin-bottom:15px; background:var(--bg-bar); padding:15px; border-radius:10px; border:2px solid var(--border-color); text-align:center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                        <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:bold; letter-spacing:1px; margin-bottom:5px;">System Capacity</div>
+                        <div style="display:flex; justify-content:space-around; align-items:center; gap:10px;">
                             <div style="display:flex; flex-direction:column;">
-                                <span style="font-size:24px; font-weight:900; color:var(--primary-color);" id="activeBatchCount">0</span>
-                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">BATCHES</span>
+                                <span style="font-size:24px; font-weight:900; color:#8b5cf6;" id="totalPrintTasks">0</span>
+                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">TASKS</span>
                             </div>
                             <div style="width:1px; height:30px; background:var(--border-color);"></div>
                             <div style="display:flex; flex-direction:column;">
-                                <span style="font-size:24px; font-weight:900; color:#10b981;" id="activeUnitCount">0</span>
-                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">UNITS</span>
+                                <span style="font-size:24px; font-weight:900; color:#8b5cf6;" id="totalPrintingTime">0</span>
+                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">TIME</span>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <h3>🏭 Work Orders</h3>
-                <button class="btn-blue" onclick="openNewWOModal()" style="margin-bottom:15px; padding:10px;">+ New Production Batch</button>
-                <ul class="product-list" id="woListUI"></ul>
-                <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color); flex-shrink:0;">
-                <h3>📝 SOP Editor</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:-5px; margin-bottom:10px;">Create rich-text instructions and link attachments.</p>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-blue" onclick="openSOPMasterModal('production')">📝 Production SOP Editor</button>
-                </div>
-            </div>
-            <div class="bom-main" id="woMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
-                <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
-                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                        <h2 id="woTitle" style="margin:0; font-size:22px; color:var(--text-heading);">WO-1234: Product Name</h2>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span id="woStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none;">START: --/-- --:--</span>
-                            <span id="woEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none;">FINISH: --/-- --:--</span>
-                            <span id="woBadge" class="status-badge st-queued">Queued</span>
-                        </div>
-                    </div>
-                    <div style="font-size:14px; color:var(--text-muted);">Target Quantity: <strong id="woQtyTarget" style="color:var(--text-main);">0</strong> units</div>
-                </div>
-
-                <div class="pipeline-bar" id="woPipeline">
-                    <div class="pipe-step" id="pipe-Queued" onclick="advanceWO('Queued')">1. Queued</div>
-                    <div class="pipe-step" id="pipe-Picking" onclick="advanceWO('Picking')">2. Picking Parts</div>
-                    <div class="pipe-step" id="pipe-Production" onclick="advanceWO('In Production')">3. In Production</div>
-                    <div class="pipe-step" id="pipe-Completed" onclick="advanceWO('Completed')">4. Completed</div>
-                </div>
-
-                <div id="sect-Queued" class="wo-section">
-                    <h3 style="margin-top:0; color:var(--text-heading);">Work Order Created</h3>
-                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch is queued and waiting for an operator. Once you are ready to pull parts from the physical inventory shelves, begin the picking process.</p>
-                    <button class="btn-blue" style="width:auto; padding:12px 25px; margin-top:10px;" onclick="advanceWO('Picking')">📋 Start Picking Parts</button>
-                </div>
-
-                <div id="sect-Picking" class="wo-section">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
-                        <h3 style="margin:0; color:var(--text-heading);">🛒 Active Pick List</h3>
-                        <button class="print-btn" onclick="printPickList()">🖨️ Print List</button>
-                    </div>
-                    <div id="woPickList" style="margin-bottom:20px;"></div>
-                    <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('In Production')">✅ All Parts Picked -> Move to Production</button>
-                </div>
-
-                <div id="sect-Production" class="wo-section">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
-                        <h3 style="margin:0; color:var(--text-heading);">🛠️ Build Instructions (SOP)</h3>
-                        <div style="display:flex; gap: 10px;">
-                            <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color);">🔒</button>
-                            <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
-                        </div>
-                    </div>
-                    <div id="inlineSOPContainer" style="display:flex; flex-direction:column; position:relative;">
-                        <div id="woSOPList" style="margin-bottom:20px;"></div>
-                        <div id="inlineSaveContainer" style="text-align:right; margin-top:10px; border-top:1px solid var(--border-color); padding-top:15px; display:none; position:sticky; bottom:0; background:var(--bg-container); z-index:100; padding-bottom:15px;">
-                            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveInlineSOP()">💾 Save Changes to Cloud</button>
-                        </div>
-                    </div>
-                    <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px; margin-top:30px;">
-                        <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
-                        <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly deduct all picked raw materials and log the finished goods to your inventory ledger.</p>
-                        <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Process Inventory</button>
-                    </div>
-                </div>
-
-                <div id="sect-Completed" class="wo-section">
-                    <h3 style="margin-top:0; color:#10b981;">✅ Production Complete</h3>
-                    <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch has been finalized. All raw materials have been deducted and the finished goods have been recorded in the ledger.</p>
+                    <h3>🖨️ Print Tasks</h3>
+                    <button class="btn-blue" onclick="refreshPrintQueue()" style="margin-bottom:10px; padding:10px;">↻ Refresh Queue</button>
+                    <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="margin-bottom:15px; padding:10px; background:#8b5cf6; border-color:#8b5cf6;">📝 Edit Print SOPs</button>
+                    <ul class="product-list" id="printListUI"></ul>
                 </div>
                 
-                <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
-                    <button class="btn-red" style="width: auto; padding: 8px 15px; font-size: 13px;" onclick="deleteCurrentWO()">🗑️ Archive / Delete Work Order</button>
+                <div class="bom-main" id="printMainArea" style="display:none; overflow-y:auto; padding-right:15px;">
+                    <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                            <h2 id="printJobTitle" style="margin:0; font-size:22px; color:var(--text-heading);">Item Name</h2>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="printJobStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none;">START: --/-- --:--</span>
+                                <span id="printJobEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none;">FINISH: --/-- --:--</span>
+                                <span id="printJobBadge" class="status-badge st-queued">Queued</span>
+                            </div>
+                        </div>
+                        <div style="font-size:14px; color:var(--text-muted);">Quantity: <strong id="printJobQty" style="color:var(--text-main);">0</strong> | Source: <strong id="printJobSource" style="font-family:monospace;">Manual</strong></div>
+                    </div>
+
+                    <div class="pipeline-bar" id="printPipeline">
+                        <div class="pipe-step" id="pipe-P-Queued" onclick="advancePrintStatus('Queued')">1. Queued</div>
+                        <div class="pipe-step" id="pipe-P-Printing" onclick="advancePrintStatus('Printing')">2. Printing</div>
+                        <div class="pipe-step" id="pipe-P-Cleaned" onclick="advancePrintStatus('Cleaned')">3. Cleaned</div>
+                        <div class="pipe-step" id="pipe-P-Completed" onclick="advancePrintStatus('Completed')">4. Completed</div>
+                    </div>
+
+                    <!-- Sections for each stage -->
+                    <div id="sect-P-Queued" class="wo-section">
+                        <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:20px; border-radius:10px; text-align:center;">
+                            <h3 style="margin-top:0; color:var(--text-heading);">⏳ Waiting in Queue</h3>
+                            <p style="color:var(--text-muted); margin-bottom:20px;">This job is queued and ready for printing. Please ensure the printer is loaded with the correct filament.</p>
+                            <button class="btn-blue" style="width:auto; padding:12px 35px; font-size:15px;" onclick="advancePrintStatus('Printing')">▶ Start Print Job</button>
+                        </div>
+                    </div>
+
+                    <div id="sect-P-Printing" class="wo-section">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                            <h3 style="margin:0; color:var(--text-heading);">🖨️ Printing Instructions (SOP)</h3>
+                            <button class="print-btn" onclick="openPrintSOP(currentPrintJob.part_name)">🖨️ Full View</button>
+                        </div>
+                        <div id="printSOPList" style="margin-bottom:20px;"></div>
+                        <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:15px; border-radius:8px; border-left:4px solid #f97316;">
+                            <h4 style="margin:0 0 10px 0; color:#f97316;">Next Step: Post-Processing</h4>
+                            <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Once the print finishes, remove it from the plate and mark it as cleaned.</p>
+                            <button class="btn-orange" style="width:auto; padding:12px 25px;" onclick="advancePrintStatus('Cleaned')">🧹 Mark as Cleaned</button>
+                        </div>
+                    </div>
+
+                    <div id="sect-P-Cleaned" class="wo-section">
+                        <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:20px; border-radius:10px; border-left:4px solid #10b981;">
+                            <h3 style="margin-top:0; color:#10b981;">✨ Part Cleaned & Cured</h3>
+                            <p style="color:var(--text-muted); margin-bottom:20px;">The part has been removed, cleaned, and is ready for use. Marking complete will add it to the inventory shelf.</p>
+                            <button class="btn-green" style="width:auto; padding:12px 35px; font-size:15px;" onclick="advancePrintStatus('Completed')">✅ Mark Completed & Add to Inventory</button>
+                        </div>
+                    </div>
+
+                    <div id="sect-P-Completed" class="wo-section">
+                        <div style="background:var(--bg-panel); border:2px solid #10b981; padding:30px; border-radius:10px; text-align:center;">
+                            <h1 style="margin:0; font-size:40px;">🏁</h1>
+                            <h3 style="color:#10b981; margin:10px 0;">Job Finished</h3>
+                            <p style="color:var(--text-muted); max-width:400px; margin:0 auto;">This 3D print job is fully processed. The quantity has been recorded in the inventory ledger for future assembly.</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
+                        <button class="btn-red" style="width: auto; padding: 8px 15px; font-size: 13px;" onclick="deletePrintJob()">🗑️ Remove Print Job</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- End of prodhub-tab -->
 
     <div id="sales-tab" class="tab-content">
         <div class="control-panel" style="grid-template-columns: repeat(4, 1fr);">
@@ -1106,6 +1235,10 @@
 
 </body>
 <script>
+    // --- ZERO-CACHE SECURITY POLICY ---
+    window.localStorage.clear(); window.sessionStorage.clear();
+    console.log("🚀 Neogleamz Zero-Cache Protocol: Local/Session Storage cleared.");
+
     // --- 1. GLOBAL VARIABLES & SUPABASE ---
     const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7');
     let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
@@ -1138,35 +1271,41 @@
 
     function updateHubStats() {
         try {
-            // Ledger Stat: Total unique rows
-            if (typeof finalResults !== 'undefined') {
-                document.getElementById('hubStatLedger').innerText = `${finalResults.length} RECORDS`;
-            }
-            // Simple Stat: Items with 3D print check
-            if (typeof inventoryDB !== 'undefined' && typeof catalogCache !== 'undefined') {
-                let printedCount = Object.keys(catalogCache).filter(k => catalogCache[k].is3D).length;
+            // Inventory Stats
+            if (typeof finalResults !== 'undefined') document.getElementById('hubStatLedger').innerText = `${finalResults.length} RECORDS`;
+            if (typeof catalogCache !== 'undefined') {
+                let printedCount = Object.keys(catalogCache).filter(k => catalogCache[k].is_3d_print).length;
                 document.getElementById('hubStatSimple').innerText = `${printedCount} PRINTED ITEMS`;
             }
-            // Stock Stat: Total Asset Value
             if (typeof catalogCache !== 'undefined' && typeof inventoryDB !== 'undefined') {
                 let totalValue = 0;
                 Object.keys(catalogCache).forEach(k => {
                     let c = catalogCache[k], i = inventoryDB[k] || {};
-                    let s = c.totalQty - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
-                    totalValue += s * (c.avgUnitCost || 0);
+                    let s = (c.totalQty || 0) + (i.manual_adjustment || 0) - (i.consumed_qty || 0) - (i.scrap_qty || 0);
+                    totalValue += Math.max(0, s) * (c.avgUnitCost || 0);
                 });
-                // Add Finished Goods Value
                 if (typeof productsDB !== 'undefined') {
                     Object.keys(productsDB).forEach(p => {
                         let i = inventoryDB[`RECIPE:::${p}`] || {produced_qty:0, sold_qty:0};
                         let s = (i.produced_qty || 0) - (i.sold_qty || 0);
                         let cost = (typeof calculateProductBreakdown === 'function') ? calculateProductBreakdown(p).total : 0;
-                        totalValue += s * cost;
+                        totalValue += Math.max(0, s) * cost;
                     });
                 }
-                document.getElementById('hubStatStock').innerText = `$${totalValue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ASSETS`;
+                document.getElementById('hubStatStock').innerText = `$${Math.round(totalValue).toLocaleString()} ASSETS`;
             }
-        } catch(e) { console.warn("Hub Stats Error:", e); }
+
+            // Production Stats
+            if (typeof productsDB !== 'undefined') document.getElementById('hubStatRecipes').innerText = `${Object.keys(productsDB).length} RECIPES`;
+            if (typeof workOrdersDB !== 'undefined') {
+                let activeBatches = workOrdersDB.filter(w => w.status !== 'Completed').length;
+                document.getElementById('hubStatBatches').innerText = `${activeBatches} ACTIVE BATCHES`;
+            }
+            if (typeof printQueueDB !== 'undefined') {
+                let queuedPrints = printQueueDB.filter(p => p.status !== 'Completed').length;
+                document.getElementById('hubStatPrints').innerText = `${queuedPrints} QUEUED PRINTS`;
+            }
+        } catch(e) { console.warn("Hub Stats Sync Error:", e); }
     }    let salesDB = []; let aliasDB = {}; let printQueueDB = [];
     let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
     let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
@@ -1412,21 +1551,36 @@
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); 
     	document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active')); 
     	
-        // Find the button that was clicked and set it active
         const btns = document.querySelectorAll('.tab-btn');
         btns.forEach(b => { if(b.getAttribute('onclick')?.includes(`'${tabId}'`)) b.classList.add('active'); });
 
     	target.classList.add('active'); sysLog(`Switched to ${tabId}.`); 
-    	if (tabId === 'pipeline') { renderLedgerView(false, 'results'); } 
-    	if (tabId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); } 
-    	if (tabId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); } 
-    	if (tabId === 'inventory') { buildCatalogCache(); renderInventoryTable(); populateDropdowns(); } 
-    	if (tabId === 'production') { buildCatalogCache(); renderWOList(); } 
+        
+        if (tabId === 'invhub') showInventoryPane('hub');
+        if (tabId === 'prodhub') showProductionPane('hub');
+
     	if (tabId === 'sales') { renderSalesTable(); }
     	if (tabId === 'analytics') { renderAnalyticsDashboard(); }
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
-        if (tabId === 'invhub') { if(typeof updateHubStats === 'function') updateHubStats(); }
-        if (tabId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
+    }
+
+    function showProductionPane(paneId) {
+        document.getElementById('prodHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
+        document.querySelectorAll('#prodhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
+        
+        if (paneId !== 'hub') {
+            const pane = document.getElementById('pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            if (pane) {
+                pane.style.display = 'flex';
+                pane.querySelectorAll('.sub-nav-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId));
+                });
+            }
+            if (paneId === 'bom') { buildCatalogCache(); renderProductList(); populateDropdowns(); if(currentProduct) renderProductBOM(); } 
+            if (paneId === 'production') { buildCatalogCache(); renderWOList(); } 
+            if (paneId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
+        }
+        if (typeof updateHubStats === 'function') updateHubStats();
     }
 
     function applyTableInteractivity(containerId) {
