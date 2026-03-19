@@ -219,12 +219,31 @@
         
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
         table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
-        th { background-color: var(--bg-th); color: var(--text-th); padding: 8px 6px; position: sticky; top: 0; text-align: left; z-index: 10; cursor: grab; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s, box-shadow 0.2s; }
-        th:hover { opacity: 0.9; }
-        td { padding: 6px 8px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        
-        th.sorted-asc { color: #0ea5e9; box-shadow: inset 0 -4px 0 #0ea5e9; }
-        th.sorted-desc { color: #eab308; box-shadow: inset 0 -4px 0 #eab308; }
+        th { 
+            background: var(--bg-th); 
+            color: var(--text-th); 
+            padding: 12px 10px; 
+            position: sticky; 
+            top: 0; 
+            text-align: left; 
+            z-index: 10; 
+            cursor: pointer; 
+            user-select: none; 
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--border-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        th:hover { background: #334155; color: white; }
+        [data-theme="dark"] th:hover { background: #1e293b; }
+
+        th.sorted-asc::after { content: ' ▲'; color: #38bdf8; font-size: 10px; margin-left: 5px; }
+        th.sorted-desc::after { content: ' ▼'; color: #fbbf24; font-size: 10px; margin-left: 5px; }
+
+        th.sorted-asc, th.sorted-desc { background: var(--bg-th); color: white; }
         
         .text-right { text-align: right; }
         .highlight-calc { background-color: var(--bg-highlight); color: var(--text-highlight); font-weight: bold; }
