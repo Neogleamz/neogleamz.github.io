@@ -133,16 +133,10 @@ function renderCeoTerminal() {
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
     
     let controlHtml = `
-        <div style="background: var(--bg-surface-light); padding: 10px; border-radius: 8px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--border-color);">
-            <select id="ceo-product-select" style="width: 100%; padding: 8px; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); border-radius: 4px;">
-                <option value="">-- Select Retail Product to Add --</option>
-                ${availableRetail.sort().map(k => `<option value="${k}">${k}</option>`).join('')}
-            </select>
-            <div style="display:flex; gap:6px; width:100%;">
-                <button class="btn-blue" onclick="addCeoProductToBoard()" style="flex:1; padding: 6px 2px; font-size:12px; white-space:nowrap;">+ Item</button>
-                <button class="btn-orange" onclick="openCeoBundleModal()" style="flex:1; padding: 6px 2px; font-size:12px; white-space:nowrap;">+ Bundle</button>
-                <button class="btn-green" onclick="openCeoCustomModal()" style="flex:1; padding: 6px 2px; font-size:12px; white-space:nowrap;">+ Custom</button>
-            </div>
+        <div style="background: var(--bg-surface-light); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border-color);">
+            <button class="btn-blue" onclick="openCeoAddModal()" style="width:100%; padding: 12px; font-size:14px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
+                🚀 Add Product to Analysis
+            </button>
         </div>
     `;
 
@@ -164,7 +158,6 @@ function renderCeoTerminal() {
                 <span style="${toggleStyle(p.applyAff)}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
                 <span style="${toggleStyle(p.applyWarr)}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
             </div>
-            <input type="range" id="ceo-vol-${index}" min="0" max="2000" step="1" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}-num').value=this.value; updateCeoEngine();">
         </div>`;
     });
     
@@ -197,7 +190,7 @@ function updateCeoEngine() {
             let effAff = p.applyAff ? gAff : 0;
             let effWarr = p.applyWarr ? gWarr : 0;
 
-            let liveCogs = getEngineTrueCogs(p.name);
+            let liveCogs = (p.isBundle || p.name.startsWith('🧪')) ? (p.cogs || 0) : getEngineTrueCogs(p.name);
             let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
 
             // Math: Current (Customer ALWAYS pays shipping - infinite threshold)
@@ -409,3 +402,68 @@ function saveCeoCustomItem() {
 }
 
 function removeCeoProduct(idx) { ceoActiveProducts.splice(idx, 1); renderCeoTerminal(); }
+
+// --- UNIFIED MODAL HANDLERS ---
+function openCeoAddModal() {
+    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
+    let sel = document.getElementById('ceo-unified-select');
+    sel.innerHTML = `<option value="">-- Choose Catalog Product --</option>` + availableRetail.map(k => `<option value="${k}">${k}</option>`).join('');
+    
+    document.getElementById('ceoUnifiedBundleBuilder').style.display = 'none';
+    document.getElementById('ceoAddModal').style.display = 'flex';
+}
+
+function addCeoRealProduct() {
+    let pName = document.getElementById('ceo-unified-select').value;
+    if(!pName) return alert("Select a product.");
+    if(ceoActiveProducts.some(p => p.name === pName)) return alert("Item already on board.");
+    ceoActiveProducts.push({ name:pName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:getEngineLiveMsrp(pName), testMsrp:getEngineLiveMsrp(pName), vol:0 });
+    document.getElementById('ceoAddModal').style.display = 'none';
+    renderCeoTerminal();
+}
+
+function addCeoCustomProduct() {
+    let nameRaw = document.getElementById('ceo-unified-custom-name').value.trim();
+    if(!nameRaw) return alert("Enter item name.");
+    let iName = "🧪 " + nameRaw;
+    if(ceoActiveProducts.some(p => p.name === iName)) return alert("Name exists.");
+    let cogs = parseFloat(document.getElementById('ceo-unified-custom-cogs').value) || 0;
+    let msrp = parseFloat(document.getElementById('ceo-unified-custom-msrp').value) || 0;
+    ceoActiveProducts.push({ name:iName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:msrp, testMsrp:msrp, cogs:cogs, vol:0 });
+    document.getElementById('ceoAddModal').style.display = 'none';
+    renderCeoTerminal();
+}
+
+function switchToBundleView() {
+    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
+    let html = `<table id="ceoUnifiedBundleTable"><thead><tr><th>Qty</th><th>Retail Product</th><th>COGS</th><th>MSRP</th></tr></thead><tbody>`;
+    availableRetail.forEach(k => {
+        let c = getEngineTrueCogs(k); let m = getEngineLiveMsrp(k);
+        html += `<tr class="unified-bundle-row"><td><input type="number" class="u-bundle-qty" data-name="${k}" data-cogs="${c}" data-msrp="${m}" min="0" step="1" value="0" style="width:50px;"></td><td class="u-bundle-name">${k}</td><td>${ceoFmt.format(c)}</td><td>${ceoFmt.format(m)}</td></tr>`;
+    });
+    document.getElementById('ceoUnifiedBundleTableWrap').innerHTML = html + `</tbody></table>`;
+    document.getElementById('ceoUnifiedBundleBuilder').style.display = 'block';
+}
+
+function filterUnifiedBundleList() {
+    let f = document.getElementById('ceoUnifiedBundleSearch').value.toLowerCase();
+    document.querySelectorAll('.unified-bundle-row').forEach(r => {
+        let n = r.querySelector('.u-bundle-name').innerText.toLowerCase();
+        r.style.display = n.includes(f) ? '' : 'none';
+    });
+}
+
+function addCeoBundleProduct() {
+    let n = document.getElementById('ceoUnifiedBundleName').value.trim();
+    if(!n) return alert("Bundle Name required.");
+    let bName = "📦 " + n;
+    if(ceoActiveProducts.some(p => p.name === bName)) return alert("Bundle exists.");
+    let tCogs = 0, tMsrp = 0, count = 0;
+    document.querySelectorAll('.u-bundle-qty').forEach(i => {
+        let q = parseInt(i.value) || 0; if(q > 0) { tCogs += q * parseFloat(i.dataset.cogs); tMsrp += q * parseFloat(i.dataset.msrp); count++; }
+    });
+    if(count === 0) return alert("Add items to bundle.");
+    ceoActiveProducts.push({ name:bName, isBundle:true, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:tMsrp, testMsrp:tMsrp, cogs:tCogs, vol:0 });
+    document.getElementById('ceoAddModal').style.display = 'none';
+    renderCeoTerminal();
+}
