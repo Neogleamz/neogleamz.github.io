@@ -68,10 +68,17 @@ function renderAnalyticsDashboard() {
         });
 
         // Update KPI Cards
-        document.getElementById('kpiRawInv').innerText = `$${rawInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-        document.getElementById('kpiBuiltInv').innerText = `$${builtInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-        document.getElementById('kpiTotalRev').innerText = `$${totals.captured.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-        document.getElementById('kpiTotalProfit').innerText = `$${totals.net.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        let elRaw = document.getElementById('kpiRawInv');
+        if (elRaw) elRaw.innerText = `$${rawInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        
+        let elBuilt = document.getElementById('kpiBuiltInv');
+        if (elBuilt) elBuilt.innerText = `$${builtInvValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        
+        let elRev = document.getElementById('kpiTotalRev');
+        if (elRev) elRev.innerText = `$${totals.captured.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        
+        let elProfit = document.getElementById('kpiTotalProfit');
+        if (elProfit) elProfit.innerText = `$${totals.net.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
 
         // --- CHART 1: WATERFALL (PROFIT DERIVATION) ---
         renderWaterfallChart(totals);
