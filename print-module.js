@@ -31,6 +31,8 @@ async function refreshPrintQueue() {
     }
 }
 
+let printDraggedIndex = null;
+
 function renderPrintQueue() {
     const ui = document.getElementById('printListUI');
     if (!ui) return;
@@ -43,7 +45,7 @@ function renderPrintQueue() {
         ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>";
         document.getElementById('printMainArea').style.display = 'none';
     } else {
-        printQueueDB.forEach(job => {
+        printQueueDB.forEach((job, index) => {
             const catalogItem = catalogByName[job.part_name];
             const printTimePer = catalogItem ? (parseFloat(catalogItem.print_time_mins) || 0) : 0;
             const totalTime = printTimePer * job.qty;
@@ -57,11 +59,21 @@ function renderPrintQueue() {
             let sel = (currentPrintJob && currentPrintJob.id === job.id) ? 'selected' : '';
             let dot = job.status === 'Queued' ? '🟡' : (job.status === 'Completed' ? '🟢' : (job.status === 'Printing' ? '🖨️' : '🧹'));
             
-            ui.innerHTML += `<li class="${sel}" onclick="selectPrintJob('${job.id}')" style="display:flex; justify-content:space-between; align-items:center;">
+            // Format: "Neogleamz Name - qty - print time"
+            const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : job.part_name;
+            const timeStr = totalTime > 0 ? ` - ${totalTime.toFixed(0)}m` : "";
+
+            ui.innerHTML += `<li class="${sel}" 
+                draggable="true"
+                ondragstart="printDragStart(event, ${index})" 
+                ondragover="printDragOver(event)" 
+                ondrop="printDrop(event, ${index})" 
+                ondragend="printDragEnd(event)"
+                onclick="selectPrintJob('${job.id}')" 
+                style="display:flex; justify-content:space-between; align-items:center; cursor:grab;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span>${dot} <strong>${job.part_name}</strong></span>
+                    <span style="font-size:14px; font-weight:700;">☰ ${dot} ${displayName} - ${job.qty}${timeStr}</span>
                 </div>
-                <span style="font-weight:bold;">x${job.qty}</span>
             </li>`;
         });
     }
@@ -70,6 +82,23 @@ function renderPrintQueue() {
     const timeEl = document.getElementById('totalPrintingTime');
     if (tasksEl) tasksEl.innerText = totalTasks;
     if (timeEl) timeEl.innerText = totalWaitTime.toFixed(0);
+}
+
+function printDragStart(e, index) { 
+    printDraggedIndex = index; 
+    e.target.style.opacity = '0.5'; 
+    e.dataTransfer.effectAllowed = 'move';
+}
+function printDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function printDragEnd(e) { e.target.style.opacity = '1'; }
+function printDrop(e, index) {
+    e.preventDefault();
+    if (printDraggedIndex !== null && printDraggedIndex !== index) {
+        let movedItem = printQueueDB.splice(printDraggedIndex, 1)[0];
+        printQueueDB.splice(index, 0, movedItem);
+        renderPrintQueue();
+        if (typeof savePrintOrderPrefs === 'function') savePrintOrderPrefs();
+    }
 }
 
 function selectPrintJob(id) {

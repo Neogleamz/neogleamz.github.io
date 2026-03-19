@@ -241,21 +241,52 @@ async function validateAndCreateWO() {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
-function moveWOUp(id, e) { e.stopPropagation(); let idx = workOrdersDB.findIndex(w => w.wo_id === id); if (idx > 0) { let temp = workOrdersDB[idx]; workOrdersDB[idx] = workOrdersDB[idx - 1]; workOrdersDB[idx - 1] = temp; saveWOOrderPrefs(); renderWOList(); } }
-function moveWODown(id, e) { e.stopPropagation(); let idx = workOrdersDB.findIndex(w => w.wo_id === id); if (idx < workOrdersDB.length - 1) { let temp = workOrdersDB[idx]; workOrdersDB[idx] = workOrdersDB[idx + 1]; workOrdersDB[idx + 1] = temp; saveWOOrderPrefs(); renderWOList(); } }
+let woDraggedIndex = null;
 
 function renderWOList() {
     try {
         const ui = document.getElementById('woListUI'); ui.innerHTML = "";
         if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
-        workOrdersDB.forEach(wo => { 
+        
+        workOrdersDB.forEach((wo, index) => { 
             if(typeof wo.wip_state === 'string') wo.wip_state = JSON.parse(wo.wip_state || '{}');
             if(typeof wo.routing === 'string') wo.routing = JSON.parse(wo.routing || '{}');
-            let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : ''; let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠')); 
-            ui.innerHTML += `<li class="${sel}" onclick="selectWO('${wo.wo_id}')" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:8px;"><div style="display:flex; flex-direction:column; gap:2px;"><button class="icon-btn" style="width:16px!important; height:16px; font-size:8px; border:none; background:transparent; color:inherit;" onclick="moveWOUp('${wo.wo_id}', event)">▲</button><button class="icon-btn" style="width:16px!important; height:16px; font-size:8px; border:none; background:transparent; color:inherit;" onclick="moveWODown('${wo.wo_id}', event)">▼</button></div><span>${dot} <strong>${wo.wo_id}</strong>: ${wo.product_name}</span></div><span style="font-weight:bold;">x${wo.qty}</span></li>`; 
+            let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : ''; 
+            let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠')); 
+            
+            ui.innerHTML += `<li class="${sel}" 
+                draggable="true"
+                ondragstart="woDragStart(event, ${index})" 
+                ondragover="woDragOver(event)" 
+                ondrop="woDrop(event, ${index})" 
+                ondragend="woDragEnd(event)"
+                onclick="selectWO('${wo.wo_id}')" 
+                style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-weight:700; font-size:14px;">☰ ${dot} ${wo.wo_id}: ${wo.product_name}</span>
+                </div>
+                <span style="font-weight:900; color:var(--text-muted); font-family:monospace;">x${wo.qty}</span>
+            </li>`; 
         });
         if(!currentWO && workOrdersDB.length > 0) currentWO = workOrdersDB[0]; if(currentWO) { isSOPLocked = true; renderActiveWO(currentWO.wo_id); }
     } catch(e) { sysLog(e.message, true); }
+}
+
+function woDragStart(e, index) { 
+    woDraggedIndex = index; 
+    e.target.style.opacity = '0.5'; 
+    e.dataTransfer.effectAllowed = 'move';
+}
+function woDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function woDragEnd(e) { e.target.style.opacity = '1'; }
+function woDrop(e, index) {
+    e.preventDefault();
+    if (woDraggedIndex !== null && woDraggedIndex !== index) {
+        let movedItem = workOrdersDB.splice(woDraggedIndex, 1)[0];
+        workOrdersDB.splice(index, 0, movedItem);
+        renderWOList();
+        if (typeof saveWOOrderPrefs === 'function') saveWOOrderPrefs();
+    }
 }
 function selectWO(id) { try { currentWO = workOrdersDB.find(w => w.wo_id === id); isSOPLocked = true; renderWOList(); } catch(e) { sysLog(e.message, true); } }
 
