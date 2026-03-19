@@ -236,26 +236,57 @@ function updateCeoEngine() {
             });
         }
 
-        let tableHtml = '';
-        tableRows.forEach(r => {
-            tableHtml += `
-            <tr>
-                <td>${r.name}</td>
-                <td style="font-weight:700;">${ceoFmt.format(r.cogs)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.currentMsrp)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.curShip)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.curStripe)}</td>
-                <td style="color:#888;">${ceoFmt.format(r.curOOP)}</td>
-                <td style="color:#ccc;">${ceoFmt.format(r.curNet)}</td>
-                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${r.index}" class="ceo-table-input" value="${r.testMsrp.toFixed(2)}" onchange="updateCeoEngine()"></td>
-                <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testShip)}</td>
-                <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testStripe)}</td>
-                <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(r.testOOP)}</td>
-                <td class="${r.testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(r.testNet)}</td>
-            </tr>`;
-        });
+        const getThClass = (key) => (ceoSortKey === key ? `sorted-${ceoSortAsc ? 'asc' : 'desc'}` : '');
 
-        document.getElementById('ceo-dynamic-table').innerHTML = tableHtml || '<tr><td colspan="10" style="text-align:center;">No products active.</td></tr>';
+        let tableHtml = `
+            <div class="ceo-kpi-title" style="margin-bottom:5px;">Current vs. Test Scenario Ledger</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="${getThClass('name')}" onclick="sortCeoTable('name')" style="text-align:left;">Product Name</th>
+                        <th class="${getThClass('cogs')}" onclick="sortCeoTable('cogs')" style="font-weight:900;">True COGS</th>
+                        <th class="${getThClass('currentMsrp')}" onclick="sortCeoTable('currentMsrp')" style="color:#888;">Current MSRP</th>
+                        <th class="${getThClass('curShip')}" onclick="sortCeoTable('curShip')" style="color:#888;">Cur. Ship</th>
+                        <th class="${getThClass('curStripe')}" onclick="sortCeoTable('curStripe')" style="color:#888;">Cur. Stripe</th>
+                        <th class="${getThClass('curOOP')}" onclick="sortCeoTable('curOOP')" style="color:#888;">Cust OOP</th>
+                        <th class="${getThClass('curNet')}" onclick="sortCeoTable('curNet')" style="color:#ccc;">Current Net</th>
+                        <th class="${getThClass('testMsrp')}" onclick="sortCeoTable('testMsrp')" style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px;">Test MSRP ✏️</th>
+                        <th class="${getThClass('testShip')}" onclick="sortCeoTable('testShip')" style="color:var(--neon-cyan);">Test Ship</th>
+                        <th class="${getThClass('testStripe')}" onclick="sortCeoTable('testStripe')" style="color:var(--neon-cyan);">Test Stripe</th>
+                        <th class="${getThClass('testOOP')}" onclick="sortCeoTable('testOOP')" style="color:var(--neon-cyan);">Cust OOP</th>
+                        <th class="${getThClass('testNet')} val-green" onclick="sortCeoTable('testNet')" style="font-weight:900;">Test Net</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        if (tableRows.length === 0) {
+            tableHtml += '<tr><td colspan="12" style="text-align:center;">No products active.</td></tr>';
+        } else {
+            tableRows.forEach(r => {
+                tableHtml += `
+                <tr>
+                    <td style="text-align:left; font-weight:700;">${r.name}</td>
+                    <td style="font-weight:700;">${ceoFmt.format(r.cogs)}</td>
+                    <td style="color:#888;">${ceoFmt.format(r.currentMsrp)}</td>
+                    <td style="color:#888;">${ceoFmt.format(r.curShip)}</td>
+                    <td style="color:#888;">${ceoFmt.format(r.curStripe)}</td>
+                    <td style="color:#888;">${ceoFmt.format(r.curOOP)}</td>
+                    <td style="color:#ccc;">${ceoFmt.format(r.curNet)}</td>
+                    <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${r.index}" class="ceo-table-input" value="${r.testMsrp.toFixed(2)}" onchange="updateCeoEngine()"></td>
+                    <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testShip)}</td>
+                    <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testStripe)}</td>
+                    <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(r.testOOP)}</td>
+                    <td class="${r.testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(r.testNet)}</td>
+                </tr>`;
+            });
+        }
+        tableHtml += '</tbody></table>';
+        
+        const wrap = document.getElementById('ceoTableWrap');
+        if (wrap) {
+            wrap.innerHTML = tableHtml;
+            applyTableInteractivity('ceoTableWrap');
+        }
         
         // Update KPIs
         document.getElementById('kpiGross').innerText = ceoFmt.format(totals.gross).split('.')[0];
