@@ -203,7 +203,7 @@ function renderSalesTable() {
     let wrap = document.getElementById('salesTableWrap'); if(!wrap) return;
     
     // Updated Headers based on CFO Blueprint
-    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='bal'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('bal')">Balance</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS (Live)</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe Fee</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
+    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='adj'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('adj')">Exch. Adj.</th> <th class="${currentSalesSort.column==='bal'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('bal')">Balance</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS (Live)</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe Fee</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
@@ -221,14 +221,36 @@ function renderSalesTable() {
         
         let net = captured - tax - stripeFee - actualShipCost - cogsTotal;
         
-        return { ...x, liveCogs, stripeFee, net };
+        return { ...x, liveCogs, stripeFee, net, exchAdj: 0, isExchanged: false };
     });
+
+    // --- AUTOMATED EXCHANGE LOGIC ---
+    let orderGroups = {};
+    a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
+    Object.keys(orderGroups).forEach(oid => {
+        let group = orderGroups[oid];
+        if(group.length > 1) {
+            let balRows = group.filter(r => (parseFloat(r["Outstanding Balance"]) || 0) > 0);
+            if(balRows.length >= 2) {
+                let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
+                let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
+                if(zeroTotal && nonZeroTotal) {
+                    let offset = parseFloat(zeroTotal["Outstanding Balance"]) || 0;
+                    nonZeroTotal.exchAdj = -offset;
+                    zeroTotal.isExchanged = true;
+                    nonZeroTotal.isExchanged = true;
+                    nonZeroTotal.net -= offset; // Offset revenue for accurate net
+                }
+            }
+        }
+    });
+    // --------------------------------
     
     if(a.length===0){ 
-        h += "<tr><td colspan='15' style='text-align:center;'>No sales synced yet.</td></tr>"; 
+        h += "<tr><td colspan='16' style='text-align:center;'>No sales synced yet.</td></tr>"; 
     } else {
         a.sort((x,y) => { 
-            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'}; 
+            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', adj:'exchAdj', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'}; 
             let col = map[currentSalesSort.column]; 
             let u = x[col]; let v = y[col]; 
             if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u; 
@@ -253,7 +275,8 @@ function renderSalesTable() {
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'shipping', true)" style="color:var(--text-muted);">$${parseFloat(x.shipping || 0).toFixed(2)}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'taxes', true)" style="color:var(--text-muted);">$${parseFloat(x.taxes || 0).toFixed(2)}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'total', true)" style="font-weight:bold;">$${parseFloat(x.total || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'Outstanding Balance', true)" style="color:#ef4444;">$${parseFloat(x["Outstanding Balance"] || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:#f59e0b; font-weight:bold;">${x.exchAdj !== 0 ? '-$' + Math.abs(x.exchAdj).toFixed(2) : '$0.00'}</td>
+            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'Outstanding Balance', true)" style="color:#ef4444;">${x.isExchanged ? '<span style="color:#f59e0b;">[EXCHANGED]</span> ' : ''}$${parseFloat(x["Outstanding Balance"] || 0).toFixed(2)}</td>
             <td class="text-right" style="color:#ef4444; font-weight:bold;">$${x.liveCogs.toFixed(2)}</td>
             <td class="text-right" style="color:#888;">-$${x.stripeFee.toFixed(2)}</td>
             <td class="text-right" style="color:${netColor}; font-weight:900;">$${x.net.toFixed(2)}</td>
