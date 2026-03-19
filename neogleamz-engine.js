@@ -52,19 +52,54 @@ function getEngineTrueCogs(productName) {
 
     let cogs = 0;
     
-    if (productsDB[matchedKey].cogs) {
+    if (productsDB[matchedKey] && productsDB[matchedKey].cogs) {
         // Strip $ just in case
         cogs = parseFloat(String(productsDB[matchedKey].cogs).replace(/[^0-9.-]+/g,""));
     } else {
-        let rawCost = typeof calculateProductTotal === 'function' ? calculateProductTotal(matchedKey) : 0;
-        let labCost = 0;
-        if (typeof laborDB !== 'undefined' && laborDB[matchedKey]) {
-            labCost = (parseFloat(laborDB[matchedKey].time) / 60) * parseFloat(laborDB[matchedKey].rate);
-        }
-        cogs = rawCost + labCost;
+        cogs = calculateProductTotal(matchedKey);
     }
     
     return isNaN(cogs) ? 0.00 : cogs;
+}
+
+/**
+ * CORE BOM MATH: Recursively calculates the raw and labor breakdown of any product or sub-assembly.
+ */
+function calculateProductBreakdown(pName, visited = new Set()) {
+    if (visited.has(pName)) return { raw: 0, labor: 0, total: 0 };
+    visited.add(pName);
+    let rawCost = 0;
+    (productsDB[pName] || []).forEach(part => {
+        let k = String(part.item_key || part.di_item_id || part.name || "");
+        let q = parseFloat(part.quantity || part.qty) || 1;
+        if (k.startsWith('RECIPE:::')) {
+            let subBreakdown = calculateProductBreakdown(k.replace('RECIPE:::', ''), new Set(visited));
+            rawCost += (subBreakdown.total * q); 
+        } else if (catalogCache[k]) {
+            rawCost += (catalogCache[k].avgUnitCost * q);
+        }
+    });
+    let laborCost = 0;
+    if (laborDB[pName]) {
+        laborCost = (laborDB[pName].time / 60) * laborDB[pName].rate;
+    }
+    return { raw: rawCost, labor: laborCost, total: rawCost + laborCost };
+}
+
+function calculateProductTotal(pName) { 
+    return calculateProductBreakdown(pName).total; 
+}
+
+function getRawMaterials(pName, mult = 1, map = {}, vis = new Set()) { 
+    if (vis.has(pName)) return map; 
+    vis.add(pName); 
+    (productsDB[pName] || []).forEach(part => { 
+        let k = String(part.item_key || part.di_item_id || part.name || ""); 
+        let q = (parseFloat(part.quantity || part.qty) || 1) * mult; 
+        if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); 
+        else { map[k] = (map[k] || 0) + q; } 
+    }); 
+    return map; 
 }
 
 /**

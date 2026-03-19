@@ -202,8 +202,8 @@ function sortSales(c) { if(isResizing) return; currentSalesSort = { column: c, d
 function renderSalesTable() {
     let wrap = document.getElementById('salesTableWrap'); if(!wrap) return;
     
-    // Updated Headers based on CFO Blueprint
-    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='adj'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('adj')">Exch. Adj.</th> <th class="${currentSalesSort.column==='bal'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('bal')">Balance</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS (Live)</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe Fee</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
+    // Updated Headers based on System Standard
+    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='adj'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('adj')">Exch. Adj.</th> <th class="${currentSalesSort.column==='bal'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('bal')">Balance</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe Fee</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
@@ -212,16 +212,20 @@ function renderSalesTable() {
     let a = salesDB.map(x => {
         let qty = parseFloat(x.qty_sold) || 0;
         let captured = parseFloat(x.total) || 0;
-        let tax = parseFloat(x.taxes) || 0;
+        let p = parseFloat(x.actual_sale_price) || 0;
+        let s = parseFloat(x.shipping) || 0;
+        let t = parseFloat(x.taxes) || 0;
+        let d = parseFloat(x.discount_amount) || 0;
         
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name);
         let stripeFee = getEngineStripeFee(captured);
+        
+        // --- POWERED BY MASTER ENGINE ---
         let actualShipCost = SHIP_COST * qty;
-        let cogsTotal = liveCogs * qty;
+        let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name);
+        // --------------------------------
         
-        let net = captured - tax - stripeFee - actualShipCost - cogsTotal;
-        
-        return { ...x, liveCogs, stripeFee, net, exchAdj: 0, isExchanged: false };
+        return { ...x, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false };
     });
 
     // --- AUTOMATED EXCHANGE LOGIC ---

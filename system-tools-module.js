@@ -135,6 +135,7 @@ async function executeExport() {
         await addSheet('production_sops', 'SOPs');
         await addSheet('sales_ledger', 'Sales_Ledger');
         await addSheet('storefront_aliases', 'Storefront_Aliases');
+        await addSheet('app_settings', 'App_Settings');
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
@@ -173,6 +174,7 @@ async function executeRestore() {
             else if (sheetName === 'SOPs') { tableName = 'production_sops'; conflictKey = 'product_name'; parsedData = rawData.map(r => ({ ...r, steps: JSON.parse(r.steps || '[]') })); }
             else if (sheetName === 'Sales_Ledger') { tableName = 'sales_ledger'; conflictKey = 'id'; }
             else if (sheetName === 'Storefront_Aliases') { tableName = 'storefront_aliases'; conflictKey = 'storefront_sku'; }
+            else if (sheetName === 'App_Settings') { tableName = 'app_settings'; conflictKey = 'id'; }
             if (tableName) {
                 const { error } = await supabaseClient.from(tableName).upsert(parsedData, { onConflict: conflictKey });
                 if (error) throw error;

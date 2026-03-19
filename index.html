@@ -967,32 +967,7 @@
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
     function buildCatalogCache() { catalogCache = {}; finalResults.forEach(r => { let nn = String(r['Neogleamz Name']||"").trim(); let np = String(r['Neo Product']||"").trim(); let inam = String(r['Item Name']||"Unknown").trim(); let sp = String(r['Specification']||"").trim(); let k = nn ? `${nn}:::${np}:::(Grouped Raw Items):::(Mixed Specs)` : `:::${np}:::${inam}:::${sp}`; if (k === ":::::::::Unknown:::") return; if(!catalogCache[k]) catalogCache[k] = { neoName: nn, neoProd: np, itemName: nn ? "(Grouped Raw Items)" : inam, spec: nn ? "(Mixed Specs)" : sp, totalCostSum: 0, totalQty: 0, _rn: new Set(), _rs: new Set() }; catalogCache[k]._rn.add(inam); if(sp) catalogCache[k]._rs.add(sp); let rawQty = parseFloat(r['Quantity']) || 1; let mult = parseFloat(r['Lot Multiplier']) || 1; let actualPieces = rawQty * mult; catalogCache[k].totalCostSum += (parseFloat(r['Total Landed Cost ($)']) || 0); catalogCache[k].totalQty += actualPieces; }); Object.keys(catalogCache).forEach(k => { catalogCache[k].avgUnitCost = catalogCache[k].totalCostSum / (catalogCache[k].totalQty || 1); if(catalogCache[k]._rn && catalogCache[k]._rn.size === 1) catalogCache[k].itemName = Array.from(catalogCache[k]._rn)[0]; if(catalogCache[k]._rs) { if(catalogCache[k]._rs.size === 1) catalogCache[k].spec = Array.from(catalogCache[k]._rs)[0]; else if(catalogCache[k]._rs.size === 0) catalogCache[k].spec = ""; } }); }
     
-    function calculateProductBreakdown(pName, visited = new Set()) {
-        if (visited.has(pName)) return { raw: 0, labor: 0, total: 0 };
-        visited.add(pName);
-        let rawCost = 0;
-        (productsDB[pName] || []).forEach(part => {
-            let k = String(part.item_key || part.di_item_id || part.name || "");
-            let q = parseFloat(part.quantity || part.qty) || 1;
-            if (k.startsWith('RECIPE:::')) {
-                let subBreakdown = calculateProductBreakdown(k.replace('RECIPE:::', ''), new Set(visited));
-                rawCost += (subBreakdown.total * q); 
-            } else if (catalogCache[k]) {
-                rawCost += (catalogCache[k].avgUnitCost * q);
-            }
-        });
-        let laborCost = 0;
-        if (laborDB[pName]) {
-            laborCost = (laborDB[pName].time / 60) * laborDB[pName].rate;
-        }
-        return { raw: rawCost, labor: laborCost, total: rawCost + laborCost };
-    }
-
-    function calculateProductTotal(pName) { 
-        return calculateProductBreakdown(pName).total; 
-    }
-    
-    function getRawMaterials(pName, mult = 1, map = {}, vis = new Set()) { if (vis.has(pName)) return map; vis.add(pName); (productsDB[pName] || []).forEach(part => { let k = String(part.item_key || part.di_item_id || part.name || ""); let q = (parseFloat(part.quantity || part.qty) || 1) * mult; if (k.startsWith('RECIPE:::')) getRawMaterials(k.replace('RECIPE:::', ''), q, map, new Set(vis)); else { map[k] = (map[k] || 0) + q; } }); return map; }
+    // (BOM breakdown functions moved to neogleamz-engine.js)
     
     function populateDropdowns() { 
         try { 
@@ -1120,7 +1095,7 @@
                     <thead>
     					<tr>
         					<th onclick="sortCeoTable('name')" style="cursor:pointer;" title="Sort Name">Product Name ↕️</th>
-        					<th onclick="sortCeoTable('cogs')" style="font-weight:900; cursor:pointer;" title="Sort COGS">True COGS (Live) ↕️</th>
+        					<th onclick="sortCeoTable('cogs')" style="font-weight:900; cursor:pointer;" title="Sort COGS">True COGS ↕️</th>
         					<th onclick="sortCeoTable('currentMsrp')" style="color:#888; cursor:pointer;" title="Sort Current MSRP">Current MSRP ↕️</th>
         					<th onclick="sortCeoTable('curShip')" style="color:#888; cursor:pointer;" title="Sort Cur. Ship">Cur. Ship ↕️</th>
         					<th onclick="sortCeoTable('curStripe')" style="color:#888; cursor:pointer;" title="Sort Cur. Stripe">Cur. Stripe ↕️</th>

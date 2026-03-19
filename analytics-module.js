@@ -35,11 +35,8 @@ function renderAnalyticsDashboard() {
         let tax = parseFloat(s.taxes) || 0;
         
         // --- POWERED BY MASTER ENGINE ---
-        let cogsTotal = getEngineTrueCogs(s.internal_recipe_name) * qty;
-        let stripeFee = getEngineStripeFee(captured);
         let actualShipCost = SHIP_COST * qty; 
-        
-        let net = captured - tax - stripeFee - actualShipCost - cogsTotal;
+        let net = getHistoricalNetProfit(parseFloat(s.actual_sale_price || 0) * qty, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), parseFloat(s.discount_amount || 0), actualShipCost, s.internal_recipe_name);
         // --------------------------------
 
         totalCaptured += captured; 
@@ -59,6 +56,7 @@ function renderAnalyticsDashboard() {
     // Matrix (FILTERED to hide Sub-Assemblies)
     let wrap = document.getElementById('analyticsTableWrap'); if(!wrap) return;
     
+    // Updated Headers based on System Standard
     let ths = ` <th class="${currentAnalyticsSort.column==='n'?'sorted-'+currentAnalyticsSort.direction:''}" onclick="sortAnalytics('n')">Retail Product</th> <th class="${currentAnalyticsSort.column==='tc'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tc')">True COGS</th> <th class="${currentAnalyticsSort.column==='ms'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ms')">Live MSRP</th> <th class="${currentAnalyticsSort.column==='mg'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('mg')">Gross Margin %</th> <th class="${currentAnalyticsSort.column==='ts'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ts')">Total Units Sold</th> <th class="${currentAnalyticsSort.column==='tp'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tp')">Actual Net Profit</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
 
@@ -75,11 +73,10 @@ function renderAnalyticsDashboard() {
             let captured = parseFloat(s.total) || 0;
             let tax = parseFloat(s.taxes) || 0;
             
-            let cogsTotal = tc * qty;
-            let stripeFee = getEngineStripeFee(captured);
+            // --- POWERED BY MASTER ENGINE ---
             let actualShipCost = SHIP_COST * qty;
-            
-            let net = captured - tax - stripeFee - actualShipCost - cogsTotal;
+            let net = getHistoricalNetProfit(parseFloat(s.actual_sale_price || 0) * qty, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), parseFloat(s.discount_amount || 0), actualShipCost, s.internal_recipe_name);
+            // --------------------------------
             
             ts += qty; 
             tp += net; 
