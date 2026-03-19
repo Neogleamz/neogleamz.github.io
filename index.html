@@ -637,8 +637,16 @@
             <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             <div class="control-panel">
-                <div class="panel-card"><input type="file" id="orderFiles" multiple accept=".html"><div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div></div>
-                <div class="panel-card"><input type="file" id="parcelFiles" multiple accept=".html"><div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div></div>
+                <div class="panel-card">
+                    <label style="font-size:11px; font-weight:900; color:var(--primary-color); margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">📦 Orders Sync</label>
+                    <input type="file" id="orderFiles" multiple accept=".html">
+                    <div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div>
+                </div>
+                <div class="panel-card">
+                    <label style="font-size:11px; font-weight:900; color:var(--primary-color); margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">🚚 Parcels Sync</label>
+                    <input type="file" id="parcelFiles" multiple accept=".html">
+                    <div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div>
+                </div>
                 <div class="panel-card master-card"><div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div><button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button></div>
                 <div class="panel-card" style="grid-column: span 2;"><p style="font-size:11px; margin:0 0 8px 0; text-align:center; color:var(--text-muted);">Launch Backup Manager</p><button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Cloud Backup / Restore</button></div>
             </div>
@@ -1587,13 +1595,14 @@
 
     function showInventoryPane(paneId) {
         document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        document.querySelectorAll('#invhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
+        // Global Purge: Hide ALL detail panes across all hubs to prevent stacking
+        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
+        
         if (paneId !== 'hub') {
             const paneName = (paneId === 'pipeline' ? 'panePipeline' : 'pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
             const pane = document.getElementById(paneName);
             if (pane) {
                 pane.style.display = 'flex';
-                pane.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId)));
             }
         }
         if (typeof updateHubStats === 'function') updateHubStats();
@@ -1602,12 +1611,14 @@
 
     function showSalezPane(paneId) {
         document.getElementById('salezHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        document.querySelectorAll('#salezhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
+        // Global Purge: Hide ALL detail panes across all hubs to prevent stacking
+        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
+        
         if (paneId !== 'hub') {
-            const pane = document.getElementById('paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            const paneName = 'paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1);
+            const pane = document.getElementById(paneName);
             if (pane) {
                 pane.style.display = 'flex';
-                pane.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId)));
             }
             if (paneId === 'bridge') renderSalesTable();
             if (paneId === 'analyticz') renderAnalyticsDashboard();
@@ -1618,7 +1629,8 @@
 
     function showProductionPane(paneId) {
         document.getElementById('prodHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        document.querySelectorAll('#prodhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
+        // Global Purge: Hide ALL detail panes across all hubs to prevent stacking
+        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
         
         if (paneId !== 'hub') {
             const pMapping = { 'builder': 'paneProdBuilder', 'production': 'paneProdControl', 'print': 'paneProdPrint' };
@@ -1626,7 +1638,6 @@
             const pane = document.getElementById(paneName);
             if (pane) {
                 pane.style.display = 'flex';
-                pane.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId)));
             }
             if (paneId === 'builder') { if(typeof renderBomBuilder === 'function') renderBomBuilder(); }
             if (paneId === 'production') { if(typeof renderProductionDashboard === 'function') renderProductionDashboard(); }
