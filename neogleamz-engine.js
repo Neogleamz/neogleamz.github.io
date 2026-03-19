@@ -79,10 +79,11 @@ function calculateProductBreakdown(pName, visited = new Set()) {
         let q = parseFloat(part.quantity || part.qty) || 0;
         if (q <= 0) return;
 
-        // --- 1. SUB-ASSEMBLY RECURSION ---
+        // --- 1. SUB-ASSEMBLY ---
         if (rawKey.startsWith('RECIPE:::')) {
-            let subName = rawKey.replace('RECIPE:::', '');
-            let sub = calculateProductBreakdown(subName, new Set(visited));
+            let subName = rawKey.replace('RECIPE:::', '').trim();
+            // Call without passing 'visited' to restart the circularity check for this branch
+            let sub = calculateProductBreakdown(subName, new Set()); 
             totalRaw += (sub.raw * q);
             totalLabor += (sub.labor * q);
             totalPrintTime += (sub.print * q);
