@@ -248,3 +248,59 @@ function renderProfitabilityMatrix(SHIP_COST) {
     }
     wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('analyticsTableWrap');
 }
+
+async function backfillFinancials() {
+    if(!confirm("This will recalculate fees and profit for ALL historical sales based on CURRENT engine rules and sync them to the database. Continue?")) return;
+    
+    setMasterStatus("Backfilling Financials...", "mod-working");
+    setSysProgress(10, 'working');
+    sysLog("Starting financial backfill for all existing sales...");
+    
+    try {
+        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+        let count = 0;
+        
+        // Loop through local cache and push updates row-by-row
+        // Note: For very large datasets, a batch approach is better, but this is safest for now.
+        for(let s of salesDB) {
+            let qty = parseFloat(s.qty_sold) || 0;
+            let captured = parseFloat(s.total) || 0;
+            let p = parseFloat(s.actual_sale_price || 0);
+            let d = parseFloat(s.discount_amount || 0);
+            
+            let lineGross = p * qty;
+            let stripeFee = getEngineStripeFee(captured);
+            let actualShipCost = SHIP_COST * qty;
+            let lineNet = getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name);
+            
+            const { error } = await supabaseClient.from('sales_ledger')
+                .update({ transaction_fees: stripeFee, net_profit: lineNet })
+                .eq('order_id', s.order_id)
+                .eq('internal_recipe_name', s.internal_recipe_name);
+            
+            if(error) {
+                console.error(`Error updating row ${s.order_id}:`, error);
+            } else {
+                count++;
+            }
+            
+            // UI Update feedback
+            if(count % 5 === 0 || count === salesDB.length) {
+                setSysProgress(10 + (count / salesDB.length) * 85);
+                setMasterStatus(`Backfilling: ${count}/${salesDB.length}`, "mod-working");
+            }
+        }
+        
+        sysLog(`Successfully backfilled ${count} sales records with updated financials.`);
+        setMasterStatus("Backfill Complete!", "mod-success");
+        setSysProgress(100, 'success');
+        
+        // Refresh local data to reflect the newly persisted IDs/values
+        if(typeof loadData === 'function') await loadData();
+        renderAnalyticsDashboard();
+        
+    } catch(e) {
+        sysLog("Backfill Error: " + e.message, true);
+        setMasterStatus("Backfill Failed", "mod-error");
+    }
+}

@@ -738,7 +738,10 @@
             <div class="panel-card" style="padding: 20px; display: flex; flex-direction: column; background: var(--bg-panel); border-radius: 12px; border: 1px solid var(--border-color);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3 style="margin:0; font-size: 12px; color: var(--text-muted); font-weight: 900; letter-spacing: 0.5px;">💰 PROFIT DERIVATION (WATERFALL)</h3>
-                    <div style="font-size: 11px; color: var(--text-muted); font-style: italic;">Where the money goes...</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-green" style="font-size: 10px; padding: 4px 8px; width: auto;" onclick="backfillFinancials()">🔄 Sync Historical Data</button>
+                        <div style="font-size: 11px; color: var(--text-muted); font-style: italic;">Where the money goes...</div>
+                    </div>
                 </div>
                 <div style="flex-grow: 1; position: relative;">
                     <canvas id="waterfallChart"></canvas>
