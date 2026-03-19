@@ -436,11 +436,21 @@ function addCeoCustomProduct() {
 
 function switchToBundleView() {
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
-    let html = `<table id="ceoUnifiedBundleTable"><thead><tr><th>Qty</th><th>Retail Product</th><th>COGS</th><th>MSRP</th></tr></thead><tbody>`;
+    let customs = ceoActiveProducts.filter(p => p.name.startsWith('🧪'));
+    
+    let html = `<table id="ceoUnifiedBundleTable"><thead><tr><th>Qty</th><th>Product / Test Item</th><th>COGS</th><th>MSRP</th></tr></thead><tbody>`;
+    
+    // Catalog Products
     availableRetail.forEach(k => {
         let c = getEngineTrueCogs(k); let m = getEngineLiveMsrp(k);
         html += `<tr class="unified-bundle-row"><td><input type="number" class="u-bundle-qty" data-name="${k}" data-cogs="${c}" data-msrp="${m}" min="0" step="1" value="0" style="width:50px;"></td><td class="u-bundle-name">${k}</td><td>${ceoFmt.format(c)}</td><td>${ceoFmt.format(m)}</td></tr>`;
     });
+    
+    // Active Custom Items
+    customs.forEach(p => {
+        html += `<tr class="unified-bundle-row"><td><input type="number" class="u-bundle-qty" data-name="${p.name}" data-cogs="${p.cogs || 0}" data-msrp="${p.currentMsrp || 0}" min="0" step="1" value="0" style="width:50px;"></td><td class="u-bundle-name" style="color:#8b5cf6;">${p.name}</td><td>${ceoFmt.format(p.cogs || 0)}</td><td>${ceoFmt.format(p.currentMsrp || 0)}</td></tr>`;
+    });
+    
     document.getElementById('ceoUnifiedBundleTableWrap').innerHTML = html + `</tbody></table>`;
     document.getElementById('ceoUnifiedBundleBuilder').style.display = 'block';
 }
