@@ -64,7 +64,7 @@ function renderMasterSOP() {
     } catch(e) { sysLog(e.message, true); } 
 }
 
-function addSOPRow(areaId) { try { const area = document.getElementById(areaId); const btn = area.querySelector('.btn-blue'); const div = document.createElement('div'); div.outerHTML = generateEditableSOPRow({}, 999); area.insertBefore(document.createRange().createContextualFragment(div.outerHTML), btn); } catch(e) {} }
+function addSOPRow(areaId) { try { const area = document.getElementById(areaId); const btn = area.querySelector('.btn-blue'); const frag = document.createRange().createContextualFragment(generateEditableSOPRow({}, 999)); area.insertBefore(frag, btn); } catch(e) {} }
 function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) {} }
 function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) {} }
 function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) {} }
