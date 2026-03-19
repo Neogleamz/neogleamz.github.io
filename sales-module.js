@@ -228,9 +228,12 @@ function renderSalesTable() {
         return { ...x, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false };
     });
 
-    // --- AUTOMATED EXCHANGE LOGIC ---
+    // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
+    
+    let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0 };
+
     Object.keys(orderGroups).forEach(oid => {
         let group = orderGroups[oid];
         if(group.length > 1) {
@@ -248,7 +251,20 @@ function renderSalesTable() {
             }
         }
     });
-    // --------------------------------
+
+    // Final Calculation Pass for Totals
+    a.forEach(x => {
+        totals.gross += (parseFloat(x.actual_sale_price || 0) * (parseFloat(x.qty_sold) || 0));
+        totals.discounts += parseFloat(x.discount_amount || 0);
+        totals.captured += (parseFloat(x.total || 0) + (x.exchAdj || 0));
+        totals.cogs += x.liveCogs;
+        totals.shipping += (SHIP_COST * (parseFloat(x.qty_sold) || 0));
+        totals.stripe += x.stripeFee;
+        totals.net += x.net;
+    });
+
+    renderSalesTotals(totals);
+    // -----------------------------------------------
     
     if(a.length===0){ 
         h += "<tr><td colspan='16' style='text-align:center;'>No sales synced yet.</td></tr>"; 
@@ -290,6 +306,27 @@ function renderSalesTable() {
     
     wrap.innerHTML = h + `</tbody></table>`; 
     if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
+}
+
+function renderSalesTotals(t) {
+    let wrap = document.getElementById('salesTotalsWrap'); if(!wrap) return;
+    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    
+    let cards = [
+        { label: 'GROSS SALES', val: fmt.format(t.gross), color: '#38bdf8' },
+        { label: 'TOTAL CAPTURED', val: fmt.format(t.captured), color: '#10b981' },
+        { label: 'TRUE COGS', val: fmt.format(t.cogs), color: '#ef4444' },
+        { label: 'SHIP EXPENSE', val: fmt.format(t.shipping), color: '#f59e0b' },
+        { label: 'STRIPE FEES', val: fmt.format(t.stripe), color: '#888' },
+        { label: 'NET PROFIT', val: fmt.format(t.net), color: t.net < 0 ? '#ef4444' : '#10b981', bold: true }
+    ];
+
+    wrap.innerHTML = cards.map(c => `
+        <div class="panel-card" style="padding:12px; border:1px solid var(--border-color); display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-panel);">
+            <div style="font-size:10px; color:var(--text-muted); font-weight:900; letter-spacing:1px; margin-bottom:4px;">${c.label}</div>
+            <div style="font-size:18px; color:${c.color}; font-weight:${c.bold ? '900' : 'bold'};">${c.val}</div>
+        </div>
+    `).join('');
 }
 
 async function updateSaleCell(cell, orderId, sku, col, isNum) {
