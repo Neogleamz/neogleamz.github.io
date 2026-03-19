@@ -100,10 +100,25 @@
             .control-panel { grid-template-columns: 1fr !important; }
         }
 
-        .hub-card:hover { transform: translateY(-10px); background: var(--bg-container); border-color: #F79320; box-shadow: 0 15px 45px rgba(247, 147, 32, 0.25); }
-        .hub-card i { font-size: 48px; margin-bottom: 20px; display: block; font-style: normal; }
-        .hub-card h2 { margin: 0 0 10px 0; font-size: 22px; color: var(--text-heading); }
-        .hub-card p { margin: 0; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+        /* Hub Styling with Pulse */
+        .hub-card { 
+            background: var(--bg-glass); border: 2px solid transparent; border-radius: 20px; padding: 40px 20px; 
+            text-align: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(16px); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: 100%; min-height: 240px; position: relative; overflow: hidden; 
+        }
+        .hub-card:hover { transform: translateY(-12px) scale(1.02); border-color: #F79320; box-shadow: 0 20px 60px rgba(247, 147, 32, 0.3); }
+        .hub-card i { font-size: 56px; margin-bottom: 25px; display: block; filter: drop-shadow(0 0 15px rgba(247, 147, 32, 0.4)); font-style: normal; }
+        .hub-card h2 { margin: 0 0 8px 0; font-size: 24px; font-weight: 900; color: var(--text-heading); letter-spacing: -0.5px; }
+        .hub-card .card-stat { font-family: 'Mulish', sans-serif; font-weight: 900; font-size: 14px; color: #F79320; background: rgba(247, 147, 32, 0.1); padding: 4px 12px; border-radius: 20px; margin-top: 15px; border: 1px solid rgba(247, 147, 32, 0.2); text-transform: uppercase; }
+        .hub-card p { margin: 0; font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 80%; }
+        
+        .pulse-orange { animation: pulseGlow 2s infinite ease-in-out; }
+        @keyframes pulseGlow { 
+            0% { box-shadow: 0 0 0 0 rgba(247, 147, 32, 0.4); }
+            70% { box-shadow: 0 0 20px 10px rgba(247, 147, 32, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(247, 147, 32, 0); }
+        }
         .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; }
         .sub-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: var(--bg-glass); padding: 8px; border-radius: 10px; border: 1px solid var(--border-input); align-self: flex-start; flex-wrap: wrap; }
         .sub-nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: all 0.2s; white-space: nowrap; }
@@ -521,16 +536,19 @@
                 <i>📖</i>
                 <h2>Master Ledger</h2>
                 <p>Full database access, raw entry, and parcel syncing.</p>
+                <div id="hubStatLedger" class="card-stat">Loading...</div>
             </div>
             <div class="hub-card" onclick="showInventoryPane('simple')">
                 <i>📋</i>
                 <h2>Simple Inventory</h2>
                 <p>Fast editing for Neo Products and 3D Printed items.</p>
+                <div id="hubStatSimple" class="card-stat">Loading...</div>
             </div>
-            <div class="hub-card" onclick="showInventoryPane('inventory')">
+            <div class="hub-card pulse-orange" onclick="showInventoryPane('inventory')">
                 <i>📊</i>
                 <h2>MRP Stock Levels</h2>
                 <p>Real-time inventory levels, reorder points, and value tracking.</p>
+                <div id="hubStatStock" class="card-stat">Loading...</div>
             </div>
         </div>
 
@@ -1131,7 +1149,41 @@
             if (paneId === 'pipeline') renderLedgerView(false, 'results');
             if (paneId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
             if (paneId === 'inventory') renderInventoryTable();
+            if (typeof updateHubStats === 'function') updateHubStats();
         }
+    }
+
+    function updateHubStats() {
+        try {
+            // Ledger Stat: Total unique rows
+            if (typeof finalResults !== 'undefined') {
+                document.getElementById('hubStatLedger').innerText = `${finalResults.length} RECORDS`;
+            }
+            // Simple Stat: Items with 3D print check
+            if (typeof inventoryDB !== 'undefined' && typeof catalogCache !== 'undefined') {
+                let printedCount = Object.keys(catalogCache).filter(k => catalogCache[k].is3D).length;
+                document.getElementById('hubStatSimple').innerText = `${printedCount} PRINTED ITEMS`;
+            }
+            // Stock Stat: Total Asset Value
+            if (typeof catalogCache !== 'undefined' && typeof inventoryDB !== 'undefined') {
+                let totalValue = 0;
+                Object.keys(catalogCache).forEach(k => {
+                    let c = catalogCache[k], i = inventoryDB[k] || {};
+                    let s = c.totalQty - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
+                    totalValue += s * (c.avgUnitCost || 0);
+                });
+                // Add Finished Goods Value
+                if (typeof productsDB !== 'undefined') {
+                    Object.keys(productsDB).forEach(p => {
+                        let i = inventoryDB[`RECIPE:::${p}`] || {produced_qty:0, sold_qty:0};
+                        let s = (i.produced_qty || 0) - (i.sold_qty || 0);
+                        let cost = (typeof calculateProductBreakdown === 'function') ? calculateProductBreakdown(p).total : 0;
+                        totalValue += s * cost;
+                    });
+                }
+                document.getElementById('hubStatStock').innerText = `$${totalValue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ASSETS`;
+            }
+        } catch(e) { console.warn("Hub Stats Error:", e); }
     }    let salesDB = []; let aliasDB = {}; let printQueueDB = [];
     let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
     let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
@@ -1359,6 +1411,7 @@
             if (sR.data) { sR.data.forEach(r => { try { sopsDB[r.product_name] = (typeof r.steps === 'string') ? JSON.parse(r.steps) : (r.steps || []); } catch(e) { sopsDB[r.product_name] = []; } }); }
 
             renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); renderSalesTable(); renderAnalyticsDashboard(); 
+            if (typeof updateHubStats === 'function') updateHubStats();
             setSysProgress(100, 'success'); sysLog("System Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
@@ -1376,6 +1429,7 @@
     	if (tabId === 'sales') { renderSalesTable(); }
     	if (tabId === 'analytics') { renderAnalyticsDashboard(); }
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
+        if (tabId === 'invhub') { if(typeof updateHubStats === 'function') updateHubStats(); }
         if (tabId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
     }
 
