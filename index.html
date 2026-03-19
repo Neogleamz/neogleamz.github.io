@@ -171,17 +171,17 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 20px; 
-            padding: 15px 25px; 
+            margin-bottom: 25px; 
+            padding: 16px 32px; 
             background: var(--bg-glass);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
+            border-radius: 20px;
             box-shadow: var(--glass-shadow);
             flex-shrink: 0; 
-            gap: 20px; 
-            flex-wrap: wrap; /* Added to prevent horizontal overflow */
+            gap: 24px; 
+            flex-wrap: nowrap;
         }
         .title-block { flex: 0 0 auto; min-width: 0; }
         .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -226,23 +226,15 @@
             transform: translateY(-1px);
         }
         .tab-btn.active { 
-            background: var(--bg-container);
-            color: var(--text-heading);
-            border-color: var(--border-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background: rgba(247, 147, 32, 0.15);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(247, 147, 32, 0.3);
+            font-weight: 800;
             transform: translateY(-1px);
         }
         
-        /* Tab Accent Colors */
-        .tab-btn.active[onclick*="pipeline"] { border-bottom: 3px solid #f97316; }
-        .tab-btn.active[onclick*="simple"]   { border-bottom: 3px solid #10b981; }
-        .tab-btn.active[onclick*="bom"]      { border-bottom: 3px solid #3b82f6; }
-        .tab-btn.active[onclick*="inventory"] { border-bottom: 3px solid #0ea5e9; }
-        .tab-btn.active[onclick*="production"] { border-bottom: 3px solid #8b5cf6; }
-        .tab-btn.active[onclick*="sales"]     { border-bottom: 3px solid #ec4899; }
-        .tab-btn.active[onclick*="analytics"] { border-bottom: 3px solid #6366f1; }
-        .tab-btn.active[onclick*="ceo"]       { border-bottom: 3px solid #eab308; }
-        .tab-btn.active[onclick*="print"]     { border-bottom: 3px solid #06b6d4; }
+        /* Unified Tab Accent - All Hubs Glow Orange when Active */
         
         .tab-btn span { font-size: 16px; transition: transform 0.2s ease; display: inline-block; }
         .tab-btn:hover span { transform: scale(1.2) rotate(5deg); }
