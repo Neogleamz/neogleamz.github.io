@@ -56,7 +56,7 @@ function autoPopulateCeoBoard() {
             let liveMsrp = getEngineLiveMsrp(pName);
             ceoActiveProducts.push({
                 name: pName, isBundle: false, applyCac: false, applyAff: false, applyWarr: false,
-                currentMsrp: liveMsrp, testMsrp: liveMsrp, cogs: getEngineTrueCogs(pName), vol: vol
+                currentMsrp: liveMsrp, testMsrp: liveMsrp, vol: vol
             });
         }
     });
@@ -197,18 +197,19 @@ function updateCeoEngine() {
             let effAff = p.applyAff ? gAff : 0;
             let effWarr = p.applyWarr ? gWarr : 0;
 
+            let liveCogs = getEngineTrueCogs(p.name);
             let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
 
             // Math: Current (Customer ALWAYS pays shipping - infinite threshold)
-            let curMetrics = getEnginePredictiveMetrics(p.currentMsrp, p.cogs, 999999, effCac, effAff, effWarr);
+            let curMetrics = getEnginePredictiveMetrics(p.currentMsrp, liveCogs, 999999, effCac, effAff, effWarr);
 
             // Math: Test (Free Shipping Threshold)
-            let testMetrics = getEnginePredictiveMetrics(p.testMsrp, p.cogs, fsThreshold, effCac, effAff, effWarr);
+            let testMetrics = getEnginePredictiveMetrics(p.testMsrp, liveCogs, fsThreshold, effCac, effAff, effWarr);
 
             totals.gross += (p.testMsrp * p.vol); 
             totals.curNet += (curMetrics.net * p.vol); 
             totals.testNet += (testMetrics.net * p.vol);
-            totals.cogs += (p.cogs * p.vol); 
+            totals.cogs += (liveCogs * p.vol); 
             totals.stripe += (testMetrics.stripe * p.vol); 
             totals.curStripe += (curMetrics.stripe * p.vol);
             totals.aff += (testMetrics.aff * p.vol); 
@@ -223,13 +224,13 @@ function updateCeoEngine() {
             charts.testNetData.push(testMetrics.net);
             
             let b = p.testMsrp || 1;
-            charts.eff.push([(p.cogs/b)*100, (effCac/b)*100, (testMetrics.aff/b)*100, (testMetrics.warr/b)*100, (testMetrics.merchantShipMargin/b)*100, (testMetrics.stripe/b)*100, (Math.max(0,testMetrics.net)/b)*100]);
+            charts.eff.push([(liveCogs/b)*100, (effCac/b)*100, (testMetrics.aff/b)*100, (testMetrics.warr/b)*100, (testMetrics.merchantShipMargin/b)*100, (testMetrics.stripe/b)*100, (Math.max(0,testMetrics.net)/b)*100]);
 
             let curB = p.currentMsrp || 1;
-            charts.curEff.push([(p.cogs/curB)*100, (effCac/curB)*100, (curMetrics.aff/curB)*100, (curMetrics.warr/curB)*100, (curMetrics.merchantShipMargin/curB)*100, (curMetrics.stripe/curB)*100, (Math.max(0,curMetrics.net)/curB)*100]);
+            charts.curEff.push([(liveCogs/curB)*100, (effCac/curB)*100, (curMetrics.aff/curB)*100, (curMetrics.warr/curB)*100, (curMetrics.merchantShipMargin/curB)*100, (curMetrics.stripe/curB)*100, (Math.max(0,curMetrics.net)/curB)*100]);
 
             tableRows.push({
-                index: index, name: p.name, cogs: p.cogs, currentMsrp: p.currentMsrp, curShip: curMetrics.ship, curStripe: curMetrics.stripe, curOOP: curMetrics.oop, curNet: curMetrics.net, testMsrp: p.testMsrp, testShip: testMetrics.ship, testStripe: testMetrics.stripe, testOOP: testMetrics.oop, testNet: testMetrics.net
+                index: index, name: p.name, cogs: liveCogs, currentMsrp: p.currentMsrp, curShip: curMetrics.ship, curStripe: curMetrics.stripe, curOOP: curMetrics.oop, curNet: curMetrics.net, testMsrp: p.testMsrp, testShip: testMetrics.ship, testStripe: testMetrics.stripe, testOOP: testMetrics.oop, testNet: testMetrics.net
             });
         });
 
@@ -307,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function addCeoProductToBoard() {
     let pName = document.getElementById('ceo-product-select').value;
     if(!pName || ceoActiveProducts.some(p => p.name === pName)) return;
-    ceoActiveProducts.push({ name:pName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:getEngineLiveMsrp(pName), testMsrp:getEngineLiveMsrp(pName), cogs:getEngineTrueCogs(pName), vol:0 });
+    ceoActiveProducts.push({ name:pName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp:getEngineLiveMsrp(pName), testMsrp:getEngineLiveMsrp(pName), vol:0 });
     renderCeoTerminal();
 }
 
