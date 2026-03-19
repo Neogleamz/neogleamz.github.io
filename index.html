@@ -166,12 +166,17 @@
         .back-hub-btn { background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid #F79320; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin-right: 15px; transition: 0.2s; }
         .back-hub-btn:hover { background: #F79320; color: white; }
         
-        #loginUI { display: none; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-body); z-index: 10000; }
-        .login-box { background: var(--bg-container); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px var(--shadow-color); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border-color); }
-        .login-box h2 { color: var(--text-heading); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px; }
-        .login-box button { width: 100%; padding: 12px; font-size: 16px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .login-box button:hover { background: #0284c7; }
+        /* AUTHORITY LOGIN OVERLAY */
+        .login-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999; background: #020617; display: flex; justify-content: center; align-items: center; font-family: 'Mulish', sans-serif; }
+        .login-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 60px; width: 450px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .login-logo { height: 40px; width: auto; filter: brightness(0) invert(1); margin-bottom: 20px; }
+        .login-field { margin-bottom: 20px; text-align: left; }
+        .login-field label { display: block; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700; }
+        .login-field input { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 14px; color: white; font-size: 14px; outline: none; transition: all 0.3s; }
+        .login-field input:focus { border-color: #f97316; box-shadow: 0 0 15px rgba(249, 115, 22, 0.3); }
+        .login-btn { width: 100%; background: #f97316; color: white; border: none; border-radius: 12px; padding: 16px; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); }
+        .login-btn:hover { background: #ea580c; transform: translateY(-3px); box-shadow: 0 12px 24px rgba(249, 115, 22, 0.5); }
+        .login-error { color: #ef4444; font-size: 12px; margin-bottom: 20px; display: none; font-weight: 700; }
 
         #appUI { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; }
 
@@ -675,16 +680,19 @@
             <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 32px; width: auto; filter: brightness(0) invert(1);">
             <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
         </div>
-        <div class="top-controls" style="display:flex; gap:10px; flex-shrink:0;">
-            <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()" style="padding: 8px 12px; font-size: 13px; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; cursor: pointer; white-space: nowrap;">🌙 Dark Mode</button>
-            <button class="top-action-btn logout-btn" onclick="handleLogout()" style="padding: 8px 12px; font-size: 13px; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; cursor: pointer; white-space: nowrap;">🚪 Logout</button>
-        </div>
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('invhub')">📊 INVENTORY HUBZ</button>
             <button class="tab-btn" onclick="switchTab('prodhub')">🏭 PRODUCTZ HUB</button>
             <button class="tab-btn" onclick="switchTab('salezhub')">🛒 SALEZ HUB</button>
             <button class="tab-btn" onclick="switchTab('synchub')">⚡ SYNCZ HUB</button>
         </div>
+        <div style="flex: 1 1 280px; min-width: 0;"></div>
+    </div>
+
+    <!-- FIXED TOP CONTROLS (Left of Diagnostics) -->
+    <div class="top-controls-fixed" style="position: fixed; top: 12px; right: 230px; z-index: 2147483647; transform: translateZ(9999px); display:flex; gap:10px;">
+        <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()" style="padding: 8px 12px; font-size: 13px; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; cursor: pointer; white-space: nowrap;">🌙 Dark Mode</button>
+        <button class="top-action-btn logout-btn" onclick="handleLogout()" style="padding: 8px 12px; font-size: 13px; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; cursor: pointer; white-space: nowrap;">🚪 Logout</button>
     </div>
 
     <!-- INVENTORY HUBZ -->
@@ -1750,19 +1758,18 @@
     // --- AUTHORITATIVE HUB TRANSITIONS (UEV 2.1) ---
     // --- LEGACY HUB LOGIC VAPORIZED ---
     function hideAllExecutivePanes() {
-        document.querySelectorAll('.executive-pane').forEach(p => p.setAttribute('style', 'display: none !important'));
-        document.querySelectorAll('.hub-landing').forEach(p => p.setAttribute('style', 'display: none !important'));
-        sysLog("Global Visibility Reset (Hardened) Triggered.");
+        document.querySelectorAll('.executive-pane').forEach(p => p.style.setProperty('display', 'none', 'important'));
+        document.querySelectorAll('.hub-landing').forEach(p => p.style.setProperty('display', 'none', 'important'));
     }
 
     function showInventoryPane(paneId) {
         hideAllExecutivePanes();
         if (paneId === 'hub') {
-            document.getElementById('invHubLanding').style.display = 'flex';
+            document.getElementById('invHubLanding').style.setProperty('display', 'flex', 'important');
         } else {
             const mapper = { 'pipeline': 'panePipeline', 'simple': 'paneSimple', 'inventory': 'paneInventory' };
             const pane = document.getElementById(mapper[paneId]);
-            if (pane) pane.style.display = 'flex';
+            if (pane) pane.style.setProperty('display', 'flex', 'important');
             if (paneId == 'pipeline') renderLedgerView(false, 'results');
             if (paneId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
             if (paneId === 'inventory') renderInventoryTable();
@@ -1773,10 +1780,10 @@
     function showSalezPane(paneId) {
         hideAllExecutivePanes();
         if (paneId === 'hub') {
-            document.getElementById('salezHubLanding').style.display = 'flex';
+            document.getElementById('salezHubLanding').style.setProperty('display', 'flex', 'important');
         } else {
             const pane = document.getElementById('paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
-            if (pane) pane.style.display = 'flex';
+            if (pane) pane.style.setProperty('display', 'flex', 'important');
             if (paneId === 'bridge') renderSalesTable();
             if (paneId === 'analyticz') renderAnalyticsDashboard();
             if (paneId === 'commandz') renderCeoTerminal();
@@ -1787,11 +1794,11 @@
     function showProductionPane(paneId) {
         hideAllExecutivePanes();
         if (paneId === 'hub') {
-            document.getElementById('prodHubLanding').style.display = 'flex';
+            document.getElementById('prodHubLanding').style.setProperty('display', 'flex', 'important');
         } else {
             const mapping = { 'builder': 'paneProdBuilder', 'production': 'paneProdControl', 'print': 'paneProdPrint' };
             const pane = document.getElementById(mapping[paneId]);
-            if (pane) pane.style.display = 'flex';
+            if (pane) pane.style.setProperty('display', 'flex', 'important');
             if (paneId === 'builder') { if(typeof renderBomBuilder === 'function') renderBomBuilder(); }
             if (paneId === 'production') { if(typeof renderProductionDashboard === 'function') renderProductionDashboard(); }
             if (paneId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
@@ -1802,11 +1809,11 @@
     function showSyncPane(paneId) {
         hideAllExecutivePanes();
         if (paneId === 'hub') {
-            document.getElementById('syncHubLanding').style.display = 'flex';
+            document.getElementById('syncHubLanding').style.setProperty('display', 'flex', 'important');
         } else {
             const mapping = { 'inbound': 'paneSyncInbound', 'outbound': 'paneSyncOutbound', 'vault': 'paneSyncVault' };
             const pane = document.getElementById(mapping[paneId]);
-            if (pane) pane.style.display = 'flex';
+            if (pane) pane.style.setProperty('display', 'flex', 'important');
         }
         if (typeof updateHubStats === 'function') updateHubStats();
         sysLog(`Loaded SYNCZ pane: ${paneId}`);
