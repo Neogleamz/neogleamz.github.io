@@ -33,7 +33,7 @@ async function addManualSale() {
             order_id: id, sale_date: dt, storefront_sku: uniqueManualSku, internal_recipe_name: rec, 
             qty_sold: qty, actual_sale_price: pr, cogs_at_sale: cogs, 
             subtotal: subtot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: total,
-            source: source, outstanding_balance: balance
+            "Source": source, "Outstanding Balance": balance
         };
         
         let invK = `RECIPE:::${rec}`;
@@ -111,7 +111,7 @@ function processParsedSales(rows) {
             order_id: String(orderId), sale_date: dateStr, storefront_sku: String(skuName), 
             qty_sold: qty, actual_sale_price: price, internal_recipe_name: internalName, 
             subtotal: subTot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: tot,
-            source: orderFirstRowFlags[orderId].source, outstanding_balance: orderFirstRowFlags[orderId].balance
+            "Source": orderFirstRowFlags[orderId].source, "Outstanding Balance": orderFirstRowFlags[orderId].balance
         });
         
         if(!internalName) unmapped.add(String(skuName));
@@ -228,7 +228,7 @@ function renderSalesTable() {
         h += "<tr><td colspan='15' style='text-align:center;'>No sales synced yet.</td></tr>"; 
     } else {
         a.sort((x,y) => { 
-            let map = {d:'sale_date', o:'order_id', src:'source', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', bal:'outstanding_balance', stripe:'stripeFee', net:'net'}; 
+            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'}; 
             let col = map[currentSalesSort.column]; 
             let u = x[col]; let v = y[col]; 
             if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u; 
@@ -244,7 +244,7 @@ function renderSalesTable() {
             h += `<tr>
             <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'sale_date', false)" style="color:var(--text-muted);">${x.sale_date}</td>
             <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'order_id', false)" style="font-weight:bold;">${x.order_id}</td>
-            <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'source', false)" style="color:var(--text-muted);">${x.source || ''}</td>
+            <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'Source', false)" style="color:var(--text-muted);">${x["Source"] || ''}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'storefront_sku', false)">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'qty_sold', true)" style="font-weight:bold;">${x.qty_sold}</td>
@@ -253,7 +253,7 @@ function renderSalesTable() {
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'shipping', true)" style="color:var(--text-muted);">$${parseFloat(x.shipping || 0).toFixed(2)}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'taxes', true)" style="color:var(--text-muted);">$${parseFloat(x.taxes || 0).toFixed(2)}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'total', true)" style="font-weight:bold;">$${parseFloat(x.total || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'outstanding_balance', true)" style="color:#ef4444;">$${parseFloat(x.outstanding_balance || 0).toFixed(2)}</td>
+            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'Outstanding Balance', true)" style="color:#ef4444;">$${parseFloat(x["Outstanding Balance"] || 0).toFixed(2)}</td>
             <td class="text-right" style="color:#ef4444; font-weight:bold;">$${x.liveCogs.toFixed(2)}</td>
             <td class="text-right" style="color:#888;">-$${x.stripeFee.toFixed(2)}</td>
             <td class="text-right" style="color:${netColor}; font-weight:900;">$${x.net.toFixed(2)}</td>
