@@ -234,11 +234,11 @@
             transform: translateY(-1px);
         }
         .tab-btn.active { 
-            background: rgba(247, 147, 32, 0.15);
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 15px rgba(247, 147, 32, 0.3);
-            font-weight: 800;
+            background: rgba(247, 147, 32, 0.2);
+            color: #FF9F2D; /* More vibrant orange */
+            border-color: #FF9F2D;
+            box-shadow: 0 0 20px rgba(247, 147, 32, 0.5);
+            font-weight: 900;
             transform: translateY(-1px);
         }
         
@@ -269,22 +269,22 @@
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 50px; /* Slightly wider */
+            width: 50px; 
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 100;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0.4; /* Persistent 40% visibility as requested */
+            opacity: 0.75; /* Persistent 75% visibility as requested */
             pointer-events: auto;
         }
-        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
-        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
+        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.15) 0%, transparent 100%); }
+        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.15) 0%, transparent 100%); }
         .nav-zone:hover { 
             width: 80px; 
-            opacity: 0.8; /* 80% on hover as requested */
-            background: linear-gradient(to var(--dir, right), rgba(247, 147, 32, 0.25) 0%, transparent 100%); 
+            opacity: 1.0; /* 100% visibility on hover as requested */
+            background: linear-gradient(to var(--dir, right), rgba(247, 147, 32, 0.35) 0%, transparent 100%); 
         }
         .nav-zone.left:hover { --dir: right; }
         .nav-zone.right:hover { --dir: left; }
