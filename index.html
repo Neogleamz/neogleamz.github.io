@@ -734,12 +734,13 @@
                         <div style="width:1px; height:30px; background:var(--border-color);"></div>
                         <div style="display:flex; flex-direction:column;">
                             <span style="font-size:24px; font-weight:900; color:#8b5cf6;" id="totalPrintingTime">0</span>
-                            <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">MINUTES</span>
+                            <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">TIME</span>
                         </div>
                     </div>
                 </div>
                 <h3>🖨️ Print Tasks</h3>
-                <button class="btn-blue" onclick="refreshPrintQueue()" style="margin-bottom:15px; padding:10px;">↻ Refresh Queue</button>
+                <button class="btn-blue" onclick="refreshPrintQueue()" style="margin-bottom:10px; padding:10px;">↻ Refresh Queue</button>
+                <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="margin-bottom:15px; padding:10px; background:#8b5cf6; border-color:#8b5cf6;">📝 Edit Print SOPs</button>
                 <ul class="product-list" id="printListUI"></ul>
             </div>
             

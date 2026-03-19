@@ -1,5 +1,13 @@
 // --- 10. 3D PRINT QUEUE MODULE ---
 
+function formatPrintTime(mins) {
+    if (!mins || isNaN(mins) || mins <= 0) return "";
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+}
+
 let currentPrintJob = null;
 
 async function refreshPrintQueue() {
@@ -61,7 +69,7 @@ function renderPrintQueue() {
             
             // Format: "Neogleamz Name - amount to print - time"
             const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : job.part_name;
-            const timeStr = totalTime > 0 ? ` - ${totalTime.toFixed(0)}m` : "";
+            const timeStr = totalTime > 0 ? ` - ${formatPrintTime(totalTime)}` : "";
 
             ui.innerHTML += `<li class="${sel}" 
                 draggable="true"
@@ -81,7 +89,7 @@ function renderPrintQueue() {
     const tasksEl = document.getElementById('totalPrintTasks');
     const timeEl = document.getElementById('totalPrintingTime');
     if (tasksEl) tasksEl.innerText = totalTasks;
-    if (timeEl) timeEl.innerText = totalWaitTime.toFixed(0);
+    if (timeEl) timeEl.innerText = formatPrintTime(totalWaitTime) || "0m";
 }
 
 function printDragStart(e, index) { 
@@ -114,7 +122,12 @@ function renderActivePrintJob(id) {
     if (!job) return;
 
     document.getElementById('printMainArea').style.display = 'block';
-    document.getElementById('printJobTitle').innerText = job.part_name;
+    
+    // Simplified human-readable name for title
+    const catalogItem = catalogByName[job.part_name];
+    const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : job.part_name;
+    document.getElementById('printJobTitle').innerText = displayName;
+
     document.getElementById('printJobQty').innerText = job.qty;
     document.getElementById('printJobSource').innerText = job.wo_id || 'Manual Entry';
 
