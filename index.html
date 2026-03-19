@@ -269,19 +269,23 @@
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 40px; /* Halved */
+            width: 50px; /* Slightly wider */
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 100;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0.3; /* Persistent visibility as requested */
+            opacity: 0.4; /* Persistent 40% visibility as requested */
             pointer-events: auto;
         }
-        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.05) 0%, transparent 100%); }
-        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.05) 0%, transparent 100%); }
-        .nav-zone:hover { width: 60px; background: linear-gradient(to var(--dir, right), rgba(247, 147, 32, 0.15) 0%, transparent 100%); }
+        .nav-zone.left { left: 0; background: linear-gradient(to right, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
+        .nav-zone.right { right: 0; background: linear-gradient(to left, rgba(247, 147, 32, 0.1) 0%, transparent 100%); }
+        .nav-zone:hover { 
+            width: 80px; 
+            opacity: 0.8; /* 80% on hover as requested */
+            background: linear-gradient(to var(--dir, right), rgba(247, 147, 32, 0.25) 0%, transparent 100%); 
+        }
         .nav-zone.left:hover { --dir: right; }
         .nav-zone.right:hover { --dir: left; }
         .nav-zone i {
@@ -630,8 +634,8 @@
         <!-- Detailed Panez -->
         <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">LEDGERZ</div>
-            <div class="nav-zone left" onclick="showInventoryPane('inventory')"></div>
-            <div class="nav-zone right" onclick="showInventoryPane('simple')"></div>
+            <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             <div class="control-panel">
                 <div class="panel-card"><input type="file" id="orderFiles" multiple accept=".html"><div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div></div>
                 <div class="panel-card"><input type="file" id="parcelFiles" multiple accept=".html"><div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div></div>
@@ -643,8 +647,8 @@
 
         <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">SIMPLEZ</div>
-            <div class="nav-zone left" onclick="showInventoryPane('pipeline')"></div>
-            <div class="nav-zone right" onclick="showInventoryPane('inventory')"></div>
+            <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
             <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
             <div class="manual-entry-bar">
                 <div><label>Item Name</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
@@ -658,8 +662,8 @@
 
         <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">STOCKZ</div>
-            <div class="nav-zone left" onclick="showInventoryPane('simple')"></div>
-            <div class="nav-zone right" onclick="showInventoryPane('pipeline')"></div>
+            <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showInventoryPane('pipeline')"><i>›</i></div>
             <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
             <div class="table-wrap" id="fgiTableWrap" style="margin-bottom:30px;"></div>
 
@@ -693,8 +697,8 @@
         <!-- Detailed Panez -->
         <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">BUILDERZ</div>
-            <div class="nav-zone left" onclick="showProductionPane('print')"></div>
-            <div class="nav-zone right" onclick="showProductionPane('production')"></div>
+            <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
@@ -748,8 +752,8 @@
 
         <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">CONTROLZ</div>
-            <div class="nav-zone left" onclick="showProductionPane('builder')"></div>
-            <div class="nav-zone right" onclick="showProductionPane('print')"></div>
+            <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
@@ -842,8 +846,8 @@
 
         <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">PRINTZ</div>
-            <div class="nav-zone left" onclick="showProductionPane('production')"></div>
-            <div class="nav-zone right" onclick="showProductionPane('builder')"></div>
+            <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
@@ -958,8 +962,8 @@
         <!-- Detailed Panez -->
         <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">BRIDGEZ</div>
-            <div class="nav-zone left" onclick="showSalezPane('commandz')"></div>
-            <div class="nav-zone right" onclick="showSalezPane('analyticz')"></div>
+            <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
             <!-- Contents of Sales Sync -->
             <div class="control-panel" style="grid-template-columns: 1fr; margin-bottom: 20px;">
                 <div class="panel-card master-card" style="padding: 25px;">
@@ -974,8 +978,8 @@
 
         <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">ANALYTICZ</div>
-            <div class="nav-zone left" onclick="showSalezPane('bridge')"></div>
-            <div class="nav-zone right" onclick="showSalezPane('commandz')"></div>
+            <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
             
             <div id="analyticsContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px;">
                 <div class="analytics-grid" style="grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom: 20px;">
@@ -1025,8 +1029,8 @@
 
         <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:40px 40px 10px 40px;">
             <div class="pane-title">COMMANDZ</div>
-            <div class="nav-zone left" onclick="showSalezPane('analyticz')"></div>
-            <div class="nav-zone right" onclick="showSalezPane('bridge')"></div>
+            <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
             <!-- Contents of CEO Terminal -->
             <div id="ceoContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px; background:var(--bg-body);">
                 <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00;">
