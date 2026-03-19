@@ -278,6 +278,14 @@
             .sop-step-row { flex-direction: column; }
             .sop-step-movers { flex-direction: row; justify-content: center; }
             .sop-controls-container { min-width: 0; }
+            
+            /* 3D PRINT QUEUE STYLES */
+            .badge-queued { background: #64748b; color: white; }
+            .badge-printing { background: #3b82f6; color: white; animation: pulseBlue 2s infinite; }
+            .badge-cleaned { background: #f59e0b; color: white; }
+            .badge-completed { background: #10b981; color: white; }
+            @keyframes pulseBlue { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+            .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
         }
     </style>
 </head>
@@ -308,6 +316,7 @@
             <button class="tab-btn" onclick="switchTab('sales')">🛒 Sales Sync</button>
             <button class="tab-btn" onclick="switchTab('analytics')">📈 Analytics</button>
 			<button class="tab-btn" onclick="switchTab('ceo')">📈 CEO Terminal</button>
+            <button class="tab-btn" onclick="switchTab('print')">🖨️ 3D Print Queue</button>
         </div>
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
@@ -410,6 +419,14 @@
                         <div style="display:flex; flex-direction:column; align-items:flex-end;">
                             <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Wholesale ($)</label>
                             <input type="number" id="wholesaleInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid #8b5cf6;">
+                            <label style="font-size:11px; font-weight:bold; color:#8b5cf6; cursor:pointer;" for="is3DPrintInput">🖨️ 3D Print</label>
+                            <input type="checkbox" id="is3DPrintInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Print Time (Mins)</label>
+                            <input type="number" id="printTimeInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
                         </div>
                         <div class="total-badge" id="bomTotalCost">$0.00</div>
                     </div>
@@ -601,6 +618,19 @@
         </div>
         <div class="table-wrap" id="analyticsTableWrap"></div>
     </div>
+    <div id="print-tab" class="tab-content">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; flex-shrink:0;">
+            <h2 style="margin:0; font-size:22px; color:var(--text-heading);">🖨️ 3D Print Queue</h2>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-blue" onclick="refreshPrintQueue()" style="width:auto; padding:8px 15px;">↻ Refresh Queue</button>
+                <div id="printQueueStats" style="background:var(--bg-bar); padding:4px 15px; border-radius:6px; border:1px solid var(--border-color); font-size:13px; display:flex; gap:15px; align-items:center;">
+                    <span>Total Tasks: <b id="totalPrintTasks">0</b></span>
+                    <span>Total Printing: <b id="totalPrintingTime">0</b> min</span>
+                </div>
+            </div>
+        </div>
+        <div class="table-wrap" id="printQueueWrap"></div>
+    </div>
 </div>
 
 <div id="bulkAddModal">
@@ -757,7 +787,7 @@
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
     let productsDB = {}; let laborDB = {}; let pricingDB = {}; let isSubassemblyDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
-    let salesDB = []; let aliasDB = {};
+    let salesDB = []; let aliasDB = {}; let printQueueDB = [];
     let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
     let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
     let currentSalesSort = { column: 'd', direction: 'desc' }; let currentAnalyticsSort = { column: 'n', direction: 'asc' };
@@ -897,6 +927,8 @@
                         comps.is_subassembly = !!r.is_subassembly;
                         comps.affiliate_pct = parseFloat(r.affiliate_pct) || 0;
                         comps.warranty_pct = parseFloat(r.warranty_pct) || 0;
+                        comps.is_3d_print = !!r.is_3d_print;
+                        comps.print_time_mins = parseFloat(r.print_time_mins) || 0;
                         
                         productsDB[r.product_name] = comps; 
                         
@@ -933,6 +965,7 @@
     	if (tabId === 'sales') { renderSalesTable(); }
     	if (tabId === 'analytics') { renderAnalyticsDashboard(); }
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
+        if (tabId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
     }
 
     function applyTableInteractivity(containerId) {
@@ -1172,5 +1205,6 @@
 <script src="sales-module.js?v=1"></script>
 <script src="analytics-module.js?v=1"></script>
 <script src="ceo-module.js?v=2"></script>
+<script src="print-module.js?v=1"></script>
 </body>
 </html>

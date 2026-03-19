@@ -111,6 +111,33 @@ function calculateExactWODeductions(wo) {
     return { raws, pulls };
 }
 
+function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
+    let prints = {};
+    const recipe = productsDB[rootProduct] || [];
+    recipe.forEach(part => {
+        let k = String(part.item_key || part.di_item_id || part.name);
+        let q = (parseFloat(part.quantity || part.qty) || 1) * rootQty;
+        if (k.startsWith('RECIPE:::')) {
+            let subName = k.replace('RECIPE:::', '');
+            // Check if this sub-assembly itself is a 3D print
+            if (productsDB[subName] && productsDB[subName].is_3d_print) {
+                let buildQty = q;
+                if (routingMap && routingMap[subName]) buildQty = routingMap[subName].build || 0;
+                if (buildQty > 0) prints[subName] = (prints[subName] || 0) + buildQty;
+            } else {
+                // Not a 3D print, but check its children if we are building it
+                let buildQty = q;
+                if (routingMap && routingMap[subName]) buildQty = routingMap[subName].build || 0;
+                if (buildQty > 0) {
+                    let subPrints = find3DPrintedComponents(subName, buildQty, null);
+                    for (let s in subPrints) prints[s] = (prints[s] || 0) + subPrints[s];
+                }
+            }
+        }
+    });
+    return prints;
+}
+
 async function validateAndCreateWO() {
     try {
         const p = document.getElementById('newWOProduct').value; const q = parseFloat(document.getElementById('newWOQty').value); if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
@@ -150,6 +177,16 @@ async function validateAndCreateWO() {
             wip_state: JSON.stringify(wo.wip_state), routing: JSON.stringify(wo.routing)
         }); 
         if(error) throw new Error(error.message); 
+
+        // 🖨️ AUTO-SPAWN 3D PRINT JOBS
+        const printsToSpawn = find3DPrintedComponents(p, q, routingMap);
+        const printPromises = Object.keys(printsToSpawn).map(part => {
+            if (typeof addPrintJob === 'function') return addPrintJob(part, printsToSpawn[part], woId);
+        });
+        if (printPromises.length > 0) {
+            sysLog(`Spawning ${printPromises.length} 3D print jobs for ${woId}...`);
+            await Promise.all(printPromises);
+        }
         
         workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
