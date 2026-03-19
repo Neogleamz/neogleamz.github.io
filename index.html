@@ -521,12 +521,10 @@
             <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 32px; width: auto; filter: brightness(0) invert(1);">
             <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
         </div>
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('invhub')">📊 INVENTORY HUB</button>
-            <button class="tab-btn" onclick="switchTab('prodhub')">🏭 PRODUCTION HUB</button>
-            <button class="tab-btn" onclick="switchTab('sales')">🛒 SALES SYNC</button>
-            <button class="tab-btn" onclick="switchTab('analytics')">📈 ANALYTICS</button>
-            <button class="tab-btn" id="ceoTabAction" onclick="switchTab('ceo')">🏢 CEO</button>
+        <div class="nav-tabs" style="justify-content: center; width: 100%;">
+            <div class="nav-tab active" onclick="switchTab('invhub')">📊 INVENTORY HUBZ</div>
+            <div class="nav-tab" onclick="switchTab('prodhub')">🏭 PRODUCTZ HUB</div>
+            <div class="nav-tab" onclick="switchTab('salezhub')">🛒 SALEZ HUB</div>
         </div>
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
@@ -547,35 +545,36 @@
         </div>
     </div>
 
+    <!-- INVENTORY HUBZ -->
     <div id="invhub-tab" class="tab-content active" style="padding:0;">
-        <div id="hubLanding" class="hub-container">
+        <div id="invHubLanding" class="hub-container">
             <div class="hub-card" onclick="showInventoryPane('pipeline')">
                 <i>📖</i>
-                <h2>Master Ledger</h2>
+                <h2>LEDGERZ</h2>
                 <p>Full database access, raw entry, and parcel syncing.</p>
                 <div id="hubStatLedger" class="card-stat">Loading...</div>
             </div>
             <div class="hub-card" onclick="showInventoryPane('simple')">
                 <i>📋</i>
-                <h2>Simple Inventory</h2>
-                <p>Fast editing for Neo Products and 3D Printed items.</p>
+                <h2>SIMPLEZ</h2>
+                <p>Fast editing for Neo Productz and 3D Printed itemz.</p>
                 <div id="hubStatSimple" class="card-stat">Loading...</div>
             </div>
             <div class="hub-card" onclick="showInventoryPane('inventory')">
                 <i>📊</i>
-                <h2>MRP Stock Levels</h2>
-                <p>Real-time inventory levels, reorder points, and value tracking.</p>
+                <h2>STOCKZ</h2>
+                <p>Real-time stock levelz, reorder pointz, and value tracking.</p>
                 <div id="hubStatStock" class="card-stat">Loading...</div>
             </div>
         </div>
 
-        <!-- Detailed Panes (Wrapped) -->
+        <!-- Detailed Panez -->
         <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn active" onclick="showInventoryPane('pipeline')">Master Ledger</button>
-                <button class="sub-nav-btn" onclick="showInventoryPane('simple')">Simple View</button>
-                <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">MRP Stock</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn active" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('simple')">SIMPLEZ</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">STOCKZ</button>
             </div>
             <div class="control-panel">
                 <div class="panel-card"><h3>1. Sync Orders</h3><input type="file" id="orderFiles" multiple accept=".html"><div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div></div>
@@ -589,10 +588,10 @@
 
         <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">Master Ledger</button>
-                <button class="sub-nav-btn active" onclick="showInventoryPane('simple')">Simple View</button>
-                <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">MRP Stock</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
+                <button class="sub-nav-btn active" onclick="showInventoryPane('simple')">SIMPLEZ</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">STOCKZ</button>
             </div>
             <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><h3 style="margin: 0; font-size: 13px; color: var(--text-muted); border: none; padding: 0; white-space:nowrap;">Toggles:</h3><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
             <div class="manual-entry-bar">
@@ -607,10 +606,10 @@
 
         <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">Master Ledger</button>
-                <button class="sub-nav-btn" onclick="showInventoryPane('simple')">Simple View</button>
-                <button class="sub-nav-btn active" onclick="showInventoryPane('inventory')">MRP Stock</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
+                <button class="sub-nav-btn" onclick="showInventoryPane('simple')">SIMPLEZ</button>
+                <button class="sub-nav-btn active" onclick="showInventoryPane('inventory')">STOCKZ</button>
             </div>
             <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
             
@@ -621,36 +620,36 @@
         </div>
     </div> <!-- End of invhub-tab -->
 
-    <!-- Production Hub Section -->
+    <!-- PRODUCTZ HUB -->
     <div id="prodhub-tab" class="tab-content" style="padding:0;">
         <div id="prodHubLanding" class="hub-container">
-            <div class="hub-card" onclick="showProductionPane('bom')">
-                <i>🛠️</i>
-                <h2>Product Builder</h2>
-                <p>Define recipes, labor, and BOM structures.</p>
+            <div class="hub-card" onclick="showProductionPane('builder')">
+                <i>🔨</i>
+                <h2>BUILDERZ</h2>
+                <p>Define recipenz, labor, and BOM structurez.</p>
                 <div class="card-stat" id="hubStatRecipes">0 RECIPES</div>
             </div>
             <div class="hub-card" onclick="showProductionPane('production')">
                 <i>🏭</i>
-                <h2>Production Control</h2>
-                <p>Active Work Orders, SOPs, and Batching.</p>
-                <div class="card-stat" id="hubStatBatches">0 ACTIVE BATCHES</div>
+                <h2>CONTROLZ</h2>
+                <p>Active Batchz, SOPz, and Work Orderz.</p>
+                <div class="card-stat" id="hubStatBatches">0 BATCHES</div>
             </div>
             <div class="hub-card" onclick="showProductionPane('print')">
                 <i>🖨️</i>
-                <h2>Print Command</h2>
-                <p>3D Print Queue, status tracking, and reprints.</p>
-                <div class="card-stat" id="hubStatPrints">0 QUEUED PRINTS</div>
+                <h2>PRINTZ</h2>
+                <p>Monitor live 3D Print queuez and taskz.</p>
+                <div class="card-stat" id="hubStatPrintQueue">0 ACTIVE</div>
             </div>
         </div>
 
-        <!-- Detailed Panes (Wrapped) -->
-        <div id="paneBom" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+        <!-- Detailed Panez -->
+        <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn active" onclick="showProductionPane('bom')">Product Builder</button>
-                <button class="sub-nav-btn" onclick="showProductionPane('production')">Production Control</button>
-                <button class="sub-nav-btn" onclick="showProductionPane('print')">Print Command</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn active" onclick="showProductionPane('builder')">BUILDERZ</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('production')">CONTROLZ</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('print')">PRINTZ</button>
             </div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
@@ -905,83 +904,72 @@
         </div>
     </div> <!-- End of prodhub-tab -->
 
-    <div id="sales-tab" class="tab-content" style="padding:0;">
-        <div id="salesHubLanding" class="hub-container">
-            <div class="hub-card" onclick="showSalesPane('sync')">
+    <!-- SALEZ HUB -->
+    <div id="salezhub-tab" class="tab-content" style="padding:0;">
+        <div id="salezHubLanding" class="hub-container">
+            <div class="hub-card" onclick="showSalezPane('bridge')">
                 <i>📊</i>
-                <h2>CSV Bridge</h2>
-                <p>Upload Shopify/Etsy sales & auto-deduct live inventory.</p>
-                <div class="card-stat" id="hubStatSalesSync">PENDING SYNC</div>
+                <h2>BRIDGEZ</h2>
+                <p>Upload Shopify/Etsy salez & auto-deduct live inventory.</p>
+                <div class="card-stat" id="hubStatSalezBridge">PENDING SYNC</div>
             </div>
-            <div class="hub-card" onclick="showSalesPane('skus')">
-                <i>🏷️</i>
-                <h2>SKU Registry</h2>
-                <p>Manage unmapped SKUs and storefront aliases.</p>
-                <div class="card-stat" id="hubStatUnmapped">0 ALERTS</div>
+            <div class="hub-card" onclick="showSalezPane('analyticz')">
+                <i>📈</i>
+                <h2>ANALYTICZ</h2>
+                <p>Visual Profit Derivation, Trendz, and Insightz.</p>
+                <div class="card-stat" id="hubStatMargin">OPTIMIZING...</div>
             </div>
-            <div class="hub-card" onclick="showSalesPane('ledger')">
-                <i>📖</i>
-                <h2>Sales Ledger</h2>
-                <p>Full historical record of all captured retail revenue.</p>
-                <div class="card-stat" id="hubStatTotalSales">$0 REVENUE</div>
+            <div class="hub-card" onclick="showSalezPane('commandz')">
+                <i>💻</i>
+                <h2>COMMANDZ</h2>
+                <p>Executive Oversight: High-level financial controlz.</p>
+                <div class="card-stat" id="hubStatCommand">LIVE TERMZ</div>
             </div>
         </div>
 
-        <!-- Detailed Panes (Wrapped) -->
-        <div id="paneSalesSync" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
-            <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showSalesPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn active" onclick="showSalesPane('sync')">CSV Bridge</button>
-                <button class="sub-nav-btn" onclick="showSalesPane('skus')">SKU Registry</button>
-                <button class="sub-nav-btn" onclick="showSalesPane('ledger')">Sales Ledger</button>
+        <!-- Detailed Panez -->
+        <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div class="sub-nav">
+                <button class="sub-nav-btn" onclick="showSalezPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn active" onclick="showSalezPane('bridge')">BRIDGEZ</button>
+                <button class="sub-nav-btn" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
+                <button class="sub-nav-btn" onclick="showSalezPane('commandz')">COMMANDZ</button>
             </div>
-            
-            <div class="control-panel" style="grid-template-columns: 1fr; margin-bottom: 10px;">
-                <div class="panel-card master-card" style="padding: 30px;">
-                    <h3>🛒 Sync New Sales</h3>
-                    <p style="font-size:12px; margin-top:0; margin-bottom:15px; color:var(--text-muted);">Select your Shopify/Etsy/etc export file (.csv).</p>
+            <!-- Contents of Sales Sync -->
+            <div class="control-panel" style="grid-template-columns: 1fr; margin-bottom: 20px;">
+                <div class="panel-card master-card" style="padding: 35px;">
+                    <h3>🚀 BRIDGEZ ENGINE: Sync New Sales</h3>
                     <div style="display:flex; gap:15px; align-items:center;">
                         <input type="file" id="salesCsvFile" accept=".csv" style="flex:1; padding:8px; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:6px;">
-                        <button class="btn-green" onclick="processSalesCSV()" style="width:auto; padding:10px 25px;">🚀 Start Engine</button>
+                        <button class="btn-green" onclick="processSalesCSV()" style="width:auto; padding:10px 25px;">🚀 START SYNCZ</button>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div id="paneSalesSkus" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
-            <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showSalesPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn" onclick="showSalesPane('sync')">CSV Bridge</button>
-                <button class="sub-nav-btn active" onclick="showSalesPane('skus')">SKU Registry</button>
-                <button class="sub-nav-btn" onclick="showSalesPane('ledger')">Sales Ledger</button>
-            </div>
-            
-            <div class="panel-card" style="padding:15px; border-left: 4px solid #ef4444; background:rgba(239, 68, 68, 0.05);">
-                <h3 style="color:#ef4444; margin-top:0; margin-bottom:10px;">⚠️ Actions Required: Unmapped Storefront SKUs</h3>
-                <div id="unmappedSkusList" style="max-height:150px; overflow-y:auto; font-size:13px; color:var(--text-muted); display:flex; flex-direction:column; gap:8px;">
-                    Searching for inventory disconnects...
-                </div>
-            </div>
-        </div>
-
-        <div id="paneSalesLedger" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
-            <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showSalesPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn" onclick="showSalesPane('sync')">CSV Bridge</button>
-                <button class="sub-nav-btn" onclick="showSalesPane('skus')">SKU Registry</button>
-                <button class="sub-nav-btn active" onclick="showSalesPane('ledger')">Sales Ledger</button>
-            </div>
-
-            <div class="manual-entry-bar" style="border-color: #10b981; border-width: 1px; margin-bottom: 15px;">
-                <div style="flex: 1; min-width: 90px;"><label>Order ID</label><input id="manualSaleId" type="text" placeholder="#1001"></div>
-                <div style="flex: 1; min-width: 100px;"><label>Sale Date</label><input id="manualSaleDate" type="date"></div>
-                <div style="flex: 1.5; min-width: 120px;"><label>Recipe Sold</label><select id="manualSaleRecipe"></select></div>
-                <div style="flex: 0.5; min-width: 60px;"><label>Qty</label><input id="manualSaleQty" type="number" step="any" min="1" value="1"></div>
-                <div style="flex: 0.5; min-width: 70px;"><label>Price ($)</label><input id="manualSalePrice" type="number" step="any" placeholder="0.00"></div>
-                <button class="btn-green" style="padding: 8px 15px; width: auto; font-size:13px;" onclick="addManualSale()">+ Add Entry</button>
-            </div>
-            
             <div class="table-wrap" id="salesTableWrap"></div>
+        </div>
+
+        <div id="paneSalezAnalyticz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div class="sub-nav">
+                <button class="sub-nav-btn" onclick="showSalezPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn" onclick="showSalezPane('bridge')">BRIDGEZ</button>
+                <button class="sub-nav-btn active" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
+                <button class="sub-nav-btn" onclick="showSalezPane('commandz')">COMMANDZ</button>
+            </div>
+            <!-- Contents of Analytics Dashboard -->
+            <div id="analyticsContent" style="flex-grow:1; display:flex; flex-direction:column;"></div>
+        </div>
+
+        <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div class="sub-nav">
+                <button class="sub-nav-btn" onclick="showSalezPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn" onclick="showSalezPane('bridge')">BRIDGEZ</button>
+                <button class="sub-nav-btn" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
+                <button class="sub-nav-btn active" onclick="showSalezPane('commandz')">COMMANDZ</button>
+            </div>
+            <!-- Contents of CEO Terminal -->
+            <div id="ceoContent" style="flex-grow:1; display:flex; flex-direction:column;">
+                <button class="btn-blue" onclick="renderCeoTerminal()" style="width:250px; margin: 40px auto; padding: 20px;">BOOT COMMANDZ TERMZ 🚀</button>
+            </div>
         </div>
     </div> <!-- End of sales-tab -->
 
@@ -1587,32 +1575,20 @@
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
     }
 
-    function showSalesPane(paneId) {
-        document.getElementById('salesHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        document.querySelectorAll('#sales-tab .inventory-pane').forEach(p => p.style.display = 'none');
+    function showSalezPane(paneId) {
+        document.getElementById('salezHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
+        document.querySelectorAll('#salezhub-tab .inventory-pane').forEach(p => p.style.display = 'none');
         if (paneId !== 'hub') {
-            const pane = document.getElementById('paneSales' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            const pane = document.getElementById('paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
             if (pane) {
                 pane.style.display = 'flex';
                 pane.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId)));
             }
-            if (paneId === 'ledger') renderSalesTable();
-            if (paneId === 'skus') renderUnmappedSkus();
+            if (paneId === 'bridge') renderSalesTable();
+            if (paneId === 'analyticz') renderAnalyticsDashboard();
+            if (paneId === 'commandz') renderCeoTerminal();
         }
         if (typeof updateHubStats === 'function') updateHubStats();
-    }
-
-    function showAnalyticsPane(paneId) {
-        document.getElementById('analyticsHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
-        document.querySelectorAll('#analytics-tab .inventory-pane').forEach(p => p.style.display = 'none');
-        if (paneId !== 'hub') {
-            const pane = document.getElementById('paneAnalytics' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
-            if (pane) {
-                pane.style.display = 'flex';
-                pane.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId)));
-            }
-            if (paneId === 'dashboard' || paneId === 'waterfall' || paneId === 'matrix') renderAnalyticsDashboard();
-        }
     }
 
     function showProductionPane(paneId) {
