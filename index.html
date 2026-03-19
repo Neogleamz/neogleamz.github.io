@@ -450,6 +450,19 @@
             </div>
         </div>
 
+
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
+            <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Database Ledger <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(Click ANY cell to edit)</span></h3>
+        </div>
+        <div class="table-wrap" id="results"></div>
+    </div>
+
+    <div id="simple-tab" class="tab-content">
+        <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;">
+            <h3 style="margin: 0; font-size: 13px; color: var(--text-muted); border: none; padding: 0; white-space:nowrap;">Toggles (Green = Show):</h3>
+            <div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
         <div class="manual-entry-bar">
             <div><label>Item Name</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
             <div><label>Neogleamz Name</label><input id="m_neo_name" type="text" placeholder="Internal Name"></div>
@@ -466,17 +479,6 @@
             <button class="btn-green" style="padding: 8px 15px; width: auto; font-size: 13px; font-weight: bold;" onclick="addManualItem()">+ Add Row</button>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
-            <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Database Ledger <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(Click ANY cell to edit)</span></h3>
-        </div>
-        <div class="table-wrap" id="results"></div>
-    </div>
-
-    <div id="simple-tab" class="tab-content">
-        <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;">
-            <h3 style="margin: 0; font-size: 13px; color: var(--text-muted); border: none; padding: 0; white-space:nowrap;">Toggles (Green = Show):</h3>
-            <div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-        </div>
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;">
             <h3 style="margin:0; font-size:15px; color: var(--text-heading);">Editable Filtered View</h3>
             <button class="btn-blue" onclick="autofillNeoNames()" style="width: auto; padding: 6px 12px; font-size: 12px;">✨ Auto-Fill Missing Names</button>
