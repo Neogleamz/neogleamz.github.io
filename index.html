@@ -1028,12 +1028,12 @@
                     <div style="position:relative; height:calc(100% - 30px); width:100%;"><canvas id="trendsChart"></canvas></div>
                 </div>
 
-                <div class="matrix-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <div class="matrix-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; flex-grow: 1; min-height: 250px; display: flex; flex-direction: column;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; flex-shrink: 0;">
                         <h4 style="margin:0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Sku Profitability Matrix</h4>
                         <button class="btn-blue" onclick="backfillFinancials()" style="font-size:11px; padding:6px 12px;">↻ BACKFILL FINANCIALS</button>
                     </div>
-                    <div class="table-wrap" id="analyticsTableWrap"></div>
+                    <div class="table-wrap" id="analyticsTableWrap" style="flex-grow: 1; overflow-y: auto; min-height: 0;"></div>
                 </div>
             </div>
         </div>
