@@ -697,7 +697,7 @@
 
     <!-- INVENTORY HUBZ -->
     <div id="invhub-tab" class="tab-content active" style="padding:0;">
-        <div id="invHubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
+        <div id="invHubLanding" class="hub-landing hub-container" style="flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showInventoryPane('pipeline')">
                 <i>📖</i>
                 <h2>LEDGERZ</h2>
@@ -774,7 +774,7 @@
     </div>
     <!-- PRODUCTZ HUB -->
     <div id="prodhub-tab" class="tab-content" style="padding:0;">
-        <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
+        <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showProductionPane('builder')">
                 <i>🔨</i>
                 <h2>BUILDERZ</h2>
@@ -1035,7 +1035,7 @@
 
     <!-- SALEZ HUB -->
     <div id="salezhub-tab" class="tab-content" style="padding:0;">
-        <div id="salezHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
+        <div id="salezHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showSalezPane('bridge')">
                 <i>📊</i>
                 <i>📖</i>
@@ -1192,97 +1192,68 @@
 
     <!-- SYNCZ HUB -->
     <div id="synchub-tab" class="tab-content" style="padding:0;">
-        <div id="syncHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
-            <div class="hub-card" onclick="showSyncPane('inbound')">
-                <i>📦</i>
-                <h2>INBOUND SYNC</h2>
-                <p>Process incoming supply chain orderz & parcelz.</p>
-                <div class="card-stat">SUPPLY CHAIN</div>
-            </div>
-            <div class="hub-card" onclick="showSyncPane('outbound')">
-                <i>💸</i>
-                <h2>OUTBOUND SYNC</h2>
-                <p>Process e-commerce salez & auto-deduct live inventory.</p>
-                <div class="card-stat">E-COMMERCE</div>
-            </div>
-            <div class="hub-card" onclick="showSyncPane('vault')">
-                <i>☁️</i>
-                <h2>DATA VAULT</h2>
-                <p>Secure Cloud Backup & authoritative Restore functionz.</p>
-                <div class="card-stat">INFRASTRUCTURE</div>
-            </div>
-        </div>
-
-        <!-- Detailed Sync Panez -->
-        <div id="paneSyncInbound" class="executive-pane">
-            <div class="pane-title">INBOUND SYNC</div>
-            <div class="nav-zone left" onclick="showSyncPane('vault')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSyncPane('outbound')"><i>›</i></div>
-            
+        <div id="paneSyncMaster" class="executive-pane" style="display:flex; flex-direction:column;">
+            <div class="pane-title">GLOBAL COMMAND SYNC</div>
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
-                <div class="bom-main" style="padding:40px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                    <div class="control-panel" style="max-width:900px; width:100%; margin:0 auto; grid-template-columns: 1fr 1fr;">
-                        <div class="panel-card">
-                            <label style="font-size:13px; font-weight:900; color:var(--primary-color); margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">📦 Orders Sync (HTML)</label>
-                            <input type="file" id="orderFiles" multiple accept=".html">
-                            <div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div>
-                        </div>
-                        <div class="panel-card" style="border-left: 4px solid #f59e0b;">
-                            <label style="font-size:13px; font-weight:900; color:#f59e0b; margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px;">🚚 Parcels Sync (HTML)</label>
-                            <input type="file" id="parcelFiles" multiple accept=".html">
-                            <div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div>
-                        </div>
-                        <div class="panel-card master-card" style="grid-column: span 2;">
-                            <div id="statusMaster" class="status-bar status-idle" style="font-size:16px; padding:15px;">Ready for Supabase...</div>
-                            <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:15px; font-size:16px; margin-top:15px; width:100%;">↻ Force Mathematical Calculation</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="paneSyncOutbound" class="executive-pane">
-            <div class="pane-title">OUTBOUND SYNC</div>
-            <div class="nav-zone left" onclick="showSyncPane('inbound')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSyncPane('vault')"><i>›</i></div>
-            
-            <div class="bom-layout" style="flex-grow:1; min-height:0;">
-                <div class="bom-main" style="padding:40px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                    <div class="control-panel" style="max-width:600px; width:100%; margin:0 auto; grid-template-columns: 1fr;">
-                        <div class="panel-card master-card" style="padding: 40px; border-left: 4px solid #10b981;">
-                            <h2 style="margin-top:0; color:var(--text-heading); font-size:24px;">💸 Shopify / Etsy Sales CSV</h2>
-                            <p style="color:var(--text-muted); margin-bottom:25px; line-height:1.5;">Upload your daily exported sales CSV. The Command Center will automatically parse the rows, match SKU aliases, and instantly deduct matched quantities from the active Stockz ledger.</p>
-                            <div style="display:flex; flex-direction:column; gap:20px;">
-                                <input type="file" id="salesCsvFile" accept=".csv" style="padding:15px; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:8px; font-size:16px;">
-                                <button class="btn-green" onclick="processSalesCSV()" style="width:100%; padding:15px; font-size:18px; font-weight:bold;">🚀 INITIATE SALEZ SYNC</button>
+                <div class="bom-main" style="padding:40px; overflow-y:auto;">
+                    <div class="control-panel" style="max-width:1100px; width:100%; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                        
+                        <!-- Supply Chain Sync -->
+                        <div class="panel-card" style="border-left: 4px solid var(--primary-color);">
+                            <h3 style="margin:0 0 15px 0; font-size:16px;">📦 Supply Chain (Inbound)</h3>
+                            <div style="display:flex; flex-direction:column; gap:15px;">
+                                <div>
+                                    <label style="font-size:11px; font-weight:900; color:var(--text-muted); text-transform:uppercase;">Orders Sync (HTML)</label>
+                                    <input type="file" id="orderFiles" multiple accept=".html" style="width:100%;">
+                                </div>
+                                <div>
+                                    <label style="font-size:11px; font-weight:900; color:var(--text-muted); text-transform:uppercase;">Parcels Sync (HTML)</label>
+                                    <input type="file" id="parcelFiles" multiple accept=".html" style="width:100%;">
+                                </div>
+                                <div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div>
+                                <div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div>
                             </div>
                         </div>
+                        
+                        <!-- Sales Sync -->
+                        <div class="panel-card" style="border-left: 4px solid #10b981;">
+                            <h3 style="margin:0 0 15px 0; font-size:16px;">💸 E-Commerce (Outbound)</h3>
+                            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px; line-height:1.4;">Upload your daily exported sales CSV. The Command Center will automatically parse the rows, match SKU aliases, and instantly deduct matched quantities from the active Stockz ledger.</p>
+                            <div style="display:flex; flex-direction:column; gap:15px;">
+                                <input type="file" id="salesCsvFile" accept=".csv" style="width:100%; padding:10px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px;">
+                                <button class="btn-green" onclick="processSalesCSV()" style="width:100%; padding:12px; font-weight:900;">🚀 INITIATE SALEZ SYNC</button>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure (Vault) -->
+                        <div class="panel-card" style="border-left: 4px solid #0ea5e9;">
+                            <h3 style="margin:0 0 15px 0; font-size:16px;">☁️ Data Vault (Infrastructure)</h3>
+                            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Maintain authoritative snapshots of the entire ERP ecosystem.</p>
+                            <div style="display:flex; flex-direction:column; gap:12px;">
+                                <button class="btn-blue" style="width:100%; padding:10px;" onclick="executeExport()">⬇️ Export Cloud Vault (.xlsx)</button>
+                                <div style="border-top: 1px solid var(--border-color); padding-top:12px;">
+                                    <label style="font-size:10px; font-weight:bold; color:#ef4444; display:block; margin-bottom:5px;">⚠️ MASTER RESTORE (OVERWRITE)</label>
+                                    <input type="file" id="importBackupFile" accept=".xlsx" onchange="handleFileSelect(this)" style="font-size:10px; width:100%;">
+                                    <div id="restorePreview" style="margin-top: 10px; display: none;">
+                                        <div id="restoreCheckboxes" style="font-size:11px; margin-bottom:10px; display:flex; flex-direction:column; gap:5px;"></div>
+                                        <button class="btn-red" onclick="executeRestore()" style="width:100%; padding:10px;">🔥 OVERWRITE CLOUD</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Operations -->
+                        <div class="panel-card master-card" style="border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.03);">
+                            <h3 style="margin:0 0 15px 0; font-size:16px;">⚙️ Force Recalculation</h3>
+                            <div id="statusMaster" class="status-bar status-idle" style="font-size:14px; padding:12px; margin-bottom:15px;">Ready for sync operations...</div>
+                            <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; width:100%; padding:15px; font-weight:bold; font-size:14px; border: 2px solid #10b981;">↻ FORCE MATHEMATICAL CALCULATION</button>
+                            <p style="font-size:10px; color:var(--text-muted); margin-top:10px; font-style:italic;">Manual trigger for reconciling ledger offsets after bulk HTML imports.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div id="paneSyncVault" class="executive-pane">
-            <div class="pane-title">DATA VAULT</div>
-            <div class="nav-zone left" onclick="showSyncPane('outbound')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSyncPane('inbound')"><i>›</i></div>
-            
-            <div class="bom-layout" style="flex-grow:1; min-height:0;">
-                <div class="bom-main" style="padding:40px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                    <div class="control-panel" style="max-width:800px; width:100%; margin:0 auto; grid-template-columns: 1fr 1fr;">
-                        <div class="panel-card" style="padding:30px; border-left: 4px solid #0ea5e9; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-                            <h2 style="margin-top:0; color:#0ea5e9; font-size:20px;">☁️ Master Backup</h2>
-                            <p style="color:var(--text-muted); margin-bottom:25px; font-size:14px; line-height:1.5;">Generates a complete snapshot of your Master Ledger, Recipes, Inventory, Work Orders, and SOPs into a single Excel file.</p>
-                            <button class="btn-blue" style="width:100%; padding:15px; font-size:16px; margin-top:auto;" onclick="executeExport()">⬇️ EXPORT CLOUD VAULT</button>
-                        </div>
-                        <div class="panel-card" style="padding:30px; border-left: 4px solid #ef4444; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-                            <h2 style="margin-top:0; color:#ef4444; font-size:20px;">⚠️ Master Restore</h2>
-                            <p style="color:var(--text-muted); margin-bottom:25px; font-size:14px; line-height:1.5;">Destructive Operation: Uploading an Excel file will permanently overwrite and replace the active live database. Use with absolute caution.</p>
-                            <input type="file" id="importBackupFile" accept=".xlsx" onchange="handleFileSelect(this)" style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-input);">
-                            <div id="restorePreview" style="margin-top: 15px; display: none; width: 100%;">
-                                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">Select Sheets to Restore:</label>
-                                <div id="restoreCheckboxes" style="display:flex; flex-direction:column; gap:8px; margin-top:8px; margin-bottom: 15px; text-align: left;"></div>
-                                <button class="btn-red" id="executeRestoreBtn" onclick="executeRestore()" style="width:100%; padding:15px; font-size:16px;">🔥 OVERWRITE CLOUD</button>
+    </div>eRestore()" style="width:100%; padding:15px; font-size:16px;">🔥 OVERWRITE CLOUD</button>
                             </div>
                         </div>
                     </div>
@@ -1427,13 +1398,14 @@
     
     function hideAllExecutivePanes() {
         // Universal Master Killswitch: Clears the viewport 100% before transitions
-        document.getElementById('invHubLanding').style.display = 'none';
-        document.getElementById('prodHubLanding').style.display = 'none';
-        document.getElementById('salezHubLanding').style.display = 'none';
-        document.querySelectorAll('.executive-pane').forEach(p => p.style.display = 'none');
-        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none'); // Legacy cleanup
-        document.querySelectorAll('.production-pane').forEach(p => p.style.display = 'none'); // Legacy cleanup
-        document.querySelectorAll('.sales-pane').forEach(p => p.style.display = 'none'); // Legacy cleanup
+        document.querySelectorAll('.executive-pane').forEach(p => p.style.setProperty('display', 'none', 'important'));
+        document.querySelectorAll('.hub-landing').forEach(p => p.style.setProperty('display', 'none', 'important'));
+        
+        // Comprehensive Safety Clean for Explicit IDs
+        ['invHubLanding', 'prodHubLanding', 'salezHubLanding', 'paneSyncMaster', 'syncHubLanding'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.setProperty('display', 'none', 'important');
+        });
     }
     
     // --- GHOST LOGIC VAPORIZED ---
@@ -1758,23 +1730,13 @@
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
     }
 
-    // --- AUTHORITATIVE HUB TRANSITIONS (UEV 2.1) ---
-    // --- LEGACY HUB LOGIC VAPORIZED ---
-    function hideAllExecutivePanes() {
-        document.querySelectorAll('.executive-pane').forEach(p => p.style.setProperty('display', 'none', 'important'));
-        document.querySelectorAll('.hub-landing').forEach(p => p.style.setProperty('display', 'none', 'important'));
-        // Safety Clean
-        const landings = ['invHubLanding', 'prodHubLanding', 'salezHubLanding', 'syncHubLanding'];
-        landings.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.style.setProperty('display', 'none', 'important');
-        });
-    }
+    // --- AUTHORITATIVE HUB TRANSITIONS (UEV 2.2) ---
+    // --- REDUNDANT LOGIC VAPORIZED ---
 
     function showInventoryPane(paneId) {
         hideAllExecutivePanes();
         if (paneId === 'hub') {
-            document.getElementById('invHubLanding').style.setProperty('display', 'flex', 'important');
+            document.getElementById('invHubLanding').style.setProperty('display', 'grid', 'important');
         } else {
             const mapper = { 'pipeline': 'panePipeline', 'simple': 'paneSimple', 'inventory': 'paneInventory' };
             const pane = document.getElementById(mapper[paneId]);
@@ -1789,7 +1751,7 @@
     function showSalezPane(paneId) {
         hideAllExecutivePanes();
         if (paneId === 'hub') {
-            document.getElementById('salezHubLanding').style.setProperty('display', 'flex', 'important');
+            document.getElementById('salezHubLanding').style.setProperty('display', 'grid', 'important');
         } else {
             const pane = document.getElementById('paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
             if (pane) pane.style.setProperty('display', 'flex', 'important');
@@ -1803,7 +1765,7 @@
     function showProductionPane(paneId) {
         hideAllExecutivePanes();
         if (paneId === 'hub') {
-            document.getElementById('prodHubLanding').style.setProperty('display', 'flex', 'important');
+            document.getElementById('prodHubLanding').style.setProperty('display', 'grid', 'important');
         } else {
             const mapping = { 'builder': 'paneProdBuilder', 'production': 'paneProdControl', 'print': 'paneProdPrint' };
             const pane = document.getElementById(mapping[paneId]);
@@ -1817,15 +1779,11 @@
 
     function showSyncPane(paneId) {
         hideAllExecutivePanes();
-        if (paneId === 'hub') {
-            document.getElementById('syncHubLanding').style.setProperty('display', 'flex', 'important');
-        } else {
-            const mapping = { 'inbound': 'paneSyncInbound', 'outbound': 'paneSyncOutbound', 'vault': 'paneSyncVault' };
-            const pane = document.getElementById(mapping[paneId]);
-            if (pane) pane.style.setProperty('display', 'flex', 'important');
-        }
+        // The SYNCZ Hub has been consolidated into a single unified page
+        const pane = document.getElementById('paneSyncMaster');
+        if (pane) pane.style.setProperty('display', 'flex', 'important');
         if (typeof updateHubStats === 'function') updateHubStats();
-        sysLog(`Loaded SYNCZ pane: ${paneId}`);
+        sysLog(`Loaded Unified SYNCZ Console`);
     }
 
     function applyTableInteractivity(containerId) {
