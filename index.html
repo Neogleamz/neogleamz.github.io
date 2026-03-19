@@ -715,10 +715,10 @@
 
         <div id="paneProdControl" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn" onclick="showProductionPane('bom')">Product Builder</button>
-                <button class="sub-nav-btn active" onclick="showProductionPane('production')">Production Control</button>
-                <button class="sub-nav-btn" onclick="showProductionPane('print')">Print Command</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('builder')">BUILDERZ</button>
+                <button class="sub-nav-btn active" onclick="showProductionPane('production')">CONTROLZ</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('print')">PRINTZ</button>
             </div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
@@ -820,10 +820,10 @@
 
         <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
             <div class="sub-nav" style="margin-bottom: 20px;">
-                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ Hub</button>
-                <button class="sub-nav-btn" onclick="showProductionPane('bom')">Product Builder</button>
-                <button class="sub-nav-btn" onclick="showProductionPane('production')">Production Control</button>
-                <button class="sub-nav-btn active" onclick="showProductionPane('print')">Print Command</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('hub')" style="background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid rgba(247, 147, 32, 0.2); margin-right: 15px;">⬅ HUBZ</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('builder')">BUILDERZ</button>
+                <button class="sub-nav-btn" onclick="showProductionPane('production')">CONTROLZ</button>
+                <button class="sub-nav-btn active" onclick="showProductionPane('print')">PRINTZ</button>
             </div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
@@ -1020,8 +1020,57 @@
                 <button class="sub-nav-btn active" onclick="showSalezPane('commandz')">COMMANDZ</button>
             </div>
             <!-- Contents of CEO Terminal -->
-            <div id="ceoContent" style="flex-grow:1; display:flex; flex-direction:column;">
-                <button class="btn-blue" onclick="renderCeoTerminal()" style="width:250px; margin: 40px auto; padding: 20px;">BOOT COMMANDZ TERMZ 🚀</button>
+            <div id="ceoContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px;">
+                <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00; font-family: 'Inter', sans-serif;">
+                    <div class="ceo-terminal-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 15px; padding-bottom: 15px;">
+                        <div class="ceo-control-panel" style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; flex-direction: column;">
+                            <div class="ceo-control-header" style="font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 12px; letter-spacing: 1px;">Global Master Levers</div>
+                            <div class="ceo-slider-group ceo-global-slider">
+                                <div class="ceo-slider-label" style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px;"><span>Blended CAC ($)</span> <input type="number" id="globalCacNum" class="ceo-sync-input" value="10" style="background: transparent; border: 1px solid #333; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; width: 70px; text-align: right; padding: 2px 6px; border-radius: 4px;"></div>
+                                <input type="range" id="globalCacSlider" min="0" max="50" step="1" value="10" style="width: 100%; accent-color: var(--neon-cyan); height: 4px; background: #333; outline: none; border-radius: 2px; cursor: pointer;">
+                            </div>
+                            <div class="ceo-slider-group ceo-global-slider">
+                                <div class="ceo-slider-label" style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px;"><span>Global Affiliate (%)</span> <input type="number" id="globalAffNum" class="ceo-sync-input" value="0" style="background: transparent; border: 1px solid #333; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; width: 70px; text-align: right; padding: 2px 6px; border-radius: 4px;"></div>
+                                <input type="range" id="globalAffSlider" min="0" max="30" step="1" value="0" style="width: 100%; accent-color: var(--neon-cyan); height: 4px; background: #333; outline: none; border-radius: 2px; cursor: pointer;">
+                            </div>
+                            <div class="ceo-slider-group ceo-global-slider">
+                                <div class="ceo-slider-label" style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px;"><span>Global Warranty (%)</span> <input type="number" id="globalWarrNum" class="ceo-sync-input" value="0" style="background: transparent; border: 1px solid #333; color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; width: 70px; text-align: right; padding: 2px 6px; border-radius: 4px;"></div>
+                                <input type="range" id="globalWarrSlider" min="0" max="15" step="1" value="0" style="width: 100%; accent-color: var(--neon-cyan); height: 4px; background: #333; outline: none; border-radius: 2px; cursor: pointer;">
+                            </div>
+                            
+                            <div class="ceo-slider-group ceo-global-slider" style="background: rgba(0, 229, 255, 0.05); border-color: rgba(0, 229, 255, 0.2); padding: 8px; border-radius: 6px; border: 1px solid rgba(0, 229, 255, 0.1);">
+                                <div class="ceo-slider-label" style="justify-content: space-between; align-items: center; margin-bottom:0; display: flex;">
+                                    <span style="color:var(--neon-cyan)">Free Ship Threshold</span> 
+                                    <div style="display:flex; align-items:center;">
+                                        <span style="color:var(--neon-cyan); margin-right:4px;">$</span>
+                                        <input type="number" id="ceo-fs-threshold" value="50" style="width: 50px; background: var(--bg-input); border: 1px solid var(--border-color); color: #fff; text-align: center; border-radius: 4px; padding: 2px;" onchange="updateCeoEngine()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ceo-control-header" style="margin-top: 15px; font-size: 0.8rem; text-transform: uppercase;">Last 30 Days Vol (Dynamic)</div>
+                            <div id="ceo-dynamic-sliders"></div>
+                        </div>
+
+                        <div class="ceo-main-content" style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="ceo-kpi-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Gross Monthly Revenue</div><div class="ceo-kpi-value" id="kpiGross" style="font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Test Scenario Volume</div></div>
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Current Net (Baseline)</div><div class="ceo-kpi-value val-yellow" id="kpiOldNet" style="color:#aaa; font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiOldNetPct" style="color:#888; font-size: 0.8rem;">0% Margin</div></div>
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--neon-green); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Test Scenario Net Profit</div><div class="ceo-kpi-value val-green" id="kpiNewNet" style="color:var(--neon-green); font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiNewNetPct" style="font-size: 0.8rem;">0% Margin</div></div>
+                                <div class="ceo-kpi-card" style="background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Net Delta (Cash Gained)</div><div class="ceo-kpi-value val-green" id="kpiSaved" style="color: var(--neon-cyan); font-size: 2.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace;">$0</div><div class="ceo-kpi-sub" id="kpiSavedPct" style="color: var(--neon-cyan); font-size: 0.8rem;">+0% vs Current</div></div>
+                            </div>
+
+                            <div class="ceo-charts-row" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px;">
+                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Margin Squeeze (Test Scenario)</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="efficiencyChart"></canvas></div></div>
+                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Total Burn Autopsy</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="expenseChart"></canvas></div></div>
+                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Margin Squeeze (Current MSRP)</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="curEfficiencyChart"></canvas></div></div>
+                                <div class="ceo-chart-box" style="grid-column: span 3; background: var(--bg-container); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; min-height: 300px;"><div class="ceo-kpi-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Unit Net Comparison</div><div class="ceo-canvas-wrapper" style="position: relative; flex: 1;"><canvas id="unitChart"></canvas></div></div>
+                            </div>
+
+                            <div id="ceoTableWrap" class="ceo-table-container" style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; overflow-x: auto;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div> <!-- End of sales-tab -->
