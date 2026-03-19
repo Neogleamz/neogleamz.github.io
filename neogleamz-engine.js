@@ -201,12 +201,12 @@ function getEnginePredictiveMetrics(msrp, cogs, freeShipThreshold, cacFlat, affP
     let netProfit = oop - cogs - ENGINE_CONFIG.flatShipping - stripeFee - affAmt - warrAmt - cacFlat;
 
     return {
-        oop: oop,
-        stripe: stripeFee,
-        aff: affAmt,
-        warr: warrAmt,
-        ship: ENGINE_CONFIG.flatShipping,
-        merchantShipMargin: merchantShipCost,
-        net: netProfit
+        oop: Math.round(oop * 100) / 100,
+        stripe: Math.round(stripeFee * 100) / 100,
+        aff: Math.round(affAmt * 100) / 100,
+        warr: Math.round(warrAmt * 100) / 100,
+        ship: Math.round(ENGINE_CONFIG.flatShipping * 100) / 100,
+        merchantShipMargin: Math.round(merchantShipCost * 100) / 100,
+        net: Math.round(netProfit * 100) / 100
     };
 }

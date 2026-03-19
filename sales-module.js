@@ -172,7 +172,11 @@ async function executeSalesSync() {
             let actualShipCost = SHIP_COST * r.qty_sold;
             let net = getHistoricalNetProfit(r.actual_sale_price * r.qty_sold, r.shipping, r.taxes, r.discount_amount, actualShipCost, r.internal_recipe_name);
             
-            return { ...r, cogs_at_sale: cogs, transaction_fees: fee, net_profit: net }; 
+            let cS = Math.round(cogs * 100) / 100;
+            let fS = Math.round(fee * 100) / 100;
+            let nS = Math.round(net * 100) / 100;
+            
+            return { ...r, cogs_at_sale: cS, transaction_fees: fS, net_profit: nS }; 
         });
         // --------------------------------
 

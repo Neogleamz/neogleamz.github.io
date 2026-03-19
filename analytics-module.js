@@ -273,8 +273,11 @@ async function backfillFinancials() {
             let actualShipCost = SHIP_COST * qty;
             let lineNet = getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name);
             
+            let roundedFee = Math.round(stripeFee * 100) / 100;
+            let roundedNet = Math.round(lineNet * 100) / 100;
+            
             const { error } = await supabaseClient.from('sales_ledger')
-                .update({ transaction_fees: stripeFee, net_profit: lineNet })
+                .update({ transaction_fees: roundedFee, net_profit: roundedNet })
                 .eq('order_id', s.order_id)
                 .eq('internal_recipe_name', s.internal_recipe_name);
             
