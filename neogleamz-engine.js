@@ -68,30 +68,45 @@ function getEngineTrueCogs(productName) {
 function calculateProductBreakdown(pName, visited = new Set()) {
     if (visited.has(pName)) return { raw: 0, labor: 0, print: 0, total: 0 };
     visited.add(pName);
-    let rawCost = 0;
+
+    let totalRaw = 0;
+    let totalLabor = 0;
     let totalPrintTime = 0;
+
     (productsDB[pName] || []).forEach(part => {
         let k = String(part.item_key || part.di_item_id || part.name || "");
-        let q = parseFloat(part.quantity || part.qty) || 1;
-        if (k.startsWith('RECIPE:::')) {
-            let subBreakdown = calculateProductBreakdown(k.replace('RECIPE:::', ''), new Set(visited));
-            rawCost += (subBreakdown.total * q); 
-            totalPrintTime += (subBreakdown.print * q);
-        } else if (catalogCache[k]) {
-            rawCost += (catalogCache[k].avgUnitCost * q);
+        let q = parseFloat(part.qty) || 1;
+
+        // --- 1. 3D PRINT RECURSION (Raw Goods level) ---
+        const catalogItem = catalogCache[k];
+        if (catalogItem && catalogItem.is_3d_print) {
+            totalPrintTime += (catalogItem.print_time_mins || 0) * q;
+        }
+
+        // --- 2. SUB-ASSEMBLY RECURSION ---
+        if (productsDB[k]) {
+            let sub = calculateProductBreakdown(k, new Set(visited));
+            totalRaw += (sub.raw * q);
+            totalLabor += (sub.labor * q);
+            totalPrintTime += (sub.print * q);
+        } else {
+            // Raw Material from Catalog
+            totalRaw += (catalogItem ? (catalogItem.avgUnitCost || 0) : 0) * q;
         }
     });
 
-    // Add this product's own print time if it's flagged as a 3D print
-    if (productsDB[pName] && productsDB[pName].is_3d_print) {
-        totalPrintTime += (parseFloat(productsDB[pName].print_time_mins) || 0);
+    // Add this product's own labor
+    if (laborDB[pName]) {
+        let ownLabor = (laborDB[pName].time / 60) * laborDB[pName].rate;
+        totalLabor += ownLabor;
     }
 
-    let laborCost = 0;
-    if (laborDB[pName]) {
-        laborCost = (laborDB[pName].time / 60) * laborDB[pName].rate;
-    }
-    return { raw: rawCost, labor: laborCost, print: totalPrintTime, total: rawCost + laborCost };
+    return { 
+        raw: totalRaw, 
+        labor: totalLabor, 
+        print: totalPrintTime, 
+        total: totalRaw + totalLabor 
+    };
 }
 
 function calculateProductTotal(pName) { 

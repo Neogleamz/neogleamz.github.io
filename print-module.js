@@ -41,9 +41,8 @@ function renderPrintQueue() {
         h += "<tr><td colspan='7' style='text-align:center; padding:30px; color:var(--text-muted);'>No 3D print jobs currently in the pipeline.</td></tr>";
     } else {
         printQueueDB.forEach(job => {
-            // Use Master Engine for recursive print time check
-            const breakdown = typeof calculateProductBreakdown === 'function' ? calculateProductBreakdown(job.part_name) : {print:0};
-            const printTimePer = breakdown.print;
+            const catalogItem = catalogCache[job.part_name];
+            const printTimePer = catalogItem ? (parseFloat(catalogItem.print_time_mins) || 0) : 0;
             const totalTime = printTimePer * job.qty;
             const isActive = job.status !== 'Completed';
             
@@ -67,7 +66,6 @@ function renderPrintQueue() {
                 <td>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-weight:bold; color:#8b5cf6; cursor:pointer;" onclick="openPrintSOP('${job.part_name.replace(/'/g, "\\'")}')">🖨️ ${job.part_name}</span>
-                        <button class="icon-btn" style="width:20px; height:20px; font-size:10px;" onclick="openPrintSOP('${job.part_name.replace(/'/g, "\\'")}')">📖</button>
                     </div>
                 </td>
                 <td class="text-right" style="font-weight:bold;">${job.qty}</td>

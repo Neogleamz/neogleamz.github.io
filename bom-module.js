@@ -27,18 +27,10 @@ async function updateLaborCosts() {
         let m = parseFloat(document.getElementById('msrpInput').value) || 0;
         let w = parseFloat(document.getElementById('wholesaleInput').value) || 0;
         let isSub = document.getElementById('isSubassemblyInput').checked;
-        let is3D = document.getElementById('is3DPrintInput').checked;
-        let pt = parseFloat(document.getElementById('printTimeInput').value) || 0;
         
         laborDB[currentProduct] = { time: t, rate: r };
         pricingDB[currentProduct] = { msrp: m, wholesale: w };
         isSubassemblyDB[currentProduct] = isSub;
-
-        // Update local productsDB object as well
-        if (productsDB[currentProduct]) {
-            productsDB[currentProduct].is_3d_print = is3D;
-            productsDB[currentProduct].print_time_mins = pt;
-        }
 
         sysLog(`Updating profile for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
         const { error } = await supabaseClient.from('product_recipes').update({ 
@@ -46,9 +38,7 @@ async function updateLaborCosts() {
             labor_rate_hr: r,
             msrp: m,
             wholesale_price: w,
-            is_subassembly: isSub,
-            is_3d_print: is3D,
-            print_time_mins: pt
+            is_subassembly: isSub
         }).eq('product_name', currentProduct);
         
         if (error) throw new Error(error.message);
@@ -103,8 +93,6 @@ function renderProductBOM() {
     document.getElementById('msrpInput').value = pData.msrp;
     document.getElementById('wholesaleInput').value = pData.wholesale;
     document.getElementById('isSubassemblyInput').checked = !!isSubassemblyDB[currentProduct];
-    document.getElementById('is3DPrintInput').checked = !!productsDB[currentProduct]?.is_3d_print;
-    document.getElementById('printTimeInput').value = productsDB[currentProduct]?.print_time_mins || 0;
 
     let p = productsDB[currentProduct]||[]; let gt = 0; let wrap = document.getElementById('bomTableWrap');
     let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neo Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
