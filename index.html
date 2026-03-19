@@ -73,8 +73,8 @@
             display: flex; 
             flex-direction: row;
             box-sizing: border-box;
-            padding: 150px; 
-            gap: 150px; 
+            padding: 75px; 
+            gap: 75px; 
             width: 100%;
             height: calc(100vh - 127px);
             max-height: calc(100vh - 127px);
@@ -148,7 +148,7 @@
         .tab-content.active { 
             display: flex !important; 
         }
-        .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; }
+        .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; background: var(--bg-body); }
         .sub-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: var(--bg-glass); padding: 6px; border-radius: 12px; border: 1px solid var(--border-input); align-self: flex-start; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
         .sub-nav::-webkit-scrollbar { display: none; }
         .sub-nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 800; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
@@ -613,7 +613,7 @@
 
         <!-- Detailed Panez -->
         <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
-            <div class="nav-zone left" onclick="showInventoryPane('hub')"><i>‹</i></div>
+            <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn active" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
@@ -650,7 +650,7 @@
 
         <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showInventoryPane('hub')"><i>›</i></div>
+            <div class="nav-zone right" onclick="showInventoryPane('pipeline')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">LEDGERZ</button>
                 <button class="sub-nav-btn" onclick="showInventoryPane('simple')">SIMPLEZ</button>
@@ -688,7 +688,7 @@
 
         <!-- Detailed Panez -->
         <div id="paneProdBuilder" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
-            <div class="nav-zone left" onclick="showProductionPane('hub')"><i>‹</i></div>
+            <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn active" onclick="showProductionPane('builder')">BUILDERZ</button>
@@ -846,7 +846,7 @@
 
         <div id="paneProdPrint" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showProductionPane('hub')"><i>›</i></div>
+            <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
             <div class="sub-nav" style="margin-bottom: 20px;">
                 <button class="sub-nav-btn" onclick="showProductionPane('builder')">BUILDERZ</button>
                 <button class="sub-nav-btn" onclick="showProductionPane('production')">CONTROLZ</button>
@@ -965,7 +965,7 @@
 
         <!-- Detailed Panez -->
         <div id="paneSalezBridge" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
-            <div class="nav-zone left" onclick="showSalezPane('hub')"><i>‹</i></div>
+            <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
             <div class="sub-nav">
                 <button class="sub-nav-btn active" onclick="showSalezPane('bridge')">BRIDGEZ</button>
@@ -1041,15 +1041,15 @@
 
         <div id="paneSalezCommandz" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:10px 40px;">
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSalezPane('hub')"><i>›</i></div>
+            <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
             <div class="sub-nav">
                 <button class="sub-nav-btn" onclick="showSalezPane('bridge')">BRIDGEZ</button>
                 <button class="sub-nav-btn" onclick="showSalezPane('analyticz')">ANALYTICZ</button>
                 <button class="sub-nav-btn active" onclick="showSalezPane('commandz')">COMMANDZ</button>
             </div>
             <!-- Contents of CEO Terminal -->
-            <div id="ceoContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px;">
-                <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00; font-family: 'Inter', sans-serif;">
+            <div id="ceoContent" style="flex-grow:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:10px; background:var(--bg-body);">
+                <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00;">
                     <div class="ceo-terminal-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 15px; padding-bottom: 15px;">
                         <div class="ceo-control-panel" style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; flex-direction: column;">
                             <div class="ceo-control-header" style="font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 12px; letter-spacing: 1px;">Global Master Levers</div>
@@ -1261,7 +1261,6 @@
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
     let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
     let prefs = { widths: {}, order: [] };
-    const ENGINE_CONFIG = { stripePercent: 0.029, stripeFlat: 0.30, flatShipping: 8.00 }; 
     
     function showInventoryPane(paneId) {
         document.getElementById('invHubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
