@@ -47,7 +47,23 @@
             --kitting-build-bg: rgba(245, 158, 11, 0.1); --kitting-build-border: #d97706; --kitting-build-text: #fbbf24;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { font-family: 'Mulish', sans-serif; margin: 0; padding: 10px; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        [data-theme="light"] .title-block img { filter: brightness(0); }
+
+        /* Hub Styles */
+        .hub-container { display: flex; gap: 20px; padding: 40px; justify-content: center; align-items: stretch; height: calc(100vh - 150px); flex-wrap: wrap; overflow-y: auto; }
+        .hub-card { flex: 1; min-width: 250px; max-width: 350px; background: var(--bg-glass); border: 2px solid transparent; border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .hub-card:hover { transform: translateY(-10px); background: var(--bg-container); border-color: #F79320; box-shadow: 0 15px 45px rgba(247, 147, 32, 0.25); }
+        .hub-card i { font-size: 48px; margin-bottom: 20px; display: block; font-style: normal; }
+        .hub-card h2 { margin: 0 0 10px 0; font-size: 22px; color: var(--text-heading); }
+        .hub-card p { margin: 0; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+        .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; }
+        .sub-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: var(--bg-glass); padding: 8px; border-radius: 10px; border: 1px solid var(--border-input); align-self: flex-start; }
+        .sub-nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: all 0.2s; white-space: nowrap; }
+        .sub-nav-btn:hover { background: var(--bg-input); color: var(--text-main); }
+        .sub-nav-btn.active { background: #F79320; color: white !important; box-shadow: 0 4px 12px rgba(247, 147, 32, 0.3); }
+        .back-hub-btn { background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid #F79320; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin-right: 15px; transition: 0.2s; }
+        .back-hub-btn:hover { background: #F79320; color: white; }
         .container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-container); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px var(--shadow-color); transition: background-color 0.3s; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         
         #loginUI { display: none; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-body); z-index: 10000; }
@@ -425,10 +441,8 @@
             <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('pipeline')"><span>📦</span> Master Ledger</button>
-            <button class="tab-btn" onclick="switchTab('simple')"><span>📋</span> Simple Inventory</button>
+            <button class="tab-btn active" onclick="switchTab('invhub')"><span>📦</span> Inventory Hub</button>
             <button class="tab-btn" onclick="switchTab('bom')"><span>🛠️</span> Product Builder</button>
-            <button class="tab-btn" onclick="switchTab('inventory')"><span>📊</span> Inventory</button>
             <button class="tab-btn" onclick="switchTab('production')"><span>🏭</span> Production</button>
             <button class="tab-btn" onclick="switchTab('sales')"><span>🛒</span> Sales Sync</button>
             <button class="tab-btn" onclick="switchTab('analytics')"><span>📈</span> Analytics</button>
@@ -454,29 +468,82 @@
         </div>
     </div>
 
-    <div id="pipeline-tab" class="tab-content active">
-        <div class="control-panel">
-            <div class="panel-card">
-                <h3>1. Sync Orders</h3>
-                <input type="file" id="orderFiles" multiple accept=".html">
-                <div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div>
+    <div id="invhub-tab" class="tab-content active" style="padding:0;">
+        <div id="hubLanding" class="hub-container">
+            <div class="hub-card" onclick="showInventoryPane('pipeline')">
+                <i>📖</i>
+                <h2>Master Ledger</h2>
+                <p>Full database access, raw entry, and parcel syncing.</p>
             </div>
-            <div class="panel-card">
-                <h3>2. Sync Parcels</h3>
-                <input type="file" id="parcelFiles" multiple accept=".html">
-                <div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div>
+            <div class="hub-card" onclick="showInventoryPane('simple')">
+                <i>📋</i>
+                <h2>Simple Inventory</h2>
+                <p>Fast editing for Neo Products and 3D Printed items.</p>
             </div>
-            <div class="panel-card master-card">
-                <h3>3. Master Engine</h3>
-                <div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div>
-                <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button>
-            </div>
-            <div class="panel-card" style="grid-column: span 2;">
-                <h3>💾 Database Backup & Restore</h3>
-                <p style="font-size:11px; margin-top:0; margin-bottom: 8px; text-align:center; color:var(--text-muted);">Granular cloud export & import</p>
-                <button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Launch Backup Manager</button>
+            <div class="hub-card" onclick="showInventoryPane('inventory')">
+                <i>📊</i>
+                <h2>MRP Stock Levels</h2>
+                <p>Real-time inventory levels, reorder points, and value tracking.</p>
             </div>
         </div>
+
+        <!-- Detailed Panes (Wrapped) -->
+        <div id="panePipeline" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div style="display:flex; align-items:center; margin-bottom:10px;">
+                <button class="back-hub-btn" onclick="showInventoryPane('hub')">← Back to Hub</button>
+                <div class="sub-nav">
+                    <button class="sub-nav-btn active" onclick="showInventoryPane('pipeline')">Master Ledger</button>
+                    <button class="sub-nav-btn" onclick="showInventoryPane('simple')">Simple View</button>
+                    <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">MRP Stock</button>
+                </div>
+            </div>
+            <div class="control-panel">
+                <div class="panel-card"><h3>1. Sync Orders</h3><input type="file" id="orderFiles" multiple accept=".html"><div id="statusOrders" class="mod-status" style="display:none;">Waiting...</div></div>
+                <div class="panel-card"><h3>2. Sync Parcels</h3><input type="file" id="parcelFiles" multiple accept=".html"><div id="statusParcels" class="mod-status" style="display:none;">Waiting...</div></div>
+                <div class="panel-card master-card"><h3>3. Master Engine</h3><div id="statusMaster" class="status-bar status-idle">Ready for Supabase...</div><button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; padding:8px; font-size:13px; margin-top:5px;">↻ Force Calc</button></div>
+                <div class="panel-card" style="grid-column: span 2;"><h3>💾 Database Backup & Restore</h3><p style="font-size:11px; margin:0 0 8px 0; text-align:center; color:var(--text-muted);">Cloud export & import</p><button class="btn-blue" style="padding: 10px; font-size:13px; margin-top:auto;" onclick="openBackupModal()">Launch Backup Manager</button></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; flex-shrink:0;"><h3 style="margin:0; font-size:15px; color: var(--text-heading);">Database Ledger</h3></div>
+            <div class="table-wrap" id="results" style="flex-grow:1;"></div>
+        </div>
+
+        <div id="paneSimple" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div style="display:flex; align-items:center; margin-bottom:10px;">
+                <button class="back-hub-btn" onclick="showInventoryPane('hub')">← Back to Hub</button>
+                <div class="sub-nav">
+                    <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">Master Ledger</button>
+                    <button class="sub-nav-btn active" onclick="showInventoryPane('simple')">Simple View</button>
+                    <button class="sub-nav-btn" onclick="showInventoryPane('inventory')">MRP Stock</button>
+                </div>
+            </div>
+            <div class="panel-card" style="margin-bottom: 10px; padding: 10px 15px; flex-direction:row; align-items:center; gap:15px;"><h3 style="margin: 0; font-size: 13px; color: var(--text-muted); border: none; padding: 0; white-space:nowrap;">Toggles:</h3><div id="colToggleContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div></div>
+            <div class="manual-entry-bar">
+                <div><label>Item Name</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
+                <div><label>Neo Product Tag</label><input id="m_neo_prod" type="text" placeholder="e.g., Soulz"></div>
+                <div style="flex: 0.5;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
+                <div style="flex: 0.5;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
+                <button class="btn-green" style="padding: 8px 15px; width: auto; font-size: 13px; font-weight: bold;" onclick="addManualItem()">+ Add Row</button>
+            </div>
+            <div class="table-wrap" id="simpleResults" style="flex-grow:1;"></div>
+        </div>
+
+        <div id="paneInventory" class="inventory-pane" style="display:none; flex-direction:column; height:100%; padding:20px;">
+            <div style="display:flex; align-items:center; margin-bottom:10px;">
+                <button class="back-hub-btn" onclick="showInventoryPane('hub')">← Back to Hub</button>
+                <div class="sub-nav">
+                    <button class="sub-nav-btn" onclick="showInventoryPane('pipeline')">Master Ledger</button>
+                    <button class="sub-nav-btn" onclick="showInventoryPane('simple')">Simple View</button>
+                    <button class="sub-nav-btn active" onclick="showInventoryPane('inventory')">MRP Stock</button>
+                </div>
+            </div>
+            <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
+            <div class="table-wrap" id="inventoryResults" style="flex-grow:1;"></div>
+        </div>
+    </div>
+
+    <div id="pipeline-tab" class="tab-content" style="display:none!important;"></div>
+    <div id="simple-tab" class="tab-content" style="display:none!important;"></div>
+    <div id="inventory-tab" class="tab-content" style="display:none!important;"></div>
 
 
 
@@ -1032,7 +1099,28 @@
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neo Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
     let productsDB = {}; let laborDB = {}; let pricingDB = {}; let isSubassemblyDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
-    let salesDB = []; let aliasDB = {}; let printQueueDB = [];
+    
+    function showInventoryPane(paneId) {
+        document.getElementById('hubLanding').style.display = (paneId === 'hub') ? 'flex' : 'none';
+        
+        // Hide all panes
+        document.querySelectorAll('.inventory-pane').forEach(p => p.style.display = 'none');
+        
+        if (paneId !== 'hub') {
+            const pane = document.getElementById('pane' + paneId.charAt(0).toUpperCase() + paneId.slice(1));
+            if (pane) {
+                pane.style.display = 'flex';
+                // Update active sub-nav button
+                pane.querySelectorAll('.sub-nav-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('onclick').includes(paneId));
+                });
+            }
+            // Trigger specific renders
+            if (paneId === 'pipeline') renderLedgerView(false, 'results');
+            if (paneId === 'simple') { renderColToggles(); renderLedgerView(true, 'simpleResults'); }
+            if (paneId === 'inventory') renderInventoryTable();
+        }
+    }    let salesDB = []; let aliasDB = {}; let printQueueDB = [];
     let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
     let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
     let currentSalesSort = { column: 'd', direction: 'desc' }; let currentAnalyticsSort = { column: 'n', direction: 'asc' };
