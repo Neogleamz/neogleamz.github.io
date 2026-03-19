@@ -70,8 +70,8 @@
         
         /* Hub Grid System */
         .hub-container { 
-            display: flex; 
-            flex-direction: row;
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr);
             box-sizing: border-box;
             padding: 75px; 
             gap: 75px; 
@@ -697,7 +697,7 @@
 
     <!-- INVENTORY HUBZ -->
     <div id="invhub-tab" class="tab-content active" style="padding:0;">
-        <div id="invHubLanding" class="hub-landing hub-container" style="display:flex; flex-direction:column; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
+        <div id="invHubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
             <div class="hub-card" onclick="showInventoryPane('pipeline')">
                 <i>📖</i>
                 <h2>LEDGERZ</h2>
@@ -774,7 +774,7 @@
     </div>
     <!-- PRODUCTZ HUB -->
     <div id="prodhub-tab" class="tab-content" style="padding:0;">
-        <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-direction:column; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
+        <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
             <div class="hub-card" onclick="showProductionPane('builder')">
                 <i>🔨</i>
                 <h2>BUILDERZ</h2>
@@ -1035,7 +1035,7 @@
 
     <!-- SALEZ HUB -->
     <div id="salezhub-tab" class="tab-content" style="padding:0;">
-        <div id="salezHubLanding" class="hub-landing hub-container" style="display:none; flex-direction:column; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
+        <div id="salezHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
             <div class="hub-card" onclick="showSalezPane('bridge')">
                 <i>📊</i>
                 <i>📖</i>
@@ -1071,7 +1071,9 @@
                             <span style="font-size:11px; color:var(--text-muted); line-height:1.4;">Active e-commerce synchronization toolz have been relocated to the SYNCZ Hub.</span>
                         </div>
                     </div>
-            <div class="table-wrap" id="salesTableWrap"></div>
+                    <div class="table-wrap" id="salesTableWrap" style="flex-grow:1;"></div>
+                </div>
+            </div>
         </div>
 
             <div id="paneSalezAnalyticz" class="executive-pane">
@@ -1127,6 +1129,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         <div id="paneSalezCommandz" class="executive-pane">
             <div class="pane-title">COMMANDZ</div>
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
@@ -1189,7 +1192,7 @@
 
     <!-- SYNCZ HUB -->
     <div id="synchub-tab" class="tab-content" style="padding:0;">
-        <div id="syncHubLanding" class="hub-landing hub-container" style="display:none; flex-direction:column; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
+        <div id="syncHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px; justify-content:center; align-items:center;">
             <div class="hub-card" onclick="showSyncPane('inbound')">
                 <i>📦</i>
                 <h2>INBOUND SYNC</h2>
@@ -1760,6 +1763,12 @@
     function hideAllExecutivePanes() {
         document.querySelectorAll('.executive-pane').forEach(p => p.style.setProperty('display', 'none', 'important'));
         document.querySelectorAll('.hub-landing').forEach(p => p.style.setProperty('display', 'none', 'important'));
+        // Safety Clean
+        const landings = ['invHubLanding', 'prodHubLanding', 'salezHubLanding', 'syncHubLanding'];
+        landings.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.setProperty('display', 'none', 'important');
+        });
     }
 
     function showInventoryPane(paneId) {
