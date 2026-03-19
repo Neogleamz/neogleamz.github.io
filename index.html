@@ -285,8 +285,8 @@
     <div class="login-box">
         <h2>🔒 Neogleamz Secure Login</h2>
         <input type="email" id="loginEmail" placeholder="Enterprise Email">
-        <input type="password" id="loginPass" placeholder="Master Password" onkeydown="if(event.key === 'Enter') handleLogin()">
-        <button onclick="handleLogin()" id="loginBtn">Authenticate to Command Center</button>
+        <input type="password" id="loginPass" placeholder="Master Password">
+        <button id="loginBtn">Authenticate to Command Center</button>
         <p id="loginError" style="color:#ef4444; font-size:13px; margin-top:15px; display:none;"></p>
     </div>
 </div>
@@ -702,6 +702,49 @@
     </div>
 </div>
 
+<div id="ceoBundleModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+    <div class="massive-container">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:20px;">📦 Build Custom Bundle</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoBundleModal').style.display='none'">Close</button>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="text" id="ceoBundleName" placeholder="Bundle Name (e.g., Starter Kit)" style="flex:1; padding:10px; font-size:15px;">
+        </div>
+        <input type="text" id="ceoBundleSearch" placeholder="🔍 Search components..." onkeyup="filterCeoBundleList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
+        <div class="table-wrap" id="ceoBundleTableWrap"></div>
+        <div style="margin-top:15px; text-align:right; flex-shrink:0;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoBundle()">➕ Create Bundle & Add to Board</button>
+        </div>
+    </div>
+</div>
+
+<div id="ceoCustomModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+    <div class="container" style="width:100%; max-width:500px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px;">
+        <div class="header-area" style="flex-shrink:0;">
+            <h2 style="margin:0; font-size:20px;">🧪 Add Custom Test Item</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoCustomModal').style.display='none'">Close</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px; margin-top:10px;">
+            <div>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">Item Name</label>
+                <input type="text" id="ceoCustomName" placeholder="e.g., Hypothetical Widget" style="width:100%; padding:10px; font-size:15px;">
+            </div>
+            <div>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">True COGS ($)</label>
+                <input type="number" id="ceoCustomCogs" placeholder="0.00" step="any" style="width:100%; padding:10px; font-size:15px;">
+            </div>
+            <div>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">Live MSRP ($)</label>
+                <input type="number" id="ceoCustomMsrp" placeholder="0.00" step="any" style="width:100%; padding:10px; font-size:15px;">
+            </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoCustomItem()">🧪 Inject to Board</button>
+        </div>
+    </div>
+</div>
+
 </body>
 <script>
     // --- 1. GLOBAL VARIABLES & SUPABASE ---
@@ -738,8 +781,14 @@
 
     // --- 3. PREFS & AUTH ENGINES ---
     window.cloudTablePrefs = {}; 
-    async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; } } catch(e) { window.cloudTablePrefs = {}; } }
-    async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {} }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const passInput = document.getElementById('loginPass');
+        const loginBtn = document.getElementById('loginBtn');
+        if (passInput) passInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleLogin(); });
+        if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+    });
+
     function saveWOOrderPrefs() { try { window.cloudTablePrefs.woOrder = workOrdersDB.map(w => w.wo_id); saveCloudPrefs(); } catch(e) {} }
 
     async function handleLogin() {
