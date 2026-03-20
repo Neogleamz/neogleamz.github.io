@@ -695,13 +695,14 @@
             --icon-glow: rgba(45, 212, 191, 0.5) !important; --card-border: rgba(45, 212, 191, 0.1) !important; --card-hover-border: #2dd4bf !important; --card-glow: rgba(45, 212, 191, 0.25) !important;
         }
 
-        /* Shift the active tab accent to Teal */
+        /* Core Active Tab Accent (Signature Orange Drop Shadow) */
         .tab-btn.active { 
-            background: rgba(45, 212, 191, 0.15) !important; 
-            color: #2dd4bf !important; 
-            border-color: #2dd4bf !important;
-            box-shadow: 0 0 35px rgba(45, 212, 191, 0.8), inset 0 0 15px rgba(45, 212, 191, 0.3) !important; 
+            background: rgba(249, 115, 22, 0.15) !important; 
+            color: #f97316 !important; 
+            border-color: #f97316 !important;
+            box-shadow: 0 0 45px rgba(249, 115, 22, 0.6), inset 0 0 15px rgba(249, 115, 22, 0.3) !important; 
             font-weight: 900 !important;
+            text-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
             transform: translateY(-2px) !important;
         }
         .pane-title {
@@ -717,7 +718,6 @@
             .hub-container { padding: 15px !important; gap: 15px !important; }
             .title-block { flex-wrap: wrap !important; justify-content: center; gap: 5px !important; }
             .neo-logo { height: 40px !important; }
-            .subtitle { font-size: 12px !important; }
         }
     </style>
 </head>
@@ -746,7 +746,6 @@
     <div class="header-area">
         <div class="title-block" style="display: flex; align-items: center; gap: 15px; flex-wrap: nowrap;">
             <img class="neo-logo" src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 60px; width: auto;">
-            <span class="subtitle" style="margin: 0; font-size: 16px; color: #f97316; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px;">Cloud-Native Ledger & Command Center</span>
         </div>
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('invhub')">📊 STOCKPILEZ</button>
@@ -1996,19 +1995,28 @@
     function initVerticalResizer() {
         const resizer = document.getElementById('stockz-v-resizer');
         const topTable = document.getElementById('fgiTableWrap');
+        const bottomTable = document.getElementById('componentsTableWrap');
         if (!resizer || !topTable) return;
 
         let isResizing = false;
+        let startY = 0, startHeight = 0;
+
+        // Release the rigid initial HTML constraints
+        topTable.style.minHeight = '150px';
+        if (bottomTable) bottomTable.style.minHeight = '150px';
 
         // Load saved height
         const savedHeight = localStorage.getItem('stockzTopHeight');
         if (savedHeight) {
+            topTable.style.flex = 'none';
             topTable.style.height = savedHeight + 'px';
-            topTable.style.flexGrow = '0';
+            if (bottomTable) bottomTable.style.flex = '1';
         }
 
         resizer.addEventListener('mousedown', (e) => {
             isResizing = true;
+            startY = e.clientY;
+            startHeight = topTable.getBoundingClientRect().height;
             document.body.style.cursor = 'row-resize';
             resizer.classList.add('dragging');
             e.preventDefault();
@@ -2016,19 +2024,20 @@
 
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
-            const container = topTable.parentElement;
-            const containerRect = container.getBoundingClientRect();
-            let newHeight = e.clientY - containerRect.top - 5; // offset
             
-            // Constraints (100px min, 70% max)
-            const minH = 100;
-            const maxH = containerRect.height * 0.7;
+            const delta = e.clientY - startY;
+            let newHeight = startHeight + delta;
+            
+            const containerRect = topTable.parentElement.getBoundingClientRect();
+            const minH = 150; 
+            const maxH = containerRect.height - 180; 
+            
             if (newHeight < minH) newHeight = minH;
             if (newHeight > maxH) newHeight = maxH;
 
+            topTable.style.flex = 'none';
             topTable.style.height = newHeight + 'px';
-            topTable.style.flexGrow = '0';
-            localStorage.setItem('stockzTopHeight', newHeight);
+            if (bottomTable) bottomTable.style.flex = '1';
         });
 
         document.addEventListener('mouseup', () => {
@@ -2036,6 +2045,7 @@
                 isResizing = false;
                 document.body.style.cursor = 'default';
                 resizer.classList.remove('dragging');
+                localStorage.setItem('stockzTopHeight', topTable.style.height.replace('px',''));
             }
         });
     }
