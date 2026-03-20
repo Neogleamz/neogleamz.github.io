@@ -33,8 +33,8 @@ window.getHistoricalNetProfit = function(gross, shipCol, tax, disc, actShip, pNa
     return gross + shipCol - disc - fee - actShip - cogs;
 };
 window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, warr) {
-    let sCol = msrp >= fsThreshold ? 0 : 5.95;
-    let aShip = 4.50; 
+    let sCol = msrp >= fsThreshold ? 0 : 8.00;
+    let aShip = 8.00; 
     let fee = window.getEngineStripeFee(msrp + sCol);
     let net = msrp + sCol - cogs - fee - aShip - cac - aff - warr;
     let margin = msrp > 0 ? (net / msrp) * 100 : 0;
