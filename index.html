@@ -1200,16 +1200,38 @@
         </div>
     </div> <!-- End of sales-tab -->
 
-    <!-- SYNCZ HUB -->
+    <!-- NEXUZ -->
     <div id="synchub-tab" class="tab-content" style="padding:0;">
-        <div id="paneSyncMaster" class="executive-pane" style="display:flex; flex-direction:column;">
+        <div id="nexuzHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
+            <div class="hub-card" onclick="showNexuzPane('importz')">
+                <i>🌐</i>
+                <h2>IMPORTZ</h2>
+                <p>Supply Chain (Inbound): Orderz and Parcelz sync.</p>
+                <div class="card-stat">SUPERBUY</div>
+            </div>
+            <div class="hub-card" onclick="showNexuzPane('salez')">
+                <i>🛒</i>
+                <h2>SALEZ</h2>
+                <p>E-Commerce (Outbound): Order sync and SKU Alias.</p>
+                <div class="card-stat">SHOPIFY / ETSY</div>
+            </div>
+            <div class="hub-card" onclick="showNexuzPane('brainz')">
+                <i>🛡️</i>
+                <h2>BRAINZ</h2>
+                <p>System Operations: Vault backups and force calc.</p>
+                <div class="card-stat">CLOUD</div>
+            </div>
+        </div>
+
+        <!-- Detailed Panez -->
+        <div id="paneNexuzImportz" class="executive-pane">
+            <div class="pane-title">IMPORTZ</div>
+            <div class="nav-zone left" onclick="showNexuzPane('brainz')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showNexuzPane('salez')"><i>›</i></div>
+            
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main" style="padding:20px; overflow-y:auto;">
-                    <div class="control-panel" style="max-width:1200px; width:100%; margin:0 auto; display:grid; grid-template-columns: repeat(3, 1fr); gap:15px;">
-                        
-                        <div class="sync-section-header">🌐 Supply Chain (Inbound)</div>
-                        <div class="sync-section-desc">From Superbuy, download the complete HTML page for each order page, and for each Parcel Details page.</div>
-
+                    <div class="control-panel" style="max-width:1200px; width:100%; margin:0 auto; display:grid; grid-template-columns: repeat(2, 1fr); gap:15px;">
                         <!-- 1. Orders Sync -->
                         <div class="panel-card" style="border-left: 4px solid var(--primary-color);">
                             <h3 style="margin:0 0 10px 0; font-size:15px;">📦 Orderz Sync</h3>
@@ -1225,12 +1247,19 @@
                             <input type="file" id="parcelFiles" multiple accept=".html" style="width:100%; font-size:11px;">
                             <div id="statusParcels" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
                         </div>
-                        
-                        <div style="grid-column: span 1;"></div> <!-- Spacer -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="sync-section-header">🛒 E-Commerce (Outbound)</div>
-                        <div class="sync-section-desc">Sync sales data from Shopify and Etsy to maintain accurate finished goods inventory levels.</div>
-
+        <div id="paneNexuzSalez" class="executive-pane">
+            <div class="pane-title">SALEZ</div>
+            <div class="nav-zone left" onclick="showNexuzPane('importz')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showNexuzPane('brainz')"><i>›</i></div>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-main" style="padding:20px; overflow-y:auto;">
+                    <div class="control-panel" style="max-width:1200px; width:100%; margin:0 auto; display:grid; grid-template-columns: repeat(2, 1fr); gap:15px;">
                         <!-- 3. Sales Sync -->
                         <div class="panel-card" style="border-left: 4px solid #10b981;">
                             <h3 style="margin:0 0 10px 0; font-size:15px;">💸 Salez Order Sync</h3>
@@ -1252,12 +1281,19 @@
                                 <div style="padding:10px; text-align:center; font-size:10px; color:var(--text-muted);">Loading mappings...</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div style="grid-column: span 1;"></div> <!-- Spacer -->
-
-                        <div class="sync-section-header">🛡️ System Operations & Infrastructure</div>
-                        <div class="sync-section-desc">Authoritative Cloud management and mathematical reconciliation toolz.</div>
-
+        <div id="paneNexuzBrainz" class="executive-pane">
+            <div class="pane-title">BRAINZ</div>
+            <div class="nav-zone left" onclick="showNexuzPane('salez')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showNexuzPane('importz')"><i>›</i></div>
+            
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <div class="bom-main" style="padding:20px; overflow-y:auto;">
+                    <div class="control-panel" style="max-width:1200px; width:100%; margin:0 auto; display:grid; grid-template-columns: repeat(2, 1fr); gap:15px;">
                         <!-- 4. Data Vault -->
                         <div class="panel-card" style="border-left: 4px solid #0ea5e9;">
                             <h3 style="margin:0 0 10px 0; font-size:15px;">☁️ Backup & Restore</h3>
@@ -1275,13 +1311,12 @@
                         </div>
 
                         <!-- 5. Force Recalculation -->
-                        <div class="panel-card master-card" style="border-left: 4px solid #ef4444; grid-column: span 2;">
+                        <div class="panel-card master-card" style="border-left: 4px solid #ef4444;">
                             <h3 style="margin:0 0 10px 0; font-size:15px;">⚙️ Force Recalculation</h3>
-                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Manually trigger a complete mathematical reconciliation of all ledger offsets and inventory balances.</p>
+                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Manually trigger a complete mathematical reconciliation of all ledger balances.</p>
                             <div id="statusMaster" class="status-bar status-idle" style="font-size:13px; padding:10px; margin-bottom:10px;">Ready for sync operations...</div>
-                            <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; width:100%; padding:12px; font-weight:bold;">↻ FORCE MATHEMATICAL CALCULATION</button>
+                            <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; width:100%; padding:12px; font-weight:bold;">↻ FORCE EXACT CALCULATION</button>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -1799,7 +1834,7 @@
         if (tabId === 'invhub') { if(typeof showInventoryPane === 'function') showInventoryPane('hub'); }
         if (tabId === 'prodhub') { if(typeof showProductionPane === 'function') showProductionPane('hub'); }
         if (tabId === 'salezhub') { if(typeof showSalezPane === 'function') showSalezPane('hub'); }
-        if (tabId === 'synchub') { if(typeof showSyncPane === 'function') showSyncPane('hub'); }
+        if (tabId === 'synchub') { if(typeof showNexuzPane === 'function') showNexuzPane('hub'); }
 
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
     }
@@ -1851,14 +1886,18 @@
         if (typeof updateHubStats === 'function') updateHubStats();
     }
 
-    function showSyncPane(paneId) {
+    function showNexuzPane(paneId) {
         hideAllExecutivePanes();
-        // The SYNCZ Hub has been consolidated into a single unified page
-        const pane = document.getElementById('paneSyncMaster');
-        if (pane) pane.style.setProperty('display', 'flex', 'important');
+        if (paneId === 'hub') {
+            document.getElementById('nexuzHubLanding').style.setProperty('display', 'flex', 'important');
+        } else {
+            const mapping = { 'importz': 'paneNexuzImportz', 'salez': 'paneNexuzSalez', 'brainz': 'paneNexuzBrainz' };
+            const pane = document.getElementById(mapping[paneId]);
+            if (pane) pane.style.setProperty('display', 'flex', 'important');
+        }
         if (typeof updateHubStats === 'function') updateHubStats();
-        sysLog(`Loaded Unified SYNCZ Console`);
-        if (typeof renderAliasManager === 'function') renderAliasManager();
+        sysLog(`Loaded NEXUZ Console: ${paneId}`);
+        if(paneId === 'salez' && typeof renderAliasManager === 'function') renderAliasManager();
     }
 
     // --- SKU ALIAS MANAGER Logic ---
