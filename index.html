@@ -681,10 +681,10 @@
             <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('invhub')">📊 INVENTORY HUBZ</button>
-            <button class="tab-btn" onclick="switchTab('prodhub')">🏭 PRODUCTZ HUB</button>
-            <button class="tab-btn" onclick="switchTab('salezhub')">🛒 SALEZ HUB</button>
-            <button class="tab-btn" onclick="switchTab('synchub')">⚡ SYNCZ HUB</button>
+            <button class="tab-btn active" onclick="switchTab('invhub')">📊 STOCKPILEZ</button>
+            <button class="tab-btn" onclick="switchTab('prodhub')">🏭 MAKERZ</button>
+            <button class="tab-btn" onclick="switchTab('salezhub')">🛒 REVENUEZ</button>
+            <button class="tab-btn" onclick="switchTab('synchub')">⚡ NEXUZ</button>
         </div>
         <div class="top-controls">
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
@@ -710,13 +710,13 @@
         <div id="invHubLanding" class="hub-landing hub-container" style="flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showInventoryPane('pipeline')">
                 <i>📖</i>
-                <h2>LEDGERZ</h2>
+                <h2>DATAZ</h2>
                 <p>Full database access, raw entry, and parcel syncing.</p>
                 <div id="hubStatLedger" class="card-stat">Loading...</div>
             </div>
             <div class="hub-card" onclick="showInventoryPane('simple')">
                 <i>📋</i>
-                <h2>SIMPLEZ</h2>
+                <h2>EDITZ</h2>
                 <p>Fast editing for Neo Productz and 3D Printed itemz.</p>
                 <div id="hubStatSimple" class="card-stat">Loading...</div>
             </div>
@@ -730,7 +730,7 @@
 
         <!-- Detailed Panez -->
         <div id="panePipeline" class="executive-pane">
-            <div class="pane-title">LEDGERZ</div>
+            <div class="pane-title">DATAZ</div>
             <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             
@@ -748,7 +748,7 @@
         </div>
 
         <div id="paneSimple" class="executive-pane">
-            <div class="pane-title">SIMPLEZ</div>
+            <div class="pane-title">EDITZ</div>
             <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
             
@@ -785,21 +785,21 @@
     <!-- PRODUCTZ HUB -->
     <div id="prodhub-tab" class="tab-content" style="padding:0;">
         <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
-            <div class="hub-card" onclick="showProductionPane('builder')">
-                <i>🔨</i>
-                <h2>BUILDERZ</h2>
+            <div class="hub-card" onclick="showProductionPane('bom')">
+                <i>🛠️</i>
+                <h2>RECIPEZ</h2>
                 <p>Define recipenz, labor, and BOM structurez.</p>
                 <div class="card-stat" id="hubStatRecipes">0 RECIPES</div>
             </div>
             <div class="hub-card" onclick="showProductionPane('production')">
                 <i>🏭</i>
-                <h2>CONTROLZ</h2>
+                <h2>BATCHEZ</h2>
                 <p>Active Batchz, SOPz, and Work Orderz.</p>
                 <div class="card-stat" id="hubStatBatches">0 BATCHES</div>
             </div>
             <div class="hub-card" onclick="showProductionPane('print')">
                 <i>🖨️</i>
-                <h2>PRINTZ</h2>
+                <h2>LAYERZ</h2>
                 <p>Monitor live 3D Print queuez and taskz.</p>
                 <div class="card-stat" id="hubStatPrintQueue">0 ACTIVE</div>
             </div>
@@ -807,7 +807,7 @@
 
         <!-- Detailed Panez -->
         <div id="paneProdBuilder" class="executive-pane">
-            <div class="pane-title">BUILDERZ</div>
+            <div class="pane-title">RECIPEZ</div>
             <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
             
@@ -862,7 +862,7 @@
         </div>
 
         <div id="paneProdControl" class="executive-pane">
-            <div class="pane-title">CONTROLZ</div>
+            <div class="pane-title">BATCHEZ</div>
             <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
             
@@ -952,7 +952,7 @@
         </div>
 
         <div id="paneProdPrint" class="executive-pane">
-            <div class="pane-title">PRINTZ</div>
+            <div class="pane-title">LAYERZ</div>
             <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
             
@@ -1049,19 +1049,19 @@
             <div class="hub-card" onclick="showSalezPane('bridge')">
                 <i>📊</i>
                 <i>📖</i>
-                <h2>SALEZ LEDGER</h2>
+                <h2>ORDERZ</h2>
                 <p>Passive review of finalized outbound e-commerce salez.</p>
                 <div class="card-stat" id="hubStatSalezBridge">REVIEW ONLY</div>
             </div>
             <div class="hub-card" onclick="showSalezPane('analyticz')">
                 <i>📈</i>
-                <h2>ANALYTICZ</h2>
+                <h2>STATZ</h2>
                 <p>Visual Profit Derivation, Trendz, and Insightz.</p>
                 <div class="card-stat" id="hubStatMargin">OPTIMIZING...</div>
             </div>
             <div class="hub-card" onclick="showSalezPane('commandz')">
                 <i>💻</i>
-                <h2>COMMANDZ</h2>
+                <h2>SIMULATORZ</h2>
                 <p>Executive Oversight: High-level financial controlz.</p>
                 <div class="card-stat" id="hubStatCommand">LIVE TERMZ</div>
             </div>
@@ -1069,7 +1069,7 @@
 
         <!-- Detailed Panez -->
         <div id="paneSalezBridge" class="executive-pane">
-            <div class="pane-title">SALEZ LEDGER</div>
+            <div class="pane-title">ORDERZ</div>
             <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
             
@@ -1087,7 +1087,7 @@
         </div>
 
             <div id="paneSalezAnalyticz" class="executive-pane">
-                <div class="pane-title">ANALYTICZ</div>
+                <div class="pane-title">STATZ</div>
                 <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
                 <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
                 
@@ -1141,7 +1141,7 @@
             </div>
         </div>
         <div id="paneSalezCommandz" class="executive-pane">
-            <div class="pane-title">COMMANDZ</div>
+            <div class="pane-title">SIMULATORZ</div>
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
             <!-- Contents of CEO Terminal -->
