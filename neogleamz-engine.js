@@ -1,23 +1,28 @@
-window.getEngineTrueCogs = function(pName) {
-    if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return 0;
-    let total = 0;
+window.calculateProductBreakdown = function(pName) {
+    let res = { raw: 0, labor: 0, total: 0 };
+    if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return res;
+    
     productsDB[pName].forEach(item => {
         let key = item.item_key || item.di_item_id || item.name;
         let qty = parseFloat(item.quantity || item.qty) || 1;
         if (key.startsWith('RECIPE:::')) {
-            total += window.getEngineTrueCogs(key.replace('RECIPE:::', '')) * qty;
+            let sub = window.calculateProductBreakdown(key.replace('RECIPE:::', ''));
+            res.raw += sub.total * qty; 
         } else if (typeof catalogCache !== 'undefined' && catalogCache[key]) {
-            total += (parseFloat(catalogCache[key].avgUnitCost) || 0) * qty;
+            res.raw += (parseFloat(catalogCache[key].avgUnitCost) || 0) * qty;
         }
     });
+    
     if (typeof laborDB !== 'undefined' && laborDB[pName]) {
-        laborDB[pName].forEach(l => {
-            total += parseFloat(l.labor_cost) || 0;
-        });
+        let l = laborDB[pName];
+        res.labor = ((parseFloat(l.time) || 0) / 60) * (parseFloat(l.rate) || 0);
     }
-    return total;
+    
+    res.total = res.raw + res.labor;
+    return res;
 };
-window.calculateProductTotal = window.getEngineTrueCogs; // Bind legacy pointer
+window.getEngineTrueCogs = function(pName) { return window.calculateProductBreakdown(pName).total; };
+window.calculateProductTotal = window.getEngineTrueCogs;
 
 // ==========================================
 // CENTRAL KPI RENDER ENGINE (MIGRATED & AUDITED)
