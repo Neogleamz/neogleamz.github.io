@@ -1882,7 +1882,7 @@
             const mapping = { 'builder': 'paneProdBuilder', 'production': 'paneProdControl', 'print': 'paneProdPrint' };
             const pane = document.getElementById(mapping[paneId]);
             if (pane) pane.style.setProperty('display', 'flex', 'important');
-            if (paneId === 'builder') { if(typeof renderBomBuilder === 'function') renderBomBuilder(); }
+            if (paneId === 'builder') { if(typeof renderProductList === 'function') renderProductList(); }
             if (paneId === 'production') { if(typeof renderProductionDashboard === 'function') renderProductionDashboard(); }
             if (paneId === 'print') { if(typeof refreshPrintQueue === 'function') refreshPrintQueue(); }
         }
