@@ -2245,12 +2245,12 @@
               entries.forEach(([sku, recipe]) => {
                   let keyStr = String(sku);
                   let valStr = String(recipe);
-                  h += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:rgba(0,0,0,0.25); border:1px solid rgba(45, 212, 191, 0.2); border-left:4px solid #f97316; border-radius:8px; transition:0.2s; gap:15px; margin-bottom:8px;">
+                  h += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:rgba(0,0,0,0.25); border:1px solid rgba(45, 212, 191, 0.2); border-left:4px solid #f97316; border-radius:8px; transition:0.2s; gap:15px; margin-bottom:8px; width:100%; box-sizing:border-box;">
                         <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:0;">
-                            <span style="font-family:'Outfit', sans-serif; font-size:14px; font-weight:800; color:#f8fafc; word-break:break-word; line-height:1.2;">${keyStr}</span> 
-                            <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#f97316; font-weight:700; word-break:break-word; line-height:1.2;"><i style="opacity:0.6; margin-right:4px;">↳</i>${valStr}</span>
+                            <span style="font-family:'Outfit', sans-serif; font-size:14px; font-weight:800; color:#f8fafc; overflow-wrap:anywhere; line-height:1.2;">${keyStr}</span> 
+                            <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#f97316; font-weight:700; overflow-wrap:anywhere; line-height:1.2;"><i style="opacity:0.6; margin-right:4px;">+3</i>${valStr}</span>
                         </div>
-                        <button title="Remove Mapping" onclick="removeAliasMapping('${sku.replace(/'/g, "\\'")}')" style="flex-shrink:0; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); color:#ef4444; cursor:pointer; font-size:11px; padding:8px 14px; border-radius:6px; font-weight:900; transition:0.2s; display:flex; justify-content:center; align-items:center;" onmouseover="this.style.background='#ef4444'; this.style.color='white';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">UNLINK</button>
+                        <button title="Remove Mapping" onclick="removeAliasMapping('${sku.replace(/'/g, "\\'")}')" style="flex: 0 0 auto; width: auto !important; max-width: 100px; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); color:#ef4444; cursor:pointer; font-size:11px; padding:8px 14px; border-radius:6px; font-weight:900; transition:0.2s; display:flex; justify-content:center; align-items:center;" onmouseover="this.style.background='#ef4444'; this.style.color='white';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">UNLINK</button>
                     </div>`;
               });
         }
