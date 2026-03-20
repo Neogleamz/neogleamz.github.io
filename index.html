@@ -50,7 +50,7 @@
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; }
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Mulish', sans-serif; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; display: flex; flex-direction: column; }
-        [data-theme="light"] .title-block img { filter: brightness(0); }
+        [data-theme="dark"] .title-block img { filter: brightness(0) invert(1); }
 
         /* Responsive Layout Overrides */
         .container { 
@@ -652,6 +652,35 @@
             @keyframes pulseBlue { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
             .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
         }
+        /* NEBULA TEAL AESTHETIC OVERRIDE */
+        .hub-card i { font-size: 38px !important; margin-bottom: 25px !important; filter: drop-shadow(0 0 15px var(--icon-glow, rgba(45, 212, 191, 0.5))) !important; color: var(--text-heading); transition: all 0.3s ease; }
+        .hub-card { border-color: var(--card-border, transparent) !important; }
+        .hub-card:hover { border-color: var(--card-hover-border, #f97316) !important; box-shadow: 0 15px 45px var(--card-glow, rgba(249, 115, 22, 0.3)) !important; }
+        
+        [data-theme='dark'] {
+            --bg-body: #070f1a !important; --bg-container: #0b1526 !important; --bg-glass: rgba(11, 21, 38, 0.85) !important; --glass-border: rgba(45, 212, 191, 0.25) !important;
+            --bg-panel: #0d1a30 !important; --border-color: #1e293b !important; --text-main: #cbd5e1 !important; --text-heading: #f8fafc !important;
+            --icon-glow: rgba(45, 212, 191, 0.5) !important; --card-border: rgba(45, 212, 191, 0.1) !important; --card-hover-border: #2dd4bf !important; --card-glow: rgba(45, 212, 191, 0.25) !important;
+        }
+
+        /* Shift the active tab accent to Teal */
+        .tab-btn.active { 
+            background: rgba(45, 212, 191, 0.15) !important; 
+            color: #2dd4bf !important; 
+            border-color: #2dd4bf !important;
+            box-shadow: 0 0 35px rgba(45, 212, 191, 0.8), inset 0 0 15px rgba(45, 212, 191, 0.3) !important; 
+            font-weight: 900 !important;
+            transform: translateY(-2px) !important;
+        }
+        .pane-title {
+            color: #2dd4bf !important;
+            text-shadow: 0 0 15px rgba(45, 212, 191, 0.3) !important;
+        }
+        .nav-zone.left { background: linear-gradient(to right, rgba(45, 212, 191, 0.15) 0%, transparent 100%) !important; }
+        .nav-zone.right { background: linear-gradient(to left, rgba(45, 212, 191, 0.15) 0%, transparent 100%) !important; }
+        .nav-zone:hover { background: linear-gradient(to var(--dir, right), rgba(45, 212, 191, 0.35) 0%, transparent 100%) !important; }
+        .nav-zone i { color: #2dd4bf !important; text-shadow: 0 0 15px rgba(45, 212, 191, 0.6) !important; }
+        .nav-zone:hover i { text-shadow: 0 0 25px rgba(45, 212, 191, 0.9) !important; }
     </style>
 </head>
 <body>
@@ -677,9 +706,9 @@
 
 <div id="appUI" class="container" style="display: none;">
     <div class="header-area">
-        <div class="title-block">
-            <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 32px; width: auto; filter: brightness(0) invert(1);">
-            <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
+        <div class="title-block" style="display: flex; align-items: baseline; gap: 15px; flex-wrap: nowrap;">
+            <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 50px; width: auto; align-self: center;">
+            <p class="subtitle" style="margin: 0;">Cloud-Native Ledger & Command Center</p>
         </div>
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('invhub')">📊 STOCKPILEZ</button>
