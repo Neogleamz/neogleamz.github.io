@@ -336,12 +336,22 @@ function updateHubStats() {
         if (typeof catalogCache !== 'undefined') {
             let cKeys = Object.keys(catalogCache);
             let prints = 0;
-            cKeys.forEach(k => { if (catalogCache[k].is_3d_print) prints++; });
+            let usedSet = new Set();
+            if(typeof productsDB !== 'undefined'){
+                Object.values(productsDB).forEach(pArr => {
+                    pArr.forEach(c => usedSet.add(c.item_key || c.di_item_id || c.name));
+                });
+            }
+            let assigned = 0;
+            cKeys.forEach(k => { 
+                if (catalogCache[k].is_3d_print) prints++; 
+                if (usedSet.has(k)) assigned++;
+            });
             setStat('statEditzComps', fmtNum(cKeys.length));
             setStat('statEditzPrints', fmtNum(prints));
             setStat('statEditzRaw', fmtNum(cKeys.length - prints));
-            setStat('statEditzAssigned', '--');
-            setStat('statEditzOrphan', '--');
+            setStat('statEditzAssigned', fmtNum(assigned));
+            setStat('statEditzOrphan', fmtNum(cKeys.length - assigned));
         }
 
         // --- STOCKZ ---
