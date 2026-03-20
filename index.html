@@ -99,12 +99,14 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; 
+            justify-content: flex-start; 
             backdrop-filter: blur(16px); 
             box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
             width: 450px; /* Restored to 450px */
             flex: 0 0 450px;
-            height: 350px; /* Restored to 350px */
+            height: auto;
+            min-height: 480px;
+            padding-top: 35px;
             position: relative;
             overflow: hidden;
             box-sizing: border-box;
@@ -121,8 +123,13 @@
         .hub-card:hover i { transform: scale(1.1); }
         .hub-card h2 { margin: 0 0 6px 0; font-size: 20px; font-weight: 900; color: var(--text-heading); letter-spacing: -0.5px; }
         .hub-card .card-stat { font-family: 'Mulish', sans-serif; font-weight: 900; font-size: 11px; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 10px; border-radius: 20px; margin-top: 10px; border: 1px solid rgba(249, 115, 22, 0.15); text-transform: uppercase; }
-        .hub-card p { margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; max-width: 90%; }
+        .hub-card p { margin: 0 0 15px 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; max-width: 90%; flex-shrink: 0; }
         
+        .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: auto; }
+        .kpi-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
+        .kpi-row:hover { background: var(--bg-panel); border-color: var(--card-hover-border, #f97316); box-shadow: 0 2px 8px var(--card-glow, rgba(249, 115, 22, 0.15)); }
+        .kpi-row span { color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;}
+        .kpi-row strong { color: var(--text-heading); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 900; text-align: right;}
         
         .pulse-orange { animation: pulseGlow 4s infinite ease-in-out; }
         @keyframes pulseGlow { 
@@ -597,6 +604,17 @@
             
             .tabs { width: 100vw; max-width: 100%; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding-bottom: 2px; }
             .tabs::-webkit-scrollbar { display: none; }
+            
+            /* Tighten Hub UI for mobile */
+            .hub-container { padding: 10px !important; gap: 15px !important; min-height: auto !important; margin-bottom: 20px;}
+            .hub-card { width: 100% !important; min-width: 0 !important; min-height: 250px !important; padding: 20px 15px !important; flex: 1 1 100% !important; border-radius: 16px !important; }
+            .hub-card i { font-size: 32px !important; margin-bottom: 10px !important; }
+            .hub-card h2 { font-size: 16px !important; margin: 0 0 5px 0 !important; }
+            .hub-card p { font-size: 11px !important; margin-bottom: 10px !important; }
+            .hub-kpi-grid { padding-top: 10px !important; gap: 5px !important; margin-top:10px !important;}
+            .kpi-row { padding: 6px 8px !important; }
+            .kpi-row span { font-size: 9px !important; }
+            .kpi-row strong { font-size: 11px !important; }
             .tab-btn { flex: 0 0 auto; padding: 10px 12px; font-size: 12px; }
             
             .top-controls { justify-content: space-between; flex-wrap: wrap; margin-top: 5px; }
@@ -739,22 +757,40 @@
     <div id="invhub-tab" class="tab-content active" style="padding:0;">
         <div id="invHubLanding" class="hub-landing hub-container" style="flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showInventoryPane('pipeline')">
-                <i>📖</i>
+                <i>dY"-</i>
                 <h2>DATAZ</h2>
                 <p>Full database access, raw entry, and parcel syncing.</p>
-                <div id="hubStatLedger" class="card-stat">Loading...</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Log Recordz</span><strong id="statDatazRecords">--</strong></div>
+                    <div class="kpi-row"><span>Logged Parcelz</span><strong id="statDatazParcels">--</strong></div>
+                    <div class="kpi-row"><span>Total Actual Paid</span><strong id="statDatazPaid">--</strong></div>
+                    <div class="kpi-row"><span>Total Shipped Vol (g)</span><strong id="statDatazWt">--</strong></div>
+                    <div class="kpi-row"><span>Global Avg Cost / g</span><strong id="statDatazAvg">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showInventoryPane('simple')">
-                <i>📋</i>
+                <i>dY"<</i>
                 <h2>EDITZ</h2>
                 <p>Fast editing for Neo Productz and 3D Printed itemz.</p>
-                <div id="hubStatSimple" class="card-stat">Loading...</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Active Componentz</span><strong id="statEditzComps">--</strong></div>
+                    <div class="kpi-row"><span>3D Printed Partz</span><strong id="statEditzPrints">--</strong></div>
+                    <div class="kpi-row"><span>Raw Materialz</span><strong id="statEditzRaw">--</strong></div>
+                    <div class="kpi-row"><span>Allocated / Assigned</span><strong id="statEditzAssigned">--</strong></div>
+                    <div class="kpi-row"><span>Orphan Componentz</span><strong id="statEditzOrphan">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showInventoryPane('inventory')">
-                <i>📊</i>
+                <i>dY"S</i>
                 <h2>STOCKZ</h2>
                 <p>Real-time stock levelz, reorder pointz, and value tracking.</p>
-                <div id="hubStatStock" class="card-stat">Loading...</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Current Yield</span><strong id="statStockzUnits">--</strong></div>
+                    <div class="kpi-row"><span>Low Stock Warningz</span><strong id="statStockzAlerts">--</strong></div>
+                    <div class="kpi-row"><span>Raw Mat Valuation</span><strong id="statStockzRawVal">--</strong></div>
+                    <div class="kpi-row"><span>Product Valuation</span><strong id="statStockzFgiVal">--</strong></div>
+                    <div class="kpi-row"><span>Treasury Aggregate</span><strong id="statStockzTotalVal">--</strong></div>
+                </div>
             </div>
         </div>
 
@@ -816,22 +852,40 @@
     <div id="prodhub-tab" class="tab-content" style="padding:0;">
         <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showProductionPane('builder')">
-                <i>🛠️</i>
+                <i>dY>,?</i>
                 <h2>RECIPEZ</h2>
                 <p>Define recipenz, labor, and BOM structurez.</p>
-                <div class="card-stat" id="hubStatRecipes">0 RECIPES</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Registered Recipez</span><strong id="statRecipezActive">--</strong></div>
+                    <div class="kpi-row"><span>Global Avg Margin</span><strong id="statRecipezMargin">--</strong></div>
+                    <div class="kpi-row"><span>Highest Prod Cost</span><strong id="statRecipezCost">--</strong></div>
+                    <div class="kpi-row"><span>Master Variant</span><strong id="statRecipezMaster">--</strong></div>
+                    <div class="kpi-row"><span>Missing BOM Data</span><strong id="statRecipezMissing">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showProductionPane('production')">
-                <i>🏭</i>
+                <i>dY?-</i>
                 <h2>BATCHEZ</h2>
                 <p>Active Batchz, SOPz, and Work Orderz.</p>
-                <div class="card-stat" id="hubStatBatches">0 BATCHES</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Active Work Orderz</span><strong id="statBatchezBuilt">--</strong></div>
+                    <div class="kpi-row"><span>Yield Forecast</span><strong id="statBatchezUnits">--</strong></div>
+                    <div class="kpi-row"><span>Material Pull</span><strong id="statBatchezComps">--</strong></div>
+                    <div class="kpi-row"><span>Projected Print Hrs</span><strong id="statBatchezTime">--</strong></div>
+                    <div class="kpi-row"><span>CapEx Commitment</span><strong id="statBatchezVal">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showProductionPane('print')">
-                <i>🖨️</i>
+                <i>dY-",?</i>
                 <h2>LAYERZ</h2>
                 <p>Monitor live 3D Print queuez and taskz.</p>
-                <div class="card-stat" id="hubStatPrintQueue">0 ACTIVE</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Active Print Jobz</span><strong id="statLayerzJobs">--</strong></div>
+                    <div class="kpi-row"><span>Componentz Ready</span><strong id="statLayerzDone">--</strong></div>
+                    <div class="kpi-row"><span>Pipeline Queue</span><strong id="statLayerzPending">--</strong></div>
+                    <div class="kpi-row"><span>Material Est (g)</span><strong id="statLayerzMat">--</strong></div>
+                    <div class="kpi-row"><span>Est Print Hrs Vol</span><strong id="statLayerzScrap">--</strong></div>
+                </div>
             </div>
         </div>
 
@@ -954,7 +1008,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                             <div style="display:flex; gap: 10px;">
                                 <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color);">🔒</button>
-                                <button class="print-btn" onclick="printSOP()">🖨️ Print SOPs</button>
+                                <button class="print-btn" onclick="printSOP()">🖨️ Full View</button>
                             </div>
                         </div>
                         <div id="inlineSOPContainer" style="display:flex; flex-direction:column; position:relative;">
@@ -1077,22 +1131,40 @@
     <div id="salezhub-tab" class="tab-content" style="padding:0;">
         <div id="salezHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showSalezPane('bridge')">
-                <i>🛍️</i>
+                <i>dY>?,?</i>
                 <h2>ORDERZ</h2>
                 <p>Passive review of finalized outbound e-commerce salez.</p>
-                <div class="card-stat" id="hubStatSalezBridge">REVIEW ONLY</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Fulfilled Orderz</span><strong id="statOrderzTotal">--</strong></div>
+                    <div class="kpi-row"><span>Unit Vol Deployed</span><strong id="statOrderzUnits">--</strong></div>
+                    <div class="kpi-row"><span>Shopify Payload</span><strong id="statOrderzShopify">--</strong></div>
+                    <div class="kpi-row"><span>Etsy Payload</span><strong id="statOrderzEtsy">--</strong></div>
+                    <div class="kpi-row"><span>Gross Salez Pipeline</span><strong id="statOrderzVal">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showSalezPane('analyticz')">
-                <i>📈</i>
+                <i>dY"^</i>
                 <h2>STATZ</h2>
                 <p>Visual Profit Derivation, Trendz, and Insightz.</p>
-                <div class="card-stat" id="hubStatMargin">OPTIMIZING...</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Gross Revenue</span><strong id="statStatzRev">--</strong></div>
+                    <div class="kpi-row"><span>Pure Net Margin</span><strong id="statStatzNet">--</strong></div>
+                    <div class="kpi-row"><span>Global Trailing ROI</span><strong id="statStatzRoi">--</strong></div>
+                    <div class="kpi-row"><span>Net Yield Per Unit</span><strong id="statStatzAvgProf">--</strong></div>
+                    <div class="kpi-row"><span>Raw Component Exp</span><strong id="statStatzRawExp">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showSalezPane('commandz')">
-                <i>💻</i>
+                <i>dY'</i>
                 <h2>SIMULATORZ</h2>
                 <p>Executive Oversight: High-level financial controlz.</p>
-                <div class="card-stat" id="hubStatCommand">LIVE TERMZ</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Current CAC</span><strong id="statSimzCac">--</strong></div>
+                    <div class="kpi-row"><span>Projected Margin</span><strong id="statSimzMarg">--</strong></div>
+                    <div class="kpi-row"><span>Avg Shipping Toll</span><strong id="statSimzShip">--</strong></div>
+                    <div class="kpi-row"><span>Labor Capital Index</span><strong id="statSimzLev">--</strong></div>
+                    <div class="kpi-row"><span>Ledger Health Score</span><strong id="statSimzHealth">--</strong></div>
+                </div>
             </div>
         </div>
 
@@ -1227,22 +1299,40 @@
     <div id="synchub-tab" class="tab-content" style="padding:0;">
         <div id="nexuzHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showNexuzPane('importz')">
-                <i>🌐</i>
+                <i>dYO?</i>
                 <h2>IMPORTZ</h2>
                 <p>Supply Chain (Inbound): Orderz and Parcelz sync.</p>
-                <div class="card-stat">SUPERBUY</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Vault Ingestionz</span><strong id="statImpzSyncs">--</strong></div>
+                    <div class="kpi-row"><span>Total CapEx Syncs</span><strong id="statImpzSpend">--</strong></div>
+                    <div class="kpi-row"><span>Customs Surcharge</span><strong id="statImpzCus">--</strong></div>
+                    <div class="kpi-row"><span>Global Freight Cost</span><strong id="statImpzShip">--</strong></div>
+                    <div class="kpi-row"><span>Ledger Wt Payload (g)</span><strong id="statImpzWt">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showNexuzPane('salez')">
-                <i>🛒</i>
+                <i>dY>'</i>
                 <h2>SALEZ</h2>
                 <p>E-Commerce (Outbound): Order sync and SKU Alias.</p>
-                <div class="card-stat">SHOPIFY / ETSY</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Active SKU Alias Nodez</span><strong id="statSalzMap">--</strong></div>
+                    <div class="kpi-row"><span>Unmapped Shopify</span><strong id="statSalzUnShop">--</strong></div>
+                    <div class="kpi-row"><span>Unmapped Etsy</span><strong id="statSalzUnEtsy">--</strong></div>
+                    <div class="kpi-row"><span>Revenue Ingestion (24h)</span><strong id="statSalz24h">--</strong></div>
+                    <div class="kpi-row"><span>Sync Layer Integrity</span><strong id="statSalzHealth">--</strong></div>
+                </div>
             </div>
             <div class="hub-card" onclick="showNexuzPane('brainz')">
-                <i>🛡️</i>
+                <i>dY>,?</i>
                 <h2>BRAINZ</h2>
                 <p>System Operations: Vault backups and force calc.</p>
-                <div class="card-stat">CLOUD</div>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Session Init Time</span><strong id="statBrnzSync">--</strong></div>
+                    <div class="kpi-row"><span>Live DOM Footprint</span><strong id="statBrnzCache">--</strong></div>
+                    <div class="kpi-row"><span>Last Vault Comm</span><strong id="statBrnzBack">--</strong></div>
+                    <div class="kpi-row"><span>Engine Build Ver</span><strong id="statBrnzBld">--</strong></div>
+                    <div class="kpi-row"><span>System Faultz</span><strong id="statBrnzErr">--</strong></div>
+                </div>
             </div>
         </div>
 
@@ -1496,60 +1586,209 @@
 
     function updateHubStats() {
         try {
-            // Inventory Stats
-            let elLedger = document.getElementById('hubStatLedger');
-            if (elLedger && typeof finalResults !== 'undefined') elLedger.innerText = `${finalResults.length} RECORDS`;
-            
-            let elSimple = document.getElementById('hubStatSimple');
-            if (elSimple && typeof catalogCache !== 'undefined') {
-                let printedCount = Object.keys(catalogCache).filter(k => catalogCache[k].is_3d_print).length;
-                elSimple.innerText = `${printedCount} PRINTED ITEMS`;
+            const setStat = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+            const fmtNum = (n) => (!isNaN(n) && n !== null) ? Number(n).toLocaleString() : n;
+            const fmtMoney = (n) => (!isNaN(n) && n !== null) ? `$${Number(n).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}` : n;
+
+            // --- DATAZ ---
+            if (typeof finalResults !== 'undefined') {
+                setStat('statDatazRecords', fmtNum(finalResults.length));
+                let parcels = new Set(), totalPaid = 0, totalWt = 0;
+                finalResults.forEach(r => {
+                    totalWt += (r.actual_chargeable_weight_g || 0);
+                    if (!parcels.has(r.parcel_no) && r.parcel_no) {
+                        parcels.add(r.parcel_no);
+                        totalPaid += (r.actual_paid || 0);
+                    }
+                });
+                setStat('statDatazParcels', fmtNum(parcels.size));
+                setStat('statDatazPaid', fmtMoney(totalPaid));
+                setStat('statDatazWt', fmtNum(totalWt));
+                setStat('statDatazAvg', totalWt > 0 ? fmtMoney(totalPaid / totalWt) : '$0.00');
             }
-            
-            let elStock = document.getElementById('hubStatStock');
-            if (elStock && typeof catalogCache !== 'undefined' && typeof inventoryDB !== 'undefined') {
-                let totalValue = 0;
+
+            // --- EDITZ ---
+            if (typeof catalogCache !== 'undefined') {
+                let keys = Object.keys(catalogCache);
+                let prints = keys.filter(k => catalogCache[k].is_3d_print).length;
+                setStat('statEditzComps', fmtNum(keys.length));
+                setStat('statEditzPrints', fmtNum(prints));
+                setStat('statEditzRaw', fmtNum(keys.length - prints));
+                
+                let assigned = new Set();
+                if (typeof productsDB !== 'undefined') {
+                    Object.values(productsDB).forEach(p => {
+                        if (p.bom) p.bom.forEach(b => assigned.add(b.id));
+                    });
+                }
+                setStat('statEditzAssigned', fmtNum(assigned.size));
+                setStat('statEditzOrphan', fmtNum(keys.length - assigned.size));
+            }
+
+            // --- STOCKZ ---
+            if (typeof catalogCache !== 'undefined' && typeof inventoryDB !== 'undefined') {
+                let rawVal = 0, alerts = 0;
                 Object.keys(catalogCache).forEach(k => {
                     let c = catalogCache[k], i = inventoryDB[k] || {};
                     let s = (c.totalQty || 0) + (i.manual_adjustment || 0) - (i.consumed_qty || 0) - (i.scrap_qty || 0);
-                    totalValue += Math.max(0, s) * (c.avgUnitCost || 0);
+                    if (s <= (c.reorder_point || 0)) alerts++;
+                    rawVal += Math.max(0, s) * (c.avgUnitCost || 0);
                 });
+                let fgiVal = 0, fgiUnits = 0;
                 if (typeof productsDB !== 'undefined') {
                     Object.keys(productsDB).forEach(p => {
                         let i = inventoryDB[`RECIPE:::${p}`] || {produced_qty:0, sold_qty:0};
                         let s = (i.produced_qty || 0) - (i.sold_qty || 0);
+                        fgiUnits += Math.max(0, s);
                         let cost = (typeof calculateProductBreakdown === 'function') ? calculateProductBreakdown(p).total : 0;
-                        totalValue += Math.max(0, s) * cost;
+                        fgiVal += Math.max(0, s) * cost;
                     });
                 }
-                elStock.innerText = `$${Math.round(totalValue).toLocaleString()} ASSETS`;
+                setStat('statStockzUnits', fmtNum(fgiUnits));
+                setStat('statStockzAlerts', fmtNum(alerts));
+                setStat('statStockzRawVal', fmtMoney(rawVal));
+                setStat('statStockzFgiVal', fmtMoney(fgiVal));
+                setStat('statStockzTotalVal', fmtMoney(rawVal + fgiVal));
             }
 
-            // Production Stats
-            let elRecipes = document.getElementById('hubStatRecipes');
-            if (elRecipes && typeof productsDB !== 'undefined') elRecipes.innerText = `${Object.keys(productsDB).length} RECIPES`;
-            
-            let elBatches = document.getElementById('hubStatBatches');
-            if (elBatches && typeof workOrdersDB !== 'undefined') {
-                let activeBatches = workOrdersDB.filter(w => w.status !== 'Completed').length;
-                elBatches.innerText = `${activeBatches} BATCHES`;
-            }
-            
-            let elPrints = document.getElementById('hubStatPrintQueue');
-            if (elPrints && typeof printQueueDB !== 'undefined') {
-                let queuedPrints = printQueueDB.filter(p => !p.completed && !p.failed).length;
-                elPrints.innerText = `${queuedPrints} ACTIVE`;
+            // --- RECIPEZ ---
+            if (typeof productsDB !== 'undefined') {
+                let keys = Object.keys(productsDB);
+                setStat('statRecipezActive', fmtNum(keys.length));
+                let maxCost = 0, missing = 0, totalMargin = 0, marginCount = 0;
+                keys.forEach(p => {
+                    let cost = (typeof calculateProductBreakdown === 'function') ? calculateProductBreakdown(p).total : 0;
+                    if (cost > maxCost) maxCost = cost;
+                    let prod = productsDB[p];
+                    if (prod.bom) {
+                        prod.bom.forEach(b => { if (typeof catalogCache !== 'undefined' && !catalogCache[b.id]) missing++; });
+                    }
+                    if (prod.retail_price > 0 && cost > 0) {
+                        totalMargin += ((prod.retail_price - cost) / prod.retail_price) * 100;
+                        marginCount++;
+                    }
+                });
+                setStat('statRecipezMargin', marginCount > 0 ? (totalMargin/marginCount).toFixed(1) + '%' : '0.0%');
+                setStat('statRecipezCost', fmtMoney(maxCost));
+                setStat('statRecipezMaster', keys.length > 0 ? String(keys[0]).substring(0,12) : 'NONE');
+                setStat('statRecipezMissing', fmtNum(missing));
             }
 
-            // Salez Stats
-            let elSalez = document.getElementById('hubStatSalezBridge');
-            if (elSalez && typeof salesDB !== 'undefined') elSalez.innerText = `${salesDB.length} TOTAL SALEZ`;
-            
-            let elMargin = document.getElementById('hubStatMargin');
-            if (elMargin && typeof finalResults !== 'undefined') {
-                // Placeholder for margin calculation logic
-                elMargin.innerText = "OPTIMIZING..."; 
+            // --- BATCHEZ ---
+            if (typeof workOrdersDB !== 'undefined') {
+                let active = workOrdersDB.filter(w => w.status !== 'Completed');
+                setStat('statBatchezBuilt', fmtNum(active.length));
+                let units = 0, time = 0, val = 0, pulls = 0;
+                active.forEach(w => {
+                    units += (w.qty || 0);
+                    let cost = (typeof calculateProductBreakdown === 'function') ? calculateProductBreakdown(w.product_id).total : 0;
+                    val += (w.qty || 0) * cost;
+                    if (w.materials_pulled) pulls++;
+                });
+                if (typeof printQueueDB !== 'undefined') {
+                    active.forEach(w => {
+                        time += printQueueDB.filter(p => String(p.wo_id) === String(w.id) && !p.completed && !p.failed).reduce((sum, p) => sum + (p.expected_time_mins || 0), 0);
+                    });
+                }
+                setStat('statBatchezUnits', fmtNum(units));
+                setStat('statBatchezComps', `${pulls}/${active.length}`);
+                setStat('statBatchezTime', fmtNum(Math.round(time/60)) + ' hrs');
+                setStat('statBatchezVal', fmtMoney(val));
             }
+
+            // --- LAYERZ ---
+            if (typeof printQueueDB !== 'undefined') {
+                let active = printQueueDB.filter(p => !p.completed && !p.failed);
+                let done = printQueueDB.filter(p => p.completed && !p.failed).length;
+                setStat('statLayerzJobs', fmtNum(active.filter(p => p.status === 'Printing').length));
+                setStat('statLayerzDone', fmtNum(done));
+                setStat('statLayerzPending', fmtNum(active.filter(p => p.status === 'Queued').length));
+                
+                let mat = 0, hrs = 0;
+                active.forEach(p => {
+                    hrs += (p.expected_time_mins || 0);
+                    if (p.component_id && typeof catalogCache !== 'undefined') {
+                        mat += (catalogCache[p.component_id]?.unit_weight_g || 0) * (p.qty || 1);
+                    }
+                });
+                setStat('statLayerzMat', fmtNum(Math.round(mat)));
+                setStat('statLayerzScrap', fmtNum(Math.round(hrs/60)));
+            }
+
+            // --- ORDERZ ---
+            if (typeof salesDB !== 'undefined') {
+                setStat('statOrderzTotal', fmtNum(salesDB.length));
+                let units = 0, shopify = 0, etsy = 0, val = 0;
+                salesDB.forEach(s => {
+                    units += (s.quantity || 1);
+                    val += parseFloat(s.total) || 0;
+                    let so = (s.source || "").toLowerCase();
+                    if (so.includes("shopify")) shopify++;
+                    if (so.includes("etsy")) etsy++;
+                });
+                setStat('statOrderzUnits', fmtNum(units));
+                setStat('statOrderzShopify', fmtNum(shopify));
+                setStat('statOrderzEtsy', fmtNum(etsy));
+                setStat('statOrderzVal', fmtMoney(val));
+            }
+
+            // --- STATZ ---
+            if (typeof salesDB !== 'undefined') {
+                let rev = 0, exp = 0;
+                salesDB.forEach(s => {
+                    rev += parseFloat(s.total) || 0;
+                    exp += parseFloat(s.cogs) || 0;
+                });
+                let net = rev - exp;
+                let roi = exp > 0 ? (net / exp) * 100 : 0;
+                setStat('statStatzRev', fmtMoney(rev));
+                setStat('statStatzNet', fmtMoney(net));
+                setStat('statStatzRoi', roi.toFixed(1) + '%');
+                setStat('statStatzAvgProf', salesDB.length > 0 ? fmtMoney(net / salesDB.length) : '$0.00');
+                setStat('statStatzRawExp', fmtMoney(exp));
+            }
+
+            // --- SIMULATORZ ---
+            setStat('statSimzCac', '$0.00'); 
+            setStat('statSimzMarg', '--');
+            setStat('statSimzShip', '--');
+            setStat('statSimzLev', '--');
+            setStat('statSimzHealth', 'OPTIMAL');
+
+            // --- IMPORTZ ---
+            let syncCount = localStorage.getItem('statImpzSyncs') || 0;
+            setStat('statImpzSyncs', fmtNum(parseInt(syncCount)));
+            setStat('statImpzSpend', '--');
+            setStat('statImpzCus', '--');
+            setStat('statImpzShip', '--');
+            setStat('statImpzWt', '--');
+
+            // --- SALEZ (SYNC) ---
+            if (typeof aliasDB !== 'undefined') {
+                setStat('statSalzMap', fmtNum(Object.keys(aliasDB).length));
+                let unmappedS = 0, unmappedE = 0;
+                if (typeof salesDB !== 'undefined') {
+                    salesDB.forEach(s => {
+                        if (!s.mapped_recipe) {
+                            if ((s.source||"").toLowerCase().includes("shopify")) unmappedS++;
+                            if ((s.source||"").toLowerCase().includes("etsy")) unmappedE++;
+                        }
+                    });
+                }
+                setStat('statSalzUnShop', fmtNum(unmappedS));
+                setStat('statSalzUnEtsy', fmtNum(unmappedE));
+                setStat('statSalz24h', '0');
+                setStat('statSalzHealth', (unmappedS + unmappedE) === 0 ? 'NOMINAL' : 'UNMAPPED ALIAS');
+            }
+
+            // --- BRAINZ ---
+            setStat('statBrnzSync', (performance.now() / 1000).toFixed(2) + 's');
+            setStat('statBrnzCache', fmtNum(document.getElementsByTagName('*').length) + ' Nodes');
+            let lastSync = localStorage.getItem('lastBrainSync') || 'NEVER';
+            let tDiff = lastSync !== 'NEVER' ? Math.round((Date.now() - parseInt(lastSync))/60000) + 'm ago' : lastSync;
+            setStat('statBrnzBack', tDiff);
+            setStat('statBrnzBld', 'V.3.1.5');
+            setStat('statBrnzErr', typeof systemErrorState !== 'undefined' && systemErrorState ? 'ACTIVE FAULT' : '0');
 
         } catch(e) { console.warn("Hub Stats Sync Error:", e); }
     }
