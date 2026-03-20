@@ -53,7 +53,7 @@
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Mulish', sans-serif; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        .neo-logo, .login-logo { content: url('neo_logo_orange.png'); height: 60px; width: auto; transition: all 0.3s ease; }
+        .neo-logo, .login-logo { content: url('neo_logo_orange.png'); transition: all 0.3s ease; }
         [data-theme="dark"] .neo-logo, [data-theme="dark"] .login-logo { content: url('neo_logo_white.png'); filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
 
         /* Responsive Layout Overrides */
@@ -612,13 +612,13 @@
         /* MOBILE VIEWPORT STYLES (Max Width: 768px) */
         /* ========================================= */
         @media (max-width: 768px) {
-            body { padding: 5px; height: auto; overflow: auto; min-height: 100vh; }
-            .container { padding: 10px; box-shadow: none; border-radius: 6px; height: auto; min-height: 100%; flex-grow: 1; }
+            body { padding: 0 !important; height: auto; overflow: auto; min-height: 100vh; }
+            .container { padding: 8px !important; box-shadow: none; border-radius: 6px; height: auto; min-height: 100%; flex-grow: 1; }
             
-            .header-area { flex-direction: column; align-items: stretch; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0px; margin-bottom: 12px; }
-            .title-block { text-align: center; }
-            .title-block h1 { font-size: 18px; }
-            .title-block .subtitle { font-size: 11px; margin-top: 4px; }
+            .header-area { flex-direction: column; align-items: stretch; gap: 5px !important; border-bottom: 1px solid var(--border-color); padding: 5px 8px !important; margin-bottom: 8px !important; }
+            .title-block { text-align: center; flex-direction: column !important; align-items: center !important; gap: 2px !important; flex-wrap: nowrap !important; }
+            .neo-logo { height: 45px !important; margin: 0 auto !important; }
+            .title-block .subtitle { font-size: 10px !important; margin-top: 2px !important; white-space: normal !important; text-align: center; }
             
             .tabs { width: 100vw; max-width: 100%; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding-bottom: 2px; }
             .tabs::-webkit-scrollbar { display: none; }
@@ -667,9 +667,16 @@
             [id$="Modal"] .container { width: 95vw !important; max-width: 95vw !important; max-height: 90vh !important; overflow-y: auto; border-radius: 8px; padding: 15px; }
             .massive-container { width: 100vw; height: 100vh; max-width: none; border-radius: 0; padding: 10px; overflow-y: auto; }
             .login-box { padding: 20px; width: 90%; }
+            .exec-header { flex-direction: column; gap: 10px; margin-bottom: 15px; }
+            .exec-kpi { flex-direction: column; gap: 10px; width: 100%; }
+            .kpi-box { width: 100%; justify-content: space-between; }
             
-            .terminal-wrapper { width: 100%; display: flex; flex-direction: column; }
-            #termHeader { width: 100%; text-align: center; box-sizing: border-box; }
+            /* Pack top-controls tightly */
+            .top-controls { flex-direction: row !important; flex-wrap: wrap !important; gap: 5px !important; margin-bottom: 5px !important; margin-top: 0px !important; padding: 0px !important; }
+            .top-action-btn { width: calc(50% - 3px) !important; justify-content: center; padding: 8px !important; font-size: 11px !important; }
+            #themeToggle { margin-right: 0; }
+            .terminal-wrapper { width: 100% !important; margin-top: 0px !important; }
+            #termHeader { width: 100%; text-align: center; justify-content: center; padding: 8px !important; }
             #debugLog { position: static; width: 100%; max-height: 200px; margin-top: 10px; }
             
             table { font-size: 11px; }
@@ -719,9 +726,7 @@
         .nav-zone i { color: #2dd4bf !important; text-shadow: 0 0 15px rgba(45, 212, 191, 0.6) !important; }
         .nav-zone:hover i { text-shadow: 0 0 25px rgba(45, 212, 191, 0.9) !important; }
         @media (max-width: 768px) {
-            .hub-container { padding: 15px !important; gap: 15px !important; }
-            .title-block { flex-wrap: wrap !important; justify-content: center; gap: 5px !important; }
-            .neo-logo { height: 40px !important; }
+            .hub-container { padding: 10px !important; gap: 10px !important; margin-bottom: 10px !important; }
         }
     </style>
 </head>
@@ -731,7 +736,7 @@
 
 <div id="loginUI" class="login-container" style="display: flex;">
     <div class="login-card">
-        <img class="login-logo" src="neo_logo_orange.png" alt="Neogleamz Logo" style="display:block; margin:0 auto 15px auto; height:80px; width:auto;">
+        <img class="login-logo" src="neo_logo_orange.png" alt="Neogleamz Logo" style="display:block; margin:0 auto 15px auto; height:120px; width:auto;">
         <h1 style="margin-bottom: 30px; font-weight: 300; letter-spacing: 2px;">AUTHORITY ACCESS</h1>
         <div class="login-field">
             <label>Enterprise Email</label>
@@ -749,7 +754,7 @@
 <div id="appUI" class="container" style="display: none;">
     <div class="header-area">
         <div class="title-block" style="display: flex; align-items: center; gap: 15px; flex-wrap: nowrap;">
-            <img class="neo-logo" src="neo_logo_orange.png" alt="Neogleamz Logo" style="height: 60px; width: auto; cursor:pointer;">
+            <img class="neo-logo" src="neo_logo_orange.png" alt="Neogleamz Logo" style="height: 100px; width: auto; cursor:pointer;">
             <span class="subtitle" style="margin: 0; margin-top: 4px; font-size: 16px; color: #f97316; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px;">Cloud-Native Ledger & Command Center</span>
         </div>
         <div class="tabs">
