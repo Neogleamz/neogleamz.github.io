@@ -1,3 +1,23 @@
+window.getEngineTrueCogs = function(pName) {
+    if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return 0;
+    let total = 0;
+    productsDB[pName].forEach(item => {
+        let key = item.item_key || item.di_item_id || item.name;
+        let qty = parseFloat(item.quantity || item.qty) || 1;
+        if (key.startsWith('RECIPE:::')) {
+            total += window.getEngineTrueCogs(key.replace('RECIPE:::', '')) * qty;
+        } else if (typeof catalogCache !== 'undefined' && catalogCache[key]) {
+            total += (parseFloat(catalogCache[key].avgUnitCost) || 0) * qty;
+        }
+    });
+    if (typeof laborDB !== 'undefined' && laborDB[pName]) {
+        laborDB[pName].forEach(l => {
+            total += parseFloat(l.labor_cost) || 0;
+        });
+    }
+    return total;
+};
+window.calculateProductTotal = window.getEngineTrueCogs; // Bind legacy pointer
 
 // ==========================================
 // CENTRAL KPI RENDER ENGINE (MIGRATED & AUDITED)
