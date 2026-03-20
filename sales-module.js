@@ -168,6 +168,7 @@ async function saveAliasMapping() {
         let elUnmapped = document.getElementById('unmappedSkusList');
         if (elUnmapped) elUnmapped.innerHTML = h;
     }
+    if (typeof renderAliasManager === 'function') renderAliasManager();
 }
 
 async function executeSalesSync() {
