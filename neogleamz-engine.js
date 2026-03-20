@@ -24,6 +24,23 @@
 window.getEngineTrueCogs = function(pName) { return window.calculateProductBreakdown(pName).total; };
 window.calculateProductTotal = window.getEngineTrueCogs;
 
+window.getEngineStripeFee = function(amt) { return (amt * 0.029) + 0.30; };
+window.getEngineLiveMsrp = function(pName) { return typeof pricingDB !== 'undefined' && pricingDB[pName] ? parseFloat(pricingDB[pName].msrp) || 0 : 0; };
+window.getHistoricalNetProfit = function(gross, shipCol, tax, disc, actShip, pName) {
+    let captured = gross + shipCol + tax - disc;
+    let fee = window.getEngineStripeFee(captured);
+    let cogs = window.getEngineTrueCogs(pName);
+    return gross + shipCol - disc - fee - actShip - cogs;
+};
+window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, warr) {
+    let sCol = msrp >= fsThreshold ? 0 : 5.95;
+    let aShip = 4.50; 
+    let fee = window.getEngineStripeFee(msrp + sCol);
+    let net = msrp + sCol - cogs - fee - aShip - cac - aff - warr;
+    let margin = msrp > 0 ? (net / msrp) * 100 : 0;
+    return { netProfit: net, netMarginPercent: margin };
+};
+
 // ==========================================
 // CENTRAL KPI RENDER ENGINE (MIGRATED & AUDITED)
 // ==========================================
