@@ -18,6 +18,7 @@
 
     <style>
         :root {
+            --logo-primary: #f97316; /* Orange for Light Mode */
             --bg-body: #f0f4f8; --bg-container: #ffffff; --text-main: #333333; --text-heading: #1e293b;
             --text-muted: #64748b; --border-color: #e2e8f0; --border-input: #cbd5e1; --bg-panel: #f8fafc;
             --bg-bar: #f1f5f9; --bg-input: #ffffff; --bg-th: #1e293b; --text-th: #ffffff;
@@ -33,6 +34,7 @@
         }
 
         [data-theme="dark"] {
+            --logo-primary: #ffffff; /* White for Dark Mode */
             --bg-body: #0f172a; --bg-container: #1e293b; --text-main: #e2e8f0; --text-heading: #f8fafc;
             --text-muted: #94a3b8; --border-color: #334155; --border-input: #475569; --bg-panel: #0f172a;
             --bg-bar: #334155; --bg-input: #0f172a; --bg-th: #020617; --text-th: #f8fafc;
@@ -727,7 +729,9 @@
 
 <div id="loginUI" class="login-container" style="display: flex;">
     <div class="login-card">
-        <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" class="login-logo">
+        <h1 class="login-logo" style="margin: 0 0 10px 0; font-size: 48px; font-weight: 900; letter-spacing: -2px; color: var(--logo-primary); display: flex; justify-content: center; align-items: center;">
+            neogleam<span style="background: linear-gradient(135deg, #1e40af 0%, #38bdf8 30%, #f97316 50%, #38bdf8 70%, #1e40af 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">z</span>
+        </h1>
         <h1 style="margin-bottom: 30px; font-weight: 300; letter-spacing: 2px;">AUTHORITY ACCESS</h1>
         <div class="login-field">
             <label>Enterprise Email</label>
@@ -745,7 +749,7 @@
 <div id="appUI" class="container" style="display: none;">
     <div class="header-area">
         <div class="title-block" style="display: flex; align-items: center; gap: 15px; flex-wrap: nowrap;">
-            <h1 class="neo-logo" style="margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--text-heading); display: flex; align-items: center; cursor: pointer;">
+            <h1 class="neo-logo" style="margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--logo-primary); display: flex; align-items: center; cursor: pointer;">
                 neogleam<span style="background: linear-gradient(135deg, #1e40af 0%, #38bdf8 30%, #f97316 50%, #38bdf8 70%, #1e40af 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">z</span>
             </h1>
             <span class="subtitle" style="margin: 0; margin-top: 4px; font-size: 16px; color: #f97316; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px;">Cloud-Native Ledger & Command Center</span>
