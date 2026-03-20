@@ -1258,7 +1258,7 @@
                         <!-- 1. Orders Sync -->
                         <div class="panel-card" style="border-left: 4px solid var(--primary-color);">
                             <h3 style="margin:0 0 10px 0; font-size:15px;">📦 Orderz Sync</h3>
-                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import supplier HTML invoices to populate active ledger data.</p>
+                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML pages from superbuy</p>
                             <input type="file" id="orderFiles" multiple accept=".html" style="width:100%; font-size:11px;">
                             <div id="statusOrders" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
                         </div>
@@ -1266,7 +1266,7 @@
                         <!-- 2. Parcels Sync -->
                         <div class="panel-card" style="border-left: 4px solid #f59e0b;">
                             <h3 style="margin:0 0 10px 0; font-size:15px;">🚚 Parcelz Sync</h3>
-                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Sync tracking and fulfillment status from raw HTML sourcez.</p>
+                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML package details page for each parcel from superbuy</p>
                             <input type="file" id="parcelFiles" multiple accept=".html" style="width:100%; font-size:11px;">
                             <div id="statusParcels" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
                         </div>
@@ -1300,7 +1300,7 @@
                                 <input type="text" id="skuAliasSearch" placeholder="🔍 Search SKUs..." onkeyup="renderAliasManager()" style="flex:1; font-size:11px; padding:6px;">
                                 <button class="btn-blue" onclick="openAliasModal('')" style="padding:6px 12px; font-size:11px;">+ Add New</button>
                             </div>
-                            <div id="aliasManagerList" style="max-height:135px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; background:rgba(0,0,0,0.1); padding:5px;">
+                            <div id="aliasManagerList" style="max-height:600px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; background:rgba(0,0,0,0.1); padding:10px; display:flex; flex-direction:column; gap:5px;">
                                 <div style="padding:10px; text-align:center; font-size:10px; color:var(--text-muted);">Loading mappings...</div>
                             </div>
                         </div>
@@ -1563,7 +1563,7 @@
 
     const colMap = { 'Order Date': 'order_date', 'Order No': 'order_no', 'Parcel No': 'parcel_no', 'DI Item ID': 'di_item_id', 'Alibaba Order': 'alibaba_order', 'Item Name': 'item_name', 'Specification': 'specification', 'Neogleamz Name': 'neogleamz_name', 'Neo Product': 'neogleamz_product', 'Lot Multiplier': 'lot_multiplier', 'Quantity': 'quantity', 'Unit Weight (g)': 'unit_weight_g', 'Total Dist Weight (g)': 'total_dist_weight_g', 'Order Unit Price': 'order_unit_price', 'Order Postage': 'order_postage', 'Unit China Landed Price': 'unit_china_landed_price', 'Order Total': 'order_total', 'Actual Paid (Parcel)': 'actual_paid', 'Unit Shipping Cost ($)': 'unit_ship_weight', 'Final Landed Cost ($)': 'final_cost_weight', 'Total Landed Cost ($)': 'total_cost_weight', 'Actual Chargeable Weight (g)': 'actual_chargeable_weight_g', 'Actual Shipping Fee': 'actual_shipping_fee', '1st Tier Cost': 'first_tier_cost', '2nd Tier Cost': 'second_tier_cost', 'Custom Clearance Fee': 'custom_clearance_fee', 'Remote Area Surcharge': 'remote_area_surcharge', 'Fuel Surcharge': 'fuel_surcharge', 'Operating Cost': 'operating_cost', 'Tax': 'tax', 'Insurance': 'insurance', 'Storage Fee': 'storage_fee', 'EPE Loose Filling': 'epe_loose_filling', 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code', '3D Print': 'is_3d_print', 'Print Time': 'print_time_mins' };
 
-    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code, '3D Print': !!r.is_3d_print, 'Print Time': parseFloat(r.print_time_mins) || 0 })); }
+    function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neo Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': 'corner_protector', 'Moister-Barrier Bag': 'moister_barrier_bag', 'Packing Video': 'packing_video', '1% Discount': 'one_percent_discount', 'Points Discount': 'points_discount', 'Coupon Discount': 'coupon_discount', 'Discount Code': 'discount_code', '3D Print': !!r.is_3d_print, 'Print Time': parseFloat(r.print_time_mins) || 0 })); }
 
     // --- 2. THEME & SAFETY NET ---
     window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; });
@@ -1937,13 +1937,12 @@
             h = `<div style="padding:10px; text-align:center; font-size:10px; color:var(--text-muted);">No mappings found.</div>`;
         } else {
             entries.forEach(([sku, recipe]) => {
-                h += `<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid var(--border-color); font-size:11px;">
-                    <div style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;">
-                        <span style="font-weight:bold; color:var(--text-main);">${sku}</span> 
-                        <i style="color:var(--text-muted); margin:0 5px;">→</i> 
-                        <span style="color:#0ea5e9;">${recipe}</span>
+                h += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; font-size:11px; transition:0.2s;">
+                    <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; overflow:hidden;">
+                        <span style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:900; color:var(--text-main); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${sku}</span> 
+                        <span style="font-size:10px; color:#2dd4bf; font-weight:700;"><i style="opacity:0.6; margin-right:4px;">+' mapped to</i>${recipe}</span>
                     </div>
-                    <button onclick="removeAliasMapping('${sku.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-size:14px; padding:0 5px;">×</button>
+                    <button title="Remove Mapping" onclick="removeAliasMapping('${sku.replace(/'/g, "\\'")}')" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); color:#ef4444; cursor:pointer; font-size:10px; padding:6px 10px; border-radius:4px; font-weight:bold; transition:0.2s; flex-shrink:0; align-self:center;" onmouseover="this.style.background='#ef4444'; this.style.color='white';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">REMOVE</button>
                 </div>`;
             });
         }
