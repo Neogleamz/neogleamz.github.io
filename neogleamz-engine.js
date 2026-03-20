@@ -321,15 +321,20 @@ function updateHubStats() {
         if (typeof salesDB !== 'undefined') {
             let parcels = new Set(), totalPostage = 0, totalWt = 0;
             salesDB.forEach(s => {
-                if (s.order_id) parcels.add(s.order_id);
-                totalPostage += parseFloat(s.shipping) || parseFloat(s.shipping_collected) || 0;
-                totalWt += parseFloat(s.total_weight_g) || 0;
+                let pno = s.parcel_no;
+                if (pno) {
+                    if (!parcels.has(pno)) {
+                        parcels.add(pno);
+                        totalPostage += parseFloat(s.order_postage) || 0;
+                        totalWt += parseFloat(s.total_dist_weight_g) || 0;
+                    }
+                }
             });
             setStat('statDatazRecords', fmtNum(salesDB.length));
             setStat('statDatazParcels', fmtNum(parcels.size));
             setStat('statDatazPaid', fmtMoney(totalPostage));
             setStat('statDatazWt', fmtNum(totalWt));
-            setStat('statDatazAvg', parcels.size > 0 ? fmtMoney(totalPostage / parcels.size) : '$0.00');
+            setStat('statDatazAvg', totalWt > 0 ? fmtMoney(totalPostage / totalWt) : '$0.00');
         }
 
         // --- EDITZ ---
