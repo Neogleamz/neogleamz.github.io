@@ -99,11 +99,19 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
+            justify-content: flex-start; 
+            backdrop-filter: blur(16px); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+            width: 450px; /* Restored to 450px */
+            flex: 0 0 450px;
+            height: auto;
             min-height: 480px;
             padding-top: 35px;
             position: relative;
             overflow: hidden;
             box-sizing: border-box;
+            font-style: normal; 
+            transition: transform 0.3s ease;
         }
         .hub-card:hover { transform: translateY(-10px) scale(1.02); border-color: #f97316; box-shadow: 0 15px 45px rgba(249, 115, 22, 0.3); }
         .hub-card i { 
@@ -113,13 +121,25 @@
             filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.35)); 
             font-style: normal; 
             transition: transform 0.3s ease;
+            z-index: 1; 
         }
-        .hub-card:hover i { transform: scale(1.1); }
-        .hub-card h2 { margin: 0 0 6px 0; font-size: 20px; font-weight: 900; color: var(--text-heading); letter-spacing: -0.5px; }
+        .hub-card:hover i { transform: scale(1.15) rotate(5deg); color: var(--primary-color); }
+        .hub-card h2 { font-size: 22px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: 1.5px; z-index: 1; text-transform: uppercase; }
+        .hub-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 0; z-index: 1; opacity: 0.8; }
+        
         .hub-card .card-stat { font-family: 'Mulish', sans-serif; font-weight: 900; font-size: 11px; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 10px; border-radius: 20px; margin-top: 10px; border: 1px solid rgba(249, 115, 22, 0.15); text-transform: uppercase; }
         .hub-card p { margin: 0 0 15px 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; max-width: 90%; flex-shrink: 0; }
         
         .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: auto; }
+        .hub-kpi-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-top: auto; 
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
         .kpi-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
         .kpi-row:hover { background: var(--bg-panel); border-color: var(--card-hover-border, #f97316); box-shadow: 0 2px 8px var(--card-glow, rgba(249, 115, 22, 0.15)); }
         .kpi-row span { color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;}
