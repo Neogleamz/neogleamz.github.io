@@ -38,7 +38,7 @@ window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, 
     let fee = window.getEngineStripeFee(msrp + sCol);
     let net = msrp + sCol - cogs - fee - aShip - cac - aff - warr;
     let margin = msrp > 0 ? (net / msrp) * 100 : 0;
-    return { net: net, stripe: fee, aff: aff, cac: cac, warr: warr, margin: margin };
+    return { net: net, stripe: fee, aff: aff, cac: cac, warr: warr, margin: margin, ship: sCol, oop: msrp + sCol, merchantShipMargin: sCol - aShip };
 };
 
 // ==========================================
