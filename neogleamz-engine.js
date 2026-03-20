@@ -321,15 +321,15 @@ function updateHubStats() {
         if (typeof salesDB !== 'undefined') {
             let parcels = new Set(), totalPostage = 0, totalWt = 0;
             salesDB.forEach(s => {
-                if (s.parcel_no) parcels.add(s.parcel_no);
-                totalPostage += parseFloat(s.order_postage) || 0;
-                totalWt += parseFloat(s.total_dist_weight_g) || 0;
+                if (s.order_id) parcels.add(s.order_id);
+                totalPostage += parseFloat(s.shipping) || parseFloat(s.shipping_collected) || 0;
+                totalWt += parseFloat(s.total_weight_g) || 0;
             });
             setStat('statDatazRecords', fmtNum(salesDB.length));
             setStat('statDatazParcels', fmtNum(parcels.size));
             setStat('statDatazPaid', fmtMoney(totalPostage));
             setStat('statDatazWt', fmtNum(totalWt));
-            setStat('statDatazAvg', totalWt > 0 ? fmtMoney(totalPostage / totalWt) : '$0.00');
+            setStat('statDatazAvg', parcels.size > 0 ? fmtMoney(totalPostage / parcels.size) : '$0.00');
         }
 
         // --- EDITZ ---
@@ -356,22 +356,29 @@ function updateHubStats() {
 
         // --- STOCKZ ---
         if (typeof inventoryDB !== 'undefined') {
-            let keys = Object.keys(inventoryDB);
             let fgiUnits = 0, alerts = 0, rawVal = 0, fgiVal = 0;
-            keys.forEach(k => {
-                let s = (inventoryDB[k].produced_qty || 0) - (inventoryDB[k].sold_qty || 0);
-                if (s < 5) alerts++;
-                if (!k.startsWith('RECIPE:::') && typeof catalogCache !== 'undefined' && catalogCache[k]) {
-                    rawVal += Math.max(0, s) * (parseFloat(catalogCache[k].avgUnitCost) || 0);
-                }
-            });
-            if (typeof productsDB !== 'undefined') {
-                Object.keys(productsDB).forEach(p => {
-                    let s = (inventoryDB[`RECIPE:::` + p]?.produced_qty || 0) - (inventoryDB[`RECIPE:::` + p]?.sold_qty || 0);
-                    fgiUnits += Math.max(0, s);
-                    fgiVal += Math.max(0, s) * getEngineTrueCogs(p); // AUDITED: USES ENGINE COGS
+            
+            if (typeof catalogCache !== 'undefined') {
+                Object.keys(catalogCache).forEach(k => {
+                    let c = catalogCache[k];
+                    let i = inventoryDB[k] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0};
+                    let s = (c.totalQty || 0) - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
+                    if (s < (i.min_stock || 5)) alerts++;
+                    rawVal += Math.max(0, s) * (parseFloat(c.avgUnitCost) || 0);
                 });
             }
+
+            if (typeof productsDB !== 'undefined') {
+                Object.keys(productsDB).forEach(p => {
+                    let k = `RECIPE:::` + p;
+                    let i = inventoryDB[k] || {produced_qty:0, sold_qty:0};
+                    let s = (i.produced_qty || 0) - (i.sold_qty || 0);
+                    fgiUnits += Math.max(0, s);
+                    fgiVal += Math.max(0, s) * getEngineTrueCogs(p); 
+                    if (s < 5) alerts++;
+                });
+            }
+            
             setStat('statStockzUnits', fmtNum(fgiUnits));
             setStat('statStockzAlerts', fmtNum(alerts));
             setStat('statStockzRawVal', fmtMoney(rawVal));
