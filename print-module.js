@@ -286,3 +286,41 @@ async function addPrintJob(partName, qty, woId = null) {
     if (error) sysLog("Add Print Job Error: " + error.message, true);
     else refreshPrintQueue();
 }
+
+function openManualPrintModal() {
+    const sel = document.getElementById('manualPrintSelect');
+    if(sel) {
+        sel.innerHTML = '<option value="">-- Select 3D Part --</option>';
+        Object.keys(catalogCache).sort((a,b) => {
+            let nA = catalogCache[a].neoName || catalogCache[a].itemName || a;
+            let nB = catalogCache[b].neoName || catalogCache[b].itemName || b;
+            return nA.localeCompare(nB);
+        }).forEach(k => {
+            if (catalogCache[k].is_3d_print) {
+                let name = catalogCache[k].neoName || catalogCache[k].itemName || k;
+                sel.innerHTML += `<option value="${String(k).replace(/"/g, '&quot;')}">🖨️ ${name}</option>`;
+            }
+        });
+    }
+    const q = document.getElementById('manualPrintQty');
+    if(q) q.value = 1;
+    document.getElementById('manualPrintModal').style.display = 'flex';
+}
+
+function closeManualPrintModal() {
+    document.getElementById('manualPrintModal').style.display = 'none';
+}
+
+async function submitManualPrint() {
+    const k = document.getElementById('manualPrintSelect').value;
+    const q = parseInt(document.getElementById('manualPrintQty').value);
+    if (!k || isNaN(q) || q <= 0) return alert("Please select a valid 3D part and quantity.");
+    
+    closeManualPrintModal();
+    setMasterStatus("Queuing Manual Print...", "mod-working");
+    
+    await addPrintJob(k, q, "Manual Entry");
+    
+    setMasterStatus("Job Queued!", "mod-success");
+    setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
+}
