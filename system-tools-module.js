@@ -184,7 +184,7 @@ function handleFileSelect(input) {
         pendingRestoreData = {}; let html = '';
         workbook.SheetNames.forEach(sheetName => {
             const roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-            if(roa.length > 0) { pendingRestoreData[sheetName] = roa; html += `<label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="checkbox" class="restore-chk" value="${sheetName}" checked> Restore ${sheetName.replace('_', ' ')} (${roa.length} rows)</label>`; }
+            if(roa.length > 0) { pendingRestoreData[sheetName] = roa; html += `<label style="display:flex; align-items:center; justify-content:flex-start; gap:10px; font-size:13px; margin:6px 0; color:var(--text-main); font-weight:bold;"><input type="checkbox" class="restore-chk" value="${sheetName}" checked style="width:16px; height:16px; margin:0; flex-shrink:0; cursor:pointer;"> Restore ${sheetName.replace(/_/g, ' ')} (${roa.length} rows)</label>`; }
         });
         document.getElementById('restoreCheckboxes').innerHTML = html; document.getElementById('restorePreview').style.display = 'block';
     };
