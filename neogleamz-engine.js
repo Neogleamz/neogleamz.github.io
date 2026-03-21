@@ -156,22 +156,20 @@ function updateHubStats() {
         if (typeof workOrdersDB !== 'undefined') {
             let active = workOrdersDB.filter(w => w.status !== 'Completed');
             setStat('statBatchezBuilt', fmtNum(active.length));
-            let units = 0, time = 0, val = 0, pulls = 0;
+            let units = 0, laborMins = 0, msrpVal = 0, pulls = 0;
             active.forEach(w => {
-                units += (w.qty || 0);
-                val += (w.qty || 0) * getEngineTrueCogs(w.product_id); // AUDITED: USES ENGINE COGS
+                let q = (w.qty || 0);
+                units += q;
+                let lTime = typeof laborDB !== 'undefined' && laborDB[w.product_name] ? laborDB[w.product_name].time : 0;
+                let pMsrp = typeof pricingDB !== 'undefined' && pricingDB[w.product_name] ? pricingDB[w.product_name].msrp : 0;
+                laborMins += q * (parseFloat(lTime) || 0);
+                msrpVal += q * (parseFloat(pMsrp) || 0);
                 if (w.materials_pulled) pulls++;
             });
-            if (typeof printQueueDB !== 'undefined') {
-                active.forEach(w => {
-                    time += printQueueDB.filter(p => String(p.wo_id) === String(w.id) && !p.completed && !p.failed)
-                        .reduce((sum, p) => sum + (p.expected_time_mins || 0), 0);
-                });
-            }
             setStat('statBatchezUnits', fmtNum(units));
             setStat('statBatchezComps', pulls + '/' + active.length);
-            setStat('statBatchezTime', fmtNum(Math.round(time/60)) + ' hrs');
-            setStat('statBatchezVal', fmtMoney(val));
+            setStat('statBatchezTime', fmtNum(Math.round(laborMins/60)) + ' hrs');
+            setStat('statBatchezVal', fmtMoney(msrpVal));
         }
 
         // --- LAYERZ ---

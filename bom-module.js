@@ -46,7 +46,8 @@ async function updateLaborCosts() {
         if(typeof populateDropdowns === 'function') populateDropdowns(); 
         renderProductList(); renderProductBOM(); 
         if(typeof renderFgiTable === 'function') renderFgiTable(); 
-        if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('analytics-tab').classList.contains('active')) renderAnalyticsDashboard(); 
+        let aTab = document.getElementById('analytics-tab');
+        if(typeof renderAnalyticsDashboard === 'function' && aTab && aTab.classList.contains('active')) renderAnalyticsDashboard(); 
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
