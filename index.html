@@ -1923,11 +1923,14 @@
 
             renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); renderSalesTable(); renderAnalyticsDashboard(); renderAliasManager(); 
             if (typeof updateHubStats === 'function') updateHubStats();
+            let savedTab = localStorage.getItem('activeTab') || 'invhub';
+            switchTab(savedTab);
             setSysProgress(100, 'success'); sysLog("System Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
 
     function switchTab(tabId) { 
+        localStorage.setItem('activeTab', tabId);
         let target = document.getElementById(tabId + '-tab');
         if (!target) return console.warn(`Tab ${tabId} not found.`);
 
@@ -1939,10 +1942,10 @@
 
     	target.classList.add('active'); sysLog(`Switched to ${tabId}.`); 
         
-        if (tabId === 'invhub') { if(typeof showInventoryPane === 'function') showInventoryPane('hub'); }
-        if (tabId === 'prodhub') { if(typeof showProductionPane === 'function') showProductionPane('hub'); }
-        if (tabId === 'salezhub') { if(typeof showSalezPane === 'function') showSalezPane('hub'); }
-        if (tabId === 'synchub') { if(typeof showNexuzPane === 'function') showNexuzPane('hub'); }
+        if (tabId === 'invhub') { if(typeof showInventoryPane === 'function') showInventoryPane(localStorage.getItem('activeInvPane') || 'hub'); }
+        if (tabId === 'prodhub') { if(typeof showProductionPane === 'function') showProductionPane(localStorage.getItem('activeProdPane') || 'hub'); }
+        if (tabId === 'salezhub') { if(typeof showSalezPane === 'function') showSalezPane(localStorage.getItem('activeSalezPane') || 'hub'); }
+        if (tabId === 'synchub') { if(typeof showNexuzPane === 'function') showNexuzPane(localStorage.getItem('activeNexuzPane') || 'hub'); }
 
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
     }
@@ -1951,6 +1954,7 @@
     // --- REDUNDANT LOGIC VAPORIZED ---
 
     function showInventoryPane(paneId) {
+        localStorage.setItem('activeInvPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('invHubLanding').style.setProperty('display', 'flex', 'important');
@@ -1966,6 +1970,7 @@
     }
 
     function showSalezPane(paneId) {
+        localStorage.setItem('activeSalezPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('salezHubLanding').style.setProperty('display', 'flex', 'important');
@@ -1980,6 +1985,7 @@
     }
 
     function showProductionPane(paneId) {
+        localStorage.setItem('activeProdPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('prodHubLanding').style.setProperty('display', 'flex', 'important');
@@ -1995,6 +2001,7 @@
     }
 
     function showNexuzPane(paneId) {
+        localStorage.setItem('activeNexuzPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('nexuzHubLanding').style.setProperty('display', 'flex', 'important');
