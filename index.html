@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.0954"></script>
+    <script src="system-version.js?v=v.2026.03.21.1002"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.0954"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.0954"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1002"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1002"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -1087,7 +1087,10 @@
                     <h3>🖨️ Print Tasks</h3>
                     <button class="btn-blue" onclick="refreshPrintQueue()" style="margin-bottom:10px; padding:10px;">↻ Refresh Queue</button>
                     <button class="btn-green" onclick="openManualPrintModal()" style="margin-bottom:10px; padding:10px; background:#10b981; border-color:#10b981;">➕ New Manual Print</button>
-                    <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="margin-bottom:15px; padding:10px; background:#8b5cf6; border-color:#8b5cf6;">📝 Edit Print SOPs</button>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="flex:1; padding:10px; background:#8b5cf6; border-color:#8b5cf6; font-size:13px;">📝 Edit Print SOP</button>
+                        <button class="btn-red" onclick="deletePrintJob()" style="flex:1; padding:10px; font-size:13px;">🗑️ Remove Print Job</button>
+                    </div>
                     <ul class="product-list" id="printListUI"></ul>
                 </div>
                 
@@ -1149,9 +1152,6 @@
                         </div>
                     </div>
                     
-                    <div style="margin-top: 30px; text-align: right; flex-shrink:0;">
-                        <button class="btn-red" style="width: auto; padding: 8px 15px; font-size: 13px;" onclick="deletePrintJob()">🗑️ Remove Print Job</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -2298,15 +2298,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.0954"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.0954"></script>
-<script src="bom-module.js?v=v.2026.03.21.0954"></script>
-<script src="inventory-module.js?v=v.2026.03.21.0954"></script>
-<script src="production-module.js?v=v.2026.03.21.0954"></script>
-<script src="sales-module.js?v=v.2026.03.21.0954"></script>
-<script src="analytics-module.js?v=v.2026.03.21.0954"></script>
-<script src="ceo-module.js?v=v.2026.03.21.0954"></script>
-<script src="print-module.js?v=v.2026.03.21.0954"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1002"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1002"></script>
+<script src="bom-module.js?v=v.2026.03.21.1002"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1002"></script>
+<script src="production-module.js?v=v.2026.03.21.1002"></script>
+<script src="sales-module.js?v=v.2026.03.21.1002"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1002"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1002"></script>
+<script src="print-module.js?v=v.2026.03.21.1002"></script>
 </body>
 </html>
 
