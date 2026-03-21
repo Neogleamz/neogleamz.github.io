@@ -1,4 +1,4 @@
-﻿
+
 window.calculateProductBreakdown = function(pName) {
     let res = { raw: 0, labor: 0, total: 0 };
     if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return res;
@@ -53,22 +53,22 @@ function updateHubStats() {
 
         // --- DATAZ ---
         if (typeof finalResults !== 'undefined') {
-            let parcels = new Set(), totalPostage = 0, totalWt = 0;
+            let parcels = new Set(), totalPaid = 0, totalWt = 0;
             finalResults.forEach(s => {
                 let pno = s['Parcel No'];
-                if (pno) {
+                if (pno && String(pno).trim().toUpperCase() !== 'MANUAL') {
                     if (!parcels.has(pno)) {
                         parcels.add(pno);
-                        totalPostage += parseFloat(s['Order Postage']) || 0;
+                        totalPaid += parseFloat(s['Actual Paid (Parcel)']) || 0;
                         totalWt += parseFloat(s['Total Dist Weight (g)']) || 0;
                     }
                 }
             });
             setStat('statDatazRecords', fmtNum(finalResults.length));
             setStat('statDatazParcels', fmtNum(parcels.size));
-            setStat('statDatazPaid', fmtMoney(totalPostage));
+            setStat('statDatazPaid', fmtMoney(totalPaid));
             setStat('statDatazWt', fmtNum(totalWt));
-            setStat('statDatazAvg', totalWt > 0 ? fmtMoney(totalPostage / totalWt) : '$0.00');
+            setStat('statDatazAvg', totalWt > 0 ? fmtMoney(totalPaid / totalWt) : '$0.00');
         }
 
         // --- EDITZ ---
