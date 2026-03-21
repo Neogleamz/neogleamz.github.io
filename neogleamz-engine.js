@@ -154,7 +154,7 @@ function updateHubStats() {
 
         // --- BATCHEZ ---
         if (typeof workOrdersDB !== 'undefined') {
-            let active = workOrdersDB.filter(w => w.status !== 'Completed');
+            let active = workOrdersDB.filter(w => w.status !== 'Completed' && w.status !== 'Archived');
             setStat('statBatchezBuilt', fmtNum(active.length));
             let units = 0, laborMins = 0, msrpVal = 0, pulls = 0;
             active.forEach(w => {
@@ -174,8 +174,8 @@ function updateHubStats() {
 
         // --- LAYERZ ---
         if (typeof printQueueDB !== 'undefined') {
-            let active = printQueueDB.filter(p => !p.completed && !p.failed);
-            let done = printQueueDB.filter(p => p.completed && !p.failed).length;
+            let active = printQueueDB.filter(p => !p.completed && !p.failed && p.status !== 'Archived');
+            let done = printQueueDB.filter(p => p.completed && !p.failed && p.status !== 'Archived').length;
             setStat('statLayerzJobs', fmtNum(active.filter(p => p.status === 'Printing').length));
             setStat('statLayerzDone', fmtNum(done));
             setStat('statLayerzPending', fmtNum(active.filter(p => p.status === 'Queued').length));

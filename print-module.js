@@ -54,6 +54,7 @@ function renderPrintQueue() {
         document.getElementById('printMainArea').style.display = 'none';
     } else {
         printQueueDB.forEach((job, index) => {
+            if (job.status === 'Archived') return;
             const catalogItem = catalogByName[job.part_name];
             let printTimePer = typeof getPrintTime === 'function' ? getPrintTime(job.part_name) : 0;
             const totalTime = printTimePer * job.qty;
@@ -242,19 +243,37 @@ async function advancePrintStatus(newStatus) {
 }
 
 async function deletePrintJob() {
-    if (!currentPrintJob) return;
-    if (!confirm(`Permanently remove this print job for ${currentPrintJob.part_name}?`)) return;
     try {
+        if (!currentPrintJob) return;
+        if (!confirm(`Delete ${currentPrintJob.id}?`)) return;
+        sysLog(`Deleting Print Job ${currentPrintJob.id}`);
         setMasterStatus("Deleting...", "mod-working");
+
         const { error } = await supabaseClient.from('print_queue').delete().eq('id', currentPrintJob.id);
-        if (error) throw error;
-        
+        if (error) throw new Error(error.message);
+
+        printQueueDB = printQueueDB.filter(p => p.id !== currentPrintJob.id);
         currentPrintJob = null;
-        await refreshPrintQueue();
         setMasterStatus("Deleted", "mod-success");
-    } catch (e) {
-        sysLog(e.message, true);
-    }
+        setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
+        refreshPrintQueue();
+    } catch(e) { sysLog(e.message, true); }
+}
+
+async function archiveCurrentPrint() {
+    try {
+        if(!currentPrintJob) return;
+        if(currentPrintJob.status === 'Archived') return alert("Already archived.");
+        if(confirm(`Archive Print Job ${currentPrintJob.id}?`)) {
+            sysLog(`Archiving Print ${currentPrintJob.id}`); setMasterStatus("Archiving...", "mod-working");
+            const {error} = await supabaseClient.from('print_queue').update({status: 'Archived'}).eq('id', currentPrintJob.id);
+            if(error) throw new Error(error.message);
+            currentPrintJob.status = 'Archived';
+            setMasterStatus("Archived!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+            currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
+            refreshPrintQueue();
+        }
+    } catch(e) { sysLog(e.message, true); }
 }
 
 

@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1143"></script>
+    <script src="system-version.js?v=v.2026.03.21.1157"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1143"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1143"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1157"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1157"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -602,7 +602,7 @@
         .media-row select { width: 35%; padding: 6px; font-size: 11px; border-radius: 4px; }
         .media-row input { width: 65%; padding: 6px; font-size: 11px; border-radius: 4px; }
 
-        #mediaModal, #bulkAddModal, #sopMasterModal, #newWOModal, #backupModal, #aliasModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px); }
+        #mediaModal, #archiveExplorerModal, #bulkAddModal, #sopMasterModal, #newWOModal, #backupModal, #aliasModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px); }
         .massive-container { width:98vw; height:98vh; max-width:2000px; border-radius:8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display:flex; flex-direction:column; background:var(--bg-container); border:1px solid var(--border-color); padding: 20px;}
 
         .terminal-wrapper { position: relative; flex-shrink: 0; }
@@ -1006,7 +1006,11 @@
                     <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px; width:100%;">
                         <button class="btn-blue" onclick="openNewWOModal()" style="padding:10px;">+ New Production Batch</button>
                         <button class="btn-blue" onclick="openSOPMasterModal('production')" style="padding:10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff;">📝 Production SOP Editor</button>
-                        <button class="btn-red" style="padding:10px; font-size:13px;" onclick="deleteCurrentWO()">🗑️ Archive / Delete Work Order</button>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-blue" style="flex:1; padding:10px; font-size:13px;" onclick="openArchiveExplorer('batchez')">📂 Archives</button>
+                            <button class="btn-blue" style="flex:1; padding:10px; font-size:13px; background:#f59e0b; border-color:#f59e0b; color:#fff;" onclick="archiveCurrentWO()">📦 Archive</button>
+                            <button class="btn-red" style="flex:1; padding:10px; font-size:13px;" onclick="deleteCurrentWO()">🗑️ Delete</button>
+                        </div>
                     </div>
                     <ul class="product-list" id="woListUI"></ul>
 
@@ -1095,10 +1099,12 @@
                     </div>
                     <h3>🖨️ Print Tasks</h3>
                     <button class="btn-blue" onclick="refreshPrintQueue()" style="margin-bottom:10px; padding:10px;">↻ Refresh Queue</button>
-                    <button class="btn-green" onclick="openManualPrintModal()" style="margin-bottom:10px; padding:10px; background:#10b981; border-color:#10b981;">➕ New Manual Print</button>
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="flex:1; padding:10px; background:#8b5cf6; border-color:#8b5cf6; font-size:13px;">📝 Edit Print SOP</button>
-                        <button class="btn-red" onclick="deletePrintJob()" style="flex:1; padding:10px; font-size:13px;">🗑️ Remove Print Job</button>
+                    <button class="btn-green" onclick="openManualPrintModal()" style="margin-bottom:10px; padding:10px; background:#10b981; border-color:#10b981; width:100%;">➕ New Manual Print</button>
+                    <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="margin-bottom:10px; padding:10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff; font-size:15px; width:100%;">📝 Edit Print SOP</button>
+                    <div style="display:flex; gap:10px; margin-bottom:15px; width:100%;">
+                        <button class="btn-blue" style="flex:1; padding:10px; font-size:13px;" onclick="openArchiveExplorer('layerz')">📂 Archives</button>
+                        <button class="btn-blue" style="flex:1; padding:10px; font-size:13px; background:#f59e0b; border-color:#f59e0b; color:#fff;" onclick="archiveCurrentPrint()">📦 Archive</button>
+                        <button class="btn-red" style="flex:1; padding:10px; font-size:13px;" onclick="deletePrintJob()">🗑️ Delete</button>
                     </div>
                     <ul class="product-list" id="printListUI"></ul>
                 </div>
@@ -1552,6 +1558,20 @@
         <div style="margin-top:15px; flex-shrink:0; text-align:right;">
             <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveMasterSOP()">💾 Save SOP to Cloud</button>
         </div>
+    </div>
+</div>
+
+<div id="archiveExplorerModal">
+    <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; width:90%; max-width:1000px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; background:var(--bg-bar); border-radius:12px 12px 0 0;">
+            <h2 style="margin:0; font-size:22px;">📂 Archive Explorer</h2>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="closeArchiveExplorer()">Close</button>
+        </div>
+        <div style="display:flex; border-bottom:1px solid var(--border-color); background:var(--bg-input);">
+            <button id="tabArchBatchez" class="btn-blue" style="flex:1; border-radius:0; border:none; background:transparent; color:var(--text-main); font-weight:bold; font-size:16px; border-bottom:3px solid transparent; padding:15px;" onclick="switchArchiveTab('batchez')">🏭 Batchez</button>
+            <button id="tabArchLayerz" class="btn-blue" style="flex:1; border-radius:0; border:none; background:transparent; color:var(--text-main); font-weight:bold; font-size:16px; border-bottom:3px solid transparent; padding:15px;" onclick="switchArchiveTab('layerz')">🖨️ Layerz</button>
+        </div>
+        <div id="archiveListArea" style="flex-grow:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px;"></div>
     </div>
 </div>
 
@@ -2307,15 +2327,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1143"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1143"></script>
-<script src="bom-module.js?v=v.2026.03.21.1143"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1143"></script>
-<script src="production-module.js?v=v.2026.03.21.1143"></script>
-<script src="sales-module.js?v=v.2026.03.21.1143"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1143"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1143"></script>
-<script src="print-module.js?v=v.2026.03.21.1143"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1157"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1157"></script>
+<script src="bom-module.js?v=v.2026.03.21.1157"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1157"></script>
+<script src="production-module.js?v=v.2026.03.21.1157"></script>
+<script src="sales-module.js?v=v.2026.03.21.1157"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1157"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1157"></script>
+<script src="print-module.js?v=v.2026.03.21.1157"></script>
 </body>
 </html>
 

@@ -266,6 +266,7 @@ function renderWOList() {
         let activeBatches = 0;
         let totalUnits = 0;
         workOrdersDB.forEach(wo => {
+            if (wo.status === 'Archived') return;
             if (wo.status !== 'Completed') {
                 activeBatches++;
                 totalUnits += (parseFloat(wo.qty) || 0);
@@ -279,6 +280,7 @@ function renderWOList() {
         if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
         
         workOrdersDB.forEach((wo, index) => { 
+            if (wo.status === 'Archived') return;
             if(typeof wo.wip_state === 'string') wo.wip_state = JSON.parse(wo.wip_state || '{}');
             if(typeof wo.routing === 'string') wo.routing = JSON.parse(wo.routing || '{}');
             let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : ''; 
@@ -511,6 +513,89 @@ async function advanceWO(newStatus) {
 }
 
 async function deleteCurrentWO() { try { if(!currentWO) return; if(confirm(`Delete ${currentWO.wo_id}?`)) { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB[0] || null; renderWOList(); } } catch(e) { sysLog(e.message, true); } }
+
+async function archiveCurrentWO() {
+    try {
+        if(!currentWO) return;
+        if(currentWO.status === 'Archived') return alert("Already archived.");
+        if(confirm(`Archive WO ${currentWO.wo_id}?`)) {
+            sysLog(`Archiving ${currentWO.wo_id}`); setMasterStatus("Archiving...", "mod-working");
+            const {error} = await supabaseClient.from('work_orders').update({status: 'Archived'}).eq('wo_id', currentWO.wo_id);
+            if(error) throw new Error(error.message);
+            currentWO.status = 'Archived';
+            setMasterStatus("Archived!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+            currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
+            renderWOList();
+        }
+    } catch(e) { sysLog(e.message, true); }
+}
+
+let currentArchiveTab = 'batchez';
+function openArchiveExplorer(tab = 'batchez') {
+    document.getElementById('archiveExplorerModal').style.display = 'flex';
+    switchArchiveTab(tab);
+}
+function closeArchiveExplorer() {
+    document.getElementById('archiveExplorerModal').style.display = 'none';
+}
+function switchArchiveTab(tab) {
+    currentArchiveTab = tab;
+    document.getElementById('tabArchBatchez').style.borderBottom = tab === 'batchez' ? '3px solid #0ea5e9' : '3px solid transparent';
+    document.getElementById('tabArchLayerz').style.borderBottom = tab === 'layerz' ? '3px solid #0ea5e9' : '3px solid transparent';
+    renderArchiveList();
+}
+function renderArchiveList() {
+    const listArea = document.getElementById('archiveListArea');
+    listArea.innerHTML = '';
+    
+    if (currentArchiveTab === 'batchez') {
+        const archivedItemz = workOrdersDB.filter(w => w.status === 'Archived');
+        if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived batches found.</p>'; return; }
+        
+        archivedItemz.forEach(wo => {
+            const dt = wo.created_at ? new Date(wo.created_at).toLocaleDateString() : 'Unknown';
+            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+                <div>
+                    <strong style="color:var(--text-heading); font-size:16px;">${wo.wo_id}: ${wo.product_name}</strong>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Created: ${dt}</div>
+                </div>
+                <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
+            </div>`;
+        });
+    } else {
+        const archivedItemz = printQueueDB.filter(p => p.status === 'Archived');
+        if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived prints found.</p>'; return; }
+        
+        archivedItemz.forEach(job => {
+            const dt = job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown';
+            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+                <div>
+                    <strong style="color:var(--text-heading); font-size:16px;">Job ${job.id}: ${job.part_name}</strong>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Created: ${dt}</div>
+                </div>
+                <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
+            </div>`;
+        });
+    }
+}
+
+async function hardDeleteArchive(type, id) {
+    if(!confirm('Permanently destroy this archived record? This action cannot be undone.')) return;
+    sysLog(`Hard deleting ${id} from ${type}`);
+    setMasterStatus("Deleting...", "mod-working");
+    try {
+        if(type === 'batchez') {
+            await supabaseClient.from('work_orders').delete().eq('wo_id', id);
+            workOrdersDB = workOrdersDB.filter(w => w.wo_id !== id);
+        } else {
+            await supabaseClient.from('print_queue').delete().eq('id', id);
+            printQueueDB = printQueueDB.filter(p => p.id !== id);
+        }
+        setMasterStatus("Deleted!", "mod-success");
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        renderArchiveList();
+    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+}
 
 function printPickList() {
     try {
