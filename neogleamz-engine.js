@@ -68,7 +68,8 @@ function updateHubStats() {
             setStat('statDatazParcels', fmtNum(parcels.size));
             setStat('statDatazPaid', fmtMoney(totalPaid));
             setStat('statDatazWt', fmtNum(totalWt));
-            setStat('statDatazAvg', totalWt > 0 ? fmtMoney(totalPaid / totalWt) : '$0.00');
+            let avgCost = totalWt > 0 ? (totalPaid / totalWt) : 0;
+            setStat('statDatazAvg', '$' + avgCost.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:4}));
         }
 
         // --- EDITZ ---
