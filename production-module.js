@@ -452,27 +452,36 @@ async function advanceWO(newStatus) {
     try {
         if(!currentWO) return; if(currentWO.status === 'Completed') return alert("WO archived.");
         sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
-        if(newStatus === 'Completed') {
-            if(!confirm("Deduct raw materials and add finished goods?")) { setMasterStatus("Ready.", "status-idle"); return; }
-            let exactDeductions = calculateExactWODeductions(currentWO);
-            let ups = [];
-            Object.keys(exactDeductions.raws).forEach(k => {
-                let req = exactDeductions.raws[k];
-                if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0}; 
-                inventoryDB[k].consumed_qty += req; 
-                ups.push({item_key:k, ...inventoryDB[k]});
-            });
-            Object.keys(exactDeductions.pulls).forEach(k => {
-                let req = exactDeductions.pulls[k];
-                if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0}; 
-                inventoryDB[k].sold_qty += req; 
-                ups.push({item_key:k, ...inventoryDB[k]});
-            });
+        if (newStatus === 'Production' || newStatus === 'Completed') {
+            if (!currentWO.materials_pulled) {
+                if(!confirm(`Deduct raw materials for ${currentWO.wo_id}?`)) { setMasterStatus("Ready.", "status-idle"); return; }
+                let exactDeductions = calculateExactWODeductions(currentWO);
+                let ups = [];
+                Object.keys(exactDeductions.raws).forEach(k => {
+                    let req = exactDeductions.raws[k];
+                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0}; 
+                    inventoryDB[k].consumed_qty += req; 
+                    ups.push({item_key:k, ...inventoryDB[k]});
+                });
+                Object.keys(exactDeductions.pulls).forEach(k => {
+                    let req = exactDeductions.pulls[k];
+                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0}; 
+                    inventoryDB[k].sold_qty += req; 
+                    ups.push({item_key:k, ...inventoryDB[k]});
+                });
+                if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
+                
+                currentWO.materials_pulled = true;
+                await supabaseClient.from('work_orders').update({ materials_pulled: true }).eq('wo_id', currentWO.wo_id);
+            }
+        }
+
+        if (newStatus === 'Completed') {
+            if(!confirm(`Add ${currentWO.qty} Finished Goods to Inventory Yield?`)) { setMasterStatus("Ready.", "status-idle"); return; }
             let fgiKey = `RECIPE:::${currentWO.product_name}`;
             if(!inventoryDB[fgiKey]) inventoryDB[fgiKey]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
             inventoryDB[fgiKey].produced_qty += currentWO.qty;
-            ups.push({item_key:fgiKey, ...inventoryDB[fgiKey]});
-            await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
+            await supabaseClient.from('inventory_consumption').upsert([{item_key:fgiKey, ...inventoryDB[fgiKey]}], {onConflict:'item_key'}); 
         }
         
         const updateData = {status: newStatus};
