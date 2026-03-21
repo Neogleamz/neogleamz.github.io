@@ -612,11 +612,12 @@ function renderArchiveList() {
         if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived batches found.</p>'; return; }
         
         archivedItemz.forEach(wo => {
-            const dt = wo.created_at ? new Date(wo.created_at).toLocaleDateString() : 'Unknown';
-            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+            const dtC = wo.created_at ? new Date(wo.created_at).toLocaleDateString() : 'Unknown';
+            const dtF = wo.completed_at ? new Date(wo.completed_at).toLocaleDateString() : 'Manual Archive';
+            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
                 <div>
                     <strong style="color:var(--text-heading); font-size:16px;">${wo.wo_id}: ${wo.product_name}</strong>
-                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Created: ${dt}</div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Created: ${dtC} | <span style="color:var(--neon-green)">Completed: ${dtF}</span></div>
                 </div>
                 <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
             </div>`;
@@ -626,7 +627,8 @@ function renderArchiveList() {
         if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived prints found.</p>'; return; }
         
         archivedItemz.forEach(job => {
-            const dt = job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown';
+            const dtC = job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown';
+            const dtF = job.completed_at ? new Date(job.completed_at).toLocaleDateString() : 'Manual Archive';
             
             let cleanPartName = job.part_name.split(':::')[0];
             const catItem = typeof catalogByName !== 'undefined' ? catalogByName[cleanPartName] : null;
@@ -634,10 +636,10 @@ function renderArchiveList() {
             
             let displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
 
-            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
                 <div>
                     <strong style="color:var(--text-heading); font-size:16px;">${displayID}: ${displayName}</strong>
-                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Created: ${dt}</div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Created: ${dtC} | <span style="color:var(--neon-purple)">Completed: ${dtF}</span></div>
                 </div>
                 <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
             </div>`;
