@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1009"></script>
+    <script src="system-version.js?v=v.2026.03.21.1012"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1009"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1009"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1012"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1012"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -494,6 +494,13 @@
         
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
         table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
+        
+        td, th { 
+            border: 1px solid rgba(0, 0, 0, 0.25) !important; 
+        }
+        [data-theme="dark"] td, [data-theme="dark"] th {
+            border: 1px solid rgba(255, 255, 255, 0.20) !important; /* Extremely pronounced bright separator lines */
+        }
         th, td { border: 1px solid var(--border-color); }
         td { padding: 8px 10px; }
         th { 
@@ -2298,15 +2305,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1009"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1009"></script>
-<script src="bom-module.js?v=v.2026.03.21.1009"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1009"></script>
-<script src="production-module.js?v=v.2026.03.21.1009"></script>
-<script src="sales-module.js?v=v.2026.03.21.1009"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1009"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1009"></script>
-<script src="print-module.js?v=v.2026.03.21.1009"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1012"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1012"></script>
+<script src="bom-module.js?v=v.2026.03.21.1012"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1012"></script>
+<script src="production-module.js?v=v.2026.03.21.1012"></script>
+<script src="sales-module.js?v=v.2026.03.21.1012"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1012"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1012"></script>
+<script src="print-module.js?v=v.2026.03.21.1012"></script>
 </body>
 </html>
 
