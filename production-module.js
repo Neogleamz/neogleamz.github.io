@@ -613,12 +613,12 @@ function renderArchiveList() {
         
         const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         archivedItemz.forEach(wo => {
-            const dtC = fmt(wo.created_at) || 'Unknown';
+            const dtC = fmt(wo.started_at || wo.created_at) || 'Unknown';
             const dtF = fmt(wo.completed_at) || 'Manual Archive';
             listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
                 <div>
                     <strong style="color:var(--text-heading); font-size:16px;">${wo.wo_id}: ${wo.product_name}</strong>
-                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Created: ${dtC} | <span style="color:var(--neon-green)">Completed: ${dtF}</span></div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Started: ${dtC} | <span style="color:var(--neon-green)">Completed: ${dtF}</span></div>
                 </div>
                 <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
             </div>`;
@@ -629,7 +629,7 @@ function renderArchiveList() {
         
         const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         archivedItemz.forEach(job => {
-            const dtC = fmt(job.created_at) || 'Unknown';
+            const dtC = fmt(job.started_at || job.created_at) || 'Unknown';
             const dtF = fmt(job.completed_at) || 'Manual Archive';
             
             let cleanPartName = job.part_name.split(':::')[0];
@@ -641,7 +641,7 @@ function renderArchiveList() {
             listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
                 <div>
                     <strong style="color:var(--text-heading); font-size:16px;">${displayID}: ${displayName}</strong>
-                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Created: ${dtC} | <span style="color:var(--neon-purple)">Completed: ${dtF}</span></div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Started: ${dtC} | <span style="color:var(--neon-purple)">Completed: ${dtF}</span></div>
                 </div>
                 <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
             </div>`;
