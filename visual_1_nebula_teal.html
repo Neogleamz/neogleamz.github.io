@@ -1,15 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.0801"></script>
+    <script src="system-version.js?v=v.2026.03.21.0809"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.0801"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.0801"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.0809"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.0809"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -490,10 +490,11 @@
         th:hover { background: #334155; color: white; }
         [data-theme="dark"] th:hover { background: #1e293b; }
 
-        th.sorted-asc::after { content: ' ▲'; color: #38bdf8; font-size: 10px; margin-left: 5px; }
-        th.sorted-desc::after { content: ' ▼'; color: #fbbf24; font-size: 10px; margin-left: 5px; }
+        
+        
 
-        th.sorted-asc, th.sorted-desc { background: var(--bg-th); color: white; }
+        th.sorted-asc { background: #0ea5e9 !important; color: white !important; }
+        th.sorted-desc { background: #f97316 !important; color: white !important; }
         
         .text-right { text-align: right; }
         .highlight-calc { background-color: var(--bg-highlight); color: var(--text-highlight); font-weight: bold; }
@@ -2156,20 +2157,20 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.0801"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.0801"></script>
-<script src="bom-module.js?v=v.2026.03.21.0801"></script>
-<script src="inventory-module.js?v=v.2026.03.21.0801"></script>
-<script src="production-module.js?v=v.2026.03.21.0801"></script>
-<script src="sales-module.js?v=v.2026.03.21.0801"></script>
-<script src="analytics-module.js?v=v.2026.03.21.0801"></script>
-<script src="ceo-module.js?v=v.2026.03.21.0801"></script>
-<script src="print-module.js?v=v.2026.03.21.0801"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.0809"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.0809"></script>
+<script src="bom-module.js?v=v.2026.03.21.0809"></script>
+<script src="inventory-module.js?v=v.2026.03.21.0809"></script>
+<script src="production-module.js?v=v.2026.03.21.0809"></script>
+<script src="sales-module.js?v=v.2026.03.21.0809"></script>
+<script src="analytics-module.js?v=v.2026.03.21.0809"></script>
+<script src="ceo-module.js?v=v.2026.03.21.0809"></script>
+<script src="print-module.js?v=v.2026.03.21.0809"></script>
 </body>
 </html>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-    document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=v.2026.03.21.0801">');
+    document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=v.2026.03.21.0809">');
     const map = { 'ðŸ“–': '<i class="fa-solid fa-server"></i>', 'ðŸ“‹': '<i class="fa-solid fa-pen-to-square"></i>', 'ðŸ“Š': '<i class="fa-solid fa-boxes-stacked"></i>', 'ðŸ› ï¸': '<i class="fa-solid fa-network-wired"></i>', 'ðŸ­': '<i class="fa-solid fa-industry"></i>', 'ðŸ–¨ï¸': '<i class="fa-solid fa-layer-group"></i>', 'ðŸ“¦': '<i class="fa-solid fa-truck-fast"></i>', 'ðŸ“ˆ': '<i class="fa-solid fa-chart-line"></i>', 'ðŸ§ª': '<i class="fa-solid fa-flask"></i>', 'ðŸ“¥': '<i class="fa-solid fa-file-import"></i>', 'ðŸ’¸': '<i class="fa-solid fa-cart-shopping"></i>', 'ðŸ§ ': '<i class="fa-solid fa-microchip"></i>' };
     document.querySelectorAll('.hub-card i').forEach(el => { 
         let txt = el.textContent.trim();
