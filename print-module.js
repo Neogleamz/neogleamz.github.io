@@ -48,8 +48,9 @@ function renderPrintQueue() {
 
     let totalWaitTime = 0;
     let totalTasks = 0;
+    const activePrints = printQueueDB.filter(p => p.status !== 'Archived');
 
-    if (printQueueDB.length === 0) {
+    if (activePrints.length === 0) {
         ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>";
         document.getElementById('printMainArea').style.display = 'none';
     } else {
@@ -253,10 +254,11 @@ async function deletePrintJob() {
         if (error) throw new Error(error.message);
 
         printQueueDB = printQueueDB.filter(p => p.id !== currentPrintJob.id);
-        currentPrintJob = null;
+        currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
         setMasterStatus("Deleted", "mod-success");
         setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
         refreshPrintQueue();
+        if (currentPrintJob) renderActivePrintJob(currentPrintJob.id); else document.getElementById('printMainArea').style.display = 'none';
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -272,6 +274,7 @@ async function archiveCurrentPrint() {
             setMasterStatus("Archived!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
             currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
             refreshPrintQueue();
+            if (currentPrintJob) renderActivePrintJob(currentPrintJob.id); else document.getElementById('printMainArea').style.display = 'none';
         }
     } catch(e) { sysLog(e.message, true); }
 }

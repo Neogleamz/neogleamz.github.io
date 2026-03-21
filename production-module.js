@@ -277,7 +277,8 @@ function renderWOList() {
         if (batchEl) batchEl.innerText = activeBatches;
         if (unitEl) unitEl.innerText = totalUnits;
 
-        if(workOrdersDB.length === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
+        let activeCount = workOrdersDB.filter(w => w.status !== 'Archived').length;
+        if(activeCount === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
         
         workOrdersDB.forEach((wo, index) => { 
             if (wo.status === 'Archived') return;
@@ -300,7 +301,8 @@ function renderWOList() {
                 <span style="font-weight:900; color:var(--text-muted); font-family:monospace;">x${wo.qty}</span>
             </li>`; 
         });
-        if(!currentWO && workOrdersDB.length > 0) currentWO = workOrdersDB[0]; if(currentWO) { isSOPLocked = true; renderActiveWO(currentWO.wo_id); }
+        if(!currentWO && activeCount > 0) currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
+        if(currentWO) { isSOPLocked = true; renderActiveWO(currentWO.wo_id); } else { document.getElementById('woMainArea').style.display = 'none'; }
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -512,7 +514,7 @@ async function advanceWO(newStatus) {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
-async function deleteCurrentWO() { try { if(!currentWO) return; if(confirm(`Delete ${currentWO.wo_id}?`)) { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB[0] || null; renderWOList(); } } catch(e) { sysLog(e.message, true); } }
+async function deleteCurrentWO() { try { if(!currentWO) return; if(confirm(`Delete ${currentWO.wo_id}?`)) { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null; renderWOList(); } } catch(e) { sysLog(e.message, true); } }
 
 async function archiveCurrentWO() {
     try {
