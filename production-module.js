@@ -360,6 +360,20 @@ function renderActiveWO(id) {
         let wip = wo.wip_state || {};
         const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
         
+        if (wo.materials_pulled) {
+            document.getElementById('pipe-Queued').style.pointerEvents = 'none';
+            document.getElementById('pipe-Queued').style.opacity = '0.5';
+            document.getElementById('pipe-Picking').style.pointerEvents = 'none';
+            document.getElementById('pipe-Picking').style.opacity = '0.5';
+            document.getElementById('pipe-Picking').innerHTML = '🔒 2. Parts Picked & Deducted';
+        } else {
+            document.getElementById('pipe-Queued').style.pointerEvents = 'auto';
+            document.getElementById('pipe-Queued').style.opacity = '1';
+            document.getElementById('pipe-Picking').style.pointerEvents = 'auto';
+            document.getElementById('pipe-Picking').style.opacity = '1';
+            document.getElementById('pipe-Picking').innerHTML = '2. Start Picking Parts';
+        }
+
         if(wo.status === 'Queued') { document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); }
         else if(wo.status === 'Picking') { 
             document.getElementById('pipe-Picking').classList.add('active'); document.getElementById('sect-Picking').classList.add('active'); 
@@ -463,9 +477,15 @@ function renderActiveWO(id) {
 
 async function advanceWO(newStatus) {
     try {
-        if(!currentWO) return; if(currentWO.status === 'Completed') return alert("WO archived.");
+        if(!currentWO) return; 
+        if(currentWO.status === 'Completed') return alert("WO archived.");
+        
+        if (currentWO.materials_pulled && (newStatus === 'Queued' || newStatus === 'Picking')) {
+            return alert("Materials have already been pulled for this Work Order. You cannot revert to previous planning stages.");
+        }
+
         sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
-        if (newStatus === 'Production' || newStatus === 'Completed') {
+        if (newStatus === 'In Production' || newStatus === 'Completed') {
             if (!currentWO.materials_pulled) {
                 if(!confirm(`Deduct raw materials for ${currentWO.wo_id}?`)) { setMasterStatus("Ready.", "status-idle"); return; }
                 let exactDeductions = calculateExactWODeductions(currentWO);
