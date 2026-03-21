@@ -182,19 +182,38 @@ function updateHubStats() {
             setStat('statLayerzDone', fmtNum(done));
             setStat('statLayerzPending', fmtNum(active.filter(p => p.status === 'Queued').length));
             
+            // Universal Recursive BOM Time Aggregator
+            window.getPrintTime = function(partName) {
+                let cat = typeof catalogByName !== 'undefined' ? catalogByName[partName] : null;
+                if (cat && parseFloat(cat.print_time_mins) > 0) return parseFloat(cat.print_time_mins);
+                
+                let recipe = typeof productsDB !== 'undefined' ? productsDB[partName] : null;
+                if (recipe) {
+                    if (parseFloat(recipe.print_time_mins) > 0) return parseFloat(recipe.print_time_mins);
+                    let total = 0;
+                    recipe.forEach(comp => {
+                        let k = String(comp.item_key || comp.di_item_id || comp.name);
+                        let q = parseFloat(comp.quantity || comp.qty) || 1;
+                        if (k.startsWith('RECIPE:::')) {
+                            total += (window.getPrintTime(k.replace('RECIPE:::', '')) * q);
+                        } else {
+                            let cc = typeof catalogByName !== 'undefined' ? catalogByName[k] : null;
+                            if (cc && cc.is_3d_print) {
+                                total += (parseFloat(cc.print_time_mins) || 0) * q;
+                            }
+                        }
+                    });
+                    return total;
+                }
+                return 0;
+            };
+
             let mat = 0, hrs = 0;
             active.forEach(p => {
-                let pt = 0;
+                let pt = window.getPrintTime(p.part_name);
                 let wt = 0;
                 let cat = typeof catalogByName !== 'undefined' ? catalogByName[p.part_name] : null;
-                let rec = typeof productsDB !== 'undefined' ? productsDB[p.part_name] : null;
-                
-                if (cat) {
-                    pt = parseFloat(cat.print_time_mins) || 0;
-                    wt = parseFloat(cat.unit_weight_g) || 0;
-                } else if (rec) {
-                    pt = parseFloat(rec.print_time_mins) || 0;
-                }
+                if (cat) wt = parseFloat(cat.unit_weight_g) || 0;
                 
                 hrs += (pt * (p.qty || 1));
                 mat += (wt * (p.qty || 1));
