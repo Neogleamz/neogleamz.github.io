@@ -318,19 +318,19 @@ function updateHubStats() {
         const fmtMoney = (n) => (!isNaN(n) && n !== null) ? '$' + Number(n).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : n;
 
         // --- DATAZ ---
-        if (typeof salesDB !== 'undefined') {
+        if (typeof finalResults !== 'undefined') {
             let parcels = new Set(), totalPostage = 0, totalWt = 0;
-            salesDB.forEach(s => {
-                let pno = s.parcel_no;
+            finalResults.forEach(s => {
+                let pno = s['Parcel No'];
                 if (pno) {
                     if (!parcels.has(pno)) {
                         parcels.add(pno);
-                        totalPostage += parseFloat(s.order_postage) || 0;
-                        totalWt += parseFloat(s.total_dist_weight_g) || 0;
+                        totalPostage += parseFloat(s['Order Postage']) || 0;
+                        totalWt += parseFloat(s['Total Dist Weight (g)']) || 0;
                     }
                 }
             });
-            setStat('statDatazRecords', fmtNum(salesDB.length));
+            setStat('statDatazRecords', fmtNum(finalResults.length));
             setStat('statDatazParcels', fmtNum(parcels.size));
             setStat('statDatazPaid', fmtMoney(totalPostage));
             setStat('statDatazWt', fmtNum(totalWt));
