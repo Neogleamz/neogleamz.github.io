@@ -55,7 +55,12 @@ function renderPrintQueue() {
     } else {
         printQueueDB.forEach((job, index) => {
             const catalogItem = catalogByName[job.part_name];
-            const printTimePer = catalogItem ? (parseFloat(catalogItem.print_time_mins) || 0) : 0;
+            const recipeItem = typeof productsDB !== 'undefined' ? productsDB[job.part_name] : null;
+
+            let printTimePer = 0;
+            if (catalogItem) printTimePer = parseFloat(catalogItem.print_time_mins) || 0;
+            else if (recipeItem) printTimePer = parseFloat(recipeItem.print_time_mins) || 0;
+
             const totalTime = printTimePer * job.qty;
             const isActive = job.status !== 'Completed';
             
@@ -260,6 +265,8 @@ async function deletePrintJob() {
 function getPrintTime(partName) {
     const catalogItem = catalogByName[partName];
     if (catalogItem) return parseFloat(catalogItem.print_time_mins) || 0;
+    const recipeItem = typeof productsDB !== 'undefined' ? productsDB[partName] : null;
+    if (recipeItem) return parseFloat(recipeItem.print_time_mins) || 0;
     return 0;
 }
 

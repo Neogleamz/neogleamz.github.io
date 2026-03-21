@@ -184,10 +184,20 @@ function updateHubStats() {
             
             let mat = 0, hrs = 0;
             active.forEach(p => {
-                hrs += (p.expected_time_mins || 0);
-                if (p.component_id && typeof catalogCache !== 'undefined') {
-                    mat += (catalogCache[p.component_id]?.unit_weight_g || 0) * (p.qty || 1);
+                let pt = 0;
+                let wt = 0;
+                let cat = typeof catalogByName !== 'undefined' ? catalogByName[p.part_name] : null;
+                let rec = typeof productsDB !== 'undefined' ? productsDB[p.part_name] : null;
+                
+                if (cat) {
+                    pt = parseFloat(cat.print_time_mins) || 0;
+                    wt = parseFloat(cat.unit_weight_g) || 0;
+                } else if (rec) {
+                    pt = parseFloat(rec.print_time_mins) || 0;
                 }
+                
+                hrs += (pt * (p.qty || 1));
+                mat += (wt * (p.qty || 1));
             });
             setStat('statLayerzMat', fmtNum(Math.round(mat)));
             setStat('statLayerzScrap', fmtNum(Math.round(hrs/60)));
