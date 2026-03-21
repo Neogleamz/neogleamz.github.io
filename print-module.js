@@ -90,8 +90,9 @@ function renderPrintQueue() {
                 onclick="selectPrintJob('${job.id}')" 
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:14px; font-weight:700;">☰ ${dot} <span style="font-family:monospace; color:#8b5cf6;">[${displayID}]</span> ${displayName} - ${job.qty}${timeStr}</span>
+                    <span style="font-size:14px; font-weight:700;">☰ ${dot} ${displayID}: ${displayName}${timeStr}</span>
                 </div>
+                <span style="font-weight:900; color:var(--text-muted); font-family:monospace;">x${job.qty}</span>
             </li>`;
         });
     }
