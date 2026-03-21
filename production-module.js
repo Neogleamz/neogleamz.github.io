@@ -356,24 +356,39 @@ function renderActiveWO(id) {
             if(wo.completed_at) { enEl.innerText = `FINISH: ${fmtDT(wo.completed_at)}`; enEl.style.display = 'inline-block'; }
             else enEl.style.display = 'none';
         }
-        ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { document.getElementById('pipe-'+s).classList.remove('active'); document.getElementById('sect-'+s).classList.remove('active'); });
+        ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { 
+            let el = document.getElementById('pipe-'+s);
+            el.classList.remove('active'); 
+            el.style.pointerEvents = 'auto';
+            el.style.opacity = '1';
+            document.getElementById('sect-'+s).classList.remove('active'); 
+        });
+
+        document.getElementById('pipe-Queued').innerHTML = '1. Queued';
+        document.getElementById('pipe-Picking').innerHTML = '2. Start Picking Parts';
+        document.getElementById('pipe-Production').innerHTML = '3. Send to Production';
+        document.getElementById('pipe-Completed').innerHTML = '4. Finalize Batch';
+
         let wip = wo.wip_state || {};
         const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
         
-        if (wo.materials_pulled) {
+        if (wo.status === 'Picking' || wo.status === 'In Production' || wo.status === 'Completed') {
             document.getElementById('pipe-Queued').style.pointerEvents = 'none';
-            document.getElementById('pipe-Queued').style.opacity = '0.5';
+            document.getElementById('pipe-Queued').style.opacity = '0.6';
             document.getElementById('pipe-Queued').innerHTML = '🔒 1. Queued';
+        }
+        if (wo.status === 'In Production' || wo.status === 'Completed' || wo.materials_pulled) {
             document.getElementById('pipe-Picking').style.pointerEvents = 'none';
-            document.getElementById('pipe-Picking').style.opacity = '0.5';
+            document.getElementById('pipe-Picking').style.opacity = '0.6';
             document.getElementById('pipe-Picking').innerHTML = '🔒 2. Parts Picked & Deducted';
-        } else {
-            document.getElementById('pipe-Queued').style.pointerEvents = 'auto';
-            document.getElementById('pipe-Queued').style.opacity = '1';
-            document.getElementById('pipe-Queued').innerHTML = '1. Queued';
-            document.getElementById('pipe-Picking').style.pointerEvents = 'auto';
-            document.getElementById('pipe-Picking').style.opacity = '1';
-            document.getElementById('pipe-Picking').innerHTML = '2. Start Picking Parts';
+        }
+        if (wo.status === 'Completed') {
+            document.getElementById('pipe-Production').style.pointerEvents = 'none';
+            document.getElementById('pipe-Production').style.opacity = '0.6';
+            document.getElementById('pipe-Production').innerHTML = '🔒 3. Send to Production';
+            document.getElementById('pipe-Completed').style.pointerEvents = 'none';
+            document.getElementById('pipe-Completed').style.opacity = '0.6';
+            document.getElementById('pipe-Completed').innerHTML = '🔒 4. Finalize Batch';
         }
 
         if(wo.status === 'Queued') { document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); }
@@ -476,11 +491,6 @@ function renderActiveWO(id) {
         else if(wo.status === 'Completed') { 
             document.getElementById('pipe-Completed').classList.add('active'); 
             document.getElementById('sect-Completed').classList.add('active'); 
-            document.getElementById('pipe-Queued').innerHTML = '🔒 1. Queued';
-            document.getElementById('pipe-Picking').innerHTML = '🔒 2. Parts Picked & Deducted';
-            document.getElementById('pipe-Production').innerHTML = '🔒 3. Send to Production';
-            document.getElementById('pipe-Completed').innerHTML = '🔒 4. Finalize Batch';
-            document.querySelectorAll('.pipe-step').forEach(el => { el.style.pointerEvents = 'none'; el.style.opacity = '0.7'; });
         }
     } catch(e) { sysLog(e.message, true); }
 }
