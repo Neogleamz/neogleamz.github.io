@@ -7,18 +7,46 @@ if (orderFilesEl) orderFilesEl.addEventListener('change', async(e)=>{if(e.target
 const parcelFilesEl = document.getElementById('parcelFiles');
 if (parcelFilesEl) parcelFilesEl.addEventListener('change', async(e)=>{if(e.target.files.length>0) await runFileImport(e.target, 'parcels');});
 
+function importTrace(msg, isErr=false) {
+    let t = document.getElementById('importzProgressTerminal');
+    if(t) {
+        let line = document.createElement('div');
+        line.style.color = isErr ? '#ef4444' : '#38bdf8';
+        line.style.paddingBottom = '3px';
+        line.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        line.innerText = `> ${msg}`;
+        t.appendChild(line);
+        t.parentElement.scrollTop = t.parentElement.scrollHeight;
+    }
+}
+
 async function runFileImport(inputNode, type) {
-    inputNode.disabled = true; let statId = type==='orders' ? 'statusOrders' : 'statusParcels';
-    setModuleStatus(statId, '⚙️ Extracting...', 'mod-working'); sysLog(`Starting ${type} extract...`); setSysProgress(20, 'working');
+    if(!inputNode.files.length) return;
+    let term = document.getElementById('importzProgressTerminal'); if(term) term.innerHTML = "";
+    importTrace(`INITIALIZING IMPORT PROTOCOL: [${type.toUpperCase()}]`, false);
+    importTrace(`Loaded ${inputNode.files.length} payload file(s) into memory matrix.`);
+    let statId = type === 'orders' ? 'statusOrders' : 'statusParcels';
+    setSysProgress(20, 'working'); setModuleStatus(statId, "⏳ Parsing...", "mod-working"); inputNode.disabled = true;
     try {
         let resObj = type === 'orders' ? await extractOrders(inputNode.files) : await extractParcels(inputNode.files);
         if (resObj.count > 0) {
+            importTrace(`Data successfully extracted globally! Detected ${resObj.count} valid dictionary instances.`);
+            importTrace(`Transmitting [${resObj.table}] insertion payload -> supabaseClient...`);
             sysLog(`Pushing ${resObj.count} items...`); setSysProgress(80, 'working');
             const {error} = await supabaseClient.from(resObj.table).upsert(resObj.data, {onConflict: resObj.conflict}); if(error) throw new Error(error.message);
-            if (resObj.data2) { const {error2} = await supabaseClient.from(resObj.table2).upsert(resObj.data2, {onConflict: resObj.conflict2}); if(error2) throw new Error(error2.message); }
+            if (resObj.data2) { 
+                importTrace(`Secondary relation payload found! Transmitting [${resObj.table2}] insertion payload...`);
+                const {error2} = await supabaseClient.from(resObj.table2).upsert(resObj.data2, {onConflict: resObj.conflict2}); if(error2) throw new Error(error2.message); 
+            }
+            importTrace(`Upload Cycle Completed Successfully! Local data sync triggered.`);
             setSysProgress(100, 'success'); setModuleStatus(statId, `✅ Synced!`, 'mod-success'); inputNode.value = ""; setTimeout(()=>{setSysProgress(0,'working');syncAndCalculate();}, 1000);
-        } else { setSysProgress(100, 'error'); setModuleStatus(statId, "❌ No data.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'),3000); }
-    } catch(e) { sysLog(e.message, true); setSysProgress(100, 'error'); setModuleStatus(statId, "❌ Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'),3000); }
+        } else { 
+            importTrace(`HALT WARNING: Zero valid DOM items located in the payload targets.`, true);
+            setSysProgress(100, 'error'); setModuleStatus(statId, "❌ No data.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'),3000); }
+    } catch(e) { 
+        importTrace(`CRITICAL FAULT: ${e.message}`, true);
+        sysLog(e.message, true); setSysProgress(100, 'error'); setModuleStatus(statId, "❌ Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'),3000); 
+    }
     inputNode.disabled = false;
 }
 
