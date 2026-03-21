@@ -224,6 +224,7 @@ async function advancePrintStatus(newStatus) {
         if (newStatus === 'Printing') updatePayload.started_at = new Date().toISOString();
         if (newStatus === 'Completed') {
             updatePayload.completed_at = new Date().toISOString();
+            updatePayload.is_archived = true;
             
             // 📦 INVENTORY INTEGRATION: Add the finished raw material to shelf
             // We increment produced_qty for this raw material. 
@@ -247,6 +248,12 @@ async function advancePrintStatus(newStatus) {
 
         const { error } = await supabaseClient.from('print_queue').update(updatePayload).eq('id', currentPrintJob.id);
         if (error) throw error;
+        
+        currentPrintJob.status = newStatus;
+        if(updatePayload.is_archived) {
+            currentPrintJob.is_archived = true;
+            currentPrintJob = printJobsDB.find(j => !j.is_archived) || null;
+        }
 
         setMasterStatus("Job Updated!", "mod-success");
         await refreshPrintQueue();

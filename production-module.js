@@ -545,6 +545,7 @@ async function advanceWO(newStatus) {
         if(newStatus === 'Completed') {
             currentWO.completed_at = new Date().toISOString();
             updateData.completed_at = currentWO.completed_at;
+            updateData.status = 'Archived';
         }
 
         const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); 
@@ -562,7 +563,11 @@ async function advanceWO(newStatus) {
             }
         } catch(pe) { sysLog("Print Spawn Error: " + pe.message, true); }
 
-        currentWO.status = newStatus; setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList(); 
+        currentWO.status = updateData.status || newStatus; 
+        if(currentWO.status === 'Archived') {
+            currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
+        }
+        setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList(); 
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
