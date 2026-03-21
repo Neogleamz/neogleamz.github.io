@@ -363,12 +363,14 @@ function renderActiveWO(id) {
         if (wo.materials_pulled) {
             document.getElementById('pipe-Queued').style.pointerEvents = 'none';
             document.getElementById('pipe-Queued').style.opacity = '0.5';
+            document.getElementById('pipe-Queued').innerHTML = '🔒 1. Queued';
             document.getElementById('pipe-Picking').style.pointerEvents = 'none';
             document.getElementById('pipe-Picking').style.opacity = '0.5';
             document.getElementById('pipe-Picking').innerHTML = '🔒 2. Parts Picked & Deducted';
         } else {
             document.getElementById('pipe-Queued').style.pointerEvents = 'auto';
             document.getElementById('pipe-Queued').style.opacity = '1';
+            document.getElementById('pipe-Queued').innerHTML = '1. Queued';
             document.getElementById('pipe-Picking').style.pointerEvents = 'auto';
             document.getElementById('pipe-Picking').style.opacity = '1';
             document.getElementById('pipe-Picking').innerHTML = '2. Start Picking Parts';
@@ -474,6 +476,8 @@ function renderActiveWO(id) {
         else if(wo.status === 'Completed') { 
             document.getElementById('pipe-Completed').classList.add('active'); 
             document.getElementById('sect-Completed').classList.add('active'); 
+            document.getElementById('pipe-Queued').innerHTML = '🔒 1. Queued';
+            document.getElementById('pipe-Picking').innerHTML = '🔒 2. Parts Picked & Deducted';
             document.getElementById('pipe-Production').innerHTML = '🔒 3. Send to Production';
             document.getElementById('pipe-Completed').innerHTML = '🔒 4. Finalize Batch';
             document.querySelectorAll('.pipe-step').forEach(el => { el.style.pointerEvents = 'none'; el.style.opacity = '0.7'; });
