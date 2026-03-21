@@ -471,7 +471,13 @@ function renderActiveWO(id) {
                 }
             }
         }
-        else if(wo.status === 'Completed') { document.getElementById('pipe-Completed').classList.add('active'); document.getElementById('sect-Completed').classList.add('active'); }
+        else if(wo.status === 'Completed') { 
+            document.getElementById('pipe-Completed').classList.add('active'); 
+            document.getElementById('sect-Completed').classList.add('active'); 
+            document.getElementById('pipe-Production').innerHTML = '🔒 3. Send to Production';
+            document.getElementById('pipe-Completed').innerHTML = '🔒 4. Finalize Batch';
+            document.querySelectorAll('.pipe-step').forEach(el => { el.style.pointerEvents = 'none'; el.style.opacity = '0.7'; });
+        }
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -531,8 +537,8 @@ async function advanceWO(newStatus) {
         
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
-            const alreadySpawned = (typeof printQueueDB !== 'undefined') && printQueueDB.some(p => p.wo_id === currentWO.wo_id);
-            if (!alreadySpawned) {
+            const { data: existingPrints } = await supabaseClient.from('print_queue').select('id').eq('wo_id', currentWO.wo_id);
+            if (!existingPrints || existingPrints.length === 0) {
                 const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
                 for(let job of Object.keys(printJobs)) {
                     if(typeof addPrintJob === 'function') {
