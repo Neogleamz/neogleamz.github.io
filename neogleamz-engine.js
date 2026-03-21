@@ -102,7 +102,7 @@ function updateHubStats() {
                     let c = catalogCache[k];
                     let i = inventoryDB[k] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0};
                     let s = (c.totalQty || 0) - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
-                    if (s < (i.min_stock || 5)) alerts++;
+                    if (s < (i.min_stock || 0)) alerts++;
                     rawVal += Math.max(0, s) * (parseFloat(c.avgUnitCost) || 0);
                 });
             }
@@ -114,7 +114,7 @@ function updateHubStats() {
                     let s = (i.produced_qty || 0) - (i.sold_qty || 0);
                     fgiUnits += Math.max(0, s);
                     fgiVal += Math.max(0, s) * getEngineTrueCogs(p); 
-                    if (s < 5) alerts++;
+                    if (s < 0) alerts++;
                 });
             }
             
