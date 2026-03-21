@@ -224,21 +224,13 @@ async function advancePrintStatus(newStatus) {
         if (newStatus === 'Printing') updatePayload.started_at = new Date().toISOString();
         if (newStatus === 'Completed') {
             updatePayload.completed_at = new Date().toISOString();
-            updatePayload.is_archived = true;
+            updatePayload.status = 'Archived';
             
             // 📦 INVENTORY INTEGRATION: Add the finished raw material to shelf
-            // We increment produced_qty for this raw material. 
-            // The item_key is the part_name.
             const k = currentPrintJob.part_name;
             if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
-            
             inventoryDB[k].produced_qty += (parseFloat(currentPrintJob.qty) || 0);
-            
-            const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert({
-                item_key: k,
-                ...inventoryDB[k]
-            }, { onConflict: 'item_key' });
-            
+            const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert({ item_key: k, ...inventoryDB[k] }, { onConflict: 'item_key' });
             if (invErr) throw new Error("Inventory update failed: " + invErr.message);
 
             // 🔄 REFRESH UI: Make sure inventory tab reflects the new stock
@@ -249,10 +241,9 @@ async function advancePrintStatus(newStatus) {
         const { error } = await supabaseClient.from('print_queue').update(updatePayload).eq('id', currentPrintJob.id);
         if (error) throw error;
         
-        currentPrintJob.status = newStatus;
-        if(updatePayload.is_archived) {
-            currentPrintJob.is_archived = true;
-            currentPrintJob = printJobsDB.find(j => !j.is_archived) || null;
+        currentPrintJob.status = updatePayload.status || newStatus;
+        if(currentPrintJob.status === 'Archived') {
+            currentPrintJob = printQueueDB.find(j => j.status !== 'Archived') || null;
         }
 
         setMasterStatus("Job Updated!", "mod-success");
