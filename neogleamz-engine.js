@@ -60,7 +60,7 @@ function updateHubStats() {
                     if (!parcels.has(pno)) {
                         parcels.add(pno);
                         totalPaid += parseFloat(s['Actual Paid (Parcel)']) || 0;
-                        totalWt += parseFloat(s['Total Dist Weight (g)']) || 0;
+                        totalWt += parseFloat(s['Actual Chargeable Weight (g)']) || 0;
                     }
                 }
             });
