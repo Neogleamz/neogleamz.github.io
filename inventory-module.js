@@ -64,7 +64,7 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         inventoryDB[rKey] = payload;
         setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); 
         setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),2000); 
-        renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('analytics-tab').classList.contains('active')) renderAnalyticsDashboard();
+        renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') renderAnalyticsDashboard();
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
 }
 
