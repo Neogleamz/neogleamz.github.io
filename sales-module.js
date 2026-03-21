@@ -155,7 +155,8 @@ function processParsedSales(rows) {
         syncTrace("HALT WARNING: Zero valid rows detected or Ledger matched existing instances 100%. Aborting.", true);
         setTimeout(() => alert("No new sales found in this file! All orders are already in the ledger or the file contained invalid rows."), 10);
         let elUnmapped = document.getElementById('unmappedSkusList');
-        if (elUnmapped) elUnmapped.innerHTML = "All storefront SKUs are currently mapped and recognized.";
+        if (elUnmapped) elUnmapped.innerHTML = "";
+        syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
         setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); 
         let elFile = document.getElementById('salesCsvFile');
         if (elFile) elFile.value = ""; 
@@ -232,7 +233,8 @@ async function executeSalesSync() {
         let count = pendingSalesRows.length;
         pendingSalesRows = [];
         let elUnmapped = document.getElementById('unmappedSkusList');
-        if (elUnmapped) elUnmapped.innerHTML = "All storefront SKUs are currently mapped and recognized.";
+        if (elUnmapped) elUnmapped.innerHTML = "";
+        syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
         
         let elFile = document.getElementById('salesCsvFile');
         if (elFile) elFile.value = "";
