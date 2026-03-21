@@ -259,7 +259,11 @@ async function advancePrintStatus(newStatus) {
 async function deletePrintJob() {
     try {
         if (!currentPrintJob) return;
-        if (!confirm(`Delete ${currentPrintJob.id}?`)) return;
+        let cleanPartName = currentPrintJob.part_name.split(':::')[0];
+        const catalogItem = catalogByName[cleanPartName];
+        const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
+        let displayID = (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());
+        if (!confirm(`Delete ${displayID}: ${displayName}?`)) return;
         sysLog(`Deleting Print Job ${currentPrintJob.id}`);
         setMasterStatus("Deleting...", "mod-working");
 
