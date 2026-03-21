@@ -65,9 +65,25 @@ async function addManualSale() {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); alert("Error adding manual sale: \n" + e.message); }
 }
 
+function syncTrace(msg, isErr=false) {
+    let t = document.getElementById('syncProgressTerminal');
+    if(t) {
+        let line = document.createElement('div');
+        line.style.color = isErr ? '#ef4444' : '#38bdf8';
+        line.style.paddingBottom = '3px';
+        line.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        line.innerText = `> ${msg}`;
+        t.appendChild(line);
+        t.parentElement.scrollTop = t.parentElement.scrollHeight;
+    }
+}
+
 async function processSalesCSV() {
+    let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
+    syncTrace("INITIALIZING SYNC PROTOCOL...", false);
     const fileInput = document.getElementById('salesCsvFile'); const file = fileInput.files[0];
-    if(!file) return alert("Please select a CSV file first.");
+    if(!file) { syncTrace("ERROR: No CSV payload selected.", true); return alert("Please select a CSV file first."); }
+    syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
     sysLog("Reading Sales CSV..."); setMasterStatus("Parsing...", "mod-working"); setSysProgress(20, 'working');
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -80,6 +96,8 @@ async function processSalesCSV() {
 }
 
 function processParsedSales(rows) {
+    syncTrace(`File parsed successfully. Target rows length: ${rows.length}`);
+    syncTrace("Scanning for missing Storefront SKUs inside Local Dictionary...");
     pendingSalesRows = []; let unmapped = new Set();
     let orderFirstRowFlags = {};
 
@@ -173,6 +191,7 @@ async function saveAliasMapping() {
 
 async function executeSalesSync() {
     try {
+        syncTrace(`Mapping verified. Preparing Database Payload structure for ${pendingSalesRows.length} internal components...`);
         sysLog(`Pushing ${pendingSalesRows.length} sales...`); setMasterStatus("Syncing Sales...", "mod-working"); setSysProgress(60, 'working');
 
         // --- POWERED BY MASTER ENGINE ---
@@ -199,13 +218,16 @@ async function executeSalesSync() {
             return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
         });
 
+        syncTrace(`Injecting aggregated Sales Ledger objects to network array...`);
         const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
         if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
         
+        syncTrace(`Deducting ${invPayload.length} distinct BOM recipes from Live Inventory...`);
         const { error: e2 } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'}); 
         if(e2) throw new Error("Inventory Deduction Error: " + e2.message);
 
-        salesPayload.forEach(s => salesDB.unshift(s)); 
+        syncTrace(`Transaction successful! Updating dynamic DOM clusters!`);
+        salesPayload.forEach(s => salesDB.unshift(s));  
         let count = pendingSalesRows.length;
         pendingSalesRows = [];
         let elUnmapped = document.getElementById('unmappedSkusList');
