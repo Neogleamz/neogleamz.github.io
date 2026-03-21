@@ -568,9 +568,16 @@ function renderArchiveList() {
         
         archivedItemz.forEach(job => {
             const dt = job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown';
+            
+            let cleanPartName = job.part_name.split(':::')[0];
+            const catItem = typeof catalogByName !== 'undefined' ? catalogByName[cleanPartName] : null;
+            const displayName = catItem ? (catItem.neoName || catItem.itemName) : cleanPartName;
+            
+            let displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
+
             listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
                 <div>
-                    <strong style="color:var(--text-heading); font-size:16px;">Job ${job.id}: ${job.part_name}</strong>
+                    <strong style="color:var(--text-heading); font-size:16px;">${displayID}: ${displayName}</strong>
                     <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Created: ${dt}</div>
                 </div>
                 <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>

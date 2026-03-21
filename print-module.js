@@ -55,8 +55,9 @@ function renderPrintQueue() {
     } else {
         printQueueDB.forEach((job, index) => {
             if (job.status === 'Archived') return;
-            const catalogItem = catalogByName[job.part_name];
-            let printTimePer = typeof getPrintTime === 'function' ? getPrintTime(job.part_name) : 0;
+            let cleanPartName = job.part_name.split(':::')[0];
+            const catalogItem = catalogByName[cleanPartName];
+            let printTimePer = typeof getPrintTime === 'function' ? getPrintTime(cleanPartName) : 0;
             const totalTime = printTimePer * job.qty;
             const isActive = job.status !== 'Completed';
             
@@ -68,8 +69,9 @@ function renderPrintQueue() {
             let sel = (currentPrintJob && currentPrintJob.id === job.id) ? 'selected' : '';
             let dot = job.status === 'Queued' ? '🟡' : (job.status === 'Completed' ? '🟢' : (job.status === 'Printing' ? '🖨️' : '🧹'));
             
-            // Format: "Neogleamz Name - amount to print - time"
-            const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : job.part_name;
+            // Format: "[ID] Neogleamz Name - amount to print - time"
+            const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
+            const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
             const timeStr = totalTime > 0 ? ` - ${formatPrintTime(totalTime)}` : "";
 
             ui.innerHTML += `<li class="${sel}" 
@@ -81,7 +83,7 @@ function renderPrintQueue() {
                 onclick="selectPrintJob('${job.id}')" 
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:14px; font-weight:700;">☰ ${dot} ${displayName} - ${job.qty}${timeStr}</span>
+                    <span style="font-size:14px; font-weight:700;">☰ ${dot} <span style="font-family:monospace; color:#8b5cf6;">[${displayID}]</span> ${displayName} - ${job.qty}${timeStr}</span>
                 </div>
             </li>`;
         });
@@ -125,9 +127,12 @@ function renderActivePrintJob(id) {
     document.getElementById('printMainArea').style.display = 'block';
     
     // Simplified human-readable name for title
-    const catalogItem = catalogByName[job.part_name];
-    const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : job.part_name;
-    document.getElementById('printJobTitle').innerText = displayName;
+    let cleanPartName = job.part_name.split(':::')[0];
+    const catalogItem = catalogByName[cleanPartName];
+    const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
+    const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
+
+    document.getElementById('printJobTitle').innerText = `${displayID}: ${displayName}`;
 
     document.getElementById('printJobQty').innerText = job.qty;
     document.getElementById('printJobSource').innerText = job.wo_id || 'Manual Entry';
@@ -181,7 +186,8 @@ function renderActivePrintJob(id) {
     // SOP logic for Printing stage
     if (job.status === 'Printing' || job.status === 'Cleaned') {
         const sopList = document.getElementById('printSOPList');
-        const steps = sopsDB[job.part_name] || [];
+        let cleanPartName = job.part_name.split(':::')[0];
+        const steps = sopsDB[cleanPartName] || [];
         if (steps.length === 0) {
             sopList.innerHTML = `<div style="padding:15px; color:var(--text-muted); border:1px dashed var(--border-color); border-radius:6px;">No specific 3D Print SOP found for this item.</div>`;
         } else {
@@ -278,6 +284,7 @@ async function archiveCurrentPrint() {
 
 
 function openPrintSOP(pName) {
+    pName = pName.split(':::')[0];
     if (typeof openSOPMasterModal === 'function') {
         openSOPMasterModal('3d');
         const select = document.getElementById('sopMasterProductSelect');
