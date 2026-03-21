@@ -611,9 +611,10 @@ function renderArchiveList() {
         const archivedItemz = workOrdersDB.filter(w => w.status === 'Archived');
         if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived batches found.</p>'; return; }
         
+        const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         archivedItemz.forEach(wo => {
-            const dtC = wo.created_at ? new Date(wo.created_at).toLocaleDateString() : 'Unknown';
-            const dtF = wo.completed_at ? new Date(wo.completed_at).toLocaleDateString() : 'Manual Archive';
+            const dtC = fmt(wo.created_at) || 'Unknown';
+            const dtF = fmt(wo.completed_at) || 'Manual Archive';
             listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
                 <div>
                     <strong style="color:var(--text-heading); font-size:16px;">${wo.wo_id}: ${wo.product_name}</strong>
@@ -626,9 +627,10 @@ function renderArchiveList() {
         const archivedItemz = printQueueDB.filter(p => p.status === 'Archived');
         if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived prints found.</p>'; return; }
         
+        const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         archivedItemz.forEach(job => {
-            const dtC = job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown';
-            const dtF = job.completed_at ? new Date(job.completed_at).toLocaleDateString() : 'Manual Archive';
+            const dtC = fmt(job.created_at) || 'Unknown';
+            const dtF = fmt(job.completed_at) || 'Manual Archive';
             
             let cleanPartName = job.part_name.split(':::')[0];
             const catItem = typeof catalogByName !== 'undefined' ? catalogByName[cleanPartName] : null;
