@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1243"></script>
+    <script src="system-version.js?v=v.2026.03.21.1249"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1243"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1243"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1249"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1249"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -1081,22 +1081,18 @@
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
-                    <div id="printQueueStats" style="margin-top:0; margin-bottom:15px; background:var(--bg-bar); padding:15px; border-radius:10px; border:2px solid var(--border-color); text-align:center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                        <div style="display:flex; justify-content:space-around; align-items:center; gap:10px;">
-                            <div style="display:flex; flex-direction:column;">
-                                <span style="font-size:24px; font-weight:900; color:#8b5cf6;" id="totalPrintTasks">0</span>
-                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">TASKS</span>
-                            </div>
-                            <div style="width:1px; height:30px; background:var(--border-color);"></div>
-                            <div style="display:flex; flex-direction:column;">
-                                <span style="font-size:24px; font-weight:900; color:#8b5cf6;" id="totalPrintingTime">0</span>
-                                <span style="font-size:10px; font-weight:bold; color:var(--text-muted);">TIME</span>
-                            </div>
+                    <div id="printQueueStats" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:center; box-shadow:var(--glass-shadow); border-left: 4px solid #8b5cf6;">
+                        <div style="display:flex; flex-direction:column; align-items:center; border-right: 1px solid var(--border-color);">
+                            <span style="font-size:20px; font-weight:900; color:#8b5cf6;" id="totalPrintTasks">0</span>
+                            <span style="font-size:9px; font-weight:900; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Active Prints</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <span style="font-size:20px; font-weight:900; color:#8b5cf6;" id="totalPrintingTime">0m</span>
+                            <span style="font-size:9px; font-weight:900; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Print Time</span>
                         </div>
                     </div>
-                    <h3>🖨️ Print Tasks</h3>
-                    <button class="btn-blue" onclick="refreshPrintQueue()" style="margin-bottom:10px; padding:10px;">↻ Refresh Queue</button>
-                    <button class="btn-green" onclick="openManualPrintModal()" style="margin-bottom:10px; padding:10px; background:#10b981; border-color:#10b981; width:100%;">➕ New Manual Print</button>
+                    <h3 style="margin-top:10px;">🖨️ Print Tasks</h3>
+                    <button class="btn-green" onclick="openManualPrintModal()" style="margin-bottom:10px; padding:10px; background:#0ea5e9; border-color:#0ea5e9; width:100%;">➕ New Manual Print</button>
                     <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="margin-bottom:10px; padding:10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff; font-size:15px; width:100%;">📝 Edit Print SOP</button>
                     <div style="display:flex; gap:10px; margin-bottom:15px; width:100%;">
                         <button class="btn-blue" style="flex:1; padding:10px; font-size:13px;" onclick="openArchiveExplorer('layerz')">📂 Archives</button>
@@ -2321,15 +2317,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1243"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1243"></script>
-<script src="bom-module.js?v=v.2026.03.21.1243"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1243"></script>
-<script src="production-module.js?v=v.2026.03.21.1243"></script>
-<script src="sales-module.js?v=v.2026.03.21.1243"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1243"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1243"></script>
-<script src="print-module.js?v=v.2026.03.21.1243"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1249"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1249"></script>
+<script src="bom-module.js?v=v.2026.03.21.1249"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1249"></script>
+<script src="production-module.js?v=v.2026.03.21.1249"></script>
+<script src="sales-module.js?v=v.2026.03.21.1249"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1249"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1249"></script>
+<script src="print-module.js?v=v.2026.03.21.1249"></script>
 </body>
 </html>
 
