@@ -301,8 +301,17 @@ function renderWOList() {
                 <span style="font-weight:900; font-family:monospace;">x${wo.qty}</span>
             </li>`; 
         });
-        if(!currentWO && activeCount > 0) currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
-        if(currentWO) { isSOPLocked = true; renderActiveWO(currentWO.wo_id); } else { document.getElementById('woMainArea').style.display = 'none'; }
+        if(!currentWO) {
+            let activeWO = workOrdersDB.find(w => w.status !== 'Archived');
+            if(activeWO) {
+                setTimeout(() => selectWO(activeWO.wo_id), 50);
+            } else {
+                document.getElementById('woMainArea').style.display = 'none';
+            }
+        } else {
+            // Already selected, just ensure main area renders
+            if(currentWO) { isSOPLocked = true; renderActiveWO(currentWO.wo_id); }
+        }
     } catch(e) { sysLog(e.message, true); }
 }
 
