@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1157"></script>
+    <script src="system-version.js?v=v.2026.03.21.1212"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1157"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1157"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1212"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1212"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -1030,22 +1030,20 @@
 
                     <div class="pipeline-bar" id="woPipeline">
                         <div class="pipe-step" id="pipe-Queued" onclick="advanceWO('Queued')">1. Queued</div>
-                        <div class="pipe-step" id="pipe-Picking" onclick="advanceWO('Picking')">2. Picking Parts</div>
-                        <div class="pipe-step" id="pipe-Production" onclick="advanceWO('In Production')">3. In Production</div>
-                        <div class="pipe-step" id="pipe-Completed" onclick="advanceWO('Completed')">4. Completed</div>
+                        <div class="pipe-step" id="pipe-Picking" onclick="advanceWO('Picking')">2. Start Picking Parts</div>
+                        <div class="pipe-step" id="pipe-Production" onclick="advanceWO('In Production')">3. Send to Production</div>
+                        <div class="pipe-step" id="pipe-Completed" onclick="advanceWO('Completed')">4. Finalize Batch</div>
                     </div>
 
                     <div id="sect-Queued" class="wo-section">
-                        <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">This batch is queued and waiting for an operator. Once you are ready to pull parts from the physical inventory shelves, begin the picking process.</p>
-                        <button class="btn-blue" style="width:auto; padding:12px 25px; margin-top:10px;" onclick="advanceWO('Picking')">📋 Start Picking Parts</button>
+                        <p style="color:var(--text-muted); font-size:14px; line-height:1.5; margin:0;">This batch is queued and waiting for an operator. Once you are ready to pull parts from the physical inventory shelves, advance the stage.</p>
                     </div>
 
                     <div id="sect-Picking" class="wo-section">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                             <button class="print-btn" onclick="printPickList()">🖨️ Print List</button>
                         </div>
-                        <div id="woPickList" style="margin-bottom:20px;"></div>
-                        <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('In Production')">✅ All Parts Picked -> Move to Production</button>
+                        <div id="woPickList" style="margin-bottom:0px;"></div>
                     </div>
 
                     <div id="sect-Production" class="wo-section">
@@ -1063,8 +1061,7 @@
                         </div>
                         <div style="background:var(--bg-negative); border:1px solid #fca5a5; padding:15px; border-radius:8px; margin-top:30px;">
                             <h4 style="margin:0 0 10px 0; color:#b91c1c;">⚠️ Finalize Production</h4>
-                            <p style="font-size:13px; color:#991b1b; margin-top:0;">Marking this complete will instantly deduct all picked raw materials and log the finished goods to your inventory ledger.</p>
-                            <button class="btn-green" style="width:auto; padding:12px 25px;" onclick="advanceWO('Completed')">🏁 Mark Complete & Process Inventory</button>
+                            <p style="font-size:13px; color:#991b1b; margin-top:0; margin-bottom:0;">Marking this complete will instantly deduct all picked raw materials and log the finished goods to your inventory ledger.</p>
                         </div>
                     </div>
 
@@ -1124,17 +1121,16 @@
 
                     <div class="pipeline-bar" id="printPipeline">
                         <div class="pipe-step" id="pipe-P-Queued" onclick="advancePrintStatus('Queued')">1. Queued</div>
-                        <div class="pipe-step" id="pipe-P-Printing" onclick="advancePrintStatus('Printing')">2. Printing</div>
-                        <div class="pipe-step" id="pipe-P-Cleaned" onclick="advancePrintStatus('Cleaned')">3. Cleaned</div>
-                        <div class="pipe-step" id="pipe-P-Completed" onclick="advancePrintStatus('Completed')">4. Completed</div>
+                        <div class="pipe-step" id="pipe-P-Printing" onclick="advancePrintStatus('Printing')">2. Start Print Job</div>
+                        <div class="pipe-step" id="pipe-P-Cleaned" onclick="advancePrintStatus('Cleaned')">3. Mark as Cleaned</div>
+                        <div class="pipe-step" id="pipe-P-Completed" onclick="advancePrintStatus('Completed')">4. Finalize Print</div>
                     </div>
 
                     <!-- Sections for each stage -->
                     <div id="sect-P-Queued" class="wo-section">
                         <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:20px; border-radius:10px; text-align:center;">
                             <h3 style="margin-top:0; color:var(--text-heading);">⏳ Waiting in Queue</h3>
-                            <p style="color:var(--text-muted); margin-bottom:20px;">This job is queued and ready for printing. Please ensure the printer is loaded with the correct filament.</p>
-                            <button class="btn-blue" style="width:auto; padding:12px 35px; font-size:15px;" onclick="advancePrintStatus('Printing')">▶ Start Print Job</button>
+                            <p style="color:var(--text-muted); margin-bottom:0;">This job is queued and ready for printing. Please ensure the printer is loaded with the correct filament.</p>
                         </div>
                     </div>
 
@@ -1146,16 +1142,14 @@
                         <div id="printSOPList" style="margin-bottom:20px;"></div>
                         <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:15px; border-radius:8px; border-left:4px solid #f97316;">
                             <h4 style="margin:0 0 10px 0; color:#f97316;">Next Step: Post-Processing</h4>
-                            <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Once the print finishes, remove it from the plate and mark it as cleaned.</p>
-                            <button class="btn-orange" style="width:auto; padding:12px 25px;" onclick="advancePrintStatus('Cleaned')">🧹 Mark as Cleaned</button>
+                            <p style="font-size:13px; color:var(--text-muted); margin-top:0; margin-bottom:0;">Once the print finishes, remove it from the plate and mark it as cleaned.</p>
                         </div>
                     </div>
 
                     <div id="sect-P-Cleaned" class="wo-section">
                         <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:20px; border-radius:10px; border-left:4px solid #10b981;">
                             <h3 style="margin-top:0; color:#10b981;">✨ Part Cleaned & Cured</h3>
-                            <p style="color:var(--text-muted); margin-bottom:20px;">The part has been removed, cleaned, and is ready for use. Marking complete will add it to the inventory shelf.</p>
-                            <button class="btn-green" style="width:auto; padding:12px 35px; font-size:15px;" onclick="advancePrintStatus('Completed')">✅ Mark Completed & Add to Inventory</button>
+                            <p style="color:var(--text-muted); margin-bottom:0;">The part has been removed, cleaned, and is ready for use. Advance to complete to add it to the inventory shelf.</p>
                         </div>
                     </div>
 
@@ -2327,15 +2321,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1157"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1157"></script>
-<script src="bom-module.js?v=v.2026.03.21.1157"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1157"></script>
-<script src="production-module.js?v=v.2026.03.21.1157"></script>
-<script src="sales-module.js?v=v.2026.03.21.1157"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1157"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1157"></script>
-<script src="print-module.js?v=v.2026.03.21.1157"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1212"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1212"></script>
+<script src="bom-module.js?v=v.2026.03.21.1212"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1212"></script>
+<script src="production-module.js?v=v.2026.03.21.1212"></script>
+<script src="sales-module.js?v=v.2026.03.21.1212"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1212"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1212"></script>
+<script src="print-module.js?v=v.2026.03.21.1212"></script>
 </body>
 </html>
 
