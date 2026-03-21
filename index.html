@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1027"></script>
+    <script src="system-version.js?v=v.2026.03.21.1036"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1027"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1027"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1036"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1036"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -876,6 +876,10 @@
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main" style="padding:20px;">
+                    <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:flex-end;">
+                        <button class="btn-red" style="width:auto; padding:8px 15px; font-size:12px;" onclick="resetInventoryConsumption()">⚠️ Reset Stock Levels</button>
+                        <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="printReorderReport()">🖨️ Low Inventory Report</button>
+                    </div>
                     <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
                     <div class="table-wrap" id="fgiTableWrap"></div>
                     <div id="stockz-v-resizer" class="v-resizer"></div>
@@ -2305,15 +2309,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1027"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1027"></script>
-<script src="bom-module.js?v=v.2026.03.21.1027"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1027"></script>
-<script src="production-module.js?v=v.2026.03.21.1027"></script>
-<script src="sales-module.js?v=v.2026.03.21.1027"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1027"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1027"></script>
-<script src="print-module.js?v=v.2026.03.21.1027"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1036"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1036"></script>
+<script src="bom-module.js?v=v.2026.03.21.1036"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1036"></script>
+<script src="production-module.js?v=v.2026.03.21.1036"></script>
+<script src="sales-module.js?v=v.2026.03.21.1036"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1036"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1036"></script>
+<script src="print-module.js?v=v.2026.03.21.1036"></script>
 </body>
 </html>
 
