@@ -531,7 +531,7 @@ async function advanceWO(newStatus) {
         
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
-            const alreadySpawned = (typeof printQueueDB !== 'undefined') && printQueueDB.some(p => p.source_wo === currentWO.wo_id);
+            const alreadySpawned = (typeof printQueueDB !== 'undefined') && printQueueDB.some(p => p.wo_id === currentWO.wo_id);
             if (!alreadySpawned) {
                 const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
                 for(let job of Object.keys(printJobs)) {
