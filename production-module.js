@@ -298,7 +298,7 @@ function renderWOList() {
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-weight:700; font-size:14px;">☰ ${dot} ${wo.wo_id}: ${wo.product_name}</span>
                 </div>
-                <span style="font-weight:900; color:var(--text-muted); font-family:monospace;">x${wo.qty}</span>
+                <span style="font-weight:900; font-family:monospace;">x${wo.qty}</span>
             </li>`; 
         });
         if(!currentWO && activeCount > 0) currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;

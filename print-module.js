@@ -92,7 +92,7 @@ function renderPrintQueue() {
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:14px; font-weight:700;">☰ ${dot} ${displayID}: ${displayName}${timeStr}</span>
                 </div>
-                <span style="font-weight:900; color:var(--text-muted); font-family:monospace;">x${job.qty}</span>
+                <span style="font-weight:900; font-family:monospace;">x${job.qty}</span>
             </li>`;
         });
     }
