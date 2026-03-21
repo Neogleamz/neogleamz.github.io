@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1012"></script>
+    <script src="system-version.js?v=v.2026.03.21.1019"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1012"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1012"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1019"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1019"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -186,7 +186,7 @@
         }
         .title-block { flex: 1 1 280px; min-width: 0; }
         .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .title-block .subtitle { font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .title-block .subtitle { font-size: 8.5px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .tabs { 
             flex: 1 1 auto; 
@@ -687,7 +687,7 @@
 <div id="appUI" class="container" style="display: none;">
     <div class="header-area">
         <div class="title-block">
-            <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 32px; width: auto; filter: brightness(0) invert(1);">
+            <img src="https://neogleamz.com/cdn/shop/files/neo_logo_lowercase.png?v=1748839346" alt="Neogleamz Logo" style="height: 24px; width: auto; filter: brightness(0) invert(1);">
             <p class="subtitle" style="margin-top: 5px;">Cloud-Native Ledger & Command Center</p>
         </div>
         <div class="tabs">
@@ -2164,20 +2164,20 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1012"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1012"></script>
-<script src="bom-module.js?v=v.2026.03.21.1012"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1012"></script>
-<script src="production-module.js?v=v.2026.03.21.1012"></script>
-<script src="sales-module.js?v=v.2026.03.21.1012"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1012"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1012"></script>
-<script src="print-module.js?v=v.2026.03.21.1012"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1019"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1019"></script>
+<script src="bom-module.js?v=v.2026.03.21.1019"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1019"></script>
+<script src="production-module.js?v=v.2026.03.21.1019"></script>
+<script src="sales-module.js?v=v.2026.03.21.1019"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1019"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1019"></script>
+<script src="print-module.js?v=v.2026.03.21.1019"></script>
 </body>
 </html>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-    document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=v.2026.03.21.1012">');
+    document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=v.2026.03.21.1019">');
     const map = { 'ðŸ“–': '<i class="fa-solid fa-server"></i>', 'ðŸ“‹': '<i class="fa-solid fa-pen-to-square"></i>', 'ðŸ“Š': '<i class="fa-solid fa-boxes-stacked"></i>', 'ðŸ› ï¸': '<i class="fa-solid fa-network-wired"></i>', 'ðŸ­': '<i class="fa-solid fa-industry"></i>', 'ðŸ–¨ï¸': '<i class="fa-solid fa-layer-group"></i>', 'ðŸ“¦': '<i class="fa-solid fa-truck-fast"></i>', 'ðŸ“ˆ': '<i class="fa-solid fa-chart-line"></i>', 'ðŸ§ª': '<i class="fa-solid fa-flask"></i>', 'ðŸ“¥': '<i class="fa-solid fa-file-import"></i>', 'ðŸ’¸': '<i class="fa-solid fa-cart-shopping"></i>', 'ðŸ§ ': '<i class="fa-solid fa-microchip"></i>' };
     document.querySelectorAll('.hub-card i').forEach(el => { 
         let txt = el.textContent.trim();
