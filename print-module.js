@@ -283,7 +283,11 @@ async function archiveCurrentPrint() {
     try {
         if(!currentPrintJob) return;
         if(currentPrintJob.status === 'Archived') return alert("Already archived.");
-        if(confirm(`Archive Print Job ${currentPrintJob.id}?`)) {
+        let cleanPartName = currentPrintJob.part_name.split(':::')[0];
+        const catalogItem = catalogByName[cleanPartName];
+        const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
+        let displayID = (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());
+        if(confirm(`Archive Print Job ${displayID}: ${displayName}?`)) {
             sysLog(`Archiving Print ${currentPrintJob.id}`); setMasterStatus("Archiving...", "mod-working");
             const {error} = await supabaseClient.from('print_queue').update({status: 'Archived'}).eq('id', currentPrintJob.id);
             if(error) throw new Error(error.message);
