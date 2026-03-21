@@ -531,10 +531,13 @@ async function advanceWO(newStatus) {
         
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
-            const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
-            for(let job of Object.keys(printJobs)) {
-                if(typeof addPrintJob === 'function') {
-                    await addPrintJob(job, printJobs[job], currentWO.wo_id);
+            const alreadySpawned = (typeof printQueueDB !== 'undefined') && printQueueDB.some(p => p.source_wo === currentWO.wo_id);
+            if (!alreadySpawned) {
+                const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
+                for(let job of Object.keys(printJobs)) {
+                    if(typeof addPrintJob === 'function') {
+                        await addPrintJob(job, printJobs[job], currentWO.wo_id);
+                    }
                 }
             }
         } catch(pe) { sysLog("Print Spawn Error: " + pe.message, true); }
