@@ -1758,6 +1758,11 @@
             sysLog("Logging out...");
             const { error } = await supabaseClient.auth.signOut();
             if (error) throw new Error(error.message);
+            sessionStorage.removeItem('activeTab');
+            sessionStorage.removeItem('activeInvPane');
+            sessionStorage.removeItem('activeProdPane');
+            sessionStorage.removeItem('activeSalezPane');
+            sessionStorage.removeItem('activeNexuzPane');
             document.getElementById('appUI').style.display = 'none';
             document.getElementById('loginUI').style.display = 'flex';
             document.getElementById('loginPass').value = '';
@@ -1922,14 +1927,14 @@
 
             renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); renderSalesTable(); renderAnalyticsDashboard(); renderAliasManager(); 
             if (typeof updateHubStats === 'function') updateHubStats();
-            let savedTab = localStorage.getItem('activeTab') || 'invhub';
+            let savedTab = sessionStorage.getItem('activeTab') || 'invhub';
             switchTab(savedTab, true);
             setSysProgress(100, 'success'); sysLog("System Ready."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
 
     function switchTab(tabId, isInit = false) { 
-        localStorage.setItem('activeTab', tabId);
+        sessionStorage.setItem('activeTab', tabId);
         let target = document.getElementById(tabId + '-tab');
         if (!target) return console.warn(`Tab ${tabId} not found.`);
 
@@ -1941,10 +1946,10 @@
 
     	target.classList.add('active'); sysLog(`Switched to ${tabId}.`); 
         
-        if (tabId === 'invhub') { if(typeof showInventoryPane === 'function') showInventoryPane(isInit ? (localStorage.getItem('activeInvPane') || 'hub') : 'hub'); }
-        if (tabId === 'prodhub') { if(typeof showProductionPane === 'function') showProductionPane(isInit ? (localStorage.getItem('activeProdPane') || 'hub') : 'hub'); }
-        if (tabId === 'salezhub') { if(typeof showSalezPane === 'function') showSalezPane(isInit ? (localStorage.getItem('activeSalezPane') || 'hub') : 'hub'); }
-        if (tabId === 'synchub') { if(typeof showNexuzPane === 'function') showNexuzPane(isInit ? (localStorage.getItem('activeNexuzPane') || 'hub') : 'hub'); }
+        if (tabId === 'invhub') { if(typeof showInventoryPane === 'function') showInventoryPane(isInit ? (sessionStorage.getItem('activeInvPane') || 'hub') : 'hub'); }
+        if (tabId === 'prodhub') { if(typeof showProductionPane === 'function') showProductionPane(isInit ? (sessionStorage.getItem('activeProdPane') || 'hub') : 'hub'); }
+        if (tabId === 'salezhub') { if(typeof showSalezPane === 'function') showSalezPane(isInit ? (sessionStorage.getItem('activeSalezPane') || 'hub') : 'hub'); }
+        if (tabId === 'synchub') { if(typeof showNexuzPane === 'function') showNexuzPane(isInit ? (sessionStorage.getItem('activeNexuzPane') || 'hub') : 'hub'); }
 
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
     }
@@ -1953,7 +1958,7 @@
     // --- REDUNDANT LOGIC VAPORIZED ---
 
     function showInventoryPane(paneId) {
-        localStorage.setItem('activeInvPane', paneId);
+        sessionStorage.setItem('activeInvPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('invHubLanding').style.setProperty('display', 'flex', 'important');
@@ -1969,7 +1974,7 @@
     }
 
     function showSalezPane(paneId) {
-        localStorage.setItem('activeSalezPane', paneId);
+        sessionStorage.setItem('activeSalezPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('salezHubLanding').style.setProperty('display', 'flex', 'important');
@@ -1984,7 +1989,7 @@
     }
 
     function showProductionPane(paneId) {
-        localStorage.setItem('activeProdPane', paneId);
+        sessionStorage.setItem('activeProdPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('prodHubLanding').style.setProperty('display', 'flex', 'important');
@@ -2000,7 +2005,7 @@
     }
 
     function showNexuzPane(paneId) {
-        localStorage.setItem('activeNexuzPane', paneId);
+        sessionStorage.setItem('activeNexuzPane', paneId);
         hideAllExecutivePanes();
         if (paneId === 'hub') {
             document.getElementById('nexuzHubLanding').style.setProperty('display', 'flex', 'important');
