@@ -236,7 +236,7 @@ function updateHubStats() {
             setStat('statOrderzUnits', fmtNum(pTotals.units || 0));
             setStat('statOrderzShopify', fmtNum(shopify));
             setStat('statOrderzAov', fmtMoney(aov));
-            setStat('statOrderzVal', fmtMoney(pTotals.captured));
+            setStat('statOrderzBurden', (pTotals.burdenPct || 0).toFixed(1) + '%');
         } else if (typeof salesDB !== 'undefined') {
             setStat('statOrderzTotal', fmtNum(salesDB.length));
             let units = 0, shopify = 0, val = 0;

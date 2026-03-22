@@ -345,7 +345,7 @@ function renderSalesTable() {
         }
     });
 
-    let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0 };
+    let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0, burdenUnits: 0, burdenPct: 0 };
 
     Object.keys(orderGroups).forEach(oid => {
         let group = orderGroups[oid];
@@ -384,7 +384,14 @@ function renderSalesTable() {
         totals.stripe += x.stripeFee;
         totals.net += x.net;
         totals.units += (parseFloat(x.qty_sold) || 0);
+        
+        // Track Warranty/Exchange structural overhead
+        if(x.transaction_type === 'Post-Ship Exchange' || x.transaction_type === 'Replacement / Warranty' || x.transaction_type === 'Warranty') {
+            totals.burdenUnits += (parseFloat(x.qty_sold) || 0);
+        }
     });
+
+    totals.burdenPct = totals.units > 0 ? (totals.burdenUnits / totals.units) * 100 : 0;
 
     // --- EXPORT TO ANALYTICS MODULE ---
     window.salesEngineTotals = totals;
