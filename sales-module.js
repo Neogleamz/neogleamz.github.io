@@ -399,11 +399,30 @@ window.updateSaleType = async function(sel, orderId, sku) {
     setMasterStatus("Saving...", "mod-working");
     let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
     if(row) {
+        let oldVal = row.transaction_type || 'Standard';
         row.transaction_type = newVal;
         const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
         if(error) { alert("Error saving type: " + error.message); return; }
+        
+        let wasShipped = (oldVal !== 'Pre-Ship Exchange');
+        let isShipped = (newVal !== 'Pre-Ship Exchange');
+        
+        if (wasShipped !== isShipped) {
+            let k = `RECIPE:::${row.internal_recipe_name}`;
+            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+            
+            let q = parseFloat(row.qty_sold || 0);
+            if (isShipped && !wasShipped) {
+                inventoryDB[k].sold_qty += q;
+            } else if (!isShipped && wasShipped) {
+                inventoryDB[k].sold_qty -= q;
+            }
+            await supabaseClient.from('inventory_consumption').upsert([{item_key: k, ...inventoryDB[k]}], {onConflict:'item_key'});
+        }
+
         setMasterStatus("Saved!", "mod-success"); 
         renderSalesTable(); 
+        if(typeof renderInventoryTable === 'function') renderInventoryTable();
         if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     }
