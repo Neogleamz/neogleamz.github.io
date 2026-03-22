@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1441"></script>
+    <script src="system-version.js?v=v.2026.03.21.1905"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1441"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1441"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1905"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1905"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -492,6 +492,32 @@
             border-radius: 2px;
         }
         
+        .h-resizer {
+            width: 10px;
+            margin: 0 5px;
+            background: rgba(249, 115, 22, 0.05); /* Very subtle orange */
+            cursor: col-resize;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+        .h-resizer:hover, .h-resizer.dragging {
+            background: rgba(249, 115, 22, 0.3);
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+        }
+        .h-resizer::after {
+            content: "";
+            height: 40px;
+            width: 4px;
+            background: rgba(249, 115, 22, 0.4);
+            border-radius: 2px;
+        }
+        
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
         table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; }
         
@@ -656,10 +682,17 @@
             .manual-entry-bar div { min-width: 100%; flex: 1; }
             .manual-entry-bar button { width: 100%; margin-top: 10px; }
 
-            .bom-layout { grid-template-columns: 1fr; }
-            .bom-sidebar { max-height: 250px; }
-            .add-part-bar { flex-wrap: wrap; flex-direction: column; align-items: stretch; }
-            .add-part-bar select, .add-part-bar input, .add-part-bar button { width: 100%; margin-bottom: 5px;}
+            .bom-layout { flex-direction: column; gap: 15px; }
+            .bom-sidebar { width: 100% !important; min-width: 100% !important; max-width: 100% !important; flex: 0 0 auto !important; max-height: 250px; }
+            .bom-main { width: 100% !important; min-width: 100% !important; max-width: 100% !important; overflow-x: hidden; }
+            .add-part-bar { flex-wrap: wrap; flex-direction: column; align-items: stretch; gap: 5px; }
+            
+            /* Stack side-by-side ledgers vertically on mobile */
+            .stockz-split-container { flex-direction: column !important; gap: 10px !important; }
+            .stockz-split-container > #fgiTableWrap { flex: none !important; min-height: 250px !important; }
+            .stockz-split-container > #invTableWrap { flex: 1 !important; min-height: 250px !important; }
+            .h-resizer { display: none !important; }
+            .add-part-bar select, .add-part-bar input, .add-part-bar button { width: 100%; margin-bottom: 0px;}
             
             .analytics-grid { grid-template-columns: 1fr 1fr; }
             
@@ -881,9 +914,11 @@
                         <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="printReorderReport()">🖨️ Low Inventory Report</button>
                     </div>
                     <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
-                    <div class="table-wrap" id="fgiTableWrap"></div>
-                    <div id="stockz-v-resizer" class="v-resizer"></div>
-                    <div class="table-wrap" id="invTableWrap" style="flex-grow:1;"></div>
+                    <div class="stockz-split-container" style="display: flex; flex-direction: row; flex-grow: 1; min-height: 0; width: 100%; gap: 15px;">
+                        <div class="table-wrap" id="fgiTableWrap" style="flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative;"></div>
+                        <div id="stockz-h-resizer" class="h-resizer"></div>
+                        <div class="table-wrap" id="invTableWrap" style="flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1797,12 +1832,79 @@
     async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; if (p.ceoBoard && typeof ceoActiveProducts !== 'undefined') ceoActiveProducts = p.ceoBoard; } } catch(e) { window.cloudTablePrefs = {}; } }
     async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {}, ceoBoard: typeof ceoActiveProducts !== 'undefined' ? ceoActiveProducts : [] }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
 
+    function initHorizontalResizer() {
+        const resizer = document.getElementById('stockz-h-resizer');
+        const leftTable = document.getElementById('fgiTableWrap');
+        const rightTable = document.getElementById('invTableWrap');
+        if (!resizer || !leftTable || !rightTable) return;
+
+        let isResizing = false;
+        let startX = 0, startWidth = 0;
+
+        // Reset rigid heights that might have carried from v-resizer logic
+        leftTable.style.minHeight = '0';
+        leftTable.style.height = 'auto';
+        rightTable.style.minHeight = '0';
+        rightTable.style.height = 'auto';
+
+        // Set minimum widths
+        leftTable.style.minWidth = '200px';
+        rightTable.style.minWidth = '200px';
+
+        // Load saved flex-basis or width
+        const savedBasis = localStorage.getItem('stockzLeftWidth');
+        if (savedBasis) {
+            leftTable.style.flex = `0 0 ${savedBasis}`;
+        }
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = leftTable.getBoundingClientRect().width;
+            document.body.style.cursor = 'col-resize';
+            resizer.classList.add('dragging');
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            
+            const delta = e.clientX - startX;
+            let newWidth = startWidth + delta;
+            
+            const containerRect = leftTable.parentElement.getBoundingClientRect();
+            // Need to account for gap and resizer in container width
+            const availableWidth = containerRect.width - resizer.offsetWidth - 15; 
+            
+            const minW = 200; 
+            const maxW = availableWidth - 200; // Right table needs at least 200px
+            
+            if (newWidth < minW) newWidth = minW;
+            if (newWidth > maxW) newWidth = maxW;
+
+            // Convert width back to percentage for fluid resizing when window shifts
+            const flexBasisPercent = (newWidth / availableWidth) * 100;
+            leftTable.style.flex = `0 0 ${flexBasisPercent}%`;
+            // Keep the right table filling the rest gracefully
+            rightTable.style.flex = '1 1 0%';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+                resizer.classList.remove('dragging');
+                localStorage.setItem('stockzLeftWidth', leftTable.style.flexBasis);
+            }
+        });
+    }
+
     async function launchApp() { 
         sysLog("Booting System..."); 
         setMasterStatus("Fetching data...", "mod-working"); 
         await loadCloudPrefs(); 
         await loadData(); 
-        initVerticalResizer();
+        initHorizontalResizer();
     }
 
     function initVerticalResizer() {
@@ -2314,15 +2416,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1441"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1441"></script>
-<script src="bom-module.js?v=v.2026.03.21.1441"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1441"></script>
-<script src="production-module.js?v=v.2026.03.21.1441"></script>
-<script src="sales-module.js?v=v.2026.03.21.1441"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1441"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1441"></script>
-<script src="print-module.js?v=v.2026.03.21.1441"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1905"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1905"></script>
+<script src="bom-module.js?v=v.2026.03.21.1905"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1905"></script>
+<script src="production-module.js?v=v.2026.03.21.1905"></script>
+<script src="sales-module.js?v=v.2026.03.21.1905"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1905"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1905"></script>
+<script src="print-module.js?v=v.2026.03.21.1905"></script>
 </body>
 </html>
 
