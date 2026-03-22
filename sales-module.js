@@ -375,11 +375,13 @@ function renderSalesTable() {
 
     // Final Calculation Pass for Totals
     a.forEach(x => {
-        totals.gross += (parseFloat(x.actual_sale_price || 0) * (parseFloat(x.qty_sold) || 0));
-        totals.discounts += parseFloat(x.discount_amount || 0);
-        totals.captured += (parseFloat(x.total || 0) + (x.exchAdj || 0));
+        let isCostOnly = x.isCostOnlyItem;
+        
+        totals.gross += isCostOnly ? 0 : (parseFloat(x.actual_sale_price || 0) * (parseFloat(x.qty_sold) || 0));
+        totals.discounts += isCostOnly ? 0 : parseFloat(x.discount_amount || 0);
+        totals.captured += isCostOnly ? 0 : (parseFloat(x.total || 0) + (x.exchAdj || 0));
         totals.cogs += x.liveCogs;
-        totals.shipping += (x.transaction_type === 'Pre-Ship Exchange') ? 0 :
+        totals.shipping += (x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Gift') ? 0 :
                            (x.isCostOnlyItem && parseFloat(x.shipping || 0) > 0 && !x.isRevenueTransfer) ? parseFloat(x.shipping) :
                            SHIP_COST;
         totals.stripe += x.stripeFee;
