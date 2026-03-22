@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.1953"></script>
+    <script src="system-version.js?v=v.2026.03.21.1954"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1953"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1953"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.1954"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.1954"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -899,7 +899,11 @@
                         <div style="flex: 0.5; min-width: 80px;"><label>Multiplier</label><input id="m_mult" type="number" step="any" min="1" value="1"></div>
                         <div style="flex: 0.5; min-width: 80px;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
                         <div style="flex: 0.5; min-width: 80px; align-items:center; justify-content:center; flex-direction:row; gap:8px;">
-                            <label style="margin-bottom:0; cursor:pointer;" title="Check if this is a 3D Printed Part"><input id="m_is_3d" type="checkbox" style="width:16px; height:16px; margin:0;"> <span style="font-size: 1.5em; vertical-align: middle;">🖨️</span> 3D Print</label>
+                            <label style="margin-bottom:0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;" title="Check if this is a 3D Printed Part">
+                                <input id="m_is_3d" type="checkbox" style="width:16px; height:16px; margin:0;"> 
+                                <span style="font-size: 30px; line-height: 1;">🖨️</span> 
+                                <span style="white-space:nowrap;">3D Print</span>
+                            </label>
                         </div>
                         <div style="flex: 0.5; min-width: 80px;"><label>Print Time (m)</label><input id="m_print_time" type="number" step="1" min="0" placeholder="Mins"></div>
                         <button class="btn-green" style="padding: 8px 15px; font-size: 13px; font-weight: bold; width:auto; height:35px;" onclick="addManualItem()">+ Add Row</button>
@@ -2423,15 +2427,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.1953"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.1953"></script>
-<script src="bom-module.js?v=v.2026.03.21.1953"></script>
-<script src="inventory-module.js?v=v.2026.03.21.1953"></script>
-<script src="production-module.js?v=v.2026.03.21.1953"></script>
-<script src="sales-module.js?v=v.2026.03.21.1953"></script>
-<script src="analytics-module.js?v=v.2026.03.21.1953"></script>
-<script src="ceo-module.js?v=v.2026.03.21.1953"></script>
-<script src="print-module.js?v=v.2026.03.21.1953"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.1954"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.1954"></script>
+<script src="bom-module.js?v=v.2026.03.21.1954"></script>
+<script src="inventory-module.js?v=v.2026.03.21.1954"></script>
+<script src="production-module.js?v=v.2026.03.21.1954"></script>
+<script src="sales-module.js?v=v.2026.03.21.1954"></script>
+<script src="analytics-module.js?v=v.2026.03.21.1954"></script>
+<script src="ceo-module.js?v=v.2026.03.21.1954"></script>
+<script src="print-module.js?v=v.2026.03.21.1954"></script>
 </body>
 </html>
 
