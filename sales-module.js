@@ -307,7 +307,41 @@ function renderSalesTable() {
     // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
-    
+
+    // 100% PAYLOAD TRANSFER: Shift all Shopify Captured Cash from Unshipped -> Replacement
+    Object.values(orderGroups).forEach(group => {
+        let unshipped = group.filter(x => x.transaction_type === 'Pre-Ship Exchange');
+        let replacements = group.filter(x => x.transaction_type === 'Replacement / Warranty');
+        
+        if (unshipped.length > 0 && replacements.length > 0) {
+            let u = unshipped[0];
+            let r = replacements[0];
+
+            // Transfer Revenue metrics
+            r.actual_sale_price = u.actual_sale_price;
+            r.shipping = parseFloat(u.shipping || 0);
+            r.taxes = parseFloat(u.taxes || 0);
+            r.total = parseFloat(u.total || 0);
+            r.stripeFee = u.stripeFee;
+            r.discount_amount = parseFloat(u.discount_amount || 0);
+
+            // Re-calculate the Replacement's Net using pure physical attributes and true revenue, bypassing Shopify's merged 'total' string
+            let rawRev = (parseFloat(r.actual_sale_price || 0) * (parseFloat(r.qty_sold) || 0)) + parseFloat(r.shipping || 0) - parseFloat(r.discount_amount || 0);
+            r.net = rawRev - r.liveCogs - (SHIP_COST * parseFloat(r.qty_sold || 0)) - r.stripeFee;
+
+            // Zero out all metrics on the Unshipped row entirely (so it doesn't keep Revenue)
+            u.actual_sale_price = 0;
+            u.shipping = 0;
+            u.taxes = 0;
+            u.total = 0;
+            u.stripeFee = 0;
+            u.discount_amount = 0;
+            u.liveCogs = 0; // Ensure 0
+            u.net = 0;
+            u.exchAdj = 0; // Clear any visual adjustments
+        }
+    });
+
     let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0 };
 
     Object.keys(orderGroups).forEach(oid => {
@@ -341,7 +375,7 @@ function renderSalesTable() {
         totals.discounts += parseFloat(x.discount_amount || 0);
         totals.captured += (parseFloat(x.total || 0) + (x.exchAdj || 0));
         totals.cogs += x.liveCogs;
-        totals.shipping += (SHIP_COST * (parseFloat(x.qty_sold) || 0));
+        totals.shipping += (x.transaction_type === 'Pre-Ship Exchange') ? 0 : (SHIP_COST * (parseFloat(x.qty_sold) || 0));
         totals.stripe += x.stripeFee;
         totals.net += x.net;
     });
