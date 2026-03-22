@@ -271,14 +271,16 @@ function renderSalesTable() {
     // Pre-calculate Engine stats for sorting and rendering
     let a = salesDB.map(x => {
         let qty = parseFloat(x.qty_sold) || 0;
-        let captured = parseFloat(x.total) || 0;
         let p = parseFloat(x.actual_sale_price) || 0;
         let s = parseFloat(x.shipping) || 0;
         let t = parseFloat(x.taxes) || 0;
         let d = parseFloat(x.discount_amount) || 0;
         
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name);
-        let stripeFee = getEngineStripeFee(captured);
+        
+        // BUGFIX: Base Stripe Fee on True Line Capture, avoiding Shopify's merged Total inflation
+        let trueLineCaptured = (p * qty) + s + t - d;
+        let stripeFee = getEngineStripeFee(trueLineCaptured);
         
         // --- POWERED BY MASTER ENGINE ---
         let actualShipCost = SHIP_COST * qty;
@@ -306,7 +308,13 @@ function renderSalesTable() {
                     nonZeroTotal.exchAdj = -offset;
                     zeroTotal.isExchanged = true;
                     nonZeroTotal.isExchanged = true;
-                    nonZeroTotal.net -= offset; // Offset revenue for accurate net
+                    
+                    // Fix double-fulfillment constraint: 
+                    // The original item (nonZeroTotal) was never built or shipped due to the pre-shipment exchange.
+                    // We must mathematically refund the ghost COGS and Ship Cost back to Net Profit.
+                    nonZeroTotal.net += nonZeroTotal.liveCogs;
+                    nonZeroTotal.net += (SHIP_COST * parseFloat(nonZeroTotal.qty_sold || 0));
+                    nonZeroTotal.liveCogs = 0; 
                 }
             }
         }
