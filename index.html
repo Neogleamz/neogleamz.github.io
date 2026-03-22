@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.22.0141"></script>
+    <script src="system-version.js?v=v.2026.03.22.0206"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.22.0141"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0141"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.22.0206"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0206"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -804,6 +804,7 @@
             <button class="tab-btn active" onclick="switchTab('invhub')">📊 STOCKPILEZ</button>
             <button class="tab-btn" onclick="switchTab('prodhub')">🏭 MAKERZ</button>
             <button class="tab-btn" onclick="switchTab('salezhub')">🛒 REVENUEZ</button>
+            <button class="tab-btn" onclick="switchTab('socialzhub')">💬 SOCIALZ</button>
             <button class="tab-btn" onclick="switchTab('synchub')">⚡ NEXUZ</button>
         </div>
         <div class="top-controls">
@@ -1365,6 +1366,36 @@
             </div>
         </div>
     </div> <!-- End of sales-tab -->
+
+    <!-- SOCIALZ -->
+    <div id="socialzhub-tab" class="tab-content" style="padding:0; display:none; flex-direction:column; height:100%;">
+        <div id="socialzHubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px;">
+            <div class="hub-card" onclick="alert('Module in Development');">
+                <i>📱</i>
+                <h2>AUDIENCE</h2>
+                <p>Followers, engagement, and brand reach metrics.</p>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Total Followers</span><strong id="statSocFollowers">--</strong></div>
+                    <div class="kpi-row"><span>Weekly Growth</span><strong id="statSocGrowth">--</strong></div>
+                    <div class="kpi-row"><span>Active Engagement</span><strong id="statSocEngage">--</strong></div>
+                    <div class="kpi-row"><span>Conversion Rate</span><strong id="statSocConv">--</strong></div>
+                    <div class="kpi-row"><span>Top Platform</span><strong id="statSocTop">--</strong></div>
+                </div>
+            </div>
+            <div class="hub-card" onclick="alert('Module in Development');">
+                <i>🎯</i>
+                <h2>CAMPAIGNZ</h2>
+                <p>Active ad sets, affiliate reach, and ROAS.</p>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Active Ads</span><strong id="statSocAds">--</strong></div>
+                    <div class="kpi-row"><span>Daily Ad Spend</span><strong id="statSocSpend">--</strong></div>
+                    <div class="kpi-row"><span>Blended ROAS</span><strong id="statSocRoas">--</strong></div>
+                    <div class="kpi-row"><span>Affiliate Clicks</span><strong id="statSocAff">--</strong></div>
+                    <div class="kpi-row"><span>Campaign Health</span><strong id="statSocHealth">--</strong></div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- End of socialz-tab -->
 
     <!-- NEXUZ -->
     <div id="synchub-tab" class="tab-content" style="padding:0;">
@@ -2462,15 +2493,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.22.0141"></script>
-<script src="system-tools-module.js?v=v.2026.03.22.0141"></script>
-<script src="bom-module.js?v=v.2026.03.22.0141"></script>
-<script src="inventory-module.js?v=v.2026.03.22.0141"></script>
-<script src="production-module.js?v=v.2026.03.22.0141"></script>
-<script src="sales-module.js?v=v.2026.03.22.0141"></script>
-<script src="analytics-module.js?v=v.2026.03.22.0141"></script>
-<script src="ceo-module.js?v=v.2026.03.22.0141"></script>
-<script src="print-module.js?v=v.2026.03.22.0141"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.22.0206"></script>
+<script src="system-tools-module.js?v=v.2026.03.22.0206"></script>
+<script src="bom-module.js?v=v.2026.03.22.0206"></script>
+<script src="inventory-module.js?v=v.2026.03.22.0206"></script>
+<script src="production-module.js?v=v.2026.03.22.0206"></script>
+<script src="sales-module.js?v=v.2026.03.22.0206"></script>
+<script src="analytics-module.js?v=v.2026.03.22.0206"></script>
+<script src="ceo-module.js?v=v.2026.03.22.0206"></script>
+<script src="print-module.js?v=v.2026.03.22.0206"></script>
 </body>
 </html>
 
