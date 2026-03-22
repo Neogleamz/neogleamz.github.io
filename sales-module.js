@@ -308,24 +308,6 @@ function renderSalesTable() {
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
     
-    // DELUXE UX TWEAK: Transfer Revenue payload from Unshipped to Replacement so Unshipped renders as $0 Net.
-    Object.values(orderGroups).forEach(group => {
-        let unshipped = group.filter(x => x.transaction_type === 'Pre-Ship Exchange');
-        let replacements = group.filter(x => x.transaction_type === 'Replacement / Warranty');
-        if (unshipped.length > 0 && replacements.length > 0) {
-            let tNet = 0;
-            let tStripe = 0;
-            unshipped.forEach(u => {
-                tNet += u.net;
-                tStripe += u.stripeFee;
-                u.net = 0;
-                u.stripeFee = 0;
-            });
-            replacements[0].net += tNet;
-            replacements[0].stripeFee += tStripe;
-        }
-    });
-    
     let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0 };
 
     Object.keys(orderGroups).forEach(oid => {
