@@ -223,17 +223,17 @@ function updateHubStats() {
         // --- ORDERZ ---
         if (typeof salesDB !== 'undefined') {
             setStat('statOrderzTotal', fmtNum(salesDB.length));
-            let units = 0, shopify = 0, etsy = 0, val = 0;
+            let units = 0, shopify = 0, val = 0;
             salesDB.forEach(s => {
                 units += (s.quantity || 1);
                 val += parseFloat(s.total) || 0;
                 let so = (s.source || "").toLowerCase();
                 if (so.includes("shopify")) shopify++;
-                if (so.includes("etsy")) etsy++;
             });
+            let aov = salesDB.length > 0 ? (val / salesDB.length) : 0;
             setStat('statOrderzUnits', fmtNum(units));
             setStat('statOrderzShopify', fmtNum(shopify));
-            setStat('statOrderzEtsy', fmtNum(etsy));
+            setStat('statOrderzAov', fmtMoney(aov));
             setStat('statOrderzVal', fmtMoney(val));
         }
 
