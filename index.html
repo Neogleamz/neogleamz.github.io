@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.2012"></script>
+    <script src="system-version.js?v=v.2026.03.21.2014"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.2012"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.2012"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.2014"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.2014"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -2324,12 +2324,24 @@
         for (let entry of entries) {
             let ps = entry.target;
             if(ps.offsetWidth === 0) return;
-            let maxChars = Math.max(30, Math.floor(ps.clientWidth / 7.2));
+            let maxChars = Math.max(30, Math.floor(ps.clientWidth / 5.8));
             Array.from(ps.options).forEach(opt => {
                 let fTxt = opt.getAttribute('data-fulltxt');
                 if(fTxt) {
                     if(fTxt.length > maxChars) {
-                        opt.innerText = fTxt.substring(0, maxChars - 3) + '...';
+                        let splitIdx = fTxt.lastIndexOf('   ━━━━   ');
+                        if (splitIdx !== -1) {
+                            let priceStr = fTxt.substring(splitIdx);
+                            let nameStr = fTxt.substring(0, splitIdx);
+                            let availChars = maxChars - priceStr.length;
+                            if(availChars > 15) {
+                                opt.innerText = nameStr.substring(0, availChars - 3) + '...' + priceStr;
+                            } else {
+                                opt.innerText = fTxt.substring(0, maxChars - 3) + '...';
+                            }
+                        } else {
+                            opt.innerText = fTxt.substring(0, maxChars - 3) + '...';
+                        }
                     } else {
                         opt.innerText = fTxt;
                     }
@@ -2445,15 +2457,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.2012"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.2012"></script>
-<script src="bom-module.js?v=v.2026.03.21.2012"></script>
-<script src="inventory-module.js?v=v.2026.03.21.2012"></script>
-<script src="production-module.js?v=v.2026.03.21.2012"></script>
-<script src="sales-module.js?v=v.2026.03.21.2012"></script>
-<script src="analytics-module.js?v=v.2026.03.21.2012"></script>
-<script src="ceo-module.js?v=v.2026.03.21.2012"></script>
-<script src="print-module.js?v=v.2026.03.21.2012"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.2014"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.2014"></script>
+<script src="bom-module.js?v=v.2026.03.21.2014"></script>
+<script src="inventory-module.js?v=v.2026.03.21.2014"></script>
+<script src="production-module.js?v=v.2026.03.21.2014"></script>
+<script src="sales-module.js?v=v.2026.03.21.2014"></script>
+<script src="analytics-module.js?v=v.2026.03.21.2014"></script>
+<script src="ceo-module.js?v=v.2026.03.21.2014"></script>
+<script src="print-module.js?v=v.2026.03.21.2014"></script>
 </body>
 </html>
 
