@@ -28,39 +28,18 @@ function renderAnalyticsDashboard() {
         // 3. Aggregated Financials for Charts
         const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
         
-        let totals = {
-            gross: 0,
-            discounts: 0,
-            captured: 0,
-            cogs: 0,
-            shipping: 0,
-            stripe: 0,
-            net: 0
-        };
+        // --- INHERIT MASTER LEDGER PHYSICS ---
+        // We inherit identical math from the sales-module instantly to perfectly support Warranty/Exchange logic offsets
+        let totals = window.salesEngineTotals || { gross: 0, discounts: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0 };
+        let processedSalesDB = window.processedSalesDB || salesDB;
 
         let trendData = {}; // { 'YYYY-MM-DD': { gross: 0, net: 0 } }
 
-        salesDB.forEach(s => { 
-            let qty = parseFloat(s.qty_sold) || 0;
-            let captured = parseFloat(s.total) || 0;
-            let p = parseFloat(s.actual_sale_price || 0);
-            let d = parseFloat(s.discount_amount || 0);
+        processedSalesDB.forEach(s => { 
             let dt = s.sale_date || 'Unknown';
-            
-            let lineGross = p * qty;
-            let actualShipCost = SHIP_COST * qty;
-            let lineCogs = getEngineTrueCogs(s.internal_recipe_name) * qty;
-            
-            let lineNet = s.net_profit !== undefined && s.net_profit !== null ? parseFloat(s.net_profit) : getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name);
-            let lineStripe = s.transaction_fees !== undefined && s.transaction_fees !== null ? parseFloat(s.transaction_fees) : getEngineStripeFee(captured);
-
-            totals.gross += lineGross;
-            totals.discounts += d;
-            totals.captured += captured;
-            totals.cogs += lineCogs;
-            totals.shipping += actualShipCost;
-            totals.stripe += lineStripe;
-            totals.net += lineNet;
+            let lineGross = (parseFloat(s.actual_sale_price || 0) * (parseFloat(s.qty_sold) || 0));
+            // Inherit the dynamically corrected net profit straight from the master ledger math
+            let lineNet = parseFloat(s.net) || 0;
 
             if(!trendData[dt]) trendData[dt] = { gross: 0, net: 0 };
             trendData[dt].gross += lineGross;
@@ -237,11 +216,11 @@ function renderProfitabilityMatrix(SHIP_COST) {
         let mg = ms > 0 ? ((ms - tc) / ms) * 100 : 0;
         let ts = 0; let tp = 0;
         
-        salesDB.filter(s => s.internal_recipe_name === p).forEach(s => { 
+        let pArray = window.processedSalesDB || salesDB;
+        pArray.filter(s => s.internal_recipe_name === p).forEach(s => { 
             let qty = parseFloat(s.qty_sold) || 0;
-            let captured = parseFloat(s.total) || 0;
-            let actualShipCost = SHIP_COST * qty;
-            let net = s.net_profit !== undefined && s.net_profit !== null ? parseFloat(s.net_profit) : getHistoricalNetProfit(parseFloat(s.actual_sale_price || 0) * qty, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), parseFloat(s.discount_amount || 0), actualShipCost, s.internal_recipe_name);
+            // Simply inherit the fully corrected net from the master matrix
+            let net = parseFloat(s.net) || 0;
             tp += net;
             ts += qty; 
         });
