@@ -307,12 +307,12 @@ function updateHubStats() {
             let capex = 0, customs = 0, freight = 0, weight = 0, pkgs = new Set();
             finalResults.forEach(r => {
                 capex += parseFloat(r['Order Total']) || parseFloat(r.order_total) || 0;
-                weight += parseFloat(r['Actual Chargeable Weight (g)']) || parseFloat(r.actual_chargeable_weight_g) || 0;
                 let pno = r['Parcel No'] || r.parcel_no;
                 if (pno && !pkgs.has(pno)) {
                     pkgs.add(pno);
                     customs += parseFloat(r['Custom Clearance Fee']) || parseFloat(r.custom_clearance_fee) || 0;
                     freight += parseFloat(r['Actual Shipping Fee']) || parseFloat(r.actual_shipping_fee) || 0;
+                    weight += parseFloat(r['Actual Chargeable Weight (g)']) || parseFloat(r.actual_chargeable_weight_g) || 0;
                 }
             });
             setStat('statImpzSpend', fmtMoney(capex));
