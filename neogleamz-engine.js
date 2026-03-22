@@ -68,8 +68,9 @@ function updateHubStats() {
             setStat('statDatazParcels', fmtNum(parcels.size));
             setStat('statDatazPaid', fmtMoney(totalPaid));
             setStat('statDatazWt', fmtNum(totalWt));
-            let avgCost = totalWt > 0 ? (totalPaid / totalWt) : 0;
-            setStat('statDatazAvg', '$' + avgCost.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:4}));
+            let absoluteRawSpend = 0;
+            finalResults.forEach(s => absoluteRawSpend += parseFloat(s['Total Landed Cost ($)']) || 0);
+            setStat('statDatazTotalCost', fmtMoney(absoluteRawSpend));
         }
 
         // --- EDITZ ---
