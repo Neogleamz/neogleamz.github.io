@@ -294,7 +294,8 @@ function renderSalesTable() {
         // --- POWERED BY MASTER ENGINE ---
         let actualShipCost = type === 'Pre-Ship Exchange' ? 0 : 
                              type === 'Gift' ? 0 :
-                             (isCostOnlyItem && s > 0 ? s : SHIP_COST);
+                             isCostOnlyItem ? (s > 0 ? s : SHIP_COST) : 
+                             s; // Standard items cleanly map actual ship cost to match what the customer paid
         let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty);
         
         if (type === 'Pre-Ship Exchange') {
@@ -304,7 +305,7 @@ function renderSalesTable() {
         }
         // --------------------------------
         
-        return { ...x, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false, isCostOnlyItem };
+        return { ...x, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false, isCostOnlyItem, actualShipCost };
     });
 
     // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
@@ -319,9 +320,11 @@ function renderSalesTable() {
                 if (!primaryFound) {
                     primaryFound = true;
                 } else {
-                    // Refund the redundant standalone SHIP_COST from secondary items sharing the box
-                    r.net += r.actualShipCost;
-                    r.actualShipCost = 0;
+                    // Refund the redundant standalone SHIP_COST from secondary items sharing the box ONLY if it was forced by the algorithm
+                    if (r.actualShipCost === (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00)) {
+                        r.net += r.actualShipCost;
+                        r.actualShipCost = 0;
+                    }
                 }
             }
         });
@@ -397,9 +400,7 @@ function renderSalesTable() {
         totals.discounts += isCostOnly ? 0 : parseFloat(x.discount_amount || 0);
         totals.captured += isCostOnly ? 0 : (parseFloat(x.total || 0) + (x.exchAdj || 0));
         totals.cogs += x.liveCogs;
-        totals.shipping += (x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Gift') ? 0 :
-                           (x.isCostOnlyItem && parseFloat(x.shipping || 0) > 0 && !x.isRevenueTransfer) ? parseFloat(x.shipping) :
-                           SHIP_COST;
+        totals.shipping += x.actualShipCost || 0;
         totals.stripe += x.stripeFee;
         totals.net += x.net;
         totals.units += (parseFloat(x.qty_sold) || 0);
