@@ -277,7 +277,7 @@ function renderSalesTable() {
         let t = parseFloat(x.taxes) || 0;
         let d = parseFloat(x.discount_amount) || 0;
         
-        let liveCogs = getEngineTrueCogs(x.internal_recipe_name);
+        let liveCogs = getEngineTrueCogs(x.internal_recipe_name) * qty;
         let isCostOnlyItem = (type === 'Replacement / Warranty' || type === 'Warranty');
         
         // --- CUSTOM EXCEPTION OVERRIDES ---
@@ -293,11 +293,11 @@ function renderSalesTable() {
         
         // --- POWERED BY MASTER ENGINE ---
         let actualShipCost = type === 'Pre-Ship Exchange' ? 0 : 
-                             (isCostOnlyItem && s > 0 ? s : (SHIP_COST * qty));
-        let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name);
+                             (isCostOnlyItem && s > 0 ? s : SHIP_COST);
+        let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty);
         
         if (type === 'Pre-Ship Exchange') {
-            net += getEngineTrueCogs(x.internal_recipe_name); // refund the dynamic COGS that engine deducted
+            net += liveCogs; // refund the dynamic COGS that engine deducted
         } else if (isCostOnlyItem) {
             net = 0 - actualShipCost - liveCogs;
         }
@@ -380,7 +380,7 @@ function renderSalesTable() {
         totals.cogs += x.liveCogs;
         totals.shipping += (x.transaction_type === 'Pre-Ship Exchange') ? 0 :
                            (x.isCostOnlyItem && parseFloat(x.shipping || 0) > 0 && !x.isRevenueTransfer) ? parseFloat(x.shipping) :
-                           (SHIP_COST * (parseFloat(x.qty_sold) || 0));
+                           SHIP_COST;
         totals.stripe += x.stripeFee;
         totals.net += x.net;
     });
