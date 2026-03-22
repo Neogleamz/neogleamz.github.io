@@ -97,7 +97,7 @@ function updateHubStats() {
 
         // --- STOCKZ ---
         if (typeof inventoryDB !== 'undefined') {
-            let fgiUnits = 0, alerts = 0, rawVal = 0, fgiVal = 0;
+            let fgiUnits = 0, alerts = 0, fgiVal = 0, rawCount = 0;
             
             if (typeof catalogCache !== 'undefined') {
                 Object.keys(catalogCache).forEach(k => {
@@ -105,7 +105,7 @@ function updateHubStats() {
                     let i = inventoryDB[k] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0};
                     let s = (c.totalQty || 0) - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
                     if (s < (i.min_stock || 0)) alerts++;
-                    rawVal += Math.max(0, s) * (parseFloat(c.avgUnitCost) || 0);
+                    rawCount += Math.max(0, s);
                 });
             }
 
@@ -114,17 +114,78 @@ function updateHubStats() {
                     let k = `RECIPE:::` + p;
                     let i = inventoryDB[k] || {produced_qty:0, sold_qty:0};
                     let s = (i.produced_qty || 0) - (i.sold_qty || 0);
-                    fgiUnits += Math.max(0, s);
+                    if (!isSubassemblyDB[p]) {
+                        fgiUnits += Math.max(0, s);
+                    }
                     fgiVal += Math.max(0, s) * getEngineTrueCogs(p); 
                     if (s < 0) alerts++;
                 });
             }
+
+            // --- MAX POTENTIAL YIELD SIMULATION ---
+            let maxOverallYield = 0;
+            if (typeof productsDB !== 'undefined' && typeof catalogCache !== 'undefined') {
+                let simStock = {};
+                // Load Raw Materials
+                Object.keys(catalogCache).forEach(k => {
+                    let i = inventoryDB[k] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0};
+                    simStock[k] = (catalogCache[k].totalQty || 0) - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
+                });
+                // Load Pre-Built Subassemblies
+                Object.keys(productsDB).filter(p => isSubassemblyDB[p]).forEach(p => {
+                    let k = `RECIPE:::` + p;
+                    let i = inventoryDB[k] || {produced_qty:0, sold_qty:0};
+                    simStock[k] = (i.produced_qty || 0) - (i.sold_qty || 0);
+                });
+
+                function simCanBuild(recipeName, stockTracker) {
+                    let tempStock = {...stockTracker};
+                    if (!productsDB[recipeName]) return false;
+                    for (let comp of productsDB[recipeName]) {
+                        let compKey = comp.item_key || comp.di_item_id || comp.name;
+                        let reqQty = parseFloat(comp.quantity) || 1;
+                        if (String(compKey).startsWith('RECIPE:::')) {
+                            let subName = String(compKey).replace('RECIPE:::', '');
+                            let availablePrebuilt = tempStock[compKey] || 0;
+                            if (availablePrebuilt >= reqQty) {
+                                tempStock[compKey] -= reqQty;
+                            } else {
+                                let needed = reqQty - availablePrebuilt;
+                                tempStock[compKey] = 0;
+                                for (let i = 0; i < needed; i++) {
+                                    if (!simCanBuild(subName, tempStock)) return false;
+                                }
+                            }
+                        } else {
+                            if ((tempStock[compKey] || 0) < reqQty) return false;
+                            tempStock[compKey] -= reqQty;
+                        }
+                    }
+                    Object.keys(tempStock).forEach(k => stockTracker[k] = tempStock[k]);
+                    return true;
+                }
+
+                let buildable = true;
+                let retailRecipes = Object.keys(productsDB).filter(p => !isSubassemblyDB[p]);
+                let loopGuard = 0;
+                while (buildable && retailRecipes.length > 0 && loopGuard < 100000) {
+                    loopGuard++;
+                    let builtAny = false;
+                    for (let p of retailRecipes) {
+                        if (simCanBuild(p, simStock)) {
+                            maxOverallYield++;
+                            builtAny = true;
+                        }
+                    }
+                    if (!builtAny) buildable = false;
+                }
+            }
             
             setStat('statStockzUnits', fmtNum(fgiUnits));
             setStat('statStockzAlerts', fmtNum(alerts));
-            setStat('statStockzRawVal', fmtMoney(rawVal));
             setStat('statStockzFgiVal', fmtMoney(fgiVal));
-            setStat('statStockzTotalVal', fmtMoney(rawVal + fgiVal));
+            setStat('statStockzMaxYield', fmtNum(maxOverallYield));
+            setStat('statStockzRawCount', fmtNum(rawCount));
         }
 
         // --- RECIPEZ ---
