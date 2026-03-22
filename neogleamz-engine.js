@@ -221,7 +221,23 @@ function updateHubStats() {
         }
 
         // --- ORDERZ ---
-        if (typeof salesDB !== 'undefined') {
+        // --- ORDERZ ---
+        let pArray = window.processedSalesDB;
+        let pTotals = window.salesEngineTotals;
+        if (pArray && pTotals) {
+            let shopify = 0;
+            pArray.forEach(s => {
+                let so = (s.Source || "").toLowerCase();
+                if (so.includes("shopify")) shopify++;
+            });
+            let orderCount = new Set(pArray.map(x => x.order_id)).size;
+            setStat('statOrderzTotal', fmtNum(orderCount));
+            let aov = orderCount > 0 ? (pTotals.captured / orderCount) : 0;
+            setStat('statOrderzUnits', fmtNum(pTotals.units || 0));
+            setStat('statOrderzShopify', fmtNum(shopify));
+            setStat('statOrderzAov', fmtMoney(aov));
+            setStat('statOrderzVal', fmtMoney(pTotals.captured));
+        } else if (typeof salesDB !== 'undefined') {
             setStat('statOrderzTotal', fmtNum(salesDB.length));
             let units = 0, shopify = 0, val = 0;
             salesDB.forEach(s => {

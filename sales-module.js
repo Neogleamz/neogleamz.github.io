@@ -345,7 +345,7 @@ function renderSalesTable() {
         }
     });
 
-    let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0 };
+    let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0 };
 
     Object.keys(orderGroups).forEach(oid => {
         let group = orderGroups[oid];
@@ -383,6 +383,7 @@ function renderSalesTable() {
                            SHIP_COST;
         totals.stripe += x.stripeFee;
         totals.net += x.net;
+        totals.units += (parseFloat(x.qty_sold) || 0);
     });
 
     // --- EXPORT TO ANALYTICS MODULE ---
