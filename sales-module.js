@@ -311,6 +311,22 @@ function renderSalesTable() {
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
 
+    // DEDUPLICATE OUTBOUND SHIPPING OVERHEAD FOR MULTI-ITEM ORDERS
+    Object.values(orderGroups).forEach(group => {
+        let primaryFound = false;
+        group.forEach(r => {
+            if (r.transaction_type !== 'Pre-Ship Exchange' && r.transaction_type !== 'Gift') {
+                if (!primaryFound) {
+                    primaryFound = true;
+                } else {
+                    // Refund the redundant standalone SHIP_COST from secondary items sharing the box
+                    r.net += r.actualShipCost;
+                    r.actualShipCost = 0;
+                }
+            }
+        });
+    });
+
     // 100% PAYLOAD TRANSFER: Shift all Shopify Captured Cash from Unshipped -> Replacement
     Object.values(orderGroups).forEach(group => {
         let unshipped = group.filter(x => x.transaction_type === 'Pre-Ship Exchange');
@@ -331,7 +347,7 @@ function renderSalesTable() {
 
             // Re-calculate the Replacement's Net using pure physical attributes and true revenue, bypassing Shopify's merged 'total' string
             let rawRev = (parseFloat(r.actual_sale_price || 0) * (parseFloat(r.qty_sold) || 0)) + parseFloat(r.shipping || 0) - parseFloat(r.discount_amount || 0);
-            r.net = rawRev - r.liveCogs - (SHIP_COST * parseFloat(r.qty_sold || 0)) - r.stripeFee;
+            r.net = rawRev - r.liveCogs - r.actualShipCost - r.stripeFee;
 
             // Zero out all metrics on the Unshipped row entirely (so it doesn't keep Revenue)
             u.actual_sale_price = 0;
