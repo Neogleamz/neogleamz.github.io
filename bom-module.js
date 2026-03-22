@@ -159,7 +159,44 @@ function renderProductBOM() {
 async function updateBOMQty(cell) { try { let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v) || v<=0) { cell.innerText=oldValTemp; return; } if(v.toString()===oldValTemp) return; let k = cell.getAttribute('data-key').replace(/"/g, '"').replace(/\\'/g, "'"); let p = productsDB[currentProduct].find(x => String(x.item_key || x.di_item_id || x.name) === k); if(p) { p.quantity = v; p.qty = v; cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); await syncRecipe(currentProduct); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
 async function removePart(btn) { try { if(!currentProduct) return; let k = btn.getAttribute('data-key').replace(/"/g, '"').replace(/\\'/g, "'"); productsDB[currentProduct] = productsDB[currentProduct].filter(p => String(p.item_key || p.di_item_id || p.name) !== k); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
 async function addPartToProduct() { try { if(!currentProduct) return alert("Select product."); let k = document.getElementById('partSelector').value; let q = parseFloat(document.getElementById('partQty').value) || 0; if(q<=0 || !k) return alert("Invalid inputs."); if(k === 'RECIPE:::' + currentProduct) return alert("No self nesting."); let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + q; ex.qty = ex.quantity; } else productsDB[currentProduct].push({item_key: k, quantity: q}); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
-async function createNewProduct() { try { let n = prompt("Recipe Name:"); if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; laborDB[n] = {time:0, rate:0}; pricingDB[n] = {msrp:0, wholesale:0}; isSubassemblyDB[n] = false; await supabaseClient.from('product_recipes').insert({product_name: n, components: [], labor_time_mins: 0, labor_rate_hr: 0, msrp: 0, wholesale_price: 0, is_subassembly: false, is_3d_print: false, print_time_mins: 0}); currentProduct = n; renderProductList(); renderProductBOM(); if(typeof populateDropdowns === 'function') populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
-async function deleteCurrentProduct() { try { if(!currentProduct) return; if(confirm(`Delete ${currentProduct}?`)){ sysLog(`Deleting ${currentProduct}`); const {error} = await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct);
-            if(error) throw new Error(error.message); delete productsDB[currentProduct]; delete laborDB[currentProduct]; delete pricingDB[currentProduct]; delete isSubassemblyDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').update({components: productsDB[n]}).eq('product_name', n)); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
+let recipeModalMode = '';
+function showRecipeModal(mode) {
+    recipeModalMode = mode;
+    const m = document.getElementById('recipeActionModal');
+    const t = document.getElementById('recipeModalTitle');
+    const p = document.getElementById('recipeModalText');
+    const i = document.getElementById('recipeModalInput');
+    const b = document.getElementById('recipeModalConfirmBtn');
+    
+    if(mode === 'create') {
+        t.innerText = "Create New Recipe";
+        p.innerText = "Enter a unique name for the new product or sub-assembly:";
+        i.style.display = "block";
+        i.value = "";
+        b.innerText = "Create";
+        b.className = "btn-green";
+        m.style.display = "flex";
+        setTimeout(() => i.focus(), 100);
+    } else if(mode === 'delete') {
+        if(!currentProduct) return;
+        t.innerText = "Delete Recipe";
+        p.innerText = "Are you absolutely sure you want to delete '" + currentProduct + "' forever?";
+        i.style.display = "none";
+        b.innerText = "Delete";
+        b.className = "btn-red";
+        m.style.display = "flex";
+    }
+}
+function submitRecipeModal() {
+    document.getElementById('recipeActionModal').style.display='none';
+    if(recipeModalMode === 'create') {
+        let val = document.getElementById('recipeModalInput').value;
+        if(val) executeCreateNewProduct(val);
+    } else if(recipeModalMode === 'delete') {
+        executeDeleteCurrentProduct();
+    }
+}
 
+async function executeCreateNewProduct(n) { try { if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; laborDB[n] = {time:0, rate:0}; pricingDB[n] = {msrp:0, wholesale:0}; isSubassemblyDB[n] = false; await supabaseClient.from('product_recipes').insert({product_name: n, components: [], labor_time_mins: 0, labor_rate_hr: 0, msrp: 0, wholesale_price: 0, is_subassembly: false, is_3d_print: false, print_time_mins: 0}); currentProduct = n; renderProductList(); renderProductBOM(); if(typeof populateDropdowns === 'function') populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
+async function executeDeleteCurrentProduct() { try { if(!currentProduct) return; sysLog(`Deleting ${currentProduct}`); const {error} = await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct);
+            if(error) throw new Error(error.message); delete productsDB[currentProduct]; delete laborDB[currentProduct]; delete pricingDB[currentProduct]; delete isSubassemblyDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').update({components: productsDB[n]}).eq('product_name', n)); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); renderProductList(); } catch(e) { sysLog(e.message, true); } }

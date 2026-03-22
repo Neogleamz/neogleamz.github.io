@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.2042"></script>
+    <script src="system-version.js?v=v.2026.03.21.2049"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.2042"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.2042"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.2049"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.2049"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -983,7 +983,7 @@
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-sidebar">
-                    <button class="btn-blue" onclick="createNewProduct()" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
+                    <button class="btn-blue" onclick="showRecipeModal(\'create\')" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
                     <ul class="product-list" id="productListUI"></ul>
                 </div>
                 <div class="bom-main" id="bomMainArea" style="display:none; padding:20px;">
@@ -1024,7 +1024,7 @@
                     </div>
                     <div class="table-wrap" id="bomTableWrap"></div>
                     <div style="margin-top: 15px; text-align: right; flex-shrink:0;">
-                        <button class="btn-red" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="deleteCurrentProduct()">Delete Recipe</button>
+                        <button class="btn-red" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="showRecipeModal(\'delete\')">Delete Recipe</button>
                     </div>
                 </div>
             </div>
@@ -1531,6 +1531,18 @@
 
     <!-- DECOMMISSIONED LEGACY TABS: Contents moved into Trinity Hubz -->
     <!-- DECOMMISSIONED LEGACY TABS: Contents moved into Trinity Hubz -->
+</div>
+
+<div id="recipeActionModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10006; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+    <div style="background:var(--bg-container); border:1px solid var(--border-color); border-radius:8px; padding:20px; width:400px; text-align:center; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+        <h3 id="recipeModalTitle" style="color:var(--text-heading); margin-top:0; font-size:22px;">Action</h3>
+        <p id="recipeModalText" style="color:var(--text-main); margin-bottom:15px; font-size:15px;"></p>
+        <input type="text" id="recipeModalInput" style="width:100%; padding:10px; margin-bottom:20px; border-radius:4px; border:1px solid var(--border-input); background:var(--bg-input); color:white; display:none; outline:none;" placeholder="Recipe Name">
+        <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn-blue" style="background:#64748b; border-color:#64748b; width:100px;" onclick="document.getElementById('recipeActionModal').style.display='none'">Cancel</button>
+            <button id="recipeModalConfirmBtn" class="btn-green" style="width:100px;" onclick="submitRecipeModal()">Confirm</button>
+        </div>
+    </div>
 </div>
 
 <div id="bulkAddModal">
@@ -2456,15 +2468,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.2042"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.2042"></script>
-<script src="bom-module.js?v=v.2026.03.21.2042"></script>
-<script src="inventory-module.js?v=v.2026.03.21.2042"></script>
-<script src="production-module.js?v=v.2026.03.21.2042"></script>
-<script src="sales-module.js?v=v.2026.03.21.2042"></script>
-<script src="analytics-module.js?v=v.2026.03.21.2042"></script>
-<script src="ceo-module.js?v=v.2026.03.21.2042"></script>
-<script src="print-module.js?v=v.2026.03.21.2042"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.2049"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.2049"></script>
+<script src="bom-module.js?v=v.2026.03.21.2049"></script>
+<script src="inventory-module.js?v=v.2026.03.21.2049"></script>
+<script src="production-module.js?v=v.2026.03.21.2049"></script>
+<script src="sales-module.js?v=v.2026.03.21.2049"></script>
+<script src="analytics-module.js?v=v.2026.03.21.2049"></script>
+<script src="ceo-module.js?v=v.2026.03.21.2049"></script>
+<script src="print-module.js?v=v.2026.03.21.2049"></script>
 </body>
 </html>
 
