@@ -232,7 +232,10 @@ function updateHubStats() {
             });
             let orderCount = new Set(pArray.map(x => x.order_id)).size;
             setStat('statOrderzTotal', fmtNum(orderCount));
-            let aov = orderCount > 0 ? (pTotals.captured / orderCount) : 0;
+            
+            // Exclude purely non-revenue transactions from diluting the AOV
+            let validAovOrders = new Set(pArray.filter(x => !x.isCostOnlyItem && !x.isRevenueTransfer).map(x => x.order_id)).size;
+            let aov = validAovOrders > 0 ? (pTotals.captured / validAovOrders) : 0;
             setStat('statOrderzUnits', fmtNum(pTotals.units || 0));
             setStat('statOrderzShopify', fmtNum(shopify));
             setStat('statOrderzAov', fmtMoney(aov));
