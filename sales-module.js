@@ -385,8 +385,10 @@ function renderSalesTable() {
         totals.net += x.net;
     });
 
-    // Totals logic removed - moving to Analytics tab
-    // -----------------------------------------------
+    // --- EXPORT TO ANALYTICS MODULE ---
+    window.salesEngineTotals = totals;
+    window.processedSalesDB = a;
+    // ----------------------------------
     
     if(a.length===0){ 
         h += "<tr><td colspan='16' style='text-align:center;'>No sales synced yet.</td></tr>"; 

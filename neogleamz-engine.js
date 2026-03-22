@@ -239,30 +239,17 @@ function updateHubStats() {
 
         // --- STATZ ---
         if (typeof salesDB !== 'undefined') {
-            let rev = 0, exp = 0, actualNet = 0;
-            salesDB.forEach(s => {
-                let rawTotal = parseFloat(s.total) || 0;
-                let tax = parseFloat(s.tax) || 0;
-                let postage = parseFloat(s.order_postage) || 0;
-                let shipCollected = parseFloat(s.shipping_collected) || 0;
-                let discount = parseFloat(s.discount) || 0;
-                
-                // AUDITED: Historical Engine Net Profit call
-                let pName = s.neogleamz_product || s.item_name;
-                let cogs = getEngineTrueCogs(pName);
-                
-                // Add revenue and expenses
-                rev += rawTotal;
-                exp += cogs;
-                
-                actualNet += getHistoricalNetProfit(rawTotal, shipCollected, tax, discount, postage, pName);
-            });
-            let roi = exp > 0 ? (actualNet / exp) * 100 : 0;
-            setStat('statStatzRev', fmtMoney(rev));
-            setStat('statStatzNet', fmtMoney(actualNet)); // REAL MATHEMATICAL NET PROFIT
+            // Inherit the precisely normalized master Engine logic to guarantee 100% uniformity
+            let totals = window.salesEngineTotals || { captured: 0, cogs: 0, net: 0, count: salesDB.length || 1 };
+            
+            let roi = totals.cogs > 0 ? (totals.net / totals.cogs) * 100 : 0;
+            let avgYield = totals.count > 0 ? (totals.net / totals.count) : 0;
+            
+            setStat('statStatzRev', fmtMoney(totals.captured));
+            setStat('statStatzNet', fmtMoney(totals.net)); // REAL MATHEMATICAL NET PROFIT
             setStat('statStatzRoi', roi.toFixed(1) + '%');
-            setStat('statStatzAvgProf', salesDB.length > 0 ? fmtMoney(actualNet / salesDB.length) : '$0.00');
-            setStat('statStatzRawExp', fmtMoney(exp));
+            setStat('statStatzAvgProf', fmtMoney(avgYield));
+            setStat('statStatzRawExp', fmtMoney(totals.cogs));
         }
 
         // --- SIMULATORZ ---
