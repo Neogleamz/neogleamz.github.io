@@ -385,8 +385,8 @@ function renderSalesTable() {
         totals.net += x.net;
         totals.units += (parseFloat(x.qty_sold) || 0);
         
-        // Track Warranty/Exchange structural overhead
-        if(x.transaction_type === 'Post-Ship Exchange' || x.transaction_type === 'Replacement / Warranty' || x.transaction_type === 'Warranty') {
+        // Track strictly isolated Warranty overhead
+        if(x.transaction_type === 'Warranty') {
             totals.burdenUnits += (parseFloat(x.qty_sold) || 0);
         }
     });
