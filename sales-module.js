@@ -263,13 +263,14 @@ function renderSalesTable() {
     if(!wrap) return;
     
     // Updated Headers based on System Standard
-    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='adj'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('adj')">Exch. Adj.</th> <th class="${currentSalesSort.column==='bal'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('bal')">Balance</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe Fee</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
+    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='type'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('type')">Type</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='adj'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('adj')">Exch. Adj.</th> <th class="${currentSalesSort.column==='bal'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('bal')">Balance</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe Fee</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
 
     // Pre-calculate Engine stats for sorting and rendering
     let a = salesDB.map(x => {
+        let type = x.transaction_type || 'Standard';
         let qty = parseFloat(x.qty_sold) || 0;
         let p = parseFloat(x.actual_sale_price) || 0;
         let s = parseFloat(x.shipping) || 0;
@@ -278,16 +279,29 @@ function renderSalesTable() {
         
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name);
         
+        // --- CUSTOM EXCEPTION OVERRIDES ---
+        if (type === 'Pre-Ship Exchange') {
+            liveCogs = 0;
+        } else if (type === 'Replacement / Warranty') {
+            p = 0; s = 0; t = 0; d = 0;
+        }
+        
         // BUGFIX: Base Stripe Fee on True Line Capture, avoiding Shopify's merged Total inflation
         let trueLineCaptured = (p * qty) + s + t - d;
-        let stripeFee = getEngineStripeFee(trueLineCaptured);
+        let stripeFee = type === 'Replacement / Warranty' ? 0 : getEngineStripeFee(trueLineCaptured);
         
         // --- POWERED BY MASTER ENGINE ---
-        let actualShipCost = SHIP_COST * qty;
+        let actualShipCost = type === 'Pre-Ship Exchange' ? 0 : (SHIP_COST * qty);
         let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name);
+        
+        if (type === 'Pre-Ship Exchange') {
+            net += getEngineTrueCogs(x.internal_recipe_name); // refund the dynamic COGS that engine deducted
+        } else if (type === 'Replacement / Warranty') {
+            net = 0 - actualShipCost - liveCogs;
+        }
         // --------------------------------
         
-        return { ...x, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false };
+        return { ...x, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false };
     });
 
     // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
@@ -303,7 +317,8 @@ function renderSalesTable() {
             if(balRows.length >= 2) {
                 let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
                 let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
-                if(zeroTotal && nonZeroTotal) {
+                // Only invoke algorithmic logic if NO manual exception type is declared on the components
+                if(zeroTotal && nonZeroTotal && zeroTotal.transaction_type === 'Standard' && nonZeroTotal.transaction_type === 'Standard') {
                     let offset = parseFloat(zeroTotal["Outstanding Balance"]) || 0;
                     nonZeroTotal.exchAdj = -offset;
                     zeroTotal.isExchanged = true;
@@ -338,7 +353,7 @@ function renderSalesTable() {
         h += "<tr><td colspan='16' style='text-align:center;'>No sales synced yet.</td></tr>"; 
     } else {
         a.sort((x,y) => { 
-            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', adj:'exchAdj', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'}; 
+            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', type:'transaction_type', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', adj:'exchAdj', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'}; 
             let col = map[currentSalesSort.column]; 
             let u = x[col]; let v = y[col]; 
             if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u; 
@@ -357,6 +372,8 @@ function renderSalesTable() {
             <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'Source', false)" style="color:var(--text-muted);">${x["Source"] || ''}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'storefront_sku', false)">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
+            <td style="padding:4px;"><select style="background:var(--bg_secondary); color:#fff; border:1px solid #334155; border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')"><option style="background:#0f172a; color:#fff;" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option><option style="background:#0f172a; color:#fff;" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option><option style="background:#0f172a; color:#fff;" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option><option style="background:#0f172a; color:#fff;" value="Replacement / Warranty" ${x.transaction_type==='Replacement / Warranty'?'selected':''}>Replacement / Warranty</option></select></td>
+
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'qty_sold', true)" style="font-weight:bold;">${x.qty_sold}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'actual_sale_price', true)" style="color:#10b981;">$${parseFloat(x.actual_sale_price).toFixed(2)}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_amount', true)" style="color:#f59e0b;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
@@ -376,6 +393,21 @@ function renderSalesTable() {
     if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
 }
 
+window.updateSaleType = async function(sel, orderId, sku) {
+    let newVal = sel.value;
+    sysLog(`Editing Sale Type ${orderId}: ${newVal}`);
+    setMasterStatus("Saving...", "mod-working");
+    let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
+    if(row) {
+        row.transaction_type = newVal;
+        const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
+        if(error) { alert("Error saving type: " + error.message); return; }
+        setMasterStatus("Saved!", "mod-success"); 
+        renderSalesTable(); 
+        if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+    }
+}
 
 async function updateSaleCell(cell, orderId, sku, col, isNum) {
     try {
