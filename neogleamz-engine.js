@@ -234,7 +234,11 @@ function updateHubStats() {
             setStat('statOrderzTotal', fmtNum(orderCount));
             
             // Exclude purely non-revenue transactions from diluting the AOV
-            let validAovOrders = new Set(pArray.filter(x => !x.isCostOnlyItem && !x.isRevenueTransfer).map(x => x.order_id)).size;
+            let validAovOrders = new Set(pArray.filter(x => 
+                !x.isCostOnlyItem && 
+                !x.isRevenueTransfer && 
+                x.transaction_type !== 'Pre-Ship Exchange'
+            ).map(x => x.order_id)).size;
             let aov = validAovOrders > 0 ? (pTotals.captured / validAovOrders) : 0;
             setStat('statOrderzUnits', fmtNum(pTotals.units || 0));
             setStat('statOrderzShopify', fmtNum(shopify));
