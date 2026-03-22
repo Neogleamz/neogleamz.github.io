@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.21.2008"></script>
+    <script src="system-version.js?v=v.2026.03.21.2012"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.2008"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.2008"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.21.2012"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.21.2012"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -2320,6 +2320,24 @@
     
         // Removed legacy calculateProductTotal from global scope if it was here.
         // It now lives in neogleamz-engine.js if needed.
+    const partSelectorObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+            let ps = entry.target;
+            if(ps.offsetWidth === 0) return;
+            let maxChars = Math.max(30, Math.floor(ps.clientWidth / 7.2));
+            Array.from(ps.options).forEach(opt => {
+                let fTxt = opt.getAttribute('data-fulltxt');
+                if(fTxt) {
+                    if(fTxt.length > maxChars) {
+                        opt.innerText = fTxt.substring(0, maxChars - 3) + '...';
+                    } else {
+                        opt.innerText = fTxt;
+                    }
+                }
+            });
+        }
+    });
+
     function populateDropdowns() { 
         try { 
             let retailRecipes = []; let subRecipes = [];
@@ -2333,9 +2351,9 @@
             let recipesHtml = `<optgroup label="📦 RETAIL PRODUCTS">${retailRecipes.join('')}</optgroup>`;
             if(subRecipes.length > 0) recipesHtml += `<optgroup label="⚙️ SUB-ASSEMBLIES">${subRecipes.join('')}</optgroup>`;
 
-            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `🔩 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); let fullText = textParts.join('   '); if(fullText.length > 95) fullText = fullText.substring(0, 92) + '...'; return `<option value="${String(k).replace(/"/g, '&quot;')}">${fullText}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
+            let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `🔩 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); let fullText = textParts.join('   '); let escaped = String(fullText).replace(/"/g, '&quot;'); return `<option value="${String(k).replace(/"/g, '&quot;')}" data-fulltxt="${escaped}   ━━━━   💰 $${cost}">${escaped}   ━━━━   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
             
-            const ps = document.getElementById('partSelector'); if(ps) ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipesHtml + raws; 
+            const ps = document.getElementById('partSelector'); if(ps) { ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipesHtml + raws; partSelectorObserver.observe(ps); }
             
             // Batch builds and routing can use all products
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
@@ -2427,15 +2445,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.21.2008"></script>
-<script src="system-tools-module.js?v=v.2026.03.21.2008"></script>
-<script src="bom-module.js?v=v.2026.03.21.2008"></script>
-<script src="inventory-module.js?v=v.2026.03.21.2008"></script>
-<script src="production-module.js?v=v.2026.03.21.2008"></script>
-<script src="sales-module.js?v=v.2026.03.21.2008"></script>
-<script src="analytics-module.js?v=v.2026.03.21.2008"></script>
-<script src="ceo-module.js?v=v.2026.03.21.2008"></script>
-<script src="print-module.js?v=v.2026.03.21.2008"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.21.2012"></script>
+<script src="system-tools-module.js?v=v.2026.03.21.2012"></script>
+<script src="bom-module.js?v=v.2026.03.21.2012"></script>
+<script src="inventory-module.js?v=v.2026.03.21.2012"></script>
+<script src="production-module.js?v=v.2026.03.21.2012"></script>
+<script src="sales-module.js?v=v.2026.03.21.2012"></script>
+<script src="analytics-module.js?v=v.2026.03.21.2012"></script>
+<script src="ceo-module.js?v=v.2026.03.21.2012"></script>
+<script src="print-module.js?v=v.2026.03.21.2012"></script>
 </body>
 </html>
 
