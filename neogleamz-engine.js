@@ -233,16 +233,16 @@ function updateHubStats() {
             let orderCount = new Set(pArray.map(x => x.order_id)).size;
             setStat('statOrderzTotal', fmtNum(orderCount));
             
-            // Exclude purely non-revenue transactions from diluting the AOV
-            let validAovOrders = new Set(pArray.filter(x => 
+            // Exclude purely non-revenue transactions from diluting the AON
+            let validAonOrders = new Set(pArray.filter(x => 
                 !x.isCostOnlyItem && 
                 !x.isRevenueTransfer && 
                 x.transaction_type !== 'Pre-Ship Exchange'
             ).map(x => x.order_id)).size;
-            let aov = validAovOrders > 0 ? (pTotals.captured / validAovOrders) : 0;
+            let aon = validAonOrders > 0 ? (pTotals.net / validAonOrders) : 0;
             setStat('statOrderzUnits', fmtNum(pTotals.units || 0));
             setStat('statOrderzShopify', fmtNum(shopify));
-            setStat('statOrderzAov', fmtMoney(aov));
+            setStat('statOrderzAon', fmtMoney(aon));
             setStat('statOrderzBurden', (pTotals.burdenPct || 0).toFixed(1) + '%');
         } else if (typeof salesDB !== 'undefined') {
             setStat('statOrderzTotal', fmtNum(salesDB.length));
@@ -253,10 +253,10 @@ function updateHubStats() {
                 let so = (s.source || "").toLowerCase();
                 if (so.includes("shopify")) shopify++;
             });
-            let aov = salesDB.length > 0 ? (val / salesDB.length) : 0;
+            let aon = salesDB.length > 0 ? (val / salesDB.length) : 0;
             setStat('statOrderzUnits', fmtNum(units));
             setStat('statOrderzShopify', fmtNum(shopify));
-            setStat('statOrderzAov', fmtMoney(aov));
+            setStat('statOrderzAon', fmtMoney(aon));
             setStat('statOrderzVal', fmtMoney(val));
         }
 
