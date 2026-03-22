@@ -325,8 +325,9 @@ function renderSalesTable() {
             r.stripeFee = u.stripeFee;
             r.discount_amount = parseFloat(u.discount_amount || 0);
 
-            // Re-calculate the Replacement's Net using its own physical CoGS/Shipping, but the new Revenue and Stripe Fee
-            r.net = r.total - r.liveCogs - (SHIP_COST * parseFloat(r.qty_sold || 0)) + r.stripeFee;
+            // Re-calculate the Replacement's Net using pure physical attributes and true revenue, bypassing Shopify's merged 'total' string
+            let rawRev = (parseFloat(r.actual_sale_price || 0) * (parseFloat(r.qty_sold) || 0)) + parseFloat(r.shipping || 0) - parseFloat(r.discount_amount || 0);
+            r.net = rawRev - r.liveCogs - (SHIP_COST * parseFloat(r.qty_sold || 0)) - r.stripeFee;
 
             // Zero out all metrics on the Unshipped row entirely (so it doesn't keep Revenue)
             u.actual_sale_price = 0;
