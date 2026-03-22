@@ -317,19 +317,19 @@ function renderSalesTable() {
             if(balRows.length >= 2) {
                 let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
                 let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
-                // Only invoke algorithmic logic if NO manual exception type is declared on the components
-                if(zeroTotal && nonZeroTotal && zeroTotal.transaction_type === 'Standard' && nonZeroTotal.transaction_type === 'Standard') {
+                // Always run the visual Total Captured offset so Shopify's merged raw totals look legible
+                if(zeroTotal && nonZeroTotal) {
                     let offset = parseFloat(zeroTotal["Outstanding Balance"]) || 0;
                     nonZeroTotal.exchAdj = -offset;
                     zeroTotal.isExchanged = true;
                     nonZeroTotal.isExchanged = true;
                     
-                    // Fix double-fulfillment constraint: 
-                    // The original item (nonZeroTotal) was never built or shipped due to the pre-shipment exchange.
-                    // We must mathematically refund the ghost COGS and Ship Cost back to Net Profit.
-                    nonZeroTotal.net += nonZeroTotal.liveCogs;
-                    nonZeroTotal.net += (SHIP_COST * parseFloat(nonZeroTotal.qty_sold || 0));
-                    nonZeroTotal.liveCogs = 0; 
+                    // IF NO manual overrides are placed, also algorithmically neutralize ghost costs
+                    if (zeroTotal.transaction_type === 'Standard' && nonZeroTotal.transaction_type === 'Standard') {
+                        nonZeroTotal.net += nonZeroTotal.liveCogs;
+                        nonZeroTotal.net += (SHIP_COST * parseFloat(nonZeroTotal.qty_sold || 0));
+                        nonZeroTotal.liveCogs = 0; 
+                    }
                 }
             }
         }
