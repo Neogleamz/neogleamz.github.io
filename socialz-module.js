@@ -39,6 +39,30 @@
         let selectedStyles = [];
         let viewMode = 'grid'; 
 
+        function initSocialzData(data) {
+            if(!data) return;
+            socialzSkaters = data.map(row => ({
+                id: row.id,
+                name: row.name || '',
+                region: row.region || '',
+                location: row.location || '',
+                type: row.skater_type || '',
+                isFavorite: !!row.is_favorite,
+                style: row.style || '',
+                summary: row.summary || '',
+                viralUrl: row.viral_url || '',
+                contactInfo: row.contact_info || '',
+                collabTier: row.collab_tier || '',
+                collabStatus: row.collab_status || '',
+                handles: { ig: row.handle_ig || '', tt: row.handle_tt || '', yt: row.handle_yt || '', fb: row.handle_fb || '' },
+                links: { ig: row.link_ig || '', tt: row.link_tt || '', yt: row.link_yt || '', fb: row.link_fb || '' },
+                followers: { ig: parseFloat(row.followers_ig) || 0, tt: parseFloat(row.followers_tt) || 0, yt: parseFloat(row.followers_yt) || 0, fb: parseFloat(row.followers_fb) || 0 },
+                rawFollowers: parseFloat(row.raw_followers) || 0
+            }));
+            updateFilterDropdownOptions();
+            renderSkaters();
+        }
+
         // --- Helpers ---
         function parseFollowerCount(str) {
             if(!str) return 0;
@@ -87,13 +111,13 @@
             if (index > -1) {
                 socialzSkaters[index].isFavorite = !socialzSkaters[index].isFavorite;
                 renderSkaters();
-                showToast(socialzSkaters[index].isFavorite ? 'Added to favorites' : 'Removed from favorites');
+                sysLog(socialzSkaters[index].isFavorite ? 'Added to favorites' : 'Removed from favorites');
             }
         }
 
         // --- Analytics Dashboard ---
         function openAnalyticsDashboard() {
-            if (socialzSkaters.length === 0) { showToast("No data to analyze.", "error"); return; }
+            if (socialzSkaters.length === 0) { sysLog("No data to analyze."); return; }
             document.getElementById('analytics-modal').classList.remove('hidden');
             renderDashboardCharts();
         }
@@ -372,7 +396,7 @@
 
         // --- Export CSV ---
         function exportCSV() {
-            if (socialzSkaters.length === 0) { showToast("Nothing to export", "error"); return; }
+            if (socialzSkaters.length === 0) { sysLog("Nothing to export"); return; }
             const headers = ["Name", "Region", "Location", "Type", "Favorite", "Styles", "Summary", "Viral URL", "Contact Info", "Collaboration Tier", "Collaboration Status", "IG Handle", "IG Link", "IG Followers", "TikTok Handle", "TikTok Link", "TikTok Followers", "YouTube Handle", "YouTube Link", "YouTube Subs", "FB Handle", "FB Link", "FB Followers"];
             const rows = socialzSkaters.map(s => [
                 s.name, s.region, s.location, s.type, s.isFavorite ? "Yes" : "No", s.style, s.summary, s.viralUrl, s.contactInfo, s.collabTier, s.collabStatus,
@@ -394,7 +418,7 @@
         function handleCSVImport(input) {
             const f = input.files[0]; if (!f) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = typeof XLSX !== 'undefined' ? XLSX.read(data, {type: 'array'}) : null;
@@ -421,8 +445,7 @@
                         const isFav = favVal === 'yes' || favVal === 'true' || favVal === '1';
                         
                         return { 
-                            id: Math.random(), 
-                            name: get('name'), 
+                            name: get('name') || 'Unnamed Skater', 
                             region: get('region'), 
                             location: get('location'), 
                             type: get('type'), 
@@ -440,11 +463,28 @@
                         };
                     }).filter(s => s !== null);
                     
-                    socialzSkaters = [...socialzSkaters, ...newS]; 
-                    updateFilterDropdownOptions(); 
-                    renderSkaters(); 
-                    if(typeof showToast === 'function') showToast(`Imported ${newS.length} skater records successfully!`);
-                } catch(err) { console.error("IMPORT ERROR:", err); if(typeof showToast === 'function') showToast("Import failed. Are you sure it's an Excel or CSV file?", "error"); }
+                    if(typeof sysLog === 'function') sysLog("Syncing CSV to Database...");
+                    
+                    // Transform to Supabase payload
+                    const dbPayload = newS.map(s => ({
+                        name: s.name, region: s.region, location: s.location, skater_type: s.type, is_favorite: s.isFavorite, style: s.style, summary: s.summary, viral_url: s.viralUrl, contact_info: s.contactInfo, collab_tier: s.collabTier, collab_status: s.collabStatus,
+                        handle_ig: s.handles.ig, handle_tt: s.handles.tt, handle_yt: s.handles.yt, handle_fb: s.handles.fb,
+                        link_ig: s.links.ig, link_tt: s.links.tt, link_yt: s.links.yt, link_fb: s.links.fb,
+                        followers_ig: parseFollowerCount(s.followers.ig), followers_tt: parseFollowerCount(s.followers.tt), followers_yt: parseFollowerCount(s.followers.yt), followers_fb: parseFollowerCount(s.followers.fb),
+                        raw_followers: s.rawFollowers
+                    }));
+                    
+                    // Upsert via unique Name key
+                    const { error } = await supabaseClient.from('socialz_audience').upsert(dbPayload, { onConflict: 'name' });
+                    if(error) throw new Error(error.message);
+                    
+                    // Pull fresh data to sync UUIDs back from standard DB constraint
+                    const { data: remoteData, error: fetchErr } = await supabaseClient.from('socialz_audience').select('*').order('name', { ascending: true });
+                    if(fetchErr) throw new Error(fetchErr.message);
+                    
+                    initSocialzData(remoteData);
+                    sysLog(`Imported ${newS.length} records successfully!`);
+                } catch(err) { console.error("IMPORT ERROR:", err); sysLog("Import failed: " + err.message); }
                 input.value = '';
             };
             reader.readAsArrayBuffer(f);
@@ -463,13 +503,55 @@
             document.getElementById('input-fb').value = s.handles.fb; document.getElementById('input-fb-link').value = s.links.fb; document.getElementById('input-fb-followers').value = s.followers.fb;
         }
 
-        function deleteSkaterFromModal() { const i = parseInt(document.getElementById('edit-index').value); if (i > -1 && confirm("Delete?")) { socialzSkaters.splice(i, 1); updateFilterDropdownOptions(); renderSkaters(); closeModal(); showToast("Deleted"); } }
-        function handleFormSubmit(e) {
+        async function deleteSkaterFromModal() { 
+            const i = parseInt(document.getElementById('edit-index').value); 
+            if (i > -1 && confirm("Delete?")) { 
+                try {
+                    const skater = socialzSkaters[i];
+                    if (skater.id && typeof skater.id === 'string' && skater.name) {
+                        const { error } = await supabaseClient.from('socialz_audience').delete().eq('name', skater.name);
+                        if(error) throw new Error(error.message);
+                    }
+                    socialzSkaters.splice(i, 1); updateFilterDropdownOptions(); renderSkaters(); closeModal(); sysLog("Deleted"); 
+                } catch(e) { sysLog("Failed to delete from DB: " + e.message); }
+            } 
+        }
+        
+        async function handleFormSubmit(e) {
             e.preventDefault(); const i = parseInt(document.getElementById('edit-index').value);
             const igf = document.getElementById('input-ig-followers').value, ttf = document.getElementById('input-tt-followers').value, ytf = document.getElementById('input-yt-followers').value, fbf = document.getElementById('input-fb-followers').value;
-            const s = { id: i === -1 ? Math.random() : socialzSkaters[i].id, name: document.getElementById('input-name').value, location: document.getElementById('input-location').value, region: toTitleCase(document.getElementById('input-region').value), contactInfo: document.getElementById('input-contact').value, style: document.getElementById('input-style').value, type: toTitleCase(document.getElementById('input-type').value), collabTier: document.getElementById('input-collab-tier').value, collabStatus: document.getElementById('input-collab-status').value, summary: document.getElementById('input-summary').value, viralUrl: document.getElementById('input-viral').value, isFavorite: document.getElementById('input-favorite').checked, handles: { ig: document.getElementById('input-ig').value, tt: document.getElementById('input-tt').value, yt: document.getElementById('input-yt').value, fb: document.getElementById('input-fb').value }, links: { ig: document.getElementById('input-ig-link').value, tt: document.getElementById('input-tt-link').value, yt: document.getElementById('input-yt').value, fb: document.getElementById('input-fb').value }, followers: { ig: igf, tt: ttf, yt: ytf, fb: fbf }, rawFollowers: parseFollowerCount(igf) + parseFollowerCount(ttf) + parseFollowerCount(ytf) + parseFollowerCount(fbf) };
-            if (i === -1) socialzSkaters.push(s); else socialzSkaters[i] = s;
-            updateFilterDropdownOptions(); renderSkaters(); closeModal(); showToast("Saved!");
+            
+            const dbRow = {
+                name: document.getElementById('input-name').value || 'Unnamed Skater',
+                region: toTitleCase(document.getElementById('input-region').value),
+                location: document.getElementById('input-location').value,
+                skater_type: toTitleCase(document.getElementById('input-type').value),
+                is_favorite: document.getElementById('input-favorite').checked,
+                style: document.getElementById('input-style').value,
+                summary: document.getElementById('input-summary').value,
+                viral_url: document.getElementById('input-viral').value,
+                contact_info: document.getElementById('input-contact').value,
+                collab_tier: document.getElementById('input-collab-tier').value,
+                collab_status: document.getElementById('input-collab-status').value,
+                handle_ig: document.getElementById('input-ig').value, handle_tt: document.getElementById('input-tt').value, handle_yt: document.getElementById('input-yt').value, handle_fb: document.getElementById('input-fb').value,
+                link_ig: document.getElementById('input-ig-link').value, link_tt: document.getElementById('input-tt-link').value, link_yt: document.getElementById('input-yt-link').value, link_fb: document.getElementById('input-fb-link').value,
+                followers_ig: parseFollowerCount(igf), followers_tt: parseFollowerCount(ttf), followers_yt: parseFollowerCount(ytf), followers_fb: parseFollowerCount(fbf),
+                raw_followers: parseFollowerCount(igf) + parseFollowerCount(ttf) + parseFollowerCount(ytf) + parseFollowerCount(fbf)
+            };
+            
+            try {
+                if(i !== -1 && typeof socialzSkaters[i].id === 'string') { dbRow.id = socialzSkaters[i].id; }
+                const { data, error } = await supabaseClient.from('socialz_audience').upsert(dbRow, { onConflict: 'name' }).select();
+                if(error) throw new Error(error.message);
+                
+                // Fetch full remote state again just to ensure everything is perfect
+                const { data: remoteData } = await supabaseClient.from('socialz_audience').select('*').order('name', { ascending: true });
+                if(remoteData) initSocialzData(remoteData);
+                closeModal(); sysLog("Saved to DB!");
+            } catch(err) {
+                console.error("DB SAVE ERROR", err);
+                sysLog("Failed to save to DB: " + err.message);
+            }
         }
 
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }

@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.22.0609"></script>
+    <script src="system-version.js?v=v.2026.03.22.0650"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.22.0609"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0609"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.22.0650"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0650"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -1825,7 +1825,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0609"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0650"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2744,22 +2744,22 @@
                 </div>
                 
                 <div class="flex-grow overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-900/20">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-crown text-amber-500"></i> Top 10 Most Followed Skaters</h3>
-                            <div class="h-80 w-full"><canvas id="chart-top-skaters"></canvas></div>
+                    <div class="grid grid-cols-2 gap-4 md:gap-6">
+                        <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-2 md:mb-4 flex items-center gap-2 text-sm md:text-base"><i class="fa-solid fa-crown text-amber-500"></i> Top 10 Skaters</h3>
+                            <div class="flex-grow w-full relative min-h-[180px] h-[30vh]"><canvas id="chart-top-skaters"></canvas></div>
                         </div>
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-tags text-indigo-500"></i> Most Popular Styles</h3>
-                            <div class="h-80 w-full"><canvas id="chart-top-styles"></canvas></div>
+                        <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-2 md:mb-4 flex items-center gap-2 text-sm md:text-base"><i class="fa-solid fa-tags text-indigo-500"></i> Popular Styles</h3>
+                            <div class="flex-grow w-full relative min-h-[180px] h-[30vh]"><canvas id="chart-top-styles"></canvas></div>
                         </div>
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-globe text-blue-500"></i> Skaters by Region</h3>
-                            <div class="h-80 w-full flex items-center justify-center"><canvas id="chart-regions"></canvas></div>
+                        <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-2 md:mb-4 flex items-center gap-2 text-sm md:text-base"><i class="fa-solid fa-globe text-blue-500"></i> Region Spread</h3>
+                            <div class="flex-grow w-full relative min-h-[180px] h-[30vh]"><canvas id="chart-regions"></canvas></div>
                         </div>
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-share-nodes text-brand"></i> Total Followers per Platform</h3>
-                            <div class="h-80 w-full flex items-center justify-center"><canvas id="chart-platforms"></canvas></div>
+                        <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-2 md:mb-4 flex items-center gap-2 text-sm md:text-base"><i class="fa-solid fa-share-nodes text-brand"></i> Followers per Platform</h3>
+                            <div class="flex-grow w-full relative min-h-[180px] h-[30vh]"><canvas id="chart-platforms"></canvas></div>
                         </div>
                     </div>
                 </div>
@@ -3019,160 +3019,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <div id="analytics-modal" class="fixed inset-0 z-50 hidden overflow-hidden">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAnalyticsDashboard()"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="glass-panel w-full max-w-7xl h-[90vh] rounded-3xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/20">
-                            <i class="fa-solid fa-chart-line text-2xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold">Analytics Dashboard</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-widest">Real-time Performance Metrics</p>
-                        </div>
-                    </div>
-                    <button onclick="closeAnalyticsDashboard()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center">
-                        <i class="fa-solid fa-times text-lg"></i>
-                    </button>
-                </div>
-                
-                <div class="flex-grow overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-900/20">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-crown text-amber-500"></i> Top 10 Most Followed Skaters</h3>
-                            <div class="h-80 w-full"><canvas id="chart-top-skaters"></canvas></div>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-tags text-indigo-500"></i> Most Popular Styles</h3>
-                            <div class="h-80 w-full"><canvas id="chart-top-styles"></canvas></div>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-globe text-blue-500"></i> Skaters by Region</h3>
-                            <div class="h-80 w-full flex items-center justify-center"><canvas id="chart-regions"></canvas></div>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fa-solid fa-share-nodes text-brand"></i> Total Followers per Platform</h3>
-                            <div class="h-80 w-full flex items-center justify-center"><canvas id="chart-platforms"></canvas></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
-
-    <!-- Edit/Add Modal -->
-    <div id="skater-modal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="glass-panel w-full max-w-5xl rounded-2xl shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700">
-                <form id="skater-form" onsubmit="handleFormSubmit(event)" class="p-5">
-                    <div style="display: none !important;" class="flex justify-between items-center mb-5 border-b border-slate-200 dark:border-slate-700 pb-3">
-                        <h2 class="text-2xl font-bold" id="modal-title">Add New Skater</h2>
-                        <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                            <i class="fa-solid fa-times text-xl"></i>
-                        </button>
-                    </div>
-                    <input type="hidden" id="edit-index">
-                    <div class="mb-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider border-l-4 border-brand pl-2">Profile Information</h3>
-                            <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" id="input-favorite" class="w-4 h-4 accent-red-500 rounded border-slate-300">
-                                <span class="text-xs font-bold text-slate-500 uppercase group-hover:text-red-500 transition-colors">Favorite Skater</span>
-                            </label>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div class="space-y-3">
-                                <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Full Name</label><input required type="text" id="input-name" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm"></div>
-                                <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Location</label><input type="text" id="input-location" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm"></div>
-                            </div>
-                            <div class="space-y-3">
-                                <div class="hidden md:block opacity-0 pointer-events-none"><label class="block text-xs font-medium mb-1 uppercase">Spacer</label><div class="py-1.5 h-[34px]"></div></div>
-                                <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Region</label><select id="input-region" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm">
-                                    <option value="">Select Region</option><option value="East">East</option><option value="West">West</option><option value="Midwest">Midwest</option><option value="South">South</option><option value="International">International</option>
-                                </select></div>
-                            </div>
-                            <div class="space-y-3">
-                                <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Style</label><input type="text" id="input-style" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm" placeholder="e.g. JB; Step; Instruction"></div>
-                                <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Type</label><select id="input-type" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm">
-                                    <option value="Indoor">Indoor</option><option value="Outdoor">Outdoor</option><option value="Hybrid">Hybrid</option>
-                                </select></div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-4 mb-4">
-                            <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Contact Info</label><input type="text" id="input-contact" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm" placeholder="Email, Phone, etc."></div>
-                            <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Collaboration Tier</label><select id="input-collab-tier" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm">
-                                <option value="">Select Tier</option><option value="Tier 1">Tier 1</option><option value="Tier 2">Tier 2</option><option value="Tier 3">Tier 3</option>
-                            </select></div>
-                            <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Collaboration Status</label><select id="input-collab-status" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm">
-                                <option value="">Select Status</option><option value="Active">Active</option><option value="Outreach">Outreach</option><option value="Pending">Pending</option><option value="Do Not Contact">Do Not Contact</option>
-                            </select></div>
-                        </div>
-                        <div class="w-full mb-2">
-                            <label class="block text-xs font-medium mb-1 text-purple-500 uppercase text-[10px]"><i class="fa-solid fa-paragraph mr-1"></i> Bio / Summary</label>
-                            <textarea id="input-summary" rows="3" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm leading-relaxed resize-none" placeholder="Short skater biography or summary..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Social Channels Section -->
-                    <div class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-700 mt-6">
-                        <div class="grid grid-cols-[50px_1fr_1.5fr_1fr] gap-3 items-center">
-                            <div class="col-span-2 flex justify-between items-center w-full pr-2">
-                                <h3 class="text-sm font-bold uppercase text-slate-400 tracking-wider border-l-4 border-blue-500 pl-2">Social Channels</h3>
-                                <label class="text-xs font-bold text-amber-500 uppercase whitespace-nowrap flex items-center">
-                                    <i class="fa-solid fa-rocket mr-1 text-amber-500"></i> Viral URL
-                                </label>
-                            </div>
-                            <input type="text" id="input-viral" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm" placeholder="https://...">
-                            <div></div>
-                            
-                            <div></div>
-                            <label class="text-xs font-bold text-slate-400 uppercase">Handle</label>
-                            <label class="text-xs font-bold text-slate-400 uppercase">Full Link URL</label>
-                            <label class="text-xs font-bold text-slate-400 uppercase">Followers</label>
-
-                            <!-- Instagram -->
-                            <div class="text-pink-500 text-2xl text-center"><i class="fa-brands fa-instagram"></i></div>
-                            <input type="text" id="input-ig" placeholder="@user" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-medium">
-                            <input type="text" id="input-ig-link" placeholder="https://instagram.com/..." class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-mono text-slate-500">
-                            <input type="text" id="input-ig-followers" placeholder="e.g. 1.2M" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-bold text-pink-500">
-
-                            <!-- TikTok -->
-                            <div class="text-cyan-500 text-2xl text-center"><i class="fa-brands fa-tiktok"></i></div>
-                            <input type="text" id="input-tt" placeholder="@user" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-medium">
-                            <input type="text" id="input-tt-link" placeholder="https://tiktok.com/..." class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-mono text-slate-500">
-                            <input type="text" id="input-tt-followers" placeholder="e.g. 500k" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-mono text-cyan-500">
-
-                            <!-- YouTube -->
-                            <div class="text-red-500 text-2xl text-center"><i class="fa-brands fa-youtube"></i></div>
-                            <input type="text" id="input-yt" placeholder="@user" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-medium">
-                            <input type="text" id="input-yt-link" placeholder="https://youtube.com/..." class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-mono text-slate-500">
-                            <input type="text" id="input-yt-followers" placeholder="e.g. 10k" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-bold text-red-500">
-
-                            <!-- Facebook -->
-                            <div class="text-blue-500 text-2xl text-center"><i class="fa-brands fa-facebook"></i></div>
-                            <input type="text" id="input-fb" placeholder="User" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-medium">
-                            <input type="text" id="input-fb-link" placeholder="https://facebook.com/..." class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-mono text-slate-500">
-                            <input type="text" id="input-fb-followers" placeholder="e.g. 5k" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm font-bold text-blue-500">
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between pt-6 border-t border-slate-200 dark:border-slate-700 mt-5">
-                        <button type="button" id="btn-delete-modal" onclick="deleteSkaterFromModal()" class="px-4 py-2 rounded-lg font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2 text-sm"><i class="fa-solid fa-trash"></i> <span class="hidden sm:inline">Delete Skater</span></button>
-                        <div class="flex gap-3"><button type="button" onclick="closeModal()" class="px-5 py-2 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm">Cancel</button><button type="submit" class="px-6 py-2 rounded-lg font-bold bg-brand text-white shadow-lg shadow-orange-500/25 hover:bg-orange-600 transition-all transform hover:scale-105 text-sm">Save Changes</button></div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    
-    <script src="socialz-module.js?v=v.2026.03.22.0609"></script>
+    <script src="socialz-module.js?v=v.2026.03.22.0650"></script>
 </body>
 <script>
     // --- ZERO-CACHE SECURITY POLICY ---
@@ -3248,7 +3095,7 @@
         } catch(e) { console.error(e); } 
     }
     
-    window.onerror = function(msg, url, lineNo) { sysLog(`Code Error: ${msg} (Line: ${lineNo})`, true); return false; };
+    window.onerror = function(msg, url, lineNo) { if(msg.includes('ResizeObserver')) return false; sysLog(`Code Error: ${msg} (Line: ${lineNo})`, true); return false; };
     window.addEventListener('unhandledrejection', function(event) { sysLog(`Async Error: ${event.reason}`, true); });
 
     function setSysProgress(val, state = 'working') { try { const b = document.getElementById('sysProgress'); if(b) { b.value = val; b.className = 'prog-' + state; } } catch(e) {} }
@@ -3489,19 +3336,22 @@
     async function loadData() {
         try {
             setSysProgress(10, 'working');
-            const [lR, pR, cR, wR, sR, saleR, aliasR] = await Promise.all([ 
+            const [lR, pR, cR, wR, sR, saleR, aliasR, socR] = await Promise.all([ 
                 supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), 
                 supabaseClient.from('product_recipes').select('*'), 
                 supabaseClient.from('inventory_consumption').select('*'), 
                 supabaseClient.from('work_orders').select('*'), 
                 supabaseClient.from('production_sops').select('*'),
                 supabaseClient.from('sales_ledger').select('*').order('sale_date', { ascending: false }),
-                supabaseClient.from('storefront_aliases').select('*')
+                supabaseClient.from('storefront_aliases').select('*'),
+                supabaseClient.from('socialz_audience').select('*')
             ]);
             
             if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); 
             if (wR.error) throw new Error(wR.error.message); if (sR.error) throw new Error(sR.error.message);
             if (saleR.error) throw new Error(saleR.error.message); if (aliasR.error) throw new Error(aliasR.error.message);
+            if (socR && socR.error) { console.warn("SOCIALZ DB Warning:", socR.error.message); }
+            if (socR && socR.data && typeof initSocialzData === 'function') { initSocialzData(socR.data); }
             
             setSysProgress(30, 'working');
             if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
@@ -3968,15 +3818,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.22.0609"></script>
-<script src="system-tools-module.js?v=v.2026.03.22.0609"></script>
-<script src="bom-module.js?v=v.2026.03.22.0609"></script>
-<script src="inventory-module.js?v=v.2026.03.22.0609"></script>
-<script src="production-module.js?v=v.2026.03.22.0609"></script>
-<script src="sales-module.js?v=v.2026.03.22.0609"></script>
-<script src="analytics-module.js?v=v.2026.03.22.0609"></script>
-<script src="ceo-module.js?v=v.2026.03.22.0609"></script>
-<script src="print-module.js?v=v.2026.03.22.0609"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.22.0650"></script>
+<script src="system-tools-module.js?v=v.2026.03.22.0650"></script>
+<script src="bom-module.js?v=v.2026.03.22.0650"></script>
+<script src="inventory-module.js?v=v.2026.03.22.0650"></script>
+<script src="production-module.js?v=v.2026.03.22.0650"></script>
+<script src="sales-module.js?v=v.2026.03.22.0650"></script>
+<script src="analytics-module.js?v=v.2026.03.22.0650"></script>
+<script src="ceo-module.js?v=v.2026.03.22.0650"></script>
+<script src="print-module.js?v=v.2026.03.22.0650"></script>
 </body>
 </html>
 
