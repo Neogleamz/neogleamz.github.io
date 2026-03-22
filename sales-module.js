@@ -278,7 +278,7 @@ function renderSalesTable() {
         let d = parseFloat(x.discount_amount) || 0;
         
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name) * qty;
-        let isCostOnlyItem = (type === 'Replacement / Warranty' || type === 'Warranty');
+        let isCostOnlyItem = (type === 'Replacement / Warranty' || type === 'Warranty' || type === 'Gift');
         
         // --- CUSTOM EXCEPTION OVERRIDES ---
         if (type === 'Pre-Ship Exchange') {
@@ -293,6 +293,7 @@ function renderSalesTable() {
         
         // --- POWERED BY MASTER ENGINE ---
         let actualShipCost = type === 'Pre-Ship Exchange' ? 0 : 
+                             type === 'Gift' ? 0 :
                              (isCostOnlyItem && s > 0 ? s : SHIP_COST);
         let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty);
         
@@ -421,7 +422,14 @@ function renderSalesTable() {
             <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'Source', false)" style="color:var(--text-muted);">${x["Source"] || ''}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'storefront_sku', false)">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
-            <td style="padding:4px;"><select style="background:var(--bg_secondary); color:#fff; border:1px solid #334155; border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')"><option style="background:#0f172a; color:#fff;" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option><option style="background:#0f172a; color:#fff;" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option><option style="background:#0f172a; color:#fff;" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option><option style="background:#0f172a; color:#fff;" value="Replacement / Warranty" ${x.transaction_type==='Replacement / Warranty'?'selected':''}>Exchange Replacement</option><option style="background:#0f172a; color:#fff;" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option></select></td>
+            <td style="padding:4px;"><select style="background:var(--bg_secondary); color:#fff; border:1px solid #334155; border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')">
+                <option style="background:#0f172a; color:#fff;" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option>
+                <option style="background:#0f172a; color:#fff;" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
+                <option style="background:#0f172a; color:#fff;" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
+                <option style="background:#0f172a; color:#fff;" value="Replacement / Warranty" ${x.transaction_type==='Replacement / Warranty'?'selected':''}>Exchange Replacement</option>
+                <option style="background:#0f172a; color:#fff;" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
+                <option style="background:#0f172a; color:#fff;" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
+            </select></td>
 
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'qty_sold', true)" style="font-weight:bold;">${x.qty_sold}</td>
             <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'actual_sale_price', true)" style="color:#10b981;">$${parseFloat(x.actual_sale_price).toFixed(2)}</td>
