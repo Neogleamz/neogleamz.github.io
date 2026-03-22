@@ -33,16 +33,18 @@ function renderAnalyticsDashboard() {
         let totals = window.salesEngineTotals || { gross: 0, discounts: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0 };
         let processedSalesDB = window.processedSalesDB || salesDB;
 
-        let trendData = {}; // { 'YYYY-MM-DD': { gross: 0, net: 0 } }
+        let trendData = {}; // { 'YYYY-MM-DD': { captured: 0, net: 0 } }
 
         processedSalesDB.forEach(s => { 
             let dt = s.sale_date || 'Unknown';
-            let lineGross = (parseFloat(s.actual_sale_price || 0) * (parseFloat(s.qty_sold) || 0));
+            // Trace exact "Captured" values (resolves discounts/shipping/tax) to match actual payouts
+            let lineCaptured = (parseFloat(s.total) || 0) + (parseFloat(s.exchAdj) || 0);
+            
             // Inherit the dynamically corrected net profit straight from the master ledger math
             let lineNet = parseFloat(s.net) || 0;
 
-            if(!trendData[dt]) trendData[dt] = { gross: 0, net: 0 };
-            trendData[dt].gross += lineGross;
+            if(!trendData[dt]) trendData[dt] = { captured: 0, net: 0 };
+            trendData[dt].captured += lineCaptured;
             trendData[dt].net += lineNet;
         });
 
@@ -164,7 +166,7 @@ function renderTrendsChart(trendData) {
     if (trendsChart) trendsChart.destroy();
 
     const sortedDates = Object.keys(trendData).sort();
-    const grossVals = sortedDates.map(d => trendData[d].gross);
+    const capturedVals = sortedDates.map(d => trendData[d].captured);
     const netVals = sortedDates.map(d => trendData[d].net);
 
     trendsChart = new Chart(ctx, {
@@ -173,8 +175,8 @@ function renderTrendsChart(trendData) {
             labels: sortedDates,
             datasets: [
                 {
-                    label: 'Gross Sales',
-                    data: grossVals,
+                    label: 'Captured Revenue',
+                    data: capturedVals,
                     borderColor: '#6366f1',
                     backgroundColor: 'rgba(99, 102, 241, 0.1)',
                     fill: true,
