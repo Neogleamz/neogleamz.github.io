@@ -27,10 +27,10 @@ window.calculateProductTotal = window.getEngineTrueCogs;
 
 window.getEngineStripeFee = function(amt) { return (amt * 0.029) + 0.30; };
 window.getEngineLiveMsrp = function(pName) { return typeof pricingDB !== 'undefined' && pricingDB[pName] ? parseFloat(pricingDB[pName].msrp) || 0 : 0; };
-window.getHistoricalNetProfit = function(gross, shipCol, tax, disc, actShip, pName) {
+window.getHistoricalNetProfit = function(gross, shipCol, tax, disc, actShip, pName, qty = 1) {
     let captured = gross + shipCol + tax - disc;
     let fee = window.getEngineStripeFee(captured);
-    let cogs = window.getEngineTrueCogs(pName);
+    let cogs = window.getEngineTrueCogs(pName) * qty;
     return gross + shipCol - disc - fee - actShip - cogs;
 };
 window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, warr) {
