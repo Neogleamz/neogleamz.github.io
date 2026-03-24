@@ -172,13 +172,13 @@ function openPackerzSopTerminal(orderGroup) {
     if (!activeQueue) return;
 
     let itemsHtml = orderGroup.items.map(i => `
-        <div id="qa-row-${orderGroup.order_id}-${i.sku}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <span style="font-weight:900; color:var(--text-heading); font-size:13px; display:block;">${i.recipe}</span>
-                <span style="font-size:11px; color:var(--text-muted); font-family:monospace;">Source Alias: ${i.sku}</span>
+        <div id="qa-row-${orderGroup.order_id}-${i.sku}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; gap:15px;">
+            <div style="flex-grow:1; min-width:0;">
+                <span style="font-weight:900; color:var(--text-heading); font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${i.recipe}</span>
+                <span style="font-size:11px; color:var(--text-muted); font-family:monospace; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Source Alias: ${i.sku || 'N/A'}</span>
             </div>
-            <div style="background:#10b981; color:white; font-weight:900; font-size:14px; padding:6px 14px; border-radius:6px;">${i.qty}</div>
-            <button id="qa-btn-${orderGroup.order_id}-${i.sku}" style="margin-left:15px; padding:6px 12px; background:var(--text-heading); color:var(--bg-body); border:none; border-radius:6px; font-weight:800; font-size:10px; cursor:pointer;" onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${i.recipe.replace(/'/g,"\\'")}')">VIEW SOP</button>
+            <div style="background:#10b981; color:white; font-weight:900; font-size:14px; padding:6px 14px; border-radius:6px; flex-shrink:0;">${i.qty}</div>
+            <button id="qa-btn-${orderGroup.order_id}-${i.sku}" style="padding:6px 15px; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; flex-shrink:0; width:auto;" onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${i.recipe.replace(/'/g,"\\'")}')">VIEW SOP: ${i.recipe.length > 20 ? i.recipe.substring(0,20)+'...' : i.recipe}</button>
         </div>
     `).join('');
 
