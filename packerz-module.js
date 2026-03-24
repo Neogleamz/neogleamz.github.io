@@ -271,10 +271,10 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                       let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
                       let dId = getDId(m.url);
                       if (m.type === 'img') { 
-                          mediaHtml += `<img src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'img')">`; 
+                          mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'img')">`; 
                       } else { 
                           let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
-                          mediaHtml += `<div style="position:relative; width: 300px; height: 200px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${mediaUrl}', 'iframe')"><iframe src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`; 
+                          mediaHtml += `<div style="position:relative; width: 300px; height: 200px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`; 
                       }
                   }
               });

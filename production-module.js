@@ -476,8 +476,8 @@ function renderActiveWO(id) {
                             [s.m1, s.m2, s.m3].forEach(m => {
                                 if(m && m.url) {
                                     let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
-                                    if (m.type === 'img') { let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; attachmentHtml += `<img src="${imgThumbUrl}" style="max-width:300px; max-height:200px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; } 
-                                    else { let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; let icon = m.type === 'vid' ? '🎬' : '📄'; attachmentHtml += `<div style="position:relative; width: 300px; height: 200px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`; }
+                                    if (m.type === 'img') { let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" style="max-width:300px; max-height:200px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; } 
+                                    else { let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; let icon = m.type === 'vid' ? '🎬' : '📄'; attachmentHtml += `<div style="position:relative; width: 300px; height: 200px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`; }
                                 }
                             });
                             attachmentHtml += `</div>`;
