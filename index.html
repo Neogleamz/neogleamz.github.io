@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.23.2048"></script>
+    <script src="system-version.js?v=v.2026.03.23.2120"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.23.2048"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.23.2048"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.23.2120"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.23.2120"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -1825,7 +1825,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.23.2048"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.23.2120"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2610,7 +2610,7 @@
                 <div style="width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 15px 15px 15px; background: rgba(15, 23, 42, 0.4); border-radius: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
                     <!-- Controls and Grid extracted from V5 -->
                     
-        <div class="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm sticky mt-2 top-0 z-30">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md" style="position: sticky; top: 15px; z-index: 50; margin-top: 15px; margin-bottom: 25px; padding: 18px 18px;">
             <!-- Search & Sort Row -->
             <div class="flex flex-row gap-3 justify-between items-center w-full">
                 <div class="relative flex-1">
@@ -2620,13 +2620,22 @@
                 </div>
                 
                 <div class="flex items-center gap-3 shrink-0">
-                    <!-- View Mode Toggle -->
-                    <div class="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-600">
-                        <button onclick="setViewMode('grid')" id="view-mode-grid" class="px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 bg-white dark:bg-slate-800 shadow-sm text-brand" title="Grid View">
-                            <i class="fa-solid fa-grip"></i>
+                    <style>
+                        .neon-view-toggle { background: #0f172a; border-radius: 999px; padding: 4px; display: flex; box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05); }
+                        .neon-view-toggle button { height: 32px; padding: 0 16px; gap: 8px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); border: none; outline: none; background: transparent; color: #64748b; font-family: 'Mulish', sans-serif; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
+                        .neon-view-toggle button:hover { color: #94a3b8; }
+                        .neon-view-toggle button.active { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; box-shadow: 0 4px 15px rgba(249,115,22,0.4), inset 0 1px 1px rgba(255,255,255,0.4); filter: brightness(1.1); }
+                        .neon-view-toggle svg { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+                    </style>
+
+                    <div class="neon-view-toggle shrink-0" id="view-mode-container">
+                        <button class="active" onclick="toggleViewMode(false)" id="neon-grid">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="5" height="16" rx="1"></rect><rect x="9.5" y="4" width="5" height="16" rx="1"></rect><rect x="17" y="4" width="5" height="16" rx="1"></rect></svg>
+                            Grid
                         </button>
-                        <button onclick="setViewMode('compact')" id="view-mode-compact" class="px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" title="Compact List View">
-                            <i class="fa-solid fa-list-ul"></i>
+                        <button onclick="toggleViewMode(true)" id="neon-list">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><rect x="3" y="10" width="18" height="4" rx="1"></rect><rect x="3" y="16" width="18" height="4" rx="1"></rect></svg>
+                            Row
                         </button>
                     </div>
 
@@ -2698,7 +2707,7 @@
 
         <!-- Skater List/Grid Container -->
         <div id="skater-grid-wrapper" class="rounded-xl overflow-hidden">
-            <div id="skater-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-all duration-300 min-w-full">
+            <div id="skater-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full">
                 <!-- Cards/Rows rendered here via JS -->
             </div>
         </div>
@@ -3020,7 +3029,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.03.23.2048"></script>
+    <script src="socialz-module.js?v=v.2026.03.23.2120"></script>
 </body>
 <script>
     // --- ZERO-CACHE SECURITY POLICY ---
@@ -3819,15 +3828,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.23.2048"></script>
-<script src="system-tools-module.js?v=v.2026.03.23.2048"></script>
-<script src="bom-module.js?v=v.2026.03.23.2048"></script>
-<script src="inventory-module.js?v=v.2026.03.23.2048"></script>
-<script src="production-module.js?v=v.2026.03.23.2048"></script>
-<script src="sales-module.js?v=v.2026.03.23.2048"></script>
-<script src="analytics-module.js?v=v.2026.03.23.2048"></script>
-<script src="ceo-module.js?v=v.2026.03.23.2048"></script>
-<script src="print-module.js?v=v.2026.03.23.2048"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.23.2120"></script>
+<script src="system-tools-module.js?v=v.2026.03.23.2120"></script>
+<script src="bom-module.js?v=v.2026.03.23.2120"></script>
+<script src="inventory-module.js?v=v.2026.03.23.2120"></script>
+<script src="production-module.js?v=v.2026.03.23.2120"></script>
+<script src="sales-module.js?v=v.2026.03.23.2120"></script>
+<script src="analytics-module.js?v=v.2026.03.23.2120"></script>
+<script src="ceo-module.js?v=v.2026.03.23.2120"></script>
+<script src="print-module.js?v=v.2026.03.23.2120"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">

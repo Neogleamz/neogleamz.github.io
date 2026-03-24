@@ -199,23 +199,25 @@
         }
 
         // --- View Mode Logic ---
-        function setViewMode(mode) {
-            viewMode = mode;
-            const gridBtn = document.getElementById('view-mode-grid');
-            const compactBtn = document.getElementById('view-mode-compact');
-            const container = document.getElementById('skater-grid');
+        window.toggleViewMode = function(isCompact) {
+            viewMode = isCompact ? 'compact' : 'grid';
+            
+            // Sync Neon Toggle Button states
+            const btnGrid = document.getElementById('neon-grid');
+            if (btnGrid) btnGrid.className = !isCompact ? 'active' : '';
+            
+            const btnList = document.getElementById('neon-list');
+            if (btnList) btnList.className = isCompact ? 'active' : '';
 
-            if (mode === 'grid') {
-                gridBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 bg-white dark:bg-slate-800 shadow-sm text-brand";
-                compactBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
-                container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-all duration-300 min-w-full";
+            // Update Layout Container
+            const container = document.getElementById('skater-grid');
+            if (!isCompact) {
+                container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full";
             } else {
-                compactBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 bg-white dark:bg-slate-800 shadow-sm text-brand";
-                gridBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
                 container.className = "flex flex-col gap-2 transition-all duration-300 min-w-full";
             }
             renderSkaters();
-        }
+        };
 
         function toggleSortDirection() {
             socialzSortDirection = socialzSortDirection === 'asc' ? 'desc' : 'asc';
@@ -322,7 +324,7 @@
                     } else {
                         // COMPACT LIST VIEW
                         return `
-                        <div class="bg-white dark:bg-slate-800 p-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all grid grid-cols-[36px_minmax(100px,0.8fr)_70px_60px_90px_repeat(4,85px)_30px_65px_36px] items-center gap-2 overflow-hidden">
+                        <div class="bg-white dark:bg-slate-800 p-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all grid items-center gap-2 overflow-hidden" style="grid-template-columns: 36px minmax(100px, 0.8fr) 70px 60px 90px repeat(4, 85px) 30px 65px 36px;">
                             <!-- Avatar -->
                             <div class="w-8 h-8 relative rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
                                 <div class="absolute inset-0 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 text-[10px] font-bold">${s.name.charAt(0)}</div>
