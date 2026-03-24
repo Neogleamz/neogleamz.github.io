@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.24.1807"></script>
+    <script src="system-version.js?v=v.2026.03.24.1815"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.24.1807"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1807"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.24.1815"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1815"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.03.24.1807"></script>
+    <script src="packerz-module.js?v=v.2026.03.24.1815"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1807"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1815"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2439,19 +2439,27 @@
 
         </div>
 
+        <style>
+            @media (max-width: 900px) {
+                .packerz-header-bar { flex-direction: column !important; padding: 15px !important; gap: 15px !important; }
+                .packerz-header-btns { position: static !important; right: auto !important; width: 100% !important; justify-content: center !important; }
+                .packerz-kanban-wrapper { flex-direction: column !important; height: auto !important; overflow-y: auto !important; padding: 15px !important; flex-grow:0 !important; }
+                .packerz-kanban-col { flex: none !important; height: 65vh !important; }
+            }
+        </style>
         <div id="paneFulfillzPackerz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
 
-            <div style="display:flex; justify-content:center; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color); position:relative;">
+            <div class="packerz-header-bar" style="display:flex; justify-content:center; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color); position:relative;">
                 <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#F59E0B; text-align:center;">📦 PACKERZ TERMINAL</h2>
-                <div style="position:absolute; right:30px; display:flex; gap:10px;">
+                <div class="packerz-header-btns" style="position:absolute; right:30px; display:flex; gap:10px;">
                     <button onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='#fff'" onmouseout="this.style.background='rgba(59,130,246,0.1)'; this.style.color='#3b82f6'">⚙️ BLUEPRINTS</button>
                     <button onclick="document.getElementById('packerzArchiveModal').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.color='#10b981'">🗃️ COMPLETED ARCHIVE</button>
                 </div>
             </div>
             
-            <div style="display:flex; flex-grow:1; padding:30px; gap:25px; height: calc(100vh - 250px); overflow:hidden;">
+            <div class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:30px; gap:25px; height: calc(100vh - 250px); overflow:hidden;">
                 <!-- Column 1: AWAITING -->
-                <div style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column;">
+                <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:var(--text-muted); border-bottom:2px solid var(--border-color); padding-bottom:12px;">AWAITING ASSEMBLY</h3>
                     <div id="packerzAwaitingQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <!-- JS INJECT -->
@@ -2459,7 +2467,7 @@
                 </div>
                 
                 <!-- Column 2: IN PROGRESS -->
-                <div style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(245,158,11,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(245,158,11,0.05);">
+                <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(245,158,11,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(245,158,11,0.05);">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.3); padding-bottom:12px;">IN PROGRESS (PICK & PACK)</h3>
                     <div id="packerzActiveQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to open the SOP terminal.</div>
@@ -3076,7 +3084,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.03.24.1807"></script>
+    <script src="socialz-module.js?v=v.2026.03.24.1815"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3987,15 +3995,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.24.1807"></script>
-<script src="system-tools-module.js?v=v.2026.03.24.1807"></script>
-<script src="bom-module.js?v=v.2026.03.24.1807"></script>
-<script src="inventory-module.js?v=v.2026.03.24.1807"></script>
-<script src="production-module.js?v=v.2026.03.24.1807"></script>
-<script src="sales-module.js?v=v.2026.03.24.1807"></script>
-<script src="analytics-module.js?v=v.2026.03.24.1807"></script>
-<script src="ceo-module.js?v=v.2026.03.24.1807"></script>
-<script src="print-module.js?v=v.2026.03.24.1807"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.24.1815"></script>
+<script src="system-tools-module.js?v=v.2026.03.24.1815"></script>
+<script src="bom-module.js?v=v.2026.03.24.1815"></script>
+<script src="inventory-module.js?v=v.2026.03.24.1815"></script>
+<script src="production-module.js?v=v.2026.03.24.1815"></script>
+<script src="sales-module.js?v=v.2026.03.24.1815"></script>
+<script src="analytics-module.js?v=v.2026.03.24.1815"></script>
+<script src="ceo-module.js?v=v.2026.03.24.1815"></script>
+<script src="print-module.js?v=v.2026.03.24.1815"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
