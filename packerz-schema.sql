@@ -20,3 +20,9 @@ ADD COLUMN IF NOT EXISTS internal_fulfillment_status TEXT DEFAULT 'Awaiting Asse
 UPDATE sales_ledger 
 SET internal_fulfillment_status = 'Awaiting Assembly' 
 WHERE internal_fulfillment_status IS NULL;
+
+-- 4. Extend the ledger to support explicit Kanban timestamp auditing + Telemetry Payloads
+ALTER TABLE sales_ledger
+ADD COLUMN IF NOT EXISTS qa_cleared_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS assembly_completed_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS qa_telemetry_data JSONB;

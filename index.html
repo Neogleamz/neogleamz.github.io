@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.24.1149"></script>
+    <script src="system-version.js?v=v.2026.03.24.1653"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.24.1149"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1149"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.24.1653"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1653"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.03.24.1149"></script>
+    <script src="packerz-module.js?v=v.2026.03.24.1653"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1149"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1653"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2444,26 +2444,34 @@
         </div>
 
         <div id="paneFufillzPackerz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
-            <div class="nav-zone left" onclick="showFufillzPane('packerz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showFufillzPane('packerz')"><i>›</i></div>
+            <div class="nav-zone left" onclick="showFufillzPane('packerzadmin')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showFufillzPane('packerzadmin')"><i>›</i></div>
             <div style="display:flex; justify-content:center; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color);">
                 <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#F59E0B; text-align:center;">📦 PACKERZ TERMINAL</h2>
             </div>
             
-            <div style="display:flex; flex-grow:1; padding:30px; gap:30px; height: calc(100vh - 250px); overflow:hidden;">
-                <!-- Column 1 -->
+            <div style="display:flex; flex-grow:1; padding:30px; gap:25px; height: calc(100vh - 250px); overflow:hidden;">
+                <!-- Column 1: AWAITING -->
                 <div style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:var(--text-muted); border-bottom:2px solid var(--border-color); padding-bottom:12px;">AWAITING ASSEMBLY</h3>
                     <div id="packerzAwaitingQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
-                        <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Waiting for Shopify Webhooks...</div>
+                        <!-- JS INJECT -->
                     </div>
                 </div>
                 
-                <!-- Column 2 -->
+                <!-- Column 2: IN PROGRESS -->
                 <div style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(245,158,11,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(245,158,11,0.05);">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.3); padding-bottom:12px;">IN PROGRESS (PICK & PACK)</h3>
                     <div id="packerzActiveQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to open the SOP terminal.</div>
+                    </div>
+                </div>
+
+                <!-- Column 3: COMPLETED ARCHIVE -->
+                <div style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(16,185,129,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(16,185,129,0.05);">
+                    <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#10b981; border-bottom:2px solid rgba(16,185,129,0.3); padding-bottom:12px;">COMPLETED ARCHIVE</h3>
+                    <div id="packerzCompletedQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
+                        <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
                     </div>
                 </div>
             </div>
@@ -3077,49 +3085,70 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.03.24.1149"></script>
+    <script src="socialz-module.js?v=v.2026.03.24.1653"></script>
 
         <div id="paneFufillzSopAdmin" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1; background:var(--bg-body);">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color);">
-                <div class="nav-zone left" onclick="showFufillzPane('hub')"><i>‹</i></div>
-                <div class="nav-zone right" onclick="showFufillzPane('hub')"><i>›</i></div>
-                <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#10b981; text-align:center;">⚙️ PACKERZ ADMIN: SOP BLUEPRINTS</h2>
-            </div>
-            
-            <div style="display:flex; flex-grow:1; padding:30px; gap:30px; height: calc(100vh - 250px); overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <div class="nav-zone left" onclick="showFufillzPane('packerz')"><i>‹</i></div>
+                    <div class="nav-zone right" onclick="showFufillzPane('packerz')"><i>›</i></div>
+                    <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#10b981; text-align:center;">⚙️ PACKERZ ADMIN: SOP BLUEPRINTS</h2>
+                </div>
                 
-                <!-- Left Column: Selection & Config -->
-                <div style="flex:0 0 400px; background:var(--bg-panel); border-radius:16px; padding:25px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:20px; overflow-y:auto;" class="custom-scroll">
-                    <h3 style="margin-top:0; color:var(--text-heading); font-size:16px;">1. Target Recipe</h3>
-                    <select id="packerzAdminRecipeSelect" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" onchange="loadPackerzSopFromDB()">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <select id="packerzAdminRecipeSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" onchange="loadPackerzSopFromDB()">
                         <option value="">-- Loading Recipes... --</option>
                     </select>
-
-                    <h3 style="margin:0; color:var(--text-heading); font-size:16px; padding-top:15px; border-top:1px solid var(--border-color);">2. Physical Box Sku Requirement</h3>
-                    <input type="text" id="packerzAdminBoxSku" placeholder="e.g. 8x8x4_corrugated" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-family:monospace;">
-
-                    <h3 style="margin:0; color:var(--text-heading); font-size:16px; padding-top:15px; border-top:1px solid var(--border-color);">3. Mandatory QA Checklists</h3>
-                    <p style="font-size:11px; color:var(--text-muted); margin-top:-5px;">Type one requirement per line. Packer cannot complete fulfillment until all boxes are physically checked.</p>
-                    <textarea id="packerzAdminQA" rows="6" placeholder="Included Thank You Card\nInner Product Bubble Wrapped\nShipping Label Taped Securely" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:vertical; font-size:13px;"></textarea>
-                    
-                    <button class="btn-green" style="margin-top:auto; width:100%; padding:18px; font-size:16px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:12px;" onclick="savePackerzSOPToDB()" id="btnSavePackerzSOP">
+                    <input type="text" id="packerzAdminBoxSku" placeholder="Box Sku (e.g. 8x8x4_corrugated)" style="width:200px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-family:monospace;">
+                    <button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" onclick="savePackerzSOPToDB()" id="btnSavePackerzSOP">
                         💾 SAVE MASTER BLUEPRINT
                     </button>
                 </div>
+            </div>
+            
+            <div id="packerzSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; padding:30px; min-height:0; overflow:hidden;">
                 
-                <!-- Right Column: BATCHEZ Style Rich-Text SOP Editor -->
-                <div style="flex:1; background:var(--bg-container); border-radius:16px; padding:25px; border:1px solid var(--border-color); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--border-color); padding-bottom:15px; margin-bottom:20px;">
-                        <h3 style="margin:0; font-size:18px; font-weight:900; color:var(--text-heading);">4. Packing Instructions (Rich Text)</h3>
+                <!-- Left Pane: Telemetry Editor & Live Preview -->
+                <div id="packerzSopLeftPane" style="flex:0 0 65%; min-width:600px; padding-right:20px; display:flex; flex-direction:row; gap:15px; border-right:1px solid transparent;">
+                    
+                    <!-- Column 1: Config & Input -->
+                    <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                        <h3 style="margin:0 0 10px 0; color:var(--text-heading); font-size:16px;">3. Audited Telemetry Checklist</h3>
+                        <div style="font-size:11px; color:var(--text-muted); line-height:1.5; margin-bottom:15px;">
+                            Paste your SOP checklist. The engine instantly previews interactivity.<br>
+                            <b style="color:#10b981; font-family:monospace; font-size:12px;"># </b> Header &nbsp;|&nbsp; 
+                            <b style="color:var(--text-muted); font-family:monospace; font-size:12px;">> </b> Subtext &nbsp;|&nbsp;
+                            <b style="color:#F59E0B; font-family:monospace; font-size:12px;">[INPUT] </b> Inline Box
+                        </div>
+                        <textarea id="packerzAdminQA" oninput="renderPackerzTelemetryPreview()" placeholder="# Gather SOULZ Parts&#10;- 2 x SK8Lytz Units&#10;- Charge Units&#10;&#10;# Configure ZENGGE&#10;> Set Device to 1 Segment&#10;[INPUT] Enter Left SK8Lytz Serial Number" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px;"></textarea>
                     </div>
                     
-                    <div id="packerzSopEditorArea" class="custom-scroll" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px;">
-                        <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the left to begin compiling standard operating procedures.</div>
+                    <!-- Column 2: Live Preview Render -->
+                    <div style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">Live Telemetry Preview</div>
+                        <div id="packerzAdminQAPreview" class="custom-scroll" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
+                            <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Resizer Divider -->
+                <div id="packerzSopResizer" style="width:12px; cursor:ew-resize; background:var(--border-color); flex-shrink:0; transition:background 0.2s; z-index:10; border-left:1px solid var(--border-input); border-right:1px solid var(--border-input);" onmousedown="initPackerzSopResize(event)" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='var(--border-color)'"></div>
+
+                <!-- Right Pane: Rich Text -->
+                <div id="packerzSopRightPane" style="flex:1; padding-left:20px; display:flex; flex-direction:column; overflow-y:auto;">
+                    <div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;" class="custom-scroll">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">4. Packing Instructions (Rich Text)</h3>
+                        </div>
+                        <div id="packerzSopEditorArea" class="custom-scroll" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
+                            <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the top bar to begin compiling standard operating procedures.</div>
+                        </div>
+                        <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" onclick="addPackerzSOPRow(this)">+ ADD PROCEDURE STEP</button>
+                    </div>
+                </div>
             </div>
-        </div>\n</body>
+        </div></body>
 <script>
     // --- ZERO-CACHE SECURITY POLICY ---
     // window.localStorage.clear(); window.sessionStorage.clear();
@@ -3856,6 +3885,9 @@
             
             // Manual sale SHOULD NOT show sub-assemblies
             const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = '<option value="">-- Select Product Sold --</option>' + Object.keys(productsDB).filter(p => !isSubassemblyDB[p]).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join(''); 
+            
+            // Packerz Blueprint Admin Population
+            if(typeof initPackerzAdmin === 'function') initPackerzAdmin();
         } catch(e) {} 
     }
 
@@ -3936,15 +3968,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.24.1149"></script>
-<script src="system-tools-module.js?v=v.2026.03.24.1149"></script>
-<script src="bom-module.js?v=v.2026.03.24.1149"></script>
-<script src="inventory-module.js?v=v.2026.03.24.1149"></script>
-<script src="production-module.js?v=v.2026.03.24.1149"></script>
-<script src="sales-module.js?v=v.2026.03.24.1149"></script>
-<script src="analytics-module.js?v=v.2026.03.24.1149"></script>
-<script src="ceo-module.js?v=v.2026.03.24.1149"></script>
-<script src="print-module.js?v=v.2026.03.24.1149"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.24.1653"></script>
+<script src="system-tools-module.js?v=v.2026.03.24.1653"></script>
+<script src="bom-module.js?v=v.2026.03.24.1653"></script>
+<script src="inventory-module.js?v=v.2026.03.24.1653"></script>
+<script src="production-module.js?v=v.2026.03.24.1653"></script>
+<script src="sales-module.js?v=v.2026.03.24.1653"></script>
+<script src="analytics-module.js?v=v.2026.03.24.1653"></script>
+<script src="ceo-module.js?v=v.2026.03.24.1653"></script>
+<script src="print-module.js?v=v.2026.03.24.1653"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4006,6 +4038,55 @@
             <div class="table-wrap" id="tipzListContainer" style="flex-grow: 1; overflow-y: auto; padding: 15px; background:var(--bg-body);">
                 <!-- RENDER TIPZ HERE -->
             </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- PACKERZ QA GATE & SOP VIEWER MODAL             -->
+<!-- ============================================== -->
+<div id="packerzSopViewerModal" class="modal-overlay" style="display:none; align-items:flex-start; top:85px; height:calc(100vh - 85px);">
+    <div class="modal-content" style="width:100%; height:100%; max-width:none; border-radius:0; border:none; display:flex; flex-direction:column; padding:0; background:var(--bg-panel); box-shadow:none;">
+        
+        <!-- Header -->
+        <div style="padding:20px 25px; border-bottom:1px solid var(--border-color); background:rgba(16,185,129,0.05); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h2 id="packerzSopViewerTitle" style="margin:0; font-size:22px; color:#10b981; font-weight:900; letter-spacing:1px; display:flex; align-items:center; gap:10px;">
+                    🎯 ACTIVE SOP CHECKLIST
+                </h2>
+                <div id="packerzSopViewerSubtitle" style="font-size:12px; color:var(--text-muted); font-family:monospace; margin-top:5px;">Awaiting Recipe Target...</div>
+            </div>
+            <button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" onclick="closePackerzSopViewer()">X</button>
+        </div>
+
+        <!-- Split Scrollable SOP Content & QA Gate Footer -->
+        <div id="packerzLiveSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; overflow:hidden;">
+            
+            <!-- Left Pane (SWAPPED to QA Checklist & Completion) -->
+            <div id="packerzLiveSopLeftPane" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container);">
+                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;" class="custom-scroll">
+                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
+                    <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;">
+                        <!-- Auto-Generated Checkboxes Go Here -->
+                    </div>
+                </div>
+                
+                <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
+                    <button id="btnPackerzSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; background:#10b981; color:white; border:none; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
+                        COMPLETE QA CHECKS
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resizer Divider -->
+            <div id="packerzLiveSopResizer" style="width:12px; cursor:ew-resize; background:var(--border-color); flex-shrink:0; transition:background 0.2s; z-index:10; border-left:1px solid var(--border-input); border-right:1px solid var(--border-input);" onmousedown="initPackerzLiveSopResize(event)" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='var(--border-color)'"></div>
+
+            <!-- Right Pane (SWAPPED to Procedure Steps) -->
+            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;" class="custom-scroll">
+                <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -4221,4 +4302,5 @@
 </script>
 </body>
 </html>
+
 
