@@ -1,6 +1,6 @@
 // --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
 function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
-function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
+function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = `<video src="${url}" style="max-width:100%; max-height:100%; outline:none; box-shadow:0 0 40px rgba(0,0,0,0.5);" controls autoplay controlsList="nodownload"></video>`; } else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
 function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = ''; } catch(e) { sysLog(e.message, true); } }
 
 function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
@@ -476,8 +476,19 @@ function renderActiveWO(id) {
                             [s.m1, s.m2, s.m3].forEach(m => {
                                 if(m && m.url) {
                                     let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
-                                    if (m.type === 'img') { let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" style="max-width:300px; max-height:200px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; } 
-                                    else { let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; let icon = m.type === 'vid' ? '🎬' : '📄'; attachmentHtml += `<div style="position:relative; width: 300px; height: 200px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`; }
+                                    if (m.type === 'img') { 
+                                        let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; 
+                                        attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" style="max-width:300px; max-height:200px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; 
+                                    } else { 
+                                        let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
+                                        if (isNativeVid) {
+                                            attachmentHtml += `<div style="position:relative; width:300px; height:200px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
+                                        } else {
+                                            let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
+                                            if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
+                                            attachmentHtml += `<div style="position:relative; width:300px; height:200px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`; 
+                                        }
+                                    }
                                 }
                             });
                             attachmentHtml += `</div>`;
