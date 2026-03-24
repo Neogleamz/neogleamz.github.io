@@ -274,8 +274,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                           mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'img')">`; 
                       } else { 
                           let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
-                          let icon = m.type === 'vid' ? '🎬' : '📄';
-                          mediaHtml += `<div style="position:relative; width: 300px; height: 150px; background:var(--bg-glass); border-radius: 8px; border: 1px dashed var(--border-color); cursor: zoom-in; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); transition:all 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.1)';this.style.borderColor='#3b82f6';this.style.color='#3b82f6';" onmouseout="this.style.background='var(--bg-glass)';this.style.borderColor='var(--border-color)';this.style.color='var(--text-muted)';" onclick="if(typeof openMediaModal==='function') openMediaModal('${mediaUrl}', 'iframe')"><div style="font-size:32px; margin-bottom:10px;">${icon}</div><div style="font-size:12px; font-weight:bold;">Load External Media</div></div>`; 
+                          mediaHtml += `<div style="position:relative; width: 300px; height: 200px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`; 
                       }
                   }
               });
