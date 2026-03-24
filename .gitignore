@@ -1,0 +1,25 @@
+# Local env files containing sensitive keys
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Dependency directories
+node_modules/
+
+# Local Netlify/Vercel/Supabase cached files
+.vercel
+.netlify
+supabase/.temp/
+supabase/.branches/
+
+# Editor directories and files
+.idea
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store

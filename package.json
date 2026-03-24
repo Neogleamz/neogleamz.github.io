@@ -1,0 +1,24 @@
+{
+  "name": "neogleamz.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "analytics-module.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Neogleamz/neogleamz.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Neogleamz/neogleamz.github.io/issues"
+  },
+  "homepage": "https://github.com/Neogleamz/neogleamz.github.io#readme",
+  "devDependencies": {
+    "supabase": "^2.83.0"
+  }
+}
