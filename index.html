@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.24.1653"></script>
+    <script src="system-version.js?v=v.2026.03.24.1732"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.24.1653"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1653"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.24.1732"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1732"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.03.24.1653"></script>
+    <script src="packerz-module.js?v=v.2026.03.24.1732"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1653"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.24.1732"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -1858,7 +1858,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('invhub')">📊 STOCKPILEZ</button>
             <button class="tab-btn" onclick="switchTab('prodhub')">🏭 MAKERZ</button>
-            <button class="tab-btn" onclick="switchTab('fufillzhub')">📦 FUFILLZ</button>
+            <button class="tab-btn" onclick="switchTab('fulfillzhub')">📦 FULFILLZ</button>
             <button class="tab-btn" onclick="switchTab('salezhub')">🛒 REVENUEZ</button>
             <button class="tab-btn" onclick="switchTab('socialzhub')">👥 SOCIALZ</button>
             <button class="tab-btn" onclick="switchTab('synchub')">⚡ NEXUZ</button>
@@ -2424,10 +2424,10 @@
         </div>
     </div> <!-- End of sales-tab -->
 
-        <!-- FUFILLZ -->
-    <div id="fufillzhub-tab" class="tab-content">
-        <div id="fufillzhubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px;">
-            <div class="hub-card" onclick="showFufillzPane('packerz')">
+        <!-- FULFILLZ -->
+    <div id="fulfillzhub-tab" class="tab-content">
+        <div id="fulfillzhubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px;">
+            <div class="hub-card" onclick="showFulfillzPane('packerz')">
                 <i style="color: #F59E0B;">📦</i>
                 <h2>PACKERZ</h2>
                 <p>Internal Fulfillment Terminal &amp; SOP Quality-Assurance Desk.</p>
@@ -2436,18 +2436,17 @@
                 </div>
             </div>
             
-            <div class="hub-card" onclick="showFufillzPane('packerzadmin')" style="border-color: #10b981;">
-                <i style="color: #10b981;">⚙️</i>
-                <h2 style="color:#10b981;">BLUEPRINTS</h2>
-                <p>Configure internal fulfillment policies, BATCHEZ-legacy Rich Text SOPs, and QA checklists.</p>
-            </div>
+
         </div>
 
-        <div id="paneFufillzPackerz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
-            <div class="nav-zone left" onclick="showFufillzPane('packerzadmin')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showFufillzPane('packerzadmin')"><i>›</i></div>
-            <div style="display:flex; justify-content:center; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color);">
+        <div id="paneFulfillzPackerz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
+
+            <div style="display:flex; justify-content:center; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color); position:relative;">
                 <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#F59E0B; text-align:center;">📦 PACKERZ TERMINAL</h2>
+                <div style="position:absolute; right:30px; display:flex; gap:10px;">
+                    <button onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='#fff'" onmouseout="this.style.background='rgba(59,130,246,0.1)'; this.style.color='#3b82f6'">⚙️ BLUEPRINTS</button>
+                    <button onclick="document.getElementById('packerzArchiveModal').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.color='#10b981'">🗃️ COMPLETED ARCHIVE</button>
+                </div>
             </div>
             
             <div style="display:flex; flex-grow:1; padding:30px; gap:25px; height: calc(100vh - 250px); overflow:hidden;">
@@ -2464,14 +2463,6 @@
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.3); padding-bottom:12px;">IN PROGRESS (PICK & PACK)</h3>
                     <div id="packerzActiveQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to open the SOP terminal.</div>
-                    </div>
-                </div>
-
-                <!-- Column 3: COMPLETED ARCHIVE -->
-                <div style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(16,185,129,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(16,185,129,0.05);">
-                    <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#10b981; border-bottom:2px solid rgba(16,185,129,0.3); padding-bottom:12px;">COMPLETED ARCHIVE</h3>
-                    <div id="packerzCompletedQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
-                        <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
                     </div>
                 </div>
             </div>
@@ -3085,28 +3076,56 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.03.24.1653"></script>
+    <script src="socialz-module.js?v=v.2026.03.24.1732"></script>
 
-        <div id="paneFufillzSopAdmin" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1; background:var(--bg-body);">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color);">
-                <div style="display:flex; align-items:center; gap:20px;">
-                    <div class="nav-zone left" onclick="showFufillzPane('packerz')"><i>‹</i></div>
-                    <div class="nav-zone right" onclick="showFufillzPane('packerz')"><i>›</i></div>
-                    <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#10b981; text-align:center;">⚙️ PACKERZ ADMIN: SOP BLUEPRINTS</h2>
-                </div>
-                
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <select id="packerzAdminRecipeSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" onchange="loadPackerzSopFromDB()">
-                        <option value="">-- Loading Recipes... --</option>
-                    </select>
-                    <input type="text" id="packerzAdminBoxSku" placeholder="Box Sku (e.g. 8x8x4_corrugated)" style="width:200px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-family:monospace;">
-                    <button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" onclick="savePackerzSOPToDB()" id="btnSavePackerzSOP">
-                        💾 SAVE MASTER BLUEPRINT
-                    </button>
+        <!-- ============================================== -->
+<!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
+<!-- ============================================== -->
+<div id="packerzArchiveModal" class="modal-overlay" style="display:none; align-items:center; z-index:1100;" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-content" style="max-width:2000px; width:98vw; height:98vh; display:flex; flex-direction:column; padding:0; background:var(--bg-container); border-radius:8px; border:1px solid rgba(16,185,129,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
+        <div style="padding:20px 25px; border-bottom:1px solid var(--border-color); background:var(--bg-glass); display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span style="font-size:24px;">🗃️</span>
+                <div>
+                    <h2 style="margin:0; font-size:20px; font-weight:900; color:#10b981; letter-spacing:1px; text-transform:uppercase;">COMPLETED ORDERS ARCHIVE</h2>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Historical read-only ledger of successfully shipped units under Fulfillz.</div>
                 </div>
             </div>
+            <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('packerzArchiveModal').style.display='none'">Close</button>
+        </div>
+        <div style="padding:25px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden;">
+            <div id="packerzCompletedQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
+                <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
+<!-- ============================================== -->
+<div id="paneFulfillzSopAdmin" class="modal-overlay" style="display:none; align-items:center; z-index:1100;" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-content" style="max-width:2000px; width:98vw; height:98vh; display:flex; flex-direction:column; padding:0; background:var(--bg-container); border-radius:8px; border:1px solid rgba(59,130,246,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 2px solid #3b82f6;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span style="font-size:24px;">⚙️</span>
+                <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#3b82f6; text-align:center;">PACKERZ ADMIN: SOP BLUEPRINTS</h2>
+            </div>
             
-            <div id="packerzSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; padding:30px; min-height:0; overflow:hidden;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <select id="packerzAdminRecipeSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" onchange="loadPackerzSopFromDB()">
+                    <option value="">-- Loading Recipes... --</option>
+                </select>
+                <input type="text" id="packerzAdminBoxSku" placeholder="Box Sku (e.g. 8x8x4_corrugated)" style="width:200px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-family:monospace;">
+                <button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" onclick="savePackerzSOPToDB()" id="btnSavePackerzSOP">
+                    💾 SAVE MASTER BLUEPRINT
+                </button>
+                <button class="btn-red" style="width:auto; padding:6px 15px; margin-left:15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='none'">Close</button>
+            </div>
+        </div>
+        
+        <div id="packerzSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; padding:30px; min-height:0; overflow:hidden;">
                 
                 <!-- Left Pane: Telemetry Editor & Live Preview -->
                 <div id="packerzSopLeftPane" style="flex:0 0 65%; min-width:600px; padding-right:20px; display:flex; flex-direction:row; gap:15px; border-right:1px solid transparent;">
@@ -3570,7 +3589,7 @@
         if (tabId === 'prodhub') { if(typeof showProductionPane === 'function') showProductionPane(isInit ? (sessionStorage.getItem('activeProdPane') || 'hub') : 'hub'); }
         if (tabId === 'salezhub') { if(typeof showSalezPane === 'function') showSalezPane(isInit ? (sessionStorage.getItem('activeSalezPane') || 'hub') : 'hub'); }
         if (tabId === 'synchub') { if(typeof showNexuzPane === 'function') showNexuzPane(isInit ? (sessionStorage.getItem('activeNexuzPane') || 'hub') : 'hub'); }
-        if (tabId === 'fufillzhub') { if(typeof showFufillzPane === 'function') showFufillzPane(isInit ? (sessionStorage.getItem('activeFufillzPane') || 'hub') : 'hub'); }
+        if (tabId === 'fulfillzhub') { if(typeof showFulfillzPane === 'function') showFulfillzPane(isInit ? (sessionStorage.getItem('activeFulfillzPane') || 'hub') : 'hub'); }
         if (tabId === 'socialzhub') { if(typeof showSocialzPane === 'function') showSocialzPane('roster'); }
 
     	if (tabId === 'ceo') { if(typeof renderCeoTerminal === 'function') renderCeoTerminal(); }
@@ -3626,22 +3645,22 @@
         if (typeof updateHubStats === 'function') updateHubStats();
     }
 
-        function showFufillzPane(paneId) {
-        sessionStorage.setItem('activeFufillzPane', paneId);
-        document.getElementById('fufillzhubLanding').style.setProperty('display', 'none', 'important');
-        if(document.getElementById('paneFufillzPackerz')) document.getElementById('paneFufillzPackerz').style.setProperty('display', 'none', 'important');
-        if(document.getElementById('paneFufillzSopAdmin')) document.getElementById('paneFufillzSopAdmin').style.setProperty('display', 'none', 'important');
+        function showFulfillzPane(paneId) {
+        sessionStorage.setItem('activeFulfillzPane', paneId);
+        document.getElementById('fulfillzhubLanding').style.setProperty('display', 'none', 'important');
+        if(document.getElementById('paneFulfillzPackerz')) document.getElementById('paneFulfillzPackerz').style.setProperty('display', 'none', 'important');
+        if(document.getElementById('paneFulfillzSopAdmin')) document.getElementById('paneFulfillzSopAdmin').style.setProperty('display', 'none', 'important');
         
         if (paneId === 'hub') {
-            document.getElementById('fufillzhubLanding').style.setProperty('display', 'flex', 'important');
+            document.getElementById('fulfillzhubLanding').style.setProperty('display', 'flex', 'important');
         } else {
-            const mapping = { 'packerz': 'paneFufillzPackerz', 'packerzadmin': 'paneFufillzSopAdmin' };
+            const mapping = { 'packerz': 'paneFulfillzPackerz' };
             if(mapping[paneId] && document.getElementById(mapping[paneId])) {
                 document.getElementById(mapping[paneId]).style.setProperty('display', 'flex', 'important');
                 if(paneId === 'packerz' && typeof fetchUnfulfilledOrders === 'function') setTimeout(fetchUnfulfilledOrders, 100);
             }
         }
-        sysLog(`Loaded FUFILLZ Console: ${paneId}`);
+        sysLog(`Loaded FULFILLZ Console: ${paneId}`);
     }
 
     function showNexuzPane(paneId) {
@@ -3968,15 +3987,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.24.1653"></script>
-<script src="system-tools-module.js?v=v.2026.03.24.1653"></script>
-<script src="bom-module.js?v=v.2026.03.24.1653"></script>
-<script src="inventory-module.js?v=v.2026.03.24.1653"></script>
-<script src="production-module.js?v=v.2026.03.24.1653"></script>
-<script src="sales-module.js?v=v.2026.03.24.1653"></script>
-<script src="analytics-module.js?v=v.2026.03.24.1653"></script>
-<script src="ceo-module.js?v=v.2026.03.24.1653"></script>
-<script src="print-module.js?v=v.2026.03.24.1653"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.24.1732"></script>
+<script src="system-tools-module.js?v=v.2026.03.24.1732"></script>
+<script src="bom-module.js?v=v.2026.03.24.1732"></script>
+<script src="inventory-module.js?v=v.2026.03.24.1732"></script>
+<script src="production-module.js?v=v.2026.03.24.1732"></script>
+<script src="sales-module.js?v=v.2026.03.24.1732"></script>
+<script src="analytics-module.js?v=v.2026.03.24.1732"></script>
+<script src="ceo-module.js?v=v.2026.03.24.1732"></script>
+<script src="print-module.js?v=v.2026.03.24.1732"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4040,6 +4059,28 @@
             </div>
         </div>
     </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
+<div id="packerzArchiveModal" class="modal-overlay" style="display:none; align-items:center; z-index:1000;" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-content" style="max-width:2000px; width:98vw; height:98vh; display:flex; flex-direction:column; padding:0; background:var(--bg-container); border-radius:8px; border:1px solid rgba(16,185,129,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
+        <div style="padding:20px 25px; border-bottom:1px solid var(--border-color); background:var(--bg-glass); display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span style="font-size:24px;">🗃️</span>
+                <div>
+                    <h2 style="margin:0; font-size:20px; font-weight:900; color:#10b981; letter-spacing:1px; text-transform:uppercase;">COMPLETED ORDERS ARCHIVE</h2>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Historical read-only ledger of successfully shipped units under Fulfillz.</div>
+                </div>
+            </div>
+            <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('packerzArchiveModal').style.display='none'">Close</button>
+        </div>
+        <div style="padding:25px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden;">
+            <div id="packerzCompletedQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
+                <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -427,6 +427,8 @@ function updateHubStats() {
         setStat('statBrnzBack', tDiff);
         setStat('statBrnzBld', 'V.3.1.5');
         setStat('statBrnzErr', typeof systemErrorState !== 'undefined' && systemErrorState ? 'ACTIVE FAULT' : '0');
-
+        
+        // --- FULFILLZ ---
+        if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
     } catch(e) { console.warn("Hub Stats Sync Error:", e); }
 }
