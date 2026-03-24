@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.03.22.0650"></script>
+    <script src="system-version.js?v=v.2026.03.23.2037"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.22.0650"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0650"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.03.23.2037"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.23.2037"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script>
@@ -1825,7 +1825,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.22.0650"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.03.23.2037"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -1862,6 +1862,7 @@
             <button class="tab-btn" onclick="switchTab('synchub')">⚡ NEXUZ</button>
         </div>
         <div class="top-controls">
+            <button id="tipzBtn" class="top-action-btn" onclick="openTipzModal()" style="border-color: #f97316; color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">💡 Tipz</button>
             <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
             <button class="top-action-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
             <div class="terminal-wrapper">
@@ -3019,7 +3020,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.03.22.0650"></script>
+    <script src="socialz-module.js?v=v.2026.03.23.2037"></script>
 </body>
 <script>
     // --- ZERO-CACHE SECURITY POLICY ---
@@ -3818,15 +3819,289 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.03.22.0650"></script>
-<script src="system-tools-module.js?v=v.2026.03.22.0650"></script>
-<script src="bom-module.js?v=v.2026.03.22.0650"></script>
-<script src="inventory-module.js?v=v.2026.03.22.0650"></script>
-<script src="production-module.js?v=v.2026.03.22.0650"></script>
-<script src="sales-module.js?v=v.2026.03.22.0650"></script>
-<script src="analytics-module.js?v=v.2026.03.22.0650"></script>
-<script src="ceo-module.js?v=v.2026.03.22.0650"></script>
-<script src="print-module.js?v=v.2026.03.22.0650"></script>
+<script src="neogleamz-engine.js?v=v.2026.03.23.2037"></script>
+<script src="system-tools-module.js?v=v.2026.03.23.2037"></script>
+<script src="bom-module.js?v=v.2026.03.23.2037"></script>
+<script src="inventory-module.js?v=v.2026.03.23.2037"></script>
+<script src="production-module.js?v=v.2026.03.23.2037"></script>
+<script src="sales-module.js?v=v.2026.03.23.2037"></script>
+<script src="analytics-module.js?v=v.2026.03.23.2037"></script>
+<script src="ceo-module.js?v=v.2026.03.23.2037"></script>
+<script src="print-module.js?v=v.2026.03.23.2037"></script>
+
+<!-- TIPZ BOARD MODAL -->
+<div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div class="massive-container" style="max-width: 800px; height: 90vh; justify-content: flex-start; display: flex; flex-direction: column;">
+        <style>
+            #tipzModal .rt-toolbar {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 4px !important;
+                min-height: auto !important;
+            }
+            #tipzModal .rt-btn {
+                margin: 0 !important;
+                padding: 2px 6px !important;
+            }
+            #tipzModal .sop-controls-container {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+        </style>
+        <div class="header-area" style="flex-shrink:0; margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <h2 style="margin:0; font-size:20px;">💡 Tipz Board & Suggestions</h2>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn-green" style="width:auto; padding:6px 15px;" onclick="submitTipzSuggestion()">🚀 Submit Tip</button>
+                <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="closeTipzModal()">Close</button>
+            </div>
+        </div>
+        
+        <!-- Submit Form -->
+        <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 20px; flex-shrink: 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div id="tipzMainToolbar" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"></div>
+                <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
+                    <span style="font-size:11px; color:var(--text-muted); margin-right:4px;">Priority:</span>
+                    <button type="button" id="newTipPrioHigh" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:transparent; color:var(--text-muted); border:1px solid var(--border-color);" onclick="setNewTipPriority('High')">High</button>
+                    <button type="button" id="newTipPrioMed" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:#f59e0b20; color:#f59e0b; border:1px solid #f59e0b40;" onclick="setNewTipPriority('Medium')">Med</button>
+                    <button type="button" id="newTipPrioLow" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:transparent; color:var(--text-muted); border:1px solid var(--border-color);" onclick="setNewTipPriority('Low')">Low</button>
+                </div>
+            </div>
+            <div style="border:1px solid var(--border-input); border-radius:4px; min-height:80px; background:var(--bg-input); margin-bottom:0; padding:10px;">
+                <div id="tipzTextarea" class="sop-text-rich" contenteditable="true" style="width:100%; min-height:80px; font-size:14px; color:var(--text-main); font-family:inherit; outline:none;" placeholder="Enter your tip or suggestion here... (Rich Text Supported)"></div>
+            </div>
+        </div>
+
+        <!-- List View -->
+        <div style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0; background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color); background: var(--bg-bar);">
+                <h3 style="margin:0; font-size:14px; font-weight: bold; color: var(--text-heading);">Current Tipz</h3>
+                <button class="btn-blue" style="width:auto; padding: 4px 10px; font-size: 11px;" onclick="fetchAndRenderTipz()">↻ Refresh</button>
+            </div>
+            <div class="table-wrap" id="tipzListContainer" style="flex-grow: 1; overflow-y: auto; padding: 15px; background:var(--bg-body);">
+                <!-- RENDER TIPZ HERE -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentTipzData = [];
+    let currentNewTipPriority = 'Medium';
+    
+    function setNewTipPriority(prio) {
+        currentNewTipPriority = prio;
+        const h = document.getElementById('newTipPrioHigh');
+        const m = document.getElementById('newTipPrioMed');
+        const l = document.getElementById('newTipPrioLow');
+        
+        [h,m,l].forEach(btn => {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--text-muted)';
+            btn.style.borderColor = 'var(--border-color)';
+        });
+        
+        if(prio === 'High') { h.style.background = '#ef444420'; h.style.color = '#ef4444'; h.style.borderColor = '#ef444440'; }
+        else if(prio === 'Medium') { m.style.background = '#f59e0b20'; m.style.color = '#f59e0b'; m.style.borderColor = '#f59e0b40'; }
+        else if(prio === 'Low') { l.style.background = '#3b82f620'; l.style.color = '#3b82f6'; l.style.borderColor = '#3b82f640'; }
+    }
+
+    async function fetchAndRenderTipz() {
+        const container = document.getElementById('tipzListContainer');
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding: 20px;">Loading Tipz...</div>`;
+        
+        try {
+            if (typeof supabaseClient === 'undefined') {
+                container.innerHTML = `<div style="text-align:center; color:#ef4444; padding: 20px;">Supabase client not found. Cannot load tipz.</div>`;
+                return;
+            }
+            
+            const { data, error } = await supabaseClient.from('tipz').select('*').order('created_at', { ascending: false });
+            
+            if (error) {
+                console.warn("Could not fetch tipz:", error);
+                if (error.code === 'PGRST204') {
+                    container.innerHTML = `<div style="text-align:center; color:#ef4444; padding: 20px;">Schema error: It looks like you haven't added the priority & status columns yet! Run the SQL snippet.</div>`;
+                } else {
+                    container.innerHTML = `<div style="text-align:center; color:#ef4444; padding: 20px;">Failed to load tipz: ${error.message}</div>`;
+                }
+                return;
+            }
+            
+            currentTipzData = data || [];
+            
+            // Client-side Sort: Rank by status (Open first) then Priority (High > Medium > Low) then Date (Newest first)
+            const priorityWeight = { "High": 3, "Medium": 2, "Low": 1, "None": 0 };
+            currentTipzData.sort((a,b) => {
+                let statusA = a.status || "Open";
+                let statusB = b.status || "Open";
+                if(statusA !== statusB) return statusA === "Closed" ? 1 : -1;
+                
+                let pA = priorityWeight[a.priority || "Medium"] || 0;
+                let pB = priorityWeight[b.priority || "Medium"] || 0;
+                if(pA !== pB) return pB - pA;
+                
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+            
+            if (currentTipzData.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding: 20px;">No tipz submitted yet! Be the first!</div>`;
+                return;
+            }
+            
+            let html = `<div style="display:flex; flex-direction:column; gap:8px;">`;
+            const rtToolbarHtml = typeof getRTToolbar === 'function' ? getRTToolbar() : '';
+            
+            const prioBtn = (t, label, color, isAct) => 
+                `<button style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:${isAct ? color+'20' : 'transparent'}; color:${isAct ? color : 'var(--text-muted)'}; border:1px solid ${isAct ? color+'40' : 'var(--border-color)'}; margin-right:2px;" onclick="setTipzPriority(${t.id}, '${label === 'Med' ? 'Medium' : label}')">${label}</button>`;
+
+            currentTipzData.forEach(t => {
+                let st = t.status || 'Open';
+                let pr = t.priority || 'Medium';
+                
+                let stColor = st === 'Closed' ? '#10b981' : '#8b5cf6';
+                let opacity = st === 'Closed' ? '0.6' : '1';
+                
+                html += `
+                <div class="sop-step-row" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px; opacity: ${opacity}; display:flex; flex-direction:column; gap:4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <div style="display:flex; flex-direction:row; justify-content:space-between; align-items:center; gap:8px;">
+                        <div class="sop-controls-container" style="flex-grow:1; opacity: 0.3; transition: opacity 0.2s; overflow-x:auto;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'">
+                            ${rtToolbarHtml}
+                        </div>
+                        
+                        <div style="display:flex; align-items:center; flex-shrink:0;">
+                            ${prioBtn(t, 'High', '#ef4444', pr === 'High')}
+                            ${prioBtn(t, 'Med', '#f59e0b', pr === 'Medium')}
+                            ${prioBtn(t, 'Low', '#3b82f6', pr === 'Low')}
+                            <span style="margin:0 4px; color:var(--border-color);">|</span>
+                            <span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; background:${stColor}20; color:${stColor}; border:1px solid ${stColor}40; cursor:pointer;" onclick="toggleTipzStatus(${t.id}, '${st}')" title="Click to Toggle Status">${st}</span>
+                            <button class="icon-btn" style="width:20px; height:20px; padding:0; font-size:12px; color:#ef4444; margin-left:4px;" onclick="deleteTipz(${t.id})" title="Delete Tip">🗑️</button>
+                        </div>
+                    </div>
+                    
+                    <div class="sop-text-container" style="border:1px solid transparent; border-radius:4px; transition:0.2s;">
+                        <div id="tip_editor_${t.id}" class="sop-text-rich" contenteditable="true" onblur="saveTipzInline(${t.id})" style="font-size:14px; color:var(--text-main); line-height:1.4; outline:none; min-height:22px; padding:2px 4px;" onfocus="this.parentElement.style.border='1px solid #0ea5e9'; this.parentElement.style.background='var(--bg-input)'">${t.suggestion}</div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = `<div style="text-align:center; color:#ef4444; padding: 20px;">Exception fetching tipz: ${error.message}</div>`;
+        }
+    }
+
+    function openTipzModal() {
+        document.getElementById('tipzModal').style.display = 'flex';
+        document.getElementById('tipzTextarea').innerHTML = '';
+        if (typeof getRTToolbar === 'function') {
+            document.getElementById('tipzMainToolbar').innerHTML = getRTToolbar();
+        }
+        setNewTipPriority('Medium');
+        fetchAndRenderTipz();
+        setTimeout(() => document.getElementById('tipzTextarea').focus(), 100);
+    }
+    
+    function closeTipzModal() {
+        document.getElementById('tipzModal').style.display = 'none';
+    }
+    
+    async function submitTipzSuggestion() {
+        const textElement = document.getElementById('tipzTextarea');
+        let text = textElement.innerHTML;
+        
+        // Basic check if it's empty or just whitespace/br tags
+        if (!textElement.textContent.trim() && !text.includes('<img')) {
+            alert("Please enter a suggestion before submitting.");
+            return;
+        }
+        
+        const prio = currentNewTipPriority;
+        
+        try {
+            if (typeof supabaseClient !== 'undefined') {
+                const userEmail = localStorage.getItem('neo_user_email') || document.getElementById('loginEmail')?.value || 'unknown_user';
+                
+                const { error } = await supabaseClient.from('tipz').insert({ 
+                    suggestion: text,
+                    user_email: userEmail,
+                    priority: prio,
+                    status: 'Open'
+                });
+                
+                if (error) {
+                    console.warn("Tipz table insert failed.", error);
+                    alert("Failed to submit suggestion. Error: " + error.message);
+                    return;
+                }
+            }
+            textElement.innerHTML = '';
+            setNewTipPriority('Medium');
+            fetchAndRenderTipz();
+        } catch (error) {
+            console.error("Tipz submission error:", error);
+            alert("Failed to submit suggestion.");
+        }
+    }
+
+    async function saveTipzInline(id) {
+        let editor = document.getElementById(`tip_editor_${id}`);
+        if (!editor) return;
+        
+        let newHtml = editor.innerHTML;
+        editor.parentElement.style.border = '1px solid transparent';
+        editor.parentElement.style.background = 'transparent';
+        
+        let originalText = currentTipzData.find(x => x.id === id)?.suggestion || '';
+        if (newHtml === originalText) return; // No change
+        
+        // Prevent empty save
+        if (!editor.textContent.trim() && !newHtml.includes('<img')) {
+            alert("Tip cannot be empty. Deleting instead?");
+            editor.innerHTML = originalText;
+            return;
+        }
+        
+        const {error} = await supabaseClient.from('tipz').update({suggestion: newHtml}).eq('id', id);
+        if(!error) {
+            // Update local cache so next blur doesn't think it changed
+            let t = currentTipzData.find(x => x.id === id);
+            if (t) t.suggestion = newHtml;
+        } else {
+            alert("Error updating: " + error.message);
+        }
+    }
+
+    async function deleteTipz(id) {
+        if(confirm("Are you sure you want to permanently delete this Tip?")) {
+            const {error} = await supabaseClient.from('tipz').delete().eq('id', id);
+            if(!error) fetchAndRenderTipz();
+            else alert("Error deleting: " + error.message);
+        }
+    }
+
+    async function setTipzPriority(id, prio) {
+        const {error} = await supabaseClient.from('tipz').update({priority: prio}).eq('id', id);
+        if(!error) fetchAndRenderTipz();
+        else alert("Error updating priority: " + error.message);
+    }
+
+    async function toggleTipzStatus(id, currentStatus) {
+        let newStatus = currentStatus === 'Open' ? 'Closed' : 'Open';
+        const {error} = await supabaseClient.from('tipz').update({status: newStatus}).eq('id', id);
+        if(!error) fetchAndRenderTipz();
+        else alert("Error updating status: " + error.message);
+    }
+</script>
 </body>
 </html>
 
