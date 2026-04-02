@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.02.1745"></script>
+    <script src="system-version.js?v=v.2026.04.02.1751"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.02.1745"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.1745"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.02.1751"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.1751"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.02.1745"></script>
+    <script src="packerz-module.js?v=v.2026.04.02.1751"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.1745"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.1751"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -1954,11 +1954,18 @@
                         <div style="flex: 0.5; min-width: 80px;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
                         <div style="flex: 0.5; min-width: 80px;"><label>Multiplier</label><input id="m_mult" type="number" step="any" min="1" value="1"></div>
                         <div style="flex: 0.5; min-width: 80px;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
-                        <div style="flex: 0.5; min-width: 80px; align-items:center; justify-content:center; flex-direction:row; gap:8px;">
-                            <label style="margin-bottom:0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;" title="Check if this is a 3D Printed Part">
-                                <input id="m_is_3d" type="checkbox" style="width:16px; height:16px; margin:0;"> 
-                                <span style="font-size: 30px; line-height: 1;">🖨️</span> 
-                                <span style="white-space:nowrap; font-size: 1.25em; font-weight: 600;">3D Print</span>
+                        <div style="flex: 0.5; min-width: 70px; display:flex; flex-direction:column; align-items:center;">
+                            <label>3D Print</label>
+                            <label style="margin-bottom:0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; height: 35px;" title="Check if this is a 3D Printed Part">
+                                <input id="m_is_3d" type="checkbox" style="width:18px; height:18px; margin:0; cursor:pointer;"> 
+                                <span style="font-size: 24px; line-height: 1;">🖨️</span> 
+                            </label>
+                        </div>
+                        <div style="flex: 0.5; min-width: 70px; display:flex; flex-direction:column; align-items:center;">
+                            <label>Filament</label>
+                            <label style="margin-bottom:0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; height: 35px;" title="Check if this is a Raw Filament source">
+                                <input id="m_is_filament" type="checkbox" style="width:18px; height:18px; margin:0; cursor:pointer;"> 
+                                <span style="font-size: 24px; line-height: 1;">🧵</span> 
                             </label>
                         </div>
                         <div style="flex: 0.5; min-width: 80px;"><label>Print Time (m)</label><input id="m_print_time" type="number" step="1" min="0" placeholder="Mins"></div>
@@ -3101,7 +3108,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.02.1745"></script>
+    <script src="socialz-module.js?v=v.2026.04.02.1751"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4020,15 +4027,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.02.1745"></script>
-<script src="system-tools-module.js?v=v.2026.04.02.1745"></script>
-<script src="bom-module.js?v=v.2026.04.02.1745"></script>
-<script src="inventory-module.js?v=v.2026.04.02.1745"></script>
-<script src="production-module.js?v=v.2026.04.02.1745"></script>
-<script src="sales-module.js?v=v.2026.04.02.1745"></script>
-<script src="analytics-module.js?v=v.2026.04.02.1745"></script>
-<script src="ceo-module.js?v=v.2026.04.02.1745"></script>
-<script src="print-module.js?v=v.2026.04.02.1745"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.02.1751"></script>
+<script src="system-tools-module.js?v=v.2026.04.02.1751"></script>
+<script src="bom-module.js?v=v.2026.04.02.1751"></script>
+<script src="inventory-module.js?v=v.2026.04.02.1751"></script>
+<script src="production-module.js?v=v.2026.04.02.1751"></script>
+<script src="sales-module.js?v=v.2026.04.02.1751"></script>
+<script src="analytics-module.js?v=v.2026.04.02.1751"></script>
+<script src="ceo-module.js?v=v.2026.04.02.1751"></script>
+<script src="print-module.js?v=v.2026.04.02.1751"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
