@@ -1,0 +1,1 @@
+ALTER TABLE full_landed_costs ADD COLUMN IF NOT EXISTS is_filament BOOLEAN DEFAULT FALSE;

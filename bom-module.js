@@ -28,9 +28,13 @@ async function updateLaborCosts() {
         let w = parseFloat(document.getElementById('wholesaleInput').value) || 0;
         let isSub = document.getElementById('isSubassemblyInput').checked;
         
+        let pGrams = 0; let pgEl = document.getElementById('printGramsInput'); if(pgEl) pGrams = parseFloat(pgEl.value) || 0;
+        let fKey = ""; let fkEl = document.getElementById('filamentKeyInput'); if(fkEl) fKey = fkEl.value || "";
+
         laborDB[currentProduct] = { time: t, rate: r };
         pricingDB[currentProduct] = { msrp: m, wholesale: w };
         isSubassemblyDB[currentProduct] = isSub;
+        if(productsDB[currentProduct]) { productsDB[currentProduct].print_grams = pGrams; productsDB[currentProduct].filament_item_key = fKey; }
 
         sysLog(`Updating profile for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
         const { error } = await supabaseClient.from('product_recipes').update({ 
@@ -38,7 +42,9 @@ async function updateLaborCosts() {
             labor_rate_hr: r,
             msrp: m,
             wholesale_price: w,
-            is_subassembly: isSub
+            is_subassembly: isSub,
+            print_grams: pGrams,
+            filament_item_key: fKey || null
         }).eq('product_name', currentProduct);
         
         if (error) throw new Error(error.message);
@@ -145,6 +151,20 @@ function renderProductBOM() {
     document.getElementById('isSubassemblyInput').checked = !!isSubassemblyDB[currentProduct];
 
     let p = productsDB[currentProduct]||[]; let gt = 0; let wrap = document.getElementById('bomTableWrap');
+    
+    let pgInp = document.getElementById('printGramsInput'); if(pgInp) pgInp.value = p.print_grams || 0;
+    let fkInp = document.getElementById('filamentKeyInput');
+    if(fkInp) {
+        let h = '<option value="">-- None --</option>';
+        Object.keys(catalogCache).forEach(k => { 
+            let c = catalogCache[k];
+            if (c.itemType === "Raw Goods" || c.is_filament || (c.itemName||"").toLowerCase().includes("filament") || (c.itemName||"").toLowerCase().includes("pla ")) {
+                h += `<option value="${String(k).replace(/"/g, '&quot;')}">${c.neoName || c.itemName}</option>`; 
+            }
+        });
+        fkInp.innerHTML = h; fkInp.value = p.filament_item_key || "";
+    }
+
     let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neogleamz Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
     if(p.length===0){ h += "<tr><td colspan='8' style='text-align:center;'>No components.</td></tr>"; }
