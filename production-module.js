@@ -137,15 +137,25 @@ function getDirectMaterials(name, amount) {
     let res = {};
     (productsDB[name] || []).forEach(part => {
         let k = String(part.item_key || part.di_item_id || part.name); let q = (parseFloat(part.quantity || part.qty) || 1) * amount;
-        if(!k.startsWith('RECIPE:::')) { res[k] = (res[k] || 0) + q; }
+        
+        if(!k.startsWith('RECIPE:::')) { 
+            let cLog = typeof catalogByName !== 'undefined' ? catalogByName[k] : null;
+            if(!cLog && typeof catalogCache !== 'undefined') {
+                cLog = Object.values(catalogCache).find(c => (c.neoName||c.itemName) === k);
+            }
+            
+            // If it's a 3D Print WITH a constructed recipe, unroll it into its Filaments
+            let rName = cLog ? (cLog.neoName || cLog.itemName) : k;
+            if (cLog && cLog.is_3d_print && productsDB[rName] && productsDB[rName].length > 0) {
+                let subDirect = getDirectMaterials(rName, q);
+                for(let pk in subDirect) {
+                    res[pk] = (res[pk] || 0) + subDirect[pk];
+                }
+            } else {
+                res[k] = (res[k] || 0) + q; 
+            }
+        }
     });
-    
-    let pDoc = productsDB[name] || {};
-    let pGrams = parseFloat(pDoc.print_grams) || 0;
-    if (pDoc.filament_item_key && pGrams > 0) {
-        let fId = pDoc.filament_item_key;
-        res[fId] = (res[fId] || 0) + (pGrams * amount);
-    }
     
     return res;
 }
