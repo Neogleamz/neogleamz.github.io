@@ -75,28 +75,58 @@ function extractSOPDataFromUI(containerId) {
 async function saveMasterSOP() { try { const p = document.getElementById('sopMasterProductSelect').value; if(!p) return; let steps = extractSOPDataFromUI('sopMasterEditorArea'); sopsDB[p] = steps; sysLog(`Saving Master SOP for ${p}`); setMasterStatus("Saving...", "mod-working"); const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}, {onConflict: 'product_name'}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); document.getElementById('sopMasterModal').style.display = 'none'; if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } }
 async function saveInlineSOP() { try { if(!currentWO) return; const p = currentWO.product_name; let steps = extractSOPDataFromUI('inlineSOPContainer'); sopsDB[p] = steps; sysLog(`Saving Inline SOP for ${p}`); setMasterStatus("Saving...", "mod-working"); const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}, {onConflict: 'product_name'}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); toggleSOPLock(); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } }
 
-window.isBatchOrderMode = false;
-function openNewWOModal(mode = 'create') { 
-    window.isBatchOrderMode = (mode === 'order');
+function openNewWOModal() { 
     document.getElementById('woErrorBox').style.display = 'none'; 
     document.getElementById('woRoutingArea').style.display = 'none'; 
     document.getElementById('newWOQty').value = 1; 
-    
-    const modalTitle = document.querySelector('#newWOModal h2');
-    const submitBtn = document.querySelector('#newWOModal .btn-green');
-    
-    if (window.isBatchOrderMode) {
-        modalTitle.innerText = "📦 Batch Order Estimator";
-        submitBtn.innerText = "Calculate Raw Demands";
-        submitBtn.onclick = function() { generateBatchOrderReport(); };
-    } else {
-        modalTitle.innerText = "🏭 Start Production Batch";
-        submitBtn.innerText = "Verify Inventory & Create";
-        submitBtn.onclick = function() { validateAndCreateWO(); };
-    }
-    
     document.getElementById('newWOModal').style.display = 'flex'; 
     checkWORouting(); 
+}
+
+let multiBatchItems = [];
+
+function openMultiBatchModal() {
+    multiBatchItems = [];
+    document.getElementById('multiBatchQty').value = 1;
+    renderStagedBatchItems();
+    document.getElementById('multiBatchOrderModal').style.display = 'flex';
+}
+
+function stageBatchItem() {
+    const p = document.getElementById('multiBatchProduct').value;
+    const q = parseFloat(document.getElementById('multiBatchQty').value);
+    if(!p || isNaN(q) || q <= 0) return alert("Select product and valid quantity.");
+    
+    let existing = multiBatchItems.find(i => i.p === p);
+    if(existing) {
+        existing.q += q;
+    } else {
+        multiBatchItems.push({p: p, q: q});
+    }
+    renderStagedBatchItems();
+}
+
+function removeBatchItem(index) {
+    multiBatchItems.splice(index, 1);
+    renderStagedBatchItems();
+}
+
+function renderStagedBatchItems() {
+    let list = document.getElementById('stagedBatchItemsList');
+    if(multiBatchItems.length === 0) {
+        list.innerHTML = '<li style="color:var(--text-muted); text-align:center; font-size:12px; margin-top:20px;">Cart is empty. Add products above.</li>';
+        return;
+    }
+    
+    let h = '';
+    multiBatchItems.forEach((item, index) => {
+        let f = fmtKey(item.p); let name = f.nn ? f.nn : f.in;
+        h += `<li style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:10px 15px; border-radius:6px; border:1px solid var(--border-color);">
+            <div style="font-weight:bold; color:var(--text-heading); font-size:14px;">${item.q}x <span style="color:#0ea5e9;">${name}</span></div>
+            <button class="btn-red" style="padding:4px 8px; font-size:12px; width:auto;" onclick="removeBatchItem(${index})">X</button>
+        </li>`;
+    });
+    list.innerHTML = h;
 }
 
 function checkWORouting() {
@@ -255,21 +285,26 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
     return prints;
 }
 
-function generateBatchOrderReport() {
-    const p = document.getElementById('newWOProduct').value; 
-    const q = parseFloat(document.getElementById('newWOQty').value); 
-    if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
-    
-    let routingMap = {};
-    document.querySelectorAll('.route-row').forEach(row => {
-        let subName = row.getAttribute('data-subname');
-        let pull = parseFloat(row.querySelector('.route-pull-input').value) || 0;
-        let build = parseFloat(row.querySelector('.route-build-input').value) || 0;
-        routingMap[subName] = { pull: pull, build: build };
-    });
+function generateMultiBatchOrderReport() {
+    if(multiBatchItems.length === 0) return alert("Cart is empty.");
 
-    let tempWO = { product_name: p, qty: q, routing: routingMap };
-    let exactDeductions = calculateExactWODeductions(tempWO);
+    let exactDeductions = { raws: {}, pulls: {}, built_subs: {} };
+    
+    // Aggregate deductions for every staged item assuming 100% build strategy for sub-assemblies
+    multiBatchItems.forEach(item => {
+        let tempWO = { product_name: item.p, qty: item.q, routing: {} }; 
+        let itemDeductions = calculateExactWODeductions(tempWO);
+        
+        Object.keys(itemDeductions.raws).forEach(k => {
+            exactDeductions.raws[k] = (exactDeductions.raws[k] || 0) + itemDeductions.raws[k];
+        });
+        Object.keys(itemDeductions.pulls).forEach(k => {
+            exactDeductions.pulls[k] = (exactDeductions.pulls[k] || 0) + itemDeductions.pulls[k];
+        });
+        Object.keys(itemDeductions.built_subs).forEach(k => {
+            exactDeductions.built_subs[k] = (exactDeductions.built_subs[k] || 0) + itemDeductions.built_subs[k];
+        });
+    });
 
     // Build the report HTML inside batchOrderReportContent
     let h = `
@@ -388,7 +423,7 @@ function generateBatchOrderReport() {
     h += `</tbody></table>`;
 
     document.getElementById('batchOrderReportContent').innerHTML = h;
-    document.getElementById('newWOModal').style.display = 'none';
+    document.getElementById('multiBatchOrderModal').style.display = 'none';
     document.getElementById('batchOrderReportModal').style.display = 'flex';
 }
 

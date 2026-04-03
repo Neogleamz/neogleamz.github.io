@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.0259"></script>
+    <script src="system-version.js?v=v.2026.04.03.0304"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.0259"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0259"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.0304"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0304"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.0259"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.0304"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0259"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0304"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2116,7 +2116,7 @@
                     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px; width:100%;">
                         <div style="display:flex; gap:8px;">
                             <button class="btn-blue" onclick="openNewWOModal('create')" style="flex:1; padding:6px 10px; font-family:'Mulish', sans-serif; font-size:14px; font-weight:900;">+ CreateBatch</button>
-                            <button class="btn-green" onclick="openNewWOModal('order')" style="flex:1; padding:6px 10px; font-family:'Mulish', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
+                            <button class="btn-green" onclick="openMultiBatchModal()" style="flex:1; padding:6px 10px; font-family:'Mulish', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
                         </div>
                         <button class="btn-blue" onclick="openSOPMasterModal('production')" style="padding:6px 10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff; font-family:'Mulish', sans-serif; font-size:14px; font-weight:900;">📝 Production SOP Editor</button>
                         <div style="display:flex; gap:6px;">
@@ -3016,6 +3016,32 @@
     </div>
 </div>
 
+<div id="multiBatchOrderModal" style="display:none; z-index:10001; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+    <div class="container" style="width:100%; max-width:650px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px; max-height:85vh;">
+        <h2 style="margin-top:0;">🛒 Multi-Item Batch Estimator</h2>
+        
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px; background:var(--bg-panel); padding:10px; border-radius:8px; border:1px solid var(--border-color);">
+            <select id="multiBatchProduct" style="flex:1; padding:10px; font-size:15px;"></select>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <label style="font-weight:bold; font-size:14px;">Qty:</label>
+                <input type="number" id="multiBatchQty" value="1" min="1" step="any" style="padding:10px; width:70px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;">
+            </div>
+            <button class="btn-blue" onclick="stageBatchItem()" style="padding:10px 15px; font-size:14px; white-space:nowrap;">+ Add to Order</button>
+        </div>
+        
+        <div style="flex-grow:1; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:15px; overflow-y:auto; margin-bottom:20px;">
+            <h3 style="margin-top:0; font-size:15px; color:var(--text-heading); border-bottom:2px solid var(--border-color); padding-bottom:5px;">Staged Targets</h3>
+            <ul id="stagedBatchItemsList" style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
+            </ul>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto; flex-shrink:0;">
+            <button class="btn-red" style="width:auto;" onclick="document.getElementById('multiBatchOrderModal').style.display='none'">Cancel</button>
+            <button class="btn-green" style="width:auto; font-weight:bold;" onclick="generateMultiBatchOrderReport()">📊 Generate Master Projection</button>
+        </div>
+    </div>
+</div>
+
 <div id="batchOrderReportModal" style="display:none; z-index:10002; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
     <div style="background:var(--bg-container); border:1px solid var(--border-color); border-radius:8px; padding:20px; width:700px; max-height:80vh; display:flex; flex-direction:column;">
         <h2 style="margin-top:0; color:var(--text-heading);">📊 Batch Order Projection</h2>
@@ -3114,7 +3140,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.0259"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.0304"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3970,6 +3996,7 @@
             // Batch builds and routing can use all products
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
             const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
+            const mbo = document.getElementById('multiBatchProduct'); if(mbo) mbo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
             // (SOP dropdown now handled in openSOPMasterModal)
             
             // Aliases can link to anything
@@ -4060,15 +4087,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.0259"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.0259"></script>
-<script src="bom-module.js?v=v.2026.04.03.0259"></script>
-<script src="inventory-module.js?v=v.2026.04.03.0259"></script>
-<script src="production-module.js?v=v.2026.04.03.0259"></script>
-<script src="sales-module.js?v=v.2026.04.03.0259"></script>
-<script src="analytics-module.js?v=v.2026.04.03.0259"></script>
-<script src="ceo-module.js?v=v.2026.04.03.0259"></script>
-<script src="print-module.js?v=v.2026.04.03.0259"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.0304"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.0304"></script>
+<script src="bom-module.js?v=v.2026.04.03.0304"></script>
+<script src="inventory-module.js?v=v.2026.04.03.0304"></script>
+<script src="production-module.js?v=v.2026.04.03.0304"></script>
+<script src="sales-module.js?v=v.2026.04.03.0304"></script>
+<script src="analytics-module.js?v=v.2026.04.03.0304"></script>
+<script src="ceo-module.js?v=v.2026.04.03.0304"></script>
+<script src="print-module.js?v=v.2026.04.03.0304"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
