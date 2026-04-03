@@ -728,10 +728,18 @@ function openArchiveExplorer(tab = 'batchez') {
 function closeArchiveExplorer() {
     document.getElementById('archiveExplorerModal').style.display = 'none';
 }
-function switchArchiveTab(tab) {
+async function switchArchiveTab(tab) {
     currentArchiveTab = tab;
     document.getElementById('tabArchBatchez').style.borderBottom = tab === 'batchez' ? '3px solid #0ea5e9' : '3px solid transparent';
     document.getElementById('tabArchLayerz').style.borderBottom = tab === 'layerz' ? '3px solid #0ea5e9' : '3px solid transparent';
+    
+    if (tab === 'layerz' && !window._layerzArchiveLoaded) {
+        if (typeof refreshPrintQueue === 'function') {
+            document.getElementById('archiveListArea').innerHTML = '<p style="color:var(--text-muted); text-align:center;">Fetching records...</p>';
+            await refreshPrintQueue();
+            window._layerzArchiveLoaded = true;
+        }
+    }
     renderArchiveList();
 }
 function renderArchiveList() {
