@@ -593,7 +593,7 @@ async function advanceWO(newStatus) {
                     if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
                     inventoryDB[k].consumed_qty += req; 
                     if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
-                    else inventoryDB[k].assembly_consumed_qty = (inventoryDB[k].assembly_consumed_qty||0) + req;
+                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req; // Rerouted from assembly
                     upsKeys.add(k);
                 });
                 Object.keys(exactDeductions.built_subs).forEach(k => {
@@ -602,7 +602,7 @@ async function advanceWO(newStatus) {
                     
                     inventoryDB[k].consumed_qty += req;
                     if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
-                    else inventoryDB[k].assembly_consumed_qty = (inventoryDB[k].assembly_consumed_qty||0) + req;
+                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req; // Rerouted from assembly
                     
                     let cleanName = k.replace('RECIPE:::', '');
                     let is3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
