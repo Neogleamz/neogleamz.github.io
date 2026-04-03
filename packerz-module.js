@@ -148,12 +148,15 @@ async function fetchPackerzCompletedOrders() {
             }).join('');
             
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16,185,129,0.2); padding-bottom:8px; margin-bottom:4px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid rgba(16,185,129,0.2); padding-bottom:8px; margin-bottom:4px;">
                     <div style="display:flex; flex-direction:column;">
                         <strong style="color:var(--text-heading); font-size:14px; font-weight:900;">ORDER ${order.order_id}</strong>
                         <span style="font-size:9px; color:var(--text-muted); font-family:monospace; margin-top:2px;">Closed: ${completedString}</span>
                     </div>
-                    <span style="font-size:10px; color:#10b981; font-weight:900; background:rgba(16,185,129,0.1); padding:4px 8px; border-radius:6px;">${shortDate}</span>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                        <span style="font-size:10px; color:#10b981; font-weight:900; background:rgba(16,185,129,0.1); padding:4px 8px; border-radius:6px;">${shortDate}</span>
+                        <button onclick="unarchivePackerzOrder('${order.order_id}')" style="background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; font-size:9px; font-weight:bold; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">UNARCHIVE</button>
+                    </div>
                 </div>
                 <div style="color:var(--text-muted); font-weight:700; background:var(--bg-panel); padding:10px; border-radius:8px;">
                     ${itemsPreview}
@@ -470,9 +473,33 @@ async function executePackerzCompletion(orderId) {
         // 3. Re-Sync Live Queue
         fetchUnfulfilledOrders();
         
-    } catch(err) {
+} catch(err) {
         console.error("Completion Error", err);
-        alert("CRITICAL ERROR: Failed to close out structural order constraints. \\n" + err.message);
+        alert("CRITICAL ERROR: Failed to close out structural order constraints. \n" + err.message);
+    }
+}
+
+async function unarchivePackerzOrder(orderId) {
+    if(!confirm(`Are you absolutely sure you want to UNARCHIVE Order ${orderId} and return it to the active queue?`)) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('sales_ledger')
+            .update({ 
+                internal_fulfillment_status: 'Awaiting Assembly',
+                assembly_completed_at: null
+            })
+            .eq('order_id', orderId);
+
+        if(error) throw error;
+
+        // Re-Sync Live Queues
+        if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
+        fetchPackerzCompletedOrders();
+        
+    } catch(err) {
+        console.error("Unarchive Error", err);
+        alert("CRITICAL ERROR: Failed to unarchive order. \n" + err.message);
     }
 }
 
