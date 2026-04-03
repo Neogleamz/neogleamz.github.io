@@ -168,77 +168,118 @@ function printReorderReport() {
         html += `<h2>🚨 Low Stock Reorder Report</h2><p style="color:#64748b; font-size:14px;">Date: ${new Date().toLocaleDateString()}</p>`;
         
         let items = [];
-        let fgiItems = [];
-        let rawDemand = {}; 
         
-        // Phase 1: Track dependent Raw Material demand caused by explicit FGI shortfalls
-        Object.keys(productsDB).forEach(pName => {
-            let k = `RECIPE:::${pName}`;
+        let onHand = {};
+        let dependentDemand = {};
+        let buildTargets = {};
+        let purchaseTargets = {};
+
+        // Helper to evaluate physical stock
+        function getStock(k, isProduct) {
             let i = inventoryDB[k] || {};
-            let b = parseFloat(i.produced_qty) || 0; 
-            let pb = parseFloat(i.prototype_produced_qty) || 0; 
-            let sold = parseFloat(i.sold_qty) || 0; 
-            let c_prod = parseFloat(i.production_consumed_qty) || 0; 
-            let c_proto = parseFloat(i.prototype_consumed_qty) || 0; 
-            let scrap = parseFloat(i.scrap_qty) || 0; 
-            let adj = parseFloat(i.manual_adjustment) || 0;
+            if (isProduct) {
+                let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; 
+                let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; 
+                let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; 
+                let adj = parseFloat(i.manual_adjustment) || 0;
+                return b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+            } else {
+                let c = catalogCache[k] || {totalQty:0};
+                return c.totalQty - (parseFloat(i.consumed_qty) || 0) - (parseFloat(i.scrap_qty) || 0) + (parseFloat(i.manual_adjustment) || 0);
+            }
+        }
+
+        // Initialize Physical Stocks
+        Object.keys(productsDB).forEach(p => onHand[`RECIPE:::${p}`] = getStock(`RECIPE:::${p}`, true));
+        Object.keys(catalogCache).forEach(k => onHand[k] = getStock(k, false));
+
+        // Get effectively available stock considering downstream demand
+        function getNet(k) { return (onHand[k] || 0) + (buildTargets[k.replace('RECIPE:::', '')] || 0) + (purchaseTargets[k] || 0) - (dependentDemand[k] || 0); }
+
+        // Iterative MRP Resolution Algorithm
+        let changed = true;
+        let iter = 0;
+        while(changed && iter < 100) {
+            changed = false; iter++;
             
-            let s = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
-            let ms = parseFloat(i.min_stock) || 0;
-            
-            if (ms > 0 && s < ms) {
-                let short = ms - s;
-                fgiItems.push({ n: pName, s: s, ms: ms, short: short });
-                
-                // Explode missing FGI into dependent Raw Demands
-                function explode(prod, neededQty) {
-                    if(!productsDB[prod]) return;
-                    productsDB[prod].forEach(item => {
-                        let subK = item.item_key || item.di_item_id || item.name;
-                        let qtyPer = parseFloat(item.quantity || item.qty) || 1;
-                        let totalNeeded = qtyPer * neededQty;
-                        if(subK.startsWith('RECIPE:::')) {
-                            explode(subK.replace('RECIPE:::', ''), totalNeeded);
-                        } else {
-                            rawDemand[subK] = (rawDemand[subK] || 0) + totalNeeded;
-                        }
+            // Re-evaluate FGIs & Sub-Assemblies
+            Object.keys(productsDB).forEach(p => {
+                let k = `RECIPE:::${p}`;
+                let ms = parseFloat((inventoryDB[k]||{}).min_stock) || 0;
+                let net = getNet(k);
+                let deficit = ms - net; 
+                if (deficit > 0.0001) {
+                    buildTargets[p] = (buildTargets[p] || 0) + deficit;
+                    changed = true; // Required further traversal since we increased build targets!
+                    
+                    // Explode immediately to create dependent demand for raw materials/subs
+                    (productsDB[p] || []).forEach(comp => {
+                        let subK = comp.item_key || comp.di_item_id || comp.name;
+                        let qPer = parseFloat(comp.quantity || comp.qty) || 1;
+                        dependentDemand[subK] = (dependentDemand[subK] || 0) + (qPer * deficit);
                     });
                 }
-                explode(pName, short);
-            }
+            });
+
+            // Re-evaluate Raw Supply Chain (End of the line)
+            Object.keys(catalogCache).forEach(k => {
+                let ms = parseFloat((inventoryDB[k]||{}).min_stock) || 0;
+                let net = getNet(k);
+                let deficit = ms - net;
+                if (deficit > 0.0001) {
+                    purchaseTargets[k] = (purchaseTargets[k] || 0) + deficit;
+                    changed = true;
+                }
+            });
+        }
+
+        // --- View Model Generation ---
+        
+        // Collate Production Targets
+        let retailTargets = []; let subTargets = []; let printTargets = [];
+        Object.keys(buildTargets).forEach(p => {
+            let k = `RECIPE:::${p}`;
+            let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
+            let isSub = !!isSubassemblyDB[p];
+            let obj = { n: p, s: onHand[k] || 0, ms: parseFloat((inventoryDB[k]||{}).min_stock) || 0, short: buildTargets[p], depDemand: dependentDemand[k] || 0 };
+            if (is3D) printTargets.push(obj);
+            else if (isSub) subTargets.push(obj);
+            else retailTargets.push(obj);
         });
 
-        // Generate FGI Production Table
-        if(fgiItems.length > 0) {
-            html += `<h3>🏭 Production Targets (Build These)</h3><table><thead><tr><th>Product / Sub-Assembly Name</th><th>Current Stock</th><th>Min Target</th><th>Shortfall (Units to Build)</th></tr></thead><tbody>`;
-            fgiItems.sort((a,b) => b.short - a.short).forEach(x => {
-                html += `<tr><td style="font-weight:bold;">${x.n}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="color:#f97316; font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td></tr>`; 
-            });
+        if(Object.keys(buildTargets).length > 0) {
+            html += `<h3>🏭 Production Targets (Build These)</h3><table><thead><tr><th style="width:50%;">Product Name</th><th style="text-align:right;">Stock</th><th style="text-align:right;">Dep. Req</th><th style="text-align:right;">Min Target</th><th style="text-align:right; color:#f97316;">Must Build</th></tr></thead><tbody>`;
+            
+            const renderBuildRows = (arr, title, icn) => {
+                if(arr.length === 0) return;
+                html += `<tr><td colspan="5" style="background:#f1f5f9; font-weight:bold; color:#0f172a; border-top:2px solid #ccc;">${icn} ${title}</td></tr>`;
+                arr.sort((a,b) => b.short - a.short).forEach(x => {
+                    html += `<tr><td style="font-weight:bold; padding-left:20px;">${x.n}</td><td style="text-align:right; color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td style="text-align:right; color:#64748b;">${x.depDemand > 0 ? x.depDemand.toFixed(2).replace(/\.?0+$/,'') : '-'}</td><td style="text-align:right;">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="text-align:right; color:#f97316; font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td></tr>`;
+                });
+            };
+            
+            renderBuildRows(retailTargets, 'Retail Products', '📦');
+            renderBuildRows(subTargets, 'Sub-Assemblies', '⚙️');
+            renderBuildRows(printTargets, '3D Prints', '🖨️');
             html += `</tbody></table><br>`;
         }
 
-        // Phase 2: Compute overall Raw Material shortfalls (Native Min Stock + FGI Dependent Demand)
-        html += `<h3>📦 Supply Chain Deficits (Order These)</h3><table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
+        html += `<h3>📦 Supply Chain Deficits (Order These)</h3><table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Dep. Req</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
         
-        Object.keys(catalogCache).forEach(k => {
-            let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k] || {};
-            let s = c.totalQty - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
-            
-            let explicitMs = parseFloat(i.min_stock) || 0;
-            let depDemand = parseFloat(rawDemand[k]) || 0;
-            let targetStock = explicitMs + depDemand;
-            
-            if(targetStock > 0 && s < targetStock) { 
-                let short = targetStock - s; 
-                items.push({nn: c.neoName, n: c.itemName, sp: c.spec, s: s, ms: targetStock, short: short, cost: short * (c.avgUnitCost || 0)}); 
-            }
+        Object.keys(purchaseTargets).forEach(k => {
+            let c = catalogCache[k] || {}; let f = fmtKey(k); let i = inventoryDB[k] || {};
+            let currentStock = onHand[k] || 0;
+            let ms = parseFloat(i.min_stock) || 0;
+            let depDemand = dependentDemand[k] || 0;
+            let short = purchaseTargets[k];
+            items.push({nn: c.neoName, n: c.itemName, sp: c.spec, s: currentStock, ms: ms, short: short, depDemand: depDemand, cost: short * (c.avgUnitCost || 0)}); 
         });
 
-        if(items.length === 0) { html += `<tr><td colspan="7" style="text-align:center; padding: 20px;">All monitored raw stock levels are optimal.</td></tr>`; } 
+        if(items.length === 0) { html += `<tr><td colspan="8" style="text-align:center; padding: 20px;">All monitored raw stock levels are optimal.</td></tr>`; } 
         else {
             let grandTotal = 0;
-            items.sort((a,b) => b.cost - a.cost).forEach(x => { grandTotal += x.cost; let displaySpec = x.sp === '(Mixed Specs)' ? '' : x.sp; html += `<tr><td>${x.nn || ''}</td><td>${x.n}</td><td>${displaySpec}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td><td>$${x.cost.toFixed(2)}</td></tr>`; });
-            html += `<tr><td colspan="6" style="text-align:right; font-weight:bold; padding-top: 15px;">Total Capital Required:</td><td style="font-weight:bold; padding-top: 15px;">$${grandTotal.toFixed(2)}</td></tr>`;
+            items.sort((a,b) => b.cost - a.cost).forEach(x => { grandTotal += x.cost; let displaySpec = x.sp === '(Mixed Specs)' ? '' : x.sp; html += `<tr><td>${x.nn || ''}</td><td>${x.n}</td><td>${displaySpec}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td style="color:#64748b;">${x.depDemand > 0 ? x.depDemand.toFixed(2).replace(/\.?0+$/,'') : '-'}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td><td>$${x.cost.toFixed(2)}</td></tr>`; });
+            html += `<tr><td colspan="7" style="text-align:right; font-weight:bold; padding-top: 15px;">Total Capital Required:</td><td style="font-weight:bold; padding-top: 15px;">$${grandTotal.toFixed(2)}</td></tr>`;
         }
         html += `</tbody></table></body></html>`; let win = window.open('', '', 'width=900,height=700'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
     } catch (e) { sysLog(e.message, true); }
