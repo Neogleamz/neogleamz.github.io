@@ -465,7 +465,28 @@ async function executePackerzCompletion(orderId) {
 
         if(error) throw error;
 
-        // NOTE: Hardware Stock mathematical deduction runs natively via RPC or subsequent dynamic query injections.
+        // 2. Fetch specific line items for this order and structurally deduct (upsert) the Inventory ledger
+        const { data: lineItems, error: itemsError } = await supabaseClient
+            .from('sales_ledger')
+            .select('internal_recipe_name, qty_sold')
+            .eq('order_id', orderId);
+
+        if (itemsError) throw itemsError;
+
+        let invMap = {};
+        lineItems.forEach(r => { let k = `RECIPE:::${r.internal_recipe_name}`; if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); invMap[k] += r.qty_sold; });
+        let invPayload = Object.keys(invMap).map(k => {
+            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+            inventoryDB[k].sold_qty = invMap[k];
+            return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
+        });
+
+        if (invPayload.length > 0) {
+            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
+            if (invError) throw new Error("Inventory Deduction Error: " + invError.message);
+        }
+
+        if (typeof renderInventoryTable === 'function') renderInventoryTable();
         
         // 2. Clear Active UI Node
         document.getElementById('packerzActiveQueue').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>';
@@ -483,6 +504,29 @@ async function unarchivePackerzOrder(orderId) {
     if(!confirm(`Are you absolutely sure you want to UNARCHIVE Order ${orderId} and return it to the active queue?`)) return;
     
     try {
+        // 1. Fetch specific line items for this order and structurally refund (upsert) the Inventory ledger
+        const { data: lineItems, error: itemsError } = await supabaseClient
+            .from('sales_ledger')
+            .select('internal_recipe_name, qty_sold')
+            .eq('order_id', orderId);
+
+        if (itemsError) throw itemsError;
+
+        let invMap = {};
+        lineItems.forEach(r => { let k = `RECIPE:::${r.internal_recipe_name}`; if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); invMap[k] -= r.qty_sold; });
+        let invPayload = Object.keys(invMap).map(k => {
+            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+            inventoryDB[k].sold_qty = invMap[k];
+            return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
+        });
+
+        if (invPayload.length > 0) {
+            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
+            if (invError) throw new Error("Inventory Refund Error: " + invError.message);
+        }
+
+        if (typeof renderInventoryTable === 'function') renderInventoryTable();
+
         const { error } = await supabaseClient
             .from('sales_ledger')
             .update({ 

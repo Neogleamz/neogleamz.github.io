@@ -212,21 +212,11 @@ async function executeSalesSync() {
         });
         // --------------------------------
 
-        let invMap = {};
-        pendingSalesRows.forEach(r => { let k = `RECIPE:::${r.internal_recipe_name}`; if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); invMap[k] += r.qty_sold; });
-        let invPayload = Object.keys(invMap).map(k => {
-            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-            inventoryDB[k].sold_qty = invMap[k];
-            return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
-        });
-
         syncTrace(`Injecting aggregated Sales Ledger objects to network array...`);
         const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
         if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
-        
-        syncTrace(`Deducting ${invPayload.length} distinct BOM recipes from Live Inventory...`);
-        const { error: e2 } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'}); 
-        if(e2) throw new Error("Inventory Deduction Error: " + e2.message);
+
+        syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
 
         syncTrace(`Transaction successful! Updating dynamic DOM clusters!`);
         salesPayload.forEach(s => salesDB.unshift(s));  
@@ -245,7 +235,7 @@ async function executeSalesSync() {
         if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         
         syncTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
-        setTimeout(() => alert(`Success! ${count} sales were synced and inventory was updated.`), 10);
+        setTimeout(() => alert(`Success! ${count} sales were synced. Inventory deduction is automatically deferred until Packerz Assembly Completion.`), 10);
         setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000);
     } catch(e) { 
         syncTrace(`CRITICAL FAULT: ${e.message}`, true);
