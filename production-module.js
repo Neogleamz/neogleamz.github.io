@@ -28,20 +28,24 @@ function populateSOPDropdown() {
     
     let options = '<option value="">-- Select Item to Edit SOP --</option>';
     if (currentSopMode === '3d') {
-        // Show only 3D Printed Raw Goods (iterate catalogCache which now has flags)
-        Object.keys(catalogCache).forEach(k => {
-            let c = catalogCache[k];
-            if (c && c.is_3d_print) {
-                let name = c.neoName || c.itemName;
-                let time = c.print_time_mins || 0;
-                options += `<option value="${String(k).replace(/"/g, '&quot;')}">🖨️ ${name} (${time}m)</option>`;
+        // Show only 3D Printed Products/Recipes (is_3d_print flag lives on productsDB entries)
+        Object.keys(productsDB).sort().forEach(p => {
+            let pData = productsDB[p];
+            if (pData && pData.is_3d_print) {
+                let time = pData.print_time_mins || 0;
+                options += `<option value="${String(p).replace(/"/g, '&quot;')}">🖨️ ${p}${time ? ' (' + time + 'm)' : ''}</option>`;
             }
         });
     } else {
-        // Show all Products (Retail and Sub-assemblies)
-        Object.keys(productsDB).sort().forEach(p => {
-            options += `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`;
-        });
+        // Grouped like RECIPEZ: 📦 Retail → ⚙️ Sub-Assemblies → 🖨️ 3D Prints
+        let sorted = Object.keys(productsDB).sort();
+        let retail  = sorted.filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print));
+        let subs    = sorted.filter(p =>  isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print));
+        let prints  = sorted.filter(p => productsDB[p] && productsDB[p].is_3d_print);
+        const grp = (label, icon, arr) => arr.length ? `<optgroup label="${label}">${arr.map(p => `<option value="${String(p).replace(/"/g,'&quot;')}">${icon} ${p}</option>`).join('')}</optgroup>` : '';
+        options += grp('📦 RETAIL PRODUCTS', '📦', retail);
+        options += grp('⚙️ SUB-ASSEMBLIES',  '⚙️',  subs);
+        options += grp('🖨️ 3D PRINTS',       '🖨️',  prints);
     }
     sopSelect.innerHTML = options;
 }

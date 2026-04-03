@@ -4064,8 +4064,8 @@
             let printProds = sortedProducts.filter(p => productsDB[p] && productsDB[p].is_3d_print);
             const mapOpts = (arr, char) => arr.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${char} ${p}</option>`).join('');
 
-            // Batch builds and routing can use all products
-            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + sortedProducts.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
+            // Batch builds and routing can use all products — grouped like RECIPEZ
+            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
             
             const nwoRetail = document.getElementById('newWOProductRetail'); if(nwoRetail) nwoRetail.innerHTML = '<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦');
             const nwoSub = document.getElementById('newWOProductSub'); if(nwoSub) nwoSub.innerHTML = '<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️');
@@ -4077,11 +4077,11 @@
 
             // (SOP dropdown now handled in openSOPMasterModal)
             
-            // Aliases can link to anything
-            const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = '<option value="">-- Select Neogleamz Recipe --</option>' + sortedProducts.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
+            // Aliases can link to anything — grouped like RECIPEZ
+            const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = '<option value="">-- Select Neogleamz Recipe --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
             
-            // Manual sale SHOULD NOT show sub-assemblies
-            const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = '<option value="">-- Select Product Sold --</option>' + sortedProducts.filter(p => !isSubassemblyDB[p]).map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : '📦'} ${p}</option>`).join(''); 
+            // Manual sale — no sub-assemblies; retail first, then 3D prints
+            const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = '<option value="">-- Select Product Sold --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
             
             // Packerz Blueprint Admin Population
             if(typeof initPackerzAdmin === 'function') initPackerzAdmin();
