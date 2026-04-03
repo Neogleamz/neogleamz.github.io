@@ -80,9 +80,17 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
             if(payload.manual_adjustment === a) return; 
         }
         else if(mode === 'consumed_qty') { payload.consumed_qty = Math.abs(v); if(payload.consumed_qty === c) return; } 
-        else if(mode === 'prototype_consumed_qty') { payload.prototype_consumed_qty = Math.abs(v); if(payload.prototype_consumed_qty === (inventoryDB[rKey].prototype_consumed_qty||0)) return; } 
+        else if(mode === 'prototype_consumed_qty') { 
+            payload.prototype_consumed_qty = Math.abs(v); let old = parseFloat(inventoryDB[rKey].prototype_consumed_qty)||0;
+            if(payload.prototype_consumed_qty === old) return; 
+            payload.consumed_qty = (parseFloat(inventoryDB[rKey].consumed_qty)||0) + (payload.prototype_consumed_qty - old);
+        } 
         else if(mode === 'assembly_consumed_qty') { payload.assembly_consumed_qty = Math.abs(v); if(payload.assembly_consumed_qty === (inventoryDB[rKey].assembly_consumed_qty||0)) return; } 
-        else if(mode === 'production_consumed_qty') { payload.production_consumed_qty = Math.abs(v); if(payload.production_consumed_qty === (inventoryDB[rKey].production_consumed_qty||0)) return; } 
+        else if(mode === 'production_consumed_qty') { 
+            payload.production_consumed_qty = Math.abs(v); let old = parseFloat(inventoryDB[rKey].production_consumed_qty)||0;
+            if(payload.production_consumed_qty === old) return; 
+            payload.consumed_qty = (parseFloat(inventoryDB[rKey].consumed_qty)||0) + (payload.production_consumed_qty - old);
+        } 
         else if(mode === 'stock') { payload.manual_adjustment = v - (p - c - sq); if(payload.manual_adjustment === a) return; }
         else if(mode === 'manual_adjustment') { payload.manual_adjustment = v; if(payload.manual_adjustment === a) return; }
         else if(mode === 'min_stock') { payload.min_stock = Math.abs(v); if(payload.min_stock === inventoryDB[rKey].min_stock) return; }
