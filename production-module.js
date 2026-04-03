@@ -285,6 +285,36 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
     return prints;
 }
 
+function sortReportTable(th, n, isNumeric) {
+    let table = th.closest('table');
+    let tbody = table.querySelector('tbody');
+    let rows = Array.from(tbody.querySelectorAll('tr'));
+    if(rows.length === 0 || (rows.length === 1 && rows[0].innerText.includes('No '))) return; // empty table
+    
+    let isAsc = th.getAttribute('data-asc') !== 'true';
+    th.setAttribute('data-asc', isAsc ? 'true' : 'false');
+
+    table.querySelectorAll('th').forEach(h => {
+        if(h !== th) h.removeAttribute('data-asc');
+        h.innerHTML = h.innerHTML.replace(' ▲', '').replace(' ▼', '').replace(' ↕', ' ↕');
+        if(!h.innerHTML.includes('↕')) h.innerHTML += ' ↕';
+    });
+    th.innerHTML = th.innerHTML.replace(' ↕', '') + (isAsc ? ' ▲' : ' ▼');
+
+    rows.sort((a, b) => {
+        let textA = a.querySelectorAll('td')[n].innerText;
+        let textB = b.querySelectorAll('td')[n].innerText;
+        if(!isNumeric) {
+            return isAsc ? textA.localeCompare(textB) : textB.localeCompare(textA);
+        }
+        let valA = parseFloat(textA.replace(/[^0-9.-]/g, ''))||0;
+        let valB = parseFloat(textB.replace(/[^0-9.-]/g, ''))||0;
+        return isAsc ? valA - valB : valB - valA;
+    });
+
+    rows.forEach(r => tbody.appendChild(r));
+}
+
 function generateMultiBatchOrderReport() {
     if(multiBatchItems.length === 0) return alert("Cart is empty.");
 
@@ -306,16 +336,53 @@ function generateMultiBatchOrderReport() {
         });
     });
 
-    // Build the report HTML inside batchOrderReportContent
-    let h = `
+    let h = '';
+
+    // Calculate critical procurement first
+    let orderList = [];
+    Object.keys(exactDeductions.raws).forEach(k => {
+        let req = exactDeductions.raws[k]; 
+        let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; 
+        let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
+        let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment; 
+        let diff = onHand - req;
+        if(diff < 0) {
+            let f = fmtKey(k); let name = f.nn ? f.nn : f.in; 
+            orderList.push({ name: name, qty: Math.abs(diff) });
+        }
+    });
+
+    if(orderList.length > 0) {
+        h += `
+            <div style="background:#451a1a; padding:15px; border-radius:8px; border:1px solid #ef4444; margin-bottom:20px;">
+            <h3 style="color:#fca5a5; border-bottom:1px solid #b91c1c; padding-bottom:10px; margin-top:0;">🚨 Critical Procurement (Must Order)</h3>
+            <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:2px solid #b91c1c; text-align:left;">
+                        <th style="padding:8px; cursor:pointer; color:#fca5a5; user-select:none;" onclick="sortReportTable(this, 0, false)">Material ↕</th>
+                        <th style="padding:8px; text-align:right; cursor:pointer; color:#fca5a5; user-select:none;" onclick="sortReportTable(this, 1, true)">Quantity To Order ↕</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        orderList.forEach(item => {
+            h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${item.name}</td>
+                <td style="padding:8px; text-align:right; color:#ef4444; font-weight:bold;">${item.qty.toFixed(2)}</td>
+            </tr>`;
+        });
+        h += `</tbody></table></div>`;
+    }
+
+    h += `
         <h3 style="color:var(--primary-color); border-bottom:1px solid var(--border-color); padding-bottom:10px; margin-top:0;">Raw Materials Demand</h3>
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
-                    <th style="padding:8px;">Material</th>
-                    <th style="padding:8px; text-align:right;">Required</th>
-                    <th style="padding:8px; text-align:right;">In Stock</th>
-                    <th style="padding:8px; text-align:right;">Balance</th>
+                    <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Material ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Required ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 2, true)">In Stock ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 3, true)">Balance ↕</th>
                 </tr>
             </thead>
             <tbody>
@@ -352,10 +419,10 @@ function generateMultiBatchOrderReport() {
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
-                    <th style="padding:8px;">Sub-Assembly</th>
-                    <th style="padding:8px; text-align:right;">Pull Qty</th>
-                    <th style="padding:8px; text-align:right;">In Stock</th>
-                    <th style="padding:8px; text-align:right;">Balance</th>
+                    <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Sub-Assembly ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Pull Qty ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 2, true)">In Stock ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 3, true)">Balance ↕</th>
                 </tr>
             </thead>
             <tbody>
@@ -391,10 +458,10 @@ function generateMultiBatchOrderReport() {
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
-                    <th style="padding:8px;">Sub-Assembly</th>
-                    <th style="padding:8px; text-align:right;">Target Qty</th>
-                    <th style="padding:8px; text-align:right;">Current Stock</th>
-                    <th style="padding:8px; text-align:right;">Estimated Total</th>
+                    <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Sub-Assembly ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Target Qty ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 2, true)">Current Stock ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 3, true)">Estimated Total ↕</th>
                 </tr>
             </thead>
             <tbody>
@@ -431,7 +498,7 @@ function printBatchOrderReport() {
     const printContent = document.getElementById('batchOrderReportContent').innerHTML;
     const printWindow = window.open('', '', 'height=600,width=800');
     // Ensure styles map to printable black/white/red/green versions for paper
-    printWindow.document.write(`<html><head><title>Batch Order Projection</title><style>body{font-family:sans-serif; padding:20px; color:#000;} table{width:100%; border-collapse:collapse; margin-bottom:20px;} th,td{border-bottom:1px solid #ccc; padding:8px; text-align:left;} th.right, td.right{text-align:right;} h3{border-bottom:2px solid #000; padding-bottom:5px; margin-top:20px;}</style></head><body><h1>📦 Batch Order Projection</h1>${printContent.replace(/color:#ef4444/g, 'color:red').replace(/color:#10b981/g, 'color:green').replace(/color:var\(--text-[^\)]+\)/g, 'color:black')}</body></html>`);
+    printWindow.document.write(`<html><head><title>Batch Order Projection</title><style>body{font-family:sans-serif; padding:20px; color:#000;} table{width:100%; border-collapse:collapse; margin-bottom:20px;} th,td{border-bottom:1px solid #ccc; padding:8px; text-align:left;} th.right, td.right{text-align:right;} h3{border-bottom:2px solid #000; padding-bottom:5px; margin-top:20px;}</style></head><body><h1>📦 Batch Order Projection</h1>${printContent.replace(/color:#ef4444/g, 'color:red').replace(/color:#10b981/g, 'color:green').replace(/color:var\(--text-[^\)]+\)/g, 'color:black').replace(/ ▲| ▼| ↕/g, '')}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => { printWindow.print(); }, 250);
