@@ -20,8 +20,8 @@ function renderFgiTable() {
         let ms = parseFloat(i.min_stock) || 0;
         let unit_msrp = (typeof getEngineLiveMsrp === 'function') ? getEngineLiveMsrp(p) : 0;
         let msrpv = s * unit_msrp;
-        let unit_net = unit_msrp > 0 ? (unit_msrp - breakdown.total) : 0;
-        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, ms: ms, tc: breakdown.total, msrpv: msrpv, tv: tv, net: unit_net, isSub: !!isSubassemblyDB[p], is3D: is3D }; 
+        let total_net = unit_msrp > 0 ? (unit_msrp - breakdown.total) * s : 0;
+        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, ms: ms, tc: breakdown.total, msrpv: msrpv, tv: tv, net: total_net, isSub: !!isSubassemblyDB[p], is3D: is3D }; 
     });
     if(a.length===0){ h += "<tr><td colspan='10' style='text-align:center;'>No finished goods.</td></tr>"; }
     else {
