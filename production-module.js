@@ -596,23 +596,6 @@ async function advanceWO(newStatus) {
                     else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req; // Rerouted from assembly
                     upsKeys.add(k);
                 });
-                Object.keys(exactDeductions.built_subs).forEach(k => {
-                    let req = exactDeductions.built_subs[k];
-                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
-                    
-                    inventoryDB[k].consumed_qty += req;
-                    if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
-                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req; // Rerouted from assembly
-                    
-                    let cleanName = k.replace('RECIPE:::', '');
-                    let is3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
-                    
-                    if (!is3D) {
-                        if(bType === 'Prototype') inventoryDB[k].prototype_produced_qty = (inventoryDB[k].prototype_produced_qty||0) + req;
-                        else inventoryDB[k].produced_qty += req;
-                    }
-                    upsKeys.add(k);
-                });
                 Object.keys(exactDeductions.pulls).forEach(k => {
                     let req = exactDeductions.pulls[k];
                     if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
@@ -630,14 +613,38 @@ async function advanceWO(newStatus) {
 
         if (newStatus === 'Completed') {
             if(!confirm(`Add ${currentWO.qty} Finished Goods to Inventory Yield?`)) { setMasterStatus("Ready.", "status-idle"); return; }
+            let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
+            
+            let exactDeductions = calculateExactWODeductions(currentWO);
+            let upsKeys = new Set();
+            
+            Object.keys(exactDeductions.built_subs).forEach(k => {
+                let req = exactDeductions.built_subs[k];
+                if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
+                
+                inventoryDB[k].consumed_qty += req;
+                if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
+                else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                
+                let cleanName = k.replace('RECIPE:::', '');
+                let is3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
+                
+                if (!is3D) {
+                    if(bType === 'Prototype') inventoryDB[k].prototype_produced_qty = (inventoryDB[k].prototype_produced_qty||0) + req;
+                    else inventoryDB[k].produced_qty += req;
+                }
+                upsKeys.add(k);
+            });
+
             let fgiKey = `RECIPE:::${currentWO.product_name}`;
             if(!inventoryDB[fgiKey]) inventoryDB[fgiKey]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
             
-            let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
             if(bType === 'Prototype') inventoryDB[fgiKey].prototype_produced_qty = (inventoryDB[fgiKey].prototype_produced_qty||0) + currentWO.qty;
             else inventoryDB[fgiKey].produced_qty += currentWO.qty;
+            upsKeys.add(fgiKey);
             
-            await supabaseClient.from('inventory_consumption').upsert([{item_key:fgiKey, consumed_qty: inventoryDB[fgiKey].consumed_qty, manual_adjustment: inventoryDB[fgiKey].manual_adjustment, produced_qty: inventoryDB[fgiKey].produced_qty, sold_qty: inventoryDB[fgiKey].sold_qty, min_stock: inventoryDB[fgiKey].min_stock, scrap_qty: inventoryDB[fgiKey].scrap_qty, prototype_consumed_qty: inventoryDB[fgiKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[fgiKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[fgiKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[fgiKey].prototype_produced_qty||0}], {onConflict:'item_key'}); 
+            let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
+            if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
         }
         
         const updateData = {status: newStatus};
