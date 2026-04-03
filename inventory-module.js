@@ -7,9 +7,10 @@ function renderFgiTable() {
     let ths = ` <th class="${currentFgiSort.column==='n'?'sorted-'+currentFgiSort.direction:''}" onclick="sortFGI('n')">Product Name</th> <th class="${currentFgiSort.column==='b'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('b')" style="border-bottom:2px solid #3b82f6;">Built (Prod)</th> <th class="${currentFgiSort.column==='pb'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('pb')" style="border-bottom:2px solid #8b5cf6;">Built (Proto)</th> <th class="${currentFgiSort.column==='sold'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('sold')" style="border-bottom:2px solid #ef4444;">Sold</th> <th class="${currentFgiSort.column==='s'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('s')" style="border-bottom:2px solid #10b981;">Stock</th> <th class="${currentFgiSort.column==='rc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('rc')">COGS</th> <th class="${currentFgiSort.column==='lc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('lc')">Labor</th> <th class="${currentFgiSort.column==='tc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tc')">True COGS</th> <th class="${currentFgiSort.column==='tv'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tv')">Assets</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     let a = Object.keys(productsDB).map(p => { 
-        let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0, prototype_produced_qty: 0}; 
+        let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0, consumed_qty: 0, prototype_produced_qty: 0, scrap_qty: 0, manual_adjustment: 0}; 
         let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; 
-        let s = b - sold; 
+        let consumed = parseFloat(i.consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
+        let s = b - sold - consumed - scrap + adj; 
         let breakdown = calculateProductBreakdown(p);
         let tv = s * breakdown.total;
         let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
@@ -52,7 +53,13 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         if(mode === 'produced_qty') { payload.produced_qty = Math.abs(v); if(payload.produced_qty === inventoryDB[rKey].produced_qty) return; }
         else if(mode === 'prototype_produced_qty') { payload.prototype_produced_qty = Math.abs(v); if(payload.prototype_produced_qty === (inventoryDB[rKey].prototype_produced_qty||0)) return; }
         else if(mode === 'sold_qty') { payload.sold_qty = Math.abs(v); if(payload.sold_qty === inventoryDB[rKey].sold_qty) return; }
-        else if(mode === 'fgi_stock') { payload.produced_qty = v + inventoryDB[rKey].sold_qty; if(payload.produced_qty === inventoryDB[rKey].produced_qty) return; }
+        else if(mode === 'fgi_stock') { 
+            let c = parseFloat(inventoryDB[rKey].consumed_qty) || 0;
+            let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
+            let ma = parseFloat(inventoryDB[rKey].manual_adjustment) || 0;
+            payload.produced_qty = v + inventoryDB[rKey].sold_qty + c + sq - ma; 
+            if(payload.produced_qty === inventoryDB[rKey].produced_qty) return; 
+        }
         else if(mode === 'consumed_qty') { payload.consumed_qty = Math.abs(v); if(payload.consumed_qty === c) return; } 
         else if(mode === 'prototype_consumed_qty') { payload.prototype_consumed_qty = Math.abs(v); if(payload.prototype_consumed_qty === (inventoryDB[rKey].prototype_consumed_qty||0)) return; } 
         else if(mode === 'assembly_consumed_qty') { payload.assembly_consumed_qty = Math.abs(v); if(payload.assembly_consumed_qty === (inventoryDB[rKey].assembly_consumed_qty||0)) return; } 
