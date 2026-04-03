@@ -117,20 +117,20 @@ function renderProductList() {
 
     let html = "";
     if(retailProds.length > 0) {
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-retail', this.querySelector('span'))">RETAIL PRODUCTS <span>▼</span></li>`;
-        html += `<div id="cat-retail" style="display:block;">`;
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-retail', this.querySelector('span'))">RETAIL PRODUCTS <span>▶</span></li>`;
+        html += `<div id="cat-retail" style="display:none;">`;
         retailProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
     if(subProds.length > 0) {
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-sub', this.querySelector('span'))">SUB-ASSEMBLIES <span>▼</span></li>`;
-        html += `<div id="cat-sub" style="display:block;">`;
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-sub', this.querySelector('span'))">SUB-ASSEMBLIES <span>▶</span></li>`;
+        html += `<div id="cat-sub" style="display:none;">`;
         subProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
     if(realPrintProds.length > 0) {
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-3d', this.querySelector('span'))">3D PRINTS <span>▼</span></li>`;
-        html += `<div id="cat-3d" style="display:block;">`;
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-3d', this.querySelector('span'))">3D PRINTS <span>▶</span></li>`;
+        html += `<div id="cat-3d" style="display:none;">`;
         realPrintProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
