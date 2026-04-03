@@ -100,7 +100,8 @@ function checkWORouting() {
     rArea.style.display = 'block'; let h = "";
     keys.forEach(k => {
         let req = subsNeeded[k]; let invKey = `RECIPE:::${k}`; let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
-        let onHand = (i.produced_qty||0) + (i.prototype_produced_qty||0) - (i.consumed_qty||0) - (i.scrap_qty||0) - (i.sold_qty||0) + (i.manual_adjustment||0); 
+        let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
+        let onHand = (i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb);
         let autoPull = Math.min(req, Math.max(0, onHand)); let autoBuild = req - autoPull;
         let safeK = k.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g, '');
         h += `<div class="route-row" data-subname="${k}">
@@ -260,7 +261,8 @@ async function validateAndCreateWO() {
 
         Object.keys(exactDeductions.pulls).forEach(k => {
             let req = exactDeductions.pulls[k]; let i = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
-            let onHand = (i.produced_qty||0) + (i.prototype_produced_qty||0) - (i.consumed_qty||0) - (i.scrap_qty||0) - (i.sold_qty||0) + (i.manual_adjustment||0);
+            let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
+            let onHand = (i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb);
             if(req > onHand) { let name = k.replace('RECIPE:::', ''); shortfalls.push(`<li><strong>⚙️ ${name}</strong>: Need to pull ${req.toFixed(2)}, Shelf has ${onHand.toFixed(2)}</li>`); }
         });
 
@@ -291,7 +293,8 @@ async function validateAndCreateWO() {
             
             // Calculate active on-shelf stock for this exact 3D printed component
             let rawOnHand = isLegacyRaw ? ((catalogCache[part] ? catalogCache[part].totalQty : 0) - (i.consumed_qty||0) - (i.scrap_qty||0) + (i.manual_adjustment||0)) : 0;
-            let onHand = isLegacyRaw ? rawOnHand : ((i.produced_qty||0) + (i.prototype_produced_qty||0) - (i.sold_qty||0) - (i.consumed_qty||0) - (i.scrap_qty||0) + (i.manual_adjustment||0));
+            let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
+            let onHand = isLegacyRaw ? rawOnHand : ((i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb));
             
             let amountToPrint = totalNeeded;
             if (onHand > 0) {
@@ -677,8 +680,9 @@ async function advanceWO(newStatus) {
                     let prefix = isLegacyRaw ? "" : "RECIPE:::";
 
                     let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
-                    let rawOnHand = isLegacyRaw ? ((catalogCache[job] ? catalogCache[job].totalQty : 0) - i.consumed_qty - i.scrap_qty + i.manual_adjustment) : 0;
-                    let onHand = isLegacyRaw ? rawOnHand : (i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment);
+                    let rawOnHand = isLegacyRaw ? ((catalogCache[job] ? catalogCache[job].totalQty : 0) - (i.consumed_qty||0) - (i.scrap_qty||0) + (i.manual_adjustment||0)) : 0;
+                    let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
+                    let onHand = isLegacyRaw ? rawOnHand : ((i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb));
                     
                     let amountToPrint = totalNeeded;
                     if (onHand > 0) amountToPrint = Math.max(0, totalNeeded - onHand);

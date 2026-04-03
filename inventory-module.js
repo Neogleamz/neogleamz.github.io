@@ -1,4 +1,7 @@
 // --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
+window.fgiCategoryState = window.fgiCategoryState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true };
+window.toggleFgiCategory = function(cat) { window.fgiCategoryState[cat] = !window.fgiCategoryState[cat]; renderFgiTable(); };
+
 function sortFGI(c) { if(isResizing) return; currentFgiSort = { column: c, direction: currentFgiSort.column===c && currentFgiSort.direction==='asc' ? 'desc' : 'asc' }; renderFgiTable(); }
 function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
 
@@ -9,8 +12,8 @@ function renderFgiTable() {
     let a = Object.keys(productsDB).map(p => { 
         let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0, consumed_qty: 0, prototype_produced_qty: 0, scrap_qty: 0, manual_adjustment: 0}; 
         let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; 
-        let consumed = parseFloat(i.consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
-        let s = b + pb - sold - consumed - scrap + adj; 
+        let c_prod = parseFloat(i.production_consumed_qty) || 0; let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
+        let s = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
         let breakdown = calculateProductBreakdown(p);
         let tv = s * breakdown.total;
         let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
@@ -18,11 +21,23 @@ function renderFgiTable() {
     });
     if(a.length===0){ h += "<tr><td colspan='9' style='text-align:center;'>No finished goods.</td></tr>"; }
     else {
-        a.sort((x,y) => { let u = x[currentFgiSort.column]; let v = y[currentFgiSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentFgiSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentFgiSort.direction==='asc'?-1:1; if(u>v) return currentFgiSort.direction==='asc'?1:-1; return 0; });
-        a.forEach(x => { 
-            let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); 
-            let icon = x.is3D ? "🖨️" : (x.isSub ? "⚙️" : "📦");
-            h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${icon} ${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="font-weight:bold; color:#10b981;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:var(--text-muted);">$${x.rc.toFixed(2)}</td><td class="text-right" style="color:var(--text-muted);">$${x.lc.toFixed(2)}</td><td class="text-right" style="font-weight:bold;">$${x.tc.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
+        let sortFn = (x,y) => { let u = x[currentFgiSort.column]; let v = y[currentFgiSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentFgiSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentFgiSort.direction==='asc'?-1:1; if(u>v) return currentFgiSort.direction==='asc'?1:-1; return 0; };
+        let groups = [
+            { id: 'cat-retail', name: 'Retail Products', icn: '📦', items: a.filter(x => !x.is3D && !x.isSub).sort(sortFn) },
+            { id: 'cat-sub', name: 'Sub-Assemblies', icn: '⚙️', items: a.filter(x => x.isSub && !x.is3D).sort(sortFn) },
+            { id: 'cat-print', name: '3D Prints', icn: '🖨️', items: a.filter(x => x.is3D).sort(sortFn) }
+        ];
+
+        groups.forEach(g => {
+            if(g.items.length === 0) return;
+            let isExp = window.fgiCategoryState[g.id] !== false;
+            let chevron = isExp ? '▼' : '▶';
+            h += `<tr class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><td colspan="9" style="font-weight:900; color:var(--primary-color); padding:10px 15px; font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1);"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></td></tr>`;
+            
+            g.items.forEach(x => { 
+                let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); 
+                h += `<tr class="${g.id}" style="display:${isExp?'table-row':'none'};"><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="font-weight:bold; color:#10b981;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:var(--text-muted);">$${x.rc.toFixed(2)}</td><td class="text-right" style="color:var(--text-muted);">$${x.lc.toFixed(2)}</td><td class="text-right" style="font-weight:bold;">$${x.tc.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
+            });
         });
     }
     wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('fgiTableWrap');
@@ -57,10 +72,11 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
             let p = parseFloat(inventoryDB[rKey].produced_qty) || 0;
             let pb = parseFloat(inventoryDB[rKey].prototype_produced_qty) || 0;
             let sold = parseFloat(inventoryDB[rKey].sold_qty) || 0;
-            let c = parseFloat(inventoryDB[rKey].consumed_qty) || 0;
+            let c_prod = parseFloat(inventoryDB[rKey].production_consumed_qty) || 0;
+            let c_proto = parseFloat(inventoryDB[rKey].prototype_consumed_qty) || 0;
             let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
             let a = parseFloat(inventoryDB[rKey].manual_adjustment) || 0;
-            payload.manual_adjustment = v - (p + pb - sold - c - sq); 
+            payload.manual_adjustment = v - (p - sold - c_prod - sq - Math.max(0, c_proto - pb)); 
             if(payload.manual_adjustment === a) return; 
         }
         else if(mode === 'consumed_qty') { payload.consumed_qty = Math.abs(v); if(payload.consumed_qty === c) return; } 
