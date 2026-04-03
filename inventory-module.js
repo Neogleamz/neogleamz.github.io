@@ -7,7 +7,7 @@ function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c,
 
 function renderFgiTable() {
     const wrap = document.getElementById('fgiTableWrap'); if(!wrap) return;
-    let ths = ` <th class="${currentFgiSort.column==='n'?'sorted-'+currentFgiSort.direction:''}" onclick="sortFGI('n')">Product Name</th> <th class="${currentFgiSort.column==='b'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('b')" style="border-bottom:2px solid #3b82f6;">Built (Prod)</th> <th class="${currentFgiSort.column==='pb'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('pb')" style="border-bottom:2px solid #8b5cf6;">Built (Proto)</th> <th class="${currentFgiSort.column==='sold'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('sold')" style="border-bottom:2px solid #ef4444;">Sold</th> <th class="${currentFgiSort.column==='s'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('s')" style="border-bottom:2px solid #10b981;">Stock</th> <th class="${currentFgiSort.column==='rc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('rc')">COGS</th> <th class="${currentFgiSort.column==='lc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('lc')">Labor</th> <th class="${currentFgiSort.column==='tc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tc')">True COGS</th> <th class="${currentFgiSort.column==='tv'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tv')">Assets</th> `;
+    let ths = ` <th class="${currentFgiSort.column==='n'?'sorted-'+currentFgiSort.direction:''}" onclick="sortFGI('n')">Product Name</th> <th class="${currentFgiSort.column==='b'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('b')" style="border-bottom:2px solid #3b82f6;">Built (Prod)</th> <th class="${currentFgiSort.column==='pb'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('pb')" style="border-bottom:2px solid #8b5cf6;">Built (Proto)</th> <th class="${currentFgiSort.column==='sold'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('sold')" style="border-bottom:2px solid #ef4444;">Sold</th> <th class="${currentFgiSort.column==='s'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('s')" style="border-bottom:2px solid #10b981;">Stock</th> <th class="${currentFgiSort.column==='ms'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('ms')" style="border-bottom:2px solid #f97316;">Min Stock</th> <th class="${currentFgiSort.column==='tc'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tc')">True COGS</th> <th class="${currentFgiSort.column==='tv'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tv')">Assets</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     let a = Object.keys(productsDB).map(p => { 
         let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0, consumed_qty: 0, prototype_produced_qty: 0, scrap_qty: 0, manual_adjustment: 0}; 
@@ -17,7 +17,8 @@ function renderFgiTable() {
         let breakdown = calculateProductBreakdown(p);
         let tv = s * breakdown.total;
         let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
-        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, rc: breakdown.raw, lc: breakdown.labor, tc: breakdown.total, tv: tv, isSub: !!isSubassemblyDB[p], is3D: is3D }; 
+        let ms = parseFloat(i.min_stock) || 0;
+        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, ms: ms, tc: breakdown.total, tv: tv, isSub: !!isSubassemblyDB[p], is3D: is3D }; 
     });
     if(a.length===0){ h += "<tr><td colspan='9' style='text-align:center;'>No finished goods.</td></tr>"; }
     else {
@@ -32,11 +33,11 @@ function renderFgiTable() {
             if(g.items.length === 0) return;
             let isExp = window.fgiCategoryState[g.id] !== false;
             let chevron = isExp ? '▼' : '▶';
-            h += `<tr class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><td colspan="9" style="font-weight:900; color:var(--primary-color); padding:10px 15px; font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1);"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></td></tr>`;
+            h += `<tr class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><td colspan="8" style="font-weight:900; color:var(--primary-color); padding:10px 15px; font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1);"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></td></tr>`;
             
             g.items.forEach(x => { 
                 let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); 
-                h += `<tr class="${g.id}" style="display:${isExp?'table-row':'none'};"><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="font-weight:bold; color:#10b981;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:var(--text-muted);">$${x.rc.toFixed(2)}</td><td class="text-right" style="color:var(--text-muted);">$${x.lc.toFixed(2)}</td><td class="text-right" style="font-weight:bold;">$${x.tc.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
+                h += `<tr class="${g.id}" style="display:${isExp?'table-row':'none'};"><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="font-weight:bold; color:#10b981;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold;">$${x.tc.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
             });
         });
     }
@@ -162,11 +163,56 @@ function printReorderReport() {
         html += `<table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
         
         let items = [];
+        let rawDemand = {}; 
+        
+        // Phase 1: Track dependent Raw Material demand caused by explicit FGI shortfalls
+        Object.keys(productsDB).forEach(pName => {
+            let k = `RECIPE:::${pName}`;
+            let i = inventoryDB[k] || {};
+            let b = parseFloat(i.produced_qty) || 0; 
+            let pb = parseFloat(i.prototype_produced_qty) || 0; 
+            let sold = parseFloat(i.sold_qty) || 0; 
+            let c_prod = parseFloat(i.production_consumed_qty) || 0; 
+            let c_proto = parseFloat(i.prototype_consumed_qty) || 0; 
+            let scrap = parseFloat(i.scrap_qty) || 0; 
+            let adj = parseFloat(i.manual_adjustment) || 0;
+            
+            let s = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+            let ms = parseFloat(i.min_stock) || 0;
+            
+            if (ms > 0 && s < ms) {
+                let short = ms - s;
+                // Explode missing FGI into dependent Raw Demands
+                function explode(prod, neededQty) {
+                    if(!productsDB[prod]) return;
+                    productsDB[prod].forEach(item => {
+                        let subK = item.item_key || item.di_item_id || item.name;
+                        let qtyPer = parseFloat(item.quantity || item.qty) || 1;
+                        let totalNeeded = qtyPer * neededQty;
+                        if(subK.startsWith('RECIPE:::')) {
+                            explode(subK.replace('RECIPE:::', ''), totalNeeded);
+                        } else {
+                            rawDemand[subK] = (rawDemand[subK] || 0) + totalNeeded;
+                        }
+                    });
+                }
+                explode(pName, short);
+            }
+        });
+
+        // Phase 2: Compute overall Raw Material shortfalls (Native Min Stock + FGI Dependent Demand)
         Object.keys(catalogCache).forEach(k => {
             let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k] || {};
             let s = c.totalQty - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
-            let ms = i.min_stock || 0;
-            if(ms > 0 && s < ms) { let short = ms - s; items.push({nn: c.neoName, n: c.itemName, sp: c.spec, s: s, ms: ms, short: short, cost: short * (c.avgUnitCost || 0)}); }
+            
+            let explicitMs = parseFloat(i.min_stock) || 0;
+            let depDemand = parseFloat(rawDemand[k]) || 0;
+            let targetStock = explicitMs + depDemand;
+            
+            if(targetStock > 0 && s < targetStock) { 
+                let short = targetStock - s; 
+                items.push({nn: c.neoName, n: c.itemName, sp: c.spec, s: s, ms: targetStock, short: short, cost: short * (c.avgUnitCost || 0)}); 
+            }
         });
 
         if(items.length === 0) { html += `<tr><td colspan="7" style="text-align:center; padding: 20px;">All monitored stock levels are optimal.</td></tr>`; } 
