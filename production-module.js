@@ -351,6 +351,42 @@ function generateBatchOrderReport() {
     if(!hasPulls) h += `<tr><td colspan="4" style="text-align:center; padding:10px; color:var(--text-muted);">No sub-assemblies pulled.</td></tr>`;
     h += `</tbody></table>`;
 
+    h += `
+        <h3 style="color:var(--primary-color); border-bottom:1px solid var(--border-color); padding-bottom:10px;">Sub-Assemblies To Build (Production Targets)</h3>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
+            <thead>
+                <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
+                    <th style="padding:8px;">Sub-Assembly</th>
+                    <th style="padding:8px; text-align:right;">Target Qty</th>
+                    <th style="padding:8px; text-align:right;">Current Stock</th>
+                    <th style="padding:8px; text-align:right;">Estimated Total</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    let hasBuilds = false;
+    Object.keys(exactDeductions.built_subs).forEach(k => {
+        hasBuilds = true;
+        let req = exactDeductions.built_subs[k]; 
+        let i = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, prototype_produced_qty:0, prototype_consumed_qty:0, scrap_qty:0, manual_adjustment:0};
+        let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
+        let onHand = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+        let estTotal = onHand + req;
+        
+        let name = k.replace('RECIPE:::', '');
+        
+        h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${name}</td>
+            <td style="padding:8px; text-align:right; color:#3b82f6; font-weight:bold;">${req.toFixed(2)}</td>
+            <td style="padding:8px; text-align:right; color:var(--text-main);">${onHand.toFixed(2)}</td>
+            <td style="padding:8px; text-align:right; font-weight:bold; color:#10b981;">+${estTotal.toFixed(2)}</td>
+        </tr>`;
+    });
+
+    if(!hasBuilds) h += `<tr><td colspan="4" style="text-align:center; padding:10px; color:var(--text-muted);">No sub-assemblies built.</td></tr>`;
+    h += `</tbody></table>`;
+
     document.getElementById('batchOrderReportContent').innerHTML = h;
     document.getElementById('newWOModal').style.display = 'none';
     document.getElementById('batchOrderReportModal').style.display = 'flex';
