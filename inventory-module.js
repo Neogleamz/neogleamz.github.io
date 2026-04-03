@@ -233,7 +233,7 @@ function printReorderReport() {
         }
 
         // --- Production Targets Build List (Tree View) ---
-        html += `<h2>🏭 Production Targets Build List</h2><div style="margin-bottom:20px; padding:15px; background:#fffbdd; border:1px solid #fde047; border-radius:5px; font-size:12px;"><strong>Note:</strong> "On Hand" indicates physical stock at the time of report generation. It does not dynamically deplete for shared components across multiple builds. Refer to the Low Inventory Supply Chain Report below for aggregate raw material ordering deficits.</div>`;
+        html += `<h3>🏭 Production Targets Build List</h3><div style="margin-bottom:20px; padding:15px; background:#fffbdd; border:1px solid #fde047; border-radius:5px; font-size:12px;"><strong>Note:</strong> "On Hand" indicates physical stock at the time of report generation. It does not dynamically deplete for shared components across multiple builds. Refer to the Low Inventory Supply Chain Report below for aggregate raw material ordering deficits.</div>`;
 
         let deficits = [];
         Object.keys(productsDB).forEach(p => {
@@ -251,7 +251,7 @@ function printReorderReport() {
         });
 
         if (deficits.length === 0) {
-            html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px;">✅ All production products are at or above optimal stock levels.</p>`;
+            html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px; background:#f8fafc;">✅ All production products are at or above optimal stock levels.</p>`;
         } else {
             function getStockLocal(k, isProd) {
                 let i = inventoryDB[k] || {};
@@ -278,7 +278,7 @@ function printReorderReport() {
                     let isProd = subK.startsWith('RECIPE:::');
                     let stock = getStockLocal(subK, isProd);
                     let ok = stock >= totalReq;
-                    let statStr = ok ? `<span class="stock-badge" style="background:#d1fae5; color:#065f46;">✅ OK</span>` : `<span class="stock-badge" style="background:#fee2e2; color:#991b1b;">🔴 SHORT ${ (totalReq - stock).toFixed(2).replace(/\.?0+$/,'') }</span>`;
+                    let statStr = ok ? `<span class="stock-badge" style="background:#d1fae5; color:#065f46; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">✅ OK</span>` : `<span class="stock-badge" style="background:#fee2e2; color:#991b1b; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">🔴 SHORT ${ (totalReq - stock).toFixed(2).replace(/\.?0+$/,'') }</span>`;
                     
                     let displayName = subK;
                     if (isProd) {
@@ -311,9 +311,9 @@ function printReorderReport() {
             });
         }
         
-        html += `<br><hr style="border:none; border-top:2px solid #cbd5e1; margin:30px 0;">`;
+        html += `<br><hr style="border:none; border-top:1px solid #cbd5e1; margin:20px 0;">`;
 
-        html += `<h3>📦 Supply Chain Deficits (Order These)</h3><table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Dep. Req</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
+        html += `<h3>📦 Supply Chain Deficits (Order These)</h3>`;
         
         Object.keys(purchaseTargets).forEach(k => {
             let c = catalogCache[k] || {}; let f = fmtKey(k); let i = inventoryDB[k] || {};
@@ -324,12 +324,16 @@ function printReorderReport() {
             items.push({nn: c.neoName, n: c.itemName, sp: c.spec, s: currentStock, ms: ms, short: short, depDemand: depDemand, cost: short * (c.avgUnitCost || 0)}); 
         });
 
-        if(items.length === 0) { html += `<tr><td colspan="8" style="text-align:center; padding: 20px;">All monitored raw stock levels are optimal.</td></tr>`; } 
+        if(items.length === 0) { 
+            html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px; background:#f8fafc;">✅ All monitored raw stock levels are optimal.</p>`; 
+        } 
         else {
+            html += `<table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Dep. Req</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
             let grandTotal = 0;
             items.sort((a,b) => b.cost - a.cost).forEach(x => { grandTotal += x.cost; let displaySpec = x.sp === '(Mixed Specs)' ? '' : x.sp; html += `<tr><td>${x.nn || ''}</td><td>${x.n}</td><td>${displaySpec}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td style="color:#64748b;">${x.depDemand > 0 ? x.depDemand.toFixed(2).replace(/\.?0+$/,'') : '-'}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td><td>$${x.cost.toFixed(2)}</td></tr>`; });
             html += `<tr><td colspan="7" style="text-align:right; font-weight:bold; padding-top: 15px;">Total Capital Required:</td><td style="font-weight:bold; padding-top: 15px;">$${grandTotal.toFixed(2)}</td></tr>`;
+            html += `</tbody></table>`;
         }
-        html += `</tbody></table></body></html>`; let win = window.open('', '', 'width=900,height=700'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
+        html += `</body></html>`; let win = window.open('', '', 'width=900,height=700'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
     } catch (e) { sysLog(e.message, true); }
 }
