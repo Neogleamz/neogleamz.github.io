@@ -10,7 +10,7 @@ function renderFgiTable() {
         let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0, consumed_qty: 0, prototype_produced_qty: 0, scrap_qty: 0, manual_adjustment: 0}; 
         let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; 
         let consumed = parseFloat(i.consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
-        let s = b - sold - consumed - scrap + adj; 
+        let s = b + pb - sold - consumed - scrap + adj; 
         let breakdown = calculateProductBreakdown(p);
         let tv = s * breakdown.total;
         let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
@@ -54,11 +54,14 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         else if(mode === 'prototype_produced_qty') { payload.prototype_produced_qty = Math.abs(v); if(payload.prototype_produced_qty === (inventoryDB[rKey].prototype_produced_qty||0)) return; }
         else if(mode === 'sold_qty') { payload.sold_qty = Math.abs(v); if(payload.sold_qty === inventoryDB[rKey].sold_qty) return; }
         else if(mode === 'fgi_stock') { 
+            let p = parseFloat(inventoryDB[rKey].produced_qty) || 0;
+            let pb = parseFloat(inventoryDB[rKey].prototype_produced_qty) || 0;
+            let sold = parseFloat(inventoryDB[rKey].sold_qty) || 0;
             let c = parseFloat(inventoryDB[rKey].consumed_qty) || 0;
             let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
-            let ma = parseFloat(inventoryDB[rKey].manual_adjustment) || 0;
-            payload.produced_qty = v + inventoryDB[rKey].sold_qty + c + sq - ma; 
-            if(payload.produced_qty === inventoryDB[rKey].produced_qty) return; 
+            let a = parseFloat(inventoryDB[rKey].manual_adjustment) || 0;
+            payload.manual_adjustment = v - (p + pb - sold - c - sq); 
+            if(payload.manual_adjustment === a) return; 
         }
         else if(mode === 'consumed_qty') { payload.consumed_qty = Math.abs(v); if(payload.consumed_qty === c) return; } 
         else if(mode === 'prototype_consumed_qty') { payload.prototype_consumed_qty = Math.abs(v); if(payload.prototype_consumed_qty === (inventoryDB[rKey].prototype_consumed_qty||0)) return; } 
