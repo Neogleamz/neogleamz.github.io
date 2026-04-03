@@ -62,7 +62,7 @@ function renderPrintQueue() {
     } else {
         printQueueDB.forEach((job, index) => {
             if (job.status === 'Archived') return;
-            let cleanPartName = job.part_name.split(':::')[0];
+            let cleanPartName = job.part_name.startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : job.part_name.split(':::')[0];
             const catalogItem = catalogByName[cleanPartName];
             let printTimePer = typeof getPrintTime === 'function' ? getPrintTime(cleanPartName) : 0;
             const totalTime = printTimePer * job.qty;
@@ -135,7 +135,7 @@ function renderActivePrintJob(id) {
     document.getElementById('printMainArea').style.display = 'block';
     
     // Simplified human-readable name for title
-    let cleanPartName = job.part_name.split(':::')[0];
+    let cleanPartName = job.part_name.startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : job.part_name.split(':::')[0];
     const catalogItem = catalogByName[cleanPartName];
     const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
     const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
@@ -194,7 +194,7 @@ function renderActivePrintJob(id) {
     // SOP logic for Printing stage
     if (job.status === 'Printing' || job.status === 'Cleaned') {
         const sopList = document.getElementById('printSOPList');
-        let cleanPartName = job.part_name.split(':::')[0];
+        let cleanPartName = job.part_name.startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : job.part_name.split(':::')[0];
         const steps = sopsDB[cleanPartName] || [];
         if (steps.length === 0) {
             sopList.innerHTML = `<div style="padding:15px; color:var(--text-muted); border:1px dashed var(--border-color); border-radius:6px;">No specific 3D Print SOP found for this item.</div>`;
@@ -226,11 +226,28 @@ async function advancePrintStatus(newStatus) {
             updatePayload.completed_at = new Date().toISOString();
             updatePayload.status = 'Archived';
             
-            // 📦 INVENTORY INTEGRATION: Add the finished raw material to shelf
+            // 📦 INVENTORY INTEGRATION: Add finished good and deduct filaments (if manual job)
             const k = currentPrintJob.part_name;
+            let manualUpserts = [];
+            
             if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
             inventoryDB[k].produced_qty += (parseFloat(currentPrintJob.qty) || 0);
-            const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert({ item_key: k, ...inventoryDB[k] }, { onConflict: 'item_key' });
+
+            if (currentPrintJob.wo_id === "Manual Entry" || !currentPrintJob.wo_id) {
+                let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+                if (typeof getDirectMaterials === 'function' && productsDB[cleanPartName]) {
+                    let exactRaws = getDirectMaterials(cleanPartName, parseFloat(currentPrintJob.qty) || 1);
+                    Object.keys(exactRaws).forEach(rawK => {
+                        let req = exactRaws[rawK];
+                        if(!inventoryDB[rawK]) inventoryDB[rawK] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+                        inventoryDB[rawK].consumed_qty += req;
+                        manualUpserts.push({ item_key: rawK, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
+                    });
+                }
+            }
+
+            manualUpserts.push({ item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
+            const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert(manualUpserts, { onConflict: 'item_key' });
             if (invErr) throw new Error("Inventory update failed: " + invErr.message);
 
             // 🔄 REFRESH UI: Make sure inventory tab reflects the new stock
@@ -257,7 +274,7 @@ async function advancePrintStatus(newStatus) {
 async function deletePrintJob() {
     try {
         if (!currentPrintJob) return;
-        let cleanPartName = currentPrintJob.part_name.split(':::')[0];
+        let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
         const catalogItem = catalogByName[cleanPartName];
         const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
         let displayID = (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());
@@ -281,7 +298,7 @@ async function archiveCurrentPrint() {
     try {
         if(!currentPrintJob) return;
         if(currentPrintJob.status === 'Archived') return alert("Already archived.");
-        let cleanPartName = currentPrintJob.part_name.split(':::')[0];
+        let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
         const catalogItem = catalogByName[cleanPartName];
         const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
         let displayID = (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());
@@ -328,14 +345,11 @@ function openManualPrintModal() {
     const sel = document.getElementById('manualPrintSelect');
     if(sel) {
         sel.innerHTML = '<option value="">-- Select 3D Part --</option>';
-        Object.keys(catalogCache).sort((a,b) => {
-            let nA = catalogCache[a].neoName || catalogCache[a].itemName || a;
-            let nB = catalogCache[b].neoName || catalogCache[b].itemName || b;
-            return nA.localeCompare(nB);
+        Object.keys(productsDB).sort((a,b) => {
+            return a.localeCompare(b);
         }).forEach(k => {
-            if (catalogCache[k].is_3d_print) {
-                let name = catalogCache[k].neoName || catalogCache[k].itemName || k;
-                sel.innerHTML += `<option value="${String(k).replace(/"/g, '&quot;')}">🖨️ ${name}</option>`;
+            if (productsDB[k] && productsDB[k].is_3d_print) {
+                sel.innerHTML += `<option value="RECIPE:::${String(k).replace(/"/g, '&quot;')}">🖨️ ${k}</option>`;
             }
         });
     }

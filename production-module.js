@@ -139,24 +139,9 @@ function getDirectMaterials(name, amount) {
         let k = String(part.item_key || part.di_item_id || part.name); let q = (parseFloat(part.quantity || part.qty) || 1) * amount;
         
         if(!k.startsWith('RECIPE:::')) { 
-            let cLog = typeof catalogByName !== 'undefined' ? catalogByName[k] : null;
-            if(!cLog && typeof catalogCache !== 'undefined') {
-                cLog = Object.values(catalogCache).find(c => (c.neoName||c.itemName) === k);
-            }
-            
-            // If it's a 3D Print WITH a constructed recipe, unroll it into its Filaments
-            let rName = cLog ? (cLog.neoName || cLog.itemName) : k;
-            if (cLog && cLog.is_3d_print && productsDB[rName] && productsDB[rName].length > 0) {
-                let subDirect = getDirectMaterials(rName, q);
-                for(let pk in subDirect) {
-                    res[pk] = (res[pk] || 0) + subDirect[pk];
-                }
-            } else {
-                res[k] = (res[k] || 0) + q; 
-            }
+            res[k] = (res[k] || 0) + q; 
         }
     });
-    
     return res;
 }
 
@@ -191,14 +176,7 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
         let k = String(part.item_key || part.di_item_id || part.name || "");
         let q = (parseFloat(part.quantity || part.qty) || 1) * rootQty;
         const cleanK = k.replace('RECIPE:::', '');
-        const catalogItem = catalogByName[k] || catalogByName[cleanK];
-
-        // 1. 3D PRINTED RAW MATERIAL
-        if (catalogItem && catalogItem.is_3d_print) {
-            prints[cleanK] = (prints[cleanK] || 0) + q;
-        }
-
-        // 2. 3D PRINTED SUB-ASSEMBLY (RECIPE)
+        // 3D PRINTED SUB-ASSEMBLY (RECIPE)
         if (k.startsWith('RECIPE:::')) {
             const subName = cleanK;
             
@@ -270,7 +248,7 @@ async function validateAndCreateWO() {
         // 🖨️ AUTO-SPAWN 3D PRINT JOBS
         const printsToSpawn = find3DPrintedComponents(p, q, routingMap);
         const printPromises = Object.keys(printsToSpawn).map(part => {
-            if (typeof addPrintJob === 'function') return addPrintJob(part, printsToSpawn[part], woId);
+            if (typeof addPrintJob === 'function') return addPrintJob('RECIPE:::' + part, printsToSpawn[part], woId);
         });
         if (printPromises.length > 0) {
             sysLog(`Spawning ${printPromises.length} 3D print jobs for ${woId}...`);

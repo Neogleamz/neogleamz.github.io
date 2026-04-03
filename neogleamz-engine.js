@@ -140,7 +140,7 @@ function updateHubStats() {
 
                 function simCanBuild(recipeName, stockTracker) {
                     let tempStock = {...stockTracker};
-                    if (!productsDB[recipeName]) return false;
+                    if (!productsDB[recipeName] || productsDB[recipeName].length === 0) return false;
                     for (let comp of productsDB[recipeName]) {
                         let compKey = comp.item_key || comp.di_item_id || comp.name;
                         let reqQty = parseFloat(comp.quantity) || 1;

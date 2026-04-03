@@ -12,14 +12,15 @@ function renderFgiTable() {
         let s = b - sold; 
         let breakdown = calculateProductBreakdown(p);
         let tv = s * breakdown.total;
-        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, rc: breakdown.raw, lc: breakdown.labor, tc: breakdown.total, tv: tv, isSub: !!isSubassemblyDB[p] }; 
+        let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
+        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, rc: breakdown.raw, lc: breakdown.labor, tc: breakdown.total, tv: tv, isSub: !!isSubassemblyDB[p], is3D: is3D }; 
     });
     if(a.length===0){ h += "<tr><td colspan='9' style='text-align:center;'>No finished goods.</td></tr>"; }
     else {
         a.sort((x,y) => { let u = x[currentFgiSort.column]; let v = y[currentFgiSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentFgiSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentFgiSort.direction==='asc'?-1:1; if(u>v) return currentFgiSort.direction==='asc'?1:-1; return 0; });
         a.forEach(x => { 
             let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); 
-            let icon = x.isSub ? "⚙️" : "📦";
+            let icon = x.is3D ? "🖨️" : (x.isSub ? "⚙️" : "📦");
             h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${icon} ${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="font-weight:bold; color:#10b981;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="color:var(--text-muted);">$${x.rc.toFixed(2)}</td><td class="text-right" style="color:var(--text-muted);">$${x.lc.toFixed(2)}</td><td class="text-right" style="font-weight:bold;">$${x.tc.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
         });
     }

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.02.1816"></script>
+    <script src="system-version.js?v=v.2026.04.02.2222"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.02.1816"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.1816"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.02.2222"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.2222"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.02.1816"></script>
+    <script src="packerz-module.js?v=v.2026.04.02.2222"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -774,7 +774,7 @@
         }
     
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 4px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -801,7 +801,7 @@
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
 
         /* Multi-select styling */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
         /* Prevent select background color changes on focus/hover in some browsers */
         select:focus option {
@@ -1116,7 +1116,7 @@
     
     
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 4px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -1143,7 +1143,7 @@
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
 
         /* Multi-select styling */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
         /* Prevent select background color changes on focus/hover in some browsers */
         select:focus option {
@@ -1458,7 +1458,7 @@
     
     
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 4px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -1485,7 +1485,7 @@
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
 
         /* Multi-select styling */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
         /* Prevent select background color changes on focus/hover in some browsers */
         select:focus option {
@@ -1799,7 +1799,7 @@
     /* Legacy overrides purged - Tailwind Polyfill engine dominates */
 
     /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 4px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -1817,7 +1817,7 @@
     .toast-enter { animation: slideIn 0.3s ease-out forwards; }
 
     /* Multi-select styling */
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
     /* Prevent select background color changes on focus/hover in some browsers */
     select:focus option {
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.1816"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.2222"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -1951,25 +1951,17 @@
                         <div><label>NEOGLEAMZ PRODUCT</label><input id="m_neo_prod" type="text" placeholder="e.g., Soulz"></div>
                         <div><label>ITEM NAME (RAW)</label><input id="m_name" type="text" placeholder="e.g., Bulk Wire"></div>
                         <div><label>SPECIFICATION</label><input id="m_spec" type="text" placeholder="e.g., 50m"></div>
-                        <div style="flex: 0.5; min-width: 80px;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
-                        <div style="flex: 0.5; min-width: 80px;"><label>Multiplier</label><input id="m_mult" type="number" step="any" min="1" value="1"></div>
-                        <div style="flex: 0.5; min-width: 80px;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
-                        <div style="flex: 0.5; min-width: 70px; display:flex; flex-direction:column; align-items:center;">
-                            <label>3D Print</label>
-                            <label style="margin-bottom:0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; height: 35px;" title="Check if this is a 3D Printed Part">
-                                <input id="m_is_3d" type="checkbox" style="width:18px; height:18px; margin:0; cursor:pointer;"> 
-                                <span style="font-size: 24px; line-height: 1;">🖨️</span> 
-                            </label>
-                        </div>
-                        <div style="flex: 0.5; min-width: 70px; display:flex; flex-direction:column; align-items:center;">
+                        <div style="flex: 0.5; min-width: 70px;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
+                        <div style="flex: 0.5; min-width: 70px;"><label>Multiplier</label><input id="m_mult" type="number" step="any" min="1" value="1"></div>
+                        <div style="flex: 0.5; min-width: 70px;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
+                        <div style="flex: 0; min-width: 50px; display:flex; flex-direction:column; align-items:center;">
                             <label>Filament</label>
-                            <label style="margin-bottom:0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; height: 35px;" title="Check if this is a Raw Filament source">
-                                <input id="m_is_filament" type="checkbox" style="width:18px; height:18px; margin:0; cursor:pointer;"> 
-                                <span style="font-size: 24px; line-height: 1;">🧵</span> 
+                            <label style="margin-bottom:0; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; height: 35px;" title="Check if this is a Raw Filament spool">
+                                <input id="m_is_filament" type="checkbox" style="width:16px; height:16px; margin:0; cursor:pointer;"> 
+                                <span style="font-size: 18px; line-height: 1;">🧵</span> 
                             </label>
                         </div>
-                        <div style="flex: 0.5; min-width: 80px;"><label>Print Time (m)</label><input id="m_print_time" type="number" step="1" min="0" placeholder="Mins"></div>
-                        <div style="flex: 0.5; min-width: 80px;"><label>Print Grams</label><input id="m_print_grams" type="number" step="any" min="0" placeholder="Grams"></div>
+                        <button class="btn-blue" style="padding: 8px 10px; font-size: 13px; font-weight: bold; width:auto; height:35px; margin-right:5px;" onclick="autofillNeoNames()">🪄 Auto-Fill Ledger</button>
                         <button class="btn-green" style="padding: 8px 15px; font-size: 13px; font-weight: bold; width:auto; height:35px;" onclick="addManualItem()">+ Add Row</button>
                     </div>
                     <div class="table-wrap" id="simpleResults" style="flex-grow:1;"></div>
@@ -2060,6 +2052,14 @@
                             <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
                                 <label style="font-size:11px; font-weight:bold; color:#f59e0b; cursor:pointer;" for="isSubassemblyInput">⚙️ Sub-Assembly</label>
                                 <input type="checkbox" id="isSubassemblyInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
+                                <label style="font-size:11px; font-weight:bold; color:#38bdf8; cursor:pointer;" for="is3dPrintInput">🖨️ 3D Print</label>
+                                <input type="checkbox" id="is3dPrintInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <label style="font-size:11px; font-weight:bold; color:#38bdf8;">Print Time (m)</label>
+                                <input type="number" id="recipePrintTimeInput" style="width:70px; padding:4px; border-color:#38bdf8;" min="0" step="any" onchange="updateLaborCosts()">
                             </div>
 
                             <div style="display:flex; flex-direction:column; align-items:flex-end;">
@@ -3100,7 +3100,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.02.1816"></script>
+    <script src="socialz-module.js?v=v.2026.04.02.2222"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3807,7 +3807,26 @@
     
     function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
     async function updateDBCell(cell, rowKey, uiCol, isN) { try { let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } } let dbCol = colMap[uiCol]; if(!dbCol) return; sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey); if (r && isN) { let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0; if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; } } let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000); if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); } setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; } }
-    async function addManualItem() { try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; const is3d = document.getElementById('m_is_3d').checked; const isFilament = document.getElementById('m_is_filament').checked; const printTime = parseFloat(document.getElementById('m_print_time').value) || 0; const printGrams = parseFloat(document.getElementById('m_print_grams').value) || 0; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); let payload = { is_3d_print: is3d, is_filament: isFilament, print_time_mins: printTime, print_grams: printGrams }; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = payload[dbCol] || ""; } else { if (payload[dbCol] === undefined) payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost','m_print_time', 'm_print_grams'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; document.getElementById('m_is_3d').checked = false; document.getElementById('m_is_filament').checked = false; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); } }
+    
+    function autofillNeoInfo() {
+        let rawName = document.getElementById('m_name').value.trim().toLowerCase();
+        let specStr = document.getElementById('m_spec').value.trim().toLowerCase();
+        if(!rawName) return alert("Please enter an Item Name (RAW) first.");
+        
+        for(let k in catalogCache) {
+            let entry = catalogCache[k];
+            let eName = (entry.itemName || "").toLowerCase();
+            let eSpec = (entry.spec || "").toLowerCase();
+            
+            if(eName === rawName && eSpec === specStr) {
+                if(entry.neoName) document.getElementById('m_neo_name').value = entry.neoName;
+                if(entry.neoProd) document.getElementById('m_neo_prod').value = entry.neoProd;
+                return;
+            }
+        }
+        alert("No exact matching Item Name + Spec found in the ledger to map Neo data from.");
+    }
+    async function addManualItem() { try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; const isFilament = document.getElementById('m_is_filament').checked; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); let payload = { is_filament: isFilament }; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = payload[dbCol] || ""; } else { if (payload[dbCol] === undefined) payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; document.getElementById('m_is_filament').checked = false; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); } }
     async function autofillNeoNames() { if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); setSysProgress(20, 'working'); try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neogleamz Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neogleamz Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'), 3000; }); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); } }
 
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
@@ -3918,9 +3937,12 @@
             let retailRecipes = []; let subRecipes = [];
             Object.keys(productsDB).sort().forEach(p => {
                 let cost = getEngineTrueCogs(p).toFixed(2);
-                let htmlStr = `<option value="RECIPE:::${p}">[Product] ${p}   💰 $${cost}/unit</option>`;
-                if(isSubassemblyDB[p]) subRecipes.push(htmlStr.replace('[Product]', '⚙️'));
-                else retailRecipes.push(htmlStr.replace('[Product]', '📦'));
+                let pData = productsDB[p] || {};
+                let iconStr = pData.is_3d_print ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦');
+                let htmlStr = `<option value="RECIPE:::${p}">[Product] ${p}   💰 $${cost}/unit</option>`.replace('[Product]', iconStr);
+                if(pData.is_3d_print) subRecipes.push(htmlStr);
+                else if(isSubassemblyDB[p]) subRecipes.push(htmlStr);
+                else retailRecipes.push(htmlStr);
             });
 
             let recipesHtml = `<optgroup label="📦 RETAIL PRODUCTS">${retailRecipes.join('')}</optgroup>`;
@@ -3931,15 +3953,15 @@
             const ps = document.getElementById('partSelector'); if(ps) { ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipesHtml + raws; partSelectorObserver.observe(ps); }
             
             // Batch builds and routing can use all products
-            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
-            const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
+            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
+            const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
             // (SOP dropdown now handled in openSOPMasterModal)
             
             // Aliases can link to anything
-            const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = '<option value="">-- Select Neogleamz Recipe --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${isSubassemblyDB[p] ? '⚙️' : '📦'} ${p}</option>`).join(''); 
+            const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = '<option value="">-- Select Neogleamz Recipe --</option>' + Object.keys(productsDB).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
             
             // Manual sale SHOULD NOT show sub-assemblies
-            const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = '<option value="">-- Select Product Sold --</option>' + Object.keys(productsDB).filter(p => !isSubassemblyDB[p]).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">📦 ${p}</option>`).join(''); 
+            const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = '<option value="">-- Select Product Sold --</option>' + Object.keys(productsDB).filter(p => !isSubassemblyDB[p]).sort().map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : '📦'} ${p}</option>`).join(''); 
             
             // Packerz Blueprint Admin Population
             if(typeof initPackerzAdmin === 'function') initPackerzAdmin();
@@ -4023,15 +4045,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.02.1816"></script>
-<script src="system-tools-module.js?v=v.2026.04.02.1816"></script>
-<script src="bom-module.js?v=v.2026.04.02.1816"></script>
-<script src="inventory-module.js?v=v.2026.04.02.1816"></script>
-<script src="production-module.js?v=v.2026.04.02.1816"></script>
-<script src="sales-module.js?v=v.2026.04.02.1816"></script>
-<script src="analytics-module.js?v=v.2026.04.02.1816"></script>
-<script src="ceo-module.js?v=v.2026.04.02.1816"></script>
-<script src="print-module.js?v=v.2026.04.02.1816"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.02.2222"></script>
+<script src="system-tools-module.js?v=v.2026.04.02.2222"></script>
+<script src="bom-module.js?v=v.2026.04.02.2222"></script>
+<script src="inventory-module.js?v=v.2026.04.02.2222"></script>
+<script src="production-module.js?v=v.2026.04.02.2222"></script>
+<script src="sales-module.js?v=v.2026.04.02.2222"></script>
+<script src="analytics-module.js?v=v.2026.04.02.2222"></script>
+<script src="ceo-module.js?v=v.2026.04.02.2222"></script>
+<script src="print-module.js?v=v.2026.04.02.2222"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">

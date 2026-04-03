@@ -1,7 +1,7 @@
-// --- 6. BULK MODAL ---
 function openBulkAddModal() {
     if(!currentProduct) return alert("Please select a product from the sidebar first."); document.getElementById('bulkAddTitle').innerText = currentProduct; bulkAddData = [];
-    Object.keys(productsDB).sort().forEach(p => { if(p === currentProduct) return; bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: (isSubassemblyDB[p] ? "⚙️ " : "📦 ") + p, np: "Sub-Assembly", n: "", sp: "(Nested Recipe)", uc: getEngineTrueCogs(p), q: "" }); });
+// --- 6. BULK MODAL ---
+    Object.keys(productsDB).sort().forEach(p => { if(p === currentProduct) return; let pData = productsDB[p] || {}; let iconStr = pData.is_3d_print ? "🖨️ " : (isSubassemblyDB[p] ? "⚙️ " : "📦 "); bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: iconStr + p, np: "Sub-Assembly", n: "", sp: "(Nested Recipe)", uc: getEngineTrueCogs(p), q: "" }); });
     Object.keys(catalogCache).forEach(k => { let c = catalogCache[k]; bulkAddData.push({ k: k, isSub: false, nn: c.neoName||"", np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "" }); });
     document.getElementById('bulkSearch').value = ""; document.getElementById('bulkAddModal').style.display = 'flex'; renderBulkAddBody();
 }
@@ -27,10 +27,16 @@ async function updateLaborCosts() {
         let m = parseFloat(document.getElementById('msrpInput').value) || 0;
         let w = parseFloat(document.getElementById('wholesaleInput').value) || 0;
         let isSub = document.getElementById('isSubassemblyInput').checked;
+        let is3d = document.getElementById('is3dPrintInput').checked;
+        let pt = parseFloat(document.getElementById('recipePrintTimeInput').value) || 0;
 
         laborDB[currentProduct] = { time: t, rate: r };
         pricingDB[currentProduct] = { msrp: m, wholesale: w };
         isSubassemblyDB[currentProduct] = isSub;
+        
+        if (!productsDB[currentProduct]) productsDB[currentProduct] = [];
+        productsDB[currentProduct].is_3d_print = is3d;
+        productsDB[currentProduct].print_time_mins = pt;
 
         sysLog(`Updating profile for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
         const { error } = await supabaseClient.from('product_recipes').update({ 
@@ -38,7 +44,9 @@ async function updateLaborCosts() {
             labor_rate_hr: r,
             msrp: m,
             wholesale_price: w,
-            is_subassembly: isSub
+            is_subassembly: isSub,
+            is_3d_print: is3d,
+            print_time_mins: pt
         }).eq('product_name', currentProduct);
         
         if (error) throw new Error(error.message);
@@ -73,18 +81,13 @@ function renderProductList() {
     }
 
     if(allProds.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; } 
-    let printProds = [];
-    if (typeof catalogCache !== 'undefined') {
-        printProds = Object.values(catalogCache).filter(c => c.is_3d_print).map(c => c.neoName || c.itemName);
-    }
-    printProds.forEach(pp => { if(!productsDB[pp]) productsDB[pp] = []; });
-    allProds = Object.keys(productsDB);
+    let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
 
     if(!currentProduct && allProds.length > 0) currentProduct = allProds[0]; 
 
     let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p));
     let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p));
-    let realPrintProds = allProds.filter(p => printProds.includes(p));
+    let realPrintProds = printProds;
 
     function buildItem(n) {
         let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'"); let icon = printProds.includes(n) ? '🖨️' : (isSubassemblyDB[n] ? '⚙️' : '📦');
@@ -100,18 +103,36 @@ function renderProductList() {
         </li>`;
     }
 
+    window.toggleRecipeCategory = function(catId, btn) {
+        const el = document.getElementById(catId);
+        if (!el) return;
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+            btn.innerHTML = '▼';
+        } else {
+            el.style.display = 'none';
+            btn.innerHTML = '▶';
+        }
+    };
+
     let html = "";
     if(retailProds.length > 0) {
-        html += `<li style="cursor:default; background:transparent; border:none; padding:4px 0; margin-bottom:5px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold;">RETAIL PRODUCTS</li>`;
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-retail', this.querySelector('span'))">RETAIL PRODUCTS <span>▼</span></li>`;
+        html += `<div id="cat-retail" style="display:block;">`;
         retailProds.forEach(p => html += buildItem(p));
+        html += `</div>`;
     }
     if(subProds.length > 0) {
-        html += `<li style="cursor:default; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold;">SUB-ASSEMBLIES</li>`;
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-sub', this.querySelector('span'))">SUB-ASSEMBLIES <span>▼</span></li>`;
+        html += `<div id="cat-sub" style="display:block;">`;
         subProds.forEach(p => html += buildItem(p));
+        html += `</div>`;
     }
     if(realPrintProds.length > 0) {
-        html += `<li style="cursor:default; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold;">3D PRINTS</li>`;
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-3d', this.querySelector('span'))">3D PRINTS <span>▼</span></li>`;
+        html += `<div id="cat-3d" style="display:block;">`;
         realPrintProds.forEach(p => html += buildItem(p));
+        html += `</div>`;
     }
 
     ui.innerHTML = html;
@@ -156,14 +177,18 @@ function renderProductBOM() {
     document.getElementById('wholesaleInput').value = pData.wholesale;
     document.getElementById('isSubassemblyInput').checked = !!isSubassemblyDB[currentProduct];
 
-    let p = productsDB[currentProduct]||[]; let gt = 0; let wrap = document.getElementById('bomTableWrap');
+    let p = productsDB[currentProduct]||[]; 
+    document.getElementById('is3dPrintInput').checked = !!p.is_3d_print;
+    document.getElementById('recipePrintTimeInput').value = p.print_time_mins || 0;
+    
+    let gt = 0; let wrap = document.getElementById('bomTableWrap');
     
     let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neogleamz Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
     if(p.length===0){ h += "<tr><td colspan='8' style='text-align:center;'>No components.</td></tr>"; }
     else {
         let a = [];
-        p.forEach(x => { let k = String(x.item_key||x.di_item_id||x.name); let q = parseFloat(x.quantity||x.qty)||1; let nn="", np="", n="", sp="", uc=0; if(k.startsWith('RECIPE:::')) { let s = k.replace('RECIPE:::', ''); nn= (isSubassemblyDB[s] ? "⚙️ " : "📦 ") + s; np="Sub-Assembly"; n=""; sp=""; uc=getEngineTrueCogs(s); } else { let c = catalogCache[k]; if(c){ nn=c.neoName; np=c.neoProd; n=c.itemName; sp=c.spec; uc=c.avgUnitCost; } else { n="Unknown Item"; sp="N/A"; } } let ec = uc*q; gt+=ec; a.push({rawKey: k, nn: nn, np: np, n: n, sp: sp, q: q, uc: uc, ec: ec}); });
+        p.forEach(x => { let k = String(x.item_key||x.di_item_id||x.name); let q = parseFloat(x.quantity||x.qty)||1; let nn="", np="", n="", sp="", uc=0; if(k.startsWith('RECIPE:::')) { let s = k.replace('RECIPE:::', ''); let pData = productsDB[s] || {}; nn= (pData.is_3d_print ? "🖨️ " : (isSubassemblyDB[s] ? "⚙️ " : "📦 ")) + s; np="Sub-Assembly"; n=""; sp=""; uc=getEngineTrueCogs(s); } else { let c = catalogCache[k]; if(c){ nn=c.neoName; np=c.neoProd; n=c.itemName; sp=c.spec; uc=c.avgUnitCost; } else { n="Unknown Item"; sp="N/A"; } } let ec = uc*q; gt+=ec; a.push({rawKey: k, nn: nn, np: np, n: n, sp: sp, q: q, uc: uc, ec: ec}); });
         a.sort((x,y) => { let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; });
         a.forEach(x => { let sk = String(x.rawKey).replace(/'/g, "\\'").replace(/"/g, '"'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.rawKey.startsWith('RECIPE:::')) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" onfocus="storeOldVal(this)" onblur="updateBOMQty(this)">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" onclick="removePart(this)">X</button></td></tr>`; } });
     }
