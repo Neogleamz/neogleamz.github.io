@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.02.2258"></script>
+    <script src="system-version.js?v=v.2026.04.02.2302"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.02.2258"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.2258"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.02.2302"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.2302"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.02.2258"></script>
+    <script src="packerz-module.js?v=v.2026.04.02.2302"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.2258"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.02.2302"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -3100,7 +3100,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.02.2258"></script>
+    <script src="socialz-module.js?v=v.2026.04.02.2302"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3934,19 +3934,20 @@
 
     function populateDropdowns() { 
         try { 
-            let retailRecipes = []; let subRecipes = [];
+            let retailRecipes = []; let subRecipes = []; let printRecipes = [];
             Object.keys(productsDB).sort().forEach(p => {
                 let cost = getEngineTrueCogs(p).toFixed(2);
                 let pData = productsDB[p] || {};
                 let iconStr = pData.is_3d_print ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦');
                 let htmlStr = `<option value="RECIPE:::${p}">[Product] ${p}   💰 $${cost}/unit</option>`.replace('[Product]', iconStr);
-                if(pData.is_3d_print) subRecipes.push(htmlStr);
+                if(pData.is_3d_print) printRecipes.push(htmlStr);
                 else if(isSubassemblyDB[p]) subRecipes.push(htmlStr);
                 else retailRecipes.push(htmlStr);
             });
 
             let recipesHtml = `<optgroup label="📦 RETAIL PRODUCTS">${retailRecipes.join('')}</optgroup>`;
             if(subRecipes.length > 0) recipesHtml += `<optgroup label="⚙️ SUB-ASSEMBLIES">${subRecipes.join('')}</optgroup>`;
+            if(printRecipes.length > 0) recipesHtml += `<optgroup label="🖨️ 3D PRINTS">${printRecipes.join('')}</optgroup>`;
 
             let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `🔩 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); let fullText = textParts.join('   '); let escaped = String(fullText).replace(/"/g, '&quot;'); return `<option value="${String(k).replace(/"/g, '&quot;')}" data-fulltxt="${escaped}   💰 $${cost}">${escaped}   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
             
@@ -4045,15 +4046,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.02.2258"></script>
-<script src="system-tools-module.js?v=v.2026.04.02.2258"></script>
-<script src="bom-module.js?v=v.2026.04.02.2258"></script>
-<script src="inventory-module.js?v=v.2026.04.02.2258"></script>
-<script src="production-module.js?v=v.2026.04.02.2258"></script>
-<script src="sales-module.js?v=v.2026.04.02.2258"></script>
-<script src="analytics-module.js?v=v.2026.04.02.2258"></script>
-<script src="ceo-module.js?v=v.2026.04.02.2258"></script>
-<script src="print-module.js?v=v.2026.04.02.2258"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.02.2302"></script>
+<script src="system-tools-module.js?v=v.2026.04.02.2302"></script>
+<script src="bom-module.js?v=v.2026.04.02.2302"></script>
+<script src="inventory-module.js?v=v.2026.04.02.2302"></script>
+<script src="production-module.js?v=v.2026.04.02.2302"></script>
+<script src="sales-module.js?v=v.2026.04.02.2302"></script>
+<script src="analytics-module.js?v=v.2026.04.02.2302"></script>
+<script src="ceo-module.js?v=v.2026.04.02.2302"></script>
+<script src="print-module.js?v=v.2026.04.02.2302"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
