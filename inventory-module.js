@@ -41,7 +41,9 @@ function renderFgiTable() {
             g.items.forEach(x => { 
                 let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '"'); 
                 let netColor = x.net > 0 ? '#10b981' : (x.net < 0 ? '#ef4444' : 'var(--text-muted)');
-                h += `<tr class="${g.id}" style="display:${isExp?'table-row':'none'};"><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="font-weight:bold; color:#10b981;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:${netColor};">$${x.net.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:var(--text-main);">$${(x.msrpv||0).toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
+                let isLow = x.ms > 0 && x.s < x.ms; 
+                let sc = x.s < 0 ? 'negative-stock' : (isLow ? 'low-stock' : 'highlight-calc');
+                h += `<tr class="${g.id}" style="display:${isExp?'table-row':'none'};"><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:${netColor};">$${x.net.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:var(--text-main);">$${(x.msrpv||0).toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
             });
         });
     }
@@ -164,9 +166,9 @@ function printReorderReport() {
     try {
         let html = `<html><head><title>Neogleamz Reorder Report</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; font-size:14px; margin-top: 15px;} th,td{border:1px solid #ccc; padding:8px; text-align:left;} th{background:#f1f5f9;}</style></head><body>`;
         html += `<h2>🚨 Low Stock Reorder Report</h2><p style="color:#64748b; font-size:14px;">Date: ${new Date().toLocaleDateString()}</p>`;
-        html += `<table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
         
         let items = [];
+        let fgiItems = [];
         let rawDemand = {}; 
         
         // Phase 1: Track dependent Raw Material demand caused by explicit FGI shortfalls
@@ -186,6 +188,8 @@ function printReorderReport() {
             
             if (ms > 0 && s < ms) {
                 let short = ms - s;
+                fgiItems.push({ n: pName, s: s, ms: ms, short: short });
+                
                 // Explode missing FGI into dependent Raw Demands
                 function explode(prod, neededQty) {
                     if(!productsDB[prod]) return;
@@ -204,7 +208,18 @@ function printReorderReport() {
             }
         });
 
+        // Generate FGI Production Table
+        if(fgiItems.length > 0) {
+            html += `<h3>🏭 Production Targets (Build These)</h3><table><thead><tr><th>Product / Sub-Assembly Name</th><th>Current Stock</th><th>Min Target</th><th>Shortfall (Units to Build)</th></tr></thead><tbody>`;
+            fgiItems.sort((a,b) => b.short - a.short).forEach(x => {
+                html += `<tr><td style="font-weight:bold;">${x.n}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="color:#f97316; font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td></tr>`; 
+            });
+            html += `</tbody></table><br>`;
+        }
+
         // Phase 2: Compute overall Raw Material shortfalls (Native Min Stock + FGI Dependent Demand)
+        html += `<h3>📦 Supply Chain Deficits (Order These)</h3><table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
+        
         Object.keys(catalogCache).forEach(k => {
             let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k] || {};
             let s = c.totalQty - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
@@ -219,7 +234,7 @@ function printReorderReport() {
             }
         });
 
-        if(items.length === 0) { html += `<tr><td colspan="7" style="text-align:center; padding: 20px;">All monitored stock levels are optimal.</td></tr>`; } 
+        if(items.length === 0) { html += `<tr><td colspan="7" style="text-align:center; padding: 20px;">All monitored raw stock levels are optimal.</td></tr>`; } 
         else {
             let grandTotal = 0;
             items.sort((a,b) => b.cost - a.cost).forEach(x => { grandTotal += x.cost; let displaySpec = x.sp === '(Mixed Specs)' ? '' : x.sp; html += `<tr><td>${x.nn || ''}</td><td>${x.n}</td><td>${displaySpec}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td><td>$${x.cost.toFixed(2)}</td></tr>`; });
