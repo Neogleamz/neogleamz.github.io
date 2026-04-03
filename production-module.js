@@ -599,7 +599,11 @@ async function advanceWO(newStatus) {
                 Object.keys(exactDeductions.pulls).forEach(k => {
                     let req = exactDeductions.pulls[k];
                     if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
-                    inventoryDB[k].sold_qty += req; 
+                    
+                    inventoryDB[k].consumed_qty += req; 
+                    if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
+                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                    
                     upsKeys.add(k);
                 });
                 
