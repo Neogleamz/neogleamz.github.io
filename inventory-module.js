@@ -210,9 +210,8 @@ function printReorderReport() {
                 let deficit = ms - net; 
                 if (deficit > 0.0001) {
                     buildTargets[p] = (buildTargets[p] || 0) + deficit;
-                    changed = true; // Required further traversal since we increased build targets!
+                    changed = true; 
                     
-                    // Explode immediately to create dependent demand for raw materials/subs
                     (productsDB[p] || []).forEach(comp => {
                         let subK = comp.item_key || comp.di_item_id || comp.name;
                         let qPer = parseFloat(comp.quantity || comp.qty) || 1;
@@ -231,37 +230,6 @@ function printReorderReport() {
                     changed = true;
                 }
             });
-        }
-
-        // --- View Model Generation ---
-        
-        // Collate Production Targets
-        let retailTargets = []; let subTargets = []; let printTargets = [];
-        Object.keys(buildTargets).forEach(p => {
-            let k = `RECIPE:::${p}`;
-            let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
-            let isSub = !!isSubassemblyDB[p];
-            let obj = { n: p, s: onHand[k] || 0, ms: parseFloat((inventoryDB[k]||{}).min_stock) || 0, short: buildTargets[p], depDemand: dependentDemand[k] || 0 };
-            if (is3D) printTargets.push(obj);
-            else if (isSub) subTargets.push(obj);
-            else retailTargets.push(obj);
-        });
-
-        if(Object.keys(buildTargets).length > 0) {
-            html += `<h3>🏭 Production Targets (Build These)</h3><table><thead><tr><th style="width:50%;">Product Name</th><th style="text-align:right;">Stock</th><th style="text-align:right;">Dep. Req</th><th style="text-align:right;">Min Target</th><th style="text-align:right; color:#f97316;">Must Build</th></tr></thead><tbody>`;
-            
-            const renderBuildRows = (arr, title, icn) => {
-                if(arr.length === 0) return;
-                html += `<tr><td colspan="5" style="background:#f1f5f9; font-weight:bold; color:#0f172a; border-top:2px solid #ccc;">${icn} ${title}</td></tr>`;
-                arr.sort((a,b) => b.short - a.short).forEach(x => {
-                    html += `<tr><td style="font-weight:bold; padding-left:20px;">${x.n}</td><td style="text-align:right; color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td style="text-align:right; color:#64748b;">${x.depDemand > 0 ? x.depDemand.toFixed(2).replace(/\.?0+$/,'') : '-'}</td><td style="text-align:right;">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="text-align:right; color:#f97316; font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td></tr>`;
-                });
-            };
-            
-            renderBuildRows(retailTargets, 'Retail Products', '📦');
-            renderBuildRows(subTargets, 'Sub-Assemblies', '⚙️');
-            renderBuildRows(printTargets, '3D Prints', '🖨️');
-            html += `</tbody></table><br>`;
         }
 
         html += `<h3>📦 Supply Chain Deficits (Order These)</h3><table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Dep. Req</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
@@ -283,4 +251,93 @@ function printReorderReport() {
         }
         html += `</tbody></table></body></html>`; let win = window.open('', '', 'width=900,height=700'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
     } catch (e) { sysLog(e.message, true); }
+}
+
+function printLowProductsReport() {
+    try {
+        let html = `<html><head><title>Low Products Build List</title><style>body{font-family:sans-serif; padding:20px;} ul{list-style-type:none; padding-left:20px;} li{margin:5px 0; font-size:14px; padding-left:25px; position:relative;} li::before{content:"⌞"; position:absolute; left:0; top:-5px; font-size:18px; color:#cbd5e1;} .ok{color:#10b981; font-weight:bold;} .short{color:#ef4444; font-weight:bold;} .stock-badge{display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;}</style></head><body>`;
+        html += `<h2>🏭 Production Targets Build List</h2><p style="color:#64748b; font-size:14px;">Date: ${new Date().toLocaleDateString()}</p><div style="margin-bottom:20px; padding:15px; background:#fffbdd; border:1px solid #fde047; border-radius:5px; font-size:12px;"><strong>Note:</strong> "On Hand" indicates physical stock at the time of report generation. It does not dynamically deplete for shared components across multiple builds. Refer to the Low Inventory Supply Chain Report for aggregate raw material ordering deficits.</div>`;
+
+        let deficits = [];
+        Object.keys(productsDB).forEach(p => {
+            let k = `RECIPE:::${p}`;
+            let ms = parseFloat((inventoryDB[k]||{}).min_stock) || 0;
+            if (ms <= 0) return;
+            let i = inventoryDB[k] || {};
+            let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; 
+            let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; 
+            let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; 
+            let adj = parseFloat(i.manual_adjustment) || 0;
+            let s = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+            
+            if (s < ms) deficits.push({ n: p, ms: ms, s: s, short: ms - s });
+        });
+
+        if (deficits.length === 0) {
+            html += `<p style="padding:20px; font-weight:bold; color:#10b981;">✅ All production products are at or above optimal stock levels.</p></body></html>`;
+            let win = window.open('','','width=900,height=700'); win.document.write(html); win.document.close(); setTimeout(()=>win.print(),250); return;
+        }
+
+        function getStockLocal(k, isProd) {
+            let i = inventoryDB[k] || {};
+            if (isProd) {
+                let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; 
+                let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; 
+                let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; 
+                let adj = parseFloat(i.manual_adjustment) || 0;
+                return b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+            } else {
+                let c = catalogCache[k] || {totalQty:0};
+                return c.totalQty - (parseFloat(i.consumed_qty) || 0) - (parseFloat(i.scrap_qty) || 0) + (parseFloat(i.manual_adjustment) || 0);
+            }
+        }
+
+        function buildTree(pName, reqQty) {
+            let recipe = productsDB[pName] || [];
+            if (recipe.length === 0) return "";
+            let thtml = "<ul>";
+            recipe.forEach(comp => {
+                let subK = comp.item_key || comp.di_item_id || comp.name;
+                let qPer = parseFloat(comp.quantity || comp.qty) || 1;
+                let totalReq = qPer * reqQty;
+                let isProd = subK.startsWith('RECIPE:::');
+                let stock = getStockLocal(subK, isProd);
+                let ok = stock >= totalReq;
+                let statStr = ok ? `<span class="stock-badge" style="background:#d1fae5; color:#065f46;">✅ OK</span>` : `<span class="stock-badge" style="background:#fee2e2; color:#991b1b;">🔴 SHORT ${ (totalReq - stock).toFixed(2).replace(/\.?0+$/,'') }</span>`;
+                
+                let displayName = subK;
+                if (isProd) {
+                    let s = subK.replace('RECIPE:::', '');
+                    let is3D = !!(productsDB[s] && productsDB[s].is_3d_print);
+                    let isSub = !!isSubassemblyDB[s];
+                    let icn = is3D ? "🖨️ " : (isSub ? "⚙️ " : "📦 ");
+                    displayName = icn + s;
+                    thtml += `<li><strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}`;
+                    if (!ok) thtml += buildTree(s, totalReq - stock);
+                    thtml += `</li>`;
+                } else {
+                    let c = catalogCache[subK];
+                    displayName = c ? (c.neoName || c.itemName) : subK;
+                    thtml += `<li>🧵 <strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}</li>`;
+                }
+            });
+            thtml += "</ul>";
+            return thtml;
+        }
+
+        deficits.sort((a,b) => b.short - a.short).forEach(d => {
+            let is3D = !!(productsDB[d.n] && productsDB[d.n].is_3d_print);
+            let isSub = !!isSubassemblyDB[d.n];
+            let icn = is3D ? "🖨️ " : (isSub ? "⚙️ " : "📦 ");
+            html += `<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:5px; padding:15px; margin-bottom:15px;">`;
+            html += `<div style="font-size:16px; font-weight:bold; color:#0f172a;">${icn} ${d.n} <span style="font-size:13px; font-weight:normal; color:#64748b; margin-left:10px;">(Target: ${d.ms.toFixed(2).replace(/\.?0+$/,'')} | Current: ${d.s.toFixed(2).replace(/\.?0+$/,'')} | Must Build: <span style="color:#f97316; font-weight:bold;">${d.short.toFixed(2).replace(/\.?0+$/,'')}</span>)</span></div>`;
+            html += buildTree(d.n, d.short);
+            html += `</div>`;
+        });
+        
+        html += `</body></html>`;
+        let win = window.open('', '', 'width=900,height=700'); 
+        win.document.write(html); win.document.close(); 
+        setTimeout(() => win.print(), 250);
+    } catch(e) { sysLog(e.message, true); }
 }
