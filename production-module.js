@@ -752,7 +752,6 @@ function renderArchiveList() {
                     <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Started: ${dtC} | <span style="color:var(--neon-green)">Completed: ${dtF}</span></div>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:13px;" onclick="unarchiveRecord('batchez', '${wo.wo_id}')">♻️ Unarchive</button>
                     <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
                 </div>
             </div>`;
@@ -778,7 +777,6 @@ function renderArchiveList() {
                     <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Started: ${dtC} | <span style="color:var(--neon-purple)">Completed: ${dtF}</span></div>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:13px;" onclick="unarchiveRecord('layerz', '${job.id}')">♻️ Unarchive</button>
                     <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
                 </div>
             </div>`;
@@ -786,27 +784,6 @@ function renderArchiveList() {
     }
 }
 
-async function unarchiveRecord(type, id) {
-    if(!confirm('Restore this item from the archives?')) return;
-    sysLog(`Unarchiving ${id} from ${type}`);
-    setMasterStatus("Restoring...", "mod-working");
-    try {
-        if(type === 'batchez') {
-            await supabaseClient.from('work_orders').update({status: 'Completed'}).eq('wo_id', id);
-            let wo = workOrdersDB.find(w => w.wo_id === id);
-            if(wo) wo.status = 'Completed';
-            renderWOList();
-        } else {
-            await supabaseClient.from('print_queue').update({status: 'Completed'}).eq('id', id);
-            let job = printQueueDB.find(p => p.id === id);
-            if(job) job.status = 'Completed';
-            if(typeof renderPrintQueue === 'function') renderPrintQueue();
-        }
-        setMasterStatus("Restored!", "mod-success");
-        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-        renderArchiveList();
-    } catch(e) { sysLog(e.message, true); }
-}
 
 async function hardDeleteArchive(type, id) {
     if(!confirm('Permanently destroy this archived record? This action cannot be undone.')) return;
