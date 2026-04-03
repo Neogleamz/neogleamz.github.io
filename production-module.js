@@ -259,8 +259,8 @@ async function validateAndCreateWO() {
         });
 
         Object.keys(exactDeductions.pulls).forEach(k => {
-            let req = exactDeductions.pulls[k]; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0}; 
-            let onHand = i.produced_qty - i.sold_qty;
+            let req = exactDeductions.pulls[k]; let i = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
+            let onHand = (i.produced_qty||0) + (i.prototype_produced_qty||0) - (i.consumed_qty||0) - (i.scrap_qty||0) - (i.sold_qty||0) + (i.manual_adjustment||0);
             if(req > onHand) { let name = k.replace('RECIPE:::', ''); shortfalls.push(`<li><strong>⚙️ ${name}</strong>: Need to pull ${req.toFixed(2)}, Shelf has ${onHand.toFixed(2)}</li>`); }
         });
 
@@ -290,8 +290,8 @@ async function validateAndCreateWO() {
             let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
             
             // Calculate active on-shelf stock for this exact 3D printed component
-            let rawOnHand = isLegacyRaw ? ((catalogCache[part] ? catalogCache[part].totalQty : 0) - i.consumed_qty - i.scrap_qty + i.manual_adjustment) : 0;
-            let onHand = isLegacyRaw ? rawOnHand : (i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment);
+            let rawOnHand = isLegacyRaw ? ((catalogCache[part] ? catalogCache[part].totalQty : 0) - (i.consumed_qty||0) - (i.scrap_qty||0) + (i.manual_adjustment||0)) : 0;
+            let onHand = isLegacyRaw ? rawOnHand : ((i.produced_qty||0) + (i.prototype_produced_qty||0) - (i.sold_qty||0) - (i.consumed_qty||0) - (i.scrap_qty||0) + (i.manual_adjustment||0));
             
             let amountToPrint = totalNeeded;
             if (onHand > 0) {
