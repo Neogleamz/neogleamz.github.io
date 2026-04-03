@@ -92,8 +92,22 @@ function openMultiBatchModal() {
     document.getElementById('multiBatchOrderModal').style.display = 'flex';
 }
 
+function getMultiBatchProduct() {
+    let r = document.getElementById('multiBatchProductRetail');
+    let s = document.getElementById('multiBatchProductSub');
+    let p = document.getElementById('multiBatchProductPrint');
+    return (r && r.value) || (s && s.value) || (p && p.value) || '';
+}
+
+function getNewWOProduct() {
+    let r = document.getElementById('newWOProductRetail');
+    let s = document.getElementById('newWOProductSub');
+    let p = document.getElementById('newWOProductPrint');
+    return (r && r.value) || (s && s.value) || (p && p.value) || '';
+}
+
 function stageBatchItem() {
-    const p = document.getElementById('multiBatchProduct').value;
+    const p = getMultiBatchProduct();
     const q = parseFloat(document.getElementById('multiBatchQty').value);
     if(!p || isNaN(q) || q <= 0) return alert("Select product and valid quantity.");
     
@@ -103,6 +117,12 @@ function stageBatchItem() {
     } else {
         multiBatchItems.push({p: p, q: q});
     }
+    
+    // Clear selections
+    let mr = document.getElementById('multiBatchProductRetail'); if(mr) mr.value = '';
+    let ms = document.getElementById('multiBatchProductSub'); if(ms) ms.value = '';
+    let mp = document.getElementById('multiBatchProductPrint'); if(mp) mp.value = '';
+
     renderStagedBatchItems();
 }
 
@@ -130,7 +150,7 @@ function renderStagedBatchItems() {
 }
 
 function checkWORouting() {
-    const p = document.getElementById('newWOProduct').value;
+    const p = getNewWOProduct();
     const q = parseFloat(document.getElementById('newWOQty').value) || 0;
     const rArea = document.getElementById('woRoutingArea');
     const rList = document.getElementById('woRoutingList');
@@ -506,7 +526,7 @@ function printBatchOrderReport() {
 
 async function validateAndCreateWO() {
     try {
-        const p = document.getElementById('newWOProduct').value; const q = parseFloat(document.getElementById('newWOQty').value); if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
+        const p = getNewWOProduct(); const q = parseFloat(document.getElementById('newWOQty').value); if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
         
         let routingMap = {};
         document.querySelectorAll('.route-row').forEach(row => {

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.0324"></script>
+    <script src="system-version.js?v=v.2026.04.03.0332"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.0324"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0324"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.0332"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0332"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.0324"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.0332"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1826,7 +1826,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0324"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0332"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2983,18 +2983,24 @@
 <div id="newWOModal" style="z-index:10001;">
     <div class="container" style="width:100%; max-width:650px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px;">
         <h2 style="margin-top:0;">🏭 Start Production Batch</h2>
-        <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
-            <select id="newWOProduct" style="flex:1; padding:10px; font-size:15px;" onchange="checkWORouting()"></select>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <label style="font-weight:bold; font-size:14px;">Batch Type:</label>
-                <select id="batchTypeSelect" style="padding:10px; width:120px; font-size:15px;">
-                    <option value="Production">Production</option>
-                    <option value="Prototype">Prototype</option>
-                </select>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+            <div style="display:flex; gap:10px;">
+                <select id="newWOProductRetail" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('newWOProductSub').value=''; document.getElementById('newWOProductPrint').value='';}; checkWORouting()"><option value="">📦 Select Retail Product</option></select>
+                <select id="newWOProductSub" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('newWOProductRetail').value=''; document.getElementById('newWOProductPrint').value='';}; checkWORouting()"><option value="">⚙️ Select Sub-Assembly</option></select>
+                <select id="newWOProductPrint" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('newWOProductRetail').value=''; document.getElementById('newWOProductSub').value='';}; checkWORouting()"><option value="">🖨️ Select 3D Print</option></select>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <label style="font-weight:bold; font-size:14px;">Target Qty:</label>
-                <input type="number" id="newWOQty" value="1" min="1" step="any" style="padding:10px; width:90px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;" oninput="checkWORouting()">
+            <div style="display:flex; gap:15px; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-weight:bold; font-size:14px;">Batch Type:</label>
+                    <select id="batchTypeSelect" style="padding:10px; width:120px; font-size:15px;">
+                        <option value="Production">Production</option>
+                        <option value="Prototype">Prototype</option>
+                    </select>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-weight:bold; font-size:14px;">Target Qty:</label>
+                    <input type="number" id="newWOQty" value="1" min="1" step="any" style="padding:10px; width:90px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;" oninput="checkWORouting()">
+                </div>
             </div>
         </div>
         
@@ -3020,15 +3026,19 @@
     <div class="container" style="width:100%; max-width:650px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px; max-height:85vh;">
         <h2 style="margin-top:0;">🛒 Multi-Item Batch Estimator</h2>
         
-        <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px; background:var(--bg-panel); padding:10px; border-radius:8px; border:1px solid var(--border-color);">
-            <div style="flex:1; min-width:0;">
-                <select id="multiBatchProduct" style="width:100%; padding:10px; font-size:15px; text-overflow:ellipsis;"></select>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+            <div style="display:flex; gap:10px;">
+                <select id="multiBatchProductRetail" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductSub').value=''; document.getElementById('multiBatchProductPrint').value='';}"><option value="">📦 Select Retail Product</option></select>
+                <select id="multiBatchProductSub" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductRetail').value=''; document.getElementById('multiBatchProductPrint').value='';}"><option value="">⚙️ Select Sub-Assembly</option></select>
+                <select id="multiBatchProductPrint" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductRetail').value=''; document.getElementById('multiBatchProductSub').value='';}"><option value="">🖨️ Select 3D Print</option></select>
             </div>
-            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                <label style="font-weight:bold; font-size:14px;">Qty:</label>
-                <input type="number" id="multiBatchQty" value="1" min="1" step="any" style="padding:10px; width:65px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-weight:bold; font-size:14px; margin-left:5px;">Qty:</label>
+                    <input type="number" id="multiBatchQty" value="1" min="1" step="any" style="padding:8px; width:65px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;">
+                </div>
+                <button class="btn-blue" onclick="stageBatchItem()" style="padding:8px 15px; font-size:14px; white-space:nowrap; width:auto; flex-shrink:0;">+ Add</button>
             </div>
-            <button class="btn-blue" onclick="stageBatchItem()" style="padding:10px 15px; font-size:14px; white-space:nowrap; width:auto; flex-shrink:0;">+ Add</button>
         </div>
         
         <div style="flex-grow:1; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:15px; overflow-y:auto; margin-bottom:20px;">
@@ -3142,7 +3152,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.0324"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.0332"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3996,10 +4006,22 @@
             const ps = document.getElementById('partSelector'); if(ps) { ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipesHtml + raws; partSelectorObserver.observe(ps); }
             
             let sortedProducts = Object.keys(productsDB).sort((a,b) => { let oa = productsDB[a]?.is_3d_print ? 3 : (isSubassemblyDB[a] ? 2 : 1); let ob = productsDB[b]?.is_3d_print ? 3 : (isSubassemblyDB[b] ? 2 : 1); return oa !== ob ? oa - ob : a.localeCompare(b); });
+            let retailProds = sortedProducts.filter(p => !isSubassemblyDB[p] && (!productsDB[p] || !productsDB[p].is_3d_print));
+            let subProds = sortedProducts.filter(p => isSubassemblyDB[p] && (!productsDB[p] || !productsDB[p].is_3d_print));
+            let printProds = sortedProducts.filter(p => productsDB[p] && productsDB[p].is_3d_print);
+            const mapOpts = (arr, char) => arr.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${char} ${p}</option>`).join('');
+
             // Batch builds and routing can use all products
             const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + sortedProducts.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
-            const nwo = document.getElementById('newWOProduct'); if(nwo) nwo.innerHTML = '<option value="">-- Select Product --</option>' + sortedProducts.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
-            const mbo = document.getElementById('multiBatchProduct'); if(mbo) mbo.innerHTML = '<option value="">-- Select Product --</option>' + sortedProducts.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${(productsDB[p] && productsDB[p].is_3d_print) ? '🖨️' : (isSubassemblyDB[p] ? '⚙️' : '📦')} ${p}</option>`).join(''); 
+            
+            const nwoRetail = document.getElementById('newWOProductRetail'); if(nwoRetail) nwoRetail.innerHTML = '<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦');
+            const nwoSub = document.getElementById('newWOProductSub'); if(nwoSub) nwoSub.innerHTML = '<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️');
+            const nwoPrint = document.getElementById('newWOProductPrint'); if(nwoPrint) nwoPrint.innerHTML = '<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️');
+
+            const mboRetail = document.getElementById('multiBatchProductRetail'); if(mboRetail) mboRetail.innerHTML = '<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦');
+            const mboSub = document.getElementById('multiBatchProductSub'); if(mboSub) mboSub.innerHTML = '<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️');
+            const mboPrint = document.getElementById('multiBatchProductPrint'); if(mboPrint) mboPrint.innerHTML = '<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️');
+
             // (SOP dropdown now handled in openSOPMasterModal)
             
             // Aliases can link to anything
@@ -4090,15 +4112,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.0324"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.0324"></script>
-<script src="bom-module.js?v=v.2026.04.03.0324"></script>
-<script src="inventory-module.js?v=v.2026.04.03.0324"></script>
-<script src="production-module.js?v=v.2026.04.03.0324"></script>
-<script src="sales-module.js?v=v.2026.04.03.0324"></script>
-<script src="analytics-module.js?v=v.2026.04.03.0324"></script>
-<script src="ceo-module.js?v=v.2026.04.03.0324"></script>
-<script src="print-module.js?v=v.2026.04.03.0324"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.0332"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.0332"></script>
+<script src="bom-module.js?v=v.2026.04.03.0332"></script>
+<script src="inventory-module.js?v=v.2026.04.03.0332"></script>
+<script src="production-module.js?v=v.2026.04.03.0332"></script>
+<script src="sales-module.js?v=v.2026.04.03.0332"></script>
+<script src="analytics-module.js?v=v.2026.04.03.0332"></script>
+<script src="ceo-module.js?v=v.2026.04.03.0332"></script>
+<script src="print-module.js?v=v.2026.04.03.0332"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
