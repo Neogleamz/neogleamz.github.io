@@ -199,6 +199,11 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
                     }
                 }
             }
+        } else {
+            // LEGACY 3D PRINTED RAW MATERIAL (STOCKPILEZ ITEM)
+            if (typeof catalogCache !== 'undefined' && catalogCache[k] && catalogCache[k].is_3d_print) {
+                prints[k] = (prints[k] || 0) + q;
+            }
         }
     });
     return prints;
@@ -221,9 +226,13 @@ async function validateAndCreateWO() {
         let shortfalls = [];
 
         Object.keys(exactDeductions.raws).forEach(k => {
-            let req = exactDeductions.raws[k]; let c = catalogCache[k] || {totalQty: 0}; let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
+            let req = exactDeductions.raws[k]; let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
             let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment; 
-            if(req > onHand) { let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); }
+            if(req > onHand) { 
+                if (!c.is_3d_print) {
+                    let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); 
+                }
+            }
         });
 
         Object.keys(exactDeductions.pulls).forEach(k => {
@@ -251,11 +260,15 @@ async function validateAndCreateWO() {
         
         Object.keys(printsToSpawn).forEach(part => {
             let totalNeeded = printsToSpawn[part];
-            let invKey = `RECIPE:::${part}`;
+            let isLegacyRaw = (typeof catalogCache !== 'undefined' && catalogCache[part]);
+            let invKey = isLegacyRaw ? part : `RECIPE:::${part}`;
+            let prefix = isLegacyRaw ? "" : "RECIPE:::";
+            
             let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
             
             // Calculate active on-shelf stock for this exact 3D printed component
-            let onHand = i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
+            let rawOnHand = isLegacyRaw ? ((catalogCache[part] ? catalogCache[part].totalQty : 0) - i.consumed_qty - i.scrap_qty + i.manual_adjustment) : 0;
+            let onHand = isLegacyRaw ? rawOnHand : (i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment);
             
             let amountToPrint = totalNeeded;
             if (onHand > 0) {
@@ -265,7 +278,7 @@ async function validateAndCreateWO() {
             // Only queue a print job for structural fallback/shortfalls instead of unconditionally spooling full amounts
             if (amountToPrint > 0) {
                 if (typeof addPrintJob === 'function') {
-                    printPromises.push(addPrintJob('RECIPE:::' + part, amountToPrint, woId));
+                    printPromises.push(addPrintJob(prefix + part, amountToPrint, woId));
                 }
             }
         });
@@ -608,15 +621,19 @@ async function advanceWO(newStatus) {
                 const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
                 for(let job of Object.keys(printJobs)) {
                     let totalNeeded = printJobs[job];
-                    let invKey = `RECIPE:::${job}`;
+                    let isLegacyRaw = (typeof catalogCache !== 'undefined' && catalogCache[job]);
+                    let invKey = isLegacyRaw ? job : `RECIPE:::${job}`;
+                    let prefix = isLegacyRaw ? "" : "RECIPE:::";
+
                     let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
-                    let onHand = i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
+                    let rawOnHand = isLegacyRaw ? ((catalogCache[job] ? catalogCache[job].totalQty : 0) - i.consumed_qty - i.scrap_qty + i.manual_adjustment) : 0;
+                    let onHand = isLegacyRaw ? rawOnHand : (i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment);
                     
                     let amountToPrint = totalNeeded;
                     if (onHand > 0) amountToPrint = Math.max(0, totalNeeded - onHand);
 
                     if (amountToPrint > 0 && typeof addPrintJob === 'function') {
-                        await addPrintJob('RECIPE:::' + job, amountToPrint, currentWO.wo_id);
+                        await addPrintJob(prefix + job, amountToPrint, currentWO.wo_id);
                     }
                 }
             }
