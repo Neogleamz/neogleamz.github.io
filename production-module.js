@@ -75,7 +75,29 @@ function extractSOPDataFromUI(containerId) {
 async function saveMasterSOP() { try { const p = document.getElementById('sopMasterProductSelect').value; if(!p) return; let steps = extractSOPDataFromUI('sopMasterEditorArea'); sopsDB[p] = steps; sysLog(`Saving Master SOP for ${p}`); setMasterStatus("Saving...", "mod-working"); const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}, {onConflict: 'product_name'}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); document.getElementById('sopMasterModal').style.display = 'none'; if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } }
 async function saveInlineSOP() { try { if(!currentWO) return; const p = currentWO.product_name; let steps = extractSOPDataFromUI('inlineSOPContainer'); sopsDB[p] = steps; sysLog(`Saving Inline SOP for ${p}`); setMasterStatus("Saving...", "mod-working"); const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}, {onConflict: 'product_name'}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); toggleSOPLock(); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } }
 
-function openNewWOModal() { document.getElementById('woErrorBox').style.display = 'none'; document.getElementById('woRoutingArea').style.display = 'none'; document.getElementById('newWOQty').value = 1; document.getElementById('newWOModal').style.display = 'flex'; checkWORouting(); }
+window.isBatchOrderMode = false;
+function openNewWOModal(mode = 'create') { 
+    window.isBatchOrderMode = (mode === 'order');
+    document.getElementById('woErrorBox').style.display = 'none'; 
+    document.getElementById('woRoutingArea').style.display = 'none'; 
+    document.getElementById('newWOQty').value = 1; 
+    
+    const modalTitle = document.querySelector('#newWOModal h2');
+    const submitBtn = document.querySelector('#newWOModal .btn-green');
+    
+    if (window.isBatchOrderMode) {
+        modalTitle.innerText = "📦 Batch Order Estimator";
+        submitBtn.innerText = "Calculate Raw Demands";
+        submitBtn.onclick = function() { generateBatchOrderReport(); };
+    } else {
+        modalTitle.innerText = "🏭 Start Production Batch";
+        submitBtn.innerText = "Verify Inventory & Create";
+        submitBtn.onclick = function() { validateAndCreateWO(); };
+    }
+    
+    document.getElementById('newWOModal').style.display = 'flex'; 
+    checkWORouting(); 
+}
 
 function checkWORouting() {
     const p = document.getElementById('newWOProduct').value;
@@ -231,6 +253,117 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
         }
     });
     return prints;
+}
+
+function generateBatchOrderReport() {
+    const p = document.getElementById('newWOProduct').value; 
+    const q = parseFloat(document.getElementById('newWOQty').value); 
+    if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
+    
+    let routingMap = {};
+    document.querySelectorAll('.route-row').forEach(row => {
+        let subName = row.getAttribute('data-subname');
+        let pull = parseFloat(row.querySelector('.route-pull-input').value) || 0;
+        let build = parseFloat(row.querySelector('.route-build-input').value) || 0;
+        routingMap[subName] = { pull: pull, build: build };
+    });
+
+    let tempWO = { product_name: p, qty: q, routing: routingMap };
+    let exactDeductions = calculateExactWODeductions(tempWO);
+
+    // Build the report HTML inside batchOrderReportContent
+    let h = `
+        <h3 style="color:var(--primary-color); border-bottom:1px solid var(--border-color); padding-bottom:10px; margin-top:0;">Raw Materials Demand</h3>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
+            <thead>
+                <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
+                    <th style="padding:8px;">Material</th>
+                    <th style="padding:8px; text-align:right;">Required</th>
+                    <th style="padding:8px; text-align:right;">In Stock</th>
+                    <th style="padding:8px; text-align:right;">Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    let hasRaws = false;
+    Object.keys(exactDeductions.raws).forEach(k => {
+        hasRaws = true;
+        let req = exactDeductions.raws[k]; 
+        let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; 
+        let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
+        let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment; 
+        let diff = onHand - req;
+        
+        let f = fmtKey(k); 
+        let name = f.nn ? f.nn : f.in; 
+        
+        let diffColor = diff < 0 ? '#ef4444' : '#10b981';
+        let stockColor = onHand <= 0 ? '#ef4444' : 'var(--text-main)';
+        
+        h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${name}</td>
+            <td style="padding:8px; text-align:right; color:#f59e0b; font-weight:bold;">${req.toFixed(2)}</td>
+            <td style="padding:8px; text-align:right; color:${stockColor};">${onHand.toFixed(2)}</td>
+            <td style="padding:8px; text-align:right; font-weight:bold; color:${diffColor};">${diff > 0 ? '+'+diff.toFixed(2) : diff.toFixed(2)}</td>
+        </tr>`;
+    });
+    
+    if(!hasRaws) h += `<tr><td colspan="4" style="text-align:center; padding:10px; color:var(--text-muted);">No raw materials required.</td></tr>`;
+    h += `</tbody></table>`;
+
+    h += `
+        <h3 style="color:var(--primary-color); border-bottom:1px solid var(--border-color); padding-bottom:10px;">Sub-Assemblies To Pull</h3>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
+            <thead>
+                <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
+                    <th style="padding:8px;">Sub-Assembly</th>
+                    <th style="padding:8px; text-align:right;">Pull Qty</th>
+                    <th style="padding:8px; text-align:right;">In Stock</th>
+                    <th style="padding:8px; text-align:right;">Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    let hasPulls = false;
+    Object.keys(exactDeductions.pulls).forEach(k => {
+        hasPulls = true;
+        let req = exactDeductions.pulls[k]; 
+        let i = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, prototype_produced_qty:0, prototype_consumed_qty:0, scrap_qty:0, manual_adjustment:0};
+        let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
+        let onHand = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+        let diff = onHand - req;
+        
+        let name = k.replace('RECIPE:::', '');
+        
+        let diffColor = diff < 0 ? '#ef4444' : '#10b981';
+        let stockColor = onHand <= 0 ? '#ef4444' : 'var(--text-main)';
+        
+        h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${name}</td>
+            <td style="padding:8px; text-align:right; color:#8b5cf6; font-weight:bold;">${req.toFixed(2)}</td>
+            <td style="padding:8px; text-align:right; color:${stockColor};">${onHand.toFixed(2)}</td>
+            <td style="padding:8px; text-align:right; font-weight:bold; color:${diffColor};">${diff > 0 ? '+'+diff.toFixed(2) : diff.toFixed(2)}</td>
+        </tr>`;
+    });
+
+    if(!hasPulls) h += `<tr><td colspan="4" style="text-align:center; padding:10px; color:var(--text-muted);">No sub-assemblies pulled.</td></tr>`;
+    h += `</tbody></table>`;
+
+    document.getElementById('batchOrderReportContent').innerHTML = h;
+    document.getElementById('newWOModal').style.display = 'none';
+    document.getElementById('batchOrderReportModal').style.display = 'flex';
+}
+
+function printBatchOrderReport() {
+    const printContent = document.getElementById('batchOrderReportContent').innerHTML;
+    const printWindow = window.open('', '', 'height=600,width=800');
+    // Ensure styles map to printable black/white/red/green versions for paper
+    printWindow.document.write(`<html><head><title>Batch Order Projection</title><style>body{font-family:sans-serif; padding:20px; color:#000;} table{width:100%; border-collapse:collapse; margin-bottom:20px;} th,td{border-bottom:1px solid #ccc; padding:8px; text-align:left;} th.right, td.right{text-align:right;} h3{border-bottom:2px solid #000; padding-bottom:5px; margin-top:20px;}</style></head><body><h1>📦 Batch Order Projection</h1>${printContent.replace(/color:#ef4444/g, 'color:red').replace(/color:#10b981/g, 'color:green').replace(/color:var\(--text-[^\)]+\)/g, 'color:black')}</body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 250);
 }
 
 async function validateAndCreateWO() {
