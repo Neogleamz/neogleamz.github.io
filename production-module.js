@@ -99,8 +99,9 @@ function checkWORouting() {
 
     rArea.style.display = 'block'; let h = "";
     keys.forEach(k => {
-        let req = subsNeeded[k]; let invKey = `RECIPE:::${k}`; let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0};
-        let onHand = i.produced_qty - i.sold_qty; let autoPull = Math.min(req, Math.max(0, onHand)); let autoBuild = req - autoPull;
+        let req = subsNeeded[k]; let invKey = `RECIPE:::${k}`; let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
+        let onHand = (i.produced_qty||0) + (i.prototype_produced_qty||0) - (i.consumed_qty||0) - (i.scrap_qty||0) - (i.sold_qty||0) + (i.manual_adjustment||0); 
+        let autoPull = Math.min(req, Math.max(0, onHand)); let autoBuild = req - autoPull;
         let safeK = k.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g, '');
         h += `<div class="route-row" data-subname="${k}">
                 <div style="display:flex; flex-direction:column;">
