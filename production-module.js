@@ -9,7 +9,7 @@ function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" 
 function generateEditableSOPRow(s, idx) {
     let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
     let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-    return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn" style="width:28px!important; height:28px; font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red icon-btn" style="width:28px!important; height:28px; font-size:12px; margin-top:5px;" onclick="removeSOPRow(this)">X</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+    return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">✕</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
 }
 
 let currentSopMode = 'production'; // 'production' or '3d'
@@ -144,16 +144,16 @@ function removeBatchItem(index) {
 function renderStagedBatchItems() {
     let list = document.getElementById('stagedBatchItemsList');
     if(multiBatchItems.length === 0) {
-        list.innerHTML = '<li style="color:var(--text-muted); text-align:center; font-size:12px; margin-top:20px;">Cart is empty. Add products above.</li>';
+        list.innerHTML = '<li class="empty-state" style="list-style:none;">Cart is empty. Add products above.</li>';
         return;
     }
     
     let h = '';
     multiBatchItems.forEach((item, index) => {
         let f = fmtKey(item.p); let name = f.nn ? f.nn : f.in;
-        h += `<li style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:10px 15px; border-radius:6px; border:1px solid var(--border-color);">
+        h += `<li style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:10px 15px; border-radius:6px; border:1px solid var(--border-color);">
             <div style="font-weight:bold; color:var(--text-heading); font-size:14px;">${item.q}x <span style="color:#0ea5e9;">${name}</span></div>
-            <button class="btn-red" style="padding:4px 8px; font-size:12px; width:auto;" onclick="removeBatchItem(${index})">X</button>
+            <button class="btn-red btn-xs" onclick="removeBatchItem(${index})">✕</button>
         </li>`;
     });
     list.innerHTML = h;
@@ -384,19 +384,19 @@ function generateMultiBatchOrderReport() {
 
     if(orderList.length > 0) {
         h += `
-            <div style="background:#451a1a; padding:15px; border-radius:8px; border:1px solid #ef4444; margin-bottom:20px;">
-            <h3 style="color:#fca5a5; border-bottom:1px solid #b91c1c; padding-bottom:10px; margin-top:0;">🚨 Critical Procurement (Must Order)</h3>
+            <div style="background:var(--bg-negative); padding:15px; border-radius:8px; border:1px solid #ef4444; margin-bottom:20px;">
+            <h3 style="color:#ef4444; border-bottom:1px solid rgba(239,68,68,0.3); padding-bottom:10px; margin-top:0;">🚨 Critical Procurement (Must Order)</h3>
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
                 <thead>
-                    <tr style="border-bottom:2px solid #b91c1c; text-align:left;">
-                        <th style="padding:8px; cursor:pointer; color:#fca5a5; user-select:none;" onclick="sortReportTable(this, 0, false)">Material ↕</th>
-                        <th style="padding:8px; text-align:right; cursor:pointer; color:#fca5a5; user-select:none;" onclick="sortReportTable(this, 1, true)">Quantity To Order ↕</th>
+                    <tr style="border-bottom:2px solid rgba(239,68,68,0.3); text-align:left;">
+                        <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Material ↕</th>
+                        <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Quantity To Order ↕</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
         orderList.forEach(item => {
-            h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            h += `<tr style="border-bottom:1px solid var(--border-color);">
                 <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${item.name}</td>
                 <td style="padding:8px; text-align:right; color:#ef4444; font-weight:bold;">${item.qty.toFixed(2)}</td>
             </tr>`;
@@ -441,11 +441,11 @@ function generateMultiBatchOrderReport() {
         </tr>`;
     });
     
-    if(!hasRaws) h += `<tr><td colspan="4" style="text-align:center; padding:10px; color:var(--text-muted);">No raw materials required.</td></tr>`;
+    if(!hasRaws) h += `<tr><td colspan="4" class="empty-state" style="border:none;">No raw materials required.</td></tr>`;
     h += `</tbody></table>`;
 
     h += `
-        <h3 style="color:var(--primary-color); border-bottom:1px solid var(--border-color); padding-bottom:10px;">Sub-Assemblies To Pull</h3>
+        <h3 style="color:#FF8C00; border-bottom:1px solid var(--border-color); padding-bottom:10px;">Sub-Assemblies To Pull</h3>
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); text-align:left;">

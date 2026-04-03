@@ -573,10 +573,10 @@ function generatePackerzEditableSOPRow(s, idx) {
     
     return `<div class="sop-step-row" style="display:flex; gap:15px; padding:20px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:12px;">
         <div class="sop-step-movers">
-            <button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="movePackerzSOPUp(this)">▲</button>
-            <button class="icon-btn" style="width:28px!important; height:28px; font-size:14px; border:none; background:var(--bg-input);" onclick="movePackerzSOPDown(this)">▼</button>
-            <button class="icon-btn" style="width:28px!important; height:28px; font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addPackerzSOPRow(this)">+</button>
-            <button class="btn-red icon-btn" style="width:28px!important; height:28px; font-size:12px; margin-top:5px;" onclick="removePackerzSOPRow(this)">X</button>
+            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="movePackerzSOPUp(this)">▲</button>
+            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="movePackerzSOPDown(this)">▼</button>
+            <button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addPackerzSOPRow(this)">+</button>
+            <button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removePackerzSOPRow(this)">✕</button>
         </div>
         <div class="sop-text-container" style="flex-grow:1; display:flex; flex-direction:column;">
             <div class="sop-text-rich" contenteditable="true" placeholder="Type extremely detailed packing instructions securely here..." style="flex-grow:1; min-height:120px; outline:none; padding:15px; border:1px solid var(--border-input); border-radius:8px; background:var(--bg-input);">${safeText}</div>
@@ -655,14 +655,14 @@ function openPackerzAuditLog(sku, telemetryJsonString) {
     try { data = JSON.parse(telemetryJsonString); } catch(e) { return alert("Corrupted Audit Log"); }
     
     let h = `
-        <div id="packerzAuditOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:99999; display:flex; align-items:center; justify-content:center;">
-            <div style="background:var(--bg-panel); border:1px solid #10b981; border-radius:12px; width:450px; max-width:90%; padding:25px; box-shadow:0 10px 40px rgba(16,185,129,0.2);">
+        <div id="packerzAuditOverlay" class="modal-overlay active">
+            <div style="background:var(--bg-container); border:1px solid #10b981; border-radius:12px; width:clamp(320px, 90vw, 500px); max-height:90vh; padding:25px; box-shadow:0 10px 40px rgba(16,185,129,0.2); display:flex; flex-direction:column;">
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:10px; margin-bottom:15px;">
                     <h3 style="margin:0; font-size:16px; color:#10b981; font-weight:900;">QA AUDIT LOG</h3>
-                    <button onclick="document.getElementById('packerzAuditOverlay').remove()" style="background:transparent; border:none; color:var(--text-muted); font-size:16px; font-weight:bold; cursor:pointer;">[X]</button>
+                    <button class="icon-btn" onclick="document.getElementById('packerzAuditOverlay').remove()" style="color:var(--text-muted); font-size:16px; font-weight:bold; border:1px solid var(--border-color);">✕</button>
                 </div>
                 <div style="font-size:11px; margin-bottom:15px; color:var(--text-muted); font-family:monospace;">Item ID: ${sku}</div>
-                <div style="max-height:60vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:5px;" class="custom-scroll">
+                <div style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:5px;" class="custom-scroll">
     `;
     
     data.forEach(d => {
