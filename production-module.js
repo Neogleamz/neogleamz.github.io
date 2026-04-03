@@ -147,25 +147,47 @@ function getDirectMaterials(name, amount) {
 
 function calculateExactWODeductions(wo) {
     let raws_production = {}; let raws_assembly = {}; let pulls = {}; let raws_total = {};
-    let topDirect = getDirectMaterials(wo.product_name, wo.qty);
-    for(let k in topDirect) { 
-        raws_production[k] = (raws_production[k] || 0) + topDirect[k];
-        raws_total[k] = (raws_total[k] || 0) + topDirect[k];
-    }
+    let built_subs = {};
     
-    if(wo.routing) {
-        for(let sub in wo.routing) {
-            if(wo.routing[sub].pull > 0) pulls[`RECIPE:::${sub}`] = wo.routing[sub].pull;
-            if(wo.routing[sub].build > 0) {
-                let subDirect = getDirectMaterials(sub, wo.routing[sub].build);
-                for(let k in subDirect) {
-                    raws_assembly[k] = (raws_assembly[k] || 0) + subDirect[k];
-                    raws_total[k] = (raws_total[k] || 0) + subDirect[k];
+    function traverseBOM(recipeName, qty, isTopLevel) {
+        (productsDB[recipeName] || []).forEach(part => {
+            let k = String(part.item_key || part.di_item_id || part.name); 
+            let q = (parseFloat(part.quantity || part.qty) || 1) * qty;
+            
+            if(!k.startsWith('RECIPE:::')) { 
+                if (isTopLevel) {
+                    raws_production[k] = (raws_production[k] || 0) + q;
+                } else {
+                    raws_assembly[k] = (raws_assembly[k] || 0) + q;
+                }
+                raws_total[k] = (raws_total[k] || 0) + q; 
+            } else {
+                let subName = k.replace('RECIPE:::', '');
+                let pullQty = 0;
+                let buildQty = q;
+                
+                // Allow dynamic override from the first-level map for manually stated shelf pulls
+                if (isTopLevel && wo.routing && wo.routing[subName]) {
+                    pullQty = parseFloat(wo.routing[subName].pull || 0);
+                    buildQty = parseFloat(wo.routing[subName].build || 0);
+                } 
+                
+                if (pullQty > 0) {
+                    pulls[k] = (pulls[k] || 0) + pullQty;
+                }
+                
+                if (buildQty > 0) {
+                    built_subs[k] = (built_subs[k] || 0) + buildQty;
+                    // Recurse heavily into the defined dependencies to guarantee deep material alignment
+                    traverseBOM(subName, buildQty, false);
                 }
             }
-        }
+        });
     }
-    return { raws: raws_total, raws_production, raws_assembly, pulls };
+
+    traverseBOM(wo.product_name, wo.qty, true);
+    
+    return { raws: raws_total, raws_production, raws_assembly, pulls, built_subs };
 }
 
 function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
@@ -572,6 +594,23 @@ async function advanceWO(newStatus) {
                     inventoryDB[k].consumed_qty += req; 
                     if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
                     else inventoryDB[k].assembly_consumed_qty = (inventoryDB[k].assembly_consumed_qty||0) + req;
+                    upsKeys.add(k);
+                });
+                Object.keys(exactDeductions.built_subs).forEach(k => {
+                    let req = exactDeductions.built_subs[k];
+                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
+                    
+                    inventoryDB[k].consumed_qty += req;
+                    if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
+                    else inventoryDB[k].assembly_consumed_qty = (inventoryDB[k].assembly_consumed_qty||0) + req;
+                    
+                    let cleanName = k.replace('RECIPE:::', '');
+                    let is3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
+                    
+                    if (!is3D) {
+                        if(bType === 'Prototype') inventoryDB[k].prototype_produced_qty = (inventoryDB[k].prototype_produced_qty||0) + req;
+                        else inventoryDB[k].produced_qty += req;
+                    }
                     upsKeys.add(k);
                 });
                 Object.keys(exactDeductions.pulls).forEach(k => {
