@@ -79,6 +79,9 @@ function openNewWOModal() {
     document.getElementById('woErrorBox').style.display = 'none'; 
     document.getElementById('woRoutingArea').style.display = 'none'; 
     document.getElementById('newWOQty').value = 1; 
+    let r = document.getElementById('newWOProductRetail'); if(r) r.value = '';
+    let s = document.getElementById('newWOProductSub'); if(s) s.value = '';
+    let p = document.getElementById('newWOProductPrint'); if(p) p.value = '';
     document.getElementById('newWOModal').style.display = 'flex'; 
     checkWORouting(); 
 }
@@ -88,6 +91,9 @@ let multiBatchItems = [];
 function openMultiBatchModal() {
     multiBatchItems = [];
     document.getElementById('multiBatchQty').value = 1;
+    let r = document.getElementById('multiBatchProductRetail'); if(r) r.value = '';
+    let s = document.getElementById('multiBatchProductSub'); if(s) s.value = '';
+    let p = document.getElementById('multiBatchProductPrint'); if(p) p.value = '';
     renderStagedBatchItems();
     document.getElementById('multiBatchOrderModal').style.display = 'flex';
 }
