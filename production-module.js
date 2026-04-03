@@ -746,7 +746,10 @@ function renderArchiveList() {
                     <strong style="color:var(--text-heading); font-size:16px;">${wo.wo_id}: ${wo.product_name}</strong>
                     <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Started: ${dtC} | <span style="color:var(--neon-green)">Completed: ${dtF}</span></div>
                 </div>
-                <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:13px;" onclick="unarchiveRecord('batchez', '${wo.wo_id}')">♻️ Unarchive</button>
+                    <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
+                </div>
             </div>`;
         });
     } else {
@@ -758,21 +761,46 @@ function renderArchiveList() {
             const dtC = fmt(job.started_at || job.created_at) || 'Unknown';
             const dtF = fmt(job.completed_at) || 'Manual Archive';
             
-            let cleanPartName = job.part_name.split(':::')[0];
+            let cleanPartName = (job.part_name || 'Unknown Part').split(':::')[0];
             const catItem = typeof catalogByName !== 'undefined' ? catalogByName[cleanPartName] : null;
             const displayName = catItem ? (catItem.neoName || catItem.itemName) : cleanPartName;
             
-            let displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
+            let displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + String(job.id || '').substring(0, 8).toUpperCase());
 
             listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
                 <div>
                     <strong style="color:var(--text-heading); font-size:16px;">${displayID}: ${displayName}</strong>
                     <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Started: ${dtC} | <span style="color:var(--neon-purple)">Completed: ${dtF}</span></div>
                 </div>
-                <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:13px;" onclick="unarchiveRecord('layerz', '${job.id}')">♻️ Unarchive</button>
+                    <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
+                </div>
             </div>`;
         });
     }
+}
+
+async function unarchiveRecord(type, id) {
+    if(!confirm('Restore this item from the archives?')) return;
+    sysLog(`Unarchiving ${id} from ${type}`);
+    setMasterStatus("Restoring...", "mod-working");
+    try {
+        if(type === 'batchez') {
+            await supabaseClient.from('work_orders').update({status: 'Completed'}).eq('wo_id', id);
+            let wo = workOrdersDB.find(w => w.wo_id === id);
+            if(wo) wo.status = 'Completed';
+            renderWOList();
+        } else {
+            await supabaseClient.from('print_queue').update({status: 'Completed'}).eq('id', id);
+            let job = printQueueDB.find(p => p.id === id);
+            if(job) job.status = 'Completed';
+            if(typeof renderPrintQueue === 'function') renderPrintQueue();
+        }
+        setMasterStatus("Restored!", "mod-success");
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        renderArchiveList();
+    } catch(e) { sysLog(e.message, true); }
 }
 
 async function hardDeleteArchive(type, id) {
