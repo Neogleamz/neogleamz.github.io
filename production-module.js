@@ -247,9 +247,29 @@ async function validateAndCreateWO() {
 
         // 🖨️ AUTO-SPAWN 3D PRINT JOBS
         const printsToSpawn = find3DPrintedComponents(p, q, routingMap);
-        const printPromises = Object.keys(printsToSpawn).map(part => {
-            if (typeof addPrintJob === 'function') return addPrintJob('RECIPE:::' + part, printsToSpawn[part], woId);
+        const printPromises = [];
+        
+        Object.keys(printsToSpawn).forEach(part => {
+            let totalNeeded = printsToSpawn[part];
+            let invKey = `RECIPE:::${part}`;
+            let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
+            
+            // Calculate active on-shelf stock for this exact 3D printed component
+            let onHand = i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
+            
+            let amountToPrint = totalNeeded;
+            if (onHand > 0) {
+                amountToPrint = Math.max(0, totalNeeded - onHand);
+            }
+            
+            // Only queue a print job for structural fallback/shortfalls instead of unconditionally spooling full amounts
+            if (amountToPrint > 0) {
+                if (typeof addPrintJob === 'function') {
+                    printPromises.push(addPrintJob('RECIPE:::' + part, amountToPrint, woId));
+                }
+            }
         });
+        
         if (printPromises.length > 0) {
             sysLog(`Spawning ${printPromises.length} 3D print jobs for ${woId}...`);
             await Promise.all(printPromises);
@@ -587,8 +607,16 @@ async function advanceWO(newStatus) {
             if (!existingPrints || existingPrints.length === 0) {
                 const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
                 for(let job of Object.keys(printJobs)) {
-                    if(typeof addPrintJob === 'function') {
-                        await addPrintJob(job, printJobs[job], currentWO.wo_id);
+                    let totalNeeded = printJobs[job];
+                    let invKey = `RECIPE:::${job}`;
+                    let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
+                    let onHand = i.produced_qty - i.sold_qty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
+                    
+                    let amountToPrint = totalNeeded;
+                    if (onHand > 0) amountToPrint = Math.max(0, totalNeeded - onHand);
+
+                    if (amountToPrint > 0 && typeof addPrintJob === 'function') {
+                        await addPrintJob('RECIPE:::' + job, amountToPrint, currentWO.wo_id);
                     }
                 }
             }
