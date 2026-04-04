@@ -728,3 +728,15 @@ function initLabelzPane() {
 
 // Initial pull triggered on script load if supabase available
 setTimeout(() => { if(typeof supabaseClient !== 'undefined') loadLabelzData(); }, 3000);
+
+// ============================================================
+// SPOOL INTEGRATION
+// ============================================================
+window.addLabelzToSpool = function(name, emoji) {
+    if(typeof addBarcodzToSpool === 'function') {
+        const slug = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30);
+        addBarcodzToSpool(name, slug, emoji || '🏷️', 'Custom Canvas Label');
+    } else {
+        alert('Barcodz subsystem not loaded yet. Try again.');
+    }
+};
