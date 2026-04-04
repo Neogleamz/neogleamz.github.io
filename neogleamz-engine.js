@@ -437,6 +437,7 @@ function updateHubStats() {
 // UNIVERSAL UI FLEX-BOM RESIZER
 // ==========================================
 let isNeoSidebarResizing = false;
+let activeResizingSidebarId = null;
 
 window.initNeoSidebarResizer = function(e) {
     if(e) e.preventDefault();
@@ -490,6 +491,9 @@ window.doNeoSidebarResize = function(e) {
         if (newWidth > 700) newWidth = 700; 
     }
     
+    // Track active ID for local caching
+    if (sidebar.id) activeResizingSidebarId = sidebar.id;
+    
     // Aggressive CSS math overrides
     sidebar.style.width = newWidth + 'px';
     sidebar.style.minWidth = newWidth + 'px';
@@ -497,8 +501,44 @@ window.doNeoSidebarResize = function(e) {
 };
 
 window.stopNeoSidebarResize = function(e) {
+    if (isNeoSidebarResizing && activeResizingSidebarId) {
+        const p = document.getElementById(activeResizingSidebarId);
+        if (p) {
+            localStorage.setItem(`neoResizer_${activeResizingSidebarId}`, p.style.width);
+        }
+    }
+    
     isNeoSidebarResizing = false;
+    activeResizingSidebarId = null;
     document.body.style.cursor = '';
     document.removeEventListener('mousemove', window.doNeoSidebarResize);
     document.removeEventListener('mouseup', window.stopNeoSidebarResize);
 };
+
+window.restoreNeoSidebarSizes = function() {
+    const idsToRestore = [
+        'packerzKanbanLeftCol', 
+        'packerzLiveSopLeftPane', 
+        'barcodzSidebar', 
+        'recipezSidebar', 
+        'batchezSidebar', 
+        'layerzSidebar'
+    ];
+    
+    for (let id of idsToRestore) {
+        const cachedWidth = localStorage.getItem(`neoResizer_${id}`);
+        if (cachedWidth) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.width = cachedWidth;
+                el.style.minWidth = cachedWidth;
+                el.style.flex = `0 0 ${cachedWidth}`;
+            }
+        }
+    }
+};
+
+// Fire on Engine Boot
+document.addEventListener('DOMContentLoaded', window.restoreNeoSidebarSizes);
+w i n d o w . r e s t o r e N e o S i d e b a r S i z e s ( ) ;  
+ 
