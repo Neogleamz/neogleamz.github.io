@@ -257,9 +257,9 @@ function handleLabelzImageUpload(e) {
 
 function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
     // We use an offscreen canvas to render with bwipjs, then drop it into fabric as an image
-    const tmpCanvas = document.createElement('canvas');
+    const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
     try {
-        bwipjs.toCanvas(tmpCanvas, {
+        bwipjs.toCanvas('labelzBwipjsRenderer', {
             bcid: format,
             text: codeStr,
             scale: 3,
@@ -281,14 +281,14 @@ function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
         });
     } catch(e) {
         console.error(e);
-        alert('Could not render barcode.');
+        alert('Could not render barcode: ' + e.message);
     }
 }
 
 function addLabelzQR(codeStr = 'NEOGLEAMZ') {
-    const tmpCanvas = document.createElement('canvas');
+    const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
     try {
-        bwipjs.toCanvas(tmpCanvas, {
+        bwipjs.toCanvas('labelzBwipjsRenderer', {
             bcid: 'qrcode',
             text: codeStr,
             scale: 3,
@@ -307,16 +307,16 @@ function addLabelzQR(codeStr = 'NEOGLEAMZ') {
         });
     } catch(e) {
         console.error(e);
-        alert('Could not render QR.');
+        alert('Could not render QR: ' + e.message);
     }
 }
 
 // Regenerates a barcode image if its text or format changes
 function regenerateBarcodeImage(obj, text, format) {
     if(!obj || !obj.isBarcode) return;
-    const tmpCanvas = document.createElement('canvas');
+    const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
     try {
-         bwipjs.toCanvas(tmpCanvas, {
+         bwipjs.toCanvas('labelzBwipjsRenderer', {
             bcid: format,
             text: text,
             scale: 3,
@@ -331,6 +331,7 @@ function regenerateBarcodeImage(obj, text, format) {
         });
     } catch(e) {
         console.warn('Barcode gen error:', e);
+        alert('Barcode gen error: ' + e.message);
     }
 }
 
