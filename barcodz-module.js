@@ -220,6 +220,20 @@ function executeBatchPrint() {
     // Clear Area
     printArea.innerHTML = '';
     
+    // Inject Dynamic @page Bounds based on selection to force browser stock preview
+    let pageCss = '';
+    if (sizeSelect === '2.25x1.25') pageCss = '@page { size: 2.25in 1.25in; margin: 0; }';
+    else if (sizeSelect === '1.125x3.5') pageCss = '@page { size: 3.5in 1.125in; margin: 0; }';
+    else if (sizeSelect === '0.75x2') pageCss = '@page { size: 2in 0.75in; margin: 0; }';
+    else if (sizeSelect === '2.125x1') pageCss = '@page { size: 2.125in 1in; margin: 0; }';
+    else if (sizeSelect === '4x6') pageCss = '@page { size: 4in 6in; margin: 0; }';
+    else if (sizeSelect === '1x1') pageCss = '@page { size: 1in 1in; margin: 0; }';
+    else if (sizeSelect === '3x1') pageCss = '@page { size: 3in 1in; margin: 0; }';
+    
+    if (pageCss) {
+        printArea.innerHTML = `<style>${pageCss}</style>`;
+    }
+    
     let totalInjected = 0;
 
     // Loop through each queued SKU
