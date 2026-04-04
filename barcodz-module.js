@@ -231,9 +231,9 @@ function renderBarcodzSpool() {
                     
                     <div style="font-size:16px; flex-shrink:0;">${item.icon}</div>
                     
-                    <div style="flex-grow:1; min-width:0; overflow:hidden;">
-                        <div style="font-size:11px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
-                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); pointer-events:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.slug}</div>
+                    <div style="flex:1 1 0px; display:flex; flex-direction:column; justify-content:center; overflow:hidden; margin:0 4px;">
+                        <div style="font-size:11px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;" title="${item.name}">${item.name}</div>
+                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${item.slug}</div>
                     </div>
                     
                     <input type="number" min="0" value="${item.qty}" onchange="setSpoolItemQty('${item.slug}', this.value)" style="width:40px; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 4px; flex-shrink:0;" />
