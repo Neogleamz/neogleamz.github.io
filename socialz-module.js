@@ -320,7 +320,7 @@
                             <div class="flex-1 flex justify-end">
                                 <button onclick="editSkater(${originalIndex})" class="text-xs font-bold text-brand hover:text-orange-400 flex items-center gap-1 shrink-0 ml-2"><i class="fa-solid fa-pen"></i> EDIT</button>
                             </div>
-                        </div></div><div class="mt-auto bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto custom-scrollbar">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
+                        </div></div><div class="mt-auto bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
                     } else {
                         // COMPACT LIST VIEW
                         return `
