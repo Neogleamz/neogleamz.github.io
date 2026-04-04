@@ -225,20 +225,20 @@ function renderBarcodzSpool() {
         window.barcodzSpoolQueue.forEach((item, index) => {
             totalQty += item.qty;
             html += `
-                <div draggable="true" ondragstart="spoolDragStart(event, ${index})" ondragover="spoolDragOver(event)" ondrop="spoolDrop(event, ${index})" ondragend="spoolDragEnd(event)" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; display:flex; align-items:center; gap:8px; cursor:grab; width:100%; box-sizing:border-box;" onmousedown="this.style.cursor='grabbing'" onmouseup="this.style.cursor='grab'">
+                <div draggable="true" ondragstart="spoolDragStart(event, ${index})" ondragover="spoolDragOver(event)" ondrop="spoolDrop(event, ${index})" ondragend="spoolDragEnd(event)" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; display:grid; grid-template-columns:12px 20px minmax(0, 1fr) 40px 20px; align-items:center; gap:8px; cursor:grab; width:100%; box-sizing:border-box;" onmousedown="this.style.cursor='grabbing'" onmouseup="this.style.cursor='grab'">
                     
                     <div style="color:var(--text-muted); cursor:grab; font-size:12px; margin-right:-4px; user-select:none;">⋮⋮</div>
                     
-                    <div style="font-size:16px; flex-shrink:0;">${item.icon}</div>
+                    <div style="font-size:16px; display:flex; justify-content:center;">${item.icon}</div>
                     
-                    <div style="width:calc(100% - 90px); overflow:hidden;">
+                    <div style="overflow:hidden;">
                         <div style="font-size:11px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
                         <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.slug}</div>
                     </div>
                     
-                    <input type="number" min="0" value="${item.qty}" onchange="setSpoolItemQty('${item.slug}', this.value)" style="width:40px; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 4px; flex-shrink:0;" />
+                    <input type="number" min="0" value="${item.qty}" onchange="setSpoolItemQty('${item.slug}', this.value)" style="width:100%; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 2px;" />
                     
-                    <button onclick="updateSpoolItem('${item.slug}', -999)" style="background:transparent; border:none; cursor:pointer; font-size:11px; opacity:0.6; padding:4px; flex-shrink:0;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Remove from queue">❌</button>
+                    <button onclick="updateSpoolItem('${item.slug}', -999)" style="background:transparent; border:none; cursor:pointer; font-size:11px; opacity:0.6; padding:4px; display:flex; justify-content:center; align-items:center; width:100%; height:100%;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Remove from queue">❌</button>
                     
                 </div>
             `;
