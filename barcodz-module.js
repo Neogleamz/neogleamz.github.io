@@ -236,7 +236,26 @@ function executeBatchPrint() {
                 wrapper.style.cssText = `width: 2.25in; height: 1.25in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 const shortName = item.name.length > 28 ? item.name.substring(0, 26) + '...' : item.name;
                 wrapper.innerHTML = `<div style="font-size:8pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.8in;"></svg>`;
-            } 
+            }
+            else if (sizeSelect === '1.125x3.5') {
+                wrapper.style.cssText = `width: 3.5in; height: 1.125in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.1in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
+                const shortName = item.name.length > 40 ? item.name.substring(0, 38) + '...' : item.name;
+                wrapper.innerHTML = `<div style="font-size:10pt; font-weight:900; line-height:1; margin-bottom:4px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.75in;"></svg>`;
+            }
+            else if (sizeSelect === '0.75x2') {
+                wrapper.style.cssText = `width: 2in; height: 0.75in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.02in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
+                const shortName = item.name.length > 22 ? item.name.substring(0, 20) + '...' : item.name;
+                wrapper.innerHTML = `<div style="font-size:6pt; font-weight:900; line-height:1; margin-bottom:1px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.5in;"></svg>`;
+            }
+            else if (sizeSelect === '2.125x1') {
+                wrapper.style.cssText = `width: 2.125in; height: 1in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
+                const shortName = item.name.length > 24 ? item.name.substring(0, 22) + '...' : item.name;
+                wrapper.innerHTML = `<div style="font-size:7pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.6in;"></svg>`;
+            }
+            else if (sizeSelect === '4x6') {
+                wrapper.style.cssText = `width: 4in; height: 6in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.25in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
+                wrapper.innerHTML = `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div><svg id="${svgId}" style="width:100%; height:2.5in;"></svg><div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`;
+            }
             else if (sizeSelect === '1x1') {
                 wrapper.style.cssText = `width: 1in; height: 1in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.02in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 wrapper.innerHTML = `<canvas id="${svgId}" style="width:0.75in; height:0.75in;"></canvas><div style="font-size:5pt; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${item.name}</div>`;
