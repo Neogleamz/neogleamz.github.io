@@ -446,3 +446,15 @@ const publicUrl = data.publicUrl;
 | `neogleamz-engine.js` | CEO dashboard KPI engine |
 | `.agents/workflows/` | AI agent workflow definitions (git, UI standards) |
 | `.env.local` | Local secrets — **never commit** |
+
+---
+
+## 15. AI Agent Tooling & System Capabilities (Antigravity)
+
+As an AI engineering assistant on the Neogleamz platform, I operate with **native executing privileges** on the host environment. I do not just suggest code; I execute it.
+
+When delegating tasks, you can rely on the following built-in OS capabilities:
+1. **GitHub CLI / Git Core:** I can read branches, stage patches, run `git diff`, and push commits directly to the remote repository. (Example: `git commit -m "feat: updated UI"`)
+2. **Supabase CLI:** I can interface with Supabase locally using `npx supabase` commands to manage edge functions, database pushing/pulling, and schema verification.
+3. **AST Parsers:** I use Abstract Syntax Tree and semantic search tools locally to identify UI standards and module patterns.
+4. **Command Constraints:** I am bound by strict "avoid raw bash" system rules when dedicated tools (like `multi_replace_file_content`) exist to prevent race conditions. If you see repetitive thought-logs about tool selection in the UI, that is a required safety protocol, not a limitation of capability.
