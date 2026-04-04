@@ -541,3 +541,33 @@ window.restoreNeoSidebarSizes = function() {
 // Fire on Engine Boot
 document.addEventListener('DOMContentLoaded', window.restoreNeoSidebarSizes);
 window.restoreNeoSidebarSizes(); // Fire immediately just in case DOM is already loaded
+
+// ==========================================
+// UNIVERSAL UI DROPDOWN MEMORY
+// ==========================================
+window.initNeoDropdownMemory = function() {
+    const selects = document.querySelectorAll('.neo-cache-select');
+    selects.forEach(select => {
+        if(!select.id) return;
+        
+        // Restore from cache if exists
+        const cachedVal = localStorage.getItem(`neoSelect_${select.id}`);
+        if(cachedVal) {
+            select.value = cachedVal;
+        }
+        
+        // Listen for future changes
+        select.addEventListener('change', function(e) {
+            localStorage.setItem(`neoSelect_${e.target.id}`, e.target.value);
+            
+            // Re-trigger global resize/render hooks if they exist on the element (React/Vanilla integration)
+            if (this.onchange && typeof this.onchange === 'function') {
+                // The native onchange inline event fires naturally, but if we need a custom engine bus dispatch, do it here.
+            }
+        });
+    });
+};
+
+// Boot dropdown memory
+document.addEventListener('DOMContentLoaded', window.initNeoDropdownMemory);
+window.initNeoDropdownMemory();
