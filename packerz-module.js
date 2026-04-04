@@ -747,9 +747,14 @@ async function initPackerzAdmin() {
     try {
         if(typeof productsDB !== 'undefined') {
             let opts = '<option value="">-- Select Active Master Recipe --</option>';
-            Object.keys(productsDB).sort().forEach(p => {
-                opts += `<option value="${String(p).replace(/"/g, '&quot;')}">📝 ${p}</option>`;
-            });
+            let sorted = Object.keys(productsDB).sort();
+            let retail  = sorted.filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print));
+            let subs    = sorted.filter(p =>  isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print));
+            let prints  = sorted.filter(p => productsDB[p] && productsDB[p].is_3d_print);
+            const grp = (label, icon, arr) => arr.length ? `<optgroup label="${label}">${arr.map(p => `<option value="${String(p).replace(/"/g,'&quot;')}">${icon} ${p}</option>`).join('')}</optgroup>` : '';
+            opts += grp('📦 RETAIL PRODUCTS', '📦', retail);
+            opts += grp('⚙️ SUB-ASSEMBLIES',  '⚙️',  subs);
+            opts += grp('🖨️ 3D PRINTS',       '🖨️',  prints);
             ddl.innerHTML = opts;
         } else {
             ddl.innerHTML = '<option value="">CRITICAL: global productsDB undefined in namespace</option>';

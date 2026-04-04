@@ -54,11 +54,26 @@ function renderMasterSOP() {
     try { 
         const p = document.getElementById('sopMasterProductSelect').value; 
         const area = document.getElementById('sopMasterEditorArea'); 
+        const qaArea = document.getElementById('productionAdminQA');
         if(!p) { 
             area.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select an item above to start writing instructions.</div>"; 
+            if(qaArea) { qaArea.value = ''; if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview(); }
             return; 
         } 
-        let steps = sopsDB[p] || []; 
+        let dbPayload = sopsDB[p];
+        let steps = [];
+        let qaChecks = [];
+        if (dbPayload) {
+            if (Array.isArray(dbPayload)) { steps = dbPayload; } 
+            else if (typeof dbPayload === 'object') {
+                steps = dbPayload.steps || [];
+                qaChecks = dbPayload.qaChecks || [];
+            }
+        }
+        if(qaArea) {
+            qaArea.value = qaChecks.join('\n');
+            if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
+        }
         let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s); 
         if(mappedSteps.length === 0) mappedSteps = [{}]; 
         let h = ""; 
@@ -76,8 +91,42 @@ function extractSOPDataFromUI(containerId) {
     let steps = []; document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { let t = row.querySelector('.sop-text-rich'); let m1t = row.querySelector('.m1-type').value; let m1u = row.querySelector('.m1-url').value; let m2t = row.querySelector('.m2-type').value; let m2u = row.querySelector('.m2-url').value; let m3t = row.querySelector('.m3-type').value; let m3u = row.querySelector('.m3-url').value; if(t && t.innerHTML.trim()) { steps.push({ text: t.innerHTML.trim(), m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u} }); } }); return steps;
 }
 
-async function saveMasterSOP() { try { const p = document.getElementById('sopMasterProductSelect').value; if(!p) return; let steps = extractSOPDataFromUI('sopMasterEditorArea'); sopsDB[p] = steps; sysLog(`Saving Master SOP for ${p}`); setMasterStatus("Saving...", "mod-working"); const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}, {onConflict: 'product_name'}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); document.getElementById('sopMasterModal').style.display = 'none'; if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } }
-async function saveInlineSOP() { try { if(!currentWO) return; const p = currentWO.product_name; let steps = extractSOPDataFromUI('inlineSOPContainer'); sopsDB[p] = steps; sysLog(`Saving Inline SOP for ${p}`); setMasterStatus("Saving...", "mod-working"); const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: steps}, {onConflict: 'product_name'}); if(error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); toggleSOPLock(); } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } }
+async function saveMasterSOP() { 
+    try { 
+        const p = document.getElementById('sopMasterProductSelect').value; 
+        if(!p) return; 
+        let steps = extractSOPDataFromUI('sopMasterEditorArea'); 
+        let rawQa = document.getElementById('productionAdminQA')?.value || '';
+        let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
+        const payload = { qaChecks: qaLines, steps: steps };
+        sopsDB[p] = payload; 
+        sysLog(`Saving Master SOP for ${p}`); 
+        setMasterStatus("Saving...", "mod-working"); 
+        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'}); 
+        if(error) throw new Error(error.message); 
+        setMasterStatus("Saved!", "mod-success"); 
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); 
+        if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); 
+    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } 
+}
+async function saveInlineSOP() { 
+    try { 
+        if(!currentWO) return; 
+        const p = currentWO.product_name; 
+        let steps = extractSOPDataFromUI('inlineSOPContainer'); 
+        let existingQa = [];
+        if (sopsDB[p] && typeof sopsDB[p] === 'object' && !Array.isArray(sopsDB[p])) existingQa = sopsDB[p].qaChecks || [];
+        const payload = { qaChecks: existingQa, steps: steps };
+        sopsDB[p] = payload; 
+        sysLog(`Saving Inline SOP for ${p}`); 
+        setMasterStatus("Saving...", "mod-working"); 
+        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'}); 
+        if(error) throw new Error(error.message); 
+        setMasterStatus("Saved!", "mod-success"); 
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); 
+        toggleSOPLock(); 
+    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } 
+}
 
 function openNewWOModal() { 
     document.getElementById('woErrorBox').style.display = 'none'; 
@@ -804,7 +853,16 @@ function renderActiveWO(id) {
             if(wo.routing) {
                 Object.keys(wo.routing).forEach(sub => {
                     if(wo.routing[sub].build > 0) {
-                        let subSteps = sopsDB[sub] || [];
+                        let subPayload = sopsDB[sub];
+                        let subSteps = []; let subQa = [];
+                        if (subPayload) {
+                            if (Array.isArray(subPayload)) subSteps = subPayload;
+                            else if (typeof subPayload === 'object') { subSteps = subPayload.steps || []; subQa = subPayload.qaChecks || []; }
+                        }
+                        if(subQa.length > 0) {
+                            stepsToRender.push({ isHeader: true, text: `📋 Telemetry / Checks: ${sub}` });
+                            subQa.forEach(q => stepsToRender.push({ isTele: true, text: q }));
+                        }
                         if(subSteps.length > 0) {
                             stepsToRender.push({ isHeader: true, text: `⚙️ Build Sub-Assembly: ${sub} (Quantity: ${wo.routing[sub].build})` });
                             stepsToRender = stepsToRender.concat(subSteps);
@@ -812,7 +870,16 @@ function renderActiveWO(id) {
                     }
                 });
             }
-            let mainSteps = sopsDB[wo.product_name] || [];
+            let mainPayload = sopsDB[wo.product_name];
+            let mainSteps = []; let mainQa = [];
+            if (mainPayload) {
+                if (Array.isArray(mainPayload)) mainSteps = mainPayload;
+                else if (typeof mainPayload === 'object') { mainSteps = mainPayload.steps || []; mainQa = mainPayload.qaChecks || []; }
+            }
+            if(mainQa.length > 0) {
+                stepsToRender.push({ isHeader: true, text: `📋 Main Assembly Telemetry / Checks: ${wo.product_name}` });
+                mainQa.forEach(q => stepsToRender.push({ isTele: true, text: q }));
+            }
             if(mainSteps.length > 0 || stepsToRender.length > 0) {
                 if(mainSteps.length > 0) {
                     stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${wo.product_name}` });
@@ -827,13 +894,23 @@ function renderActiveWO(id) {
                 sList.innerHTML = editHtml; saveContainer.style.display = 'block';
             } else {
                 saveContainer.style.display = 'none'; 
-                let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
+                let mappedSteps = stepsToRender.map(s => (s.isHeader || s.isTele || typeof s !== 'string') ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
                 if(mappedSteps.length === 0) sList.innerHTML = `<div style="padding:15px; color:var(--text-muted);">No SOPs written for this product or its sub-assemblies yet.</div>`;
                 else {
                     let stepCounter = 1;
                     mappedSteps.forEach((s, idx) => {
                         if(s.isHeader) {
                             sList.innerHTML += `<div style="background:var(--bg-bar); padding:10px 15px; margin:20px 0 10px 0; border-radius:6px; border-left:4px solid #0ea5e9; font-weight:bold; font-size:16px; color:var(--text-heading);">${s.text}</div>`;
+                        } else if(s.isTele) {
+                            let chkKey = `sop_tele_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                            let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(s.text, idx) : s.text;
+                            if (s.text.startsWith('> ')) {
+                                sList.innerHTML += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:4px 8px 4px 28px; width:100%; transition:all 0.2s;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;">${parsed}</label>`;
+                            } else if (!s.text.startsWith('[INPUT]') && !s.text.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(s.text)) {
+                                sList.innerHTML += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:6px 10px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); width:100%; transition:all 0.2s;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:16px; height:16px; flex-shrink:0; cursor:pointer; margin-top:2px;">${parsed}</label>`;
+                            } else {
+                                sList.innerHTML += `<div style="width:100%; margin-bottom:8px;">${parsed}</div>`;
+                            }
                         } else {
                             let chkKey = `sop_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : ''; let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">`;
                             [s.m1, s.m2, s.m3].forEach(m => {
@@ -858,6 +935,7 @@ function renderActiveWO(id) {
                             sList.innerHTML += `<div class="checklist-item ${doneCls}"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%;"><strong style="color:#0ea5e9; font-size:16px;">Step ${stepCounter++}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
                         }
                     });
+                    if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
                 }
             }
         }
@@ -1174,3 +1252,103 @@ function printSOP() {
     } catch(e) { sysLog(e.message, true); }
 }
 
+function parseProductionTelemetryLine(q, contextIdx) {
+    let html = '';
+    
+    function parseInputs(text) { return text.replace(/\[INPUT\]/gi, `<input type="text" placeholder="..." style="padding:4px 8px; border-radius:4px; background:rgba(255,255,255,0.1); border:1px solid #10b981; color:#fff; font-family:monospace; font-size:12px; width:120px; font-weight:bold; margin:0 6px;">`); }
+
+    function parseImgs(text) {
+        text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`; });
+        text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`; });
+        text = text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+            const safe = url.replace(/'/g, "\\'");
+            if(url.toLowerCase().endsWith('.pdf')) { return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`; }
+            if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) { return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`; }
+            return `<img src="${url}" loading="lazy" style="max-height:80px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
+        });
+        return text;
+    }
+
+    function parseBarcodes(text) { return text.replace(/\[BARCODE:([^\]]+)\]/gi, (_, val) => { const id = `sop-bc-prod-${contextIdx}-${Math.random().toString(36).substring(7)}`; return `<svg id="${id}" data-value="${val.trim()}" class="sop-barcode-svg" style="max-width:200px; background:white; padding:6px; border-radius:6px; display:block; margin:4px 0;"></svg>`; }); }
+
+    function parseQR(text) { return text.replace(/\[QR:([^\]]+)\]/gi, (_, val) => { const id = `sop-qr-prod-${contextIdx}-${Math.random().toString(36).substring(7)}`; return `<canvas id="${id}" data-value="${val.trim()}" class="sop-qr-canvas" style="border-radius:6px; display:block; margin:4px 0;"></canvas>`; }); }
+
+    function parseScan(text) { return text.replace(/\[SCAN:([^\]]+)\]/gi, (_, val) => { return `<span style="background:rgba(14,165,233,0.15); border:1px solid #0ea5e9; color:#0ea5e9; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:800; white-space:nowrap; margin:0 4px; vertical-align:middle;">📷 SCAN: ${val.trim()}</span>`; }); }
+
+    function parseAll(text) { return parseQR(parseBarcodes(parseImgs(parseInputs(parseScan(text))))); }
+
+    if (/^\[IMG:(https?:\/\/[^\]]+)\]$/i.test(q)) {
+        const url = q.match(/\[IMG:(https?:\/\/[^\]]+)\]/i)[1];
+        const safe = url.replace(/'/g, "\\'");
+        html = `<div style="margin:4px 0;"><img src="${url}" loading="lazy" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safe}', 'img')"></div>`;
+    } else if (/^\[BARCODE:([^\]]+)\]$/i.test(q)) {
+        const val = q.match(/\[BARCODE:([^\]]+)\]/i)[1].trim();
+        const id = `sop-bc-prod-${contextIdx}-${Math.random().toString(36).substring(7)}`;
+        html = `<div style="margin:4px 0; padding:8px; background:white; border-radius:8px; display:inline-block;"><svg id="${id}" data-value="${val}" class="sop-barcode-svg"></svg></div>`;
+    } else if (/^\[QR:([^\]]+)\]$/i.test(q)) {
+        const val = q.match(/\[QR:([^\]]+)\]/i)[1].trim();
+        const id = `sop-qr-prod-${contextIdx}-${Math.random().toString(36).substring(7)}`;
+        html = `<div style="margin:4px 0;"><canvas id="${id}" data-value="${val}" class="sop-qr-canvas"></canvas></div>`;
+    } else if (q.startsWith('[INPUT]') && q.match(/\[INPUT\]/gi).length === 1 && q.indexOf('[INPUT]') === 0) {
+        let label = q.replace(/\[INPUT\]/ig, '').trim();
+        html = `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:2px; margin-bottom:2px; padding:6px 10px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; width:100%;"><label style="font-size:12px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${label}</label><input type="text" placeholder="..." style="flex:1; padding:6px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:13px; font-weight:bold;"></div>`;
+    } else if (q.startsWith('# ')) {
+        let content = parseAll(q.substring(2).trim());
+        html = `<div style="font-size:14px; font-weight:900; color:#10b981; margin-top:8px; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:4px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; width:100%; line-height:1.4;">${content}</div>`;
+    } else if (q.startsWith('> ')) {
+        let content = parseAll(q.substring(2).trim());
+        html = `<span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column; line-height:1.4; font-size:12px; font-weight:600; color:var(--text-muted); padding-left:4px;">${content}</span>`;
+    } else {
+        if(q.startsWith('- ')) q = q.substring(2).trim();
+        let content = parseAll(q);
+        html = `<span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column; line-height:1.4; font-size:13px; font-weight:700; color:var(--text-heading); width:100%;">${content}</span>`;
+    }
+    return html;
+}
+
+function processTelemetryCanvasRendering(container) {
+    if (typeof JsBarcode !== 'undefined') {
+        container.querySelectorAll('.sop-barcode-svg').forEach(el => {
+            try { JsBarcode(el, el.dataset.value || 'NEOGLEAMZ', { format: 'CODE128', width: 1.8, height: 50, displayValue: true, fontSize: 11, margin: 6, lineColor: '#000', background: '#ffffff' }); } 
+            catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ Barcode error: ${e.message}</span>`; }
+        });
+    }
+    if (typeof QRCode !== 'undefined') {
+        container.querySelectorAll('.sop-qr-canvas').forEach(el => {
+            try { QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', { width: 80, margin: 1 }); } 
+            catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ QR error: ${e.message}</span>`; }
+        });
+    }
+}
+
+function renderProductionTelemetryPreview() {
+    const rawText = document.getElementById('productionAdminQA')?.value || '';
+    const previewContainer = document.getElementById('productionAdminQAPreview');
+    if(!previewContainer) return;
+
+    if(!rawText.trim()) {
+        previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
+        return;
+    }
+
+    const qaChecks = rawText.split('\n').filter(x => x.trim() !== '');
+    let html = '';
+
+    qaChecks.forEach((line, idx) => {
+        let q = line.trim();
+        if(!q) return;
+        
+        let contentHtml = parseProductionTelemetryLine(q, idx);
+
+        if (q.startsWith('> ')) {
+            html += `<label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:4px 8px 4px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s; width:100%;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'"><input type="checkbox" disabled style="width:12px; height:12px; flex-shrink:0; cursor:not-allowed; margin-top:2px;">${contentHtml}</label>`;
+        } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
+            html += `<label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:6px 10px; margin-bottom:4px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); transition:all 0.2s; width:100%;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'"><input type="checkbox" disabled style="width:16px; height:16px; flex-shrink:0; cursor:not-allowed; margin-top:2px;">${contentHtml}</label>`;
+        } else {
+            html += `<div style="width:100%; pointer-events:none; opacity:0.8;">${contentHtml}</div>`;
+        }
+    });
+
+    previewContainer.innerHTML = html;
+    processTelemetryCanvasRendering(previewContainer);
+}
