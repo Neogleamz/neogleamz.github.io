@@ -412,6 +412,8 @@ async function signoffPackerzQA() {
                 .eq('order_id', currentPackerzQaOrderId)
                 .eq('storefront_sku', currentPackerzQaSku);
         }
+        // Fire-and-forget: archive a full SOP snapshot at QA sign-off moment
+        archiveSOPSnapshot(currentPackerzQaOrderId, currentPackerzQaSku);
     } catch(err) {
         console.warn("Audit tracking mathematically failed on the Edge.", err);
     }
@@ -684,23 +686,82 @@ function renderPackerzTelemetryPreview() {
     const rawText = document.getElementById('packerzAdminQA')?.value || '';
     const previewContainer = document.getElementById('packerzAdminQAPreview');
     if(!previewContainer) return;
-    
+
     if(!rawText.trim()) {
         previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
         return;
     }
-    
+
     const qaChecks = rawText.split('\n').filter(x => x.trim() !== '');
     let html = '';
-    
+
+    // --- Inline token parsers ---
+
+    // [INPUT] → small text input inline
     function parseInputs(text) {
         return text.replace(/\[INPUT\]/gi, `<input type="text" disabled placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;">`);
     }
-    
+
+    // [IMG:url] → clickable inline thumbnail
+    function parseImgs(text) {
+        return text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+            const safe = url.replace(/'/g, "\\'");
+            return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:block;" onclick="openMediaModal('${safe}', 'img')">`;
+        });
+    }
+
+    // [BARCODE:value] → SVG placeholder (hydrated after innerHTML set)
+    let barcodeIdx = 0;
+    function parseBarcodes(text) {
+        return text.replace(/\[BARCODE:([^\]]+)\]/gi, (_, val) => {
+            const id = `sop-bc-${barcodeIdx++}`;
+            return `<svg id="${id}" data-value="${val.trim()}" class="sop-barcode-svg" style="max-width:220px; background:white; padding:6px 8px; border-radius:6px; display:block; margin:4px 0;"></svg>`;
+        });
+    }
+
+    // [QR:value] → canvas placeholder (hydrated after innerHTML set)
+    let qrIdx = 0;
+    function parseQR(text) {
+        return text.replace(/\[QR:([^\]]+)\]/gi, (_, val) => {
+            const id = `sop-qr-${qrIdx++}`;
+            return `<canvas id="${id}" data-value="${val.trim()}" class="sop-qr-canvas" style="border-radius:6px; display:block; margin:4px 0;"></canvas>`;
+        });
+    }
+
+    // Apply all inline parsers in order
+    function parseAll(text) {
+        return parseQR(parseBarcodes(parseImgs(parseInputs(text))));
+    }
+
     qaChecks.forEach((line) => {
         let q = line.trim();
         if(!q) return;
-        
+
+        // Standalone [IMG:url] line — display as full-width image block
+        if (/^\[IMG:(https?:\/\/[^\]]+)\]$/i.test(q)) {
+            const url = q.match(/\[IMG:(https?:\/\/[^\]]+)\]/i)[1];
+            const safe = url.replace(/'/g, "\\'");
+            html += `<div style="margin:4px 0;"><img src="${url}" loading="lazy" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safe}', 'img')"></div>`;
+            return;
+        }
+
+        // Standalone [BARCODE:val] line
+        if (/^\[BARCODE:([^\]]+)\]$/i.test(q)) {
+            const val = q.match(/\[BARCODE:([^\]]+)\]/i)[1].trim();
+            const id = `sop-bc-${barcodeIdx++}`;
+            html += `<div style="margin:4px 0; padding:8px; background:white; border-radius:8px; display:inline-block;"><svg id="${id}" data-value="${val}" class="sop-barcode-svg"></svg></div>`;
+            return;
+        }
+
+        // Standalone [QR:val] line
+        if (/^\[QR:([^\]]+)\]$/i.test(q)) {
+            const val = q.match(/\[QR:([^\]]+)\]/i)[1].trim();
+            const id = `sop-qr-${qrIdx++}`;
+            html += `<div style="margin:4px 0;"><canvas id="${id}" data-value="${val}" class="sop-qr-canvas"></canvas></div>`;
+            return;
+        }
+
+        // [INPUT]-only standalone row
         if (q.startsWith('[INPUT]') && q.match(/\[INPUT\]/gi).length === 1 && q.indexOf('[INPUT]') === 0) {
             let label = q.replace(/\[INPUT\]/ig, '').trim();
             html += `
@@ -709,34 +770,56 @@ function renderPackerzTelemetryPreview() {
                     <input type="text" disabled placeholder="..." style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:11px;">
                 </div>
             `;
-        } 
+        }
         else if (q.startsWith('# ')) {
-            let content = parseInputs(q.substring(2).trim());
+            let content = parseAll(q.substring(2).trim());
             html += `<div style="font-size:13px; font-weight:900; color:#10b981; margin-top:8px; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:2px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap;">${content}</div>`;
         }
         else if (q.startsWith('> ')) {
-            let subQ = q.substring(2).trim();
-            let content = parseInputs(subQ);
+            let content = parseAll(q.substring(2).trim());
             html += `
-                <label style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:2px 8px 2px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" disabled style="width:12px; height:12px; flex-shrink:0; cursor:pointer;">
-                    <span style="display:flex; align-items:center; flex-wrap:wrap;">${content}</span>
+                <label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:2px 8px 2px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'">
+                    <input type="checkbox" disabled style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;">
+                    <span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column;">${content}</span>
                 </label>
             `;
         }
         else {
             if(q.startsWith('- ')) q = q.substring(2).trim();
-            let content = parseInputs(q);
+            let content = parseAll(q);
             html += `
-                <label style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); cursor:pointer; padding:4px 8px; margin-bottom:0; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'">
-                    <input type="checkbox" disabled style="width:14px; height:14px; flex-shrink:0; cursor:pointer;">
-                    <span style="display:flex; align-items:center; flex-wrap:wrap;">${content}</span>
+                <label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); cursor:pointer; padding:4px 8px; margin-bottom:0; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'">
+                    <input type="checkbox" disabled style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:2px;">
+                    <span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column;">${content}</span>
                 </label>
             `;
         }
     });
+
     previewContainer.innerHTML = html;
+
+    // --- Hydrate barcodes (JsBarcode) ---
+    if (typeof JsBarcode !== 'undefined') {
+        previewContainer.querySelectorAll('.sop-barcode-svg').forEach(el => {
+            try {
+                JsBarcode(el, el.dataset.value || 'NEOGLEAMZ', {
+                    format: 'CODE128', width: 1.8, height: 50,
+                    displayValue: true, fontSize: 11, margin: 6,
+                    lineColor: '#000', background: '#ffffff'
+                });
+            } catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ Barcode error: ${e.message}</span>`; }
+        });
+    }
+
+    // --- Hydrate QR codes (qrcode.js) ---
+    if (typeof QRCode !== 'undefined') {
+        previewContainer.querySelectorAll('.sop-qr-canvas').forEach(el => {
+            QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', { width: 90, margin: 1, color: { dark: '#000', light: '#fff' } })
+                .catch(e => { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ QR error: ${e.message}</span>`; });
+        });
+    }
 }
+
 
 async function loadPackerzSopFromDB() {
     const sku = document.getElementById('packerzAdminRecipeSelect').value;
@@ -900,3 +983,266 @@ function stopPackerzLiveSopResize() {
     document.removeEventListener('mouseup', stopPackerzLiveSopResize);
 }
 
+// ============================================================
+// SOP MEDIA PICKER — Supabase Storage 'sop-media' bucket
+// ============================================================
+
+const SOP_MEDIA_BUCKET = 'sop-media';
+
+async function openSOPMediaPicker() {
+    const modal = document.getElementById('sopMediaPickerModal');
+    modal.style.display = 'flex';
+    await refreshSOPMediaGrid();
+}
+
+function closeSOPMediaPicker() {
+    document.getElementById('sopMediaPickerModal').style.display = 'none';
+    // Reset upload input so same file can be re-uploaded
+    const input = document.getElementById('sopMediaUploadInput');
+    if (input) input.value = '';
+}
+
+async function refreshSOPMediaGrid() {
+    const grid = document.getElementById('sopMediaGrid');
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading media library...</div>`;
+
+    try {
+        const { data, error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).list('', {
+            limit: 200, sortBy: { column: 'created_at', order: 'desc' }
+        });
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No files yet. Upload your first image above.</div>`;
+            return;
+        }
+
+        grid.innerHTML = '';
+        data.forEach(file => {
+            if (file.name === '.emptyFolderPlaceholder') return;
+            const { data: urlData } = supabaseClient.storage.from(SOP_MEDIA_BUCKET).getPublicUrl(file.name);
+            const url = urlData.publicUrl;
+            const isImg = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
+            const sizeKb = file.metadata?.size ? Math.round(file.metadata.size / 1024) : '?';
+
+            const card = document.createElement('div');
+            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column;';
+            card.onmouseover = () => { card.style.borderColor = '#0ea5e9'; card.style.transform = 'translateY(-2px)'; };
+            card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
+            card.onclick = () => insertSOPToken(`[IMG:${url}]`);
+
+            card.innerHTML = isImg
+                ? `<img src="${url}" loading="lazy" style="width:100%; height:110px; object-fit:cover;">
+                   <div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${file.name}">${file.name}</div>
+                   <div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`
+                : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px;">📄</div>
+                   <div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${file.name}</div>
+                   <div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`;
+            grid.appendChild(card);
+        });
+    } catch(e) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#ef4444; font-size:12px;">
+            ⚠️ Could not load media library: ${e.message}<br>
+            <span style="font-size:11px; color:var(--text-muted);">Make sure the '${SOP_MEDIA_BUCKET}' bucket exists in Supabase Storage with public read access.</span>
+        </div>`;
+    }
+}
+
+async function uploadSOPMedia(file) {
+    if (!file) return;
+    const statusEl = document.getElementById('sopMediaUploadStatus');
+    statusEl.style.display = 'block';
+    statusEl.innerText = `⬆ Uploading ${file.name}...`;
+
+    try {
+        const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).upload(path, file, {
+            cacheControl: '3600', upsert: false
+        });
+        if (error) throw error;
+
+        const { data: urlData } = supabaseClient.storage.from(SOP_MEDIA_BUCKET).getPublicUrl(path);
+        statusEl.innerText = `✅ Uploaded! Inserting into checklist...`;
+        insertSOPToken(`[IMG:${urlData.publicUrl}]`);
+        setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+        await refreshSOPMediaGrid();
+    } catch(e) {
+        statusEl.style.color = '#ef4444';
+        statusEl.innerText = `❌ Upload failed: ${e.message}`;
+    }
+}
+
+// Inserts a token at the cursor position in the QA textarea
+function insertSOPToken(token) {
+    const ta = document.getElementById('packerzAdminQA');
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const before = ta.value.substring(0, start);
+    const after = ta.value.substring(end);
+    // Insert on its own line for block tokens
+    const needsNewlineBefore = before.length > 0 && !before.endsWith('\n');
+    const needsNewlineAfter = after.length > 0 && !after.startsWith('\n');
+    ta.value = before + (needsNewlineBefore ? '\n' : '') + token + (needsNewlineAfter ? '\n' : '') + after;
+    ta.focus();
+    renderPackerzTelemetryPreview();
+    closeSOPMediaPicker();
+}
+
+// ============================================================
+// SOP QA ARCHIVE — snapshot SOP at moment of QA sign-off
+// Called from signoffPackerzQA() after sales_ledger update
+// ============================================================
+
+async function archiveSOPSnapshot(orderId, sku) {
+    try {
+        // Fetch the live SOP at the moment of sign-off
+        const { data: sopData } = await supabaseClient
+            .from('pack_ship_sops')
+            .select('instruction_json, required_box_sku')
+            .eq('internal_recipe_name', sku)
+            .single();
+
+        if (!sopData) return; // No SOP written yet — nothing to archive
+
+        const telemetryData = [];
+        document.querySelectorAll('.packerz-qa-check').forEach(c => {
+            telemetryData.push({ type: 'check', text: c.getAttribute('data-label'), valid: c.checked });
+        });
+        document.querySelectorAll('.packerz-qa-input').forEach(i => {
+            telemetryData.push({ type: 'input', text: i.getAttribute('data-label'), value: i.value.trim() });
+        });
+
+        await supabaseClient.from('sop_archives').insert({
+            order_id: orderId,
+            internal_recipe_name: sku,
+            qa_passed_at: new Date().toISOString(),
+            packer_telemetry: telemetryData,
+            sop_snapshot: JSON.parse(sopData.instruction_json || '{}'),
+            required_box_sku: sopData.required_box_sku || ''
+        });
+    } catch(e) {
+        console.warn('SOP archive write failed (non-critical):', e.message);
+        // Intentionally non-blocking — QA sign-off still completes even if archive fails
+    }
+}
+
+// ============================================================
+// SOP AUDIT LOG MODAL
+// ============================================================
+
+let sopAuditLogCache = [];
+
+async function openSOPAuditLog() {
+    document.getElementById('sopAuditLogModal').style.display = 'flex';
+    await loadSOPAuditLog();
+}
+
+function closeSOPAuditLog() {
+    document.getElementById('sopAuditLogModal').style.display = 'none';
+}
+
+async function loadSOPAuditLog() {
+    const body = document.getElementById('sopAuditLogBody');
+    body.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">Loading archive records...</div>`;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('sop_archives')
+            .select('*')
+            .order('qa_passed_at', { ascending: false })
+            .limit(200);
+
+        if (error) throw error;
+
+        sopAuditLogCache = data || [];
+        renderSOPAuditLogRows(sopAuditLogCache);
+    } catch(e) {
+        body.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444;">
+            ⚠️ Could not load audit log: ${e.message}<br>
+            <span style="font-size:11px; color:var(--text-muted);">Make sure the 'sop_archives' table exists in Supabase.</span>
+        </div>`;
+    }
+}
+
+function filterSOPAuditLog() {
+    const q = (document.getElementById('sopAuditSearch')?.value || '').toLowerCase().trim();
+    if (!q) { renderSOPAuditLogRows(sopAuditLogCache); return; }
+    const filtered = sopAuditLogCache.filter(r =>
+        (r.order_id || '').toLowerCase().includes(q) ||
+        (r.internal_recipe_name || '').toLowerCase().includes(q)
+    );
+    renderSOPAuditLogRows(filtered);
+}
+
+function renderSOPAuditLogRows(rows) {
+    const body = document.getElementById('sopAuditLogBody');
+    if (!rows || rows.length === 0) {
+        body.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No QA archive records found yet. Records are created automatically when a QA sign-off is completed.</div>`;
+        return;
+    }
+
+    body.innerHTML = rows.map((r, i) => {
+        const dt = r.qa_passed_at ? new Date(r.qa_passed_at).toLocaleString() : 'Unknown';
+        const telemetry = Array.isArray(r.packer_telemetry) ? r.packer_telemetry : [];
+        const checks    = telemetry.filter(t => t.type === 'check');
+        const inputs    = telemetry.filter(t => t.type === 'input');
+        const passed    = checks.filter(c => c.valid).length;
+        const total     = checks.length;
+
+        return `
+        <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; overflow:hidden;">
+            <!-- Row header —— always visible -->
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; transition:background 0.2s;"
+                 onclick="toggleSOPAuditDetail('sop-audit-detail-${i}')"
+                 onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background=''">
+                <div style="background:#10b981; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; flex-shrink:0;">✓ QA PASSED</div>
+                <div style="font-weight:900; color:var(--text-heading); font-size:13px; flex:1;">${r.order_id || '—'}</div>
+                <div style="font-size:12px; color:#0ea5e9; font-weight:700;">${r.internal_recipe_name || '—'}</div>
+                <div style="font-size:11px; color:var(--text-muted);">${dt}</div>
+                <div style="font-size:11px; color:${passed === total ? '#10b981' : '#f59e0b'}; font-weight:700;">${passed}/${total} checks</div>
+                ${r.required_box_sku ? `<div style="font-size:10px; color:var(--text-muted); font-family:monospace;">📦 ${r.required_box_sku}</div>` : ''}
+                <div style="color:var(--text-muted); font-size:12px;">▼</div>
+            </div>
+
+            <!-- Expandable detail -->
+            <div id="sop-audit-detail-${i}" style="display:none; padding:16px; border-top:1px solid var(--border-color); background:var(--bg-body);">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <!-- Telemetry checks -->
+                    <div>
+                        <div style="font-size:11px; font-weight:900; color:#10b981; letter-spacing:1px; margin-bottom:8px;">TELEMETRY CHECKS</div>
+                        ${checks.length === 0 ? '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None recorded</div>' :
+                          checks.map(c => `<div style="font-size:12px; padding:3px 0; color:${c.valid ? '#10b981' : '#ef4444'};">${c.valid ? '✅' : '❌'} ${c.text || ''}</div>`).join('')}
+                        ${inputs.length > 0 ? `<div style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:1px; margin:10px 0 6px;">INPUT VALUES</div>
+                        ${inputs.map(inp => `<div style="font-size:12px; padding:3px 0; color:var(--text-muted);">📝 ${inp.text}: <b style="color:var(--text-main); font-family:monospace;">${inp.value || '(blank)'}</b></div>`).join('')}` : ''}
+                    </div>
+                    <!-- SOP snapshot summary -->
+                    <div>
+                        <div style="font-size:11px; font-weight:900; color:#0ea5e9; letter-spacing:1px; margin-bottom:8px;">SOP SNAPSHOT AT TIME OF SIGNING</div>
+                        <div style="font-size:11px; color:var(--text-muted); background:var(--bg-input); padding:10px; border-radius:6px; max-height:200px; overflow-y:auto; font-family:monospace; line-height:1.6;">
+                            ${formatSOPSnapshotPreview(r.sop_snapshot)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleSOPAuditDetail(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function formatSOPSnapshotPreview(snapshot) {
+    if (!snapshot) return '<span style="color:var(--text-muted);">No snapshot saved.</span>';
+    try {
+        const steps = snapshot.steps || [];
+        const qa    = snapshot.qaChecks || [];
+        let out = '';
+        if (qa.length) out += qa.map(l => `<div style="color:#10b981;">${l}</div>`).join('');
+        if (steps.length) out += `<div style="margin-top:6px; color:#0ea5e9;">${steps.length} packing step(s) recorded.</div>`;
+        return out || '<span style="color:var(--text-muted);">Empty SOP snapshot.</span>';
+    } catch(e) { return `<span style="color:#ef4444;">Parse error: ${e.message}</span>`; }
+}
