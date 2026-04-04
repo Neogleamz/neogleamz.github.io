@@ -470,6 +470,6 @@ Across the Neogleamz ecosystem, whenever an item's archetype is designated visua
 - **Retail Product:** `📦` (Package)
 - **Sub-Assembly:** `⚙️` (Gear)
 - **3D Print:** `🖨️` (Printer)
-- **Raw Material:** `📦` (Package - Direct Raw Material)
+- **Raw Material / Component:** `🔩` (Nut and Bolt)
 
-> **Note:** Raw materials use the same `📦` emoji as Retail Products intentionally, carrying over from Makerz 'Direct Raw Materials' spec.
+> **Note:** These emojis MUST be used not only as list-item bullets in dropdowns, but also on physical Hub card elements to indicate item archetypes instantly.

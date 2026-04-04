@@ -37,7 +37,7 @@ function buildBarcodzCache() {
                     name: labelName,
                     slug: getItemBarcodeValue(labelName),
                     type: 'Raw Material',
-                    icon: "📦",
+                    icon: "🔩",
                     desc: c.spec !== '(Mixed Specs)' ? c.spec : '',
                     isCatalog: true
                 });
