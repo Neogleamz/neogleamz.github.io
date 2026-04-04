@@ -332,3 +332,117 @@ Before committing any new hub, page, or module:
 - [ ] All backgrounds/text use `var(--*)` tokens
 - [ ] New modals use `.modal-overlay` class
 - [ ] Multi-select dropdowns use custom panel pattern (Section 7), not `<select multiple>`
+
+---
+
+## 14. Infrastructure & Connectivity Reference
+
+> **This section is mandatory reading for any AI agent or developer before making backend changes.**
+> All credentials are stored in `.env.local` (never committed to GitHub).
+
+### Supabase Project
+
+| Field | Value |
+|---|---|
+| **Project Ref** | `qefmeivpjyaukbwadgaz` |
+| **Project URL** | `https://qefmeivpjyaukbwadgaz.supabase.co` |
+| **Dashboard** | https://supabase.com/dashboard/project/qefmeivpjyaukbwadgaz |
+| **SQL Editor** | https://supabase.com/dashboard/project/qefmeivpjyaukbwadgaz/sql/new |
+| **Storage** | https://supabase.com/dashboard/project/qefmeivpjyaukbwadgaz/storage/buckets |
+| **Anon / Publishable Key** | `sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7` (safe in client JS) |
+| **Service Role Key** | In `.env.local` as `SUPABASE_SERVICE_ROLE_KEY` — **NEVER expose in JS or commit to git** |
+
+### Supabase Client (in-page, all modules)
+
+```javascript
+// Already initialized in index.html inline <script> — do NOT re-initialize in modules
+const supabaseClient = window.supabase.createClient(
+    'https://qefmeivpjyaukbwadgaz.supabase.co',
+    'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7',
+    { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true } }
+);
+// All module .js files access this via the global `supabaseClient` variable
+```
+
+### Supabase CLI (available via npx)
+
+```powershell
+npx supabase --version          # verify installed
+npx supabase login              # browser-based auth (opens supabase.com)
+npx supabase link --project-ref qefmeivpjyaukbwadgaz  # link project
+npx supabase db push            # push local migrations
+npx supabase db pull            # pull remote schema
+```
+
+**For admin API calls without CLI login** (bucket creation, etc.), use the service role key directly:
+```powershell
+$headers = @{
+    'apikey' = $env:SUPABASE_SERVICE_ROLE_KEY
+    'Authorization' = "Bearer $env:SUPABASE_SERVICE_ROLE_KEY"
+    'Content-Type' = 'application/json'
+}
+Invoke-RestMethod -Method POST -Uri 'https://qefmeivpjyaukbwadgaz.supabase.co/storage/v1/bucket' -Headers $headers -Body '{"id":"bucket-name","name":"bucket-name","public":true}'
+```
+
+### Key Supabase Tables
+
+| Table | Purpose | Key Columns |
+|---|---|---|
+| `sales_ledger` | All customer orders / fulfillment | `order_id`, `internal_recipe_name`, `storefront_sku`, `qty_sold`, `internal_fulfillment_status`, `qa_cleared_at`, `qa_telemetry_data` |
+| `pack_ship_sops` | Packerz SOP blueprints | `internal_recipe_name` (PK), `instruction_json`, `required_box_sku` |
+| `sop_archives` | QA-passed SOP snapshots (immutable) | `id`, `order_id`, `internal_recipe_name`, `qa_passed_at`, `packer_telemetry`, `sop_snapshot` |
+| `production_sops` | Makerz work order SOPs | `product_name` (PK), `steps` (jsonb array) |
+| `inventory_consumption` | Inventory ledger | `item_key`, `consumed_qty`, `produced_qty`, `sold_qty` |
+| `catalog` | Product/BOM catalog | `name`, `bom`, `labor`, `pricing`, `is_subassembly` |
+| `print_queue` | 3D print jobs | `product_name`, `qty`, `status` |
+
+### Key Supabase Storage Buckets
+
+| Bucket | Public | Purpose |
+|---|---|---|
+| `sop-media` | ✅ Yes | Images embedded in Packerz SOP checklists via `[IMG:url]` token |
+
+**Access rules:**
+- `SELECT` (reads) — public — any URL can load images (required for [IMG:url] rendering)
+- `INSERT` (uploads) — `authenticated` only — must be logged into the app
+- `DELETE` — `authenticated` only
+
+**Public URL pattern:** `https://qefmeivpjyaukbwadgaz.supabase.co/storage/v1/object/public/{bucket}/{filename}`
+
+**Upload pattern (client-side):**
+```javascript
+const { error } = await supabaseClient.storage.from('sop-media').upload(path, file, { cacheControl: '3600', upsert: false });
+const { data } = supabaseClient.storage.from('sop-media').getPublicUrl(path);
+const publicUrl = data.publicUrl;
+```
+
+---
+
+### GitHub Repository
+
+| Field | Value |
+|---|---|
+| **Repo** | `Neogleamz/neogleamz.github.io` |
+| **Live URL** | https://neogleamz.github.io |
+| **Default branch** | `main` (protected — requires explicit user approval to push) |
+| **Local path** | `C:\Users\Chriviper\OneDrive - Neogleamz\Accounting - General\Expenses\GitHub\neogleamz.github.io` |
+
+### Git Branching Rules (from `/git_workflow.md`)
+
+- **NEVER push to `main`** without explicit user verbal approval
+- All work goes on `feature/` or `fix/` branches
+- Merge flow: `git checkout main` → `git merge feature/branch-name` → `git push origin main`
+- Force push to origin requires `--no-verify` flag due to PowerShell pre-push hook
+- Push uses: `& "C:\Program Files\Git\bin\git.exe" push origin main --no-verify`
+
+### Module File Map
+
+| File | Purpose |
+|---|---|
+| `index.html` | All HTML structure + inline `<script>` for global vars, Supabase init, utility functions |
+| `production-module.js` | Makerz tab: work orders, SOPs, 3D print queue, BOM |
+| `packerz-module.js` | Packerz tab: packing queue, SOP viewer, QA telemetry, SOP admin |
+| `fulfillz-module.js` | Fulfillz tab: shipping, tracking |
+| `neogleamz-engine.js` | CEO dashboard KPI engine |
+| `.agents/workflows/` | AI agent workflow definitions (git, UI standards) |
+| `.env.local` | Local secrets — **never commit** |

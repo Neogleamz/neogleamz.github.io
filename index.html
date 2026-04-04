@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.2159"></script>
+    <script src="system-version.js?v=v.2026.04.03.2214"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2159"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2159"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2214"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2214"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.2159"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.2214"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -399,6 +399,15 @@
         button { color: white; border: none; padding: 10px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
         button:disabled { background-color: var(--text-muted) !important; cursor: not-allowed; box-shadow: none; transform: none !important; }
         button:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+
+        /* thermal printer overrides */
+        @media print {
+            body * { visibility: hidden; }
+            #printableBarcodeArea, #printableBarcodeArea * { visibility: visible; }
+            #printableBarcodeArea { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; display: flex !important; justify-content: center; align-items: center; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            @page { margin: 0; }
+        }
         .btn-orange { background-color: #f97316; } .btn-blue { background-color: #3b82f6; } .btn-green { background-color: #10b981; } .btn-red { background-color: #ef4444; }
         .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
         .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
@@ -1955,7 +1964,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2159"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2214"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2595,7 +2604,14 @@
                 </div>
             </div>
             
-
+            <div class="hub-card" onclick="showFulfillzPane('barcodz')">
+                <i style="color: #10b981;">🏷️</i>
+                <h2>BARCODZ</h2>
+                <p>Global Catalog Barcode Directory and Thermal Label Spooler.</p>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Catalog Entropy</span><strong id="kpiBarcodzCount">Active</strong></div>
+                </div>
+            </div>
         </div>
 
 
@@ -2624,6 +2640,26 @@
                     <div id="packerzActiveQueue" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to open the SOP terminal.</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="paneFulfillzBarcodz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
+            <div class="pane-header-bar">
+                <span class="pane-header-title">🏷️ BARCODZ DIRECTORY</span>
+                <div class="pane-header-actions" style="display:flex; gap:10px; align-items:center;">
+                    <select id="barcodzSizeSelect" style="width:auto; padding:6px 12px; font-size:12px; font-weight:bold; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;">
+                        <option value="2.25x1.25">Dymo 2.25" x 1.25"</option>
+                        <option value="1x1">Square 1.0" x 1.0"</option>
+                        <option value="3x1">Standard 3.0" x 1.0"</option>
+                        <option value="A4">A4 Sheet List</option>
+                    </select>
+                </div>
+            </div>
+            <div style="padding:20px; overflow-y:auto; flex-grow:1;">
+                <input type="text" id="barcodzSearch" placeholder="🔍 Search Catalog..." style="width:100%; padding:10px 14px; font-size:14px; margin-bottom:20px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-panel); color:var(--text-main);" oninput="renderBarcodzGrid()">
+                <div id="barcodzGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+                    <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Initializing...</div>
                 </div>
             </div>
         </div>
@@ -3287,7 +3323,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.2159"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.2214"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4317,15 +4353,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.2159"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.2159"></script>
-<script src="bom-module.js?v=v.2026.04.03.2159"></script>
-<script src="inventory-module.js?v=v.2026.04.03.2159"></script>
-<script src="production-module.js?v=v.2026.04.03.2159"></script>
-<script src="sales-module.js?v=v.2026.04.03.2159"></script>
-<script src="analytics-module.js?v=v.2026.04.03.2159"></script>
-<script src="ceo-module.js?v=v.2026.04.03.2159"></script>
-<script src="print-module.js?v=v.2026.04.03.2159"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.2214"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.2214"></script>
+<script src="bom-module.js?v=v.2026.04.03.2214"></script>
+<script src="inventory-module.js?v=v.2026.04.03.2214"></script>
+<script src="production-module.js?v=v.2026.04.03.2214"></script>
+<script src="sales-module.js?v=v.2026.04.03.2214"></script>
+<script src="analytics-module.js?v=v.2026.04.03.2214"></script>
+<script src="ceo-module.js?v=v.2026.04.03.2214"></script>
+<script src="print-module.js?v=v.2026.04.03.2214"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4779,11 +4815,15 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2159"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2214"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2159"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2214"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.03.2159"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.03.2214"></script>
+    <!-- Fulfillz Subsystems -->
+    <script src="barcodz-module.js?v=v.2026.04.03.2214"></script>
+    <!-- Hidden Print Area -->
+    <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>
 </html>
 

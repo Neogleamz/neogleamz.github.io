@@ -784,9 +784,16 @@ function renderPackerzTelemetryPreview() {
         });
     }
 
+    // [SCAN:item] → pill placeholder (inline)
+    function parseScan(text) {
+        return text.replace(/\[SCAN:([^\]]+)\]/gi, (_, val) => {
+            return `<span style="background:rgba(14,165,233,0.15); border:1px solid #0ea5e9; color:#0ea5e9; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:800; white-space:nowrap; margin:0 4px; vertical-align:middle;">📷 SCAN: ${val.trim()}</span>`;
+        });
+    }
+
     // Apply all inline parsers in order
     function parseAll(text) {
-        return parseQR(parseBarcodes(parseImgs(parseInputs(text))));
+        return parseQR(parseBarcodes(parseImgs(parseInputs(parseScan(text)))));
     }
 
     qaChecks.forEach((line) => {
@@ -1097,11 +1104,18 @@ async function refreshSOPMediaGrid() {
         folders.forEach(folder => {
             const fullPath = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${folder.name}` : folder.name;
             const card = document.createElement('div');
-            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:110px; gap:6px; padding:8px;';
+            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:110px; gap:6px; padding:8px; position:relative;';
+            card.ondragover = (e) => { e.preventDefault(); card.style.borderColor = '#10b981'; card.style.backgroundColor = 'rgba(16,185,129,0.1)'; };
+            card.ondragleave = (e) => { card.style.borderColor = 'var(--border-color)'; card.style.backgroundColor = 'var(--bg-panel)'; };
+            card.ondrop = (e) => sopHandleDrop(e, fullPath);
             card.onmouseover = () => { card.style.borderColor = '#10b981'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
-            card.onclick = () => navigateSOPMediaFolder(fullPath);
-            card.innerHTML = `<div style="font-size:36px;">📁</div><div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;">${folder.name}</div>`;
+            
+            card.innerHTML = `
+                <div style="font-size:36px;" onclick="navigateSOPMediaFolder('${fullPath.replace(/'/g, "\\'")}')">📁</div>
+                <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" onclick="navigateSOPMediaFolder('${fullPath.replace(/'/g, "\\'")}')">${folder.name}</div>
+                <button onclick="deleteSOPMedia('${fullPath.replace(/'/g, "\\'")}', true)" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
+            `;
             grid.appendChild(card);
         });
 
@@ -1113,13 +1127,20 @@ async function refreshSOPMediaGrid() {
             const isImg = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
             const sizeKb = file.metadata?.size ? Math.round(file.metadata.size / 1024) : '?';
             const card = document.createElement('div');
-            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column;';
+            card.draggable = true;
+            card.ondragstart = (e) => sopHandleDragStart(e, filePath);
+            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; cursor:grab; transition:all 0.2s; display:flex; flex-direction:column; position:relative;';
             card.onmouseover = () => { card.style.borderColor = '#0ea5e9'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
-            card.onclick = () => insertSOPToken(`[IMG:${url}]`);
-            card.innerHTML = isImg
-                ? `<img src="${url}" loading="lazy" style="width:100%; height:110px; object-fit:cover;"><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${file.name}">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`
-                : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px;">📄</div><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`;
+            
+            const contentHtml = isImg
+                ? `<img src="${url}" loading="lazy" style="width:100%; height:110px; object-fit:cover; pointer-events:none;"><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;" title="${file.name}">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`
+                : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; pointer-events:none;">📄</div><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`;
+
+            card.innerHTML = `
+                <div style="flex-grow:1; display:flex; flex-direction:column;" onclick="insertSOPToken('[IMG:${url}]')">${contentHtml}</div>
+                <button onclick="deleteSOPMedia('${filePath.replace(/'/g, "\\'")}', false)" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
+            `;
             grid.appendChild(card);
         });
     } catch(e) {
@@ -1200,6 +1221,70 @@ function updateSOPMediaBreadcrumb() {
             : `<span style="color:#0ea5e9; cursor:pointer;" onclick="navigateSOPMediaFolder('${cp}')">${p}</span>`;
     });
     el.innerHTML = html;
+}
+
+// ---- Drag and Drop Moving ----
+function sopHandleDragStart(e, sourcePath) {
+    e.dataTransfer.setData('text/plain', sourcePath);
+}
+
+async function sopHandleDrop(e, destFolder) {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = 'var(--border-color)';
+    e.currentTarget.style.backgroundColor = 'var(--bg-panel)';
+    
+    const sourcePath = e.dataTransfer.getData('text/plain');
+    if (!sourcePath || destFolder === undefined) return;
+    
+    // Prevent moving folder into itself etc.. not implementing full paths here but files are fine
+    const fileName = sourcePath.split('/').pop();
+    const destPath = destFolder ? `${destFolder}/${fileName}` : fileName;
+    if (sourcePath === destPath) return;
+
+    const statusEl = document.getElementById('sopMediaUploadStatus');
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#f59e0b';
+    statusEl.innerText = `📦 Moving file to ${destFolder || 'Root'}...`;
+
+    const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).move(sourcePath, destPath);
+    if (error) { statusEl.style.color = '#ef4444'; statusEl.innerText = `❌ Move failed: ${error.message}`; return; }
+    
+    statusEl.style.color = '#10b981';
+    statusEl.innerText = `✅ Moved successfully.`;
+    setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+    await refreshSOPMediaGrid();
+}
+
+// ---- Deletion & Creation ----
+async function deleteSOPMedia(path, isFolder) {
+    if (!confirm(`⚠️ Are you sure you want to permanently delete:\n\n${path}\n\n${isFolder ? "This will instantly delete ALL files and folders inside it!" : ""}`)) return;
+
+    const statusEl = document.getElementById('sopMediaUploadStatus');
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#ef4444';
+    statusEl.innerText = `🗑️ Deleting...`;
+
+    let pathsToDelete = [path];
+
+    if (isFolder) {
+        // Fetch everything inside the folder to wipe it recursively
+        pathsToDelete = [];
+        const { data } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).list(path, { limit: 1000 });
+        if (data && data.length > 0) {
+            pathsToDelete = data.map(f => `${path}/${f.name}`);
+        }
+        // Also delete the placeholder itself just in case it wasn't caught
+        pathsToDelete.push(`${path}/.emptyFolderPlaceholder`);
+    }
+
+    const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).remove(pathsToDelete);
+    
+    if (error) { statusEl.innerText = `❌ Delete failed: ${error.message}`; return; }
+    
+    statusEl.style.color = '#10b981';
+    statusEl.innerText = `✅ Deleted successfully.`;
+    setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+    await refreshSOPMediaGrid();
 }
 
 async function createSOPMediaFolder() {
