@@ -432,3 +432,68 @@ function updateHubStats() {
         if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
     } catch(e) { console.warn("Hub Stats Sync Error:", e); }
 }
+
+// ==========================================
+// UNIVERSAL UI FLEX-BOM RESIZER
+// ==========================================
+let isNeoSidebarResizing = false;
+
+window.initNeoSidebarResizer = function(e) {
+    if(e) e.preventDefault();
+    isNeoSidebarResizing = true;
+    document.body.style.cursor = 'ew-resize';
+    document.addEventListener('mousemove', window.doNeoSidebarResize);
+    document.addEventListener('mouseup', window.stopNeoSidebarResize);
+};
+
+window.doNeoSidebarResize = function(e) {
+    if(!isNeoSidebarResizing) return;
+    
+    // Attempt to locate the exact resizer handle element being interacted with, 
+    // or just assume the DOM node currently hovered is related.
+    // The most robust way is to just find the exact `.bom-sidebar` that is a sibling or near the resizer.
+    // A universal standard: The resizer lives exactly *after* the sidebar inside a `.bom-layout`.
+    // Since document mousemove doesn't easily trace back to the DOM element without context variables,
+    // we will find the actively visible `.bom-layout` container.
+    const layouts = document.querySelectorAll('.bom-layout');
+    let activeWrapper = null;
+    let sidebar = null;
+    
+    for (let layout of layouts) {
+        if (layout.offsetParent !== null) { // is visible
+            const s = layout.querySelector('.bom-sidebar');
+            if (s) {
+                activeWrapper = layout;
+                sidebar = s;
+                break;
+            }
+        }
+    }
+    
+    // Fallback logic for Packerz custom modal split if it ever adopts initNeoSidebarResizer
+    if(!sidebar && document.getElementById('packerzLiveSopSplitWrapper')?.offsetParent !== null) {
+        activeWrapper = document.getElementById('packerzLiveSopSplitWrapper');
+        sidebar = document.getElementById('packerzLiveSopLeftPane');
+    }
+    
+    if (!sidebar || !activeWrapper) return;
+    
+    const rect = activeWrapper.getBoundingClientRect();
+    let newWidth = e.clientX - rect.left;
+    
+    if (newWidth < 280) newWidth = 280;
+    if (newWidth > rect.width - 250) newWidth = rect.width - 250; // Dynamic guard against crushing the right pane
+    if (newWidth > 700) newWidth = 700; // Absolute max guard
+    
+    // Aggressive CSS math overrides
+    sidebar.style.width = newWidth + 'px';
+    sidebar.style.minWidth = newWidth + 'px';
+    sidebar.style.flex = `0 0 ${newWidth}px`;
+};
+
+window.stopNeoSidebarResize = function(e) {
+    isNeoSidebarResizing = false;
+    document.body.style.cursor = '';
+    document.removeEventListener('mousemove', window.doNeoSidebarResize);
+    document.removeEventListener('mouseup', window.stopNeoSidebarResize);
+};

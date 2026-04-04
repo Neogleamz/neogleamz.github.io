@@ -1030,13 +1030,15 @@ function doPackerzLiveSopResize(e) {
     
     const rect = wrapper.getBoundingClientRect();
     let newWidth = e.clientX - rect.left; 
-    let minWidth = 300;
+    let minWidth = 280; // Standardized Fulfillz panel collision barrier
     
     if(newWidth < minWidth) newWidth = minWidth;
-    if(newWidth > rect.width - minWidth) newWidth = rect.width - minWidth;
+    if(newWidth > rect.width - 250) newWidth = rect.width - 250;
     
-    let percentage = (newWidth / rect.width) * 100;
-    leftPane.style.flex = `0 0 ${percentage}%`;
+    // Aggressive flex overwrite matches the global standard exactly
+    leftPane.style.width = newWidth + 'px';
+    leftPane.style.minWidth = newWidth + 'px';
+    leftPane.style.flex = `0 0 ${newWidth}px`;
 }
 
 function stopPackerzLiveSopResize() {

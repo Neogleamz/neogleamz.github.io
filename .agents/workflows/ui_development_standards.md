@@ -39,14 +39,20 @@ description: Mandatory UI Design and Layout Protocol for Neogleamz Web Platform
 
 ---
 
-## 4. Resizer Dividers
+## 4. Resizer Dividers & Lateral Scaling
 
 *   All split-pane drag dividers **must** use `class="h-resizer"` (or `v-resizer`).
 *   No inline styles, no local color overrides, no JS `onmouseover` hover hacks on resizers.
 *   Color: Teal `#2dd4bf` · Drag handle: `⋮` via CSS `::after`.
+*   **Mandatory Event Hook:** When creating a `.bom-layout` structure containing a `.bom-sidebar` and `.bom-main` component, always place the `<div class="h-resizer">` exactly between them.
+*   **Physics Engine:** Hook the resizer strictly to `onmousedown="initNeoSidebarResizer(event)"`. This triggers the global Flex-Box scaling override math (`sidebar.style.flex = 0 0 Xpx;`) allowing dynamic boundary collision checks across every Fulfillz/Makerz module universally without custom pane-specific drag classes.
 
 ```html
-<div id="my-resizer" class="h-resizer"></div>
+<div class="bom-layout" style="flex-grow:1; min-height:0;">
+    <div class="bom-sidebar">...Content...</div>
+    <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+    <div class="bom-main">...Content...</div>
+</div>
 ```
 
 ---

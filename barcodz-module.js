@@ -373,41 +373,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ------------------------------------------------------------
-// SIDEBAR RESIZER LOGIC
-// ------------------------------------------------------------
-let isBarcodzResizing = false;
-
-function initBarcodzResize(e) {
-    if(e) e.preventDefault();
-    isBarcodzResizing = true;
-    document.body.style.cursor = 'ew-resize';
-    document.addEventListener('mousemove', handleBarcodzResize);
-    document.addEventListener('mouseup', stopBarcodzResize);
-}
-
-function handleBarcodzResize(e) {
-    if(!isBarcodzResizing) return;
-    const sidebar = document.getElementById('barcodzSidebar');
-    // Traverse up to find the layout wrapper to get clean coordinates
-    const wrapper = sidebar ? sidebar.closest('.bom-layout') : null;
-    if (!sidebar || !wrapper) return;
-    
-    // Use the exact left bound of the Fulfillz view
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left;
-    
-    if (newWidth < 280) newWidth = 280;
-    if (newWidth > 700) newWidth = 700;
-    
-    sidebar.style.width = newWidth + 'px';
-    sidebar.style.minWidth = newWidth + 'px';
-    sidebar.style.flex = `0 0 ${newWidth}px`;
-}
-
-function stopBarcodzResize(e) {
-    isBarcodzResizing = false;
-    document.body.style.cursor = '';
-    document.removeEventListener('mousemove', handleBarcodzResize);
-    document.removeEventListener('mouseup', stopBarcodzResize);
-}
+// SIDEBAR RESIZER LOGIC MIGRATED TO neogleamz-engine.js
