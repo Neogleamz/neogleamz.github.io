@@ -1449,13 +1449,20 @@ async function archiveSOPSnapshot(orderId, sku) {
 
 let sopAuditLogCache = [];
 
-async function openSOPAuditLog() {
+let sopAuditReturnToPackerz = false;
+
+async function openSOPAuditLog(fromPackerzPage = false) {
+    sopAuditReturnToPackerz = fromPackerzPage;
     document.getElementById('sopAuditLogModal').style.display = 'flex';
     await loadSOPAuditLog();
 }
 
 function closeSOPAuditLog() {
     document.getElementById('sopAuditLogModal').style.display = 'none';
+    if (sopAuditReturnToPackerz) {
+        sopAuditReturnToPackerz = false;
+        document.getElementById('paneFulfillzSopAdmin').style.display = 'none';
+    }
 }
 
 async function loadSOPAuditLog() {
