@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.1931"></script>
+    <script src="system-version.js?v=v.2026.04.03.1945"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1931"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1945"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1945"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.1931"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.1945"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -268,20 +268,64 @@
 
         .top-controls { flex: 1 1 350px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
         
+        /* ============================================================
+         * .pane-title — DEPRECATED for layout use.
+         * Kept as a standalone style token only.
+         * Use .pane-header-title inside .pane-header-bar instead.
+         * ============================================================ */
         .pane-title {
-            position: absolute;
-            top: 5px; /* Moved up slightly */
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 22px; /* Slightly larger */
+            font-size: clamp(14px, 1.5vw, 22px);
             font-weight: 900;
-            color: #FF8C00; /* Signature Vibrant Orange */
+            color: #FF8C00;
             text-transform: uppercase;
-            letter-spacing: 5px; /* Increased executive spacing */
-            pointer-events: none;
-            opacity: 1; /* Full visibility */
-            z-index: 50;
+            letter-spacing: clamp(2px, 0.4vw, 5px);
             text-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+            pointer-events: none;
+        }
+
+        /* ============================================================
+         * .pane-header-bar — GLOBAL STANDARD for all executive pane headers.
+         * Single flex row: title left, optional actions right.
+         * Uses clamp() throughout — no fixed px heights ever.
+         * Template:
+         *   <div class="pane-header-bar">
+         *     <span class="pane-header-title">PAGENAME</span>
+         *     <div class="pane-header-actions"> ...buttons... </div>
+         *   </div>
+         * ============================================================ */
+        .pane-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: clamp(8px, 1.5vw, 20px);
+            padding: clamp(8px, 1.2vh, 14px) clamp(16px, 2.5vw, 30px);
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-glass);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .pane-header-title {
+            font-size: clamp(13px, 1.3vw, 20px);
+            font-weight: 900;
+            color: #FF8C00;
+            text-transform: uppercase;
+            letter-spacing: clamp(2px, 0.4vw, 5px);
+            text-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .pane-header-actions {
+            display: flex;
+            align-items: center;
+            gap: clamp(6px, 1vw, 12px);
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .pane-header-actions button {
+            width: auto !important;
+            padding: clamp(5px, 0.6vh, 8px) clamp(10px, 1.2vw, 18px);
+            font-size: clamp(11px, 0.9vw, 13px);
         }
 
         /* Full-Page Margin Navigation Zones */
@@ -391,7 +435,7 @@
             flex-direction: column;
             height: 100%;
             width: 100%;
-            padding: 20px 20px 10px 20px;
+            padding: 0; /* Padding owned by .pane-header-bar */
             box-sizing: border-box;
             overflow: hidden;
             position: relative;
@@ -1905,7 +1949,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1945"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2005,7 +2049,9 @@
 
         <!-- Detailed Panez -->
         <div id="panePipeline" class="executive-pane">
-            <div class="pane-title">DATAZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">DATAZ</span>
+            </div>
             <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             
@@ -2018,7 +2064,9 @@
         </div>
 
         <div id="paneSimple" class="executive-pane">
-            <div class="pane-title">EDITZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">EDITZ</span>
+            </div>
             <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
             
@@ -2049,16 +2097,18 @@
         </div>
 
         <div id="paneInventory" class="executive-pane">
-            <div class="pane-title">STOCKZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">STOCKZ</span>
+                <div class="pane-header-actions">
+                    <button class="btn-red" onclick="resetInventoryConsumption()">⚠️ Reset Stock Levels</button>
+                    <button class="btn-blue" onclick="printReorderReport()">🖨️ Low Stockz Report</button>
+                </div>
+            </div>
             <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('pipeline')"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main" style="padding:20px;">
-                    <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:flex-end;">
-                        <button class="btn-red" style="width:auto; padding:8px 15px; font-size:12px;" onclick="resetInventoryConsumption()">⚠️ Reset Stock Levels</button>
-                        <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="printReorderReport()">🖨️ Low Stockz Report</button>
-                    </div>
                     <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
                     <div class="stockz-split-container" style="display: flex; flex-direction: row; flex-grow: 1; min-height: 0; width: 100%; gap: 15px;">
                         <div class="table-wrap" id="fgiTableWrap" style="flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative;"></div>
@@ -2112,7 +2162,9 @@
 
         <!-- Detailed Panez -->
         <div id="paneProdBuilder" class="executive-pane">
-            <div class="pane-title">RECIPEZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">RECIPEZ</span>
+            </div>
             <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
             
@@ -2175,7 +2227,9 @@
         </div>
 
         <div id="paneProdControl" class="executive-pane">
-            <div class="pane-title">BATCHEZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">BATCHEZ</span>
+            </div>
             <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
             
@@ -2261,7 +2315,9 @@
         </div>
 
         <div id="paneProdPrint" class="executive-pane">
-            <div class="pane-title">LAYERZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">LAYERZ</span>
+            </div>
             <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
             
@@ -2390,7 +2446,9 @@
 
         <!-- Detailed Panez -->
         <div id="paneSalezBridge" class="executive-pane">
-            <div class="pane-title">ORDERZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">ORDERZ</span>
+            </div>
             <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
             
@@ -2403,7 +2461,9 @@
         </div>
 
             <div id="paneSalezAnalyticz" class="executive-pane">
-                <div class="pane-title">STATZ</div>
+                <div class="pane-header-bar">
+                    <span class="pane-header-title">STATZ</span>
+                </div>
                 <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
                 <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
                 
@@ -2456,7 +2516,9 @@
                 </div>
             </div>
         <div id="paneSalezCommandz" class="executive-pane">
-            <div class="pane-title">SIMULATORZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">SIMULATORZ</span>
+            </div>
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
             <!-- Contents of CEO Terminal -->
@@ -2540,11 +2602,11 @@
         </style>
         <div id="paneFulfillzPackerz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
 
-            <div class="packerz-header-bar" style="display:flex; justify-content:center; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color); position:relative;">
-                <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#F59E0B; text-align:center;">📦 PACKERZ TERMINAL</h2>
-                <div class="packerz-header-btns" style="position:absolute; right:30px; display:flex; gap:10px;">
-                    <button onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='#fff'" onmouseout="this.style.background='rgba(59,130,246,0.1)'; this.style.color='#3b82f6'">⚙️ BLUEPRINTS</button>
-                    <button onclick="document.getElementById('packerzArchiveModal').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.color='#10b981'">🗃️ COMPLETED ARCHIVE</button>
+            <div class="pane-header-bar" style="justify-content:center; align-items:center; position:relative;">
+                <span class="pane-header-title">📦 PACKERZ TERMINAL</span>
+                <div class="pane-header-actions" style="position:absolute; right:clamp(16px,2.5vw,30px);">
+                    <button class="btn-blue" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';">⚙️ BLUEPRINTS</button>
+                    <button class="btn-green" onclick="document.getElementById('packerzArchiveModal').style.display='flex';">🗃️ COMPLETED ARCHIVE</button>
                 </div>
             </div>
             
@@ -2611,7 +2673,9 @@
 
         <!-- Detailed Panez -->
         <div id="paneNexuzImportz" class="executive-pane">
-            <div class="pane-title">IMPORTZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">IMPORTZ</span>
+            </div>
             <div class="nav-zone left" onclick="showNexuzPane('brainz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showNexuzPane('salez')"><i>›</i></div>
             
@@ -2648,7 +2712,9 @@
         </div>
 
         <div id="paneNexuzSalez" class="executive-pane">
-            <div class="pane-title">SALEZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">SALEZ</span>
+            </div>
             <div class="nav-zone left" onclick="showNexuzPane('importz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showNexuzPane('brainz')"><i>›</i></div>
             
@@ -2689,7 +2755,9 @@
         </div>
 
         <div id="paneNexuzBrainz" class="executive-pane">
-            <div class="pane-title">BRAINZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">BRAINZ</span>
+            </div>
             <div class="nav-zone left" onclick="showNexuzPane('salez')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showNexuzPane('importz')"><i>›</i></div>
             
@@ -2729,26 +2797,15 @@
     <!-- SOCIALZ HUBZ -->
     <!-- ========================================== -->
     <div id="socialzhub-tab" class="tab-content" style="padding:0;">
-        <div id="paneSocialzRoster" class="executive-pane" style="display:none; padding: 15px 20px 20px 20px; position:relative;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; width: 100%;">
-                <div class="pane-title" style="position: relative; top: 0; left: 0; margin: 0; padding-top: 5px;">SOCIALZ AUDIENCE</div>
-                <div class="action-toolbar flex gap-2">
-                    <button onclick="openAnalyticsDashboard()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple"></i> <span >Analytics</span>
-                    </button>
-
-                    <button onclick="document.getElementById('csv-input').click()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-file-import"></i> <span >Import</span>
-                    </button>
-                    <input type="file" id="csv-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleCSVImport(this)">
-
-                    <button onclick="exportCSV()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-file-export"></i> <span >Export</span>
-                    </button>
-
-                    <button onclick="openModal()" class="bg-brand hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg shadow-orange-500/20 transition-all transform hover:scale-105 flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> <span >Add Skater</span>
-                    </button>
+        <div id="paneSocialzRoster" class="executive-pane" style="display:none;">
+            <div class="pane-header-bar">
+                <span class="pane-header-title">SOCIALZ AUDIENCE</span>
+                <div class="pane-header-actions">
+                    <button onclick="openAnalyticsDashboard()" class="btn-blue"><i class="fa-solid fa-chart-simple"></i> Analytics</button>
+                    <button onclick="document.getElementById('csv-input').click()" class="btn-blue" style="background:#475569; border-color:#475569;"><i class="fa-solid fa-file-import"></i> Import</button>
+                    <input type="file" id="csv-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleCSVImport(this)" style="display:none;">
+                    <button onclick="exportCSV()" class="btn-blue" style="background:#475569; border-color:#475569;"><i class="fa-solid fa-file-export"></i> Export</button>
+                    <button onclick="openModal()" class="btn-orange"><i class="fa-solid fa-plus"></i> Add Skater</button>
                 </div>
             </div>
             
@@ -3231,7 +3288,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.1931"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.1945"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4191,15 +4248,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.1931"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.1931"></script>
-<script src="bom-module.js?v=v.2026.04.03.1931"></script>
-<script src="inventory-module.js?v=v.2026.04.03.1931"></script>
-<script src="production-module.js?v=v.2026.04.03.1931"></script>
-<script src="sales-module.js?v=v.2026.04.03.1931"></script>
-<script src="analytics-module.js?v=v.2026.04.03.1931"></script>
-<script src="ceo-module.js?v=v.2026.04.03.1931"></script>
-<script src="print-module.js?v=v.2026.04.03.1931"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.1945"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.1945"></script>
+<script src="bom-module.js?v=v.2026.04.03.1945"></script>
+<script src="inventory-module.js?v=v.2026.04.03.1945"></script>
+<script src="production-module.js?v=v.2026.04.03.1945"></script>
+<script src="sales-module.js?v=v.2026.04.03.1945"></script>
+<script src="analytics-module.js?v=v.2026.04.03.1945"></script>
+<script src="ceo-module.js?v=v.2026.04.03.1945"></script>
+<script src="print-module.js?v=v.2026.04.03.1945"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
