@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.1921"></script>
+    <script src="system-version.js?v=v.2026.04.03.1931"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1921"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1921"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1931"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.1921"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.1931"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -470,7 +470,7 @@
         .v-resizer {
             height: 10px;
             margin: 5px 0;
-            background: rgba(249, 115, 22, 0.05); /* Very subtle orange */
+            background: rgba(45, 212, 191, 0.05); /* Teal — matches Kanban divider */
             cursor: row-resize;
             border-radius: 5px;
             display: flex;
@@ -482,41 +482,55 @@
             flex-shrink: 0;
         }
         .v-resizer:hover, .v-resizer.dragging {
-            background: rgba(249, 115, 22, 0.3);
-            box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+            background: rgba(45, 212, 191, 0.25);
+            box-shadow: 0 0 10px rgba(45, 212, 191, 0.3);
         }
         .v-resizer::after {
             content: "";
             width: 40px;
             height: 4px;
-            background: rgba(249, 115, 22, 0.4);
+            background: rgba(45, 212, 191, 0.6);
             border-radius: 2px;
         }
         
+        /* ============================================================
+         * .h-resizer — GLOBAL STANDARD for all split-pane dividers.
+         * Color: Teal #2dd4bf (matches Kanban card accent).
+         * Icon:  3-dot drag indicator via ::after pseudo-element.
+         * Usage: Apply class="h-resizer" + onmousedown handler.
+         * DO NOT add local inline scrollbar or border overrides.
+         * ============================================================ */
         .h-resizer {
-            width: 10px;
-            margin: 0 5px;
-            background: rgba(249, 115, 22, 0.05); /* Very subtle orange */
+            width: 12px;
+            margin: 0;
+            background: rgba(45, 212, 191, 0.08);
             cursor: col-resize;
-            border-radius: 5px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
             position: relative;
             z-index: 50;
             flex-shrink: 0;
         }
         .h-resizer:hover, .h-resizer.dragging {
-            background: rgba(249, 115, 22, 0.3);
-            box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+            background: rgba(45, 212, 191, 0.25);
+            box-shadow: 0 0 12px rgba(45, 212, 191, 0.35);
         }
+        /* The center drag-indicator dots */
         .h-resizer::after {
-            content: "";
-            height: 40px;
-            width: 4px;
-            background: rgba(249, 115, 22, 0.4);
-            border-radius: 2px;
+            content: "⋮";
+            color: rgba(45, 212, 191, 0.7);
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .h-resizer:hover::after {
+            color: #2dd4bf;
+            text-shadow: 0 0 8px rgba(45, 212, 191, 0.8);
         }
         
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
@@ -863,15 +877,20 @@
             .hub-container { padding: 10px !important; gap: 10px !important; margin-bottom: 10px !important; }
         }
     
-        /* Global Framework Scrollbar Uniformity */
-        * { scrollbar-width: thin; scrollbar-color: rgba(51, 65, 85, 0.6) transparent; }
+        /* =================================================================
+         * GLOBAL SCROLLBAR FRAMEWORK — Single Authority Definition.
+         * Width: 8px. Color: Teal (#2dd4bf) idle, Orange on hover.
+         * This block is the ONLY scrollbar definition in the codebase.
+         * DO NOT add ::-webkit-scrollbar rules anywhere else.
+         * ================================================================= */
+        * { scrollbar-width: thin; scrollbar-color: rgba(45, 212, 191, 0.4) transparent; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.6); border-radius: 10px; transition: background 0.2s ease; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(247, 147, 32, 0.8); }
-        .dark * { scrollbar-color: rgba(203, 213, 225, 0.4) transparent; }
-        .dark ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); }
-        .dark ::-webkit-scrollbar-thumb:hover { background: rgba(247, 147, 32, 0.8); }
+        ::-webkit-scrollbar-thumb { background: rgba(45, 212, 191, 0.45); border-radius: 10px; transition: background 0.2s ease; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(247, 147, 32, 0.85); }
+        .dark * { scrollbar-color: rgba(45, 212, 191, 0.35) transparent; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(45, 212, 191, 0.35); }
+        .dark ::-webkit-scrollbar-thumb:hover { background: rgba(247, 147, 32, 0.85); }
 
         /* Smooth Transitions */
         .transition-all-300 { transition: all 0.3s ease-in-out; }
@@ -1886,7 +1905,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1921"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1931"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -3212,7 +3231,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.1921"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.1931"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3230,7 +3249,7 @@
             <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('packerzArchiveModal').style.display='none'">Close</button>
         </div>
         <div style="padding:25px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden;">
-            <div id="packerzCompletedQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
+            <div id="packerzCompletedQueue" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
                 <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
             </div>
         </div>
@@ -3281,22 +3300,22 @@
                     <!-- Column 2: Live Preview Render -->
                     <div style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                         <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">Live Telemetry Preview</div>
-                        <div id="packerzAdminQAPreview" class="custom-scroll" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
+                        <div id="packerzAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
                             <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Resizer Divider -->
-                <div id="packerzSopResizer" style="width:12px; cursor:ew-resize; background:var(--border-color); flex-shrink:0; transition:background 0.2s; z-index:10; border-left:1px solid var(--border-input); border-right:1px solid var(--border-input);" onmousedown="initPackerzSopResize(event)" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='var(--border-color)'"></div>
+                <!-- Resizer Divider — uses global .h-resizer standard -->
+                <div id="packerzSopResizer" class="h-resizer" onmousedown="initPackerzSopResize(event)"></div>
 
                 <!-- Right Pane: Rich Text -->
-                <div id="packerzSopRightPane" style="flex:1; padding-left:20px; display:flex; flex-direction:column; overflow-y:auto;">
-                    <div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;" class="custom-scroll">
+                <div id="packerzSopRightPane" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto;">
+                    <div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">4. Packing Instructions (Rich Text)</h3>
                         </div>
-                        <div id="packerzSopEditorArea" class="custom-scroll" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
+                        <div id="packerzSopEditorArea" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
                             <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the top bar to begin compiling standard operating procedures.</div>
                         </div>
                         <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" onclick="addPackerzSOPRow(this)">+ ADD PROCEDURE STEP</button>
@@ -4172,15 +4191,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.1921"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.1921"></script>
-<script src="bom-module.js?v=v.2026.04.03.1921"></script>
-<script src="inventory-module.js?v=v.2026.04.03.1921"></script>
-<script src="production-module.js?v=v.2026.04.03.1921"></script>
-<script src="sales-module.js?v=v.2026.04.03.1921"></script>
-<script src="analytics-module.js?v=v.2026.04.03.1921"></script>
-<script src="ceo-module.js?v=v.2026.04.03.1921"></script>
-<script src="print-module.js?v=v.2026.04.03.1921"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.1931"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.1931"></script>
+<script src="bom-module.js?v=v.2026.04.03.1931"></script>
+<script src="inventory-module.js?v=v.2026.04.03.1931"></script>
+<script src="production-module.js?v=v.2026.04.03.1931"></script>
+<script src="sales-module.js?v=v.2026.04.03.1931"></script>
+<script src="analytics-module.js?v=v.2026.04.03.1931"></script>
+<script src="ceo-module.js?v=v.2026.04.03.1931"></script>
+<script src="print-module.js?v=v.2026.04.03.1931"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4291,7 +4310,7 @@
             
             <!-- Left Pane (SWAPPED to QA Checklist & Completion) -->
             <div id="packerzLiveSopLeftPane" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container);">
-                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;" class="custom-scroll">
+                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
                     <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
                     <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;">
                         <!-- Auto-Generated Checkboxes Go Here -->
@@ -4305,11 +4324,11 @@
                 </div>
             </div>
 
-            <!-- Resizer Divider -->
-            <div id="packerzLiveSopResizer" style="width:12px; cursor:ew-resize; background:var(--border-color); flex-shrink:0; transition:background 0.2s; z-index:10; border-left:1px solid var(--border-input); border-right:1px solid var(--border-input);" onmousedown="initPackerzLiveSopResize(event)" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='var(--border-color)'"></div>
+            <!-- Resizer Divider — uses global .h-resizer standard -->
+            <div id="packerzLiveSopResizer" class="h-resizer" onmousedown="initPackerzLiveSopResize(event)"></div>
 
             <!-- Right Pane (SWAPPED to Procedure Steps) -->
-            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;" class="custom-scroll">
+            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
                 <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
             </div>
 
