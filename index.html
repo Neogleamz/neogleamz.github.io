@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.2214"></script>
+    <script src="system-version.js?v=v.2026.04.03.2219"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2214"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2214"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2219"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2219"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.2214"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.2219"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1964,7 +1964,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2214"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2219"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2648,6 +2648,7 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">🏷️ BARCODZ DIRECTORY</span>
                 <div class="pane-header-actions" style="display:flex; gap:10px; align-items:center;">
+                    <button class="back-hub-btn" onclick="showFulfillzPane('hub')">◀ BACK TO HUB</button>
                     <select id="barcodzSizeSelect" style="width:auto; padding:6px 12px; font-size:12px; font-weight:bold; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;">
                         <option value="2.25x1.25">Dymo 2.25" x 1.25"</option>
                         <option value="1x1">Square 1.0" x 1.0"</option>
@@ -3323,7 +3324,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.2214"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.2219"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3968,19 +3969,21 @@
         if (typeof updateHubStats === 'function') updateHubStats();
     }
 
-        function showFulfillzPane(paneId) {
+    function showFulfillzPane(paneId) {
         sessionStorage.setItem('activeFulfillzPane', paneId);
         document.getElementById('fulfillzhubLanding').style.setProperty('display', 'none', 'important');
         if(document.getElementById('paneFulfillzPackerz')) document.getElementById('paneFulfillzPackerz').style.setProperty('display', 'none', 'important');
         if(document.getElementById('paneFulfillzSopAdmin')) document.getElementById('paneFulfillzSopAdmin').style.setProperty('display', 'none', 'important');
+        if(document.getElementById('paneFulfillzBarcodz')) document.getElementById('paneFulfillzBarcodz').style.setProperty('display', 'none', 'important');
         
         if (paneId === 'hub') {
             document.getElementById('fulfillzhubLanding').style.setProperty('display', 'flex', 'important');
         } else {
-            const mapping = { 'packerz': 'paneFulfillzPackerz' };
+            const mapping = { 'packerz': 'paneFulfillzPackerz', 'barcodz': 'paneFulfillzBarcodz' };
             if(mapping[paneId] && document.getElementById(mapping[paneId])) {
                 document.getElementById(mapping[paneId]).style.setProperty('display', 'flex', 'important');
                 if(paneId === 'packerz' && typeof fetchUnfulfilledOrders === 'function') setTimeout(fetchUnfulfilledOrders, 100);
+                if(paneId === 'barcodz' && typeof renderBarcodzGrid === 'function') setTimeout(renderBarcodzGrid, 100);
             }
         }
         sysLog(`Loaded FULFILLZ Console: ${paneId}`);
@@ -4353,15 +4356,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.2214"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.2214"></script>
-<script src="bom-module.js?v=v.2026.04.03.2214"></script>
-<script src="inventory-module.js?v=v.2026.04.03.2214"></script>
-<script src="production-module.js?v=v.2026.04.03.2214"></script>
-<script src="sales-module.js?v=v.2026.04.03.2214"></script>
-<script src="analytics-module.js?v=v.2026.04.03.2214"></script>
-<script src="ceo-module.js?v=v.2026.04.03.2214"></script>
-<script src="print-module.js?v=v.2026.04.03.2214"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.2219"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.2219"></script>
+<script src="bom-module.js?v=v.2026.04.03.2219"></script>
+<script src="inventory-module.js?v=v.2026.04.03.2219"></script>
+<script src="production-module.js?v=v.2026.04.03.2219"></script>
+<script src="sales-module.js?v=v.2026.04.03.2219"></script>
+<script src="analytics-module.js?v=v.2026.04.03.2219"></script>
+<script src="ceo-module.js?v=v.2026.04.03.2219"></script>
+<script src="print-module.js?v=v.2026.04.03.2219"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4815,13 +4818,13 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2214"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2219"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2214"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2219"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.03.2214"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.03.2219"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.03.2214"></script>
+    <script src="barcodz-module.js?v=v.2026.04.03.2219"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>
