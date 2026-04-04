@@ -225,7 +225,7 @@ function renderBarcodzSpool() {
         window.barcodzSpoolQueue.forEach((item, index) => {
             totalQty += item.qty;
             html += `
-                <div draggable="true" ondragstart="spoolDragStart(event, ${index})" ondragover="spoolDragOver(event)" ondrop="spoolDrop(event, ${index})" ondragend="spoolDragEnd(event)" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; display:flex; align-items:center; gap:8px; cursor:grab;" onmousedown="this.style.cursor='grabbing'" onmouseup="this.style.cursor='grab'">
+                <div draggable="true" ondragstart="spoolDragStart(event, ${index})" ondragover="spoolDragOver(event)" ondrop="spoolDrop(event, ${index})" ondragend="spoolDragEnd(event)" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; display:flex; align-items:center; gap:8px; cursor:grab; width:100%; box-sizing:border-box;" onmousedown="this.style.cursor='grabbing'" onmouseup="this.style.cursor='grab'">
                     
                     <div style="color:var(--text-muted); cursor:grab; font-size:12px; margin-right:-4px; user-select:none;">⋮⋮</div>
                     
