@@ -349,6 +349,17 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     }
                     return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
                 });
+                text = text.replace(/\[SCAN:([^\]]+)\]/gi, (_, val) => {
+                    return `<span style="background:rgba(14,165,233,0.15); border:1px solid #0ea5e9; color:#0ea5e9; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:800; white-space:nowrap; margin:0 4px; vertical-align:middle;">📷 SCAN: ${val.trim()}</span>`;
+                });
+                text = text.replace(/\[BARCODE:([^\]]+)\]/gi, (_, val) => {
+                    const id = `sop-bc-live-${Math.random().toString(36).slice(2,8)}`;
+                    return `<svg id="${id}" data-value="${val.trim()}" class="sop-barcode-svg" style="max-width:150px; background:white; padding:4px; border-radius:4px; display:inline-block; vertical-align:middle; margin:0 4px;"></svg>`;
+                });
+                text = text.replace(/\[QR:([^\]]+)\]/gi, (_, val) => {
+                    const id = `sop-qr-live-${Math.random().toString(36).slice(2,8)}`;
+                    return `<canvas id="${id}" data-value="${val.trim()}" class="sop-qr-canvas" style="border-radius:4px; display:inline-block; vertical-align:middle; margin:0 4px; width:45px!important; height:45px!important;"></canvas>`;
+                });
                 return text;
             }
             
@@ -429,6 +440,30 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     const row = document.getElementById(`scanrow-${rowId}`);
                     const value = row ? row.dataset.expected : 'NGZ';
                     QRCode.toCanvas(el, value, { width: 56, margin: 0, color: { dark: '#000', light: '#fff' } }).catch(() => {});
+                });
+                
+                // Hydrate inline QR
+                document.querySelectorAll('#packerzSopViewerQAList .sop-qr-canvas').forEach(el => {
+                    try {
+                        QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', {
+                            margin: 1, width: 45, color: { dark: '#000', light: '#fff' }
+                        }).catch(()=>{});
+                    } catch(e) {}
+                });
+            }
+            
+            // Hydrate inline Barcodes
+            if (typeof JsBarcode !== 'undefined') {
+                document.querySelectorAll('#packerzSopViewerQAList .sop-barcode-svg').forEach(el => {
+                    try {
+                        JsBarcode(el, el.dataset.value || 'NEOGLEAMZ', {
+                            format: 'CODE128', width: 1.5, height: 40,
+                            displayValue: true, fontSize: 10, margin: 4,
+                            lineColor: '#000', background: '#ffffff'
+                        });
+                    } catch (e) {
+                        el.outerHTML = `<span style="color:#ef4444; font-size:10px;">⚠️ Barcode error</span>`;
+                    }
                 });
             }
             
