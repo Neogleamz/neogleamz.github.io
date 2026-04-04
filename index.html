@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.2100"></script>
+    <script src="system-version.js?v=v.2026.04.03.2159"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2100"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2100"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2159"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2159"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.2100"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.2159"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1955,7 +1955,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2100"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2159"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -3287,7 +3287,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.2100"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.2159"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3348,15 +3348,18 @@
                             <div style="display:flex; gap:6px;">
                                 <button onclick="openSOPAuditLog()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📂 AUDIT LOG</button>
                                 <button onclick="openSOPMediaPicker()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📎 MEDIA</button>
+                                <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
                             <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;·&nbsp;
                             <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;·&nbsp;
                             <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;·&nbsp;
+                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;·&nbsp;
                             <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
                             <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
                             <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
+                            &nbsp;— <span style="color:#F59E0B; cursor:pointer; font-weight:700;" onclick="openSOPTokenGuide()">❓ Full Guide</span>
                         </div>
                         <textarea id="packerzAdminQA" oninput="renderPackerzTelemetryPreview()" placeholder="# Gather SOULZ Parts&#10;- 2 x SK8Lytz Units&#10;[BARCODE:SK8LYTZ-4x6-STICKER]&#10;[IMG:https://your-bucket.supabase.co/...]&#10;[QR:https://zengge.app]&#10;[INPUT] Enter Serial Number" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px;"></textarea>
                     </div>
@@ -3392,24 +3395,29 @@
          SOP MEDIA PICKER MODAL
     ============================================================ -->
     <div id="sopMediaPickerModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPMediaPicker()">
-        <div style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(14,165,233,0.3); width:800px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
+        <div style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(14,165,233,0.3); width:860px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--bg-bar); border-bottom:1px solid var(--border-color); flex-shrink:0;">
                 <div>
                     <div style="font-size:16px; font-weight:900; color:#0ea5e9;">📎 SOP Media Library</div>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Select a file to insert <code>[IMG:url]</code> into the checklist, or upload a new file.</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Browse folders, upload files, and insert image tokens into your checklist.</div>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
+                    <button onclick="createSOPMediaFolder()" style="padding:7px 14px; font-size:12px; font-weight:700; background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#10b981; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📁 NEW FOLDER</button>
                     <label style="padding:7px 14px; font-size:12px; font-weight:700; background:#0ea5e9; color:white; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">⬆ UPLOAD
                         <input type="file" id="sopMediaUploadInput" accept="image/*,video/*,.pdf" style="display:none;" onchange="uploadSOPMedia(this.files[0])">
                     </label>
                     <button onclick="closeSOPMediaPicker()" class="btn-red" style="width:auto; padding:6px 14px; font-size:13px;">✕ Close</button>
                 </div>
             </div>
+            <!-- Breadcrumb Nav -->
+            <div style="display:flex; align-items:center; padding:8px 24px; background:var(--bg-body); border-bottom:1px solid var(--border-color); flex-shrink:0; min-height:36px; font-size:12px;">
+                <span id="sopMediaBreadcrumb" style="color:#0ea5e9; font-weight:700;">📁 Root</span>
+            </div>
             <!-- Upload Progress -->
             <div id="sopMediaUploadStatus" style="display:none; padding:10px 24px; background:rgba(14,165,233,0.1); border-bottom:1px solid var(--border-color); font-size:12px; color:#0ea5e9; font-weight:700;"></div>
             <!-- File Grid -->
-            <div id="sopMediaGrid" style="flex-grow:1; overflow-y:auto; padding:20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; align-content:start;">
+            <div id="sopMediaGrid" style="flex-grow:1; overflow-y:auto; padding:20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; align-content:start;">
                 <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading media library...</div>
             </div>
         </div>
@@ -4309,15 +4317,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.2100"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.2100"></script>
-<script src="bom-module.js?v=v.2026.04.03.2100"></script>
-<script src="inventory-module.js?v=v.2026.04.03.2100"></script>
-<script src="production-module.js?v=v.2026.04.03.2100"></script>
-<script src="sales-module.js?v=v.2026.04.03.2100"></script>
-<script src="analytics-module.js?v=v.2026.04.03.2100"></script>
-<script src="ceo-module.js?v=v.2026.04.03.2100"></script>
-<script src="print-module.js?v=v.2026.04.03.2100"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.2159"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.2159"></script>
+<script src="bom-module.js?v=v.2026.04.03.2159"></script>
+<script src="inventory-module.js?v=v.2026.04.03.2159"></script>
+<script src="production-module.js?v=v.2026.04.03.2159"></script>
+<script src="sales-module.js?v=v.2026.04.03.2159"></script>
+<script src="analytics-module.js?v=v.2026.04.03.2159"></script>
+<script src="ceo-module.js?v=v.2026.04.03.2159"></script>
+<script src="print-module.js?v=v.2026.04.03.2159"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4450,6 +4458,113 @@
                 <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     CAMERA BARCODE SCANNER MODAL (html5-qrcode)
+============================================================ -->
+<div id="sopCameraModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.96); z-index:11000; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+    <div style="text-align:center;">
+        <div style="font-size:20px; font-weight:900; color:#0ea5e9; letter-spacing:1px;">📷 SCAN ITEM BARCODE</div>
+        <div id="sopCameraItemName" style="font-size:15px; font-weight:800; color:white; margin-top:6px;"></div>
+        <div id="sopCameraExpected" style="font-size:11px; color:rgba(255,255,255,0.45); font-family:monospace; margin-top:3px;"></div>
+    </div>
+    <div style="position:relative;">
+        <div id="sopCameraReader" style="width:280px; height:280px; border-radius:12px; overflow:hidden; border:2px solid #0ea5e9;"></div>
+        <div style="position:absolute; inset:0; pointer-events:none; display:flex; justify-content:center; align-items:center;">
+            <div style="width:180px; height:180px; border:2px solid rgba(14,165,233,0.7); border-radius:8px; box-shadow:0 0 0 9999px rgba(0,0,0,0.45);"></div>
+        </div>
+    </div>
+    <div id="sopCameraStatus" style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); min-height:20px; text-align:center;">Point at the QR code on the bin label...</div>
+    <div style="display:flex; gap:12px;">
+        <button onclick="closeCameraScanner()" style="padding:10px 28px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:800; font-size:14px; cursor:pointer;">✕ Cancel</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     SOP TOKEN GUIDE MODAL
+============================================================ -->
+<div id="sopTokenGuideModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.88); z-index:11001; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPTokenGuide()">
+    <div style="background:var(--bg-container); border-radius:14px; border:1px solid rgba(14,165,233,0.35); width:820px; max-width:96vw; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.9); overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 26px; background:linear-gradient(135deg,rgba(14,165,233,0.12) 0%,var(--bg-bar) 100%); border-bottom:1px solid rgba(14,165,233,0.25); flex-shrink:0;">
+            <div>
+                <div style="font-size:17px; font-weight:900; color:#0ea5e9;">❓ SOP Token Reference Guide</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">All syntax tokens available in the Audited Telemetry Checklist editor</div>
+            </div>
+            <button onclick="closeSOPTokenGuide()" class="btn-red" style="width:auto; padding:7px 16px; font-size:13px;">✕ Close</button>
+        </div>
+        <div style="flex-grow:1; overflow-y:auto; padding:28px; display:flex; flex-direction:column; gap:20px;">
+            <div style="font-size:10px; font-weight:900; color:#0ea5e9; letter-spacing:2.5px; border-bottom:1px solid rgba(14,165,233,0.2); padding-bottom:6px;">QA CHECKLIST TOKENS</div>
+            <!-- # Header -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(16,185,129,0.08); border:1px solid #10b981; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:#10b981; font-weight:900;"># Section Name</div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Section Header</div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Bold green divider — structural only, no checkbox. Groups related QA items.</div><div style="font-size:11px; color:#10b981; margin-top:4px; font-family:monospace; opacity:0.8;">Ex: <b># Gather SOULZ Parts</b></div></div>
+            </div>
+            <!-- > Sub-check -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:var(--text-muted); font-weight:900;">&gt; Sub-item</div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Indented Sub-Check</div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Smaller indented checkbox for secondary verifications under a main check.</div><div style="font-size:11px; color:var(--text-muted); margin-top:4px; font-family:monospace; opacity:0.8;">Ex: <b>&gt; Verify LED polarity visually</b></div></div>
+            </div>
+            <!-- Plain text -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:var(--text-main);">Plain text<br><span style="color:var(--text-muted); font-size:11px;">or: - Plain text</span></div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Standard QA Checkbox</div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Any plain line (with or without a leading <code>-</code>) becomes a bold full-width checkbox. All must be checked before sign-off is allowed.</div></div>
+            </div>
+            <!-- [INPUT] standalone -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(245,158,11,0.08); border:1px solid #F59E0B; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:#F59E0B; font-weight:900;">[INPUT] Label</div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Standalone Input Field</div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Creates a labeled text entry row. Packer must fill it in. Value is logged in the QA audit record for traceability.</div><div style="font-size:11px; color:#F59E0B; margin-top:4px; font-family:monospace; opacity:0.8;">Ex: <b>[INPUT] Enter Unit Serial No.</b></div></div>
+            </div>
+            <!-- Inline [INPUT] -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(245,158,11,0.08); border:1px solid #F59E0B; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:12px; color:var(--text-main);">&gt; Set power to [INPUT] W</div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Inline Input <span style="font-size:10px; color:var(--text-muted); font-weight:600;">(inside any line type)</span></div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;"><code>[INPUT]</code> can appear inside any line — plain checkbox, sub-check <code>&gt;</code>, or header <code>#</code>. Embeds a short text field inline for capturing measured values.</div><div style="font-size:11px; color:#F59E0B; margin-top:4px; font-family:monospace; opacity:0.8;">Ex: <b>&gt; Confirm rated voltage is [INPUT] V</b></div></div>
+            </div>
+            <!-- [SCAN:] -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:#0ea5e9; font-weight:900;">[SCAN:Item Name]</div>
+                <div>
+                    <div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Physical Bin Scan <span style="background:#0ea5e9; color:white; font-size:9px; padding:2px 7px; border-radius:12px; font-family:sans-serif; font-weight:800; vertical-align:middle;">NEW</span></div>
+                    <div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Renders a scan row with a mini QR code showing the bin label code (<code>NGZ-ITEMNAME</code>). Packer must point phone camera at the matching bin — validated in real-time. <b style="color:#ef4444;">Blocks sign-off until confirmed.</b></div>
+                    <div style="background:rgba(14,165,233,0.06); border:1px solid rgba(14,165,233,0.2); border-radius:8px; padding:10px 12px; margin-top:8px; font-size:11px; line-height:1.9;">
+                        <div><span style="color:#0ea5e9; font-weight:900;">Format:</span> Item name is slugified → <code style="color:#fb923c;">NGZ-SK8LYTZ-UNIT</code></div>
+                        <div><span style="color:#0ea5e9; font-weight:900;">Spaces</span> → hyphens, always uppercase</div>
+                        <div><span style="color:#0ea5e9; font-weight:900;">Ex:</span> <code>[SCAN:SK8Lytz Unit]</code> validates bin labelled <code>NGZ-SK8LYTZ-UNIT</code></div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size:10px; font-weight:900; color:#a78bfa; letter-spacing:2.5px; border-bottom:1px solid rgba(167,139,250,0.2); padding-bottom:6px; margin-top:4px;">MEDIA TOKENS</div>
+            <!-- [IMG:] -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(167,139,250,0.08); border:1px solid #a78bfa; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:12px; color:#a78bfa; font-weight:900; word-break:break-all;">[IMG:https://...]</div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Embed Image</div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Renders a full-width image from a public URL. Use the <b>📎 MEDIA</b> button to browse your Supabase bucket and insert the token automatically. Supports jpg, png, gif, webp, svg.</div></div>
+            </div>
+            <!-- [BARCODE:] -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(244,114,182,0.08); border:1px solid #f472b6; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:#f472b6; font-weight:900;">[BARCODE:value]</div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Code-128 Barcode</div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Generates a scannable Code-128 linear barcode graphic. Display only — for active camera verification use <code>[SCAN:]</code> instead.</div><div style="font-size:11px; color:#f472b6; margin-top:4px; font-family:monospace; opacity:0.8;">Ex: <b>[BARCODE:NGZ-SOULZ-BOX]</b></div></div>
+            </div>
+            <!-- [QR:] -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(251,146,60,0.08); border:1px solid #fb923c; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:#fb923c; font-weight:900;">[QR:value]</div>
+                <div><div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">QR Code</div><div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Generates a QR code from any string or URL. Useful for linking to setup guides or instruction videos. Display only.</div><div style="font-size:11px; color:#fb923c; margin-top:4px; font-family:monospace; opacity:0.8;">Ex: <b>[QR:https://zengge.app]</b></div></div>
+            </div>
+            <div style="font-size:10px; font-weight:900; color:#10b981; letter-spacing:2.5px; border-bottom:1px solid rgba(16,185,129,0.2); padding-bottom:6px; margin-top:4px;">FULL EXAMPLE</div>
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:10px; padding:18px 20px; font-family:monospace; font-size:12px; line-height:2.2; color:var(--text-muted);">
+                <div><span style="color:#10b981; font-weight:900;"># Gather SOULZ Parts</span></div>
+                <div>2 x SK8Lytz Units</div>
+                <div><span style="color:#0ea5e9;">[SCAN:SK8Lytz Unit]</span> <span style="color:#374151; font-size:11px; margin-left:8px;">← camera validates NGZ-SK8LYTZ-UNIT bin label</span></div>
+                <div><span style="color:#F59E0B;">[INPUT] Enter Unit Serial No.</span></div>
+                <div>&gt; Verify LED polarity before mounting</div>
+                <div>&gt; Confirm draw is [INPUT] mA at max brightness</div>
+                <div><span style="color:#a78bfa;">[IMG:https://your-bucket.supabase.co/sops/wiring.jpg]</span></div>
+                <div style="margin-top:4px;"><span style="color:#10b981; font-weight:900;"># QC &amp; Pack</span></div>
+                <div>Apply QC sticker to each unit</div>
+                <div><span style="color:#f472b6;">[BARCODE:NGZ-SOULZ-BOX-STICKER]</span></div>
+                <div><span style="color:#fb923c;">[QR:https://zengge.app]</span> <span style="color:#374151; font-size:11px; margin-left:8px;">← app setup guide for packer reference</span></div>
+            </div>
         </div>
     </div>
 </div>
@@ -4664,9 +4779,11 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2100"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2159"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2100"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2159"></script>
+    <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.03.2159"></script>
 </body>
 </html>
 

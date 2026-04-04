@@ -170,6 +170,18 @@ async function fetchPackerzCompletedOrders() {
     }
 }
 
+// ============================================================
+// BARCODE UTILITIES — deterministic NGZ-slug from item name
+// ============================================================
+
+function getItemBarcodeValue(itemName) {
+    // e.g. 'SK8Lytz Unit' → 'NGZ-SK8LYTZ-UNIT'
+    return 'NGZ-' + String(itemName).toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+// Track scan confirmations per session (reset on modal open)
+const scanConfirmations = new Map(); // rowId → true/false
+
 function openPackerzSopTerminal(orderGroup) {
     const activeQueue = document.getElementById('packerzActiveQueue');
     if (!activeQueue) return;
@@ -241,6 +253,7 @@ let currentPackerzQaSku = null;
 async function loadPackerzActiveSOP(orderId, sku, recipe) {
     currentPackerzQaOrderId = orderId;
     currentPackerzQaSku = sku;
+    scanConfirmations.clear();
     
     document.getElementById('packerzSopViewerModal').style.display = 'flex';
     document.getElementById('packerzSopViewerTitle').innerHTML = `🎯 ACTIVE SOP: ${recipe}`;
@@ -321,6 +334,33 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 let q = line.trim();
                 if(!q) return;
                 
+                // ── [SCAN:itemName] ──────────────────────────────────
+                if (/^\[SCAN:(.+)\]$/i.test(q)) {
+                    const itemName = q.match(/^\[SCAN:(.+)\]$/i)[1].trim();
+                    const expected = getItemBarcodeValue(itemName);
+                    const safeItem = itemName.replace(/"/g, '&quot;');
+                    const rowId = `scan-${Math.random().toString(36).slice(2,8)}`;
+                    scanConfirmations.set(rowId, false);
+                    html += `
+                        <div id="scanrow-${rowId}" class="packerz-scan-row" data-expected="${expected}" data-confirmed="false"
+                             style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px 12px; transition:border-color 0.3s;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+                                    <canvas id="scan-qr-${rowId}" width="56" height="56" style="border-radius:4px; flex-shrink:0;"></canvas>
+                                    <div style="min-width:0;">
+                                        <div style="font-size:12px; font-weight:900; color:var(--text-heading); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📦 ${safeItem}</div>
+                                        <div style="font-size:10px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${expected}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                                    <span id="scan-status-${rowId}" style="font-size:11px; color:#ef4444; font-weight:700;">⏳ Unscan</span>
+                                    <button id="scan-btn-${rowId}" onclick="openCameraScanner('${expected}', '${rowId}', '${safeItem}')" style="padding:6px 10px; background:#0ea5e9; color:white; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; white-space:nowrap;">📷 SCAN</button>
+                                </div>
+                            </div>
+                        </div>`;
+                    return;
+                }
+
                 if (q.startsWith('[INPUT]') && q.match(/\[INPUT\]/gi).length === 1 && q.indexOf('[INPUT]') === 0) {
                     let label = q.replace(/\[INPUT\]/ig, '').trim();
                     let safeLabel = label.replace(/"/g, '&quot;');
@@ -359,6 +399,17 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 }
             });
             qaList.innerHTML = html;
+            
+            // Hydrate scan row QR codes after innerHTML
+            if (typeof QRCode !== 'undefined') {
+                document.querySelectorAll('#packerzSopViewerQAList canvas[id^="scan-qr-"]').forEach(el => {
+                    const rowId = el.id.replace('scan-qr-', '');
+                    const row = document.getElementById(`scanrow-${rowId}`);
+                    const value = row ? row.dataset.expected : 'NGZ';
+                    QRCode.toCanvas(el, value, { width: 56, margin: 0, color: { dark: '#000', light: '#fff' } }).catch(() => {});
+                });
+            }
+            
             checkPackerzSopSignoffState(); // Initial check
         }
 
@@ -376,6 +427,11 @@ function checkPackerzSopSignoffState() {
     
     const inputs = document.querySelectorAll('.packerz-qa-input');
     inputs.forEach(i => { if(i.value.trim() === '') allValid = false; });
+    
+    // Gate on unconfirmed scan rows
+    document.querySelectorAll('.packerz-scan-row').forEach(row => {
+        if (row.dataset.confirmed !== 'true') allValid = false;
+    });
     
     const btnSignoff = document.getElementById('btnPackerzSopSignoff');
     if(allValid) {
@@ -988,10 +1044,13 @@ function stopPackerzLiveSopResize() {
 // ============================================================
 
 const SOP_MEDIA_BUCKET = 'sop-media';
+let currentSOPMediaFolder = '';   // '' = bucket root
 
 async function openSOPMediaPicker() {
+    currentSOPMediaFolder = '';
     const modal = document.getElementById('sopMediaPickerModal');
     modal.style.display = 'flex';
+    updateSOPMediaBreadcrumb();
     await refreshSOPMediaGrid();
 }
 
@@ -1004,47 +1063,67 @@ function closeSOPMediaPicker() {
 
 async function refreshSOPMediaGrid() {
     const grid = document.getElementById('sopMediaGrid');
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading media library...</div>`;
+    if (!grid) return;
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading...</div>`;
+    updateSOPMediaBreadcrumb();
 
     try {
-        const { data, error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).list('', {
-            limit: 200, sortBy: { column: 'created_at', order: 'desc' }
+        const { data, error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).list(currentSOPMediaFolder, {
+            limit: 300, sortBy: { column: 'name', order: 'asc' }
         });
         if (error) throw error;
 
-        if (!data || data.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No files yet. Upload your first image above.</div>`;
+        const folders = (data || []).filter(f => f.id === null && f.name !== '.emptyFolderPlaceholder');
+        const files   = (data || []).filter(f => f.id !== null && f.name !== '.emptyFolderPlaceholder');
+
+        if (folders.length === 0 && files.length === 0) {
+            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">${currentSOPMediaFolder ? 'This folder is empty.' : 'No files yet. Upload your first image above.'}</div>`;
             return;
         }
-
         grid.innerHTML = '';
-        data.forEach(file => {
-            if (file.name === '.emptyFolderPlaceholder') return;
-            const { data: urlData } = supabaseClient.storage.from(SOP_MEDIA_BUCKET).getPublicUrl(file.name);
+
+        // Back-navigation card
+        if (currentSOPMediaFolder) {
+            const upCard = document.createElement('div');
+            upCard.style.cssText = 'background:var(--bg-panel); border:1px dashed var(--border-color); border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:110px; gap:6px;';
+            upCard.onmouseover = () => upCard.style.borderColor = '#0ea5e9';
+            upCard.onmouseout  = () => upCard.style.borderColor = 'var(--border-color)';
+            upCard.onclick = () => { const p = currentSOPMediaFolder.split('/'); p.pop(); navigateSOPMediaFolder(p.join('/')); };
+            upCard.innerHTML = `<div style="font-size:28px; color:var(--text-muted);">⬆</div><div style="font-size:10px; color:var(--text-muted); font-weight:700;">Parent Folder</div>`;
+            grid.appendChild(upCard);
+        }
+
+        // Folder cards
+        folders.forEach(folder => {
+            const fullPath = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${folder.name}` : folder.name;
+            const card = document.createElement('div');
+            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:110px; gap:6px; padding:8px;';
+            card.onmouseover = () => { card.style.borderColor = '#10b981'; card.style.transform = 'translateY(-2px)'; };
+            card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
+            card.onclick = () => navigateSOPMediaFolder(fullPath);
+            card.innerHTML = `<div style="font-size:36px;">📁</div><div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;">${folder.name}</div>`;
+            grid.appendChild(card);
+        });
+
+        // File cards
+        files.forEach(file => {
+            const filePath = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${file.name}` : file.name;
+            const { data: urlData } = supabaseClient.storage.from(SOP_MEDIA_BUCKET).getPublicUrl(filePath);
             const url = urlData.publicUrl;
             const isImg = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
             const sizeKb = file.metadata?.size ? Math.round(file.metadata.size / 1024) : '?';
-
             const card = document.createElement('div');
             card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column;';
             card.onmouseover = () => { card.style.borderColor = '#0ea5e9'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
             card.onclick = () => insertSOPToken(`[IMG:${url}]`);
-
             card.innerHTML = isImg
-                ? `<img src="${url}" loading="lazy" style="width:100%; height:110px; object-fit:cover;">
-                   <div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${file.name}">${file.name}</div>
-                   <div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`
-                : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px;">📄</div>
-                   <div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${file.name}</div>
-                   <div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`;
+                ? `<img src="${url}" loading="lazy" style="width:100%; height:110px; object-fit:cover;"><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${file.name}">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`
+                : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px;">📄</div><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted);">${sizeKb} KB</div>`;
             grid.appendChild(card);
         });
     } catch(e) {
-        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#ef4444; font-size:12px;">
-            ⚠️ Could not load media library: ${e.message}<br>
-            <span style="font-size:11px; color:var(--text-muted);">Make sure the '${SOP_MEDIA_BUCKET}' bucket exists in Supabase Storage with public read access.</span>
-        </div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#ef4444; font-size:12px;">⚠️ Could not load media library: ${e.message}<br><span style="font-size:11px; color:var(--text-muted);">Ensure the '${SOP_MEDIA_BUCKET}' bucket exists with public read access.</span></div>`;
     }
 }
 
@@ -1052,19 +1131,22 @@ async function uploadSOPMedia(file) {
     if (!file) return;
     const statusEl = document.getElementById('sopMediaUploadStatus');
     statusEl.style.display = 'block';
+    statusEl.style.color = '#0ea5e9';
     statusEl.innerText = `⬆ Uploading ${file.name}...`;
 
     try {
-        const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fileName = `${Date.now()}-${safeName}`;
+        const path = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${fileName}` : fileName;
         const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).upload(path, file, {
             cacheControl: '3600', upsert: false
         });
         if (error) throw error;
 
         const { data: urlData } = supabaseClient.storage.from(SOP_MEDIA_BUCKET).getPublicUrl(path);
-        statusEl.innerText = `✅ Uploaded! Inserting into checklist...`;
+        statusEl.innerText = `✅ Uploaded${currentSOPMediaFolder ? ' to ' + currentSOPMediaFolder : ''} — inserting token...`;
         insertSOPToken(`[IMG:${urlData.publicUrl}]`);
-        setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+        setTimeout(() => { statusEl.style.display = 'none'; statusEl.style.color = '#0ea5e9'; }, 2500);
         await refreshSOPMediaGrid();
     } catch(e) {
         statusEl.style.color = '#ef4444';
@@ -1088,6 +1170,58 @@ function insertSOPToken(token) {
     renderPackerzTelemetryPreview();
     closeSOPMediaPicker();
 }
+
+// ============================================================
+// SOP MEDIA BROWSER — Folder Navigation & Guide
+// ============================================================
+
+function navigateSOPMediaFolder(path) {
+    currentSOPMediaFolder = path;
+    refreshSOPMediaGrid();
+}
+
+function updateSOPMediaBreadcrumb() {
+    const el = document.getElementById('sopMediaBreadcrumb');
+    if (!el) return;
+    if (!currentSOPMediaFolder) {
+        el.innerHTML = `<span style="color:#0ea5e9; font-weight:700;">📁 Root</span>`;
+        return;
+    }
+    const parts = currentSOPMediaFolder.split('/');
+    let html = `<span style="color:#0ea5e9; font-weight:700; cursor:pointer;" onclick="navigateSOPMediaFolder('')">📁 Root</span>`;
+    let cum = '';
+    parts.forEach((p, i) => {
+        cum += (i === 0 ? '' : '/') + p;
+        const cp = cum;
+        const last = i === parts.length - 1;
+        html += ` <span style="color:var(--text-muted); margin:0 2px;">›</span> `;
+        html += last
+            ? `<span style="color:var(--text-heading); font-weight:900;">${p}</span>`
+            : `<span style="color:#0ea5e9; cursor:pointer;" onclick="navigateSOPMediaFolder('${cp}')">${p}</span>`;
+    });
+    el.innerHTML = html;
+}
+
+async function createSOPMediaFolder() {
+    const name = prompt('Enter folder name (letters, numbers, hyphens):');
+    if (!name || !name.trim()) return;
+    const safe = name.trim().replace(/[^a-zA-Z0-9_\-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (!safe) { alert('Invalid folder name.'); return; }
+    const fullPath = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${safe}/.emptyFolderPlaceholder` : `${safe}/.emptyFolderPlaceholder`;
+    const statusEl = document.getElementById('sopMediaUploadStatus');
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#0ea5e9';
+    statusEl.innerText = `📁 Creating folder "${safe}"...`;
+    const blob = new Blob([''], { type: 'text/plain' });
+    const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).upload(fullPath, blob, { upsert: true });
+    if (error) { statusEl.style.color = '#ef4444'; statusEl.innerText = `❌ Failed: ${error.message}`; return; }
+    statusEl.innerText = `✅ Folder "${safe}" created`;
+    setTimeout(() => { statusEl.style.display = 'none'; statusEl.style.color = '#0ea5e9'; }, 2000);
+    await refreshSOPMediaGrid();
+}
+
+function openSOPTokenGuide()  { document.getElementById('sopTokenGuideModal').style.display = 'flex'; }
+function closeSOPTokenGuide() { document.getElementById('sopTokenGuideModal').style.display = 'none'; }
 
 // ============================================================
 // SOP QA ARCHIVE — snapshot SOP at moment of QA sign-off
@@ -1226,7 +1360,7 @@ function renderSOPAuditLogRows(rows) {
                 </div>
             </div>
         </div>`;
-    }).join('');
+    }).join("");
 }
 
 function toggleSOPAuditDetail(id) {
@@ -1245,4 +1379,84 @@ function formatSOPSnapshotPreview(snapshot) {
         if (steps.length) out += `<div style="margin-top:6px; color:#0ea5e9;">${steps.length} packing step(s) recorded.</div>`;
         return out || '<span style="color:var(--text-muted);">Empty SOP snapshot.</span>';
     } catch(e) { return `<span style="color:#ef4444;">Parse error: ${e.message}</span>`; }
+}
+
+// ============================================================
+// CAMERA SCANNER ENGINE — html5-qrcode
+// ============================================================
+
+let _html5QrScanner = null;     // active Html5Qrcode instance
+let _activeScanRowId = null;    // which scan row is being confirmed
+
+async function openCameraScanner(expectedValue, rowId, itemName) {
+    _activeScanRowId = rowId;
+
+    // Show the modal
+    const modal = document.getElementById('sopCameraModal');
+    modal.style.display = 'flex';
+    document.getElementById('sopCameraItemName').innerText = itemName || expectedValue;
+    document.getElementById('sopCameraExpected').innerText = `Expected: ${expectedValue}`;
+    document.getElementById('sopCameraStatus').innerText = 'Point at the QR code on the bin label...';
+    document.getElementById('sopCameraStatus').style.color = 'rgba(255,255,255,0.7)';
+
+    // Clear previous reader instance
+    if (_html5QrScanner) {
+        try { await _html5QrScanner.stop(); } catch(e) {}
+        _html5QrScanner = null;
+    }
+    // Clear the DOM element so html5-qrcode can re-mount
+    const readerEl = document.getElementById('sopCameraReader');
+    readerEl.innerHTML = '';
+
+    try {
+        _html5QrScanner = new Html5Qrcode('sopCameraReader');
+        await _html5QrScanner.start(
+            { facingMode: 'environment' },   // rear camera
+            { fps: 12, qrbox: { width: 200, height: 200 }, aspectRatio: 1.0 },
+            (decodedText) => handleScanResult(decodedText, expectedValue, rowId),
+            () => {}  // suppress per-frame errors
+        );
+    } catch(err) {
+        document.getElementById('sopCameraStatus').innerText = `❌ Camera error: ${err.message || err}`;
+        document.getElementById('sopCameraStatus').style.color = '#ef4444';
+    }
+}
+
+async function closeCameraScanner() {
+    if (_html5QrScanner) {
+        try { await _html5QrScanner.stop(); } catch(e) {}
+        _html5QrScanner = null;
+    }
+    document.getElementById('sopCameraModal').style.display = 'none';
+    document.getElementById('sopCameraReader').innerHTML = '';
+    _activeScanRowId = null;
+}
+
+async function handleScanResult(decodedText, expectedValue, rowId) {
+    const scanned = (decodedText || '').trim();
+    const row     = document.getElementById(`scanrow-${rowId}`);
+    const status  = document.getElementById(`scan-status-${rowId}`);
+    const btn     = document.getElementById(`scan-btn-${rowId}`);
+
+    if (scanned === expectedValue) {
+        // ✅ Match — confirm the row
+        closeCameraScanner();
+        if (row)    { row.dataset.confirmed = 'true'; row.style.borderColor = '#10b981'; row.style.background = 'rgba(16,185,129,0.06)'; }
+        if (status) { status.innerText = '✅ Confirmed'; status.style.color = '#10b981'; }
+        if (btn)    { btn.innerText = '✓ SCANNED'; btn.style.background = '#10b981'; btn.disabled = true; }
+        // Record in the telemetry Map
+        scanConfirmations.set(rowId, true);
+        checkPackerzSopSignoffState();
+    } else {
+        // ❌ Mismatch — flash warning, keep camera open
+        const statusEl = document.getElementById('sopCameraStatus');
+        if (statusEl) {
+            statusEl.innerText = `⚠️ Wrong item — scanned: ${scanned}\nExpected: ${expectedValue}`;
+            statusEl.style.color = '#ef4444';
+            setTimeout(() => {
+                statusEl.innerText = 'Point at the QR code on the bin label...';
+                statusEl.style.color = 'rgba(255,255,255,0.7)';
+            }, 2500);
+        }
+    }
 }
