@@ -181,25 +181,18 @@ function renderBarcodzSpool() {
         window.barcodzSpoolQueue.forEach(item => {
             totalQty += item.qty;
             html += `
-                <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div style="font-size:16px;">${item.icon}</div>
-                        <div style="font-size:8px; font-weight:bold; color:var(--text-muted); background:var(--bg-panel); padding:2px 6px; border-radius:6px; border:1px solid var(--border-color); text-transform:uppercase;">${item.type}</div>
+                <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; display:flex; align-items:center; gap:8px;">
+                    <div style="font-size:16px; flex-shrink:0;">${item.icon}</div>
+                    
+                    <div style="flex-grow:1; min-width:0; overflow:hidden;">
+                        <div style="font-size:11px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
+                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted);">${item.slug}</div>
                     </div>
                     
-                    <div>
-                        <div style="font-size:12px; font-weight:bold; color:var(--text-main); line-height:1.2; margin-bottom:2px;">${item.name}</div>
-                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0;">${item.slug}</div>
-                    </div>
-                    
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:6px;">
-                        <button class="icon-btn" style="color:#ef4444;" onclick="updateSpoolItem('${item.slug}', -999)">🗑️</button>
-                        
-                        <div style="display:flex; align-items:center; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; overflow:hidden;">
-                            <button onclick="updateSpoolItem('${item.slug}', -1)" style="width:24px; height:24px; background:transparent; border:none; cursor:pointer; color:var(--text-main); font-weight:bold;">-</button>
-                            <div style="width:30px; text-align:center; font-size:12px; font-weight:bold; border-left:1px solid var(--border-color); border-right:1px solid var(--border-color); line-height:24px;">${item.qty}</div>
-                            <button onclick="updateSpoolItem('${item.slug}', 1)" style="width:24px; height:24px; background:transparent; border:none; cursor:pointer; color:var(--text-main); font-weight:bold;">+</button>
-                        </div>
+                    <div style="display:flex; align-items:center; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:4px; overflow:hidden; flex-shrink:0;">
+                        <button onclick="updateSpoolItem('${item.slug}', -1)" style="width:20px; height:22px; background:transparent; border:none; cursor:pointer; color:var(--text-main); font-weight:bold; font-size:12px;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='transparent'">-</button>
+                        <div style="width:24px; text-align:center; font-size:11px; font-weight:bold; border-left:1px solid var(--border-color); border-right:1px solid var(--border-color); line-height:22px;">${item.qty}</div>
+                        <button onclick="updateSpoolItem('${item.slug}', 1)" style="width:20px; height:22px; background:transparent; border:none; cursor:pointer; color:var(--text-main); font-weight:bold; font-size:12px;" onmouseover="this.style.background='rgba(16,185,129,0.2)'" onmouseout="this.style.background='transparent'">+</button>
                     </div>
                 </div>
             `;
