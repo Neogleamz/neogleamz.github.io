@@ -101,12 +101,12 @@ function renderBarcodzGrid() {
                         <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">${item.icon}</div>
                         
                         <!-- Type Centered -->
-                        <div style="text-align:center;">
-                            <span style="font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px;">${item.type}</span>
+                        <div style="display:flex; justify-content:center; align-items:center; height:100%;">
+                            <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${item.type}</span>
                         </div>
                         
                         <!-- Button Top Right -->
-                        <button onclick="addBarcodzToSpool('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}', '${item.icon}', '${item.type}')" style="background:var(--primary-color); color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;"><i style="margin-right:2px;">➕</i> Spool</button>
+                        <button onclick="addBarcodzToSpool('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}', '${item.icon}', '${item.type}')" style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                     </div>
                     
                     <!-- Content -->
