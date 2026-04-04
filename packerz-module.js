@@ -330,6 +330,28 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 return text.replace(/\[INPUT\]/gi, `<input type="text" onclick="event.stopPropagation()" class="packerz-qa-input" placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;" onkeyup="checkPackerzSopSignoffState()">`);
             }
             
+            function parseInlineMedia(text) {
+                text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+                    const safe = url.replace(/'/g, "\\'");
+                    return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">📄 View PDF</button>`;
+                });
+                text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+                    const safe = url.replace(/'/g, "\\'");
+                    return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">🎥 Play Video</button>`;
+                });
+                text = text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+                    const safe = url.replace(/'/g, "\\'");
+                    if(url.toLowerCase().endsWith('.pdf')) {
+                       return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">📄 View PDF</button>`;
+                    }
+                    if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) {
+                       return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">🎥 Play Video</button>`;
+                    }
+                    return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
+                });
+                return text;
+            }
+            
             qaChecks.forEach((line) => {
                 let q = line.trim();
                 if(!q) return;
@@ -372,13 +394,13 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     `;
                 } 
                 else if (q.startsWith('# ')) {
-                    let content = parseInputs(q.substring(2).trim());
+                    let content = parseInlineMedia(parseInputs(q.substring(2).trim()));
                     html += `<div style="font-size:13px; font-weight:900; color:#10b981; margin-top:8px; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:2px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap;">${content}</div>`;
                 }
                 else if (q.startsWith('> ')) {
                     let subQ = q.substring(2).trim();
                     let safeSubQ = subQ.replace(/"/g, '&quot;');
-                    let content = parseInputs(subQ);
+                    let content = parseInlineMedia(parseInputs(subQ));
                     html += `
                         <label style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:2px 8px 2px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'">
                             <input type="checkbox" class="packerz-qa-check" data-label="${safeSubQ}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer;" onchange="checkPackerzSopSignoffState()">
@@ -389,7 +411,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 else {
                     if(q.startsWith('- ')) q = q.substring(2).trim();
                     let safeQ = q.replace(/"/g, '&quot;');
-                    let content = parseInputs(q);
+                    let content = parseInlineMedia(parseInputs(q));
                     html += `
                         <label style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); cursor:pointer; padding:4px 8px; margin-bottom:0; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'">
                             <input type="checkbox" class="packerz-qa-check" data-label="${safeQ}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer;" onchange="checkPackerzSopSignoffState()">
@@ -758,12 +780,27 @@ function renderPackerzTelemetryPreview() {
         return text.replace(/\[INPUT\]/gi, `<input type="text" disabled placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;">`);
     }
 
-    // [IMG:url] → clickable inline thumbnail
+    // Advanced universal media parser: intercepts accidental img tags pointing to pdf/mp4 and forces them into native buttons
     function parseImgs(text) {
-        return text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+        text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
             const safe = url.replace(/'/g, "\\'");
-            return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:block;" onclick="openMediaModal('${safe}', 'img')">`;
+            return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`;
         });
+        text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+            const safe = url.replace(/'/g, "\\'");
+            return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`;
+        });
+        text = text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
+            const safe = url.replace(/'/g, "\\'");
+            if(url.toLowerCase().endsWith('.pdf')) {
+               return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`;
+            }
+            if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) {
+               return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`;
+            }
+            return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
+        });
+        return text;
     }
 
     // [BARCODE:value] → SVG placeholder (hydrated after innerHTML set)
