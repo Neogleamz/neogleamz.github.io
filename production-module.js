@@ -1352,3 +1352,32 @@ function renderProductionTelemetryPreview() {
     previewContainer.innerHTML = html;
     processTelemetryCanvasRendering(previewContainer);
 }
+
+let isProductionResizing = false;
+function initProductionSopResize(e) {
+    isProductionResizing = true;
+    document.body.style.cursor = 'ew-resize';
+    document.addEventListener('mousemove', doProductionSopResize);
+    document.addEventListener('mouseup', stopProductionSopResize);
+}
+
+function doProductionSopResize(e) {
+    if(!isProductionResizing) return;
+    const wrapper = document.getElementById('productionSopSplitWrapper');
+    const leftPane = document.getElementById('productionSopLeftPane');
+    if(!wrapper || !leftPane) return;
+    const rect = wrapper.getBoundingClientRect();
+    let newWidth = e.clientX - rect.left - 30;
+    if(newWidth < 300) newWidth = 300;
+    if(newWidth > rect.width - 60 - 300) newWidth = rect.width - 60 - 300;
+    leftPane.style.flex = '0 0 ' + newWidth + 'px';
+}
+
+function stopProductionSopResize() {
+    if(isProductionResizing) {
+        isProductionResizing = false;
+        document.body.style.cursor = 'default';
+        document.removeEventListener('mousemove', doProductionSopResize);
+        document.removeEventListener('mouseup', stopProductionSopResize);
+    }
+}

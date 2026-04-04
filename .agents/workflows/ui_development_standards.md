@@ -273,29 +273,15 @@ function closeMyModal() { document.getElementById('myModal').style.display = 'no
 
 ---
 
-## 11. SOP / Inline Editor Pattern
+## 11. Unified Telemetry SOP Editor Pattern
 
-Used in BATCHEZ and LAYERZ. Step list + inline save footer:
+The universal standard for all SOP Compilation across Hubs relies exclusively on the **Telemetry Split-Pane Architecture** coupled with the proprietary Neogleamz markdown syntax compiler.
 
-```html
-<!-- SOP Step Row -->
-<div class="sop-step-row" style="display:flex; align-items:flex-start; gap:10px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px 12px; margin-bottom:6px;">
-    <div class="sop-step-movers" style="display:flex; flex-direction:column; gap:2px; flex-shrink:0;">
-        <button class="icon-btn" onclick="moveSopStep(i, -1)" style="width:22px; height:22px; font-size:12px;">▲</button>
-        <button class="icon-btn" onclick="moveSopStep(i, 1)" style="width:22px; height:22px; font-size:12px;">▼</button>
-    </div>
-    <span style="font-size:13px; font-weight:700; color:#f59e0b; min-width:24px;">3.</span>
-    <div class="sop-controls-container" style="flex-grow:1; display:flex; flex-direction:column; gap:6px;">
-        <input type="text" value="Step description" style="width:100%; background:var(--bg-input); border:1px solid var(--border-input); border-radius:4px; padding:6px 8px; color:var(--text-main); font-size:13px;">
-    </div>
-    <button class="icon-btn" onclick="deleteSopStep(i)" style="color:#ef4444; flex-shrink:0;">✕</button>
-</div>
-
-<!-- Inline Save Footer (sticky) -->
-<div style="position:sticky; bottom:0; background:var(--bg-container); border-top:1px solid var(--border-color); padding:12px 0; text-align:right; z-index:100;">
-    <button class="btn-green" style="width:auto; padding:10px 28px;" onclick="saveSOP()">💾 Save to Cloud</button>
-</div>
-```
+**Core Rules & Data State:**
+- **No Data Fragmentation:** Never use deep arrays of objects `[{text: "...", m1: {url:"..."}}]` for complex workflow step storage. SOPs must be saved natively into a single global string column leveraging the raw Fulfillz telemetry format: `#`, `>`, `[IMG:url]`, `[VID:]`, `[PDF:]`, `[SCAN:tag]`, `[BARCODE:val]`, `[QR:url]`, and `[INPUT]`. 
+- **Required DOM Architecture:** Layout MUST be a dual split-pane interface. Utilize our standard `.h-resizer` global wrapper pattern.
+- **Workflow State Loop:** User interaction must hook a raw left-pane Text Area `.value` input driving an asynchronous, near-instant HTML parsing loop projected onto a pure right-pane Live Telemetry Output window.
+- **Standardized Headers:** The active modal header MUST utilize `btn-*` styled metadata navigation tags (Audit Log, Bucket Media Injection, Guide Modal).
 
 ---
 
