@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.04.0224"></script>
+    <script src="system-version.js?v=v.2026.04.04.0255"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.04.0224"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0224"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.04.0255"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0255"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.04.0224"></script>
+    <script src="packerz-module.js?v=v.2026.04.04.0255"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1981,7 +1981,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0224"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0255"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2222,6 +2222,10 @@
                             <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
                                 <label style="font-size:11px; font-weight:bold; color:#38bdf8; cursor:pointer;" for="is3dPrintInput">🖨️ 3D Print</label>
                                 <input type="checkbox" id="is3dPrintInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
+                                <label style="font-size:11px; font-weight:bold; color:#10b981; cursor:pointer;" for="isLabelInput">🏷️ Label</label>
+                                <input type="checkbox" id="isLabelInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
                             </div>
                             <div style="display:flex; flex-direction:column; align-items:flex-end;">
                                 <label style="font-size:11px; font-weight:bold; color:#38bdf8;">Print Time (m)</label>
@@ -2637,6 +2641,14 @@
                     <div class="kpi-row"><span>Catalog Entropy</span><strong id="kpiBarcodzCount">Active</strong></div>
                 </div>
             </div>
+            <div class="hub-card" onclick="showFulfillzPane('labelz')">
+                <i style="color: #8b5cf6;">🎨</i>
+                <h2>LABELZ</h2>
+                <p>Custom Label Designer, File Manager &amp; Thermal Print Engine.</p>
+                <div class="hub-kpi-grid">
+                    <div class="kpi-row"><span>Label Designs</span><strong id="kpiLabelzCount">0</strong></div>
+                </div>
+            </div>
         </div>
 
 
@@ -2741,6 +2753,139 @@
             </div>
         </div>
     </div>
+
+        <!-- LABELZ PANE -->
+        <div id="paneFulfillzLabelz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
+            <div class="pane-header-bar">
+                <span class="pane-header-title">LABELZ</span>
+                <div class="pane-header-actions" style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn-green" onclick="openCreateLabelModal()" style="padding:6px 16px; font-size:13px; font-weight:800;">+ NEW LABEL</button>
+                </div>
+            </div>
+
+            <div class="nav-zone left" onclick="showFulfillzPane('barcodz')"><i>‹</i></div>
+            <div class="nav-zone right" onclick="showFulfillzPane('hub')"><i>›</i></div>
+
+            <div class="bom-layout" style="flex-grow:1; min-height:0;">
+                <!-- Sidebar: Spool -->
+                <div id="labelzSidebar" class="bom-sidebar" style="display:flex; flex-direction:column; min-width:280px; width:320px;">
+                    <div style="padding:16px; border-bottom:1px solid var(--border-color); flex-shrink:0;">
+                        <h3 style="margin:0; font-size:14px; color:var(--text-heading); text-transform:uppercase;">🖨️ Print Spooler</h3>
+                        <p style="margin:4px 0 0 0; font-size:10px; color:var(--text-muted);">Add labels to queue, then fire batch print.</p>
+                    </div>
+                    <div id="barcodzSpoolList" style="flex-grow:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                        <div class="empty-state" style="padding:40px 10px; opacity:0.6; text-align:center;">
+                            <div style="font-size:32px; margin-bottom:10px;">🛒</div>
+                            <div style="font-size:12px; color:var(--text-muted);">Spool is empty.<br>Add items from the grid.</div>
+                        </div>
+                    </div>
+                    <div style="padding:16px; border-top:1px solid var(--border-color); flex-shrink:0; display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.2);">
+                        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold; color:var(--text-heading);">
+                            <span>Total Labels:</span>
+                            <span id="spoolTotalCount">0</span>
+                        </div>
+                        <select id="barcodzSizeSelect" class="neo-cache-select" style="width:100%; padding:6px 12px; font-size:12px; font-weight:bold; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px; margin-bottom:4px;">
+                            <option value="2.25x1.25">Dymo 2.25" x 1.25"</option>
+                            <option value="1.125x3.5">Dymo Address 1.125" x 3.5"</option>
+                            <option value="0.75x2">Dymo Return 0.75" x 2"</option>
+                            <option value="2.125x1">Dymo Multi 2.125" x 1"</option>
+                            <option value="1x1">Square 1.0" x 1.0"</option>
+                            <option value="3x1">Standard 3.0" x 1.0"</option>
+                            <option value="4x6">Shipping 4.0" x 6.0"</option>
+                        </select>
+                        <button class="btn-green" onclick="executeBatchPrint()" style="width:100%; padding:12px; font-size:14px;">FIRE PRINT BATCH</button>
+                    </div>
+                </div>
+
+                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+
+                <!-- Main: Label Grid -->
+                <div class="bom-main" style="padding:20px; overflow-y:auto;">
+                    <input type="text" id="labelzSearch" placeholder="🔍 Search Labels..." style="width:100%; padding:10px 14px; font-size:14px; margin-bottom:20px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-panel); color:var(--text-main);" oninput="renderLabelzGrid()">
+                    <div id="labelzGrid">
+                        <div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading label designs...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LABELZ CREATE/EDIT MODAL -->
+        <div id="labelzModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10020; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeLabelzModal()">
+            <div style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(139,92,246,0.4); width:620px; max-width:94vw; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
+                <!-- Header -->
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--bg-bar); border-bottom:2px solid #8b5cf6; flex-shrink:0;">
+                    <div style="font-size:16px; font-weight:900; color:#8b5cf6;" id="labelzModalTitle">+ Create New Label</div>
+                    <button onclick="closeLabelzModal()" class="btn-red" style="width:auto; padding:5px 14px; font-size:13px;">✕ Close</button>
+                </div>
+                <!-- Body -->
+                <div style="padding:24px; overflow-y:auto; display:flex; flex-direction:column; gap:18px;">
+                    <!-- Name + Emoji -->
+                    <div style="display:flex; gap:12px; align-items:flex-end;">
+                        <div style="flex:1;">
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Label Name *</label>
+                            <input type="text" id="labelzProductName" placeholder="e.g. Candle Box Label" style="width:100%; padding:10px; margin-top:4px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:14px; font-weight:bold;">
+                        </div>
+                        <div style="position:relative;">
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Emoji</label>
+                            <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                                <button type="button" onclick="toggleLabelEmojiPicker()" style="font-size:26px; background:var(--bg-bar); border:1px solid var(--border-color); border-radius:8px; padding:6px 12px; cursor:pointer;" id="labelzEmojiDisplay">🏷️</button>
+                                <input type="hidden" id="labelzSelectedEmoji" value="🏷️">
+                            </div>
+                            <!-- Emoji Picker -->
+                            <div id="labelzEmojiPicker" style="display:none; position:absolute; bottom:100%; right:0; background:var(--bg-container); border:1px solid var(--border-color); border-radius:10px; padding:10px; flex-wrap:wrap; gap:6px; width:260px; max-height:180px; overflow-y:auto; z-index:100; box-shadow:0 4px 16px rgba(0,0,0,0.4); margin-bottom:6px;">
+                                🏷️🎁📦🧴💊🍬🎨🧲⚙️🔩🔖📌🔑💎🌟✨🛍️📋🗂️📁💼🧶🧵🖊️🖋️📝🎀🎗️🎫🎟️🔷🔶🟣🟢🔴🟡
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Size -->
+                    <div>
+                        <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Default Label Size</label>
+                        <select id="labelzLabelSize" style="width:100%; padding:10px; margin-top:4px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:13px;">
+                            <option value="2.25x1.25">Dymo 2.25" x 1.25"</option>
+                            <option value="1.125x3.5">Dymo Address 1.125" x 3.5"</option>
+                            <option value="0.75x2">Dymo Return 0.75" x 2"</option>
+                            <option value="2.125x1">Dymo Multi 2.125" x 1"</option>
+                            <option value="3x1">Standard 3.0" x 1.0"</option>
+                            <option value="4x6">Shipping 4.0" x 6.0"</option>
+                            <option value="1x1">Square 1.0" x 1.0"</option>
+                        </select>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div>
+                        <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Upload Existing Label File</label>
+                        <div style="margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+                            <label style="display:flex; align-items:center; gap:10px; background:var(--bg-bar); border:1px dashed var(--border-color); border-radius:8px; padding:12px 16px; cursor:pointer; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='var(--border-color)'">
+                                <span style="font-size:20px;">📎</span>
+                                <div>
+                                    <div style="font-size:13px; font-weight:700; color:var(--text-heading);">Choose file (.jpg, .png, .pdf)</div>
+                                    <div style="font-size:11px; color:var(--text-muted);">This will be stored in Supabase and used for printing</div>
+                                </div>
+                                <input type="file" id="labelzFileInput" accept="image/*,.pdf" style="display:none;" onchange="uploadLabelFile(this.files[0])">
+                            </label>
+                            <div id="labelzFileUploadStatus" style="display:none; font-size:12px; font-weight:700; padding:6px 12px; border-radius:6px; background:rgba(16,185,129,0.1);"></div>
+                            <div id="labelzFilePreview"></div>
+                        </div>
+                    </div>
+
+                    <!-- Layout JSON (advanced) -->
+                    <details style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                        <summary style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; cursor:pointer;">🎨 Advanced: Custom Layout JSON (Optional)</summary>
+                        <div style="margin-top:10px;">
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">Define a structured label layout. Leave blank if using an uploaded file.</div>
+                            <textarea id="labelzLayoutArea" placeholder='{"fields":[{"type":"text","value":"My Label","x":10,"y":10}]}' style="width:100%; min-height:100px; padding:10px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-family:monospace; font-size:12px; resize:vertical;"></textarea>
+                        </div>
+                    </details>
+
+                    <!-- Actions -->
+                    <div style="display:flex; gap:10px; padding-top:8px; border-top:1px solid var(--border-color);">
+                        <button class="btn-green" onclick="saveLabelRecipe()" style="flex:1; padding:12px; font-size:14px; font-weight:900;">💾 SAVE LABEL</button>
+                        <button class="btn-red" style="width:auto; padding:12px 20px;" onclick="if(labelzCurrentEdit)deleteLabelRecipe(labelzCurrentEdit.product_name)">🗑️ DELETE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <!-- NEXUZ -->
     <div id="synchub-tab" class="tab-content" style="padding:0;">
@@ -3458,7 +3603,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.04.0224"></script>
+    <script src="socialz-module.js?v=v.2026.04.04.0255"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4108,15 +4253,17 @@
         if(document.getElementById('paneFulfillzPackerz')) document.getElementById('paneFulfillzPackerz').style.setProperty('display', 'none', 'important');
         if(document.getElementById('paneFulfillzSopAdmin')) document.getElementById('paneFulfillzSopAdmin').style.setProperty('display', 'none', 'important');
         if(document.getElementById('paneFulfillzBarcodz')) document.getElementById('paneFulfillzBarcodz').style.setProperty('display', 'none', 'important');
+        if(document.getElementById('paneFulfillzLabelz')) document.getElementById('paneFulfillzLabelz').style.setProperty('display', 'none', 'important');
         
         if (paneId === 'hub') {
             document.getElementById('fulfillzhubLanding').style.setProperty('display', 'flex', 'important');
         } else {
-            const mapping = { 'packerz': 'paneFulfillzPackerz', 'barcodz': 'paneFulfillzBarcodz' };
+            const mapping = { 'packerz': 'paneFulfillzPackerz', 'barcodz': 'paneFulfillzBarcodz', 'labelz': 'paneFulfillzLabelz' };
             if(mapping[paneId] && document.getElementById(mapping[paneId])) {
                 document.getElementById(mapping[paneId]).style.setProperty('display', 'flex', 'important');
                 if(paneId === 'packerz' && typeof fetchUnfulfilledOrders === 'function') setTimeout(fetchUnfulfilledOrders, 100);
                 if(paneId === 'barcodz' && typeof renderBarcodzGrid === 'function') setTimeout(renderBarcodzGrid, 100);
+                if(paneId === 'labelz' && typeof initLabelzPane === 'function') setTimeout(initLabelzPane, 100);
             }
         }
         sysLog(`Loaded FULFILLZ Console: ${paneId}`);
@@ -4489,15 +4636,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.04.0224"></script>
-<script src="system-tools-module.js?v=v.2026.04.04.0224"></script>
-<script src="bom-module.js?v=v.2026.04.04.0224"></script>
-<script src="inventory-module.js?v=v.2026.04.04.0224"></script>
-<script src="production-module.js?v=v.2026.04.04.0224"></script>
-<script src="sales-module.js?v=v.2026.04.04.0224"></script>
-<script src="analytics-module.js?v=v.2026.04.04.0224"></script>
-<script src="ceo-module.js?v=v.2026.04.04.0224"></script>
-<script src="print-module.js?v=v.2026.04.04.0224"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.04.0255"></script>
+<script src="system-tools-module.js?v=v.2026.04.04.0255"></script>
+<script src="bom-module.js?v=v.2026.04.04.0255"></script>
+<script src="inventory-module.js?v=v.2026.04.04.0255"></script>
+<script src="production-module.js?v=v.2026.04.04.0255"></script>
+<script src="sales-module.js?v=v.2026.04.04.0255"></script>
+<script src="analytics-module.js?v=v.2026.04.04.0255"></script>
+<script src="ceo-module.js?v=v.2026.04.04.0255"></script>
+<script src="print-module.js?v=v.2026.04.04.0255"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4951,13 +5098,14 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.04.0224"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.04.0255"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.04.0224"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.04.0255"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.04.0224"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.04.0255"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.04.0224"></script>
+    <script src="barcodz-module.js?v=v.2026.04.04.0255"></script>
+    <script src="labelz-module.js?v=v.2026.04.04.0255"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>

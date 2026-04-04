@@ -33,10 +33,12 @@ async function updateLaborCosts() {
         laborDB[currentProduct] = { time: t, rate: r };
         pricingDB[currentProduct] = { msrp: m, wholesale: w };
         isSubassemblyDB[currentProduct] = isSub;
+        const isLabel = document.getElementById('isLabelInput')?.checked || false;
         
         if (!productsDB[currentProduct]) productsDB[currentProduct] = [];
         productsDB[currentProduct].is_3d_print = is3d;
         productsDB[currentProduct].print_time_mins = pt;
+        productsDB[currentProduct].is_label = isLabel;
 
         sysLog(`Updating profile for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
         const { error } = await supabaseClient.from('product_recipes').update({ 
@@ -46,7 +48,8 @@ async function updateLaborCosts() {
             wholesale_price: w,
             is_subassembly: isSub,
             is_3d_print: is3d,
-            print_time_mins: pt
+            print_time_mins: pt,
+            is_label: isLabel
         }).eq('product_name', currentProduct);
         
         if (error) throw new Error(error.message);
@@ -82,15 +85,16 @@ function renderProductList() {
 
     if(allProds.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; } 
     let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
+    let labelProds = allProds.filter(p => productsDB[p] && productsDB[p].is_label);
 
     if(!currentProduct && allProds.length > 0) currentProduct = allProds[0]; 
 
-    let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p));
-    let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p));
-    let realPrintProds = printProds;
+    let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let realPrintProds = printProds.filter(p => !labelProds.includes(p));
 
     function buildItem(n) {
-        let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'"); let icon = printProds.includes(n) ? '🖨️' : (isSubassemblyDB[n] ? '⚙️' : '📦');
+        let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'"); let icon = labelProds.includes(n) ? '🏷️' : (printProds.includes(n) ? '🖨️' : (isSubassemblyDB[n] ? '⚙️' : '📦'));
         return `<li class="${sel}" 
             draggable="true" 
             ondragstart="productDragStart(event, '${safeName}')" 
@@ -132,6 +136,12 @@ function renderProductList() {
         html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-3d', this.querySelector('span'))">3D PRINTS <span>▶</span></li>`;
         html += `<div id="cat-3d" style="display:none;">`;
         realPrintProds.forEach(p => html += buildItem(p));
+        html += `</div>`;
+    }
+    if(labelProds.length > 0) {
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:#10b981; font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-labels', this.querySelector('span'))">🏷️ CUSTOM LABELS <span>▶</span></li>`;
+        html += `<div id="cat-labels" style="display:none;">`;
+        labelProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
 
@@ -180,6 +190,7 @@ function renderProductBOM() {
     let p = productsDB[currentProduct]||[]; 
     document.getElementById('is3dPrintInput').checked = !!p.is_3d_print;
     document.getElementById('recipePrintTimeInput').value = p.print_time_mins || 0;
+    if (document.getElementById('isLabelInput')) document.getElementById('isLabelInput').checked = !!p.is_label;
     
     let gt = 0; let wrap = document.getElementById('bomTableWrap');
     

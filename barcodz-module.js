@@ -45,12 +45,25 @@ function buildBarcodzCache() {
         });
     }
     
+    // 3. Gather Custom Labels from label_designs (LABELZ module)
+    if (typeof getLabelzForBarcodz === 'function') {
+        getLabelzForBarcodz().forEach(lbl => {
+            if (!barcodzCache.find(x => x.name === lbl.name)) {
+                barcodzCache.push(lbl);
+            }
+        });
+    }
+    
     // Alphabetical sort by product name
     barcodzCache.sort((a,b) => a.name.localeCompare(b.name));
     
     // Update KPI counter
     const kpi = document.getElementById('kpiBarcodzCount');
     if (kpi) kpi.innerText = barcodzCache.length;
+    
+    // Update LABELZ KPI counter
+    const kpiL = document.getElementById('kpiLabelzCount');
+    if (kpiL) kpiL.innerText = typeof labelzDB !== 'undefined' ? labelzDB.length : 0;
 }
 
 function renderBarcodzGrid() {
