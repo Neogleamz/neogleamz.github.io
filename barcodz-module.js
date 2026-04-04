@@ -106,7 +106,7 @@ function renderBarcodzGrid() {
                         </div>
                         
                         <!-- Button Top Right -->
-                        <button onclick="triggerPrintBarcodz('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}')" style="background:#10b981; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;"><i style="margin-right:2px;">🖨️</i> Print</button>
+                        <button onclick="addBarcodzToSpool('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}', '${item.icon}', '${item.type}')" style="background:var(--primary-color); color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;"><i style="margin-right:2px;">➕</i> Spool</button>
                     </div>
                     
                     <!-- Content -->
@@ -132,142 +132,159 @@ function renderBarcodzGrid() {
 }
 
 // ------------------------------------------------------------
-// THERMAL PRINTING LOGIC
+// THERMAL BATCH PRINT SPOOLER
 // ------------------------------------------------------------
-function triggerPrintBarcodz(itemName, slugCode) {
+
+window.barcodzSpoolQueue = [];
+
+function addBarcodzToSpool(name, slug, icon, type) {
+    let existing = window.barcodzSpoolQueue.find(x => x.slug === slug);
+    if (existing) {
+        existing.qty++;
+    } else {
+        window.barcodzSpoolQueue.push({ name, slug, icon, type, qty: 1 });
+    }
+    renderBarcodzSpool();
+}
+
+function updateSpoolItem(slug, amt) {
+    let existing = window.barcodzSpoolQueue.find(x => x.slug === slug);
+    if (!existing) return;
+    
+    existing.qty += amt;
+    if (existing.qty <= 0) {
+        window.barcodzSpoolQueue = window.barcodzSpoolQueue.filter(x => x.slug !== slug);
+    }
+    renderBarcodzSpool();
+}
+
+function clearBarcodzSpool() {
+    window.barcodzSpoolQueue = [];
+    renderBarcodzSpool();
+}
+
+function renderBarcodzSpool() {
+    const list = document.getElementById('barcodzSpoolList');
+    const counter = document.getElementById('spoolTotalCount');
+    if (!list) return; // not rendered yet
+    
+    let totalQty = 0;
+    
+    if (window.barcodzSpoolQueue.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state" style="padding:40px 10px; opacity:0.6; text-align:center;">
+                <div style="font-size:32px; margin-bottom:10px;">🛒</div>
+                <div style="font-size:12px; color:var(--text-muted);">Spool is empty.<br>Add items from the directory.</div>
+            </div>`;
+    } else {
+        let html = '';
+        window.barcodzSpoolQueue.forEach(item => {
+            totalQty += item.qty;
+            html += `
+                <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div style="font-size:16px;">${item.icon}</div>
+                        <div style="font-size:8px; font-weight:bold; color:var(--text-muted); background:var(--bg-panel); padding:2px 6px; border-radius:6px; border:1px solid var(--border-color); text-transform:uppercase;">${item.type}</div>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size:12px; font-weight:bold; color:var(--text-main); line-height:1.2; margin-bottom:2px;">${item.name}</div>
+                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0;">${item.slug}</div>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:6px;">
+                        <button class="icon-btn" style="color:#ef4444;" onclick="updateSpoolItem('${item.slug}', -999)">🗑️</button>
+                        
+                        <div style="display:flex; align-items:center; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; overflow:hidden;">
+                            <button onclick="updateSpoolItem('${item.slug}', -1)" style="width:24px; height:24px; background:transparent; border:none; cursor:pointer; color:var(--text-main); font-weight:bold;">-</button>
+                            <div style="width:30px; text-align:center; font-size:12px; font-weight:bold; border-left:1px solid var(--border-color); border-right:1px solid var(--border-color); line-height:24px;">${item.qty}</div>
+                            <button onclick="updateSpoolItem('${item.slug}', 1)" style="width:24px; height:24px; background:transparent; border:none; cursor:pointer; color:var(--text-main); font-weight:bold;">+</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+    }
+    
+    if (counter) counter.innerText = totalQty;
+}
+
+function executeBatchPrint() {
+    if (window.barcodzSpoolQueue.length === 0) return alert("Print Spool is empty!");
+    
     const sizeSelect = document.getElementById('barcodzSizeSelect')?.value || '2.25x1.25';
     const printArea = document.getElementById('printableBarcodeArea');
     if (!printArea) return alert("Printable area missing from DOM.");
     
-    // Clear area
+    // Clear Area
     printArea.innerHTML = '';
     
-    // Generate Layout wrapper based on size
-    const wrapper = document.createElement('div');
-    
-    if (sizeSelect === '2.25x1.25') {
-        // Typical Dymo 30334 (2.25" x 1.25") or generic equivalent
-        wrapper.style.cssText = `
-            width: 2.25in;
-            height: 1.25in;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            box-sizing: border-box;
-            padding: 0.05in;
-            overflow: hidden;
-            background: white;
-            color: black;
-            font-family: sans-serif;
-            page-break-after: always;
-        `;
-        
-        // Truncate name if it's too insanely long for the top margin
-        const shortName = itemName.length > 28 ? itemName.substring(0, 26) + '...' : itemName;
-        
-        wrapper.innerHTML = `
-            <div style="font-size:8pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>
-            <svg id="print-bc-svg" style="width:100%; height:0.8in;"></svg>
-        `;
-    } 
-    else if (sizeSelect === '1x1') {
-        // Very small square QR
-        wrapper.style.cssText = `
-            width: 1in;
-            height: 1in;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            box-sizing: border-box;
-            padding: 0.02in;
-            overflow: hidden;
-            background: white;
-            color: black;
-            font-family: sans-serif;
-            page-break-after: always;
-        `;
-        // Instead of 1D barcode which is too long, we generate a QR code for square labels
-        wrapper.innerHTML = `
-            <canvas id="print-bc-qr" style="width:0.75in; height:0.75in;"></canvas>
-            <div style="font-size:5pt; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${itemName}</div>
-        `;
-    }
-    else if (sizeSelect === '3x1') {
-        // Standard wide address/inventory label
-        wrapper.style.cssText = `
-            width: 3in;
-            height: 1in;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            box-sizing: border-box;
-            padding: 0.1in;
-            overflow: hidden;
-            background: white;
-            color: black;
-            font-family: sans-serif;
-            page-break-after: always;
-        `;
-        
-        wrapper.innerHTML = `
-            <div style="font-size:10pt; font-weight:900; line-height:1; margin-bottom:4px;">${itemName}</div>
-            <svg id="print-bc-svg" style="width:100%; height:0.6in;"></svg>
-        `;
-    }
-    else {
-        // A4 Dump
-        wrapper.style.cssText = `
-            width: 100%;
-            height: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 20px;
-            background: white;
-            color: black;
-        `;
-        wrapper.innerHTML = `
-            <div style="font-size:18px; font-weight:bold; margin-bottom:10px;">${itemName}</div>
-            <svg id="print-bc-svg" style="max-width:300px; height:100px; padding:10px; border:1px dashed #ccc;"></svg>
-        `;
-    }
+    let totalInjected = 0;
 
-    printArea.appendChild(wrapper);
+    // Loop through each queued SKU
+    window.barcodzSpoolQueue.forEach(item => {
+        
+        // Loop for the requested Quantity
+        for (let i = 0; i < item.qty; i++) {
+        
+            const wrapper = document.createElement('div');
+            // Give specific IDs to JSBarcode hook correctly
+            const svgId = `print-bc-${item.slug}-${i}`;
+            
+            if (sizeSelect === '2.25x1.25') {
+                wrapper.style.cssText = `width: 2.25in; height: 1.25in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
+                const shortName = item.name.length > 28 ? item.name.substring(0, 26) + '...' : item.name;
+                wrapper.innerHTML = `<div style="font-size:8pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.8in;"></svg>`;
+            } 
+            else if (sizeSelect === '1x1') {
+                wrapper.style.cssText = `width: 1in; height: 1in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.02in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
+                wrapper.innerHTML = `<canvas id="${svgId}" style="width:0.75in; height:0.75in;"></canvas><div style="font-size:5pt; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${item.name}</div>`;
+            }
+            else if (sizeSelect === '3x1') {
+                wrapper.style.cssText = `width: 3in; height: 1in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.1in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
+                wrapper.innerHTML = `<div style="font-size:10pt; font-weight:900; line-height:1; margin-bottom:4px;">${item.name}</div><svg id="${svgId}" style="width:100%; height:0.6in;"></svg>`;
+            }
+            else {
+                wrapper.style.cssText = `width: 100%; height: auto; display: flex; flex-direction: column; align-items: flex-start; padding: 20px; background: white; color: black;`;
+                wrapper.innerHTML = `<div style="font-size:18px; font-weight:bold; margin-bottom:10px;">${item.name}</div><svg id="${svgId}" style="max-width:300px; height:100px; padding:10px; border:1px dashed #ccc;"></svg>`;
+            }
 
-    // Apply Code-128 via jsBarcode if needed
-    if (sizeSelect !== '1x1') {
-        if (typeof JsBarcode !== 'undefined') {
-            JsBarcode("#print-bc-svg", slugCode, {
-                format: "code128",
-                lineColor: "#000",
-                width: 2,
-                height: 40,
-                displayValue: true,
-                fontSize: 12,
-                margin: 0
-            });
+            printArea.appendChild(wrapper);
+
+            // Execute SVG Generation Inline immediately on the appended node
+            if (sizeSelect !== '1x1') {
+                if (typeof JsBarcode !== 'undefined') {
+                    JsBarcode(`#${svgId}`, item.slug, {
+                        format: "code128",
+                        lineColor: "#000",
+                        width: 2,
+                        height: 40,
+                        displayValue: true,
+                        fontSize: 12,
+                        margin: 0
+                    });
+                }
+            } else {
+                if (typeof QRCode !== 'undefined') {
+                    QRCode.toCanvas(document.getElementById(svgId), item.slug, { margin: 1, width: 80 }, function (err) { if(err) console.error(err); });
+                }
+            }
+            
+            totalInjected++;
         }
-    } else {
-        // Apply QR Core
-        if (typeof QRCode !== 'undefined') {
-            QRCode.toCanvas(document.getElementById('print-bc-qr'), slugCode, { margin: 1, width: 80 }, function (err) {
-                if(err) console.error(err);
-            });
-        }
-    }
+    });
+
+    if (totalInjected === 0) return;
 
     // Force browser print overlay async so engines can run
     setTimeout(() => {
         window.print();
         setTimeout(() => {
             printArea.innerHTML = '';
-        }, 1000); // cleanup
+            // Auto Clear Queue as defined in standard operating logic
+            clearBarcodzSpool();
+        }, 1500); // cleanup delay allowing OS to snapshot
     }, 200);
 }
 
