@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.1945"></script>
+    <script src="system-version.js?v=v.2026.04.03.1951"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1945"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1945"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1951"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1951"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.1945"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.1951"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -285,47 +285,44 @@
 
         /* ============================================================
          * .pane-header-bar — GLOBAL STANDARD for all executive pane headers.
-         * Single flex row: title left, optional actions right.
+         * ZERO visual identity as a separate bar: transparent bg, no border.
+         * Title + buttons sit at the top edge of content with minimal padding.
          * Uses clamp() throughout — no fixed px heights ever.
-         * Template:
-         *   <div class="pane-header-bar">
-         *     <span class="pane-header-title">PAGENAME</span>
-         *     <div class="pane-header-actions"> ...buttons... </div>
-         *   </div>
          * ============================================================ */
         .pane-header-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: clamp(8px, 1.5vw, 20px);
-            padding: clamp(8px, 1.2vh, 14px) clamp(16px, 2.5vw, 30px);
-            border-bottom: 1px solid var(--border-color);
-            background: var(--bg-glass);
+            padding: clamp(6px, 0.8vh, 10px) clamp(16px, 2.5vw, 30px) clamp(4px, 0.5vh, 8px);
+            background: transparent;
+            border-bottom: none;
             flex-shrink: 0;
             position: relative;
             z-index: 10;
         }
         .pane-header-title {
-            font-size: clamp(13px, 1.3vw, 20px);
+            font-size: clamp(11px, 1.0vw, 15px);
             font-weight: 900;
             color: #FF8C00;
             text-transform: uppercase;
-            letter-spacing: clamp(2px, 0.4vw, 5px);
-            text-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+            letter-spacing: clamp(2px, 0.3vw, 4px);
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.25);
             white-space: nowrap;
             flex-shrink: 0;
         }
         .pane-header-actions {
             display: flex;
             align-items: center;
-            gap: clamp(6px, 1vw, 12px);
+            gap: clamp(4px, 0.8vw, 10px);
             flex-wrap: wrap;
             justify-content: flex-end;
         }
         .pane-header-actions button {
             width: auto !important;
-            padding: clamp(5px, 0.6vh, 8px) clamp(10px, 1.2vw, 18px);
-            font-size: clamp(11px, 0.9vw, 13px);
+            padding: clamp(3px, 0.4vh, 5px) clamp(8px, 0.9vw, 13px);
+            font-size: clamp(10px, 0.75vw, 12px);
+            font-weight: 700;
         }
 
         /* Full-Page Margin Navigation Zones */
@@ -454,7 +451,7 @@
             height: 100%;
             width: 100%;
             border-top: 1px solid var(--border-color);
-            padding-top: 15px;
+            padding-top: clamp(6px, 0.8vh, 10px);
             flex-grow: 1;
             min-height: 0;
             overflow: hidden;
@@ -488,6 +485,12 @@
             border-radius: 8px; 
             padding: 20px; 
             box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        /* Compress top padding inside panes — title already provides top context */
+        .executive-pane .bom-main,
+        .executive-pane [class^="bom-main"],
+        .executive-pane .bom-layout .bom-main {
+            padding-top: clamp(6px, 0.8vh, 10px) !important;
         }
         .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; flex-grow: 1; overflow-y: auto; }
         
@@ -1949,7 +1952,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1945"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1951"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -3288,7 +3291,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.1945"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.1951"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4248,15 +4251,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.1945"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.1945"></script>
-<script src="bom-module.js?v=v.2026.04.03.1945"></script>
-<script src="inventory-module.js?v=v.2026.04.03.1945"></script>
-<script src="production-module.js?v=v.2026.04.03.1945"></script>
-<script src="sales-module.js?v=v.2026.04.03.1945"></script>
-<script src="analytics-module.js?v=v.2026.04.03.1945"></script>
-<script src="ceo-module.js?v=v.2026.04.03.1945"></script>
-<script src="print-module.js?v=v.2026.04.03.1945"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.1951"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.1951"></script>
+<script src="bom-module.js?v=v.2026.04.03.1951"></script>
+<script src="inventory-module.js?v=v.2026.04.03.1951"></script>
+<script src="production-module.js?v=v.2026.04.03.1951"></script>
+<script src="sales-module.js?v=v.2026.04.03.1951"></script>
+<script src="analytics-module.js?v=v.2026.04.03.1951"></script>
+<script src="ceo-module.js?v=v.2026.04.03.1951"></script>
+<script src="print-module.js?v=v.2026.04.03.1951"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
