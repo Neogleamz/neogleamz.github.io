@@ -479,11 +479,16 @@ window.doNeoSidebarResize = function(e) {
     if (!sidebar || !activeWrapper) return;
     
     const rect = activeWrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left;
+    const paddingLeft = parseFloat(window.getComputedStyle(activeWrapper).paddingLeft) || 0;
+    let newWidth = e.clientX - rect.left - paddingLeft;
     
     if (newWidth < 280) newWidth = 280;
     if (newWidth > rect.width - 250) newWidth = rect.width - 250; // Dynamic guard against crushing the right pane
-    if (newWidth > 700) newWidth = 700; // Absolute max guard
+    
+    // Absolute max guard only applies to standard BOM sidebars, not 50/50 Kanbans
+    if (activeWrapper.classList.contains('bom-layout')) {
+        if (newWidth > 700) newWidth = 700; 
+    }
     
     // Aggressive CSS math overrides
     sidebar.style.width = newWidth + 'px';
