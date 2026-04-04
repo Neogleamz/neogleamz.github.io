@@ -372,3 +372,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// ------------------------------------------------------------
+// SIDEBAR RESIZER LOGIC
+// ------------------------------------------------------------
+
+function initBarcodzResize(e) {
+    if(e) e.preventDefault();
+    document.addEventListener('mousemove', handleBarcodzResize, true);
+    document.addEventListener('mouseup', stopBarcodzResize, true);
+}
+
+function handleBarcodzResize(e) {
+    const sidebar = document.getElementById('barcodzSidebar');
+    if (!sidebar) return;
+    
+    // Default left pane boundary is approx 80px due to outmost module nav tab
+    const moduleNavOffset = 80;
+    let newWidth = e.clientX - moduleNavOffset;
+    
+    if (newWidth < 280) newWidth = 280;
+    if (newWidth > 640) newWidth = 640;
+    
+    sidebar.style.width = newWidth + 'px';
+    sidebar.style.minWidth = newWidth + 'px';
+}
+
+function stopBarcodzResize(e) {
+    document.removeEventListener('mousemove', handleBarcodzResize, true);
+    document.removeEventListener('mouseup', stopBarcodzResize, true);
+}
