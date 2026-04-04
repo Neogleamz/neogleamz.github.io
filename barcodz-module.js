@@ -253,6 +253,8 @@ function executeBatchPrint() {
     if (window.barcodzSpoolQueue.length === 0) return alert("Print Spool is empty!");
     
     const sizeSelect = document.getElementById('barcodzSizeSelect')?.value || '2.25x1.25';
+    const typeSelect = (document.getElementById('barcodzTypeSelect')?.value || 'CODE128');
+    const isQR = typeSelect === 'QR';
     const printArea = document.getElementById('printableBarcodeArea');
     if (!printArea) return alert("Printable area missing from DOM.");
     
@@ -324,11 +326,18 @@ function executeBatchPrint() {
 
             printArea.appendChild(wrapper);
 
-            // Execute SVG Generation Inline immediately on the appended node
-            if (sizeSelect !== '1x1') {
+            // Execute barcode rendering based on selected type
+            if (isQR) {
+                // QR Code — always render to canvas regardless of size
+                const canvas = document.getElementById(svgId);
+                if (canvas && typeof QRCode !== 'undefined') {
+                    const qrSize = sizeSelect === '4x6' ? 280 : sizeSelect === '1x1' ? 80 : 120;
+                    QRCode.toCanvas(canvas, item.slug, { margin: 1, width: qrSize }, function(err) { if(err) console.error(err); });
+                }
+            } else if (sizeSelect !== '1x1') {
                 if (typeof JsBarcode !== 'undefined') {
                     JsBarcode(`#${svgId}`, item.slug, {
-                        format: "code128",
+                        format: typeSelect,
                         lineColor: "#000",
                         width: 2,
                         height: 40,
@@ -338,6 +347,7 @@ function executeBatchPrint() {
                     });
                 }
             } else {
+                // 1x1 size default = QR
                 if (typeof QRCode !== 'undefined') {
                     QRCode.toCanvas(document.getElementById(svgId), item.slug, { margin: 1, width: 80 }, function (err) { if(err) console.error(err); });
                 }

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.04.0215"></script>
+    <script src="system-version.js?v=v.2026.04.04.0224"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.04.0215"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0215"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.04.0224"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0224"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.04.0215"></script>
+    <script src="packerz-module.js?v=v.2026.04.04.0224"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1981,7 +1981,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0215"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.04.0224"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2689,7 +2689,19 @@
                         <option value="4x6">Shipping 4.0" x 6.0"</option>
                         <option value="A4">A4 Sheet List</option>
                     </select>
+                    <select id="barcodzTypeSelect" class="neo-cache-select" style="width:auto; padding:6px 12px; font-size:12px; font-weight:bold; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;" title="Barcode format — all options are phone-scannable">
+                        <option value="CODE128">CODE 128 — Universal 1D ⭐</option>
+                        <option value="QR">QR Code — 2D Square 📷</option>
+                        <option value="CODE39">CODE 39 — Alphanumeric 1D</option>
+                        <option value="EAN13">EAN-13 — Retail 13-digit</option>
+                        <option value="UPCA">UPC-A — Retail US 12-digit</option>
+                        <option value="UPCE">UPC-E — Compact Retail</option>
+                        <option value="ITF14">ITF-14 — Shipping Carton</option>
+                        <option value="MSI">MSI — Warehouse/Inventory</option>
+                        <option value="codabar">Codabar — Medical/Library</option>
+                    </select>
                 </div>
+
             </div>
             
             <div class="nav-zone left" onclick="showFulfillzPane('packerz')"><i>‹</i></div>
@@ -3446,7 +3458,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.04.0215"></script>
+    <script src="socialz-module.js?v=v.2026.04.04.0224"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4477,15 +4489,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.04.0215"></script>
-<script src="system-tools-module.js?v=v.2026.04.04.0215"></script>
-<script src="bom-module.js?v=v.2026.04.04.0215"></script>
-<script src="inventory-module.js?v=v.2026.04.04.0215"></script>
-<script src="production-module.js?v=v.2026.04.04.0215"></script>
-<script src="sales-module.js?v=v.2026.04.04.0215"></script>
-<script src="analytics-module.js?v=v.2026.04.04.0215"></script>
-<script src="ceo-module.js?v=v.2026.04.04.0215"></script>
-<script src="print-module.js?v=v.2026.04.04.0215"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.04.0224"></script>
+<script src="system-tools-module.js?v=v.2026.04.04.0224"></script>
+<script src="bom-module.js?v=v.2026.04.04.0224"></script>
+<script src="inventory-module.js?v=v.2026.04.04.0224"></script>
+<script src="production-module.js?v=v.2026.04.04.0224"></script>
+<script src="sales-module.js?v=v.2026.04.04.0224"></script>
+<script src="analytics-module.js?v=v.2026.04.04.0224"></script>
+<script src="ceo-module.js?v=v.2026.04.04.0224"></script>
+<script src="print-module.js?v=v.2026.04.04.0224"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4939,13 +4951,13 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.04.0215"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.04.0224"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.04.0215"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.04.0224"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.04.0215"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.04.0224"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.04.0215"></script>
+    <script src="barcodz-module.js?v=v.2026.04.04.0224"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>
