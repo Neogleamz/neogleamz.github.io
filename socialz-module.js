@@ -155,9 +155,9 @@
             const sortedStyles = Array.from(uniqueStyles).sort();
             if (styleList) {
                 styleList.innerHTML = sortedStyles.map(st => `
-                    <label class="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md cursor-pointer transition-colors">
-                        <input type="checkbox" class="w-3.5 h-3.5 accent-brand rounded border-slate-300" ${selectedStyles.includes(st) ? 'checked' : ''} onchange="handleStyleToggle('${st}')">
-                        <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">${st}</span>
+                    <label style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; background:transparent;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} onchange="handleStyleToggle('${st}')">
+                        <span style="font-size:12px; color:var(--text-main); font-weight:600; user-select:none;">${st}</span>
                     </label>
                 `).join('');
             }
@@ -175,13 +175,14 @@
 
         function toggleMultiSelect(type) {
             const panel = document.getElementById(`${type}-options-panel`);
-            panel.classList.toggle('hidden');
+            const isHidden = panel.style.display === 'none' || panel.style.display === '';
+            panel.style.display = isHidden ? 'block' : 'none';
         }
 
         window.addEventListener('click', function(e) {
             const container = document.getElementById('multi-select-style-container');
             const panel = document.getElementById('style-options-panel');
-            if (container && !container.contains(e.target)) { panel.classList.add('hidden'); }
+            if (container && !container.contains(e.target)) { panel.style.display = 'none'; }
         });
 
         function handleStyleToggle(style) {
@@ -320,7 +321,7 @@
                             <div class="flex-1 flex justify-end">
                                 <button onclick="editSkater(${originalIndex})" class="text-xs font-bold text-brand hover:text-orange-400 flex items-center gap-1 shrink-0 ml-2"><i class="fa-solid fa-pen"></i> EDIT</button>
                             </div>
-                        </div></div><div class="mt-auto bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto custom-scrollbar">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
+                        </div></div><div class="mt-auto bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
                     } else {
                         // COMPACT LIST VIEW
                         return `

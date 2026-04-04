@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.0543"></script>
+    <script src="system-version.js?v=v.2026.04.03.2008"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.0543"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0543"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2008"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2008"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.0543"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.2008"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -268,20 +268,64 @@
 
         .top-controls { flex: 1 1 350px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
         
+        /* ============================================================
+         * .pane-title — DEPRECATED for layout use.
+         * Kept as a standalone style token only.
+         * Use .pane-header-title inside .pane-header-bar instead.
+         * ============================================================ */
         .pane-title {
+            font-size: clamp(14px, 1.5vw, 22px);
+            font-weight: 900;
+            color: #FF8C00;
+            text-transform: uppercase;
+            letter-spacing: clamp(2px, 0.4vw, 5px);
+            text-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+            pointer-events: none;
+        }
+
+        /* ============================================================
+         * .pane-header-bar — GLOBAL STANDARD for all executive pane headers.
+         * ZERO visual identity as a separate bar: transparent bg, no border.
+         * Title + buttons sit at the top edge of content with minimal padding.
+         * Uses clamp() throughout — no fixed px heights ever.
+         * ============================================================ */
+        .pane-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: clamp(8px, 1.5vw, 20px);
+            padding: clamp(6px, 0.8vh, 10px) clamp(16px, 2.5vw, 30px) clamp(4px, 0.5vh, 8px);
+            background: transparent;
+            border-bottom: none;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .pane-header-title {
             position: absolute;
-            top: 5px; /* Moved up slightly */
             left: 50%;
             transform: translateX(-50%);
-            font-size: 22px; /* Slightly larger */
+            font-size: clamp(11px, 1.0vw, 15px);
             font-weight: 900;
-            color: #FF8C00; /* Signature Vibrant Orange */
+            color: #FF8C00;
             text-transform: uppercase;
-            letter-spacing: 5px; /* Increased executive spacing */
+            letter-spacing: clamp(2px, 0.3vw, 4px);
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.25);
+            white-space: nowrap;
             pointer-events: none;
-            opacity: 1; /* Full visibility */
-            z-index: 50;
-            text-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+        }
+        .pane-header-actions {
+            display: flex;
+            align-items: center;
+            gap: clamp(4px, 0.8vw, 10px);
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .pane-header-actions button {
+            width: auto !important;
+            padding: clamp(3px, 0.4vh, 5px) clamp(8px, 0.9vw, 13px);
+            font-size: clamp(10px, 0.75vw, 12px);
+            font-weight: 700;
         }
 
         /* Full-Page Margin Navigation Zones */
@@ -391,7 +435,7 @@
             flex-direction: column;
             height: 100%;
             width: 100%;
-            padding: 20px 20px 10px 20px;
+            padding: 0; /* Padding owned by .pane-header-bar */
             box-sizing: border-box;
             overflow: hidden;
             position: relative;
@@ -410,7 +454,7 @@
             height: 100%;
             width: 100%;
             border-top: 1px solid var(--border-color);
-            padding-top: 15px;
+            padding-top: clamp(6px, 0.8vh, 10px);
             flex-grow: 1;
             min-height: 0;
             overflow: hidden;
@@ -445,6 +489,12 @@
             padding: 20px; 
             box-shadow: 0 2px 4px var(--shadow-color);
         }
+        /* Compress top padding inside panes — title already provides top context */
+        .executive-pane .bom-main,
+        .executive-pane [class^="bom-main"],
+        .executive-pane .bom-layout .bom-main {
+            padding-top: clamp(6px, 0.8vh, 10px) !important;
+        }
         .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; flex-grow: 1; overflow-y: auto; }
         
         #analyticsContent, #ceoContent, #paneSalezBridge .table-wrap {
@@ -470,7 +520,7 @@
         .v-resizer {
             height: 10px;
             margin: 5px 0;
-            background: rgba(249, 115, 22, 0.05); /* Very subtle orange */
+            background: rgba(45, 212, 191, 0.05); /* Teal — matches Kanban divider */
             cursor: row-resize;
             border-radius: 5px;
             display: flex;
@@ -482,41 +532,55 @@
             flex-shrink: 0;
         }
         .v-resizer:hover, .v-resizer.dragging {
-            background: rgba(249, 115, 22, 0.3);
-            box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+            background: rgba(45, 212, 191, 0.25);
+            box-shadow: 0 0 10px rgba(45, 212, 191, 0.3);
         }
         .v-resizer::after {
             content: "";
             width: 40px;
             height: 4px;
-            background: rgba(249, 115, 22, 0.4);
+            background: rgba(45, 212, 191, 0.6);
             border-radius: 2px;
         }
         
+        /* ============================================================
+         * .h-resizer — GLOBAL STANDARD for all split-pane dividers.
+         * Color: Teal #2dd4bf (matches Kanban card accent).
+         * Icon:  3-dot drag indicator via ::after pseudo-element.
+         * Usage: Apply class="h-resizer" + onmousedown handler.
+         * DO NOT add local inline scrollbar or border overrides.
+         * ============================================================ */
         .h-resizer {
-            width: 10px;
-            margin: 0 5px;
-            background: rgba(249, 115, 22, 0.05); /* Very subtle orange */
+            width: 12px;
+            margin: 0;
+            background: rgba(45, 212, 191, 0.08);
             cursor: col-resize;
-            border-radius: 5px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
             position: relative;
             z-index: 50;
             flex-shrink: 0;
         }
         .h-resizer:hover, .h-resizer.dragging {
-            background: rgba(249, 115, 22, 0.3);
-            box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+            background: rgba(45, 212, 191, 0.25);
+            box-shadow: 0 0 12px rgba(45, 212, 191, 0.35);
         }
+        /* The center drag-indicator dots */
         .h-resizer::after {
-            content: "";
-            height: 40px;
-            width: 4px;
-            background: rgba(249, 115, 22, 0.4);
-            border-radius: 2px;
+            content: "⋮";
+            color: rgba(45, 212, 191, 0.7);
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .h-resizer:hover::after {
+            color: #2dd4bf;
+            text-shadow: 0 0 8px rgba(45, 212, 191, 0.8);
         }
         
         .table-wrap { overflow-x: auto; overflow-y: auto; flex-grow: 1; min-height: 0; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); }
@@ -863,13 +927,20 @@
             .hub-container { padding: 10px !important; gap: 10px !important; margin-bottom: 10px !important; }
         }
     
-        /* Custom Scrollbar */
+        /* =================================================================
+         * GLOBAL SCROLLBAR FRAMEWORK — Single Authority Definition.
+         * Width: 8px. Color: Teal (#2dd4bf) idle, Orange on hover.
+         * This block is the ONLY scrollbar definition in the codebase.
+         * DO NOT add ::-webkit-scrollbar rules anywhere else.
+         * ================================================================= */
+        * { scrollbar-width: thin; scrollbar-color: rgba(45, 212, 191, 0.4) transparent; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        .dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-thumb { background: rgba(45, 212, 191, 0.45); border-radius: 10px; transition: background 0.2s ease; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(247, 147, 32, 0.85); }
+        .dark * { scrollbar-color: rgba(45, 212, 191, 0.35) transparent; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(45, 212, 191, 0.35); }
+        .dark ::-webkit-scrollbar-thumb:hover { background: rgba(247, 147, 32, 0.85); }
 
         /* Smooth Transitions */
         .transition-all-300 { transition: all 0.3s ease-in-out; }
@@ -889,9 +960,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-
-        /* Multi-select styling */
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
         /* Prevent select background color changes on focus/hover in some browsers */
         select:focus option {
@@ -1205,14 +1273,6 @@
     /* Legacy overrides purged - Tailwind Polyfill engine dominates */
     
     
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        .dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
         /* Smooth Transitions */
         .transition-all-300 { transition: all 0.3s ease-in-out; }
         
@@ -1231,9 +1291,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-
-        /* Multi-select styling */
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
         /* Prevent select background color changes on focus/hover in some browsers */
         select:focus option {
@@ -1547,14 +1604,6 @@
     /* Legacy overrides purged - Tailwind Polyfill engine dominates */
     
     
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        .dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
         /* Smooth Transitions */
         .transition-all-300 { transition: all 0.3s ease-in-out; }
         
@@ -1573,9 +1622,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-
-        /* Multi-select styling */
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
         /* Prevent select background color changes on focus/hover in some browsers */
         select:focus option {
@@ -1888,13 +1934,7 @@
     
     /* Legacy overrides purged - Tailwind Polyfill engine dominates */
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    .dark ::-webkit-scrollbar-thumb { background: #334155; }
-    .dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    /* Global Scrollbars preserved in master block above */
 
     /* Smooth Transitions */
     .transition-all-300 { transition: all 0.3s ease-in-out; }
@@ -1907,7 +1947,6 @@
     .toast-enter { animation: slideIn 0.3s ease-out forwards; }
 
     /* Multi-select styling */
-    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 
     /* Prevent select background color changes on focus/hover in some browsers */
     select:focus option {
@@ -1916,7 +1955,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.0543"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2008"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2016,7 +2055,9 @@
 
         <!-- Detailed Panez -->
         <div id="panePipeline" class="executive-pane">
-            <div class="pane-title">DATAZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">DATAZ</span>
+            </div>
             <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             
@@ -2029,7 +2070,9 @@
         </div>
 
         <div id="paneSimple" class="executive-pane">
-            <div class="pane-title">EDITZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">EDITZ</span>
+            </div>
             <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
             
@@ -2060,16 +2103,18 @@
         </div>
 
         <div id="paneInventory" class="executive-pane">
-            <div class="pane-title">STOCKZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">STOCKZ</span>
+                <div class="pane-header-actions">
+                    <button class="btn-red" onclick="resetInventoryConsumption()">⚠️ Reset Stock Levels</button>
+                    <button class="btn-blue" onclick="printReorderReport()">🖨️ Low Stockz Report</button>
+                </div>
+            </div>
             <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showInventoryPane('pipeline')"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main" style="padding:20px;">
-                    <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:flex-end;">
-                        <button class="btn-red" style="width:auto; padding:8px 15px; font-size:12px;" onclick="resetInventoryConsumption()">⚠️ Reset Stock Levels</button>
-                        <button class="btn-blue" style="width:auto; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="printReorderReport()">🖨️ Low Stockz Report</button>
-                    </div>
                     <div id="invSummary" class="control-panel" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;"></div>
                     <div class="stockz-split-container" style="display: flex; flex-direction: row; flex-grow: 1; min-height: 0; width: 100%; gap: 15px;">
                         <div class="table-wrap" id="fgiTableWrap" style="flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative;"></div>
@@ -2123,7 +2168,9 @@
 
         <!-- Detailed Panez -->
         <div id="paneProdBuilder" class="executive-pane">
-            <div class="pane-title">RECIPEZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">RECIPEZ</span>
+            </div>
             <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
             
@@ -2186,7 +2233,9 @@
         </div>
 
         <div id="paneProdControl" class="executive-pane">
-            <div class="pane-title">BATCHEZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">BATCHEZ</span>
+            </div>
             <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
             
@@ -2272,7 +2321,9 @@
         </div>
 
         <div id="paneProdPrint" class="executive-pane">
-            <div class="pane-title">LAYERZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">LAYERZ</span>
+            </div>
             <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
             
@@ -2401,7 +2452,9 @@
 
         <!-- Detailed Panez -->
         <div id="paneSalezBridge" class="executive-pane">
-            <div class="pane-title">ORDERZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">ORDERZ</span>
+            </div>
             <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
             
@@ -2414,7 +2467,9 @@
         </div>
 
             <div id="paneSalezAnalyticz" class="executive-pane">
-                <div class="pane-title">STATZ</div>
+                <div class="pane-header-bar">
+                    <span class="pane-header-title">STATZ</span>
+                </div>
                 <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
                 <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
                 
@@ -2467,7 +2522,9 @@
                 </div>
             </div>
         <div id="paneSalezCommandz" class="executive-pane">
-            <div class="pane-title">SIMULATORZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">SIMULATORZ</span>
+            </div>
             <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
             <!-- Contents of CEO Terminal -->
@@ -2527,7 +2584,7 @@
     </div> <!-- End of sales-tab -->
 
         <!-- FULFILLZ -->
-    <div id="fulfillzhub-tab" class="tab-content">
+    <div id="fulfillzhub-tab" class="tab-content" style="padding:0;">
         <div id="fulfillzhubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showFulfillzPane('packerz')">
                 <i style="color: #F59E0B;">📦</i>
@@ -2541,29 +2598,22 @@
 
         </div>
 
-        <style>
-            @media (max-width: 900px) {
-                .packerz-header-bar { flex-direction: column !important; padding: 15px !important; gap: 15px !important; }
-                .packerz-header-btns { position: static !important; right: auto !important; width: 100% !important; justify-content: center !important; }
-                .packerz-kanban-wrapper { flex-direction: column !important; height: auto !important; overflow-y: auto !important; padding: 15px !important; flex-grow:0 !important; }
-                .packerz-kanban-col { flex: none !important; height: 65vh !important; }
-            }
-        </style>
+
         <div id="paneFulfillzPackerz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
 
-            <div class="packerz-header-bar" style="display:flex; justify-content:center; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 1px solid var(--border-color); position:relative;">
-                <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#F59E0B; text-align:center;">📦 PACKERZ TERMINAL</h2>
-                <div class="packerz-header-btns" style="position:absolute; right:30px; display:flex; gap:10px;">
-                    <button onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='#fff'" onmouseout="this.style.background='rgba(59,130,246,0.1)'; this.style.color='#3b82f6'">⚙️ BLUEPRINTS</button>
-                    <button onclick="document.getElementById('packerzArchiveModal').style.display='flex';" style="padding:10px 20px; border-radius:8px; font-size:13px; font-weight:900; letter-spacing:1px; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.color='#10b981'">🗃️ COMPLETED ARCHIVE</button>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">📦 PACKERZ TERMINAL</span>
+                <div class="pane-header-actions">
+                    <button class="btn-blue" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';">⚙️ BLUEPRINTS</button>
+                    <button class="btn-green" onclick="document.getElementById('packerzArchiveModal').style.display='flex';">🗃️ COMPLETED ARCHIVE</button>
                 </div>
             </div>
             
-            <div class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:30px; gap:25px; height: calc(100vh - 250px); overflow:hidden;">
+            <div class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:clamp(8px,1.2vh,16px) clamp(12px,1.5vw,20px); gap:clamp(12px,1.5vw,20px); overflow:hidden;">
                 <!-- Column 1: AWAITING -->
                 <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:var(--text-muted); border-bottom:2px solid var(--border-color); padding-bottom:12px;">AWAITING ASSEMBLY</h3>
-                    <div id="packerzAwaitingQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
+                    <div id="packerzAwaitingQueue" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <!-- JS INJECT -->
                     </div>
                 </div>
@@ -2571,7 +2621,7 @@
                 <!-- Column 2: IN PROGRESS -->
                 <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(245,158,11,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(245,158,11,0.05);">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.3); padding-bottom:12px;">IN PROGRESS (PICK & PACK)</h3>
-                    <div id="packerzActiveQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
+                    <div id="packerzActiveQueue" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to open the SOP terminal.</div>
                     </div>
                 </div>
@@ -2622,7 +2672,9 @@
 
         <!-- Detailed Panez -->
         <div id="paneNexuzImportz" class="executive-pane">
-            <div class="pane-title">IMPORTZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">IMPORTZ</span>
+            </div>
             <div class="nav-zone left" onclick="showNexuzPane('brainz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showNexuzPane('salez')"><i>›</i></div>
             
@@ -2659,7 +2711,9 @@
         </div>
 
         <div id="paneNexuzSalez" class="executive-pane">
-            <div class="pane-title">SALEZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">SALEZ</span>
+            </div>
             <div class="nav-zone left" onclick="showNexuzPane('importz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showNexuzPane('brainz')"><i>›</i></div>
             
@@ -2700,7 +2754,9 @@
         </div>
 
         <div id="paneNexuzBrainz" class="executive-pane">
-            <div class="pane-title">BRAINZ</div>
+            <div class="pane-header-bar">
+                <span class="pane-header-title">BRAINZ</span>
+            </div>
             <div class="nav-zone left" onclick="showNexuzPane('salez')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showNexuzPane('importz')"><i>›</i></div>
             
@@ -2740,26 +2796,15 @@
     <!-- SOCIALZ HUBZ -->
     <!-- ========================================== -->
     <div id="socialzhub-tab" class="tab-content" style="padding:0;">
-        <div id="paneSocialzRoster" class="executive-pane" style="display:none; padding: 15px 20px 20px 20px; position:relative;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; width: 100%;">
-                <div class="pane-title" style="position: relative; top: 0; left: 0; margin: 0; padding-top: 5px;">SOCIALZ AUDIENCE</div>
-                <div class="action-toolbar flex gap-2">
-                    <button onclick="openAnalyticsDashboard()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple"></i> <span >Analytics</span>
-                    </button>
-
-                    <button onclick="document.getElementById('csv-input').click()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-file-import"></i> <span >Import</span>
-                    </button>
-                    <input type="file" id="csv-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleCSVImport(this)">
-
-                    <button onclick="exportCSV()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-file-export"></i> <span >Export</span>
-                    </button>
-
-                    <button onclick="openModal()" class="bg-brand hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg shadow-orange-500/20 transition-all transform hover:scale-105 flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> <span >Add Skater</span>
-                    </button>
+        <div id="paneSocialzRoster" class="executive-pane" style="display:none;">
+            <div class="pane-header-bar">
+                <span class="pane-header-title">SOCIALZ AUDIENCE</span>
+                <div class="pane-header-actions">
+                    <button onclick="openAnalyticsDashboard()" class="btn-blue"><i class="fa-solid fa-chart-simple"></i> Analytics</button>
+                    <button onclick="document.getElementById('csv-input').click()" class="btn-blue" style="background:#475569; border-color:#475569;"><i class="fa-solid fa-file-import"></i> Import</button>
+                    <input type="file" id="csv-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleCSVImport(this)" style="display:none;">
+                    <button onclick="exportCSV()" class="btn-blue" style="background:#475569; border-color:#475569;"><i class="fa-solid fa-file-export"></i> Export</button>
+                    <button onclick="openModal()" class="btn-orange"><i class="fa-solid fa-plus"></i> Add Skater</button>
                 </div>
             </div>
             
@@ -2835,15 +2880,15 @@
                 </div>
 
                 <!-- Multi-select Filter: Style -->
-                <div class="relative" id="multi-select-style-container">
-                    <i class="fa-solid fa-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs z-10"></i>
-                    <button onclick="toggleMultiSelect('style')" id="style-multi-btn" class="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-left text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand flex justify-between items-center overflow-hidden">
-                        <span id="style-btn-text" class="truncate">All Styles</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                <div class="relative" id="multi-select-style-container" style="position:relative;">
+                    <i class="fa-solid fa-tag" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:11px; z-index:10; pointer-events:none;"></i>
+                    <button onclick="toggleMultiSelect('style')" id="style-multi-btn" style="width:100%; padding:6px 28px 6px 28px; background:var(--bg-input); border:1px solid var(--border-input); border-radius:6px; text-align:left; font-size:11px; color:var(--text-main); cursor:pointer; display:flex; justify-content:space-between; align-items:center; overflow:hidden; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-input)'">
+                        <span id="style-btn-text" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">All Styles</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size:9px; color:var(--text-muted); flex-shrink:0; margin-left:4px;"></i>
                     </button>
                     <!-- Options Panel -->
-                    <div id="style-options-panel" class="hidden absolute top-full left-0 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
-                        <div id="style-options-list" class="p-2 space-y-1">
+                    <div id="style-options-panel" style="display:none; position:absolute; top:calc(100% + 4px); left:0; width:100%; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:500; max-height:220px; overflow-y:auto;">
+                        <div id="style-options-list" style="padding:6px; display:flex; flex-direction:column; gap:2px;">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
@@ -3242,7 +3287,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.0543"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.2008"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3260,7 +3305,7 @@
             <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('packerzArchiveModal').style.display='none'">Close</button>
         </div>
         <div style="padding:25px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden;">
-            <div id="packerzCompletedQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
+            <div id="packerzCompletedQueue" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
                 <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
             </div>
         </div>
@@ -3311,22 +3356,22 @@
                     <!-- Column 2: Live Preview Render -->
                     <div style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                         <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">Live Telemetry Preview</div>
-                        <div id="packerzAdminQAPreview" class="custom-scroll" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
+                        <div id="packerzAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
                             <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Resizer Divider -->
-                <div id="packerzSopResizer" style="width:12px; cursor:ew-resize; background:var(--border-color); flex-shrink:0; transition:background 0.2s; z-index:10; border-left:1px solid var(--border-input); border-right:1px solid var(--border-input);" onmousedown="initPackerzSopResize(event)" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='var(--border-color)'"></div>
+                <!-- Resizer Divider — uses global .h-resizer standard -->
+                <div id="packerzSopResizer" class="h-resizer" onmousedown="initPackerzSopResize(event)"></div>
 
                 <!-- Right Pane: Rich Text -->
-                <div id="packerzSopRightPane" style="flex:1; padding-left:20px; display:flex; flex-direction:column; overflow-y:auto;">
-                    <div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;" class="custom-scroll">
+                <div id="packerzSopRightPane" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto;">
+                    <div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">4. Packing Instructions (Rich Text)</h3>
                         </div>
-                        <div id="packerzSopEditorArea" class="custom-scroll" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
+                        <div id="packerzSopEditorArea" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
                             <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the top bar to begin compiling standard operating procedures.</div>
                         </div>
                         <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" onclick="addPackerzSOPRow(this)">+ ADD PROCEDURE STEP</button>
@@ -4202,15 +4247,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.0543"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.0543"></script>
-<script src="bom-module.js?v=v.2026.04.03.0543"></script>
-<script src="inventory-module.js?v=v.2026.04.03.0543"></script>
-<script src="production-module.js?v=v.2026.04.03.0543"></script>
-<script src="sales-module.js?v=v.2026.04.03.0543"></script>
-<script src="analytics-module.js?v=v.2026.04.03.0543"></script>
-<script src="ceo-module.js?v=v.2026.04.03.0543"></script>
-<script src="print-module.js?v=v.2026.04.03.0543"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.2008"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.2008"></script>
+<script src="bom-module.js?v=v.2026.04.03.2008"></script>
+<script src="inventory-module.js?v=v.2026.04.03.2008"></script>
+<script src="production-module.js?v=v.2026.04.03.2008"></script>
+<script src="sales-module.js?v=v.2026.04.03.2008"></script>
+<script src="analytics-module.js?v=v.2026.04.03.2008"></script>
+<script src="ceo-module.js?v=v.2026.04.03.2008"></script>
+<script src="print-module.js?v=v.2026.04.03.2008"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4321,7 +4366,7 @@
             
             <!-- Left Pane (SWAPPED to QA Checklist & Completion) -->
             <div id="packerzLiveSopLeftPane" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container);">
-                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;" class="custom-scroll">
+                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
                     <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
                     <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;">
                         <!-- Auto-Generated Checkboxes Go Here -->
@@ -4335,11 +4380,11 @@
                 </div>
             </div>
 
-            <!-- Resizer Divider -->
-            <div id="packerzLiveSopResizer" style="width:12px; cursor:ew-resize; background:var(--border-color); flex-shrink:0; transition:background 0.2s; z-index:10; border-left:1px solid var(--border-input); border-right:1px solid var(--border-input);" onmousedown="initPackerzLiveSopResize(event)" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='var(--border-color)'"></div>
+            <!-- Resizer Divider — uses global .h-resizer standard -->
+            <div id="packerzLiveSopResizer" class="h-resizer" onmousedown="initPackerzLiveSopResize(event)"></div>
 
             <!-- Right Pane (SWAPPED to Procedure Steps) -->
-            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;" class="custom-scroll">
+            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
                 <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
             </div>
 

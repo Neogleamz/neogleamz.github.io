@@ -1,0 +1,334 @@
+---
+description: Mandatory UI Design and Layout Protocol for Neogleamz Web Platform
+---
+
+# Neogleamz UI Development Standards
+
+> **Living Document.** These standards exist to enforce uniformity and prevent technical debt — not to block modernization. If a better pattern, technology, or aesthetic emerges, update this document and migrate the existing codebase to match. The rule is: *do it everywhere or don't do it anywhere.* Standards evolve; fragmentation doesn't.
+
+**⛔ ENFORCEMENT:** Every new hub, module, page, or component MUST follow the current version of this document. If you intentionally supersede a pattern, update the relevant section and file a migration note. Partial adoption of a new pattern is a critical failure — it creates the very inconsistency this doc exists to prevent.
+
+---
+
+## 1. Global CSS Variable Strictness
+
+*   **No Hardcoded Hex Colors for Backgrounds/Text.** Use the token system:
+    *   `var(--bg-body)` · `var(--bg-glass)` · `var(--bg-panel)` · `var(--bg-input)` · `var(--bg-container)` · `var(--bg-bar)`
+    *   `var(--border-color)` · `var(--border-input)`
+    *   `var(--text-heading)` · `var(--text-main)` · `var(--text-muted)`
+    *   `var(--primary-color)` · `var(--secondary-color)` · `var(--shadow-color)` · `var(--glass-shadow)`
+*   **Branding hex is allowed only for:** buttons, badges, icons, chart elements — where explicit colors provide UI meaning.
+
+---
+
+## 2. Structural & Layout Mandates
+
+*   **Flexbox or Grid for all layout.**
+*   **No hardcoded `px` for layout sizing.** Use fluid units: `clamp(min, preferred, max)`, `%`, `vw`, `vh`, `fr`.
+*   Fixed `px` only for: icon sizes, border widths (1px, 2px), badge heights.
+*   **No Tailwind CSS utility classes in HTML** — the project does not load Tailwind. Use the design system CSS classes or inline styles with `var(--*)` tokens. Tailwind-styled code will break silently.
+
+---
+
+## 3. Scrollbar & Overflow Governance
+
+*   **Never declare `::-webkit-scrollbar` locally.** The global definition in `index.html` is the only authority.
+*   Width: `8px` · Thumb: `rgba(45,212,191,0.45)` idle → `rgba(247,147,32,0.85)` hover
+*   Use `overflow-y: auto` on scrollable containers to inherit the global scrollbar automatically.
+*   **Purge `custom-scroll` / `custom-scrollbar` classes** — deprecated and removed.
+
+---
+
+## 4. Resizer Dividers
+
+*   All split-pane drag dividers **must** use `class="h-resizer"` (or `v-resizer`).
+*   No inline styles, no local color overrides, no JS `onmouseover` hover hacks on resizers.
+*   Color: Teal `#2dd4bf` · Drag handle: `⋮` via CSS `::after`.
+
+```html
+<div id="my-resizer" class="h-resizer"></div>
+```
+
+---
+
+## 5. Pane Header Bar (Mandatory for ALL Executive Panes)
+
+Every `executive-pane` must have a `.pane-header-bar` as its **first child**. Title must be centered. Action buttons (if any) go in `.pane-header-actions`.
+
+```html
+<!-- Title only -->
+<div class="executive-pane">
+    <div class="pane-header-bar">
+        <span class="pane-header-title">PAGENAME</span>
+    </div>
+    <div class="nav-zone left" onclick="..."><i>‹</i></div>
+    <div class="nav-zone right" onclick="..."><i>›</i></div>
+    <div class="bom-layout" style="flex-grow:1; min-height:0;">
+        <div class="bom-main" style="padding:20px;">
+            ...content...
+        </div>
+    </div>
+</div>
+
+<!-- With action buttons -->
+<div class="executive-pane">
+    <div class="pane-header-bar">
+        <span class="pane-header-title">PAGENAME</span>
+        <div class="pane-header-actions">
+            <button class="btn-blue">⚙️ ACTION</button>
+            <button class="btn-red">⚠️ DANGER</button>
+        </div>
+    </div>
+    ...
+</div>
+```
+
+**Rules:**
+- Title is `position:absolute; left:50%; transform:translateX(-50%)` — centered regardless of buttons
+- `pane-header-bar` is transparent (no background, no border) — content starts immediately below
+- Never add a fixed height or `min-height` to `.pane-header-bar`
+- Never create a separate button row div below the header bar
+
+---
+
+## 6. Standard Button Classes
+
+| Class | Color | Use Case |
+|---|---|---|
+| `btn-blue` | Blue `#3b82f6` | Primary action, navigation, neutral action |
+| `btn-green` | Green `#10b981` | Confirm, save, create, archive |
+| `btn-red` | Red `#ef4444` | Destructive, reset, delete, danger |
+| `btn-orange` / `btn-brand` | Orange `#FF8C00` | Primary brand CTA, Add actions |
+| `icon-btn` | Muted | Small circular icon-only button |
+
+```html
+<button class="btn-blue">Save</button>
+<button class="btn-red" style="width:auto; padding:6px 14px;">Delete</button>
+<button class="icon-btn" title="Edit">✏️</button>
+```
+
+---
+
+## 7. Dropdown / Select Standard
+
+**RULE: Never use `<select multiple>` for multi-select UIs.** Use the custom panel pattern below.
+
+### Standard Single Select
+```html
+<div style="position:relative;">
+    <i class="fa-solid fa-icon" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:11px; pointer-events:none;"></i>
+    <select onchange="myHandler(this.value)" style="width:100%; padding:6px 28px; background:var(--bg-input); border:1px solid var(--border-input); border-radius:6px; font-size:12px; color:var(--text-main); cursor:pointer; appearance:none;">
+        <option value="">All Items</option>
+    </select>
+    <i class="fa-solid fa-chevron-down" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:9px; pointer-events:none;"></i>
+</div>
+```
+
+### Standard Multi-Select (Custom Panel)
+The pattern used in Socialz "All Styles" — a trigger button + absolutely-positioned panel containing styled checkbox labels. Toggle via `display:none/block`, **never via Tailwind `.hidden`**.
+
+```html
+<!-- HTML -->
+<div style="position:relative;" id="my-ms-container">
+    <i class="fa-solid fa-tag" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:11px; z-index:10; pointer-events:none;"></i>
+    <button onclick="toggleMsPanel('my')" id="my-ms-btn"
+        style="width:100%; padding:6px 28px; background:var(--bg-input); border:1px solid var(--border-input); border-radius:6px; text-align:left; font-size:11px; color:var(--text-main); cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+        <span id="my-ms-text">All Items</span>
+        <i class="fa-solid fa-chevron-down" style="font-size:9px; color:var(--text-muted);"></i>
+    </button>
+    <div id="my-ms-panel" style="display:none; position:absolute; top:calc(100% + 4px); left:0; width:100%; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:500; max-height:220px; overflow-y:auto;">
+        <div id="my-ms-list" style="padding:6px; display:flex; flex-direction:column; gap:2px;">
+            <!-- Inject via JS -->
+        </div>
+    </div>
+</div>
+```
+
+```javascript
+// JS — render items, toggle, click-outside
+function renderMyMsItems(items) {
+    const list = document.getElementById('my-ms-list');
+    list.innerHTML = items.map(item => `
+        <label style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
+            <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer;" ${selected.includes(item) ? 'checked' : ''} onchange="handleMyToggle('${item}')">
+            <span style="font-size:12px; color:var(--text-main); font-weight:600;">${item}</span>
+        </label>
+    `).join('');
+}
+function toggleMsPanel(id) {
+    const p = document.getElementById(`${id}-ms-panel`);
+    p.style.display = (p.style.display === 'none' || !p.style.display) ? 'block' : 'none';
+}
+window.addEventListener('click', e => {
+    const c = document.getElementById('my-ms-container');
+    const p = document.getElementById('my-ms-panel');
+    if (c && !c.contains(e.target)) p.style.display = 'none';
+});
+```
+
+---
+
+## 8. Hub / Page Structure
+
+Every hub tab must follow this nesting pattern:
+
+```html
+<div id="myhub-tab" class="tab-content" style="padding:0;">
+    <!-- Landing (shown when no pane is active) -->
+    <div id="myHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
+        <div class="hub-card" onclick="showMyPane('pane1')">
+            <i>🔧</i>
+            <h2>SECTION NAME</h2>
+            <p>Short description.</p>
+            <div class="hub-kpi-grid">
+                <div class="kpi-row"><span>KPI Label</span><strong id="statMyKpi">--</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pane (shown when drilling in) -->
+    <div id="paneMySection" class="executive-pane">
+        <div class="pane-header-bar">
+            <span class="pane-header-title">SECTION NAME</span>
+            <div class="pane-header-actions">
+                <!-- optional buttons -->
+            </div>
+        </div>
+        <div class="nav-zone left" onclick="showMyPane('prev')"><i>‹</i></div>
+        <div class="nav-zone right" onclick="showMyPane('next')"><i>›</i></div>
+        <div class="bom-layout" style="flex-grow:1; min-height:0;">
+            <div class="bom-main" style="padding:20px;">
+                <!-- content -->
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+---
+
+## 9. Kanban Card
+
+Used in Packerz. All cards must match this structure:
+
+```html
+<div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:10px; cursor:pointer; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+    <!-- Card Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong style="font-size:13px; color:var(--text-heading);">ORDER #1234</strong>
+        <span class="status-badge st-queued">Awaiting</span>
+    </div>
+    <!-- Card Body -->
+    <div style="font-size:12px; color:var(--text-muted); display:flex; flex-direction:column; gap:4px;">
+        <span>1x Product Name</span>
+    </div>
+    <!-- Card Footer -->
+    <div style="font-size:11px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:8px;">
+        📅 Due: 2026-04-15
+    </div>
+</div>
+```
+
+**Status badge classes:** `st-queued` · `st-active` · `st-completed` · `st-failed`
+
+---
+
+## 10. Modal / Popup Windows
+
+All modals must use `.modal-overlay`. Never use raw `position:fixed` without this class.
+
+```html
+<div id="myModal" class="modal-overlay">
+    <div style="background:var(--bg-glass); border:1px solid var(--border-color); border-radius:16px; padding:clamp(20px,3vw,40px); width:clamp(320px,90vw,700px); max-height:90vh; overflow-y:auto; display:flex; flex-direction:column; gap:20px; position:relative;">
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+            <h3 style="margin:0; font-size:clamp(14px,1.3vw,18px); color:var(--text-heading); text-transform:uppercase; letter-spacing:2px;">Modal Title</h3>
+            <button class="icon-btn" onclick="closeMyModal()">✕</button>
+        </div>
+        <!-- Body -->
+        <div style="flex-grow:1;">
+            <!-- content -->
+        </div>
+        <!-- Footer -->
+        <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border-color); padding-top:12px;">
+            <button class="btn-blue" onclick="submitMyModal()">Confirm</button>
+            <button class="btn-red" style="background:transparent;" onclick="closeMyModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+```
+
+```javascript
+function openMyModal() { document.getElementById('myModal').style.display = 'flex'; }
+function closeMyModal() { document.getElementById('myModal').style.display = 'none'; }
+```
+
+---
+
+## 11. SOP / Inline Editor Pattern
+
+Used in BATCHEZ and LAYERZ. Step list + inline save footer:
+
+```html
+<!-- SOP Step Row -->
+<div class="sop-step-row" style="display:flex; align-items:flex-start; gap:10px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px 12px; margin-bottom:6px;">
+    <div class="sop-step-movers" style="display:flex; flex-direction:column; gap:2px; flex-shrink:0;">
+        <button class="icon-btn" onclick="moveSopStep(i, -1)" style="width:22px; height:22px; font-size:12px;">▲</button>
+        <button class="icon-btn" onclick="moveSopStep(i, 1)" style="width:22px; height:22px; font-size:12px;">▼</button>
+    </div>
+    <span style="font-size:13px; font-weight:700; color:#f59e0b; min-width:24px;">3.</span>
+    <div class="sop-controls-container" style="flex-grow:1; display:flex; flex-direction:column; gap:6px;">
+        <input type="text" value="Step description" style="width:100%; background:var(--bg-input); border:1px solid var(--border-input); border-radius:4px; padding:6px 8px; color:var(--text-main); font-size:13px;">
+    </div>
+    <button class="icon-btn" onclick="deleteSopStep(i)" style="color:#ef4444; flex-shrink:0;">✕</button>
+</div>
+
+<!-- Inline Save Footer (sticky) -->
+<div style="position:sticky; bottom:0; background:var(--bg-container); border-top:1px solid var(--border-color); padding:12px 0; text-align:right; z-index:100;">
+    <button class="btn-green" style="width:auto; padding:10px 28px;" onclick="saveSOP()">💾 Save to Cloud</button>
+</div>
+```
+
+---
+
+## 12. Standard Utility Classes Reference
+
+| Class | Purpose |
+|---|---|
+| `.pane-header-bar` | Executive pane header (flex row, transparent bg) |
+| `.pane-header-title` | Orange centered pane title |
+| `.pane-header-actions` | Right-aligned button group in header |
+| `.h-resizer` | Horizontal split-pane drag divider (teal) |
+| `.modal-overlay` | Fixed full-screen glassmorphic modal backdrop |
+| `.btn-blue` `.btn-green` `.btn-red` `.btn-orange` | Standard colored action buttons |
+| `.icon-btn` | Small circular icon-only button |
+| `.empty-state` | Centered empty table/data state message |
+| `.section-hdr` | Orange uppercase section label within pane content |
+| `.bom-layout` | Two-column layout (sidebar + main) inside panes |
+| `.bom-sidebar` | Left sidebar within bom-layout |
+| `.bom-main` | Main content area within bom-layout |
+| `.product-list` | Styled `<ul>` list for sidebar item navigation |
+| `.product-list li.selected` | Active/selected item in sidebar list |
+| `.status-badge` | Pill badge; add `.st-queued` `.st-active` `.st-completed` `.st-failed` |
+| `.hub-card` | Landing page hub entry card |
+| `.kpi-row` | Single KPI row inside a hub-card |
+| `.panel-card` | Interior content card with border-left accent |
+| `.table-wrap` | Scrollable table container |
+
+---
+
+## 13. New Hub / Module Checklist
+
+Before committing any new hub, page, or module:
+
+- [ ] `tab-content` div has `style="padding:0;"`
+- [ ] Hub panes use `.pane-header-bar` + `.pane-header-title` (centered title)
+- [ ] All split-pane dividers use `.h-resizer` or `.v-resizer`
+- [ ] No `custom-scroll` or local `::-webkit-scrollbar` declarations
+- [ ] No hardcoded `px` heights on layout containers
+- [ ] No Tailwind CSS utility classes anywhere
+- [ ] All toggle/show/hide uses `element.style.display` — not `.classList.toggle('hidden')`
+- [ ] Button colors use `btn-*` classes — no inline JS hover hacks
+- [ ] All backgrounds/text use `var(--*)` tokens
+- [ ] New modals use `.modal-overlay` class
+- [ ] Multi-select dropdowns use custom panel pattern (Section 7), not `<select multiple>`

@@ -662,7 +662,7 @@ function openPackerzAuditLog(sku, telemetryJsonString) {
                     <button class="icon-btn" onclick="document.getElementById('packerzAuditOverlay').remove()" style="color:var(--text-muted); font-size:16px; font-weight:bold; border:1px solid var(--border-color);">✕</button>
                 </div>
                 <div style="font-size:11px; margin-bottom:15px; color:var(--text-muted); font-family:monospace;">Item ID: ${sku}</div>
-                <div style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:5px;" class="custom-scroll">
+                <div style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:5px;">
     `;
     
     data.forEach(d => {
