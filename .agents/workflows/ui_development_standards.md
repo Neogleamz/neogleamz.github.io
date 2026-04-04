@@ -194,8 +194,8 @@ Every hub tab must follow this nesting pattern:
                 <!-- optional buttons -->
             </div>
         </div>
-        <div class="nav-zone left" onclick="showMyPane('prev')"><i>‹</i></div>
-        <div class="nav-zone right" onclick="showMyPane('next')"><i>›</i></div>
+        <div class="nav-zone left" onclick="showMyPane('prevSubPane')"><i>‹</i></div>
+        <div class="nav-zone right" onclick="showMyPane('nextSubPane')"><i>›</i></div>
         <div class="bom-layout" style="flex-grow:1; min-height:0;">
             <div class="bom-main" style="padding:20px;">
                 <!-- content -->
@@ -203,6 +203,8 @@ Every hub tab must follow this nesting pattern:
         </div>
     </div>
 </div>
+
+**Navigation Rule:** The `.nav-zone` left/right arrows MUST be used exclusively to cycle laterally between identical-level sub-panes inside the active Hub. They MUST NOT be used to return to the root Hub landing page. (Returning to the hub landing page is handled automatically by clicking the main Hub tab icon in the global top header, e.g., the 'FULFILLZ' button).
 ```
 
 ---
