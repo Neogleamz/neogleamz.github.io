@@ -13,7 +13,7 @@ let labelzCurrentEdit = null;
 // Fabric Canvas Instance Variables
 let fCanvas = null;
 let currentZoom = 1;
-const PPI = 96; // Standard web pixels per inch
+const PPI = 300; // High-res internal pixels per inch for crisp printing/scaling
 
 // Template Definitions
 const labelzTemplates = {
@@ -109,7 +109,17 @@ function initFabricCanvas() {
     fCanvas.on('selection:created', onCanvasSelection);
     fCanvas.on('selection:updated', onCanvasSelection);
     fCanvas.on('selection:cleared', onCanvasSelectionCleared);
-    fCanvas.on('object:modified', () => fCanvas.renderAll());
+    
+    // Live update the properties panel when an object is being dragged or resized
+    const updateProps = (e) => onCanvasSelection(e);
+    fCanvas.on('object:moving', updateProps);
+    fCanvas.on('object:scaling', updateProps);
+    fCanvas.on('object:rotating', updateProps);
+    
+    fCanvas.on('object:modified', (e) => {
+        fCanvas.renderAll();
+        onCanvasSelection(e);
+    });
 }
 
 function parseSize(sizeStr) {
@@ -542,13 +552,12 @@ function openCreateLabelModal() {
     document.getElementById('labelzDesignerName').value = '';
     assignLabelzDesignerEmoji('🏷️');
     
+    document.getElementById('labelzDesignerModal').style.display = 'flex';
     document.getElementById('labelzDesignerSize').value = '2.25x1.25';
     updateLabelCanvasSize();
     fCanvas.clear();
     fCanvas.backgroundColor = '#ffffff';
     document.getElementById('labelzBgColor').value = '#ffffff';
-    
-    document.getElementById('labelzDesignerModal').style.display = 'flex';
 }
 
 function openEditLabelModal(name) {
@@ -560,6 +569,7 @@ function openEditLabelModal(name) {
     document.getElementById('labelzDesignerName').value = name;
     assignLabelzDesignerEmoji(l.emoji || '🏷️');
     
+    document.getElementById('labelzDesignerModal').style.display = 'flex';
     document.getElementById('labelzDesignerSize').value = l.label_size || '2.25x1.25';
     updateLabelCanvasSize();
     
