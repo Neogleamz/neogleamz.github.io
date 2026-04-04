@@ -37,7 +37,7 @@ function buildBarcodzCache() {
                     name: labelName,
                     slug: getItemBarcodeValue(labelName),
                     type: 'Raw Material',
-                    icon: "🧵",
+                    icon: "📦",
                     desc: c.spec !== '(Mixed Specs)' ? c.spec : '',
                     isCatalog: true
                 });
@@ -71,26 +71,62 @@ function renderBarcodzGrid() {
         return;
     }
     
+    // Group items by Type
+    const grouped = {};
+    filtered.forEach(item => {
+        if(!grouped[item.type]) grouped[item.type] = [];
+        grouped[item.type].push(item);
+    });
+    
+    const typeOrder = ['Retail Product', 'Sub-Assembly', '3D Print', 'Raw Material'];
+    const groupsToRender = Object.keys(grouped).sort((a,b) => typeOrder.indexOf(a) - typeOrder.indexOf(b));
+
     let html = '';
-    filtered.forEach((item, idx) => {
+    groupsToRender.forEach(type => {
         html += `
-            <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                <div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                        <div style="font-size:20px;">${item.icon}</div>
-                        <div style="font-size:9px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 8px; border-radius:12px; text-transform:uppercase;">${item.type}</div>
+        <details open style="margin-bottom:20px; background:rgba(0,0,0,0.1); border-radius:12px; border:1px solid var(--border-color); grid-column: 1 / -1;">
+            <summary style="padding:14px 20px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; color:var(--text-heading); list-style:none; display:flex; align-items:center; border-bottom:1px solid var(--border-color); background:var(--bg-panel); border-radius:12px 12px 0 0;">
+                <span style="font-size:18px; margin-right:10px;">${grouped[type][0].icon}</span> 
+                ${type}s <span style="margin-left:10px; background:var(--bg-input); padding:2px 8px; border-radius:12px; font-size:10px; color:var(--text-muted);">${grouped[type].length}</span>
+            </summary>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; padding:16px;">
+        `;
+        
+        grouped[type].forEach(item => {
+            html += `
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                    
+                    <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
+                        <!-- Emoji Top Left -->
+                        <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">${item.icon}</div>
+                        
+                        <!-- Type Centered -->
+                        <div style="text-align:center;">
+                            <span style="font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px;">${item.type}</span>
+                        </div>
+                        
+                        <!-- Button Top Right -->
+                        <button onclick="triggerPrintBarcodz('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}')" style="background:#10b981; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;"><i style="margin-right:2px;">🖨️</i> Print</button>
                     </div>
-                    <div style="font-size:14px; font-weight:900; color:var(--text-heading); margin-bottom:4px; line-height:1.3;">${item.name}</div>
-                    <div style="font-size:10px; font-family:monospace; color:var(--text-muted); background:var(--bg-input); padding:4px; border-radius:4px; word-break:break-all;">${item.slug}</div>
-                    ${item.desc ? `<div style="font-size:11px; color:var(--text-muted); margin-top:6px; font-style:italic;">${item.desc}</div>` : ''}
+                    
+                    <!-- Content -->
+                    <div style="padding-top:4px; border-top:1px solid var(--border-color);">
+                        <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word;">${item.name}</div>
+                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0; word-break:break-all;">${item.slug}</div>
+                        ${item.desc ? `<div style="font-size:10px; color:var(--text-muted); margin-top:2px; font-style:italic; line-height:1.2;">${item.desc}</div>` : ''}
+                    </div>
                 </div>
-                
-                <div style="margin-top:16px; display:flex; gap:8px;">
-                    <button onclick="triggerPrintBarcodz('${item.name}', '${item.slug}')" style="background:#10b981; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer; flex:1; transition:0.2s;"><i style="margin-right:4px;">🖨️</i> Print Label</button>
-                </div>
+            `;
+        });
+        
+        html += `
             </div>
+        </details>
         `;
     });
+    
+    // We remove the static CSS grid on `barcodzGrid` since we pushed it down into the details elements
+    grid.style.display = 'block';
     
     grid.innerHTML = html;
 }

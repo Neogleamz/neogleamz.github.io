@@ -460,3 +460,16 @@ When delegating tasks, you can rely on the following built-in OS capabilities:
 2. **Supabase CLI:** I can interface with Supabase locally using `npx supabase` commands to manage edge functions, database pushing/pulling, and schema verification.
 3. **AST Parsers:** I use Abstract Syntax Tree and semantic search tools locally to identify UI standards and module patterns.
 4. **Command Constraints:** I am bound by strict "avoid raw bash" system rules when dedicated tools (like `multi_replace_file_content`) exist to prevent race conditions. If you see repetitive thought-logs about tool selection in the UI, that is a required safety protocol, not a limitation of capability.
+
+---
+
+## 16. Standard Item Type Typography & Emojis
+
+Across the Neogleamz ecosystem, whenever an item's archetype is designated visually, it MUST use these standardized emojis for absolute consistency (as seen in Makerz Recipez and Fulfillz Barcodz):
+
+- **Retail Product:** `📦` (Package)
+- **Sub-Assembly:** `⚙️` (Gear)
+- **3D Print:** `🖨️` (Printer)
+- **Raw Material:** `📦` (Package - Direct Raw Material)
+
+> **Note:** Raw materials use the same `📦` emoji as Retail Products intentionally, carrying over from Makerz 'Direct Raw Materials' spec.
