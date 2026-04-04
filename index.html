@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.1951"></script>
+    <script src="system-version.js?v=v.2026.04.03.1959"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1951"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1951"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.1959"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1959"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.1951"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.1959"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -302,6 +302,9 @@
             z-index: 10;
         }
         .pane-header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
             font-size: clamp(11px, 1.0vw, 15px);
             font-weight: 900;
             color: #FF8C00;
@@ -309,7 +312,7 @@
             letter-spacing: clamp(2px, 0.3vw, 4px);
             text-shadow: 0 0 10px rgba(255, 140, 0, 0.25);
             white-space: nowrap;
-            flex-shrink: 0;
+            pointer-events: none;
         }
         .pane-header-actions {
             display: flex;
@@ -1952,7 +1955,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1951"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.1959"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2581,7 +2584,7 @@
     </div> <!-- End of sales-tab -->
 
         <!-- FULFILLZ -->
-    <div id="fulfillzhub-tab" class="tab-content">
+    <div id="fulfillzhub-tab" class="tab-content" style="padding:0;">
         <div id="fulfillzhubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px;">
             <div class="hub-card" onclick="showFulfillzPane('packerz')">
                 <i style="color: #F59E0B;">📦</i>
@@ -2595,25 +2598,18 @@
 
         </div>
 
-        <style>
-            @media (max-width: 900px) {
-                .packerz-header-bar { flex-direction: column !important; padding: 15px !important; gap: 15px !important; }
-                .packerz-header-btns { position: static !important; right: auto !important; width: 100% !important; justify-content: center !important; }
-                .packerz-kanban-wrapper { flex-direction: column !important; height: auto !important; overflow-y: auto !important; padding: 15px !important; flex-grow:0 !important; }
-                .packerz-kanban-col { flex: none !important; height: 65vh !important; }
-            }
-        </style>
+
         <div id="paneFulfillzPackerz" class="executive-pane" style="display:none; flex-direction:column; flex-grow:1;">
 
-            <div class="pane-header-bar" style="justify-content:center; align-items:center; position:relative;">
+            <div class="pane-header-bar">
                 <span class="pane-header-title">📦 PACKERZ TERMINAL</span>
-                <div class="pane-header-actions" style="position:absolute; right:clamp(16px,2.5vw,30px);">
+                <div class="pane-header-actions">
                     <button class="btn-blue" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';">⚙️ BLUEPRINTS</button>
                     <button class="btn-green" onclick="document.getElementById('packerzArchiveModal').style.display='flex';">🗃️ COMPLETED ARCHIVE</button>
                 </div>
             </div>
             
-            <div class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:30px; gap:25px; height: calc(100vh - 250px); overflow:hidden;">
+            <div class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:clamp(8px,1.2vh,16px) clamp(12px,1.5vw,20px); gap:clamp(12px,1.5vw,20px); overflow:hidden;">
                 <!-- Column 1: AWAITING -->
                 <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:var(--text-muted); border-bottom:2px solid var(--border-color); padding-bottom:12px;">AWAITING ASSEMBLY</h3>
@@ -3291,7 +3287,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.1951"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.1959"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4251,15 +4247,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.1951"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.1951"></script>
-<script src="bom-module.js?v=v.2026.04.03.1951"></script>
-<script src="inventory-module.js?v=v.2026.04.03.1951"></script>
-<script src="production-module.js?v=v.2026.04.03.1951"></script>
-<script src="sales-module.js?v=v.2026.04.03.1951"></script>
-<script src="analytics-module.js?v=v.2026.04.03.1951"></script>
-<script src="ceo-module.js?v=v.2026.04.03.1951"></script>
-<script src="print-module.js?v=v.2026.04.03.1951"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.1959"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.1959"></script>
+<script src="bom-module.js?v=v.2026.04.03.1959"></script>
+<script src="inventory-module.js?v=v.2026.04.03.1959"></script>
+<script src="production-module.js?v=v.2026.04.03.1959"></script>
+<script src="sales-module.js?v=v.2026.04.03.1959"></script>
+<script src="analytics-module.js?v=v.2026.04.03.1959"></script>
+<script src="ceo-module.js?v=v.2026.04.03.1959"></script>
+<script src="print-module.js?v=v.2026.04.03.1959"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
