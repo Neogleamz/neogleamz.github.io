@@ -1265,6 +1265,7 @@ function updateSOPMediaBreadcrumb() {
 // ---- Drag and Drop Moving ----
 function sopHandleDragStart(e, sourcePath) {
     e.dataTransfer.setData('text/plain', sourcePath);
+    e.dataTransfer.setData('fulfillz-path', sourcePath);
 }
 
 async function sopHandleDrop(e, destFolder) {
@@ -1272,10 +1273,12 @@ async function sopHandleDrop(e, destFolder) {
     e.currentTarget.style.borderColor = 'var(--border-color)';
     e.currentTarget.style.backgroundColor = 'var(--bg-panel)';
     
-    const sourcePath = e.dataTransfer.getData('text/plain');
+    // Extract custom payload to bypass browser <img> URI-hijacks natively
+    let sourcePath = e.dataTransfer.getData('fulfillz-path');
+    if(!sourcePath) sourcePath = e.dataTransfer.getData('text/plain');
     if (!sourcePath || destFolder === undefined) return;
     
-    // Prevent moving folder into itself etc.. not implementing full paths here but files are fine
+    // Prevent moving folder into itself etc..
     const fileName = sourcePath.split('/').pop();
     const destPath = destFolder ? `${destFolder}/${fileName}` : fileName;
     if (sourcePath === destPath) return;
@@ -1283,10 +1286,25 @@ async function sopHandleDrop(e, destFolder) {
     const statusEl = document.getElementById('sopMediaUploadStatus');
     statusEl.style.display = 'block';
     statusEl.style.color = '#f59e0b';
-    statusEl.innerText = `📦 Moving file to ${destFolder || 'Root'}...`;
+    statusEl.innerText = `📦 Relocating file to ${destFolder || 'Root'}...`;
 
-    const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).move(sourcePath, destPath);
-    if (error) { statusEl.style.color = '#ef4444'; statusEl.innerText = `❌ Move failed: ${error.message}`; return; }
+    // Attempt native move (requires UPDATE RLS)
+    const { error: moveError } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).move(sourcePath, destPath);
+    let finalError = moveError?.message;
+
+    // Fallback: If UPDATE policy blocks .move (Returns Object not found), execute Copy(INSERT) + Remove(DELETE)
+    if (moveError) {
+        statusEl.innerText = `📦 Native move blocked by Edge Policy. Attempting clone bypass...`;
+        const { error: copyError } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).copy(sourcePath, destPath);
+        if (!copyError) {
+            await supabaseClient.storage.from(SOP_MEDIA_BUCKET).remove([sourcePath]);
+            finalError = null; // Cleared error
+        } else {
+            finalError = copyError.message;
+        }
+    }
+
+    if (finalError) { statusEl.style.color = '#ef4444'; statusEl.innerText = `❌ Move failed: ${finalError}`; return; }
     
     statusEl.style.color = '#10b981';
     statusEl.innerText = `✅ Moved successfully.`;
