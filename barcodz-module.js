@@ -110,7 +110,7 @@ function renderBarcodzGrid() {
                     </div>
                     
                     <!-- Content -->
-                    <div style="padding-top:4px; border-top:1px solid var(--border-color);">
+                    <div style="padding-top:4px; border-top:1px solid var(--border-color); text-align:center;">
                         <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word;">${item.name}</div>
                         <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0; word-break:break-all;">${item.slug}</div>
                         ${item.desc ? `<div style="font-size:10px; color:var(--text-muted); margin-top:2px; font-style:italic; line-height:1.2;">${item.desc}</div>` : ''}
