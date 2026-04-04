@@ -449,12 +449,6 @@ window.initNeoSidebarResizer = function(e) {
 window.doNeoSidebarResize = function(e) {
     if(!isNeoSidebarResizing) return;
     
-    // Attempt to locate the exact resizer handle element being interacted with, 
-    // or just assume the DOM node currently hovered is related.
-    // The most robust way is to just find the exact `.bom-sidebar` that is a sibling or near the resizer.
-    // A universal standard: The resizer lives exactly *after* the sidebar inside a `.bom-layout`.
-    // Since document mousemove doesn't easily trace back to the DOM element without context variables,
-    // we will find the actively visible `.bom-layout` container.
     const layouts = document.querySelectorAll('.bom-layout');
     let activeWrapper = null;
     let sidebar = null;
@@ -470,10 +464,16 @@ window.doNeoSidebarResize = function(e) {
         }
     }
     
-    // Fallback logic for Packerz custom modal split if it ever adopts initNeoSidebarResizer
+    // Fallback logic for Packerz custom modal split
     if(!sidebar && document.getElementById('packerzLiveSopSplitWrapper')?.offsetParent !== null) {
         activeWrapper = document.getElementById('packerzLiveSopSplitWrapper');
         sidebar = document.getElementById('packerzLiveSopLeftPane');
+    }
+    
+    // Fallback logic for Packerz Terminal Main Kanban Board
+    if(!sidebar && document.getElementById('packerzKanbanWrapper')?.offsetParent !== null) {
+        activeWrapper = document.getElementById('packerzKanbanWrapper');
+        sidebar = document.getElementById('packerzKanbanLeftCol');
     }
     
     if (!sidebar || !activeWrapper) return;

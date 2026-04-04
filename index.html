@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.03.2335"></script>
+    <script src="system-version.js?v=v.2026.04.03.2339"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2335"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2335"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.03.2339"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2339"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.03.2335"></script>
+    <script src="packerz-module.js?v=v.2026.04.03.2339"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1964,7 +1964,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2335"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.03.2339"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2636,17 +2636,19 @@
             <div class="nav-zone left" onclick="showFulfillzPane('barcodz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showFulfillzPane('barcodz')"><i>›</i></div>
             
-            <div class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:clamp(8px,1.2vh,16px) clamp(12px,1.5vw,20px); gap:clamp(12px,1.5vw,20px); overflow:hidden;">
+            <div id="packerzKanbanWrapper" class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:clamp(8px,1.2vh,16px) clamp(12px,1.5vw,20px); gap:clamp(12px,1.5vw,20px); overflow:hidden;">
                 <!-- Column 1: AWAITING -->
-                <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column;">
+                <div id="packerzKanbanLeftCol" class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width: 280px;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:var(--text-muted); border-bottom:2px solid var(--border-color); padding-bottom:12px;">AWAITING ASSEMBLY</h3>
                     <div id="packerzAwaitingQueue" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <!-- JS INJECT -->
                     </div>
                 </div>
                 
+                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+                
                 <!-- Column 2: IN PROGRESS -->
-                <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(245,158,11,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(245,158,11,0.05);">
+                <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(245,158,11,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(245,158,11,0.05); min-width: 280px;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.3); padding-bottom:12px;">IN PROGRESS (PICK & PACK)</h3>
                     <div id="packerzActiveQueue" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to open the SOP terminal.</div>
@@ -3368,7 +3370,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.03.2335"></script>
+    <script src="socialz-module.js?v=v.2026.04.03.2339"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -4400,15 +4402,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.03.2335"></script>
-<script src="system-tools-module.js?v=v.2026.04.03.2335"></script>
-<script src="bom-module.js?v=v.2026.04.03.2335"></script>
-<script src="inventory-module.js?v=v.2026.04.03.2335"></script>
-<script src="production-module.js?v=v.2026.04.03.2335"></script>
-<script src="sales-module.js?v=v.2026.04.03.2335"></script>
-<script src="analytics-module.js?v=v.2026.04.03.2335"></script>
-<script src="ceo-module.js?v=v.2026.04.03.2335"></script>
-<script src="print-module.js?v=v.2026.04.03.2335"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.03.2339"></script>
+<script src="system-tools-module.js?v=v.2026.04.03.2339"></script>
+<script src="bom-module.js?v=v.2026.04.03.2339"></script>
+<script src="inventory-module.js?v=v.2026.04.03.2339"></script>
+<script src="production-module.js?v=v.2026.04.03.2339"></script>
+<script src="sales-module.js?v=v.2026.04.03.2339"></script>
+<script src="analytics-module.js?v=v.2026.04.03.2339"></script>
+<script src="ceo-module.js?v=v.2026.04.03.2339"></script>
+<script src="print-module.js?v=v.2026.04.03.2339"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4862,13 +4864,13 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2335"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.03.2339"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2335"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.03.2339"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.03.2335"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.03.2339"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.03.2335"></script>
+    <script src="barcodz-module.js?v=v.2026.04.03.2339"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>
