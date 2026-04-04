@@ -540,5 +540,4 @@ window.restoreNeoSidebarSizes = function() {
 
 // Fire on Engine Boot
 document.addEventListener('DOMContentLoaded', window.restoreNeoSidebarSizes);
-w i n d o w . r e s t o r e N e o S i d e b a r S i z e s ( ) ;  
- 
+window.restoreNeoSidebarSizes(); // Fire immediately just in case DOM is already loaded
