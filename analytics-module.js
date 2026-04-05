@@ -213,7 +213,7 @@ function renderProfitabilityMatrix(SHIP_COST) {
     let ths = ` <th class="${currentAnalyticsSort.column==='n'?'sorted-'+currentAnalyticsSort.direction:''}" onclick="sortAnalytics('n')">Retail Product</th> <th class="${currentAnalyticsSort.column==='tc'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tc')">True COGS</th> <th class="${currentAnalyticsSort.column==='ms'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ms')">Live MSRP</th> <th class="${currentAnalyticsSort.column==='mg'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('mg')">Gross Margin %</th> <th class="${currentAnalyticsSort.column==='ts'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ts')">Total Units Sold</th> <th class="${currentAnalyticsSort.column==='tp'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tp')">Actual Net Profit</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
 
-    let a = Object.keys(productsDB).filter(p => !isSubassemblyDB[p]).map(p => {
+    let a = Object.keys(productsDB).filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label)).map(p => {
         let tc = getEngineTrueCogs(p); 
         let ms = getEngineLiveMsrp(p); 
         let mg = ms > 0 ? ((ms - tc) / ms) * 100 : 0;
@@ -245,9 +245,12 @@ function renderProfitabilityMatrix(SHIP_COST) {
 async function backfillFinancials() {
     if(!confirm("This will recalculate fees and profit for ALL historical sales based on CURRENT engine rules and sync them to the database. Continue?")) return;
     
+    let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
+    if (typeof syncTrace === 'function') syncTrace("INITIALIZING RAPID FINANCIAL BACKFILL...", false);
     setMasterStatus("Backfilling Financials...", "mod-working");
     setSysProgress(10, 'working');
     sysLog("Starting financial backfill for all existing sales...");
+    if (typeof syncTrace === 'function') syncTrace(`Engaging Master Engine ruleset for ${salesDB.length} historical ledger rows...`);
     
     try {
         const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
@@ -257,14 +260,15 @@ async function backfillFinancials() {
         // Note: For very large datasets, a batch approach is better, but this is safest for now.
         for(let s of salesDB) {
             let qty = parseFloat(s.qty_sold) || 0;
-            let captured = parseFloat(s.total) || 0;
             let p = parseFloat(s.actual_sale_price || 0);
             let d = parseFloat(s.discount_amount || 0);
             
+            let trueLineCaptured = (p * qty) + parseFloat(s.shipping || 0) + parseFloat(s.taxes || 0) - d;
+            
             let lineGross = p * qty;
-            let stripeFee = getEngineStripeFee(captured);
+            let stripeFee = getEngineStripeFee(trueLineCaptured, s["Source"]);
             let actualShipCost = SHIP_COST * qty;
-            let lineNet = getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name);
+            let lineNet = getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name, qty, s["Source"]);
             
             let roundedFee = Math.round(stripeFee * 100) / 100;
             let roundedNet = Math.round(lineNet * 100) / 100;
@@ -280,7 +284,12 @@ async function backfillFinancials() {
                 count++;
             }
             
-            // UI Update feedback
+            // Trace every record to give granular feedback
+            if (typeof syncTrace === 'function') {
+                syncTrace(`Analyzed ${s.order_id} (${s.Source || 'Unknown'}): Base $${trueLineCaptured.toFixed(2)} -> Fee: $${roundedFee.toFixed(2)} | Net: $${roundedNet.toFixed(2)}`);
+            }
+            
+            // UI Status Update feedback
             if(count % 5 === 0 || count === salesDB.length) {
                 setSysProgress(10 + (count / salesDB.length) * 85);
                 setMasterStatus(`Backfilling: ${count}/${salesDB.length}`, "mod-working");
@@ -288,6 +297,7 @@ async function backfillFinancials() {
         }
         
         sysLog(`Successfully backfilled ${count} sales records with updated financials.`);
+        if (typeof syncTrace === 'function') syncTrace(`PROCESS COMPLETE. ${count} transactions finalized under current Engine Parameters.`, false);
         setMasterStatus("Backfill Complete!", "mod-success");
         setSysProgress(100, 'success');
         
@@ -297,6 +307,7 @@ async function backfillFinancials() {
         
     } catch(e) {
         sysLog("Backfill Error: " + e.message, true);
+        if (typeof syncTrace === 'function') syncTrace(`CRITICAL FAULT: ${e.message}`, true);
         setMasterStatus("Backfill Failed", "mod-error");
     }
 }

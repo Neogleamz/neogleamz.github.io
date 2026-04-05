@@ -25,9 +25,9 @@ async function addManualSale() {
         
         // --- POWERED BY MASTER ENGINE ---
         let cogs = getEngineTrueCogs(rec);
-        let stripeFee = getEngineStripeFee(total);
+        let stripeFee = getEngineStripeFee(total, source);
         let actualShipCost = (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty;
-        let lineNet = getHistoricalNetProfit(pr * qty, ship, tax, discAmt, actualShipCost, rec);
+        let lineNet = getHistoricalNetProfit(pr * qty, ship, tax, discAmt, actualShipCost, rec, qty, source);
         // --------------------------------
         
         let uniqueManualSku = "MANUAL_ENTRY_" + rec;
@@ -201,10 +201,11 @@ async function executeSalesSync() {
         // --- POWERED BY MASTER ENGINE ---
         let salesPayload = pendingSalesRows.map(r => { 
             let cogs = getEngineTrueCogs(r.internal_recipe_name);
-            let fee = getEngineStripeFee(r.total);
+            let trueLineCaptured = (r.actual_sale_price * r.qty_sold) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0) - parseFloat(r.discount_amount || 0);
+            let fee = getEngineStripeFee(trueLineCaptured, r["Source"]);
             const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
             let actualShipCost = SHIP_COST * r.qty_sold;
-            let net = getHistoricalNetProfit(r.actual_sale_price * r.qty_sold, r.shipping, r.taxes, r.discount_amount, actualShipCost, r.internal_recipe_name);
+            let net = getHistoricalNetProfit(r.actual_sale_price * r.qty_sold, r.shipping, r.taxes, r.discount_amount, actualShipCost, r.internal_recipe_name, r.qty_sold, r["Source"]);
             
             let cS = Math.round(cogs * 100) / 100;
             let fS = Math.round(fee * 100) / 100;
@@ -270,27 +271,29 @@ function renderSalesTable() {
         let d = parseFloat(x.discount_amount) || 0;
         
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name) * qty;
-        let isCostOnlyItem = (type === 'Replacement / Warranty' || type === 'Warranty' || type === 'Gift');
+        let isCostOnlyItem = (type === 'Replacement / Warranty' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE');
         
         // --- CUSTOM EXCEPTION OVERRIDES ---
-        if (type === 'Pre-Ship Exchange') {
+        if (type === 'Pre-Ship Exchange' || type === 'IGNORE') {
             liveCogs = 0;
-        } else if (isCostOnlyItem) {
+        }
+        if (isCostOnlyItem) {
             p = 0; s = 0; t = 0; d = 0;
         }
         
         // BUGFIX: Base Stripe Fee on True Line Capture, avoiding Shopify's merged Total inflation
         let trueLineCaptured = (p * qty) + s + t - d;
-        let stripeFee = isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured);
+        let stripeFee = isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured, x['Source']);
         
         // --- POWERED BY MASTER ENGINE ---
         let actualShipCost = type === 'Pre-Ship Exchange' ? 0 : 
-                             type === 'Gift' ? 0 :
-                             isCostOnlyItem ? (s > 0 ? s : SHIP_COST) : 
-                             s; // Standard items cleanly map actual ship cost to match what the customer paid
-        let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty);
+                             type === 'IGNORE' ? 0 :
+                             (s > 0 ? s : SHIP_COST); // All valid items cleanly map actual ship cost to what the customer paid, OR default to flat-rate if Free Shipping
+        let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
         
-        if (type === 'Pre-Ship Exchange') {
+        if (type === 'IGNORE') {
+            net = 0;
+        } else if (type === 'Pre-Ship Exchange') {
             net += liveCogs; // refund the dynamic COGS that engine deducted
         } else if (isCostOnlyItem) {
             net = 0 - actualShipCost - liveCogs;
@@ -389,15 +392,22 @@ function renderSalesTable() {
     // Final Calculation Pass for Totals
     a.forEach(x => {
         let isCostOnly = x.isCostOnlyItem;
+        let p = parseFloat(x.actual_sale_price || 0);
+        let q = parseFloat(x.qty_sold || 0);
+        let s = parseFloat(x.shipping || 0);
+        let t = parseFloat(x.taxes || 0);
+        let d = parseFloat(x.discount_amount || 0);
+        let trueLineCaptured = (p * q) + s + t - d;
+        x.localDerivedTotal = trueLineCaptured; // Store for the UI rendering below
         
-        totals.gross += isCostOnly ? 0 : (parseFloat(x.actual_sale_price || 0) * (parseFloat(x.qty_sold) || 0));
-        totals.discounts += isCostOnly ? 0 : parseFloat(x.discount_amount || 0);
-        totals.captured += isCostOnly ? 0 : (parseFloat(x.total || 0) + (x.exchAdj || 0));
+        totals.gross += isCostOnly ? 0 : (p * q);
+        totals.discounts += isCostOnly ? 0 : d;
+        totals.captured += isCostOnly ? 0 : (trueLineCaptured + (x.exchAdj || 0));
         totals.cogs += x.liveCogs;
         totals.shipping += x.actualShipCost || 0;
         totals.stripe += x.stripeFee;
         totals.net += x.net;
-        totals.units += (parseFloat(x.qty_sold) || 0);
+        totals.units += (x.transaction_type === 'IGNORE') ? 0 : (parseFloat(x.qty_sold) || 0);
         
         // Track strictly isolated Warranty overhead
         if(x.transaction_type === 'Warranty') {
@@ -430,10 +440,10 @@ function renderSalesTable() {
             let netColor = x.net < 0 ? '#ef4444' : '#10b981';
 
             h += `<tr>
-            <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'sale_date', false)" style="color:var(--text-muted);">${x.sale_date}</td>
-            <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'order_id', false)" style="font-weight:bold;">${x.order_id}</td>
-            <td class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'Source', false)" style="color:var(--text-muted);">${x["Source"] || ''}</td>
-            <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'storefront_sku', false)">${x.storefront_sku}</td>
+            <td style="color:var(--text-muted);">${x.sale_date}</td>
+            <td style="font-weight:bold;">${x.order_id}</td>
+            <td style="color:var(--text-muted);">${x["Source"] || ''}</td>
+            <td class="trunc-col">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
             <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')">
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option>
@@ -442,14 +452,15 @@ function renderSalesTable() {
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Replacement / Warranty" ${x.transaction_type==='Replacement / Warranty'?'selected':''}>Exchange Replacement</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${x.transaction_type==='IGNORE'?'selected':''}>IGNORE</option>
             </select></td>
 
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'qty_sold', true)" style="font-weight:bold;">${x.qty_sold}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'actual_sale_price', true)" style="color:#10b981;">$${parseFloat(x.actual_sale_price).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'discount_amount', true)" style="color:#f59e0b;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'shipping', true)" title="${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? 'Actual Ship Expense Override' : 'Shipping Revenue'}" style="color:${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? '#ef4444' : 'var(--text-muted)'};">$${parseFloat(x.shipping || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'taxes', true)" style="color:var(--text-muted);">$${parseFloat(x.taxes || 0).toFixed(2)}</td>
-            <td class="text-right editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'total', true)" style="font-weight:bold;">$${(parseFloat(x.total || 0) + (x.exchAdj || 0)).toFixed(2)}</td>
+            <td class="text-right" style="font-weight:bold;">${x.qty_sold}</td>
+            <td class="text-right" style="color:#10b981;">$${parseFloat(x.actual_sale_price).toFixed(2)}</td>
+            <td class="text-right" style="color:#f59e0b;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
+            <td class="text-right" title="${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? 'Actual Ship Expense Override' : 'Shipping Revenue'}" style="color:${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? '#ef4444' : 'var(--text-muted)'};">$${parseFloat(x.shipping || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:var(--text-muted);">$${parseFloat(x.taxes || 0).toFixed(2)}</td>
+            <td class="text-right" style="font-weight:bold;">$${(parseFloat(x.total || 0) + (x.exchAdj || 0)).toFixed(2)}</td>
             <td class="text-right" style="color:#ef4444; font-weight:bold;">$${x.liveCogs.toFixed(2)}</td>
             <td class="text-right" style="color:#888;">-$${x.stripeFee.toFixed(2)}</td>
             <td class="text-right" style="color:${netColor}; font-weight:900;">$${x.net.toFixed(2)}</td>
@@ -472,22 +483,6 @@ window.updateSaleType = async function(sel, orderId, sku) {
         const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
         if(error) { alert("Error saving type: " + error.message); return; }
         
-        let wasShipped = (oldVal !== 'Pre-Ship Exchange');
-        let isShipped = (newVal !== 'Pre-Ship Exchange');
-        
-        if (wasShipped !== isShipped) {
-            let k = `RECIPE:::${row.internal_recipe_name}`;
-            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-            
-            let q = parseFloat(row.qty_sold || 0);
-            if (isShipped && !wasShipped) {
-                inventoryDB[k].sold_qty += q;
-            } else if (!isShipped && wasShipped) {
-                inventoryDB[k].sold_qty -= q;
-            }
-            await supabaseClient.from('inventory_consumption').upsert([{item_key: k, ...inventoryDB[k]}], {onConflict:'item_key'});
-        }
-
         setMasterStatus("Saved!", "mod-success"); 
         renderSalesTable(); 
         if(typeof renderInventoryTable === 'function') renderInventoryTable();

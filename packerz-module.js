@@ -33,7 +33,8 @@ async function fetchUnfulfilledOrders() {
             groupedOrders[row.order_id].items.push({
                 sku: row.storefront_sku,
                 recipe: row.internal_recipe_name,
-                qty: row.qty_sold
+                qty: row.qty_sold,
+                transaction_type: row.transaction_type || 'Standard'
             });
         });
 
@@ -78,7 +79,7 @@ async function fetchUnfulfilledOrders() {
             queueContainer.appendChild(card);
         });
 
-        fetchPackerzCompletedOrders();
+        loadSOPAuditLog();
 
     } catch (err) {
         console.error("PACKERZ Fetch Error:", err);
@@ -86,89 +87,7 @@ async function fetchUnfulfilledOrders() {
     }
 }
 
-async function fetchPackerzCompletedOrders() {
-    try {
-        if (!supabaseClient) return;
-        const compQueue = document.getElementById('packerzCompletedQueue');
-        if (!compQueue) return;
-        
-        compQueue.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-style:italic;">Querying archive...</div>';
 
-        const { data, error } = await supabaseClient
-            .from('sales_ledger')
-            .select('*')
-            .eq('internal_fulfillment_status', 'Completed')
-            .order('sale_date', { ascending: false })
-            .limit(150);
-
-        if (error) throw error;
-
-        const groupedOrders = {};
-        data.forEach(row => {
-            if(!groupedOrders[row.order_id]) groupedOrders[row.order_id] = { order_id: row.order_id, sale_date: row.sale_date, completed_at: row.assembly_completed_at, items: [] };
-            groupedOrders[row.order_id].items.push({ 
-                sku: row.storefront_sku, 
-                recipe: row.internal_recipe_name, 
-                qty: row.qty_sold, 
-                qa_cleared_at: row.qa_cleared_at,
-                telemetry: row.qa_telemetry_data
-            });
-        });
-
-        const distinctOrderIds = Object.keys(groupedOrders);
-        if (distinctOrderIds.length === 0) {
-            compQueue.innerHTML = '<div style="text-align:center; padding:60px; color:var(--text-muted); font-size:12px; font-style:italic;">No historical records found.</div>';
-            return;
-        }
-
-        compQueue.innerHTML = ''; 
-        distinctOrderIds.forEach(id => {
-            const order = groupedOrders[id];
-            const card = document.createElement('div');
-            card.style.cssText = 'background: var(--bg-container); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 8px; border-left: 5px solid #10b981; opacity:0.8;';
-            
-            const shortDate = new Date(order.sale_date).toLocaleDateString();
-            const completedString = order.completed_at ? new Date(order.completed_at).toLocaleString() : 'Legacy Archive (No Time Lock)';
-            
-            const itemsPreview = order.items.map(i => {
-                const qaTime = i.qa_cleared_at ? new Date(i.qa_cleared_at).toLocaleTimeString() : 'N/A';
-                let telHtml = '';
-                if(i.telemetry && i.telemetry.length > 0) {
-                    let safeT = JSON.stringify(i.telemetry).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-                    telHtml = `<button onclick="openPackerzAuditLog('${i.sku}', '${safeT}')" style="margin-top:6px; font-size:9px; font-weight:900; background:#10b981; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">VIEW AUDIT LOG</button>`;
-                }
-                
-                return `<div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px; margin-bottom:5px;">
-                            <div style="display:flex; flex-direction:column;">
-                                <span style="font-size:11px;"><b>${i.qty}x</b> ${i.recipe}</span>
-                                ${telHtml}
-                            </div>
-                            <span style="font-size:9px; color:#10b981; font-family:monospace; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px;">QA: ${qaTime}</span>
-                        </div>`;
-            }).join('');
-            
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid rgba(16,185,129,0.2); padding-bottom:8px; margin-bottom:4px;">
-                    <div style="display:flex; flex-direction:column;">
-                        <strong style="color:var(--text-heading); font-size:14px; font-weight:900;">ORDER ${order.order_id}</strong>
-                        <span style="font-size:9px; color:var(--text-muted); font-family:monospace; margin-top:2px;">Closed: ${completedString}</span>
-                    </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                        <span style="font-size:10px; color:#10b981; font-weight:900; background:rgba(16,185,129,0.1); padding:4px 8px; border-radius:6px;">${shortDate}</span>
-                        <button onclick="unarchivePackerzOrder('${order.order_id}')" style="background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; font-size:9px; font-weight:bold; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">UNARCHIVE</button>
-                    </div>
-                </div>
-                <div style="color:var(--text-muted); font-weight:700; background:var(--bg-panel); padding:10px; border-radius:8px;">
-                    ${itemsPreview}
-                </div>
-            `;
-            compQueue.appendChild(card);
-        });
-
-    } catch (err) {
-        console.error("PACKERZ Archive Error:", err);
-    }
-}
 
 // ============================================================
 // BARCODE UTILITIES — deterministic NGZ-slug from item name
@@ -186,16 +105,32 @@ function openPackerzSopTerminal(orderGroup) {
     const activeQueue = document.getElementById('packerzActiveQueue');
     if (!activeQueue) return;
 
-    let itemsHtml = orderGroup.items.map(i => `
+    let itemsHtml = orderGroup.items.map(i => {
+        let t = i.transaction_type || 'Standard';
+        let safeRecipe = i.recipe.replace(/'/g,"\\'");
+        let selectHtml = `
+            <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px; font-size:10px; font-weight:800; cursor:pointer;" onchange="updatePackerzItemType('${orderGroup.order_id}', '${i.sku}', this.value, '${safeRecipe}')">
+                <option value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
+                <option value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
+                <option value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
+                <option value="Replacement / Warranty" ${t==='Replacement / Warranty'?'selected':''}>Exchange Replacement</option>
+                <option value="Warranty" ${t==='Warranty'?'selected':''}>Warranty</option>
+                <option value="Gift" ${t==='Gift'?'selected':''}>Gift</option>
+                <option value="IGNORE" ${t==='IGNORE'?'selected':''}>IGNORE</option>
+            </select>
+        `;
+        return `
         <div id="qa-row-${orderGroup.order_id}-${i.sku}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; gap:15px;">
             <div style="flex-grow:1; min-width:0;">
                 <span style="font-weight:900; color:var(--text-heading); font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${i.recipe}</span>
                 <span style="font-size:11px; color:var(--text-muted); font-family:monospace; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Source Alias: ${i.sku || 'N/A'}</span>
             </div>
+            ${selectHtml}
             <div style="background:#10b981; color:white; font-weight:900; font-size:14px; padding:6px 14px; border-radius:6px; flex-shrink:0;">${i.qty}</div>
-            <button id="qa-btn-${orderGroup.order_id}-${i.sku}" style="padding:6px 15px; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; flex-shrink:0; width:auto;" onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${i.recipe.replace(/'/g,"\\'")}')">VIEW SOP: ${i.recipe.length > 20 ? i.recipe.substring(0,20)+'...' : i.recipe}</button>
+            <button id="qa-btn-${orderGroup.order_id}-${i.sku}" style="padding:6px 15px; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; flex-shrink:0; width:auto;" onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${safeRecipe}')">VIEW SOP: ${i.recipe.length > 20 ? i.recipe.substring(0,20)+'...' : i.recipe}</button>
         </div>
-    `).join('');
+        `;
+    }).join('');
 
     activeQueue.innerHTML = `
     <div style="padding:25px; background:var(--bg-container); border-radius:12px; border:2px solid #F59E0B; box-shadow: 0 10px 30px rgba(245,158,11,0.15);">
@@ -216,6 +151,18 @@ function openPackerzSopTerminal(orderGroup) {
     </div>`;
     
     validatePackerzAssemblyButton(orderGroup.order_id);
+}
+
+window.updatePackerzItemType = async function(orderId, sku, newVal, safeRecipe) {
+    sysLog(`Packerz overriding Sale Type ${orderId}: ${newVal}`);
+    const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
+    if(error) { alert("Error saving type mapping from Packerz: " + error.message); return; }
+    
+    // Auto-update local DB if present
+    if (typeof salesDB !== 'undefined') {
+        let r = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
+        if (r) r.transaction_type = newVal;
+    }
 }
 
 function validatePackerzAssemblyButton(orderId) {
@@ -249,10 +196,12 @@ function validatePackerzAssemblyButton(orderId) {
 
 let currentPackerzQaOrderId = null;
 let currentPackerzQaSku = null;
+let currentPackerzQaRecipe = null;
 
 async function loadPackerzActiveSOP(orderId, sku, recipe) {
     currentPackerzQaOrderId = orderId;
     currentPackerzQaSku = sku;
+    currentPackerzQaRecipe = recipe;
     scanConfirmations.clear();
     
     document.getElementById('packerzSopViewerModal').style.display = 'flex';
@@ -517,16 +466,21 @@ async function signoffPackerzQA() {
     // Natively stamp the physical QA clearance via the Edge Ledger
     try {
         if(supabaseClient) {
-            await supabaseClient.from('sales_ledger')
+            const { error: updErr } = await supabaseClient.from('sales_ledger')
                 .update({ 
-                    qa_cleared_at: new Date().toISOString(),
-                    qa_telemetry_data: JSON.stringify(telemetryData)
+                    qa_cleared_at: new Date().toISOString()
                 })
                 .eq('order_id', currentPackerzQaOrderId)
                 .eq('storefront_sku', currentPackerzQaSku);
+
+            if (updErr) {
+                console.error("QA Ledger Update silently rejected heavily:", updErr);
+                alert("Critical Database Warning: Your QA Signoff was not committed to the ledger! " + updErr.message);
+                return; // halt execution
+            }
         }
-        // Fire-and-forget: archive a full SOP snapshot at QA sign-off moment
-        archiveSOPSnapshot(currentPackerzQaOrderId, currentPackerzQaSku);
+        // Fire-and-forget: archive a full SOP snapshot at QA sign-off moment using securely captured telemetry
+        archiveSOPSnapshot(currentPackerzQaOrderId, currentPackerzQaSku, currentPackerzQaRecipe, telemetryData);
     } catch(err) {
         console.warn("Audit tracking mathematically failed on the Edge.", err);
     }
@@ -560,6 +514,7 @@ function closePackerzSopViewer() {
     document.getElementById('packerzSopViewerModal').style.display = 'none';
     currentPackerzQaOrderId = null;
     currentPackerzQaSku = null;
+    currentPackerzQaRecipe = null;
 }
 
 async function executePackerzCompletion(orderId) {
@@ -583,13 +538,18 @@ async function executePackerzCompletion(orderId) {
         // 2. Fetch specific line items for this order and structurally deduct (upsert) the Inventory ledger
         const { data: lineItems, error: itemsError } = await supabaseClient
             .from('sales_ledger')
-            .select('internal_recipe_name, qty_sold')
+            .select('internal_recipe_name, qty_sold, transaction_type')
             .eq('order_id', orderId);
 
         if (itemsError) throw itemsError;
 
         let invMap = {};
-        lineItems.forEach(r => { let k = `RECIPE:::${r.internal_recipe_name}`; if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); invMap[k] += r.qty_sold; });
+        lineItems.forEach(r => { 
+            if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
+            let k = `RECIPE:::${r.internal_recipe_name}`; 
+            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); 
+            invMap[k] += r.qty_sold; 
+        });
         let invPayload = Object.keys(invMap).map(k => {
             if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
             inventoryDB[k].sold_qty = invMap[k];
@@ -622,13 +582,18 @@ async function unarchivePackerzOrder(orderId) {
         // 1. Fetch specific line items for this order and structurally refund (upsert) the Inventory ledger
         const { data: lineItems, error: itemsError } = await supabaseClient
             .from('sales_ledger')
-            .select('internal_recipe_name, qty_sold')
+            .select('internal_recipe_name, qty_sold, transaction_type')
             .eq('order_id', orderId);
 
         if (itemsError) throw itemsError;
 
         let invMap = {};
-        lineItems.forEach(r => { let k = `RECIPE:::${r.internal_recipe_name}`; if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); invMap[k] -= r.qty_sold; });
+        lineItems.forEach(r => { 
+            if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
+            let k = `RECIPE:::${r.internal_recipe_name}`; 
+            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); 
+            invMap[k] -= r.qty_sold; 
+        });
         let invPayload = Object.keys(invMap).map(k => {
             if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
             inventoryDB[k].sold_qty = invMap[k];
@@ -652,9 +617,12 @@ async function unarchivePackerzOrder(orderId) {
 
         if(error) throw error;
 
+        // Immediately delete the snapshot from the archive so it re-enters the QA pipeline cleanly
+        await supabaseClient.from('sop_archives').delete().eq('order_id', orderId);
+
         // Re-Sync Live Queues
         if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
-        fetchPackerzCompletedOrders();
+        loadSOPAuditLog();
         
     } catch(err) {
         console.error("Unarchive Error", err);
@@ -1428,28 +1396,23 @@ function closeSOPTokenGuide() { document.getElementById('sopTokenGuideModal').st
 // Called from signoffPackerzQA() after sales_ledger update
 // ============================================================
 
-async function archiveSOPSnapshot(orderId, sku) {
+async function archiveSOPSnapshot(orderId, sku, recipeName, capturedTelemetry) {
     try {
         // Fetch the live SOP at the moment of sign-off
         const { data: sopData } = await supabaseClient
             .from('pack_ship_sops')
             .select('instruction_json, required_box_sku')
-            .eq('internal_recipe_name', sku)
+            .eq('internal_recipe_name', recipeName)
             .single();
 
         if (!sopData) return; // No SOP written yet — nothing to archive
 
-        const telemetryData = [];
-        document.querySelectorAll('.packerz-qa-check').forEach(c => {
-            telemetryData.push({ type: 'check', text: c.getAttribute('data-label'), valid: c.checked });
-        });
-        document.querySelectorAll('.packerz-qa-input').forEach(i => {
-            telemetryData.push({ type: 'input', text: i.getAttribute('data-label'), value: i.value.trim() });
-        });
+        // Bypass delayed DOM scraping by enforcing strictly injected sync capture
+        const telemetryData = capturedTelemetry || [];
 
         await supabaseClient.from('sop_archives').insert({
             order_id: orderId,
-            internal_recipe_name: sku,
+            internal_recipe_name: recipeName,
             qa_passed_at: new Date().toISOString(),
             packer_telemetry: telemetryData,
             sop_snapshot: JSON.parse(sopData.instruction_json || '{}'),
@@ -1496,7 +1459,65 @@ async function loadSOPAuditLog() {
 
         if (error) throw error;
 
-        sopAuditLogCache = data || [];
+        const rawData = data || [];
+
+        if (rawData.length > 0) {
+            const orderIds = [...new Set(rawData.map(a => a.order_id))];
+            const { data: ledgerData } = await supabaseClient
+                .from('sales_ledger')
+                .select('order_id, sale_date, assembly_completed_at, internal_fulfillment_status')
+                .in('order_id', orderIds);
+                
+            let ledgerMap = {};
+            if(ledgerData) ledgerData.forEach(row => ledgerMap[row.order_id] = row);
+            
+            // Filter out ghost archives where the order was unarchived back to Awaiting Assembly
+            const validData = rawData.filter(a => {
+                const lp = ledgerMap[a.order_id];
+                if (!lp || lp.internal_fulfillment_status !== 'Completed') return false;
+                
+                a._sale_date = lp.sale_date;
+                a._completed_at = lp.assembly_completed_at;
+                return true;
+            });
+
+            // Group valid items purely by order_id
+            const orderGroups = {};
+            validData.forEach(a => {
+                let k = a.order_id;
+                if (!orderGroups[k]) {
+                    orderGroups[k] = {
+                        order_id: a.order_id,
+                        _sale_date: a._sale_date,
+                        _completed_at: a._completed_at,
+                        items: {}
+                    };
+                }
+                
+                // Deduplicate item-level snapshots
+                let recipeKey = a.internal_recipe_name;
+                if (!orderGroups[k].items[recipeKey] || new Date(a.qa_passed_at) > new Date(orderGroups[k].items[recipeKey].qa_passed_at)) {
+                    orderGroups[k].items[recipeKey] = a;
+                }
+            });
+
+            // Convert to array and sort by latest completion mathematically map down
+            sopAuditLogCache = Object.values(orderGroups).map(g => {
+                g.items = Object.values(g.items);
+                return g;
+            });
+            sopAuditLogCache.sort((a,b) => new Date(b._completed_at) - new Date(a._completed_at));
+            // Convert to array and sort by latest completion mathematically map down
+            sopAuditLogCache = Object.values(orderGroups).map(g => {
+                g.items = Object.values(g.items);
+                return g;
+            });
+            sopAuditLogCache.sort((a,b) => new Date(b._completed_at) - new Date(a._completed_at));
+
+        } else {
+            sopAuditLogCache = [];
+        }
+
         renderSOPAuditLogRows(sopAuditLogCache);
     } catch(e) {
         body.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444;">
@@ -1523,13 +1544,51 @@ function renderSOPAuditLogRows(rows) {
         return;
     }
 
-    body.innerHTML = rows.map((r, i) => {
-        const dt = r.qa_passed_at ? new Date(r.qa_passed_at).toLocaleString() : 'Unknown';
-        const telemetry = Array.isArray(r.packer_telemetry) ? r.packer_telemetry : [];
-        const checks    = telemetry.filter(t => t.type === 'check');
-        const inputs    = telemetry.filter(t => t.type === 'input');
-        const passed    = checks.filter(c => c.valid).length;
-        const total     = checks.length;
+    body.innerHTML = rows.map((order, i) => {
+        const placedDt = order._sale_date ? new Date(order._sale_date).toLocaleString() : 'N/A';
+        const completedDt = order._completed_at ? new Date(order._completed_at).toLocaleString() : 'N/A';
+
+        let totalChecks = 0;
+        let totalPassed = 0;
+        let recipeNames = [];
+
+        const itemsHtml = (order.items || []).map((item, idx) => {
+            const telemetry = Array.isArray(item.packer_telemetry) ? item.packer_telemetry : [];
+            const checks    = telemetry.filter(t => t.type === 'check');
+            const inputs    = telemetry.filter(t => t.type === 'input');
+            const passed    = checks.filter(c => c.valid).length;
+            const total     = checks.length;
+            
+            totalChecks += total;
+            totalPassed += passed;
+            recipeNames.push(item.internal_recipe_name);
+
+            return `
+            <div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
+                <div style="font-size:13px; font-weight:900; color:#0ea5e9; margin-bottom:10px;">📦 ${item.internal_recipe_name} <span style="font-size:10px; color:var(--text-muted); float:right;">Signed: ${item.qa_passed_at ? new Date(item.qa_passed_at).toLocaleTimeString() : 'N/A'}</span></div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div>
+                        <div style="font-size:11px; font-weight:900; color:#10b981; letter-spacing:1px; margin-bottom:8px;">TELEMETRY CHECKS</div>
+                        ${checks.length === 0 ? '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None recorded</div>' :
+                          checks.map(c => `<div style="font-size:12px; padding:3px 0; color:${c.valid ? '#10b981' : '#ef4444'};">${c.valid ? '✅' : '❌'} ${c.text || ''}</div>`).join('')}
+                        ${inputs.length > 0 ? `<div style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:1px; margin:10px 0 6px;">INPUT VALUES</div>
+                        ${inputs.map(inp => `<div style="font-size:12px; padding:3px 0; color:var(--text-muted);">📝 ${inp.text}: <b style="color:var(--text-main); font-family:monospace;">${inp.value || '(blank)'}</b></div>`).join('')}` : ''}
+                    </div>
+                    <div>
+                        <button onclick="const el = this.nextElementSibling; if(el.style.display==='none'){el.style.display='block';this.innerText='Hide Original Blueprint';}else{el.style.display='none';this.innerText='View Original Blueprint';}" style="background:transparent; border:1px solid #0ea5e9; color:#0ea5e9; padding:6px 12px; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer;" onmouseover="this.style.background='rgba(14,165,233,0.1)'" onmouseout="this.style.background='transparent'">View Original Blueprint</button>
+                        <div style="display:none; font-size:11px; color:var(--text-muted); background:rgba(0,0,0,0.15); padding:10px; border-radius:6px; max-height:150px; overflow-y:auto; font-family:monospace; line-height:1.6; margin-top:8px;">
+                            <div style="font-size:10px; font-weight:900; color:#0ea5e9; letter-spacing:1px; margin-bottom:6px;">IMMUTABLE SNAPSHOT:</div>
+                            ${formatSOPSnapshotPreview(item.sop_snapshot)}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        let sumRecipes = recipeNames.join(', ');
+        if (sumRecipes.length > 30) sumRecipes = sumRecipes.substring(0, 27) + '...';
+        if (!sumRecipes) sumRecipes = "LEGACY ARCHIVE ITEM"; 
+        // Note: For orders with 0 QA passed items in sop_archives (e.g. MISC_APPAREL), they wouldn't even appear here anymore because this array is driven by sop_archives explicitly!
 
         return `
         <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; overflow:hidden;">
@@ -1538,33 +1597,23 @@ function renderSOPAuditLogRows(rows) {
                  onclick="toggleSOPAuditDetail('sop-audit-detail-${i}')"
                  onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background=''">
                 <div style="background:#10b981; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; flex-shrink:0;">✓ QA PASSED</div>
-                <div style="font-weight:900; color:var(--text-heading); font-size:13px; flex:1;">${r.order_id || '—'}</div>
-                <div style="font-size:12px; color:#0ea5e9; font-weight:700;">${r.internal_recipe_name || '—'}</div>
-                <div style="font-size:11px; color:var(--text-muted);">${dt}</div>
-                <div style="font-size:11px; color:${passed === total ? '#10b981' : '#f59e0b'}; font-weight:700;">${passed}/${total} checks</div>
-                ${r.required_box_sku ? `<div style="font-size:10px; color:var(--text-muted); font-family:monospace;">📦 ${r.required_box_sku}</div>` : ''}
-                <div style="color:var(--text-muted); font-size:12px;">▼</div>
+                <div style="font-weight:900; color:var(--text-heading); font-size:13px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:0;">${order.order_id || '—'}</div>
+                <div style="font-size:12px; color:#0ea5e9; font-weight:700; flex:1;">${sumRecipes} <span style="color:var(--text-muted); font-size:10px;">(${(order.items || []).length} items)</span></div>
+
+                <!-- Timestamp Block -->
+                <div style="display:flex; flex-direction:column; gap:2px; flex-shrink:0; text-align:right;">
+                    <div style="font-size:10px; color:var(--text-muted);"><span style="color:#f59e0b; font-weight:bold;">PLACED:</span> ${placedDt}</div>
+                    <div style="font-size:10px; color:var(--text-muted);"><span style="color:#10b981; font-weight:bold;">CLOSED:</span> ${completedDt}</div>
+                </div>
+
+                <div style="font-size:11px; color:${totalPassed === totalChecks && totalChecks > 0 ? '#10b981' : '#f59e0b'}; font-weight:700; flex-shrink:0; margin-left:10px;">${totalPassed}/${totalChecks} checks</div>
+                <button onclick="event.stopPropagation(); unarchivePackerzOrder('${order.order_id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex: none; white-space: nowrap; width: max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">UNARCHIVE</button>
+                <div style="color:var(--text-muted); font-size:12px; margin-left:8px;">▼</div>
             </div>
 
             <!-- Expandable detail -->
             <div id="sop-audit-detail-${i}" style="display:none; padding:16px; border-top:1px solid var(--border-color); background:var(--bg-body);">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-                    <!-- Telemetry checks -->
-                    <div>
-                        <div style="font-size:11px; font-weight:900; color:#10b981; letter-spacing:1px; margin-bottom:8px;">TELEMETRY CHECKS</div>
-                        ${checks.length === 0 ? '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None recorded</div>' :
-                          checks.map(c => `<div style="font-size:12px; padding:3px 0; color:${c.valid ? '#10b981' : '#ef4444'};">${c.valid ? '✅' : '❌'} ${c.text || ''}</div>`).join('')}
-                        ${inputs.length > 0 ? `<div style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:1px; margin:10px 0 6px;">INPUT VALUES</div>
-                        ${inputs.map(inp => `<div style="font-size:12px; padding:3px 0; color:var(--text-muted);">📝 ${inp.text}: <b style="color:var(--text-main); font-family:monospace;">${inp.value || '(blank)'}</b></div>`).join('')}` : ''}
-                    </div>
-                    <!-- SOP snapshot summary -->
-                    <div>
-                        <div style="font-size:11px; font-weight:900; color:#0ea5e9; letter-spacing:1px; margin-bottom:8px;">SOP SNAPSHOT AT TIME OF SIGNING</div>
-                        <div style="font-size:11px; color:var(--text-muted); background:var(--bg-input); padding:10px; border-radius:6px; max-height:200px; overflow-y:auto; font-family:monospace; line-height:1.6;">
-                            ${formatSOPSnapshotPreview(r.sop_snapshot)}
-                        </div>
-                    </div>
-                </div>
+                ${itemsHtml}
             </div>
         </div>`;
     }).join("");

@@ -25,18 +25,23 @@ window.calculateProductBreakdown = function(pName) {
 window.getEngineTrueCogs = function(pName) { return window.calculateProductBreakdown(pName).total; };
 window.calculateProductTotal = window.getEngineTrueCogs;
 
-window.getEngineStripeFee = function(amt) { return (amt * 0.029) + 0.30; };
+window.getEngineStripeFee = function(amt, source) { 
+    if (source && String(source).toLowerCase().includes('ebay')) {
+        return (amt * 0.2388); // Safe blended average accounting for 13.6% final value + ~10% Promoted Listings Ad Spend
+    }
+    return (amt * 0.029) + 0.30; 
+};
 window.getEngineLiveMsrp = function(pName) { return typeof pricingDB !== 'undefined' && pricingDB[pName] ? parseFloat(pricingDB[pName].msrp) || 0 : 0; };
-window.getHistoricalNetProfit = function(gross, shipCol, tax, disc, actShip, pName, qty = 1) {
+window.getHistoricalNetProfit = function(gross, shipCol, tax, disc, actShip, pName, qty = 1, source = "web") {
     let captured = gross + shipCol + tax - disc;
-    let fee = window.getEngineStripeFee(captured);
+    let fee = window.getEngineStripeFee(captured, source);
     let cogs = window.getEngineTrueCogs(pName) * qty;
     return gross + shipCol - disc - fee - actShip - cogs;
 };
 window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, warr) {
     let sCol = msrp >= fsThreshold ? 0 : 8.00;
     let aShip = 8.00; 
-    let fee = window.getEngineStripeFee(msrp + sCol);
+    let fee = window.getEngineStripeFee(msrp + sCol, "web");
     let net = msrp + sCol - cogs - fee - aShip - cac - aff - warr;
     let margin = msrp > 0 ? (net / msrp) * 100 : 0;
     return { net: net, stripe: fee, aff: aff, cac: cac, warr: warr, margin: margin, ship: sCol, oop: msrp + sCol, merchantShipMargin: sCol - aShip };

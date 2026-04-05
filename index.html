@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.05.0514"></script>
+    <script src="system-version.js?v=v.2026.04.05.0938"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.0514"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.0938"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0938"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.05.0514"></script>
+    <script src="packerz-module.js?v=v.2026.04.05.0938"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1980,7 +1980,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0938"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -2551,7 +2551,6 @@
                         <div class="matrix-container" style="background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; flex-grow: 1; min-height: 350px; display: flex; flex-direction: column;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; flex-shrink: 0;">
                                 <h4 style="margin:0; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px;">Sku Profitability Matrix</h4>
-                                <button class="btn-blue" onclick="backfillFinancials()" style="font-size:11px; padding:6px 12px;">↻ BACKFILL FINANCIALS</button>
                             </div>
                             <div class="table-wrap" id="analyticsTableWrap" style="flex-grow: 1; overflow-y: auto; min-height: 0;"></div>
                         </div>
@@ -2655,10 +2654,9 @@
 
             <div class="pane-header-bar">
                 <span class="pane-header-title">PACKERZ</span>
-                <div class="pane-header-actions">
+            <div class="pane-header-actions">
                     <button class="btn-blue" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';">⚙️ BLUEPRINTS</button>
-                    <button class="btn-green" onclick="document.getElementById('packerzArchiveModal').style.display='flex';">🗃️ COMPLETED ARCHIVE</button>
-                    <button class="btn-blue" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex'; openSOPAuditLog(true);" style="background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#10b981;">📂 AUDIT LOG</button>
+                    <button class="btn-green" onclick="openSOPAuditLog()">🗃️ COMPLETED ORDERS ARCHIVE</button>
                 </div>
             </div>
             
@@ -3013,7 +3011,11 @@
                             <h3 style="margin:0 0 10px 0; font-size:15px;">🛍️ Salez Order Sync</h3>
                             <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Auto-deduct Shopify/Etsy quantities from live inventory.</p>
                             <input type="file" id="salesCsvFile" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="width:100%; font-size:11px; margin-bottom:10px;">
-                            <button class="btn-green" onclick="processSalesCSV()" style="width:100%; padding:8px; font-size:12px; margin-bottom:12px;">🚀 INITIATE SYNC</button>
+                            <button class="btn-green" onclick="processSalesCSV()" style="width:100%; padding:8px; font-size:12px; margin-bottom:8px;">🚀 INITIATE SYNC</button>
+                            <div style="display:flex; gap:8px; margin-bottom:12px;">
+                                <button class="btn-blue" onclick="backfillFinancials()" style="flex:1; padding:8px; font-size:11px; background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:#38bdf8;">↻ BACKFILL FINANCIALS</button>
+                                <button class="btn-blue" onclick="alert('BACKFILL FINANCIALS:\\n\\nThis mathematical tool sequentially loops through all historical orders and dynamically recalculates your exact Net Profit and Transaction Fees based on your currently active Engine specifications (like updated BOM costs and Live eBay/Stripe Fee logic) and pushes those two specific fields up to your master database.\\n\\nIt strictly performs read operations on your original imported CSV physical parameters to execute this, explicitly refusing to overwrite your established Shopify source data strings.')" style="flex:1; padding:8px; font-size:11px; font-weight:bold; background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:#38bdf8; cursor:help;">ℹ️ READ GUIDE</button>
+                            </div>
                             
                             <!-- Trace Terminal Window -->
                             <div style="flex-grow: 1; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; font-family: monospace; font-size: 10px; color: #38bdf8; min-height:150px;">
@@ -3072,7 +3074,10 @@
                             <h3 style="margin:0 0 10px 0; font-size:15px;">⚙️ Force Recalculation</h3>
                             <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Manually trigger a complete mathematical reconciliation of all ledger balances.</p>
                             <div id="statusMaster" class="status-bar status-idle" style="font-size:13px; padding:10px; margin-bottom:10px;">Ready for sync operations...</div>
-                            <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="display:none; width:100%; padding:12px; font-weight:bold;">↻ FORCE EXACT CALCULATION</button>
+                            <div id="btnCalcWrapper" style="display:none; gap:8px; width:100%;">
+                                <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="flex:1; padding:12px; font-weight:bold;">↻ FORCE EXACT CALCULATION</button>
+                                <button class="btn-green" onclick="alert('FORCE RECALCULATION:\\n\\nThis mathematical tool sequentially pulls down your entire live database (Operations Ledger, Materials Ledger, etc.), processes every record through the local Master Engine, and verifies alignment.\\n\\nIt serves to instantly correct drift or refresh local caching, and will not execute dangerous overwrites without your explicit permission.')" style="flex:1; padding:12px; font-weight:bold; background:rgba(34, 197, 94, 0.1); border:1px solid rgba(34, 197, 94, 0.3); color:#22c55e; cursor:help;">ℹ️ READ GUIDE</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3488,7 +3493,7 @@
     </div>
 </div>
 
-<div id="sopMasterModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
+<div id="sopMasterModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
     <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(16,185,129,0.3); width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
         <!-- Header -->
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 2px solid #10b981;">
@@ -3633,35 +3638,12 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.05.0514"></script>
-
-        <!-- ============================================== -->
-<!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
-<!-- ============================================== -->
-<div id="packerzArchiveModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
-    <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(16,185,129,0.3); width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
-        <div style="padding:20px 25px; border-bottom:1px solid var(--border-color); background:var(--bg-glass); display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:15px;">
-                <span style="font-size:24px;">🗃️</span>
-                <div>
-                    <h2 style="margin:0; font-size:20px; font-weight:900; color:#10b981; letter-spacing:1px; text-transform:uppercase;">COMPLETED ORDERS ARCHIVE</h2>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Historical read-only ledger of successfully shipped units under Fulfillz.</div>
-                </div>
-            </div>
-            <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('packerzArchiveModal').style.display='none'">Close</button>
-        </div>
-        <div style="padding:25px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden;">
-            <div id="packerzCompletedQueue" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
-                <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
-            </div>
-        </div>
-    </div>
-</div>
+    <script src="socialz-module.js?v=v.2026.04.05.0938"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
 <!-- ============================================== -->
-<div id="paneFulfillzSopAdmin" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
+<div id="paneFulfillzSopAdmin" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
     <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(59,130,246,0.3); width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
         <!-- Header -->
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 2px solid #3b82f6;">
@@ -3777,8 +3759,8 @@
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--bg-bar); border-bottom:1px solid var(--border-color); flex-shrink:0;">
                 <div>
-                    <div style="font-size:16px; font-weight:900; color:#10b981;">📂 SOP Audit Log — QA-Passed Snapshots</div>
-                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Immutable record of every SOP version used at the time of QA sign-off.</div>
+                    <div style="font-size:16px; font-weight:900; color:#10b981; letter-spacing:1px; text-transform:uppercase;">🗃️ COMPLETED ORDERS ARCHIVE</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Immutable record of every SOP version and Telemetry Map used at the time of QA sign-off.</div>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
                     <input type="text" id="sopAuditSearch" placeholder="Search by order or recipe..." oninput="filterSOPAuditLog()" style="padding:7px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px; width:220px;">
@@ -4192,7 +4174,7 @@
             if (socR && socR.data && typeof initSocialzData === 'function') { initSocialzData(socR.data); }
             
             setSysProgress(30, 'working');
-            if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalc').style.display = 'inline-block'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
+            if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); sortData(currentSort.column, true); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalcWrapper').style.display = 'flex'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
             
             setSysProgress(50, 'working'); inventoryDB = {}; 
             if (cR.data) { 
@@ -4267,7 +4249,14 @@
             if (typeof updateHubStats === 'function') updateHubStats();
             let savedTab = sessionStorage.getItem('activeTab') || 'invhub';
             switchTab(savedTab, true);
-            setSysProgress(100, 'success'); sysLog("System Ready " + (typeof NEOGLEAMZ_VERSION !== 'undefined' ? NEOGLEAMZ_VERSION : "") + "."); setTimeout(() => setSysProgress(0, 'working'), 3000);
+            const savedVer = localStorage.getItem('NEOGLEAMZ_VER');
+            const currentVer = typeof NEOGLEAMZ_VERSION !== 'undefined' ? NEOGLEAMZ_VERSION : "Unknown";
+            if (savedVer && savedVer !== currentVer) {
+                sysLog(`System Updated: ${savedVer} ➝ ${currentVer}`);
+            }
+            localStorage.setItem('NEOGLEAMZ_VER', currentVer);
+            
+            setSysProgress(100, 'success'); sysLog("System Ready " + currentVer + "."); setTimeout(() => setSysProgress(0, 'working'), 3000);
         } catch (err) { setSysProgress(100, 'error'); sysLog(err.message, true); setMasterStatus("❌ Error.", "mod-error"); }
     }
 
@@ -4733,15 +4722,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.05.0514"></script>
-<script src="system-tools-module.js?v=v.2026.04.05.0514"></script>
-<script src="bom-module.js?v=v.2026.04.05.0514"></script>
-<script src="inventory-module.js?v=v.2026.04.05.0514"></script>
-<script src="production-module.js?v=v.2026.04.05.0514"></script>
-<script src="sales-module.js?v=v.2026.04.05.0514"></script>
-<script src="analytics-module.js?v=v.2026.04.05.0514"></script>
-<script src="ceo-module.js?v=v.2026.04.05.0514"></script>
-<script src="print-module.js?v=v.2026.04.05.0514"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.05.0938"></script>
+<script src="system-tools-module.js?v=v.2026.04.05.0938"></script>
+<script src="bom-module.js?v=v.2026.04.05.0938"></script>
+<script src="inventory-module.js?v=v.2026.04.05.0938"></script>
+<script src="production-module.js?v=v.2026.04.05.0938"></script>
+<script src="sales-module.js?v=v.2026.04.05.0938"></script>
+<script src="analytics-module.js?v=v.2026.04.05.0938"></script>
+<script src="ceo-module.js?v=v.2026.04.05.0938"></script>
+<script src="print-module.js?v=v.2026.04.05.0938"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4833,7 +4822,7 @@
 <!-- ============================================== -->
 <!-- PACKERZ QA GATE & SOP VIEWER MODAL             -->
 <!-- ============================================== -->
-<div id="packerzSopViewerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) closePackerzSopViewer()">
+<div id="packerzSopViewerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
     <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid #10b981; width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
         
         <!-- Header -->
@@ -5195,18 +5184,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.0938"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.0938"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.0938"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.0514"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.0514"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.0938"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.0938"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.0938"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.05.0514"></script>
-    <script src="labelz-module.js?v=v.2026.04.05.0514"></script>
+    <script src="barcodz-module.js?v=v.2026.04.05.0938"></script>
+    <script src="labelz-module.js?v=v.2026.04.05.0938"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>

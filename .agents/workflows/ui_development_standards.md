@@ -730,3 +730,15 @@ function sortSales(c) {
     renderSalesTable(); 
 }
 ```
+
+---
+
+## 26. Protocol: Immutable Source Data
+
+To guarantee **Source-Aware Accounting** across the Neogleamz ecosystem, any raw data imported from external systems (Shopify, Salez, Orders, Parcels) MUST be physically rendered as strictly immutable, read-only UI components in ledgers and datagrid tables.
+
+**Core Directives:**
+1. **Never use `contenteditable="true"` or `.editable` CSS classes** on source data columns (e.g., Sale Date, Order ID, Storefront SKU, Actual Price, Shipping Collected, Raw Shopify Total).
+2. **Never allow users to manually type over or alter imported strings** to fix discrepancies. 
+3. **Data Corrections MUST be Algorithmic:** If financial data requires correction (e.g., an order was an exchange, or revenue needs stripping), do NOT rewrite the raw value in the database. Instead, expose secondary Engine variables (like `transaction_type` dropdowns: IGNORE, Warranty, Exchange) that the Master Engine can use to *mathematically derive* the corrected net metrics down the pipeline.
+4. **Visual Accountability:** The UI Table must mathematically resemble the exact original string provided by the import CSV, providing a guaranteed source-of-truth baseline before Engine derivations take over.
