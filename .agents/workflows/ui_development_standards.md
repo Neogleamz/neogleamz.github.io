@@ -742,3 +742,25 @@ To guarantee **Source-Aware Accounting** across the Neogleamz ecosystem, any raw
 2. **Never allow users to manually type over or alter imported strings** to fix discrepancies. 
 3. **Data Corrections MUST be Algorithmic:** If financial data requires correction (e.g., an order was an exchange, or revenue needs stripping), do NOT rewrite the raw value in the database. Instead, expose secondary Engine variables (like `transaction_type` dropdowns: IGNORE, Warranty, Exchange) that the Master Engine can use to *mathematically derive* the corrected net metrics down the pipeline.
 4. **Visual Accountability:** The UI Table must mathematically resemble the exact original string provided by the import CSV, providing a guaranteed source-of-truth baseline before Engine derivations take over.
+
+---
+
+## 27. Version Bumping Protocol
+
+Any time a new feature, fix, or architectural change is implemented and pushed to the `main` branch, you **MUST** bump the system version string in `system-version.js` to reflect the date and time of the build.
+
+**Example:**
+`const NEOGLEAMZ_VERSION = "v.2026.04.05.0937";`
+
+This guarantees that the `NEOGLEAMZ_VER` local storage watcher correctly triggers the "System Updated: [old] -> [new]" log in the terminal, providing the user and all web clients absolute confirmation that their browser cache has successfully pulled the latest deployment. Failure to bump this string will result in silent cache-lock confusion.
+
+---
+
+## 28. Local Testing & Verification Guidelines
+
+To ensure the "Zero-Risk Workflow" is maintained, you must follow strict testing validation protocols before requesting user approval to merge.
+
+**Core Directives:**
+1. **Local Domain Validation:** Every feature branch MUST be tested by the user loading `127.0.0.1:5500` or clicking the `Go Live` server to verify the UI and functionality. Never assume code works blindly.
+2. **Flexbox & Edge Case Checking:** Always verify the visual boundaries of newly added UI constraints (e.g., test long text wrapping in fixed-width Flex containers, ensure buttons don't unpredictably stretch with `flex: 1` or get clipped by `max-width` restrictions). 
+3. **Cache Awareness:** Before deploying to `main`, instruct the user that GitHub Pages enforces a 3-5 minute CI/CD delay and a hard network refresh (Ctrl+F5 / Cmd+Shift+R) is strictly required on the live `.com` URL to defeat Service Worker/Browser Caching.
