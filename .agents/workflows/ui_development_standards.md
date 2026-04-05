@@ -119,6 +119,13 @@ Every `executive-pane` must have a `.pane-header-bar` as its **first child**. Ti
 
 **RULE: Never use `<select multiple>` for multi-select UIs.** Use the custom panel pattern below.
 
+**RULE: Strict Dataset Filtering (`is_label` Exclusions).**
+Whenever populating an internal Retail Product dropdown or array mapping from the master `productsDB` table, you MUST explicitly exclude Custom Labels to prevent them from masquerading as physical products.
+If mapping a "Retail" array, your filter algorithm MUST be:
+```javascript
+let retail = sorted.filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
+```
+
 ### Standard Single Select
 ```html
 <div style="position:relative;">
