@@ -92,9 +92,15 @@ function extractSOPDataFromUI(containerId) {
 }
 
 async function saveMasterSOP() { 
+    const btn = document.getElementById('btnSaveMasterSOP');
+    if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity = "0.5"; }
+
     try { 
         const p = document.getElementById('sopMasterProductSelect').value; 
-        if(!p) return; 
+        if(!p) {
+            if(btn) { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.opacity = "1"; }
+            return;
+        } 
         let steps = extractSOPDataFromUI('sopMasterEditorArea'); 
         let rawQa = document.getElementById('productionAdminQA')?.value || '';
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
@@ -102,16 +108,36 @@ async function saveMasterSOP() {
         sopsDB[p] = payload; 
         sysLog(`Saving Master SOP for ${p}`); 
         setMasterStatus("Saving...", "mod-working"); 
+        
         const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'}); 
         if(error) throw new Error(error.message); 
+        
+        if(btn) {
+            btn.innerText = "💾 SAVED SUCCESSFULLY!";
+            btn.style.background = "#059669";
+            setTimeout(() => { 
+                if(btn) { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.background = ""; btn.style.opacity = "1"; }
+            }, 3000);
+        }
+
         setMasterStatus("Saved!", "mod-success"); 
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); 
         if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); 
-    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } 
+    } catch(e) { 
+        sysLog(e.message, true); 
+        setMasterStatus("Error", "mod-error"); 
+        if(btn) { btn.innerText = "❌ ERROR - RETRY"; btn.style.opacity = "1"; btn.style.background = "#ef4444"; setTimeout(() => { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.background = ""; }, 3000); }
+    } 
 }
 async function saveInlineSOP() { 
+    const btn = document.getElementById('btnSaveInlineSOP');
+    if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity = "0.5"; }
+
     try { 
-        if(!currentWO) return; 
+        if(!currentWO) {
+            if(btn) { btn.innerText = "💾 Save Changes to Cloud"; btn.style.opacity = "1"; }
+            return;
+        } 
         const p = currentWO.product_name; 
         let steps = extractSOPDataFromUI('inlineSOPContainer'); 
         let existingQa = [];
@@ -120,12 +146,26 @@ async function saveInlineSOP() {
         sopsDB[p] = payload; 
         sysLog(`Saving Inline SOP for ${p}`); 
         setMasterStatus("Saving...", "mod-working"); 
+        
         const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'}); 
         if(error) throw new Error(error.message); 
+        
+        if(btn) {
+            btn.innerText = "💾 SAVED SUCCESSFULLY!";
+            btn.style.background = "#059669";
+            setTimeout(() => { 
+                if(btn) { btn.innerText = "💾 Save Changes to Cloud"; btn.style.background = ""; btn.style.opacity = "1"; }
+            }, 3000);
+        }
+
         setMasterStatus("Saved!", "mod-success"); 
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); 
         toggleSOPLock(); 
-    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); } 
+    } catch(e) { 
+        sysLog(e.message, true); 
+        setMasterStatus("Error", "mod-error"); 
+        if(btn) { btn.innerText = "❌ ERROR - RETRY"; btn.style.opacity = "1"; btn.style.background = "#ef4444"; setTimeout(() => { btn.innerText = "💾 Save Changes to Cloud"; btn.style.background = ""; }, 3000); }
+    } 
 }
 
 function openNewWOModal() { 

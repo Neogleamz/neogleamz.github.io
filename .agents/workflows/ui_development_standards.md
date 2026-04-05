@@ -638,3 +638,38 @@ This eliminates wasted space (like large canvas image blocks) and aligns interac
     </div>
 </div>
 ```
+
+---
+
+## 23. Global SOP Editors
+
+To ensure unity across all Neogleamz operational modules (Packerz, Batchez, Layerz, Toolz), all SOP Blueprint UI components must strictly adhere to the unified Split-Pane pattern and the sequential button state flow. 
+
+**Required Layout:**
+- **Split-Pane Architecture:** The Editor dictates a 65/35 left/right split utilizing flex ratios. Separated by the global `.h-resizer` div.
+- **Left Pane:** Includes the `Audited Telemetry Checklist` input textarea (e.g. `packerzAdminQA` or `productionAdminQA`) beside the `Live Telemetry Preview` display box.
+- **Right Pane:** The legacy manual Rich Text instructions block builder (`+ ADD PROCEDURE STEP`).
+
+**Required Feature Flow (Master Save Button):**
+Every module utilizing a Master Blueprint save sequence MUST animate its trigger `<button>` to visually confirm the network event to the operator, transitioning away from background-silent loads.
+
+The save function logic must execute this specific sequence:
+```javascript
+// 1. Initial Processing State
+btn.innerText = "UPLOADING PROTOCOLS..."; 
+btn.style.opacity = "0.5";
+
+// 2. Await Database Call
+const { error } = await supabaseClient.from('...').upsert({...});
+
+// 3. Success State
+btn.innerText = "💾 SAVED SUCCESSFULLY!";
+btn.style.background = "#059669";
+
+// 4. Revert to Idle baseline after fixed duration (3000ms)
+setTimeout(() => { 
+    btn.innerText = "💾 SAVE MASTER BLUEPRINT"; 
+    btn.style.background = ""; 
+    btn.style.opacity = "1"; 
+}, 3000);
+```
