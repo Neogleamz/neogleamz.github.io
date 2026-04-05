@@ -592,3 +592,49 @@ function showStatus(msg, isError = false) {
     setTimeout(() => el.style.display = 'none', 3500);
 }
 ```
+
+---
+
+## 22. Compact Grid Matrix Cards
+
+To ensure visual consistency for all item-level entities (e.g., Barcodz Spoolers, Labelz Selection, Recipe Parts), all cards displayed inside a repeating grid MUST follow the **Compact Grid Matrix Card** pattern.
+
+This eliminates wasted space (like large canvas image blocks) and aligns interactions cleanly into a strict CSS Grid structure.
+
+**Required Features:**
+1. Outer wrapper uses standard panel styling with a hover border transition.
+2. The Top Header uses `display:grid; grid-template-columns:auto 1fr auto; align-items:center;`.
+3. Top Header layout strictly dictates:
+   - **Left:** Big emoji in a dedicated square `var(--bg-input)` container.
+   - **Center:** Vertically stacked or horizontally flexed pill badges (e.g. Dimensions, Stock status).
+   - **Right:** Primary Action Button (e.g., Spool).
+4. The Bottom Body uses `border-top`, holds the Item Name text, and ends with the Secondary/Configuration Action Button spanning 100% width.
+
+**Template Payload:**
+```html
+<div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+    
+    <!-- Top Grid Layout -->
+    <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
+        <!-- Left: Emoji Container -->
+        <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">🏷️</div>
+        
+        <!-- Center: Status / Data Pills -->
+        <div style="display:flex; justify-content:center; align-items:center; height:100%; gap:4px;">
+            <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase;">2.25x1.25"</span>
+            <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(16,185,129,0.1); color:#10b981; padding:2px 6px; border-radius:8px; text-transform:uppercase;">STOCK: 140</span>
+        </div>
+        
+        <!-- Right: Primary Action Button -->
+        <button style="background:#8b5cf6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Primary</button>
+    </div>
+    
+    <!-- Bottom Content + Secondary Action -->
+    <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
+        <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">Item Name String Here</div>
+        
+        <!-- Span-full Width Secondary Footer Button -->
+        <button style="width:100%; background:var(--bg-bar); color:var(--text-main); border:1px solid var(--border-color); padding:4px 0; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='var(--border-color)'" onmouseout="this.style.background='var(--bg-bar)'"><i style="margin-right:4px; font-style:normal;">✏️</i> Secondary Action Edit</button>
+    </div>
+</div>
+```

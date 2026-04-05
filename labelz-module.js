@@ -63,34 +63,37 @@ function renderLabelzGrid() {
         const stockQty = stockData ? (stockData._stock_qty || 0) : 0;
         const lowThreshold = 10;
         const stockColor = stockQty === 0 ? '#ef4444' : stockQty < lowThreshold ? '#f59e0b' : '#10b981';
-        const stockEmoji = stockQty === 0 ? '🔴' : stockQty < lowThreshold ? '🟡' : '🟢';
+        const stockBg = stockQty === 0 ? 'rgba(239,68,68,0.1)' : stockQty < lowThreshold ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)';
 
-        const hasThumbnail = label.file_url && !label.file_url.toLowerCase().endsWith('.pdf');
-        const hasPDF = label.file_url && label.file_url.toLowerCase().endsWith('.pdf');
-        const hasLayout = label.layout_json && Object.keys(label.layout_json).length > 0 && !hasThumbnail && !hasPDF;
+        const cleanName = label.product_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        const safeEmoji = label.emoji || '🏷️';
+        const safeSize  = label.label_size || '2.25x1.25';
 
         html += `
-        <div style="background:var(--bg-panel);border:1px solid var(--border-color);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:0.2s;" onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='var(--border-color)'">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div style="font-size:26px;flex-shrink:0;">${label.emoji || '🏷️'}</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-size:13px;font-weight:900;color:var(--text-heading);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${label.product_name}">${label.product_name}</div>
-                    <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${label.label_size || '2.25x1.25'}"</div>
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                
+                <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
+                    <!-- Emoji Top Left -->
+                    <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">${safeEmoji}</div>
+                    
+                    <!-- Type Pills Centered -->
+                    <div style="display:flex; justify-content:center; align-items:center; height:100%; gap:4px;">
+                        <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${safeSize}"</span>
+                        <span style="display:inline-block; font-size:8px; font-weight:800; background:${stockBg}; color:${stockColor}; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">STOCK: ${stockQty}</span>
+                    </div>
+                    
+                    <!-- Spool Button Top Right -->
+                    <button onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="background:#8b5cf6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                 </div>
-                <div style="font-size:11px;font-weight:800;color:${stockColor};flex-shrink:0;">${stockEmoji} ${stockQty}</div>
+                
+                <!-- Content & Edit Base -->
+                <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
+                    <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
+                    
+                    <button onclick="openEditLabelModal('${cleanName}')" style="width:100%; background:var(--bg-bar); color:var(--text-main); border:1px solid var(--border-color); padding:4px 0; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='var(--border-color)'" onmouseout="this.style.background='var(--bg-bar)'"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Canvas</button>
+                </div>
             </div>
-
-            <!-- Thumbnail -->
-            ${hasThumbnail ? `<img src="${label.file_url}" style="width:100%;height:80px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid var(--border-color);">` :
-              hasPDF ? `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:rgba(239,68,68,0.1);border-radius:6px;border:1px dashed #ef4444;color:#ef4444;font-weight:800;font-size:13px;">📄 PDF Label</div>` :
-              hasLayout ? `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,0.08);border-radius:6px;border:1px dashed #8b5cf6;color:#8b5cf6;font-weight:800;font-size:12px;">🏷️ Canvas Design</div>` :
-              `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:var(--bg-bar);border-radius:6px;color:var(--text-muted);font-size:11px;font-style:italic;">No design yet</div>`}
-
-            <div style="display:flex;gap:6px;margin-top:auto;">
-                <button onclick="addLabelzToSpool('${label.product_name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${(label.emoji||'🏷️')}')" style="flex:1;background:#8b5cf6;color:#fff;border:none;padding:6px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">➕ Spool</button>
-                <button onclick="openEditLabelModal('${label.product_name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')" style="background:var(--bg-bar);color:var(--text-main);border:1px solid var(--border-color);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;">✏️ Edit</button>
-            </div>
-        </div>`;
+        `;
     });
 
     html += '</div>';
