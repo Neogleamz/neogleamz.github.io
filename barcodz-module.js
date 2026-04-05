@@ -415,8 +415,9 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
              inventoryDB[sizeText] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
         }
         
-        // Log thermal printing as 'production_consumed_qty'
+        // Log thermal printing as 'production_consumed_qty' and add it to the master 'consumed_qty'
         inventoryDB[sizeText].production_consumed_qty += qty;
+        inventoryDB[sizeText].consumed_qty += qty;
         
         const payload = {
              item_key: sizeText,
