@@ -1,7 +1,11 @@
 // --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
-window.fgiCategoryState = window.fgiCategoryState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true, 'cat-label': true };
-window.toggleFgiCategory = function(cat) { window.fgiCategoryState[cat] = !window.fgiCategoryState[cat]; renderFgiTable(); };
-
+const savedFgiState = JSON.parse(localStorage.getItem('fgiCategoryState') || "null");
+window.fgiCategoryState = savedFgiState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true, 'cat-label': true };
+window.toggleFgiCategory = function(cat) { 
+    window.fgiCategoryState[cat] = !window.fgiCategoryState[cat]; 
+    localStorage.setItem('fgiCategoryState', JSON.stringify(window.fgiCategoryState));
+    renderFgiTable(); 
+};
 function sortFGI(c) { if(isResizing) return; currentFgiSort = { column: c, direction: currentFgiSort.column===c && currentFgiSort.direction==='asc' ? 'desc' : 'asc' }; renderFgiTable(); }
 function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; renderInventoryTable(); }
 

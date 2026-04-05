@@ -122,10 +122,18 @@ function renderProductList() {
         </li>`;
     }
 
+    const savedRecipeState = JSON.parse(localStorage.getItem('recipeGroupState') || "null");
+    window.recipeGroupState = window.recipeGroupState || savedRecipeState || {
+        'cat-retail': true,
+        'cat-sub': true,
+        'cat-print': true,
+        'cat-raw': false,
+        'cat-label': true
+    };
+
     window.toggleRecipeCategory = function(catId, btn) {
         const el = document.getElementById(catId);
         if (!el) return;
-        window.recipeGroupState = window.recipeGroupState || {};
         if (el.style.display === 'none') {
             el.style.display = 'block';
             btn.innerHTML = '▼';
@@ -135,9 +143,9 @@ function renderProductList() {
             btn.innerHTML = '▶';
             window.recipeGroupState[catId] = false;
         }
+        localStorage.setItem('recipeGroupState', JSON.stringify(window.recipeGroupState));
     };
 
-    window.recipeGroupState = window.recipeGroupState || {};
     function getCatState(id, prodArr) {
         if (window.recipeGroupState[id] === undefined && prodArr.includes(currentProduct)) {
             window.recipeGroupState[id] = true;
