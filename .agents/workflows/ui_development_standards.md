@@ -816,7 +816,7 @@ Every archived record is rendered as an `.archive-card` with two zones:
 - **Search filter** — every archive explorer MUST include a text input that filters by ID, name, and label in real time using `filterArchiveList(q)`.
 - **Data cache** — store the full unfiltered dataset in `_archiveFullData` before rendering so the filter doesn't require a DB re-query.
 - **Toggle function** — always use `toggleArchiveDetail(id)` from `production-module.js` (global scope).
-- **Hard Delete placement** — the 🗑️ Hard Delete button MUST live inside the `.archive-card-detail` zone, **never** in the `.archive-card-header`. This prevents accidental destructive taps.
+- **Hard Delete placement** — the 🗑️ Delete button MUST live in the `.archive-card-header`, always visible. Use `event.stopPropagation()` on its `onclick` to prevent the click from also toggling the accordion. The `confirm()` dialog inside `hardDeleteArchive()` provides accidental-tap protection.
 - **Label display** — if a record has a `label` field set, display it as `"label text" — Title` in the `.archive-card-title` and as a detail row. If null, omit both.
 
 ### Status Pill Modifiers
