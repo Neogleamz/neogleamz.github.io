@@ -147,9 +147,9 @@ async function runProductionBatch() {
         const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
         if(error) throw new Error(error.message); 
         
-        setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); alert(`Built ${q}x ${n} (${batchType}) and deducted materials.`); 
+        setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); showToast(`✅ Built ${q}x ${n} (${batchType}) and deducted materials.`); 
         document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); 
-    } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); alert("Batch Error."); }
+    } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
 }
 
 async function resetInventoryConsumption() {

@@ -949,7 +949,7 @@ function renderActiveWO(id) {
 async function advanceWO(newStatus) {
     try {
         if(!currentWO) return; 
-        if(currentWO.status === 'Completed') return alert("WO archived.");
+        if(currentWO.status === 'Completed') return showToast('This Work Order is already archived.', 'error');
         
         if (currentWO.materials_pulled && (newStatus === 'Queued' || newStatus === 'Picking')) {
             return alert("Materials have already been pulled for this Work Order. You cannot revert to previous planning stages.");
@@ -1086,7 +1086,7 @@ async function deleteCurrentWO() { try { if(!currentWO) return; if(confirm(`Dele
 async function archiveCurrentWO() {
     try {
         if(!currentWO) return;
-        if(currentWO.status === 'Archived') return alert("Already archived.");
+        if(currentWO.status === 'Archived') return showToast('Already archived.', 'error');
         if(confirm(`Archive WO ${currentWO.wo_id}?`)) {
             sysLog(`Archiving ${currentWO.wo_id}`); setMasterStatus("Archiving...", "mod-working");
             const {error} = await supabaseClient.from('work_orders').update({status: 'Archived'}).eq('wo_id', currentWO.wo_id);

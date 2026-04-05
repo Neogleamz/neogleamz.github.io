@@ -153,7 +153,7 @@ function processParsedSales(rows) {
 
     if(pendingSalesRows.length === 0) {
         syncTrace("HALT WARNING: Zero valid rows detected or Ledger matched existing instances 100%. Aborting.", true);
-        setTimeout(() => alert("No new sales found in this file! All orders are already in the ledger or the file contained invalid rows."), 10);
+        setTimeout(() => showToast("No new sales found in this file! All orders already exist in the ledger or file contained invalid rows."), 10);
         let elUnmapped = document.getElementById('unmappedSkusList');
         if (elUnmapped) elUnmapped.innerHTML = "";
         syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
@@ -235,14 +235,14 @@ async function executeSalesSync() {
         if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         
         syncTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
-        setTimeout(() => alert(`Success! ${count} sales were synced. Inventory deduction is automatically deferred until Packerz Assembly Completion.`), 10);
+        setTimeout(() => showToast(`✅ Success! ${count} sales synced. Inventory deduction deferred until Packerz Assembly Completion.`), 10);
         setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000);
     } catch(e) { 
         syncTrace(`CRITICAL FAULT: ${e.message}`, true);
         sysLog(e.message, true); 
         setMasterStatus("Sync Error", "mod-error"); 
         setSysProgress(100, 'error'); 
-        setTimeout(() => alert("Database Error during Sync:\n\n" + e.message + "\n\nPlease check your Supabase columns."), 10);
+        setTimeout(() => showToast("Database Error during Sync:\n\n" + e.message + "\n\nPlease check your Supabase columns.", 'error'), 10);
     }
 }
 

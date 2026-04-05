@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.05.0206"></script>
+    <script src="system-version.js?v=v.2026.04.05.0213"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.0206"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0206"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.0213"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0213"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.05.0206"></script>
+    <script src="packerz-module.js?v=v.2026.04.05.0213"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -171,7 +171,7 @@
         }
         .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; background: var(--bg-body); }
         .sub-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: var(--bg-glass); padding: 6px; border-radius: 12px; border: 1px solid var(--border-input); align-self: flex-start; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
-        .sub-nav::-webkit-scrollbar { display: none; }
+        .sub-nav::-webkit-scrollbar { display: none; } /* §3 EXCEPTION: intentionally hidden for compact nav strip */
         .sub-nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 800; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
         .sub-nav-btn:hover { background: var(--bg-input); color: var(--text-main); }
         .sub-nav-btn.active { background: #F79320; color: white !important; box-shadow: 0 4px 12px rgba(247, 147, 32, 0.3); }
@@ -227,7 +227,7 @@
             -ms-overflow-style: none;
             padding: 4px;
         }
-        .tabs::-webkit-scrollbar { display: none; }
+        .tabs::-webkit-scrollbar { display: none; } /* §3 EXCEPTION: intentionally hidden for horizontal tab strip */
 
         .tab-btn { 
             padding: 10px 18px; 
@@ -729,7 +729,7 @@
             .title-block .subtitle { font-size: clamp(8px, 3.5vw, 12px) !important; margin-top: 2px !important; white-space: nowrap !important; text-align: center; }
             
             .tabs { flex: 0 0 auto !important; height: auto !important; width: 100vw; max-width: 100%; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding-bottom: 2px; }
-            .tabs::-webkit-scrollbar { display: none; }
+            .tabs::-webkit-scrollbar { display: none; } /* §3 EXCEPTION: mobile override — intentionally hidden */
             
             /* Tighten Hub UI for mobile */
             .hub-landing { justify-content: flex-start !important; align-items: flex-start !important; height: auto !important; padding: 10px !important; gap: 10px !important; }
@@ -1980,7 +1980,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0206"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0213"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -3377,7 +3377,7 @@
         </div>
     </div>
 
-<div id="recipeActionModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10006; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+<div id="recipeActionModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10006; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
     <div style="background:var(--bg-container); border:1px solid var(--border-color); border-radius:8px; padding:20px; width:400px; text-align:center; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
         <h3 id="recipeModalTitle" style="color:var(--text-heading); margin-top:0; font-size:22px;">Action</h3>
         <p id="recipeModalText" style="color:var(--text-main); margin-bottom:15px; font-size:15px;"></p>
@@ -3445,7 +3445,7 @@
     </div>
 </div>
 
-<div id="multiBatchOrderModal" style="display:none; z-index:10001; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+<div id="multiBatchOrderModal" class="modal-overlay" style="display:none; z-index:10001; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
     <div class="container" style="width:100%; max-width:650px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px; max-height:85vh;">
         <h2 style="margin-top:0;">🛒 Multi-Item Batch Estimator</h2>
         
@@ -3477,7 +3477,7 @@
     </div>
 </div>
 
-<div id="batchOrderReportModal" style="display:none; z-index:10002; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+<div id="batchOrderReportModal" class="modal-overlay" style="display:none; z-index:10002; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
     <div style="background:var(--bg-container); border:1px solid var(--border-color); border-radius:8px; padding:20px; width:700px; max-height:80vh; display:flex; flex-direction:column;">
         <h2 style="margin-top:0; color:var(--text-heading);">📊 Batch Order Projection</h2>
         <div id="batchOrderReportContent" style="flex-grow:1; overflow-y:auto; margin-bottom:20px; background:var(--bg-panel); padding:15px; border-radius:6px; border:1px solid var(--border-color);"></div>
@@ -3488,7 +3488,7 @@
     </div>
 </div>
 
-<div id="sopMasterModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
+<div id="sopMasterModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
     <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(16,185,129,0.3); width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
         <!-- Header -->
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 2px solid #10b981;">
@@ -3595,7 +3595,7 @@
     </div>
 </div>
 
-<div id="ceoAddModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+<div id="ceoAddModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
     <div class="massive-container" style="max-width:950px; max-height:95vh; display:flex; flex-direction:column;">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:22px;">🚀 CEO Terminal: Unified Analysis Builder</h2>
@@ -3633,12 +3633,12 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.05.0206"></script>
+    <script src="socialz-module.js?v=v.2026.04.05.0213"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
 <!-- ============================================== -->
-<div id="packerzArchiveModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
+<div id="packerzArchiveModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
     <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(16,185,129,0.3); width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
         <div style="padding:20px 25px; border-bottom:1px solid var(--border-color); background:var(--bg-glass); display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:15px;">
@@ -3661,7 +3661,7 @@
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
 <!-- ============================================== -->
-<div id="paneFulfillzSopAdmin" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
+<div id="paneFulfillzSopAdmin" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) this.style.display='none'">
     <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(59,130,246,0.3); width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
         <!-- Header -->
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 2px solid #3b82f6;">
@@ -3739,7 +3739,7 @@
     <!-- ============================================================
          SOP MEDIA PICKER MODAL
     ============================================================ -->
-    <div id="sopMediaPickerModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPMediaPicker()">
+    <div id="sopMediaPickerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPMediaPicker()">
         <div style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(14,165,233,0.3); width:860px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--bg-bar); border-bottom:1px solid var(--border-color); flex-shrink:0;">
@@ -3771,7 +3771,7 @@
     <!-- ============================================================
          SOP AUDIT LOG MODAL
     ============================================================ -->
-    <div id="sopAuditLogModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPAuditLog()">
+    <div id="sopAuditLogModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPAuditLog()">
         <div style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(16,185,129,0.3); width:1100px; max-width:96vw; height:88vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--bg-bar); border-bottom:1px solid var(--border-color); flex-shrink:0;">
@@ -3912,7 +3912,29 @@
     function savePrintOrderPrefs() { try { window.cloudTablePrefs.printOrder = printQueueDB.map(p => p.id); saveCloudPrefs(); } catch(e) {} }
     function saveProductOrderPrefs() { try { window.cloudTablePrefs.productOrder = Object.keys(productsDB).sort(); saveCloudPrefs(); } catch(e) {} }
 
+    // ============================================================
+    // §21 GLOBAL TOAST NOTIFICATION UTILITY
+    // Use showToast(msg) for non-destructive informational feedback.
+    // Use showToast(msg, 'error') for error feedback.
+    // Never replace confirm() — that is intentional and correct.
+    // ============================================================
+    function showToast(msg, type = 'success') {
+        const existing = document.getElementById('neoToast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.id = 'neoToast';
+        const bg = type === 'error' ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)';
+        const border = type === 'error' ? '#ef4444' : '#10b981';
+        const color = type === 'error' ? '#ef4444' : '#10b981';
+        toast.style.cssText = `position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:${bg}; border:1px solid ${border}; color:${color}; padding:12px 28px; border-radius:10px; font-size:13px; font-weight:800; z-index:2000; box-shadow:0 8px 24px rgba(0,0,0,0.5); backdrop-filter:blur(8px); white-space:nowrap; pointer-events:none; transition:opacity 0.4s;`;
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3200);
+    }
+    window.showToast = showToast;
+
     async function handleLogin() {
+
         const email = document.getElementById('loginEmail').value.trim();
         const pass = document.getElementById('loginPass').value.trim();
         const errObj = document.getElementById('loginError');
@@ -4602,7 +4624,7 @@
     </div>
 </div>
 
-<div id="ceoBundleModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+<div id="ceoBundleModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div class="massive-container">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:20px;">📦 Build Custom CEO Bundle</h2>
@@ -4620,7 +4642,7 @@
     </div>
 </div>
 
-<div id="ceoCustomModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+<div id="ceoCustomModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div class="massive-container" style="max-width: 500px;">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:20px;">🧪 Add Custom Test Item</h2>
@@ -4647,7 +4669,7 @@
         </div>
     </div>
 </div>
-<div id="manualPrintModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+<div id="manualPrintModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div class="massive-container" style="max-width: 500px; height: auto; min-height: 300px; justify-content: flex-start;">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:20px;">➕ New Manual Print Job</h2>
@@ -4668,18 +4690,18 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.05.0206"></script>
-<script src="system-tools-module.js?v=v.2026.04.05.0206"></script>
-<script src="bom-module.js?v=v.2026.04.05.0206"></script>
-<script src="inventory-module.js?v=v.2026.04.05.0206"></script>
-<script src="production-module.js?v=v.2026.04.05.0206"></script>
-<script src="sales-module.js?v=v.2026.04.05.0206"></script>
-<script src="analytics-module.js?v=v.2026.04.05.0206"></script>
-<script src="ceo-module.js?v=v.2026.04.05.0206"></script>
-<script src="print-module.js?v=v.2026.04.05.0206"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.05.0213"></script>
+<script src="system-tools-module.js?v=v.2026.04.05.0213"></script>
+<script src="bom-module.js?v=v.2026.04.05.0213"></script>
+<script src="inventory-module.js?v=v.2026.04.05.0213"></script>
+<script src="production-module.js?v=v.2026.04.05.0213"></script>
+<script src="sales-module.js?v=v.2026.04.05.0213"></script>
+<script src="analytics-module.js?v=v.2026.04.05.0213"></script>
+<script src="ceo-module.js?v=v.2026.04.05.0213"></script>
+<script src="print-module.js?v=v.2026.04.05.0213"></script>
 
 <!-- TIPZ BOARD MODAL -->
-<div id="tipzModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+<div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div class="massive-container" style="max-width: 800px; height: 90vh; justify-content: flex-start; display: flex; flex-direction: column;">
         <style>
             #tipzModal .rt-toolbar {
@@ -4758,7 +4780,7 @@
             <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('packerzArchiveModal').style.display='none'">Close</button>
         </div>
         <div style="padding:25px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden;">
-            <div id="packerzCompletedQueue" class="custom-scroll" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
+            <div id="packerzCompletedQueue" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
                 <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Querying database records...</div>
             </div>
         </div>
@@ -4768,7 +4790,7 @@
 <!-- ============================================== -->
 <!-- PACKERZ QA GATE & SOP VIEWER MODAL             -->
 <!-- ============================================== -->
-<div id="packerzSopViewerModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) closePackerzSopViewer()">
+<div id="packerzSopViewerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this) closePackerzSopViewer()">
     <div class="massive-container" style="background:var(--bg-container); border-radius:12px; border:1px solid #10b981; width:95%; max-width:2000px; height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; padding:0;">
         
         <!-- Header -->
@@ -4816,7 +4838,7 @@
 <!-- ============================================================
      CAMERA BARCODE SCANNER MODAL (html5-qrcode)
 ============================================================ -->
-<div id="sopCameraModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.96); z-index:11000; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+<div id="sopCameraModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.96); z-index:11000; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
     <div style="text-align:center;">
         <div style="font-size:20px; font-weight:900; color:#0ea5e9; letter-spacing:1px;">📷 SCAN ITEM BARCODE</div>
         <div id="sopCameraItemName" style="font-size:15px; font-weight:800; color:white; margin-top:6px;"></div>
@@ -4837,7 +4859,7 @@
 <!-- ============================================================
      SOP TOKEN GUIDE MODAL
 ============================================================ -->
-<div id="sopTokenGuideModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.88); z-index:11001; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPTokenGuide()">
+<div id="sopTokenGuideModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.88); z-index:11001; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPTokenGuide()">
     <div style="background:var(--bg-container); border-radius:14px; border:1px solid rgba(14,165,233,0.35); width:820px; max-width:96vw; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.9); overflow:hidden;">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 26px; background:linear-gradient(135deg,rgba(14,165,233,0.12) 0%,var(--bg-bar) 100%); border-bottom:1px solid rgba(14,165,233,0.25); flex-shrink:0;">
             <div>
@@ -5130,18 +5152,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.0206"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.0213"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.0206"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.0213"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.0206"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.0213"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.0206"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.0206"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.0206"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.0213"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.0213"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.0213"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.05.0206"></script>
-    <script src="labelz-module.js?v=v.2026.04.05.0206"></script>
+    <script src="barcodz-module.js?v=v.2026.04.05.0213"></script>
+    <script src="labelz-module.js?v=v.2026.04.05.0213"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>
