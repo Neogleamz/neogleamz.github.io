@@ -39,9 +39,9 @@ function populateSOPDropdown() {
     } else {
         // Grouped like RECIPEZ: 📦 Retail → ⚙️ Sub-Assemblies → 🖨️ 3D Prints
         let sorted = Object.keys(productsDB).sort();
-        let retail  = sorted.filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print));
-        let subs    = sorted.filter(p =>  isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print));
-        let prints  = sorted.filter(p => productsDB[p] && productsDB[p].is_3d_print);
+        let retail  = sorted.filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
+        let subs    = sorted.filter(p =>  isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
+        let prints  = sorted.filter(p => productsDB[p] && productsDB[p].is_3d_print && !(productsDB[p] && productsDB[p].is_label));
         const grp = (label, icon, arr) => arr.length ? `<optgroup label="${label}">${arr.map(p => `<option value="${String(p).replace(/"/g,'&quot;')}">${icon} ${p}</option>`).join('')}</optgroup>` : '';
         options += grp('📦 RETAIL PRODUCTS', '📦', retail);
         options += grp('⚙️ SUB-ASSEMBLIES',  '⚙️',  subs);
