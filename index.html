@@ -1,18 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.05.1033"></script>
+    <script src="system-version.js?v=v.2026.04.05.1059"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.1033"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.1033"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.1059"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.1059"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.05.1033"></script>
-    
+
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
@@ -991,669 +990,6 @@
             background-color: #1e293b;
             color: white;
         }
-    \n
-    /* SOCIALZ Native CSS Shim (Replaces Tailwind) */
-    #socialzhub-tab select, #socialzhub-tab input { background-color: var(--bg-surface-light, #1e293b); color: var(--text-color, white); padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .glass-panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--glass-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .glass-panel:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) button { background: transparent; border: none; cursor: pointer; padding: 0; outline: none; }
-    #socialzhub-tab .glass-panel { padding: 16px; display:flex; flex-direction:column; gap:8px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex { display: flex; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-col { flex-direction: column; }
-    #socialzhub-tab .gap-2 { gap: 8px; }
-    #socialzhub-tab .gap-4 { gap: 16px; }
-    #socialzhub-tab .gap-6 { gap: 24px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .items-center { align-items: center; }
-    #socialzhub-tab .justify-between { justify-content: space-between; }
-    #socialzhub-tab .justify-center { justify-content: center; }
-    #socialzhub-tab .text-sm { font-size: 0.875rem; }
-    #socialzhub-tab .text-xl { font-size: 1.25rem; }
-    #socialzhub-tab .font-bold { font-weight: bold; }
-    #socialzhub-tab .mb-2 { margin-bottom: 8px; }
-    #socialzhub-tab .mb-4 { margin-bottom: 16px; }
-    #socialzhub-tab .mt-1 { margin-top: 4px; }
-    #socialzhub-tab .mt-4 { margin-top: 16px; }
-    #socialzhub-tab .p-2 { padding: 8px; }
-    #socialzhub-tab .p-4 { padding: 16px; }
-    #socialzhub-tab .p-6 { padding: 24px; }
-    #socialzhub-tab .pt-4 { padding-top: 16px; }
-    #socialzhub-tab .border-t { border-top: 1px solid var(--border-color); }
-    #socialzhub-tab .rounded-full { border-radius: 999px; }
-    #socialzhub-tab .rounded-xl { border-radius: 12px; }
-    #socialzhub-tab .rounded-2xl { border-radius: 16px; }
-    #socialzhub-tab .w-12 { width: 48px; }
-    #socialzhub-tab .h-12 { height: 48px; }
-    #socialzhub-tab .object-cover { object-fit: cover; }
-    #socialzhub-tab .bg-slate-800, #socialzhub-tab .dark\:bg-slate-800, #socialzhub-tab .dark\:bg-slate-900 { background-color: var(--bg-surface-light, #1e293b); }
-    #socialzhub-tab .hidden { display: none !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid { display: grid; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    @media (min-width: 768px) { 
-        #socialzhub-tab > .executive-pane > .bom-layout > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
-    @media (min-width: 1024px) { 
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:flex-row { flex-direction: row; }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:w-96 { width: 24rem; }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:w-auto { width: auto; }
-    }
-    @media (min-width: 1280px) { 
-        #socialzhub-tab > .executive-pane > .bom-layout > .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .xl\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    }
-    
-    /* TOOLBAR NATIVE SHIM */
-    #socialzhub-tab .action-toolbar { display: flex; flex-direction: row; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; justify-content: flex-start; }
-    #socialzhub-tab .action-toolbar button { width: auto !important; flex: 0 0 auto !important; padding: 8px 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s, background 0.2s; white-space: nowrap; }
-    #socialzhub-tab .action-toolbar button:hover { transform: translateY(-2px); }
-    #socialzhub-tab .action-toolbar .bg-indigo-500 { background: #6366f1; color: white; }
-    #socialzhub-tab .action-toolbar .bg-indigo-500:hover { background: #4f46e5; }
-    #socialzhub-tab .action-toolbar .bg-slate-200, #socialzhub-tab .action-toolbar .dark\:bg-slate-800 { background: #1e293b; color: white; border: 1px solid #334155; box-shadow: none; }
-    #socialzhub-tab .action-toolbar .bg-slate-200:hover, #socialzhub-tab .action-toolbar .dark\:bg-slate-800:hover { background: #334155; }
-    #socialzhub-tab .action-toolbar .bg-brand { background: #f97316; color: white; }
-    #socialzhub-tab .action-toolbar .bg-brand:hover { background: #ea580c; }
-    
-    /* MODAL CSS SHIM ================================ */
-    #analytics-modal.hidden, #skater-modal.hidden { display: none !important; }
-    #analytics-modal, #skater-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1500; overflow-y: auto; box-sizing: border-box; }
-    
-    /* TAILWIND SHIM POLYFILL FOR CARDS ================================ */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .rounded-2xl { border-radius: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .shadow-sm { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:shadow-xl:hover { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); transform: translateY(-3px); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-slate-700 { border-color: #334155 !important; border-width: 1px !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-col { flex-direction: column; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .relative { position: relative; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .absolute { position: absolute; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .sticky { position: sticky; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .top-20 { top: 5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .z-30 { z-index: 30; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .overflow-hidden { overflow: hidden; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .group:hover .group-hover\:opacity-100 { opacity: 1; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .opacity-0 { opacity: 0; transition: opacity 0.2s; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .opacity-100 { opacity: 1; transition: opacity 0.2s; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .top-4 { top: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .right-4 { right: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .w-8 { width: 2rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .h-8 { height: 2rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .rounded-full { border-radius: 9999px !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-900\/80 { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-red-500 { color: #ef4444 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:text-red-400:hover { color: #f87171 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-4 { padding: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-5 { padding: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-6 { padding: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pb-4 { padding-bottom: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pb-3 { padding-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-grow { flex-grow: 1; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-4 { gap: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-1\.5 { gap: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-2 { gap: 0.375rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-4 { margin-bottom: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .my-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .w-16 { width: 4rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .h-16 { height: 4rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .shrink-0 { flex-shrink: 0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-gradient-to-br { background: linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to)); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .from-orange-400 { --tw-gradient-from: #fb923c; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .to-red-500 { --tw-gradient-to: #ef4444; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-2xl { font-size: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .z-10 { z-index: 10; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .object-cover { object-fit: cover; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-xl { font-size: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .leading-tight { line-height: 1.25; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-slate-400 { color: #94a3b8 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-slate-300 { color: #cbd5e1 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-3 { margin-top: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .leading-relaxed { line-height: 1.625; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .min-h-\[4\.5em\] { min-height: 4.5em; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-t { border-top-width: 1px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pt-3 { padding-top: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-auto { margin-top: auto; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-\[10px\] { font-size: 10px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-xs { font-size: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-700 { background-color: #334155 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-2\.5 { padding: 0.625rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-900 { background-color: #0f172a !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-900\/50 { background-color: rgba(15, 23, 42, 0.5) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-brand { background-color: #f97316 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-brand { color: #f97316 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:text-orange-400:hover { color: #fb923c !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-white { color: #ffffff !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-transparent { background-color: transparent !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-4 { padding: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-nowrap { flex-wrap: nowrap; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .justify-between { justify-content: space-between; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .justify-center { justify-content: center; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .justify-end { justify-content: flex-end; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-yellow-500\/10 { background-color: rgba(234, 179, 8, 0.1) !important; color: #facc15 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-purple-500\/10 { background-color: rgba(168, 85, 247, 0.1) !important; color: #c084fc !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-indigo-900\/30 { background-color: rgba(49, 46, 129, 0.3) !important; color: #818cf8 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-slate-700 { background-color: #475569 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-yellow-400 { color: #facc15 !important; }
-    
-    /* Dynamic Badge Colors */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-blue-900\/30 { background-color: rgba(30, 58, 138, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-blue-400 { color: #60a5fa !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-blue-300 { color: #93c5fd !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-emerald-900\/30 { background-color: rgba(6, 78, 59, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-emerald-400 { color: #34d399 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-emerald-300 { color: #6ee7b7 !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-indigo-900\/30 { background-color: rgba(49, 46, 129, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-indigo-400 { color: #818cf8 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-indigo-300 { color: #a5b4fc !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-rose-900\/30 { background-color: rgba(136, 19, 55, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-rose-400 { color: #fb7185 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-rose-300 { color: #fda4af !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-cyan-900\/30 { background-color: rgba(22, 78, 99, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-cyan-400 { color: #22d3ee !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-cyan-300 { color: #67e8f9 !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-purple-900\/30 { background-color: rgba(88, 28, 135, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-purple-400 { color: #c084fc !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-purple-300 { color: #d8b4fe !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-green-900\/30 { background-color: rgba(20, 83, 45, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-green-400 { color: #4ade80 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-green-300 { color: #86efac !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-orange-900\/30 { background-color: rgba(124, 45, 18, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-orange-400 { color: #fb923c !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-orange-300 { color: #fdba74 !important; }
-    
-    /* MODAL FOOTER & SOCIAL ICONS POLYFILL */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-pink-500 { color: #ec4899 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-cyan-500 { color: #06b6d4 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-blue-500 { color: #3b82f6 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-pink-500\/10:hover { background-color: rgba(236, 72, 153, 0.1) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-cyan-500\/10:hover { background-color: rgba(6, 182, 212, 0.1) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-red-500\/10:hover { background-color: rgba(239, 68, 68, 0.1) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-blue-500\/10:hover { background-color: rgba(59, 130, 246, 0.1) !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-sm { font-size: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-base { font-size: 0.875rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-xl { font-size: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-2xl { font-size: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-4xl { font-size: 2.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-1 { margin-bottom: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .w-full { width: 100%; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .font-medium { font-weight: 500; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .font-bold { font-weight: 700; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .tracking-tight { letter-spacing: -0.025em; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-center { text-align: center; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-4 { padding-left: 1rem; padding-right: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .group-hover\:scale-110 { transition: transform 0.2s; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .group:hover .group-hover\:scale-110 { transform: scale(1.1); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-slate-300 { color: #cbd5e1 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-1 { flex: 1 1 0%; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .min-w-0 { min-width: 0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .rounded-lg { border-radius: 0.5rem; }
-    
-    #analytics-modal *, #skater-modal * { box-sizing: border-box; }
-    
-    /* MODAL FORM Layout POLYFILL */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .space-y-6 > * + * { margin-top: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .space-y-4 > * + * { margin-top: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .space-y-3 > * + * { margin-top: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-l-4 { border-left-width: 4px; border-left-style: solid; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-brand { border-left-color: #f97316; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-blue-500 { border-color: #3b82f6 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pl-2 { padding-left: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pr-2 { padding-right: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .tracking-wider { letter-spacing: 0.05em; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-\[50px_1fr_1\.5fr_1fr\] { grid-template-columns: 50px 1.2fr 2fr 0.6fr; }
-    @media (min-width: 768px) {
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:p-8 { padding: 2rem; }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:block { display: block; }
-    }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .col-span-2 { grid-column: span 2 / span 2; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .max-w-5xl { max-width: 64rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-2 { margin-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-3 { margin-bottom: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-5 { margin-bottom: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-6 { margin-bottom: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-5 { margin-top: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-6 { margin-top: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pt-4 { padding-top: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pt-6 { padding-top: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pb-2 { padding-bottom: 0.5rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .block { display: block; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-purple-500 { color: #a855f7 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-amber-500 { color: #f59e0b !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-slate-900 { background-color: #0f172a !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-slate-200 { border-color: #e2e8f0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-b { border-bottom-width: 1px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:border-slate-600 { border-color: #475569 !important; border-width: 1px; border-style: solid; box-sizing: border-box; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mr-1 { margin-right: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-3 { padding-left: 0.5rem; padding-right: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-1\.5 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-2 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-2\.5 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .whitespace-nowrap { white-space: nowrap; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-red-900\/20:hover { background-color: rgba(127, 29, 29, 0.2); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-slate-800:hover { background-color: #1e293b; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-orange-600:hover { background-color: #ea580c; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .shadow-orange-500\/25 { box-shadow: 0 4px 14px 0 rgba(249, 115, 22, 0.25); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:scale-105:hover { transform: scale(1.05); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .resize-none { resize: none; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .h-\[34px\] { height: 34px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pointer-events-none { pointer-events: none; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-3 { gap: 0.75rem; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) input:focus, :where(#socialzhub-tab, #skater-modal, #analytics-modal) select:focus, :where(#socialzhub-tab, #skater-modal, #analytics-modal) textarea:focus { border-color: #f97316 !important; outline: none; box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2); }
-    
-    #skater-modal input[type="checkbox"] { width: auto; display: inline-block; margin-right: 8px; accent-color: #f97316; transform: scale(1.2); cursor: pointer; }
-    #skater-modal textarea { background-color: #0f172a !important; color: white !important; }
-    #skater-modal label { display: flex; align-items: center; }
-    
-    /* Legacy overrides purged - Tailwind Polyfill engine dominates */
-    
-    
-        /* Smooth Transitions */
-        .transition-all-300 { transition: all 0.3s ease-in-out; }
-        
-        /* Glassmorphism for Modals */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        .dark .glass-panel {
-            background: rgba(30, 41, 59, 0.95);
-        }
-
-        /* Toast Animation */
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-
-        /* Prevent select background color changes on focus/hover in some browsers */
-        select:focus option {
-            background-color: #1e293b;
-            color: white;
-        }
-    \n
-    /* SOCIALZ Native CSS Shim (Replaces Tailwind) */
-    #socialzhub-tab select, #socialzhub-tab input { background-color: var(--bg-surface-light, #1e293b); color: var(--text-color, white); padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .glass-panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--glass-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .glass-panel:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) button { background: transparent; border: none; cursor: pointer; padding: 0; outline: none; }
-    #socialzhub-tab .glass-panel { padding: 16px; display:flex; flex-direction:column; gap:8px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex { display: flex; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-col { flex-direction: column; }
-    #socialzhub-tab .gap-2 { gap: 8px; }
-    #socialzhub-tab .gap-4 { gap: 16px; }
-    #socialzhub-tab .gap-6 { gap: 24px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .items-center { align-items: center; }
-    #socialzhub-tab .justify-between { justify-content: space-between; }
-    #socialzhub-tab .justify-center { justify-content: center; }
-    #socialzhub-tab .text-sm { font-size: 0.875rem; }
-    #socialzhub-tab .text-xl { font-size: 1.25rem; }
-    #socialzhub-tab .font-bold { font-weight: bold; }
-    #socialzhub-tab .mb-2 { margin-bottom: 8px; }
-    #socialzhub-tab .mb-4 { margin-bottom: 16px; }
-    #socialzhub-tab .mt-1 { margin-top: 4px; }
-    #socialzhub-tab .mt-4 { margin-top: 16px; }
-    #socialzhub-tab .p-2 { padding: 8px; }
-    #socialzhub-tab .p-4 { padding: 16px; }
-    #socialzhub-tab .p-6 { padding: 24px; }
-    #socialzhub-tab .pt-4 { padding-top: 16px; }
-    #socialzhub-tab .border-t { border-top: 1px solid var(--border-color); }
-    #socialzhub-tab .rounded-full { border-radius: 999px; }
-    #socialzhub-tab .rounded-xl { border-radius: 12px; }
-    #socialzhub-tab .rounded-2xl { border-radius: 16px; }
-    #socialzhub-tab .w-12 { width: 48px; }
-    #socialzhub-tab .h-12 { height: 48px; }
-    #socialzhub-tab .object-cover { object-fit: cover; }
-    #socialzhub-tab .bg-slate-800, #socialzhub-tab .dark\:bg-slate-800, #socialzhub-tab .dark\:bg-slate-900 { background-color: var(--bg-surface-light, #1e293b); }
-    #socialzhub-tab .hidden { display: none !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid { display: grid; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    @media (min-width: 768px) { 
-        #socialzhub-tab > .executive-pane > .bom-layout > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
-    @media (min-width: 1024px) { 
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:flex-row { flex-direction: row; }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:w-96 { width: 24rem; }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .lg\:w-auto { width: auto; }
-    }
-    @media (min-width: 1280px) { 
-        #socialzhub-tab > .executive-pane > .bom-layout > .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .xl\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    }
-    
-    /* TOOLBAR NATIVE SHIM */
-    #socialzhub-tab .action-toolbar { display: flex; flex-direction: row; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; justify-content: flex-start; }
-    #socialzhub-tab .action-toolbar button { width: auto !important; flex: 0 0 auto !important; padding: 8px 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s, background 0.2s; white-space: nowrap; }
-    #socialzhub-tab .action-toolbar button:hover { transform: translateY(-2px); }
-    #socialzhub-tab .action-toolbar .bg-indigo-500 { background: #6366f1; color: white; }
-    #socialzhub-tab .action-toolbar .bg-indigo-500:hover { background: #4f46e5; }
-    #socialzhub-tab .action-toolbar .bg-slate-200, #socialzhub-tab .action-toolbar .dark\:bg-slate-800 { background: #1e293b; color: white; border: 1px solid #334155; box-shadow: none; }
-    #socialzhub-tab .action-toolbar .bg-slate-200:hover, #socialzhub-tab .action-toolbar .dark\:bg-slate-800:hover { background: #334155; }
-    #socialzhub-tab .action-toolbar .bg-brand { background: #f97316; color: white; }
-    #socialzhub-tab .action-toolbar .bg-brand:hover { background: #ea580c; }
-    
-    /* MODAL CSS SHIM ================================ */
-    #analytics-modal.hidden, #skater-modal.hidden { display: none !important; }
-    #analytics-modal, #skater-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1500; overflow-y: auto; box-sizing: border-box; }
-    
-    /* TAILWIND SHIM POLYFILL FOR CARDS ================================ */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .rounded-2xl { border-radius: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .shadow-sm { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:shadow-xl:hover { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); transform: translateY(-3px); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-slate-700 { border-color: #334155 !important; border-width: 1px !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-col { flex-direction: column; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .relative { position: relative; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .absolute { position: absolute; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .sticky { position: sticky; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .top-20 { top: 5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .z-30 { z-index: 30; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .overflow-hidden { overflow: hidden; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .group:hover .group-hover\:opacity-100 { opacity: 1; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .opacity-0 { opacity: 0; transition: opacity 0.2s; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .opacity-100 { opacity: 1; transition: opacity 0.2s; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .top-4 { top: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .right-4 { right: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .w-8 { width: 2rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .h-8 { height: 2rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .rounded-full { border-radius: 9999px !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-900\/80 { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-red-500 { color: #ef4444 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:text-red-400:hover { color: #f87171 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-4 { padding: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-5 { padding: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-6 { padding: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pb-4 { padding-bottom: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pb-3 { padding-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-grow { flex-grow: 1; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-4 { gap: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-1\.5 { gap: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-2 { gap: 0.375rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-4 { margin-bottom: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .my-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .w-16 { width: 4rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .h-16 { height: 4rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .shrink-0 { flex-shrink: 0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-gradient-to-br { background: linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to)); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .from-orange-400 { --tw-gradient-from: #fb923c; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .to-red-500 { --tw-gradient-to: #ef4444; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-2xl { font-size: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .z-10 { z-index: 10; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .object-cover { object-fit: cover; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-xl { font-size: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .leading-tight { line-height: 1.25; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-slate-400 { color: #94a3b8 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-slate-300 { color: #cbd5e1 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-3 { margin-top: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .leading-relaxed { line-height: 1.625; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .min-h-\[4\.5em\] { min-height: 4.5em; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-t { border-top-width: 1px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pt-3 { padding-top: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-auto { margin-top: auto; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-\[10px\] { font-size: 10px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-xs { font-size: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-700 { background-color: #334155 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-2\.5 { padding: 0.625rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-900 { background-color: #0f172a !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-slate-900\/50 { background-color: rgba(15, 23, 42, 0.5) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-brand { background-color: #f97316 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-brand { color: #f97316 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:text-orange-400:hover { color: #fb923c !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-white { color: #ffffff !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-transparent { background-color: transparent !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .p-4 { padding: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-nowrap { flex-wrap: nowrap; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .justify-between { justify-content: space-between; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .justify-center { justify-content: center; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .justify-end { justify-content: flex-end; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-yellow-500\/10 { background-color: rgba(234, 179, 8, 0.1) !important; color: #facc15 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-purple-500\/10 { background-color: rgba(168, 85, 247, 0.1) !important; color: #c084fc !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .bg-indigo-900\/30 { background-color: rgba(49, 46, 129, 0.3) !important; color: #818cf8 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-slate-700 { background-color: #475569 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-yellow-400 { color: #facc15 !important; }
-    
-    /* Dynamic Badge Colors */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-blue-900\/30 { background-color: rgba(30, 58, 138, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-blue-400 { color: #60a5fa !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-blue-300 { color: #93c5fd !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-emerald-900\/30 { background-color: rgba(6, 78, 59, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-emerald-400 { color: #34d399 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-emerald-300 { color: #6ee7b7 !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-indigo-900\/30 { background-color: rgba(49, 46, 129, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-indigo-400 { color: #818cf8 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-indigo-300 { color: #a5b4fc !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-rose-900\/30 { background-color: rgba(136, 19, 55, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-rose-400 { color: #fb7185 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-rose-300 { color: #fda4af !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-cyan-900\/30 { background-color: rgba(22, 78, 99, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-cyan-400 { color: #22d3ee !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-cyan-300 { color: #67e8f9 !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-purple-900\/30 { background-color: rgba(88, 28, 135, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-purple-400 { color: #c084fc !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-purple-300 { color: #d8b4fe !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-green-900\/30 { background-color: rgba(20, 83, 45, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-green-400 { color: #4ade80 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-green-300 { color: #86efac !important; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-orange-900\/30 { background-color: rgba(124, 45, 18, 0.3) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-orange-400 { color: #fb923c !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-orange-300 { color: #fdba74 !important; }
-    
-    /* MODAL FOOTER & SOCIAL ICONS POLYFILL */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-pink-500 { color: #ec4899 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-cyan-500 { color: #06b6d4 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-blue-500 { color: #3b82f6 !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-pink-500\/10:hover { background-color: rgba(236, 72, 153, 0.1) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-cyan-500\/10:hover { background-color: rgba(6, 182, 212, 0.1) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-red-500\/10:hover { background-color: rgba(239, 68, 68, 0.1) !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-blue-500\/10:hover { background-color: rgba(59, 130, 246, 0.1) !important; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-sm { font-size: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-base { font-size: 0.875rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-xl { font-size: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-2xl { font-size: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-4xl { font-size: 2.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-1 { margin-bottom: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .w-full { width: 100%; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .font-medium { font-weight: 500; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .font-bold { font-weight: 700; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .tracking-tight { letter-spacing: -0.025em; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-center { text-align: center; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-4 { padding-left: 1rem; padding-right: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .group-hover\:scale-110 { transition: transform 0.2s; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .group:hover .group-hover\:scale-110 { transform: scale(1.1); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:text-slate-300 { color: #cbd5e1 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .flex-1 { flex: 1 1 0%; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .min-w-0 { min-width: 0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .rounded-lg { border-radius: 0.5rem; }
-    
-    #analytics-modal *, #skater-modal * { box-sizing: border-box; }
-    
-    /* MODAL FORM Layout POLYFILL */
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .space-y-6 > * + * { margin-top: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .space-y-4 > * + * { margin-top: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .space-y-3 > * + * { margin-top: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-l-4 { border-left-width: 4px; border-left-style: solid; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-brand { border-left-color: #f97316; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-blue-500 { border-color: #3b82f6 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pl-2 { padding-left: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pr-2 { padding-right: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .tracking-wider { letter-spacing: 0.05em; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .grid-cols-\[50px_1fr_1\.5fr_1fr\] { grid-template-columns: 50px 1.2fr 2fr 0.6fr; }
-    @media (min-width: 768px) {
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:p-8 { padding: 2rem; }
-        :where(#socialzhub-tab, #skater-modal, #analytics-modal) .md\:block { display: block; }
-    }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .col-span-2 { grid-column: span 2 / span 2; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .max-w-5xl { max-width: 64rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-2 { margin-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-3 { margin-bottom: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-5 { margin-bottom: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mb-6 { margin-bottom: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-5 { margin-top: 1.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mt-6 { margin-top: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pt-4 { padding-top: 1rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pt-6 { padding-top: 1.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pb-2 { padding-bottom: 0.5rem; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .block { display: block; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-purple-500 { color: #a855f7 !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .text-amber-500 { color: #f59e0b !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:bg-slate-900 { background-color: #0f172a !important; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-slate-200 { border-color: #e2e8f0; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .border-b { border-bottom-width: 1px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .dark\:border-slate-600 { border-color: #475569 !important; border-width: 1px; border-style: solid; box-sizing: border-box; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .mr-1 { margin-right: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .px-3 { padding-left: 0.5rem; padding-right: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-1\.5 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-2 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .py-2\.5 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .whitespace-nowrap { white-space: nowrap; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-red-900\/20:hover { background-color: rgba(127, 29, 29, 0.2); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-slate-800:hover { background-color: #1e293b; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:bg-orange-600:hover { background-color: #ea580c; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .shadow-orange-500\/25 { box-shadow: 0 4px 14px 0 rgba(249, 115, 22, 0.25); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .hover\:scale-105:hover { transform: scale(1.05); }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .resize-none { resize: none; }
-    
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .h-\[34px\] { height: 34px; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .pointer-events-none { pointer-events: none; }
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) .gap-3 { gap: 0.75rem; }
-
-    :where(#socialzhub-tab, #skater-modal, #analytics-modal) input:focus, :where(#socialzhub-tab, #skater-modal, #analytics-modal) select:focus, :where(#socialzhub-tab, #skater-modal, #analytics-modal) textarea:focus { border-color: #f97316 !important; outline: none; box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2); }
-    
-    #skater-modal input[type="checkbox"] { width: auto; display: inline-block; margin-right: 8px; accent-color: #f97316; transform: scale(1.2); cursor: pointer; }
-    #skater-modal textarea { background-color: #0f172a !important; color: white !important; }
-    #skater-modal label { display: flex; align-items: center; }
-    
-    /* Legacy overrides purged - Tailwind Polyfill engine dominates */
-    
-    
-        /* Smooth Transitions */
-        .transition-all-300 { transition: all 0.3s ease-in-out; }
-        
-        /* Glassmorphism for Modals */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        .dark .glass-panel {
-            background: rgba(30, 41, 59, 0.95);
-        }
-
-        /* Toast Animation */
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-
-        /* Prevent select background color changes on focus/hover in some browsers */
-        select:focus option {
-            background-color: #1e293b;
-            color: white;
-        }
-    \n
     /* SOCIALZ Native CSS Shim (Replaces Tailwind) */
     #socialzhub-tab select, #socialzhub-tab input { background-color: var(--bg-surface-light, #1e293b); color: var(--text-color, white); padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; }
     :where(#socialzhub-tab, #skater-modal, #analytics-modal) .glass-panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--glass-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
@@ -1980,7 +1316,6 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.1033"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -3631,7 +2966,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.05.1033"></script>
+    <script src="socialz-module.js?v=v.2026.04.05.1059"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4718,15 +4053,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.05.1033"></script>
-<script src="system-tools-module.js?v=v.2026.04.05.1033"></script>
-<script src="bom-module.js?v=v.2026.04.05.1033"></script>
-<script src="inventory-module.js?v=v.2026.04.05.1033"></script>
-<script src="production-module.js?v=v.2026.04.05.1033"></script>
-<script src="sales-module.js?v=v.2026.04.05.1033"></script>
-<script src="analytics-module.js?v=v.2026.04.05.1033"></script>
-<script src="ceo-module.js?v=v.2026.04.05.1033"></script>
-<script src="print-module.js?v=v.2026.04.05.1033"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.05.1059"></script>
+<script src="system-tools-module.js?v=v.2026.04.05.1059"></script>
+<script src="bom-module.js?v=v.2026.04.05.1059"></script>
+<script src="inventory-module.js?v=v.2026.04.05.1059"></script>
+<script src="packerz-module.js?v=v.2026.04.05.1059"></script>
+<script src="production-module.js?v=v.2026.04.05.1059"></script>
+<script src="sales-module.js?v=v.2026.04.05.1059"></script>
+<script src="analytics-module.js?v=v.2026.04.05.1059"></script>
+<script src="ceo-module.js?v=v.2026.04.05.1059"></script>
+<script src="print-module.js?v=v.2026.04.05.1059"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5180,21 +4516,22 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.1033"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.1059"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.1033"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.1059"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.1033"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.1059"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.1033"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.1033"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.1033"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.1059"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.1059"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.1059"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.05.1033"></script>
-    <script src="labelz-module.js?v=v.2026.04.05.1033"></script>
+    <script src="barcodz-module.js?v=v.2026.04.05.1059"></script>
+    <script src="labelz-module.js?v=v.2026.04.05.1059"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>
 </html>
+
 
 
