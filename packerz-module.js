@@ -1131,8 +1131,10 @@ function stopPackerzLiveSopResize() {
 
 const SOP_MEDIA_BUCKET = 'sop-media';
 let currentSOPMediaFolder = '';   // '' = bucket root
+let activeSOPTextAreaId = 'packerzAdminQA'; // Memory for multi-module targeting
 
-async function openSOPMediaPicker() {
+async function openSOPMediaPicker(taId = 'packerzAdminQA') {
+    activeSOPTextAreaId = taId;
     currentSOPMediaFolder = '';
     const modal = document.getElementById('sopMediaPickerModal');
     modal.style.display = 'flex';
@@ -1256,7 +1258,7 @@ async function uploadSOPMedia(file) {
 
 // Inserts a token at the cursor position in the QA textarea
 function insertSOPToken(token) {
-    const ta = document.getElementById('packerzAdminQA');
+    const ta = document.getElementById(activeSOPTextAreaId);
     if (!ta) return;
     const start = ta.selectionStart;
     const end = ta.selectionEnd;
@@ -1267,7 +1269,13 @@ function insertSOPToken(token) {
     const needsNewlineAfter = after.length > 0 && !after.startsWith('\n');
     ta.value = before + (needsNewlineBefore ? '\n' : '') + token + (needsNewlineAfter ? '\n' : '') + after;
     ta.focus();
-    renderPackerzTelemetryPreview();
+    
+    if (activeSOPTextAreaId === 'packerzAdminQA' && typeof renderPackerzTelemetryPreview === 'function') {
+        renderPackerzTelemetryPreview();
+    } else if (activeSOPTextAreaId === 'productionAdminQA' && typeof renderProductionTelemetryPreview === 'function') {
+        renderProductionTelemetryPreview();
+    }
+    
     closeSOPMediaPicker();
 }
 
