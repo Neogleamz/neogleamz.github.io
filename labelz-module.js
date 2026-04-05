@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // LABELZ MODULE — Neogleamz Custom Label Manager (Canvas)
 // ============================================================
 // Manages custom thermal-printed labels using Fabric.js, bwip-js,
@@ -129,6 +129,12 @@ function initFabricCanvas() {
         fCanvas.renderAll();
         onCanvasSelection(e);
     });
+
+    // Global copy/paste listener injection (only registers once per session)
+    if (!window.lblzPasteListenerBound) {
+        window.addEventListener('paste', handleLabelzPaste);
+        window.lblzPasteListenerBound = true;
+    }
 }
 
 function parseSize(sizeStr) {
@@ -249,6 +255,14 @@ function addLabelzImage() {
 function handleLabelzImageUpload(e) {
     const file = e.target.files[0];
     if(!file) return;
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (['doc', 'docx', 'pdf', 'xml', 'txt'].includes(ext)) {
+        alert("⚠️ UNSUPPORTED FORMAT ⚠️\n\nThe Canvas Designer cannot natively read Word Documents (.docx) or PDFs directly because their formatting is proprietary.\n\nHOW TO MIGRATE YOUR LABELS:\n1. Open your Word document.\n2. Use the Windows Snipping Tool (Win + Shift + S) to take a snapshot of your label.\n3. Come back to this screen and press Ctrl+V to paste the image directly onto the canvas!");
+        e.target.value = ''; // clear
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = function(f){
         const data = f.target.result;
@@ -263,6 +277,40 @@ function handleLabelzImageUpload(e) {
     reader.readAsDataURL(file);
     e.target.value = ''; // clear
 }
+
+function handleLabelzPaste(e) {
+    // Only intercept clipboard if the Labelz Designer modal is visibly open
+    const modal = document.getElementById('labelzDesignerModal');
+    if (!modal || modal.style.display === 'none') return;
+    
+    // Give priority to native input boxes (let users paste text into properties panel)
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (!e.clipboardData || !e.clipboardData.items) return;
+    
+    for (let i = 0; i < e.clipboardData.items.length; i++) {
+        let item = e.clipboardData.items[i];
+        if (item.type.indexOf("image") !== -1) {
+            let blob = item.getAsFile();
+            const reader = new FileReader();
+            reader.onload = function(f){
+                const data = f.target.result;
+                fabric.Image.fromURL(data, function(img){
+                    img.scaleToWidth(fCanvas.width * 0.5);
+                    img.set({left: fCanvas.width/2, top: fCanvas.height/2, originX: 'center', originY: 'center'});
+                    if(fCanvas) {
+                        fCanvas.add(img);
+                        fCanvas.setActiveObject(img);
+                    }
+                });
+            };
+            reader.readAsDataURL(blob);
+            e.preventDefault(); // Stop browser from attempting to display image
+            break;
+        }
+    }
+}
+
 
 function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
     // We use an offscreen canvas to render with bwipjs, then drop it into fabric as an image
@@ -779,3 +827,4 @@ window.addLabelzToSpool = function(name, emoji) {
         alert('Barcodz subsystem not loaded yet. Try again.');
     }
 };
+
