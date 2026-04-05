@@ -1,5 +1,5 @@
 // --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
-window.fgiCategoryState = window.fgiCategoryState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true };
+window.fgiCategoryState = window.fgiCategoryState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true, 'cat-label': true };
 window.toggleFgiCategory = function(cat) { window.fgiCategoryState[cat] = !window.fgiCategoryState[cat]; renderFgiTable(); };
 
 function sortFGI(c) { if(isResizing) return; currentFgiSort = { column: c, direction: currentFgiSort.column===c && currentFgiSort.direction==='asc' ? 'desc' : 'asc' }; renderFgiTable(); }
@@ -21,15 +21,17 @@ function renderFgiTable() {
         let unit_msrp = (typeof getEngineLiveMsrp === 'function') ? getEngineLiveMsrp(p) : 0;
         let msrpv = s * unit_msrp;
         let total_net = unit_msrp > 0 ? (unit_msrp - breakdown.total) * s : 0;
-        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, ms: ms, tc: breakdown.total, msrpv: msrpv, tv: tv, net: total_net, isSub: !!isSubassemblyDB[p], is3D: is3D }; 
+        let isLabel = !!(productsDB[p] && productsDB[p].is_label);
+        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, ms: ms, tc: breakdown.total, msrpv: msrpv, tv: tv, net: total_net, isSub: !!isSubassemblyDB[p], is3D: is3D, isLabel: isLabel }; 
     });
     if(a.length===0){ h += "<tr><td colspan='10' style='text-align:center;'>No finished goods.</td></tr>"; }
     else {
         let sortFn = (x,y) => { let u = x[currentFgiSort.column]; let v = y[currentFgiSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentFgiSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentFgiSort.direction==='asc'?-1:1; if(u>v) return currentFgiSort.direction==='asc'?1:-1; return 0; };
         let groups = [
-            { id: 'cat-retail', name: 'Retail Products', icn: '📦', items: a.filter(x => !x.is3D && !x.isSub).sort(sortFn) },
-            { id: 'cat-sub', name: 'Sub-Assemblies', icn: '⚙️', items: a.filter(x => x.isSub && !x.is3D).sort(sortFn) },
-            { id: 'cat-print', name: '3D Prints', icn: '🖨️', items: a.filter(x => x.is3D).sort(sortFn) }
+            { id: 'cat-retail', name: 'Retail Products', icn: '📦', items: a.filter(x => !x.is3D && !x.isSub && !x.isLabel).sort(sortFn) },
+            { id: 'cat-label',  name: 'Custom Labels',   icn: '🏷️',  items: a.filter(x => x.isLabel).sort(sortFn) },
+            { id: 'cat-sub',    name: 'Sub-Assemblies',  icn: '⚙️',  items: a.filter(x => x.isSub && !x.is3D).sort(sortFn) },
+            { id: 'cat-print',  name: '3D Prints',       icn: '🖨️',  items: a.filter(x => x.is3D).sort(sortFn) }
         ];
 
         groups.forEach(g => {

@@ -428,7 +428,10 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
         inventoryDB[activeKey].production_consumed_qty += qty;
         inventoryDB[activeKey].consumed_qty += qty;
         
-        const payload = {
+        const payloads = [];
+        
+        // 1. Array payload for Raw Media tracking
+        payloads.push({
              item_key: activeKey,
              consumed_qty: inventoryDB[activeKey].consumed_qty || 0,
              manual_adjustment: inventoryDB[activeKey].manual_adjustment || 0,
@@ -440,9 +443,38 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
              assembly_consumed_qty: inventoryDB[activeKey].assembly_consumed_qty || 0,
              production_consumed_qty: inventoryDB[activeKey].production_consumed_qty,
              prototype_produced_qty: inventoryDB[activeKey].prototype_produced_qty || 0
-        };
+        });
         
-        const { error } = await supabaseClient.from('inventory_consumption').upsert([payload], {onConflict:'item_key'});
+        // 2. Loop through spool queue to build produced labels
+        if (window.barcodzSpoolQueue && window.barcodzSpoolQueue.length > 0) {
+            window.barcodzSpoolQueue.forEach(item => {
+                // If it's registered as a custom label in productsDB, track its produced stock
+                if (typeof productsDB !== 'undefined' && productsDB[item.name] && productsDB[item.name].is_label) {
+                    let labelKey = `RECIPE:::${item.name}`;
+                    if (!inventoryDB[labelKey]) {
+                        inventoryDB[labelKey] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
+                    }
+                    // Add produced quantity from the spool
+                    inventoryDB[labelKey].produced_qty += item.qty;
+                    
+                    payloads.push({
+                         item_key: labelKey,
+                         consumed_qty: inventoryDB[labelKey].consumed_qty,
+                         manual_adjustment: inventoryDB[labelKey].manual_adjustment,
+                         produced_qty: inventoryDB[labelKey].produced_qty,
+                         sold_qty: inventoryDB[labelKey].sold_qty,
+                         min_stock: inventoryDB[labelKey].min_stock,
+                         scrap_qty: inventoryDB[labelKey].scrap_qty,
+                         prototype_consumed_qty: inventoryDB[labelKey].prototype_consumed_qty,
+                         assembly_consumed_qty: inventoryDB[labelKey].assembly_consumed_qty,
+                         production_consumed_qty: inventoryDB[labelKey].production_consumed_qty,
+                         prototype_produced_qty: inventoryDB[labelKey].prototype_produced_qty
+                    });
+                }
+            });
+        }
+        
+        const { error } = await supabaseClient.from('inventory_consumption').upsert(payloads, {onConflict:'item_key'});
         if(error) throw error;
         
         sysLog(`Consumed ${qty}x ${sizeText} via Spool.`);
