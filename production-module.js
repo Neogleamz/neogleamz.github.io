@@ -696,7 +696,7 @@ async function validateAndCreateWO() {
             // Only queue a print job for structural fallback/shortfalls instead of unconditionally spooling full amounts
             if (amountToPrint > 0) {
                 if (typeof addPrintJob === 'function') {
-                    printPromises.push(addPrintJob(prefix + part, amountToPrint, woId, woId));
+                    printPromises.push(addPrintJob(prefix + part, amountToPrint, woId, label || null));
                 }
             }
         });
@@ -1512,5 +1512,6 @@ function stopProductionSopResize() {
         document.removeEventListener('mouseup', stopProductionSopResize);
     }
 }
+
 
 
