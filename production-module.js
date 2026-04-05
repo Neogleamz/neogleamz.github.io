@@ -1242,7 +1242,7 @@ function _renderArchiveCards(items) {
         return;
     }
     const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-    const fmtShort = (d) => d ? new Date(d).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    const fmtShort = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
     if (currentArchiveTab === 'batchez') {
         listArea.innerHTML = items.map((wo, i) => {
@@ -1512,6 +1512,7 @@ function stopProductionSopResize() {
         document.removeEventListener('mouseup', stopProductionSopResize);
     }
 }
+
 
 
 
