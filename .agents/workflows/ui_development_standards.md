@@ -472,3 +472,123 @@ Across the Neogleamz ecosystem, whenever an item's archetype is designated visua
 - **Raw Material / Component:** `🔩` (Nut and Bolt)
 
 > **Note:** These emojis MUST be used not only as list-item bullets in dropdowns, but also on physical Hub card elements to indicate item archetypes instantly.
+
+---
+
+## 17. Z-Index Authority Hierarchy
+
+To prevent UI elements from overlapping chaotically (e.g., custom dropdowns clipping under modals, or headers scrolling over panels), **every new element using `z-index` must strictly adhere to this dictionary:**
+
+| Element / Class | Z-Index Value | Rules |
+|---|---|---|
+| Base DOM Elements | `0` or `1` | Default positioning |
+| `.h-resizer` & `.v-resizer` | `10` | Must sit above standard split panes for dragging |
+| Sticky Table Headers (`<th>`) | `20` | Must stay above scrolling table rows |
+| Custom `.pane-header-bar` | `50` | Must sit above scrolling content below it |
+| Custom Dropdown Panels | `500` | E.g. Multi-select menus; must sit above all page content |
+| `.modal-overlay` | `1000` | Full screen lockouts; overtakes entire application |
+| System Alerts / Toast Banners | `2000` | Highest priority; nothing can obscure a system message |
+
+---
+
+## 18. Forms, Inputs & Focus States
+
+Text inputs, numeric inputs, and textareas must remain perfectly cohesive with the dark/glass theme.
+
+**Standard Input CSS Mandate:**
+```css
+input[type="text"], input[type="number"], textarea {
+    background: var(--bg-input);
+    border: 1px solid var(--border-input);
+    color: var(--text-main);
+    border-radius: 6px; /* 4px for tight spaces */
+    padding: 6px 10px;
+    font-size: 12px;
+    outline: none; /* Crucial: no default blue chrome borders */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Mandatory Focus State */
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(247, 147, 32, 0.4); /* Subtle brand glow */
+}
+```
+
+---
+
+## 19. Dynamic Data Tables & Sticky Headers
+
+Tables are the backbone of Neogleamz data visualization. Ad-hoc styling is strictly prohibited.
+
+**Table Standards:**
+1. **Container:** Wrap the table in `<div class="table-wrap" style="overflow-y:auto; flex-grow:1;">`.
+2. **Table Tag:** `<table class="full-table" style="width:100%; border-collapse:collapse;">`.
+3. **Sticky Headers:** All tables must have sticky headers so context isn't lost on long scrolls.
+4. **Row Hover:** Ensure `<tr>` rows have an explicit hover state to aid readability.
+
+**Standard DOM Structure:**
+```html
+<div class="table-wrap" style="overflow-y:auto; flex-grow:1;">
+    <table class="full-table" style="width:100%; border-collapse:collapse; text-align:left;">
+        <thead style="position:sticky; top:0; background:var(--bg-panel); z-index:20;">
+            <tr>
+                <th style="padding:10px; border-bottom:2px solid var(--border-color); color:var(--primary-color); font-size:11px; text-transform:uppercase;">SKU</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border-color); color:var(--primary-color); font-size:11px; text-transform:uppercase;">QTY</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
+                <td style="padding:10px; font-size:12px; color:var(--text-main);">NEO-BLTZ</td>
+                <td style="padding:10px; font-size:12px; font-weight:bold; color:#10b981;">140</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+```
+
+---
+
+## 20. Async Loading States & Data Fetching
+
+When dispatching Supabase API queries, you **must** provide a UI lock or standard visual queue. Do not allow the user to click buttons repeatedly, and do not leave them staring at a static screen.
+
+*   **Button Submissions:** The button element triggering the sync must mutate its state:
+    ```javascript
+    const btn = document.getElementById('saveBtn');
+    btn.innerText = "SYNCING CLOUD...";
+    btn.style.opacity = "0.6";
+    btn.style.pointerEvents = "none";
+    
+    await supabaseClient...
+    
+    // On success:
+    btn.innerText = "SUCCESS ✓";
+    btn.style.background = "#10b981"; // Snap to green
+    setTimeout(() => { reset button... }, 2000);
+    ```
+*   **Empty Table Data:** While querying large ledgers to populate lists, place a single temporary `<div style="padding:40px; text-align:center; color:var(--text-muted); font-style:italic;">Fetching Edge Ledgers...</div>` placeholder inside the container so it doesn't look broken.
+
+---
+
+## 21. Toast Notifications & System Feedback
+
+Do not use raw browser `alert()` except for critical destructive confirmations (e.g., `let ok = confirm("Delete this SOP?")`).
+
+For success/error feedback, rely strictly on **Button Mutation** (as seen in Section 20 above) or dedicated **in-pane status zones** (usually an empty `div` under the title).
+
+**Standard Pane Status Message Syntax:**
+```html
+<div id="paneStatusLabel" style="display:none; padding:8px; margin-bottom:10px; border-radius:6px; font-size:12px; font-weight:bold; text-align:center;"></div>
+```
+```javascript
+function showStatus(msg, isError = false) {
+    const el = document.getElementById('paneStatusLabel');
+    el.style.display = 'block';
+    el.innerText = msg;
+    el.style.background = isError ? "rgba(239, 68, 68, 0.1)" : "rgba(16, 185, 129, 0.1)";
+    el.style.color = isError ? "#ef4444" : "#10b981";
+    el.style.border = `1px solid ${isError ? "#ef4444" : "#10b981"}`;
+    setTimeout(() => el.style.display = 'none', 3500);
+}
+```
