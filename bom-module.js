@@ -68,6 +68,21 @@ async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const
 let productDraggedName = null;
 
 function renderProductList() { 
+    try {
+        const labelsToClean = [
+            'Dymo 2.25" x 1.25"', 'Dymo Address 1.125" x 3.5"', 'Dymo Return 0.75" x 2"',
+            'Dymo Multi 2.125" x 1"', 'Square 1.0" x 1.0"', 'Standard 3.0" x 1.0"',
+            'Shipping 4.0" x 6.0"', 'A4 Sheet List'
+        ];
+        labelsToClean.forEach(lbl => {
+            if (productsDB[lbl]) {
+                delete productsDB[lbl];
+                supabaseClient.from('product_recipes').delete().eq('product_name', lbl).then(()=>{});
+                sysLog("Purged temp Retail Product: " + lbl);
+            }
+        });
+    } catch(e) { }
+    
     const ui = document.getElementById('productListUI'); ui.innerHTML = ""; 
     let allProds = Object.keys(productsDB);
     
@@ -110,38 +125,56 @@ function renderProductList() {
     window.toggleRecipeCategory = function(catId, btn) {
         const el = document.getElementById(catId);
         if (!el) return;
+        window.recipeGroupState = window.recipeGroupState || {};
         if (el.style.display === 'none') {
             el.style.display = 'block';
             btn.innerHTML = '▼';
+            window.recipeGroupState[catId] = true;
         } else {
             el.style.display = 'none';
             btn.innerHTML = '▶';
+            window.recipeGroupState[catId] = false;
         }
     };
 
+    window.recipeGroupState = window.recipeGroupState || {};
+    function getCatState(id, prodArr) {
+        if (window.recipeGroupState[id] === undefined && prodArr.includes(currentProduct)) {
+            window.recipeGroupState[id] = true;
+        }
+        return {
+            disp: window.recipeGroupState[id] ? 'block' : 'none',
+            arr: window.recipeGroupState[id] ? '▼' : '▶'
+        };
+    }
+
     let html = "";
     if(retailProds.length > 0) {
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-retail', this.querySelector('span'))">RETAIL PRODUCTS <span>▶</span></li>`;
-        html += `<div id="cat-retail" style="display:none;">`;
+        let st = getCatState('cat-retail', retailProds);
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-retail', this.querySelector('span'))">RETAIL PRODUCTS <span>${st.arr}</span></li>`;
+        html += `<div id="cat-retail" style="display:${st.disp};">`;
         retailProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
     if(subProds.length > 0) {
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-sub', this.querySelector('span'))">SUB-ASSEMBLIES <span>▶</span></li>`;
-        html += `<div id="cat-sub" style="display:none;">`;
+        let st = getCatState('cat-sub', subProds);
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-sub', this.querySelector('span'))">SUB-ASSEMBLIES <span>${st.arr}</span></li>`;
+        html += `<div id="cat-sub" style="display:${st.disp};">`;
         subProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
-    if(realPrintProds.length > 0) {
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-3d', this.querySelector('span'))">3D PRINTS <span>▶</span></li>`;
-        html += `<div id="cat-3d" style="display:none;">`;
-        realPrintProds.forEach(p => html += buildItem(p));
+    if(labelProds.length > 0) {
+        let st = getCatState('cat-labels', labelProds);
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-labels', this.querySelector('span'))">CUSTOM LABELZ <span>${st.arr}</span></li>`;
+        html += `<div id="cat-labels" style="display:${st.disp};">`;
+        labelProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
-    if(labelProds.length > 0) {
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:#10b981; font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-labels', this.querySelector('span'))">🏷️ CUSTOM LABELS <span>▶</span></li>`;
-        html += `<div id="cat-labels" style="display:none;">`;
-        labelProds.forEach(p => html += buildItem(p));
+    if(realPrintProds.length > 0) {
+        let st = getCatState('cat-3d', realPrintProds);
+        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" onclick="toggleRecipeCategory('cat-3d', this.querySelector('span'))">3D PRINTS <span>${st.arr}</span></li>`;
+        html += `<div id="cat-3d" style="display:${st.disp};">`;
+        realPrintProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
 
@@ -206,7 +239,7 @@ function renderProductBOM() {
     wrap.innerHTML = h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${getEngineTrueCogs(currentProduct).toFixed(2)}`; applyTableInteractivity('bomTableWrap');
 }
 async function updateBOMQty(cell) { try { let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v) || v<=0) { cell.innerText=oldValTemp; return; } if(v.toString()===oldValTemp) return; let k = cell.getAttribute('data-key').replace(/"/g, '"').replace(/\\'/g, "'"); let p = productsDB[currentProduct].find(x => String(x.item_key || x.di_item_id || x.name) === k); if(p) { p.quantity = v; p.qty = v; cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); await syncRecipe(currentProduct); renderProductList(); } } catch(e) { sysLog(e.message, true); } }
-async function removePart(btn) { try { if(!currentProduct) return; let k = btn.getAttribute('data-key').replace(/"/g, '"').replace(/\\'/g, "'"); productsDB[currentProduct] = productsDB[currentProduct].filter(p => String(p.item_key || p.di_item_id || p.name) !== k); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
+async function removePart(btn) { try { if(!currentProduct) return; let k = btn.getAttribute('data-key').replace(/"/g, '"').replace(/\\'/g, "'"); let arr = productsDB[currentProduct]; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === k) { arr.splice(i, 1); } } await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
 async function addPartToProduct() { try { if(!currentProduct) return alert("Select product."); let k = document.getElementById('partSelector').value; let q = parseFloat(document.getElementById('partQty').value) || 0; if(q<=0 || !k) return alert("Invalid inputs."); if(k === 'RECIPE:::' + currentProduct) return alert("No self nesting."); let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + q; ex.qty = ex.quantity; } else productsDB[currentProduct].push({item_key: k, quantity: q}); await syncRecipe(currentProduct); renderProductBOM(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
 let recipeModalMode = '';
 function showRecipeModal(mode) {
@@ -248,4 +281,4 @@ function submitRecipeModal() {
 
 async function executeCreateNewProduct(n) { try { if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; laborDB[n] = {time:0, rate:0}; pricingDB[n] = {msrp:0, wholesale:0}; isSubassemblyDB[n] = false; await supabaseClient.from('product_recipes').insert({product_name: n, components: [], labor_time_mins: 0, labor_rate_hr: 0, msrp: 0, wholesale_price: 0, is_subassembly: false, is_3d_print: false, print_time_mins: 0}); currentProduct = n; renderProductList(); renderProductBOM(); if(typeof populateDropdowns === 'function') populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
 async function executeDeleteCurrentProduct() { try { if(!currentProduct) return; sysLog(`Deleting ${currentProduct}`); const {error} = await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct);
-            if(error) throw new Error(error.message); delete productsDB[currentProduct]; delete laborDB[currentProduct]; delete pricingDB[currentProduct]; delete isSubassemblyDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let oL = productsDB[n].length; productsDB[n] = productsDB[n].filter(x => String(x.item_key || x.di_item_id || x.name) !== 'RECIPE:::'+currentProduct); if(productsDB[n].length !== oL) ups.push(supabaseClient.from('product_recipes').update({components: productsDB[n]}).eq('product_name', n)); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); renderProductList(); } catch(e) { sysLog(e.message, true); } }
+            if(error) throw new Error(error.message); delete productsDB[currentProduct]; delete laborDB[currentProduct]; delete pricingDB[currentProduct]; delete isSubassemblyDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let arr = productsDB[n]; let oL = arr.length; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { arr.splice(i, 1); } } if(arr.length !== oL) ups.push(supabaseClient.from('product_recipes').update({components: arr}).eq('product_name', n)); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); renderProductList(); } catch(e) { sysLog(e.message, true); } }

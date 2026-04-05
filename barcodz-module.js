@@ -12,13 +12,15 @@ function buildBarcodzCache() {
         Object.keys(productsDB).forEach(pName => {
             const is3D = !!(productsDB[pName].is_3d_print);
             const isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]);
-            const typeLabel = is3D ? '3D Print' : (isSub ? 'Sub-Assembly' : 'Retail Product');
+            const isLabel = !!(productsDB[pName].is_label);
+            const typeLabel = isLabel ? 'Custom Labelz' : (is3D ? '3D Print' : (isSub ? 'Sub-Assembly' : 'Retail Product'));
+            const customIcon = productsDB[pName].label_emoji || '🏷️';
             
             barcodzCache.push({
                 name: pName,
                 slug: getItemBarcodeValue(pName),
                 type: typeLabel,
-                icon: is3D ? "🖨️" : (isSub ? "⚙️" : "📦"),
+                icon: isLabel ? customIcon : (is3D ? "🖨️" : (isSub ? "⚙️" : "📦")),
                 isCatalog: false
             });
         });
@@ -66,8 +68,11 @@ function buildBarcodzCache() {
     if (kpiL) kpiL.innerText = typeof labelzDB !== 'undefined' ? labelzDB.length : 0;
 }
 
-function renderBarcodzGrid() {
-    if (barcodzCache.length === 0) buildBarcodzCache();
+function renderBarcodzGrid(forceRebuild = false) {
+    let hasProducts = barcodzCache.some(x => x.type !== 'Custom Labelz');
+    if (barcodzCache.length === 0 || (!hasProducts && typeof productsDB !== 'undefined' && Object.keys(productsDB).length > 0) || forceRebuild) {
+        buildBarcodzCache();
+    }
     
     const grid = document.getElementById('barcodzGrid');
     const searchInput = document.getElementById('barcodzSearch')?.value.toLowerCase() || '';
@@ -91,16 +96,20 @@ function renderBarcodzGrid() {
         grouped[item.type].push(item);
     });
     
-    const typeOrder = ['Retail Product', 'Sub-Assembly', '3D Print', 'Raw Material'];
+    const typeOrder = ['Retail Product', 'Sub-Assembly', 'Custom Labelz', '3D Print', 'Raw Material'];
     const groupsToRender = Object.keys(grouped).sort((a,b) => typeOrder.indexOf(a) - typeOrder.indexOf(b));
 
+    let savedState = null;
+    try { savedState = JSON.parse(localStorage.getItem('barcodzGroupState')); } catch(e){}
+    window.barcodzGroupState = window.barcodzGroupState || savedState || {};
     let html = '';
     groupsToRender.forEach(type => {
+        let isOpen = window.barcodzGroupState[type] !== false;
         html += `
-        <details open style="margin-bottom:20px; background:rgba(0,0,0,0.1); border-radius:12px; border:1px solid var(--border-color); grid-column: 1 / -1;">
+        <details ${isOpen ? 'open' : ''} ontoggle="window.barcodzGroupState['${type}'] = this.open; localStorage.setItem('barcodzGroupState', JSON.stringify(window.barcodzGroupState));" style="margin-bottom:20px; background:rgba(0,0,0,0.1); border-radius:12px; border:1px solid var(--border-color); grid-column: 1 / -1;">
             <summary style="padding:14px 20px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; color:var(--text-heading); list-style:none; display:flex; align-items:center; border-bottom:1px solid var(--border-color); background:var(--bg-panel); border-radius:12px 12px 0 0;">
                 <span style="font-size:18px; margin-right:10px;">${grouped[type][0].icon}</span> 
-                ${type}s <span style="margin-left:10px; background:var(--bg-input); padding:2px 8px; border-radius:12px; font-size:10px; color:var(--text-muted);">${grouped[type].length}</span>
+                ${type.endsWith('z') ? type : type + 's'} <span style="margin-left:10px; background:var(--bg-input); padding:2px 8px; border-radius:12px; font-size:10px; color:var(--text-muted);">${grouped[type].length}</span>
             </summary>
             <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; padding:16px;">
         `;
@@ -221,20 +230,20 @@ function setSpoolItemQty(slug, qty) {
 }
 
 function renderBarcodzSpool() {
-    const list = document.getElementById('barcodzSpoolList');
-    const counter = document.getElementById('spoolTotalCount');
-    if (!list) return; // not rendered yet
+    const lists = [document.getElementById('barcodzSpoolList'), document.getElementById('labelzSpoolList')].filter(Boolean);
+    const counters = [document.getElementById('spoolTotalCount'), document.getElementById('labelzSpoolTotalCount')].filter(Boolean);
+    if (lists.length === 0) return; // not rendered yet
     
     let totalQty = 0;
+    let html = '';
     
     if (window.barcodzSpoolQueue.length === 0) {
-        list.innerHTML = `
+        html = `
             <div class="empty-state" style="padding:40px 10px; opacity:0.6; text-align:center;">
                 <div style="font-size:32px; margin-bottom:10px;">🛒</div>
                 <div style="font-size:12px; color:var(--text-muted);">Spool is empty.<br>Add items from the directory.</div>
             </div>`;
     } else {
-        let html = '';
         window.barcodzSpoolQueue.forEach((item, index) => {
             totalQty += item.qty;
             html += `
@@ -256,16 +265,22 @@ function renderBarcodzSpool() {
                 </div>
             `;
         });
-        list.innerHTML = html;
     }
     
-    if (counter) counter.innerText = totalQty;
+    lists.forEach(list => list.innerHTML = html);
+    counters.forEach(c => c.innerText = totalQty);
 }
 
 function executeBatchPrint() {
     if (window.barcodzSpoolQueue.length === 0) return alert("Print Spool is empty!");
     
-    const sizeSelect = document.getElementById('barcodzSizeSelect')?.value || '2.25x1.25';
+    let activeSizeSelect = 'barcodzSizeSelect';
+    const labelzPane = document.getElementById('paneFulfillzLabelz');
+    if (labelzPane && labelzPane.style.display !== 'none') {
+        activeSizeSelect = 'labelzSizeSelect';
+    }
+    
+    const sizeSelect = document.getElementById(activeSizeSelect)?.value || '2.25x1.25';
     const typeSelect = (document.getElementById('barcodzTypeSelect')?.value || 'CODE128');
     const isQR = typeSelect === 'QR';
     const printArea = document.getElementById('printableBarcodeArea');
@@ -375,12 +390,55 @@ function executeBatchPrint() {
     // Force browser print overlay async so engines can run
     setTimeout(() => {
         window.print();
+        
+        // Execute Inventory Consumption API call right after print action triggers
+        consumeThermalMedia(totalInjected, activeSizeSelect);
+        
         setTimeout(() => {
             printArea.innerHTML = '';
             // Auto Clear Queue as defined in standard operating logic
             clearBarcodzSpool();
         }, 1500); // cleanup delay allowing OS to snapshot
     }, 200);
+}
+
+async function consumeThermalMedia(qty, activeSizeSelectId) {
+    if(typeof inventoryDB === 'undefined' || typeof supabaseClient === 'undefined') return;
+    
+    try {
+        const selectEl = document.getElementById(activeSizeSelectId);
+        if(!selectEl) return;
+        const sizeText = selectEl.options[selectEl.selectedIndex].text;
+        
+        // Ensure standard Raw Material tracking exists for this item
+        if(!inventoryDB[sizeText]) {
+             inventoryDB[sizeText] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
+        }
+        
+        // Log thermal printing as 'production_consumed_qty'
+        inventoryDB[sizeText].production_consumed_qty += qty;
+        
+        const payload = {
+             item_key: sizeText,
+             consumed_qty: inventoryDB[sizeText].consumed_qty || 0,
+             manual_adjustment: inventoryDB[sizeText].manual_adjustment || 0,
+             produced_qty: inventoryDB[sizeText].produced_qty || 0,
+             sold_qty: inventoryDB[sizeText].sold_qty || 0,
+             min_stock: inventoryDB[sizeText].min_stock || 0,
+             scrap_qty: inventoryDB[sizeText].scrap_qty || 0,
+             prototype_consumed_qty: inventoryDB[sizeText].prototype_consumed_qty || 0,
+             assembly_consumed_qty: inventoryDB[sizeText].assembly_consumed_qty || 0,
+             production_consumed_qty: inventoryDB[sizeText].production_consumed_qty,
+             prototype_produced_qty: inventoryDB[sizeText].prototype_produced_qty || 0
+        };
+        
+        const { error } = await supabaseClient.from('inventory_consumption').upsert([payload], {onConflict:'item_key'});
+        if(error) throw error;
+        
+        sysLog(`Consumed ${qty}x ${sizeText} via Spool.`);
+    } catch(err) {
+        sysLog(`Failed to log thermal consumption: ${err.message}`, true);
+    }
 }
 
 // Global Event Hook to build index once on first open

@@ -83,7 +83,7 @@ function renderLabelzGrid() {
             <!-- Thumbnail -->
             ${hasThumbnail ? `<img src="${label.file_url}" style="width:100%;height:80px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid var(--border-color);">` :
               hasPDF ? `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:rgba(239,68,68,0.1);border-radius:6px;border:1px dashed #ef4444;color:#ef4444;font-weight:800;font-size:13px;">📄 PDF Label</div>` :
-              hasLayout ? `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,0.08);border-radius:6px;border:1px dashed #8b5cf6;color:#8b5cf6;font-weight:800;font-size:12px;">🎨 Canvas Design</div>` :
+              hasLayout ? `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,0.08);border-radius:6px;border:1px dashed #8b5cf6;color:#8b5cf6;font-weight:800;font-size:12px;">🏷️ Canvas Design</div>` :
               `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:var(--bg-bar);border-radius:6px;color:var(--text-muted);font-size:11px;font-style:italic;">No design yet</div>`}
 
             <div style="display:flex;gap:6px;margin-top:auto;">
@@ -377,9 +377,9 @@ function onCanvasSelection(e) {
                 <div style="flex:1;"><label style="font-size:10px;">Weight</label><select onchange="updObj('fontWeight', this.value)" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"><option value="normal" ${obj.fontWeight==='normal'?'selected':''}>Normal</option><option value="bold" ${obj.fontWeight==='bold'?'selected':''}>Bold</option></select></div>
             </div>
             <div style="display:flex; gap:4px; margin-top:4px;">
-               <button onclick="updObj('textAlign', 'left')" class="btn-outline" style="padding:2px 8px;">⇤</button>
-               <button onclick="updObj('textAlign', 'center')" class="btn-outline" style="padding:2px 8px;">⇥⇤</button>
-               <button onclick="updObj('textAlign', 'right')" class="btn-outline" style="padding:2px 8px;">⇥</button>
+               <button onclick="updObj('textAlign', 'left')" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇤</button>
+               <button onclick="updObj('textAlign', 'center')" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇥⇤</button>
+               <button onclick="updObj('textAlign', 'right')" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇥</button>
             </div>
         `;
     }
@@ -651,18 +651,28 @@ async function saveLabelzDesign() {
         if (error) throw error;
         
         // Ensure product_recipes has is_label
-        await supabaseClient.from('product_recipes').upsert({
+        const { error: prErr } = await supabaseClient.from('product_recipes').upsert({
             product_name: name,
             components: (typeof productsDB!=='undefined' && productsDB[name]) ? productsDB[name] : [],
             is_label: true,
             label_emoji: emoji,
             is_subassembly: false,
-            is_3d_print: false
+            is_3d_print: false,
+            labor_time_mins: 0,
+            labor_rate_hr: 0,
+            msrp: 0,
+            wholesale_price: 0,
+            print_time_mins: 0
         }, { onConflict: 'product_name', ignoreDuplicates: false });
+        if(prErr) sysLog("Labelz Error: " + prErr.message, true);
 
         if(typeof productsDB!=='undefined') {
-             if(!productsDB[name]) productsDB[name] = [];
+             if(!productsDB[name]) {
+                 productsDB[name] = [];
+                 productsDB[name].msrp = 0;
+             }
              productsDB[name].is_label = true;
+             productsDB[name].label_emoji = emoji;
         }
 
         setMasterStatus('Label saved!', 'mod-success');
@@ -677,6 +687,40 @@ async function saveLabelzDesign() {
 }
 
 // EXPORT TO PDF VIA jsPDF
+async function deleteLabelzDesign() {
+    const name = document.getElementById('labelzDesignerName').value.trim();
+    if(!name) return alert('No label loaded to delete.');
+    
+    if(!confirm(`Are you sure you want to permanently delete the custom label '${name}'?`)) return;
+    
+    try {
+        setMasterStatus('Deleting label design...', 'mod-working');
+        
+        const { error: err1 } = await supabaseClient.from('label_designs').delete().eq('product_name', name);
+        if (err1) throw err1;
+        
+        await supabaseClient.from('product_recipes').delete().eq('product_name', name);
+        
+        if(typeof productsDB !== 'undefined' && productsDB[name]) {
+            delete productsDB[name];
+        }
+        if(typeof labelzDB !== 'undefined') {
+            labelzDB = labelzDB.filter(x => x.product_name !== name);
+        }
+        
+        setMasterStatus('Label deleted!', 'mod-success');
+        setTimeout(() => setMasterStatus('Ready.', 'status-idle'), 2000);
+        
+        closeLabelzDesigner();
+        await loadLabelzData();
+        if(typeof renderProductList === 'function') renderProductList();
+        if(typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
+    } catch(e) {
+        sysLog('deleteLabelz: ' + e.message, true);
+        setMasterStatus('Error deleting', 'mod-error');
+    }
+}
+
 function exportLabelzPDF() {
     if(!fCanvas) return;
     if(typeof window.jspdf === 'undefined') return alert('jsPDF library not loaded.');
@@ -712,7 +756,7 @@ function getLabelzForBarcodz() {
     return labelzDB.map(l => ({
         name: l.product_name,
         slug: l.product_name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30),
-        type: 'Custom Canvas Label',
+        type: 'Custom Labelz',
         icon: l.emoji || '🏷️',
         isCatalog: false,
         isLabel: true,
@@ -735,7 +779,7 @@ setTimeout(() => { if(typeof supabaseClient !== 'undefined') loadLabelzData(); }
 window.addLabelzToSpool = function(name, emoji) {
     if(typeof addBarcodzToSpool === 'function') {
         const slug = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30);
-        addBarcodzToSpool(name, slug, emoji || '🏷️', 'Custom Canvas Label');
+        addBarcodzToSpool(name, slug, emoji || '🏷️', 'Custom Labelz');
     } else {
         alert('Barcodz subsystem not loaded yet. Try again.');
     }
