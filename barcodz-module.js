@@ -410,33 +410,44 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
         if(!selectEl) return;
         const sizeText = selectEl.options[selectEl.selectedIndex].text;
         
+        let activeKey = sizeText;
+        if(typeof catalogCache !== 'undefined') {
+            const foundKey = Object.keys(catalogCache).find(k => catalogCache[k].neoName === sizeText);
+            if(foundKey) activeKey = foundKey;
+            else activeKey = `${sizeText}::::::(Grouped Raw Items):::(Mixed Specs)`;
+        } else {
+            activeKey = `${sizeText}::::::(Grouped Raw Items):::(Mixed Specs)`;
+        }
+        
         // Ensure standard Raw Material tracking exists for this item
-        if(!inventoryDB[sizeText]) {
-             inventoryDB[sizeText] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
+        if(!inventoryDB[activeKey]) {
+             inventoryDB[activeKey] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
         }
         
         // Log thermal printing as 'production_consumed_qty' and add it to the master 'consumed_qty'
-        inventoryDB[sizeText].production_consumed_qty += qty;
-        inventoryDB[sizeText].consumed_qty += qty;
+        inventoryDB[activeKey].production_consumed_qty += qty;
+        inventoryDB[activeKey].consumed_qty += qty;
         
         const payload = {
-             item_key: sizeText,
-             consumed_qty: inventoryDB[sizeText].consumed_qty || 0,
-             manual_adjustment: inventoryDB[sizeText].manual_adjustment || 0,
-             produced_qty: inventoryDB[sizeText].produced_qty || 0,
-             sold_qty: inventoryDB[sizeText].sold_qty || 0,
-             min_stock: inventoryDB[sizeText].min_stock || 0,
-             scrap_qty: inventoryDB[sizeText].scrap_qty || 0,
-             prototype_consumed_qty: inventoryDB[sizeText].prototype_consumed_qty || 0,
-             assembly_consumed_qty: inventoryDB[sizeText].assembly_consumed_qty || 0,
-             production_consumed_qty: inventoryDB[sizeText].production_consumed_qty,
-             prototype_produced_qty: inventoryDB[sizeText].prototype_produced_qty || 0
+             item_key: activeKey,
+             consumed_qty: inventoryDB[activeKey].consumed_qty || 0,
+             manual_adjustment: inventoryDB[activeKey].manual_adjustment || 0,
+             produced_qty: inventoryDB[activeKey].produced_qty || 0,
+             sold_qty: inventoryDB[activeKey].sold_qty || 0,
+             min_stock: inventoryDB[activeKey].min_stock || 0,
+             scrap_qty: inventoryDB[activeKey].scrap_qty || 0,
+             prototype_consumed_qty: inventoryDB[activeKey].prototype_consumed_qty || 0,
+             assembly_consumed_qty: inventoryDB[activeKey].assembly_consumed_qty || 0,
+             production_consumed_qty: inventoryDB[activeKey].production_consumed_qty,
+             prototype_produced_qty: inventoryDB[activeKey].prototype_produced_qty || 0
         };
         
         const { error } = await supabaseClient.from('inventory_consumption').upsert([payload], {onConflict:'item_key'});
         if(error) throw error;
         
         sysLog(`Consumed ${qty}x ${sizeText} via Spool.`);
+        if(typeof renderInventoryTable === 'function') renderInventoryTable();
+        if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') renderAnalyticsDashboard();
     } catch(err) {
         sysLog(`Failed to log thermal consumption: ${err.message}`, true);
     }
