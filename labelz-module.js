@@ -494,14 +494,15 @@ function regenerateBarcodeImage(obj, text, format) {
     if(!obj || !obj.isBarcode) return;
     const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
     try {
-         bwipjs.toCanvas('labelzBwipjsRenderer', {
+         let drawOpts = {
             bcid: format,
             text: text,
             scale: 3,
-            height: format === 'qrcode' ? undefined : 10,
             includetext: format !== 'qrcode',
             textxalign: 'center',
-        });
+        };
+        if (format !== 'qrcode') drawOpts.height = 10;
+        bwipjs.toCanvas('labelzBwipjsRenderer', drawOpts);
         
         obj.setSrc(tmpCanvas.toDataURL('image/png'), function() {
             obj.set({ barcodeOpts: { bcid: format, text: text }});
