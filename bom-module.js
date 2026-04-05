@@ -277,14 +277,16 @@ function showRecipeModal(mode) {
         m.style.display = "flex";
     }
 }
-function submitRecipeModal() {
-    document.getElementById('recipeActionModal').style.display='none';
-    if(recipeModalMode === 'create') {
-        let val = document.getElementById('recipeModalInput').value;
-        if(val) executeCreateNewProduct(val);
-    } else if(recipeModalMode === 'delete') {
-        executeDeleteCurrentProduct();
-    }
+async function submitRecipeModal() {
+    await executeWithButtonAction('recipeModalConfirmBtn', 'PROCESSING...', '✅ DONE!', async () => {
+        if(recipeModalMode === 'create') {
+            let val = document.getElementById('recipeModalInput').value;
+            if(val) await executeCreateNewProduct(val);
+        } else if(recipeModalMode === 'delete') {
+            await executeDeleteCurrentProduct();
+        }
+        document.getElementById('recipeActionModal').style.display='none';
+    });
 }
 
 async function executeCreateNewProduct(n) { try { if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; laborDB[n] = {time:0, rate:0}; pricingDB[n] = {msrp:0, wholesale:0}; isSubassemblyDB[n] = false; await supabaseClient.from('product_recipes').insert({product_name: n, components: [], labor_time_mins: 0, labor_rate_hr: 0, msrp: 0, wholesale_price: 0, is_subassembly: false, is_3d_print: false, print_time_mins: 0}); currentProduct = n; renderProductList(); renderProductBOM(); if(typeof populateDropdowns === 'function') populateDropdowns(); } catch(e) { sysLog(e.message, true); } }

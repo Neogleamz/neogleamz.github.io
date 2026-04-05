@@ -673,3 +673,37 @@ setTimeout(() => {
     btn.style.opacity = "1"; 
 }, 3000);
 ```
+
+---
+
+## 24. Universal Action Button UX Standardization
+
+Any primary action button across the Neogleamz architecture that triggers an asynchronous Database/API call MUST provide direct tactile loading feedback to the operator. Silent background loading sequences are deprecated. 
+
+**Required Flow:**
+Instead of duplicating `setTimeout` state resets in every module, developers MUST utilize the global wrapper `executeWithButtonAction()` instantiated in `app.js`.
+
+```javascript
+/**
+ * Wraps any async backend call in a unified, standard UX animated button flow.
+ * 
+ * @param {string} btnId - The ID of the HTML <button> element triggering the action.
+ * @param {string} loadingStr - Status string while awaiting promise (e.g. "SYNCING...")
+ * @param {string} successStr - Temporary completion string (e.g. "✅ SUCCESS!")
+ * @param {Function} asyncCallback - The core async function payload.
+ */
+// Example Usage:
+async function submitData() {
+    await executeWithButtonAction('btnSubmit', 'UPLOADING...', '✅ SAVED!', async () => {
+        // ... Supabase Payload Call here ...
+        const { error } = await supabaseClient.from('...').upsert({});
+        if (error) throw error;
+    });
+}
+```
+
+**UX Characteristics Enforced:**
+1. Automatically prevents multi/double clicks by disabling the node.
+2. Fades opacity during processing.
+3. Automatically transitions button structure to `#059669` (Green Success) or `#ef4444` (Red Error).
+4. Restores DOM structure perfectly after 3000ms.

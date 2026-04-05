@@ -624,7 +624,7 @@ function printBatchOrderReport() {
 }
 
 async function validateAndCreateWO() {
-    try {
+    await executeWithButtonAction('btnSpawnWO', 'SPAWNING...', '✅ CREATED!', async () => {
         const p = getNewWOProduct(); const q = parseFloat(document.getElementById('newWOQty').value); if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
         
         let routingMap = {};
@@ -705,7 +705,7 @@ async function validateAndCreateWO() {
         }
         
         workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
-    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    });
 }
 
 let woDraggedIndex = null;
