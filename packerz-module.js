@@ -1231,6 +1231,16 @@ async function refreshSOPMediaGrid() {
 
 async function uploadSOPMedia(file) {
     if (!file) return;
+
+    // Strict web-safe extensions check
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'video/mp4', 'video/webm', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+        alert(`UPLOAD REJECTED: Unsupported File Format.\n\nOnly standard web formats are supported:\n- Images: JPG, PNG, WEBP, GIF, SVG\n- Videos: MP4, WEBM\n- Documents: PDF\n\nExtensions like .AVI, .TIF, or .MOV are generally incompatible with browser playback and restricted by the media bucket.`);
+        const input = document.getElementById('sopMediaUploadInput');
+        if (input) input.value = '';
+        return;
+    }
+
     const statusEl = document.getElementById('sopMediaUploadStatus');
     statusEl.style.display = 'block';
     statusEl.style.color = '#0ea5e9';
