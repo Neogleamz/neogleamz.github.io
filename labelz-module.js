@@ -637,25 +637,24 @@ function loadLabelzTemplate(tName) {
 // ============================================================
 
 async function saveLabelzDesign() {
-    const name = document.getElementById('labelzDesignerName').value.trim();
-    if(!name) return alert('Label name is required.');
-    
-    const emoji = document.getElementById('labelzDesignerEmojiVal').value || '🏷️';
-    const size = document.getElementById('labelzDesignerSize').value;
-    
-    fCanvas.discardActiveObject(); // deselect handles before saving JSON
-    const layout = fCanvas.toJSON(['isBarcode', 'barcodeOpts']); // keep custom props
+    await executeWithButtonAction('btnSaveLabelz', 'SAVING...', '✅ SAVED!', async () => {
+        const name = document.getElementById('labelzDesignerName').value.trim();
+        if(!name) return alert('Label name is required.');
+        
+        const emoji = document.getElementById('labelzDesignerEmojiVal').value || '🏷️';
+        const size = document.getElementById('labelzDesignerSize').value;
+        
+        fCanvas.discardActiveObject(); // deselect handles before saving JSON
+        const layout = fCanvas.toJSON(['isBarcode', 'barcodeOpts']); // keep custom props
 
-    const payload = {
-        product_name: name,
-        emoji,
-        label_size: size,
-        layout_json: layout,
-        updated_at: new Date().toISOString()
-    };
+        const payload = {
+            product_name: name,
+            emoji,
+            label_size: size,
+            layout_json: layout,
+            updated_at: new Date().toISOString()
+        };
 
-    try {
-        setMasterStatus('Saving label design...', 'mod-working');
         const { error } = await supabaseClient.from('label_designs').upsert(payload, { onConflict: 'product_name' });
         if (error) throw error;
         
@@ -684,26 +683,19 @@ async function saveLabelzDesign() {
              productsDB[name].label_emoji = emoji;
         }
 
-        setMasterStatus('Label saved!', 'mod-success');
-        setTimeout(() => setMasterStatus('Ready.', 'status-idle'), 2000);
-        closeLabelzDesigner();
         await loadLabelzData();
         if(typeof renderProductList === 'function') renderProductList();
-    } catch(e) {
-        sysLog('saveLabel: ' + e.message, true);
-        setMasterStatus('Error saving', 'mod-error');
-    }
+        setTimeout(() => closeLabelzDesigner(), 1000);
+    });
 }
 
 // EXPORT TO PDF VIA jsPDF
 async function deleteLabelzDesign() {
-    const name = document.getElementById('labelzDesignerName').value.trim();
-    if(!name) return alert('No label loaded to delete.');
-    
-    if(!confirm(`Are you sure you want to permanently delete the custom label '${name}'?`)) return;
-    
-    try {
-        setMasterStatus('Deleting label design...', 'mod-working');
+    await executeWithButtonAction('btnDeleteLabelz', 'DELETING...', '✅ DELETED!', async () => {
+        const name = document.getElementById('labelzDesignerName').value.trim();
+        if(!name) return alert('No label loaded to delete.');
+        
+        if(!confirm(`Are you sure you want to permanently delete the custom label '${name}'?`)) return;
         
         const { error: err1 } = await supabaseClient.from('label_designs').delete().eq('product_name', name);
         if (err1) throw err1;
@@ -717,17 +709,11 @@ async function deleteLabelzDesign() {
             labelzDB = labelzDB.filter(x => x.product_name !== name);
         }
         
-        setMasterStatus('Label deleted!', 'mod-success');
-        setTimeout(() => setMasterStatus('Ready.', 'status-idle'), 2000);
-        
-        closeLabelzDesigner();
         await loadLabelzData();
         if(typeof renderProductList === 'function') renderProductList();
         if(typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
-    } catch(e) {
-        sysLog('deleteLabelz: ' + e.message, true);
-        setMasterStatus('Error deleting', 'mod-error');
-    }
+        setTimeout(() => closeLabelzDesigner(), 1000);
+    });
 }
 
 function exportLabelzPDF() {
