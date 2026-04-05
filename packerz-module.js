@@ -38,7 +38,11 @@ async function fetchUnfulfilledOrders() {
             });
         });
 
-        const distinctOrderIds = Object.keys(groupedOrders);
+        const distinctOrderIds = Object.keys(groupedOrders).sort((a, b) => {
+            const numA = parseInt(String(a).replace(/[^0-9]/g, ''), 10) || 0;
+            const numB = parseInt(String(b).replace(/[^0-9]/g, ''), 10) || 0;
+            return numA - numB;
+        });
 
         // 3. Dynamically Blast the global KPI Dashboard Tracker
         const kpiTracker = document.getElementById('kpiUnfulfilledCount');
@@ -1712,4 +1716,5 @@ async function handleScanResult(decodedText, expectedValue, rowId) {
         }
     }
 }
+
 
