@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // NEXUZ: PACKERZ TERMINAL LOGIC
 // ==========================================
 
@@ -1398,16 +1398,13 @@ function closeSOPTokenGuide() { document.getElementById('sopTokenGuideModal').st
 
 async function archiveSOPSnapshot(orderId, sku, recipeName, capturedTelemetry) {
     try {
-        // Fetch the live SOP at the moment of sign-off
+        // Fetch the live SOP at the moment of sign-off (may be null for products without a formal SOP)
         const { data: sopData } = await supabaseClient
             .from('pack_ship_sops')
             .select('instruction_json, required_box_sku')
             .eq('internal_recipe_name', recipeName)
             .single();
 
-        if (!sopData) return; // No SOP written yet — nothing to archive
-
-        // Bypass delayed DOM scraping by enforcing strictly injected sync capture
         const telemetryData = capturedTelemetry || [];
 
         await supabaseClient.from('sop_archives').insert({
@@ -1415,12 +1412,11 @@ async function archiveSOPSnapshot(orderId, sku, recipeName, capturedTelemetry) {
             internal_recipe_name: recipeName,
             qa_passed_at: new Date().toISOString(),
             packer_telemetry: telemetryData,
-            sop_snapshot: JSON.parse(sopData.instruction_json || '{}'),
-            required_box_sku: sopData.required_box_sku || ''
+            sop_snapshot: sopData ? JSON.parse(sopData.instruction_json || '{}') : null,
+            required_box_sku: sopData ? (sopData.required_box_sku || '') : ''
         });
     } catch(e) {
         console.warn('SOP archive write failed (non-critical):', e.message);
-        // Intentionally non-blocking — QA sign-off still completes even if archive fails
     }
 }
 
@@ -1716,3 +1712,4 @@ async function handleScanResult(decodedText, expectedValue, rowId) {
         }
     }
 }
+
