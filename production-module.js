@@ -1,4 +1,4 @@
-// --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
+﻿// --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
 function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
 function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = `<video src="${url}" style="max-width:100%; max-height:100%; outline:none; box-shadow:0 0 40px rgba(0,0,0,0.5);" controls autoplay controlsList="nodownload"></video>`; } else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
 function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = ''; } catch(e) { sysLog(e.message, true); } }
@@ -1139,6 +1139,31 @@ async function archiveCurrentWO() {
     } catch(e) { sysLog(e.message, true); }
 }
 
+async function deleteWorkOrder() {
+    if (!currentWO) return;
+    // Safety guard: block deletion if materials have already been pulled to prevent inventory corruption
+    if (currentWO.materials_pulled) {
+        return showToast('Cannot delete — materials have already been pulled for this Work Order. Archive it instead.', 'error');
+    }
+    if (!confirm(`⚠️ Permanently delete ${currentWO.wo_id}: ${currentWO.product_name}?\n\nThis cannot be undone.`)) return;
+    try {
+        sysLog(`Deleting WO ${currentWO.wo_id}`);
+        setMasterStatus("Deleting...", "mod-working");
+        const { error } = await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id);
+        if (error) throw new Error(error.message);
+        workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id);
+        currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
+        setMasterStatus("Deleted!", "mod-success");
+        setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
+        renderWOList();
+        if (!currentWO) document.getElementById('woMainArea').style.display = 'none';
+    } catch(e) {
+        sysLog(e.message, true);
+        showToast('Delete failed: ' + e.message, 'error');
+        setMasterStatus("Error", "mod-error");
+    }
+}
+
 let currentArchiveTab = 'batchez';
 function openArchiveExplorer(tab = 'batchez') {
     document.getElementById('archiveExplorerModal').style.display = 'flex';
@@ -1421,3 +1446,4 @@ function stopProductionSopResize() {
         document.removeEventListener('mouseup', stopProductionSopResize);
     }
 }
+
