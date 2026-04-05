@@ -764,3 +764,90 @@ To ensure the "Zero-Risk Workflow" is maintained, you must follow strict testing
 1. **Local Domain Validation:** Every feature branch MUST be tested by the user loading `127.0.0.1:5500` or clicking the `Go Live` server to verify the UI and functionality. Never assume code works blindly.
 2. **Flexbox & Edge Case Checking:** Always verify the visual boundaries of newly added UI constraints (e.g., test long text wrapping in fixed-width Flex containers, ensure buttons don't unpredictably stretch with `flex: 1` or get clipped by `max-width` restrictions). 
 3. **Cache Awareness:** Before deploying to `main`, instruct the user that GitHub Pages enforces a 3-5 minute CI/CD delay and a hard network refresh (Ctrl+F5 / Cmd+Shift+R) is strictly required on the live `.com` URL to defeat Service Worker/Browser Caching.
+
+---
+
+## 29. Archive Explorer Standard
+
+All archive views across the Neogleamz platform **MUST** use the unified accordion-card pattern defined here. Partial adoption (e.g., a flat list in one module, accordion in another) is a critical failure of this standard.
+
+### Required Structure
+
+Every archived record is rendered as an `.archive-card` with two zones:
+1. **Header** — always visible, contains status pill, ID, title, meta, and chevron. Clicking it toggles the detail zone.
+2. **Detail** — collapsed by default. Contains timestamps, label, metadata rows, and the hard-delete button.
+
+```html
+<div class="archive-card">
+    <!-- Always-visible header -->
+    <div class="archive-card-header" onclick="toggleArchiveDetail('arc-N')">
+        <div class="archive-card-status completed">✓ COMPLETED</div>
+        <div class="archive-card-id">WO-123456</div>
+        <div class="archive-card-title">"Holiday Rush" — SK8Lytz Unit</div>
+        <div class="archive-card-meta">x12 · Apr 5, 2026</div>
+        <div class="archive-card-chevron" id="arc-N-chev">▶</div>
+    </div>
+    <!-- Collapsible detail (display:none by default) -->
+    <div class="archive-card-detail" id="arc-N" style="display:none; flex-direction:column;">
+        <div class="archive-card-detail-row"><span>Label:</span><strong>"Holiday Rush"</strong></div>
+        <div class="archive-card-detail-row"><span>Started:</span><strong>Apr 4, 2026 8:00 AM</strong></div>
+        <div class="archive-card-detail-row"><span>Completed:</span><strong>Apr 5, 2026 2:30 PM</strong></div>
+        <button class="btn-red" style="width:auto; margin-top:12px; align-self:flex-start;">🗑️ Hard Delete</button>
+    </div>
+</div>
+```
+
+### CSS Classes (defined in `index.html` global `<style>`)
+
+| Class | Purpose |
+|---|---|
+| `.archive-card` | Wrapper — border, hover, border-color transition |
+| `.archive-card-header` | Flex row, clickable, hover tint |
+| `.archive-card-status` | Status pill (add `.completed`, `.manual`, or `.print` modifier) |
+| `.archive-card-id` | Monospace ID (WO-XXXXX, PR-XXXXXXXX) |
+| `.archive-card-title` | Truncated title with label prefix if set |
+| `.archive-card-meta` | Qty + date summary, right-aligned |
+| `.archive-card-chevron` | ▶ rotates 90° when `.open` class is toggled |
+| `.archive-card-detail` | Hidden detail zone — `flex-direction:column` |
+| `.archive-card-detail-row` | Key/value row — `span` for label, `strong` for value |
+
+### Required Features
+
+- **Search filter** — every archive explorer MUST include a text input that filters by ID, name, and label in real time using `filterArchiveList(q)`.
+- **Data cache** — store the full unfiltered dataset in `_archiveFullData` before rendering so the filter doesn't require a DB re-query.
+- **Toggle function** — always use `toggleArchiveDetail(id)` from `production-module.js` (global scope).
+- **Hard Delete placement** — the 🗑️ Hard Delete button MUST live inside the `.archive-card-detail` zone, **never** in the `.archive-card-header`. This prevents accidental destructive taps.
+- **Label display** — if a record has a `label` field set, display it as `"label text" — Title` in the `.archive-card-title` and as a detail row. If null, omit both.
+
+### Status Pill Modifiers
+
+| Modifier | Color | Use Case |
+|---|---|---|
+| `.completed` | `#10b981` green | Record was fully worked through the pipeline |
+| `.manual` | `#f59e0b` amber | Record was manually archived before completion |
+| `.print` | `#8b5cf6` purple | 3D print job archive (LAYERZ) |
+
+### JavaScript Pattern
+
+```javascript
+let _archiveFullData = [];
+
+function renderArchiveList() {
+    const searchEl = document.getElementById('archiveSearchInput');
+    if (searchEl) searchEl.value = '';
+    _archiveFullData = /* filter your DB for status === 'Archived' */;
+    _renderArchiveCards(_archiveFullData);
+}
+
+function filterArchiveList(q) {
+    if (!q || !q.trim()) { _renderArchiveCards(_archiveFullData); return; }
+    const lq = q.toLowerCase();
+    _renderArchiveCards(_archiveFullData.filter(r =>
+        (r.id_field || '').toLowerCase().includes(lq) ||
+        (r.name_field || '').toLowerCase().includes(lq) ||
+        (r.label || '').toLowerCase().includes(lq)
+    ));
+}
+
+function _renderArchiveCards(items) { /* build .archive-card HTML and set listArea.innerHTML */ }
+```

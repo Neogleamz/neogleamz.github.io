@@ -175,6 +175,7 @@ function openNewWOModal() {
     let r = document.getElementById('newWOProductRetail'); if(r) r.value = '';
     let s = document.getElementById('newWOProductSub'); if(s) s.value = '';
     let p = document.getElementById('newWOProductPrint'); if(p) p.value = '';
+    let lbl = document.getElementById('newWOLabel'); if(lbl) lbl.value = '';
     document.getElementById('newWOModal').style.display = 'flex'; 
     checkWORouting(); 
 }
@@ -626,6 +627,7 @@ function printBatchOrderReport() {
 async function validateAndCreateWO() {
     await executeWithButtonAction('btnSpawnWO', 'SPAWNING...', '✅ CREATED!', async () => {
         const p = getNewWOProduct(); const q = parseFloat(document.getElementById('newWOQty').value); if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
+        const label = document.getElementById('newWOLabel')?.value.trim() || null;
         
         let routingMap = {};
         document.querySelectorAll('.route-row').forEach(row => {
@@ -660,11 +662,11 @@ async function validateAndCreateWO() {
         
         let batchType = document.getElementById('batchTypeSelect') ? document.getElementById('batchTypeSelect').value : 'Production';
         let woId = "WO-" + Date.now().toString().slice(-6); 
-        let wo = { wo_id: woId, product_name: p, qty: q, status: 'Queued', wip_state: { batch_type: batchType }, routing: routingMap }; 
+        let wo = { wo_id: woId, product_name: p, qty: q, label: label, status: 'Queued', wip_state: { batch_type: batchType }, routing: routingMap }; 
         sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
         
         const {error} = await supabaseClient.from('work_orders').insert({
-            wo_id: wo.wo_id, product_name: wo.product_name, qty: wo.qty, status: wo.status, 
+            wo_id: wo.wo_id, product_name: wo.product_name, qty: wo.qty, label: wo.label, status: wo.status, 
             wip_state: JSON.stringify(wo.wip_state), routing: JSON.stringify(wo.routing)
         }); 
         if(error) throw new Error(error.message); 
@@ -694,7 +696,7 @@ async function validateAndCreateWO() {
             // Only queue a print job for structural fallback/shortfalls instead of unconditionally spooling full amounts
             if (amountToPrint > 0) {
                 if (typeof addPrintJob === 'function') {
-                    printPromises.push(addPrintJob(prefix + part, amountToPrint, woId));
+                    printPromises.push(addPrintJob(prefix + part, amountToPrint, woId, woId));
                 }
             }
         });
@@ -746,10 +748,11 @@ function renderWOList() {
                 ondragend="woDragEnd(event)"
                 onclick="selectWO('${wo.wo_id}')" 
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-weight:700; font-size:14px;">☰ ${dot} ${wo.wo_id}: ${wo.product_name}</span>
+                <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+                    <span style="font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">☰ ${dot} ${wo.wo_id}: ${wo.product_name}</span>
+                    ${wo.label ? `<span style="font-size:11px; color:#f59e0b; font-style:italic; padding-left:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${wo.label}</span>` : ''}
                 </div>
-                <span style="font-weight:900; font-family:monospace;">x${wo.qty}</span>
+                <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${wo.qty}</span>
             </li>`; 
         });
         if(!currentWO) {
@@ -791,7 +794,9 @@ function toggleSOPLock() { isSOPLocked = !isSOPLocked; const btn = document.getE
 function renderActiveWO(id) {
     try {
         let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
-        document.getElementById('woMainArea').style.display = 'flex'; document.getElementById('woTitle').innerText = `${wo.wo_id}: ${wo.product_name} - [ ${wo.qty} UNITS ]`; document.getElementById('woQtyTarget').innerText = wo.qty;
+        document.getElementById('woMainArea').style.display = 'flex';
+        document.getElementById('woTitle').innerText = (wo.label ? `[${wo.label}] ` : '') + `${wo.wo_id}: ${wo.product_name} - [ ${wo.qty} UNITS ]`;
+        document.getElementById('woQtyTarget').innerText = wo.qty;
         let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
         if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
         
@@ -1186,53 +1191,114 @@ async function switchArchiveTab(tab) {
     }
     renderArchiveList();
 }
+let _archiveFullData = [];
+
 function renderArchiveList() {
-    const listArea = document.getElementById('archiveListArea');
-    listArea.innerHTML = '';
-    
+    const searchEl = document.getElementById('archiveSearchInput');
+    if (searchEl) searchEl.value = '';
+
     if (currentArchiveTab === 'batchez') {
-        const archivedItemz = workOrdersDB.filter(w => w.status === 'Archived');
-        if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived batches found.</p>'; return; }
-        
-        const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-        archivedItemz.forEach(wo => {
-            const dtC = fmt(wo.started_at || wo.created_at) || 'Unknown';
-            const dtF = fmt(wo.completed_at) || 'Manual Archive';
-            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
-                <div>
-                    <strong style="color:var(--text-heading); font-size:16px;">${wo.wo_id}: ${wo.product_name}</strong>
-                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${wo.qty} | Started: ${dtC} | <span style="color:var(--neon-green)">Completed: ${dtF}</span></div>
+        _archiveFullData = workOrdersDB.filter(w => w.status === 'Archived');
+    } else {
+        _archiveFullData = printQueueDB.filter(p => p.status === 'Archived');
+    }
+    _renderArchiveCards(_archiveFullData);
+}
+
+function filterArchiveList(q) {
+    if (!q || !q.trim()) { _renderArchiveCards(_archiveFullData); return; }
+    const lq = q.toLowerCase().trim();
+    let filtered;
+    if (currentArchiveTab === 'batchez') {
+        filtered = _archiveFullData.filter(w =>
+            (w.wo_id || '').toLowerCase().includes(lq) ||
+            (w.product_name || '').toLowerCase().includes(lq) ||
+            (w.label || '').toLowerCase().includes(lq)
+        );
+    } else {
+        filtered = _archiveFullData.filter(j =>
+            (j.wo_id || '').toLowerCase().includes(lq) ||
+            (j.part_name || '').toLowerCase().includes(lq) ||
+            (j.label || '').toLowerCase().includes(lq)
+        );
+    }
+    _renderArchiveCards(filtered);
+}
+
+function toggleArchiveDetail(id) {
+    const detail = document.getElementById(id);
+    const chevron = document.getElementById(id + '-chev');
+    if (!detail) return;
+    const isOpen = detail.style.display !== 'none';
+    detail.style.display = isOpen ? 'none' : 'flex';
+    if (chevron) chevron.classList.toggle('open', !isOpen);
+}
+
+function _renderArchiveCards(items) {
+    const listArea = document.getElementById('archiveListArea');
+    if (!listArea) return;
+    if (items.length === 0) {
+        listArea.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No archived records found.</div>`;
+        return;
+    }
+    const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+    const fmtShort = (d) => d ? new Date(d).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+
+    if (currentArchiveTab === 'batchez') {
+        listArea.innerHTML = items.map((wo, i) => {
+            const dtC = fmt(wo.started_at || wo.created_at) || '—';
+            const dtF = fmt(wo.completed_at);
+            const arcId = `arc-b-${i}`;
+            const statusClass = wo.completed_at ? 'completed' : 'manual';
+            const statusLabel = wo.completed_at ? '✓ COMPLETED' : '⚡ ARCHIVED';
+            return `
+            <div class="archive-card">
+                <div class="archive-card-header" onclick="toggleArchiveDetail('${arcId}')">
+                    <div class="archive-card-status ${statusClass}">${statusLabel}</div>
+                    <div class="archive-card-id">${wo.wo_id}</div>
+                    <div class="archive-card-title">${wo.label ? `"${wo.label}" — ` : ''}${wo.product_name}</div>
+                    <div class="archive-card-meta">x${wo.qty} · ${fmtShort(wo.completed_at || wo.created_at)}</div>
+                    <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
+                <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
+                    ${wo.label ? `<div class="archive-card-detail-row"><span>Label:</span><strong>"${wo.label}"</strong></div>` : ''}
+                    <div class="archive-card-detail-row"><span>Product:</span><strong>${wo.product_name}</strong></div>
+                    <div class="archive-card-detail-row"><span>Qty Target:</span><strong>${wo.qty} units</strong></div>
+                    <div class="archive-card-detail-row"><span>Started:</span><strong>${dtC}</strong></div>
+                    <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
+                    <button class="btn-red" style="width:auto; margin-top:12px; align-self:flex-start;" onclick="hardDeleteArchive('batchez', '${wo.wo_id}')">🗑️ Hard Delete</button>
                 </div>
             </div>`;
-        });
+        }).join('');
     } else {
-        const archivedItemz = printQueueDB.filter(p => p.status === 'Archived');
-        if(archivedItemz.length === 0) { listArea.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No archived prints found.</p>'; return; }
-        
-        const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-        archivedItemz.forEach(job => {
-            const dtC = fmt(job.started_at || job.created_at) || 'Unknown';
-            const dtF = fmt(job.completed_at) || 'Manual Archive';
-            
-            let cleanPartName = (job.part_name || 'Unknown Part').split(':::')[0];
+        listArea.innerHTML = items.map((job, i) => {
+            const dtC = fmt(job.started_at || job.created_at) || '—';
+            const dtF = fmt(job.completed_at);
+            const arcId = `arc-l-${i}`;
+            let cleanPartName = (job.part_name || 'Unknown Part').startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : (job.part_name || '').split(':::')[0];
             const catItem = typeof catalogByName !== 'undefined' ? catalogByName[cleanPartName] : null;
             const displayName = catItem ? (catItem.neoName || catItem.itemName) : cleanPartName;
-            
-            let displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + String(job.id || '').substring(0, 8).toUpperCase());
-
-            listArea.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px;">
-                <div>
-                    <strong style="color:var(--text-heading); font-size:16px;">${displayID}: ${displayName}</strong>
-                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">Target Qty: ${job.qty} | Started: ${dtC} | <span style="color:var(--neon-purple)">Completed: ${dtF}</span></div>
+            const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + String(job.id || '').substring(0, 8).toUpperCase());
+            return `
+            <div class="archive-card">
+                <div class="archive-card-header" onclick="toggleArchiveDetail('${arcId}')">
+                    <div class="archive-card-status print">🖨️ PRINTED</div>
+                    <div class="archive-card-id">${displayID}</div>
+                    <div class="archive-card-title">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
+                    <div class="archive-card-meta">x${job.qty} · ${fmtShort(job.completed_at || job.created_at)}</div>
+                    <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-red" style="width:auto; padding:8px 15px; font-size:13px;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
+                <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
+                    ${job.label ? `<div class="archive-card-detail-row"><span>Label:</span><strong>"${job.label}"</strong></div>` : ''}
+                    <div class="archive-card-detail-row"><span>Part:</span><strong>${displayName}</strong></div>
+                    <div class="archive-card-detail-row"><span>Qty Printed:</span><strong>${job.qty}</strong></div>
+                    <div class="archive-card-detail-row"><span>Source WO:</span><strong>${job.wo_id || 'Manual Entry'}</strong></div>
+                    <div class="archive-card-detail-row"><span>Started:</span><strong>${dtC}</strong></div>
+                    <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
+                    <button class="btn-red" style="width:auto; margin-top:12px; align-self:flex-start;" onclick="hardDeleteArchive('layerz', '${job.id}')">🗑️ Hard Delete</button>
                 </div>
             </div>`;
-        });
+        }).join('');
     }
 }
 
@@ -1446,4 +1512,5 @@ function stopProductionSopResize() {
         document.removeEventListener('mouseup', stopProductionSopResize);
     }
 }
+
 

@@ -1,4 +1,4 @@
-// --- 10. 3D PRINT QUEUE MODULE ---
+﻿// --- 10. 3D PRINT QUEUE MODULE ---
 
 function formatPrintTime(mins) {
     if (!mins || isNaN(mins) || mins <= 0) return "";
@@ -89,10 +89,11 @@ function renderPrintQueue() {
                 ondragend="printDragEnd(event)"
                 onclick="selectPrintJob('${job.id}')" 
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:14px; font-weight:700;">☰ ${dot} ${displayID}: ${displayName}${timeStr}</span>
+                <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+                    <span style="font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">☰ ${dot} ${displayID}: ${displayName}${timeStr}</span>
+                    ${job.label ? `<span style="font-size:11px; color:#f59e0b; font-style:italic; padding-left:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${job.label}</span>` : ''}
                 </div>
-                <span style="font-weight:900; font-family:monospace;">x${job.qty}</span>
+                <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${job.qty}</span>
             </li>`;
         });
     }
@@ -141,6 +142,13 @@ function renderActivePrintJob(id) {
     const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
 
     document.getElementById('printJobTitle').innerText = `${displayID}: ${displayName}`;
+
+    // Show label if present
+    const labelEl = document.getElementById('printJobLabelBadge');
+    if (labelEl) {
+        if (job.label) { labelEl.innerText = job.label; labelEl.style.display = 'inline-block'; }
+        else labelEl.style.display = 'none';
+    }
 
     document.getElementById('printJobQty').innerText = job.qty;
     document.getElementById('printJobSource').innerText = job.wo_id || 'Manual Entry';
@@ -328,12 +336,13 @@ function openPrintSOP(pName) {
     }
 }
 
-async function addPrintJob(partName, qty, woId = null) {
+async function addPrintJob(partName, qty, woId = null, label = null) {
     const payload = {
         part_name: partName,
         qty: qty,
         status: 'Queued',
         wo_id: woId,
+        label: label || null,
         created_at: new Date().toISOString()
     };
     const { error } = await supabaseClient.from('print_queue').insert([payload]);
@@ -355,6 +364,8 @@ function openManualPrintModal() {
     }
     const q = document.getElementById('manualPrintQty');
     if(q) q.value = 1;
+    const lbl = document.getElementById('manualPrintLabel');
+    if(lbl) lbl.value = '';
     document.getElementById('manualPrintModal').style.display = 'flex';
 }
 
@@ -365,13 +376,15 @@ function closeManualPrintModal() {
 async function submitManualPrint() {
     const k = document.getElementById('manualPrintSelect').value;
     const q = parseInt(document.getElementById('manualPrintQty').value);
+    const label = document.getElementById('manualPrintLabel')?.value.trim() || null;
     if (!k || isNaN(q) || q <= 0) return alert("Please select a valid 3D part and quantity.");
     
     closeManualPrintModal();
     setMasterStatus("Queuing Manual Print...", "mod-working");
     
-    await addPrintJob(k, q, "Manual Entry");
+    await addPrintJob(k, q, "Manual Entry", label);
     
     setMasterStatus("Job Queued!", "mod-success");
     setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
 }
+
