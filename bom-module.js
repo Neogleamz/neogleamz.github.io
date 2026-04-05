@@ -109,7 +109,7 @@ function renderProductList() {
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
 
     function buildItem(n) {
-        let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'"); let icon = labelProds.includes(n) ? '🏷️' : (printProds.includes(n) ? '🖨️' : (isSubassemblyDB[n] ? '⚙️' : '📦'));
+        let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'");
         return `<li class="${sel}" 
             draggable="true" 
             ondragstart="productDragStart(event, '${safeName}')" 
@@ -118,7 +118,7 @@ function renderProductList() {
             ondragend="productDragEnd(event)"
             onclick="selectProduct('${safeName}')" 
             style="font-weight:bold; font-size:14px; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px; display:flex; justify-content:space-between; align-items:center;">
-            <span>☰ ${icon} ${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span>
+            <span>☰ ${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span>
         </li>`;
     }
 
