@@ -121,7 +121,9 @@ function processParsedSales(rows) {
         }
 
         let subTot = 0, ship = 0, tax = 0, discCode = "", discAmt = 0, tot = 0;
+        let isFirstRow = false;
         if (!orderFirstRowFlags[orderId]) {
+            isFirstRow = true;
             subTot = parseFloat(String(r['Subtotal'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
             ship = parseFloat(String(r['Shipping'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
             tax = parseFloat(String(r['Taxes'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
@@ -138,7 +140,7 @@ function processParsedSales(rows) {
             order_id: String(orderId), sale_date: dateStr, storefront_sku: String(skuName), 
             qty_sold: qty, actual_sale_price: price, internal_recipe_name: internalName, 
             subtotal: subTot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: tot,
-            "Source": orderFirstRowFlags[orderId].source, "Outstanding Balance": orderFirstRowFlags[orderId].balance
+            "Source": orderFirstRowFlags[orderId].source, "Outstanding Balance": isFirstRow ? orderFirstRowFlags[orderId].balance : 0
         });
         
         if(!internalName) unmapped.add(String(skuName));
@@ -246,7 +248,7 @@ async function executeSalesSync() {
     }
 }
 
-function sortSales(c) { if(isResizing) return; currentSalesSort = { column: c, direction: currentSalesSort.column===c && currentSalesSort.direction==='asc' ? 'desc' : 'asc' }; renderSalesTable(); }
+function sortSales(c) { if(isResizing) return; currentSalesSort = { column: c, direction: currentSalesSort.column===c && currentSalesSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentSalesSort', currentSalesSort); renderSalesTable(); }
 
 function renderSalesTable() {
     let wrap = document.getElementById('salesTableWrap'); 
@@ -360,18 +362,20 @@ function renderSalesTable() {
     Object.keys(orderGroups).forEach(oid => {
         let group = orderGroups[oid];
         if(group.length > 1) {
-            let balRows = group.filter(r => (parseFloat(r["Outstanding Balance"]) || 0) > 0);
-            if(balRows.length >= 2) {
-                let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
-                let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
-                // Always run the visual Total Captured offset so Shopify's merged raw totals look legible
-                if(zeroTotal && nonZeroTotal) {
-                    let offset = parseFloat(zeroTotal["Outstanding Balance"]) || 0;
-                    nonZeroTotal.exchAdj = -offset;
+            let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
+            let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
+            
+            // Fix: We only want to trigger Automated Exchange Logic if an item with $0 line-item price exists, OR it's been manually flagged
+            let hasTrueExchangeIndication = group.some(r => r.transaction_type !== 'Standard') || group.some(r => parseFloat(r.actual_sale_price || 0) === 0);
+
+            if(zeroTotal && nonZeroTotal && hasTrueExchangeIndication) {
+                // If it's an exchange, offset the visual total by whatever outstanding balance generated
+                let orderBalance = group.reduce((sum, r) => sum + (parseFloat(r["Outstanding Balance"]) || 0), 0);
+                if(orderBalance > 0) {
+                    nonZeroTotal.exchAdj = -orderBalance;
                     zeroTotal.isExchanged = true;
                     nonZeroTotal.isExchanged = true;
                     
-                    // IF NO manual overrides are placed, also algorithmically neutralize ghost costs
                     if (zeroTotal.transaction_type === 'Standard' && nonZeroTotal.transaction_type === 'Standard') {
                         nonZeroTotal.net += nonZeroTotal.liveCogs;
                         nonZeroTotal.net += (SHIP_COST * parseFloat(nonZeroTotal.qty_sold || 0));

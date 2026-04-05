@@ -6,6 +6,7 @@ let trendsChart = null;
 function sortAnalytics(c) { 
     if(isResizing) return; 
     currentAnalyticsSort = { column: c, direction: currentAnalyticsSort.column===c && currentAnalyticsSort.direction==='asc' ? 'desc' : 'asc' }; 
+    window.saveSort('currentAnalyticsSort', currentAnalyticsSort);
     renderAnalyticsDashboard(); 
 }
 

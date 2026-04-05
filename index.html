@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.05.0428"></script>
+    <script src="system-version.js?v=v.2026.04.05.0514"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.0428"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0428"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0514"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="packerz-module.js?v=v.2026.04.05.0428"></script>
+    <script src="packerz-module.js?v=v.2026.04.05.0514"></script>
     
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1980,7 +1980,7 @@
     }
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0428"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.0514"></script>
 </head>
 <body>
 <!-- GLOBAL TERMINAL: Absolute Root level for Z-Index Authority -->
@@ -3633,7 +3633,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.05.0428"></script>
+    <script src="socialz-module.js?v=v.2026.04.05.0514"></script>
 
         <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
@@ -3802,7 +3802,11 @@
 
     // --- 1. GLOBAL VARIABLES & SUPABASE ---
     const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7', { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
-    let finalResults = []; let currentSort = { column: 'Order Date', direction: 'desc' };
+    
+    window.getSavedSort = function(key, def) { try { let v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } };
+    window.saveSort = function(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} };
+
+    let finalResults = []; let currentSort = window.getSavedSort('currentSort', { column: 'Order Date', direction: 'desc' });
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neogleamz Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
     let productsDB = {}; let laborDB = {}; let pricingDB = {}; let isSubassemblyDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
@@ -3824,9 +3828,12 @@
     // --- GHOST LOGIC VAPORIZED ---
     // KPI Engine migrated to neogleamz-engine.js
     let salesDB = []; let aliasDB = {}; let printQueueDB = [];
-    let currentFgiSort = { column: 'n', direction: 'asc' }; let currentInvSort = { column: 'nn', direction: 'asc' }; 
-    let currentBOMSort = { column: 'nn', direction: 'asc' }; let currentBulkSort = { column: 'nn', direction: 'asc' }; 
-    let currentSalesSort = { column: 'd', direction: 'desc' }; let currentAnalyticsSort = { column: 'n', direction: 'asc' };
+    let currentFgiSort = window.getSavedSort('currentFgiSort', { column: 'n', direction: 'asc' }); 
+    let currentInvSort = window.getSavedSort('currentInvSort', { column: 'nn', direction: 'asc' }); 
+    let currentBOMSort = window.getSavedSort('currentBOMSort', { column: 'nn', direction: 'asc' }); 
+    let currentBulkSort = window.getSavedSort('currentBulkSort', { column: 'nn', direction: 'asc' }); 
+    let currentSalesSort = window.getSavedSort('currentSalesSort', { column: 'd', direction: 'desc' }); 
+    let currentAnalyticsSort = window.getSavedSort('currentAnalyticsSort', { column: 'n', direction: 'asc' });
     let bulkAddData = []; 
     let catalogByName = {}; 
     let pendingSalesRows = []; 
@@ -4438,7 +4445,7 @@
         else if (pS && pS.style.display === 'flex') renderLedgerView(true, 'simpleResults'); 
     }
     function toggleSimpleCol(col) { if (hiddenSimpleCols.has(col)) hiddenSimpleCols.delete(col); else hiddenSimpleCols.add(col); renderActiveTable(); renderColToggles(); }
-    function sortData(column, keepDirection = false) { if(isResizing) return; if (!keepDirection) currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' }; finalResults.sort((a, b) => { let vA = a[column]; let vB = b[column]; if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; } let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase(); if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); }); renderActiveTable(); }
+    function sortData(column, keepDirection = false) { if(isResizing) return; if (!keepDirection) { currentSort = { column: column, direction: currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc' }; window.saveSort('currentSort', currentSort); } finalResults.sort((a, b) => { let vA = a[column]; let vB = b[column]; if (typeof vA === 'number' && typeof vB === 'number') { return currentSort.direction === 'asc' ? vA - vB : vB - vA; } let strA = (vA ?? "").toString().toLowerCase(); let strB = (vB ?? "").toString().toLowerCase(); if (strA < strB) return currentSort.direction === 'asc' ? -1 : 1; if (strA > strB) return currentSort.direction === 'asc' ? 1 : -1; return String(a['_RowKey']).localeCompare(String(b['_RowKey'])); }); renderActiveTable(); }
     
     function renderLedgerView(isSimple, containerId) {
         if (finalResults.length === 0) return; let keys = Object.keys(finalResults[0]).filter(k => k !== '_RowKey' && (!isSimple || !hiddenSimpleCols.has(k)));
@@ -4726,15 +4733,15 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.05.0428"></script>
-<script src="system-tools-module.js?v=v.2026.04.05.0428"></script>
-<script src="bom-module.js?v=v.2026.04.05.0428"></script>
-<script src="inventory-module.js?v=v.2026.04.05.0428"></script>
-<script src="production-module.js?v=v.2026.04.05.0428"></script>
-<script src="sales-module.js?v=v.2026.04.05.0428"></script>
-<script src="analytics-module.js?v=v.2026.04.05.0428"></script>
-<script src="ceo-module.js?v=v.2026.04.05.0428"></script>
-<script src="print-module.js?v=v.2026.04.05.0428"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.05.0514"></script>
+<script src="system-tools-module.js?v=v.2026.04.05.0514"></script>
+<script src="bom-module.js?v=v.2026.04.05.0514"></script>
+<script src="inventory-module.js?v=v.2026.04.05.0514"></script>
+<script src="production-module.js?v=v.2026.04.05.0514"></script>
+<script src="sales-module.js?v=v.2026.04.05.0514"></script>
+<script src="analytics-module.js?v=v.2026.04.05.0514"></script>
+<script src="ceo-module.js?v=v.2026.04.05.0514"></script>
+<script src="print-module.js?v=v.2026.04.05.0514"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5188,18 +5195,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.0428"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.0514"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.0428"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.0514"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.0428"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.0514"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.0428"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.0428"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.0428"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.0514"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.0514"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.0514"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.05.0428"></script>
-    <script src="labelz-module.js?v=v.2026.04.05.0428"></script>
+    <script src="barcodz-module.js?v=v.2026.04.05.0514"></script>
+    <script src="labelz-module.js?v=v.2026.04.05.0514"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>

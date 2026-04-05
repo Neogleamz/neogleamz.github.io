@@ -705,5 +705,28 @@ async function submitData() {
 **UX Characteristics Enforced:**
 1. Automatically prevents multi/double clicks by disabling the node.
 2. Fades opacity during processing.
-3. Automatically transitions button structure to `#059669` (Green Success) or `#ef4444` (Red Error).
 4. Restores DOM structure perfectly after 3000ms.
+
+---
+
+## 25. State Persistence & Memory in Data Tables
+
+To prevent user frustration from repetitive layout adjustments, all dynamic data tables and sorted lists **MUST** persist their layout/sort state across page reloads using browser local storage.
+
+**Required Pattern:**
+1. **Never hardcode default states.** Always wrap the initial sort variable assignment in the global `window.getSavedSort` utility.
+2. **Commit changes instantly.** Whenever the sorting metric, column, or direction is updated by a user interaction, it must immediately be committed via `window.saveSort`.
+
+**Implementation Example:**
+```javascript
+// Initialization
+let currentSalesSort = window.getSavedSort('currentSalesSort', { column: 'd', direction: 'desc' });
+
+// Mutation (OnClick Handler)
+function sortSales(c) { 
+    if(isResizing) return; 
+    currentSalesSort = { column: c, direction: currentSalesSort.column===c && currentSalesSort.direction==='asc' ? 'desc' : 'asc' }; 
+    window.saveSort('currentSalesSort', currentSalesSort); // Mandatory Hook
+    renderSalesTable(); 
+}
+```

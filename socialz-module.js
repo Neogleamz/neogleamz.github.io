@@ -33,8 +33,8 @@
 
         // --- Data & State ---
         let socialzSkaters = []; 
-        let socialzCurrentSort = 'alpha';
-        let socialzSortDirection = 'asc'; 
+        let socialzCurrentSort = window.getSavedSort ? window.getSavedSort('socialzCurrentSort', 'alpha') : 'alpha';
+        let socialzSortDirection = window.getSavedSort ? window.getSavedSort('socialzSortDirection', 'asc') : 'asc'; 
         let dashboardCharts = {};
         let selectedStyles = [];
         let viewMode = 'grid'; 
@@ -222,12 +222,13 @@
 
         function toggleSortDirection() {
             socialzSortDirection = socialzSortDirection === 'asc' ? 'desc' : 'asc';
+            if (window.saveSort) window.saveSort('socialzSortDirection', socialzSortDirection);
             const icon = document.getElementById('sort-dir-icon');
             icon.className = socialzSortDirection === 'asc' ? 'fa-solid fa-arrow-up-wide-short' : 'fa-solid fa-arrow-down-short-wide';
             renderSkaters();
         }
 
-        function handleSortChange(v) { socialzCurrentSort = v; renderSkaters(); }
+        function handleSortChange(v) { socialzCurrentSort = v; if (window.saveSort) window.saveSort('socialzCurrentSort', socialzCurrentSort); renderSkaters(); }
 
         // --- Core Rendering ---
         function renderSkaters() {

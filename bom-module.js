@@ -5,7 +5,7 @@ function openBulkAddModal() {
     Object.keys(catalogCache).forEach(k => { let c = catalogCache[k]; bulkAddData.push({ k: k, isSub: false, nn: c.neoName||"", np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "" }); });
     document.getElementById('bulkSearch').value = ""; document.getElementById('bulkAddModal').style.display = 'flex'; renderBulkAddBody();
 }
-function sortBulk(c) { currentBulkSort = { column: c, direction: currentBulkSort.column===c && currentBulkSort.direction==='asc' ? 'desc' : 'asc' }; renderBulkAddBody(); }
+function sortBulk(c) { currentBulkSort = { column: c, direction: currentBulkSort.column===c && currentBulkSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentBulkSort', currentBulkSort); renderBulkAddBody(); }
 function updateBulkQty(k, v) { let i = bulkAddData.find(x => x.k === k); if(i) i.q = v; }
 function filterBulkList() { renderBulkAddBody(); }
 function renderBulkAddBody() {
@@ -215,7 +215,7 @@ function productDrop(e, targetName) {
     }
 }
 function selectProduct(n) { currentProduct = n; renderProductList(); renderProductBOM(); }
-function sortBOM(c) { currentBOMSort = { column: c, direction: currentBOMSort.column===c && currentBOMSort.direction==='asc' ? 'desc' : 'asc' }; renderProductBOM(); }
+function sortBOM(c) { currentBOMSort = { column: c, direction: currentBOMSort.column===c && currentBOMSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentBOMSort', currentBOMSort); renderProductBOM(); }
 
 function renderProductBOM() {
     if(!currentProduct) return; document.getElementById('bomMainArea').style.display='block'; document.getElementById('bomTitle').innerText=currentProduct;
