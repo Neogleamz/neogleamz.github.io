@@ -300,6 +300,7 @@ function addLabelzText() {
 }
 
 function addLabelzRect() {
+    disableLabelzDrawingMode();
     const rect = new fabric.Rect({
         left: fCanvas.width / 2, top: fCanvas.height / 2,
         originX: 'center', originY: 'center',
@@ -311,6 +312,7 @@ function addLabelzRect() {
 }
 
 function addLabelzCircle() {
+    disableLabelzDrawingMode();
     const circ = new fabric.Circle({
         left: fCanvas.width / 2, top: fCanvas.height / 2,
         originX: 'center', originY: 'center',
@@ -319,6 +321,12 @@ function addLabelzCircle() {
     });
     fCanvas.add(circ);
     fCanvas.setActiveObject(circ);
+}
+
+function disableLabelzDrawingMode() {
+    if(fCanvas) fCanvas.isDrawingMode = false;
+    const btn = document.getElementById('lblzBrushBtn');
+    if(btn) btn.style.background = 'var(--bg-input)';
 }
 
 window.toggleLabelzDrawingMode = function(btnObj) {
@@ -334,6 +342,7 @@ window.toggleLabelzDrawingMode = function(btnObj) {
 };
 
 function addLabelzLine() {
+    disableLabelzDrawingMode();
     const line = new fabric.Line([50, 50, 200, 50], {
         stroke: '#000000',
         strokeWidth: 2
@@ -343,6 +352,7 @@ function addLabelzLine() {
 }
 
 function addLabelzDynamicText(templateContent = '[Item Name]') {
+    disableLabelzDrawingMode();
     const text = new fabric.Textbox(templateContent, {
         left: fCanvas.width / 2, top: fCanvas.height / 2,
         originX: 'center', originY: 'center',
@@ -358,6 +368,7 @@ function addLabelzDynamicText(templateContent = '[Item Name]') {
 }
 
 function addLabelzImage() {
+    disableLabelzDrawingMode();
     document.getElementById('labelzImageUpload').click();
 }
 
@@ -422,6 +433,7 @@ function handleLabelzPaste(e) {
 
 
 function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
+    disableLabelzDrawingMode();
     // We use an offscreen canvas to render with bwipjs, then drop it into fabric as an image
     const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
     try {
