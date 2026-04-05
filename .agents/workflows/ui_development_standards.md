@@ -626,7 +626,7 @@ This eliminates wasted space (like large canvas image blocks) and aligns interac
         </div>
         
         <!-- Right: Primary Action Button -->
-        <button style="background:#8b5cf6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Primary</button>
+        <button style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Primary</button>
     </div>
     
     <!-- Bottom Content + Secondary Action -->

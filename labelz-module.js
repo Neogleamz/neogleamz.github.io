@@ -59,8 +59,14 @@ function renderLabelzGrid() {
     let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">';
 
     filtered.forEach(label => {
-        const stockData = typeof productsDB !== 'undefined' && productsDB[label.product_name];
-        const stockQty = stockData ? (stockData._stock_qty || 0) : 0;
+        // Correct FGI Stock Calculation from inventoryDB
+        const invKey = 'RECIPE:::' + label.product_name;
+        const invData = typeof inventoryDB !== 'undefined' ? inventoryDB[invKey] : null;
+        let stockQty = 0;
+        if(invData) {
+            stockQty = (invData.produced_qty || 0) - (invData.sold_qty || 0);
+        }
+        
         const lowThreshold = 10;
         const stockColor = stockQty === 0 ? '#ef4444' : stockQty < lowThreshold ? '#f59e0b' : '#10b981';
         const stockBg = stockQty === 0 ? 'rgba(239,68,68,0.1)' : stockQty < lowThreshold ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)';
@@ -82,8 +88,8 @@ function renderLabelzGrid() {
                         <span style="display:inline-block; font-size:8px; font-weight:800; background:${stockBg}; color:${stockColor}; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">STOCK: ${stockQty}</span>
                     </div>
                     
-                    <!-- Spool Button Top Right -->
-                    <button onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="background:#8b5cf6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
+                    <!-- Spool Button Top Right (Matched to Barcodz Blue) -->
+                    <button onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                 </div>
                 
                 <!-- Content & Edit Base -->
