@@ -1,15 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.05.1216"></script>
+    <script src="system-version.js?v=v.2026.04.05.1232"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.1216"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.1216"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.05.1232"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.05.1232"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <script>
@@ -2178,6 +2178,11 @@
                     <input type="hidden" id="labelzDesignerEmojiVal" value="🏷️">
                 </div>
                 <div style="display:flex; align-items:center; gap:12px;">
+                    <!-- History Controls -->
+                    <div style="display:flex; background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; overflow:hidden; margin-right:10px;">
+                        <button onclick="lblzUndo()" style="background:transparent; border:none; border-right:1px solid var(--border-color); color:var(--text-main); font-size:14px; padding:4px 8px; cursor:pointer;" title="Undo (Ctrl+Z)">↩️</button>
+                        <button onclick="lblzRedo()" style="background:transparent; border:none; color:var(--text-main); font-size:14px; padding:4px 8px; cursor:pointer;" title="Redo (Ctrl+Y)">↪️</button>
+                    </div>
                     <canvas id="labelzBwipjsRenderer" style="display:none;"></canvas>
                     <!-- Templates -->
                     <select id="labelzTemplateSelect" onchange="loadLabelzTemplate(this.value)" style="padding:6px 8px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); font-size:12px; font-weight:bold;">
@@ -2212,7 +2217,9 @@
                             <button onclick="addLabelzBarcode()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📊 Barcode</button>
                             <button onclick="addLabelzQR()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📷 QR Code</button>
                             <button onclick="addLabelzImage()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🖼️ Image</button>
+                            <button onclick="toggleLabelzDrawingMode(this)" id="lblzBrushBtn" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🖌️ Paint</button>
                             <button onclick="addLabelzRect()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🟥 Rect/Line</button>
+                            <button onclick="addLabelzCircle()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🔵 Circle</button>
                         </div>
                     </div>
                     
@@ -2225,16 +2232,16 @@
                     <div style="padding:15px; border-top:1px solid var(--border-color); background:var(--bg-bar);">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <h3 style="margin:0; font-size:11px; color:var(--text-muted); text-transform:uppercase;">CANVAS BG</h3>
-                            <button onclick="clearLabelCanvasBg()" style="background:transparent; border:none; font-size:10px; color:#ef4444; cursor:pointer;">Reset</button>
+                            <button onclick="clearLabelCanvasBg()" style="background:transparent; border:none; font-size:12px; font-weight:900; color:#10b981; cursor:pointer;" title="Make Transparent">🔲 Transparent</button>
                         </div>
-                        <input type="color" id="labelzBgColor" onchange="updateLabelCanvasBg()" value="#ffffff" style="width:100%; height:30px; border:1px solid var(--border-color); border-radius:4px; cursor:pointer; margin-top:8px;">
+                        <input type="color" id="labelzBgColor" onchange="updateLabelCanvasBg()" value="#ffffff" style="width:100%; height:30px; border:1px solid var(--border-color); border-radius:4px; cursor:pointer; margin-top:8px;" title="Solid BG Color">
                     </div>
                 </div>
                 
                 <!-- Middle Pane: Fabric Canvas -->
                 <div style="flex:1; background:#111; display:flex; justify-content:center; align-items:center; overflow:hidden; position:relative; user-select:none;" id="labelzCanvasWrapper">
                     <!-- The canvas container scaled with CSS to match physical layout proportions -->
-                    <div id="labelzCanvasContainer" style="box-shadow:0 10px 40px rgba(0,0,0,0.5); border:1px solid #444; background-color:#fff;">
+                    <div id="labelzCanvasContainer" style="box-shadow:0 10px 40px rgba(0,0,0,0.5); border:1px solid #444; background-color:#fff; background-image:linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size:20px 20px; background-position:0 0, 0 10px, 10px -10px, -10px 0px;">
                         <canvas id="labelzFabricCanvas"></canvas>
                     </div>
                     <!-- Zoom controls -->
@@ -3000,7 +3007,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.05.1216"></script>
+    <script src="socialz-module.js?v=v.2026.04.05.1232"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4092,16 +4099,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.05.1216"></script>
-<script src="system-tools-module.js?v=v.2026.04.05.1216"></script>
-<script src="bom-module.js?v=v.2026.04.05.1216"></script>
-<script src="inventory-module.js?v=v.2026.04.05.1216"></script>
-<script src="packerz-module.js?v=v.2026.04.05.1216"></script>
-<script src="production-module.js?v=v.2026.04.05.1216"></script>
-<script src="sales-module.js?v=v.2026.04.05.1216"></script>
-<script src="analytics-module.js?v=v.2026.04.05.1216"></script>
-<script src="ceo-module.js?v=v.2026.04.05.1216"></script>
-<script src="print-module.js?v=v.2026.04.05.1216"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.05.1232"></script>
+<script src="system-tools-module.js?v=v.2026.04.05.1232"></script>
+<script src="bom-module.js?v=v.2026.04.05.1232"></script>
+<script src="inventory-module.js?v=v.2026.04.05.1232"></script>
+<script src="packerz-module.js?v=v.2026.04.05.1232"></script>
+<script src="production-module.js?v=v.2026.04.05.1232"></script>
+<script src="sales-module.js?v=v.2026.04.05.1232"></script>
+<script src="analytics-module.js?v=v.2026.04.05.1232"></script>
+<script src="ceo-module.js?v=v.2026.04.05.1232"></script>
+<script src="print-module.js?v=v.2026.04.05.1232"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4555,18 +4562,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.1216"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.05.1232"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.1216"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.05.1232"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.1216"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.05.1232"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.1216"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.1216"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.1216"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.05.1232"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.05.1232"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.05.1232"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.05.1216"></script>
-    <script src="labelz-module.js?v=v.2026.04.05.1216"></script>
+    <script src="barcodz-module.js?v=v.2026.04.05.1232"></script>
+    <script src="labelz-module.js?v=v.2026.04.05.1232"></script>
     <!-- Hidden Print Area -->
     <div id="printableBarcodeArea" style="display:none; background:white;"></div>
 </body>

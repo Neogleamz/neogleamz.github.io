@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // LABELZ MODULE — Neogleamz Custom Label Manager (Canvas)
 // ============================================================
 // Manages custom thermal-printed labels using Fabric.js, bwip-js,
@@ -14,6 +14,52 @@ let labelzCurrentEdit = null;
 let fCanvas = null;
 let currentZoom = 1;
 const PPI = 300; // High-res internal pixels per inch for crisp printing/scaling
+
+// History State Management
+let lblzHistory = [];
+let lblzHistoryProg = -1;
+let isHistoryLocked = false;
+
+function saveLabelzHistory() {
+    if (isHistoryLocked || !fCanvas) return;
+    const json = fCanvas.toJSON(['isBarcode', 'barcodeOpts', 'isDynamic']);
+    lblzHistory = lblzHistory.slice(0, lblzHistoryProg + 1);
+    lblzHistory.push(JSON.stringify(json));
+    lblzHistoryProg++;
+    if (lblzHistory.length > 30) {
+        lblzHistory.shift();
+        lblzHistoryProg--;
+    }
+}
+
+window.lblzUndo = function() {
+    if (lblzHistoryProg > 0) {
+        lblzHistoryProg--;
+        loadLabelzHistory(lblzHistory[lblzHistoryProg]);
+    }
+};
+
+window.lblzRedo = function() {
+    if (lblzHistoryProg < lblzHistory.length - 1) {
+        lblzHistoryProg++;
+        loadLabelzHistory(lblzHistory[lblzHistoryProg]);
+    }
+};
+
+function loadLabelzHistory(jsonStr) {
+    if (!jsonStr || !fCanvas) return;
+    isHistoryLocked = true;
+    fCanvas.loadFromJSON(jsonStr, function() {
+        fCanvas.renderAll();
+        // Restore dynamic regenerations
+        fCanvas.getObjects().forEach(o => {
+            if (o.isBarcode && o.barcodeOpts) {
+                regenerateBarcodeImage(o, o.barcodeOpts.text, o.barcodeOpts.bcid);
+            }
+        });
+        isHistoryLocked = false;
+    });
+}
 
 // Template Definitions
 const labelzTemplates = {
@@ -126,14 +172,54 @@ function initFabricCanvas() {
     fCanvas.on('object:rotating', updateProps);
     
     fCanvas.on('object:modified', (e) => {
+        saveLabelzHistory();
         fCanvas.renderAll();
         onCanvasSelection(e);
     });
+    
+    fCanvas.on('object:added', (e) => { saveLabelzHistory(); });
+    fCanvas.on('object:removed', (e) => { saveLabelzHistory(); });
 
-    // Global copy/paste listener injection (only registers once per session)
-    if (!window.lblzPasteListenerBound) {
+    // Global copy/paste & keyboard listener injection (only registers once per session)
+    if (!window.lblzKeyListenerBound) {
         window.addEventListener('paste', handleLabelzPaste);
-        window.lblzPasteListenerBound = true;
+        window.addEventListener('keydown', handleLabelzKeyboard);
+        window.lblzKeyListenerBound = true;
+    }
+}
+
+function handleLabelzKeyboard(e) {
+    const modal = document.getElementById('labelzDesignerModal');
+    if (!modal || modal.style.display === 'none') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    // Delete
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        const obj = fCanvas.getActiveObject();
+        if(obj) { fCanvas.remove(obj); fCanvas.discardActiveObject(); e.preventDefault(); }
+    }
+    // Duplicate
+    else if (e.ctrlKey && e.key === 'd') {
+        lblzDuplicateSelected();
+        e.preventDefault();
+    }
+    // Undo/Redo
+    else if (e.ctrlKey && e.key === 'z') { lblzUndo(); e.preventDefault(); }
+    else if (e.ctrlKey && e.key === 'y') { lblzRedo(); e.preventDefault(); }
+    // Arrow Nudging
+    else if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+        const obj = fCanvas.getActiveObject();
+        if (obj) {
+            e.preventDefault();
+            const px = e.shiftKey ? 10 : 1;
+            if(e.key === 'ArrowUp') obj.top -= px;
+            if(e.key === 'ArrowDown') obj.top += px;
+            if(e.key === 'ArrowLeft') obj.left -= px;
+            if(e.key === 'ArrowRight') obj.left += px;
+            fCanvas.renderAll();
+            saveLabelzHistory();
+            onCanvasSelection();
+        }
     }
 }
 
@@ -223,6 +309,29 @@ function addLabelzRect() {
     fCanvas.add(rect);
     fCanvas.setActiveObject(rect);
 }
+
+function addLabelzCircle() {
+    const circ = new fabric.Circle({
+        left: fCanvas.width / 2, top: fCanvas.height / 2,
+        originX: 'center', originY: 'center',
+        radius: 50,
+        fill: '#0ea5e9'
+    });
+    fCanvas.add(circ);
+    fCanvas.setActiveObject(circ);
+}
+
+window.toggleLabelzDrawingMode = function(btnObj) {
+    if(!fCanvas) return;
+    fCanvas.isDrawingMode = !fCanvas.isDrawingMode;
+    if(fCanvas.isDrawingMode) {
+        fCanvas.freeDrawingBrush.color = '#ef4444';
+        fCanvas.freeDrawingBrush.width = 5;
+        if(btnObj) btnObj.style.background = '#ef4444';
+    } else {
+        if(btnObj) btnObj.style.background = 'var(--bg-input)';
+    }
+};
 
 function addLabelzLine() {
     const line = new fabric.Line([50, 50, 200, 50], {
@@ -422,6 +531,18 @@ function onCanvasSelection(e) {
             <input type="range" min="0" max="360" value="${obj.angle || 0}" oninput="document.getElementById('lblzRotDisp').innerText=this.value; updObj('angle', parseFloat(this.value))" style="width:100%;">
             <span id="lblzRotDisp" style="font-size:10px;">${obj.angle||0}</span>°
         </div>
+        <div>
+            <label style="font-size:10px;">Opacity</label>
+            <input type="range" min="0" max="100" value="${(obj.opacity || 1)*100}" oninput="document.getElementById('lblzOpDisp').innerText=this.value+'%'; updObj('opacity', parseFloat(this.value)/100)" style="width:100%;">
+            <span id="lblzOpDisp" style="font-size:10px;">${Math.round((obj.opacity||1)*100)}%</span>
+        </div>
+        
+        <!-- PRO Layer Controls -->
+        <div style="display:flex; gap:6px;">
+            <button onclick="fCanvas.bringForward(fCanvas.getActiveObject()); saveLabelzHistory(); fCanvas.renderAll();" style="flex:1; padding:4px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); border-radius:4px; color:white; font-size:11px; cursor:pointer;" title="Bring Forward">🔼 Up</button>
+            <button onclick="fCanvas.sendBackwards(fCanvas.getActiveObject()); saveLabelzHistory(); fCanvas.renderAll();" style="flex:1; padding:4px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); border-radius:4px; color:white; font-size:11px; cursor:pointer;" title="Send Backward">🔽 Down</button>
+            <button onclick="lblzDuplicateSelected()" style="flex:1; padding:4px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:4px; color:#10b981; font-size:11px; font-weight:bold; cursor:pointer;" title="Duplicate Element (Ctrl+D)">📄 Copy</button>
+        </div>
     `;
 
     // Text specific
@@ -460,8 +581,8 @@ function onCanvasSelection(e) {
         `;
     }
 
-    // Rect/Line specific
-    if (obj.type === 'rect' || obj.type === 'line') {
+    // Rect/Line/Circle/Brush specific
+    if (obj.type === 'rect' || obj.type === 'line' || obj.type === 'circle' || obj.type === 'path') {
         html += `
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;"><label style="font-size:10px;">Color</label><input type="color" onchange="updObj('fill', this.value); updObj('stroke', this.value);" value="${obj.fill || obj.stroke}" style="width:100%; height:24px; border:none; padding:0;"></div>
@@ -469,7 +590,15 @@ function onCanvasSelection(e) {
         `;
     }
 
-    html += `<hr style="border-color:var(--border-color); margin:10px 0;"><button onclick="lblzDeleteSelected()" class="btn-red" style="padding:4px; width:100%; font-size:11px;">🗑️ Delete Element</button>`;
+    // Locking tool
+    html += `
+        <div style="margin-top:10px; display:flex; gap:6px;">
+           <button onclick="updObj('lockMovementX', !${!!obj.lockMovementX}); updObj('lockMovementY', !${!!obj.lockMovementY});  updObj('lockScalingX', !${!!obj.lockScalingX}); updObj('lockScalingY', !${!!obj.lockScalingY}); onCanvasSelection({target: fCanvas.getActiveObject()});" style="flex:1; background:${obj.lockMovementX ? '#ef4444' : 'var(--bg-bar)'}; color:white; border:1px solid var(--border-color); padding:4px; font-size:10px; border-radius:4px; cursor:pointer;">
+             ${obj.lockMovementX ? '🔒 UNLOCK' : '🔓 LOCK POS'}
+           </button>
+           <button onclick="lblzDeleteSelected()" class="btn-red" style="padding:4px; flex:1; font-size:11px;">🗑️ Delete</button>
+        </div>
+    `;
     html += `</div>`;
     pnl.innerHTML = html;
 }
@@ -488,8 +617,29 @@ window.updBc = function() {
     }
 };
 window.lblzDeleteSelected = function() {
-    fCanvas.remove(fCanvas.getActiveObject());
-    onCanvasSelectionCleared();
+    if(fCanvas.getActiveObject()) {
+        fCanvas.remove(fCanvas.getActiveObject());
+        fCanvas.discardActiveObject();
+    }
+};
+window.lblzDuplicateSelected = function() {
+    const act = fCanvas.getActiveObject();
+    if(!act) return;
+    act.clone(function(cloned) {
+        cloned.set({
+            left: act.left + 20,
+            top: act.top + 20,
+            evented: true
+        });
+        // clone nested props if needed
+        if(act.isDynamic) cloned.isDynamic = true;
+        if(act.isBarcode) {
+            cloned.isBarcode = true;
+            cloned.barcodeOpts = JSON.parse(JSON.stringify(act.barcodeOpts));
+        }
+        fCanvas.add(cloned);
+        fCanvas.setActiveObject(cloned);
+    });
 };
 
 function updateLabelCanvasBg() {
@@ -587,22 +737,22 @@ window.applyCatalogData = function(name, bcValue, cost) {
 
 function toggleLabelzEmojiPicker() {
     const p = document.getElementById('labelzDesignerEmojiPicker');
-    p.style.display = p.style.display === 'none' ? 'flex' : 'none';
+    if(p) p.style.display = p.style.display === 'none' ? 'flex' : 'none';
 }
 function assignLabelzDesignerEmoji(emoji) {
     document.getElementById('labelzDesignerEmojiVal').value = emoji;
     document.getElementById('labelzDesignerEmojiBtn').innerHTML = emoji + ' <span style="font-size:10px">▼</span>';
-    toggleLabelzEmojiPicker();
+    const p = document.getElementById('labelzDesignerEmojiPicker');
+    if(p) p.style.display = 'none';
 }
 
-// Bind emoji clicks
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('labelzDesignerEmojiPicker')?.addEventListener('click', (e) => {
-        if(e.target.tagName === 'DIV') return;
-        assignLabelzDesignerEmoji(e.target.innerText);
-    });
+// Bind emoji clicks safely for dynamic modals
+document.body.addEventListener('click', (e) => {
+    // If they click inside the picker container, but not the container itself
+    if (e.target.closest('#labelzDesignerEmojiPicker') && e.target.tagName !== 'DIV') {
+        assignLabelzDesignerEmoji(e.target.innerText.trim());
+    }
 });
-
 
 function openCreateLabelModal() {
     initFabricCanvas();
@@ -616,6 +766,10 @@ function openCreateLabelModal() {
     fCanvas.clear();
     fCanvas.backgroundColor = '#ffffff';
     document.getElementById('labelzBgColor').value = '#ffffff';
+    
+    lblzHistory = [];
+    lblzHistoryProg = -1;
+    saveLabelzHistory();
 }
 
 function openEditLabelModal(name) {
@@ -640,10 +794,16 @@ function openEditLabelModal(name) {
                     regenerateBarcodeImage(o, o.barcodeOpts.text, o.barcodeOpts.bcid);
                 }
             });
+            lblzHistory = [];
+            lblzHistoryProg = -1;
+            saveLabelzHistory();
         });
     } else {
         fCanvas.clear();
         fCanvas.backgroundColor = '#ffffff';
+        lblzHistory = [];
+        lblzHistoryProg = -1;
+        saveLabelzHistory();
     }
     
     document.getElementById('labelzDesignerModal').style.display = 'flex';
