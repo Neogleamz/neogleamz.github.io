@@ -397,7 +397,11 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
             }
         } else {
             // LEGACY 3D PRINTED RAW MATERIAL (STOCKPILEZ ITEM)
-            if (typeof catalogCache !== 'undefined' && catalogCache[k] && catalogCache[k].is_3d_print) {
+            // catalogCache is async — fall back to productsDB if not yet populated
+            const catalogEntry = (typeof catalogCache !== 'undefined') ? catalogCache[k] : null;
+            const isLegacy3DPrint = (catalogEntry && catalogEntry.is_3d_print) ||
+                                    (!catalogEntry && productsDB[k] && productsDB[k].is_3d_print);
+            if (isLegacy3DPrint) {
                 prints[k] = (prints[k] || 0) + q;
             }
         }
@@ -1512,6 +1516,7 @@ function stopProductionSopResize() {
         document.removeEventListener('mouseup', stopProductionSopResize);
     }
 }
+
 
 
 
