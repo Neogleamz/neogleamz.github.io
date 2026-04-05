@@ -1262,7 +1262,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-id">${wo.wo_id}</div>
                     <div class="archive-card-title">${wo.label ? `"${wo.label}" — ` : ''}${wo.product_name}</div>
                     <div class="archive-card-meta">x${wo.qty} · ${fmtShort(wo.completed_at || wo.created_at)}</div>
-                    <button onclick="event.stopPropagation(); hardDeleteArchive('batchez', '${wo.wo_id}')" title="Hard Delete" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 12px; font-size:11px; font-weight:900; cursor:pointer; flex-shrink:0; letter-spacing:0.5px; transition:background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#ef4444'">🗑️ DELETE</button>
+                    <button onclick="event.stopPropagation(); hardDeleteArchive('batchez', '${wo.wo_id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex:none; white-space:nowrap; width:max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
@@ -1290,7 +1290,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-id">${displayID}</div>
                     <div class="archive-card-title">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
                     <div class="archive-card-meta">x${job.qty} · ${fmtShort(job.completed_at || job.created_at)}</div>
-                    <button onclick="event.stopPropagation(); hardDeleteArchive('layerz', '${job.id}')" title="Hard Delete" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 12px; font-size:11px; font-weight:900; cursor:pointer; flex-shrink:0; letter-spacing:0.5px; transition:background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#ef4444'">🗑️ DELETE</button>
+                    <button onclick="event.stopPropagation(); hardDeleteArchive('layerz', '${job.id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex:none; white-space:nowrap; width:max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
@@ -1516,6 +1516,7 @@ function stopProductionSopResize() {
         document.removeEventListener('mouseup', stopProductionSopResize);
     }
 }
+
 
 
 
