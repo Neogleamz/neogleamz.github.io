@@ -1,4 +1,4 @@
-﻿// --- 10. 3D PRINT QUEUE MODULE ---
+// --- 10. 3D PRINT QUEUE MODULE ---
 
 function formatPrintTime(mins) {
     if (!mins || isNaN(mins) || mins <= 0) return "";
@@ -203,7 +203,12 @@ function renderActivePrintJob(id) {
     if (job.status === 'Printing' || job.status === 'Cleaned') {
         const sopList = document.getElementById('printSOPList');
         let cleanPartName = job.part_name.startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : job.part_name.split(':::')[0];
-        const steps = sopsDB[cleanPartName] || [];
+        let steps = sopsDB[cleanPartName] || [];
+        if (!Array.isArray(steps)) {
+            if (steps.steps && Array.isArray(steps.steps)) steps = steps.steps;
+            else steps = Object.values(steps);
+        }
+        
         if (steps.length === 0) {
             sopList.innerHTML = `<div style="padding:15px; color:var(--text-muted); border:1px dashed var(--border-color); border-radius:6px;">No specific 3D Print SOP found for this item.</div>`;
         } else {
@@ -325,14 +330,39 @@ async function archiveCurrentPrint() {
 
 
 function openPrintSOP(pName) {
-    pName = pName.split(':::')[0];
-    if (typeof openSOPMasterModal === 'function') {
-        openSOPMasterModal('3d');
-        const select = document.getElementById('sopMasterProductSelect');
-        if (select) {
-            select.value = pName;
-            renderMasterSOP();
+    try {
+        pName = pName.split(':::')[0];
+        let steps = sopsDB[pName] || [];
+        if (!Array.isArray(steps)) {
+            if (steps.steps && Array.isArray(steps.steps)) steps = steps.steps;
+            else steps = Object.values(steps);
         }
+        
+        let html = `<html><head><title>SOP - ${pName}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #0ea5e9;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#0ea5e9; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`;
+        html += `<h2>Compiled SOP Guide</h2><h3>Master Recipe: ${pName}</h3><hr>`;
+        
+        if(steps.length === 0) {
+            html += `<p>No SOP steps currently defined for this recipe.</p>`;
+        } else {
+            let stepCounter = 1;
+            steps.forEach((s) => {
+                if(s.isHeader) { 
+                    html += `<div class="header">${s.text}</div>`; 
+                } else if(typeof s === 'string') { 
+                    html += `<div class="step"><strong style="color:#0ea5e9; font-size:14px;">Step ${stepCounter++}:</strong><br> ${s}</div>`; 
+                } else { 
+                    html += `<div class="step"><strong style="color:#0ea5e9; font-size:14px;">Step ${stepCounter++}:</strong><br> ${s.text || ''}</div>`; 
+                }
+            });
+        }
+        
+        html += `</body></html>`;
+        let win = window.open('', '', 'width=800,height=600');
+        win.document.write(html);
+        win.document.close();
+        setTimeout(() => win.print(), 500);
+    } catch(e) { 
+        sysLog(`Print SOP Error: ${e.message}`, true); 
     }
 }
 

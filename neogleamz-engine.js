@@ -1,48 +1,126 @@
+// ==========================================
+// SYSTEM CONFIGURATIONS
+// ==========================================
+window.NEOGLEAMZ_CONFIG = {
+    STRIPE_PERCENTAGE: 0.029,
+    STRIPE_FLAT_FEE: 0.30,
+    EBAY_BLENDED_FEE: 0.2388,
+    DEFAULT_SHIPPING_COST: 8.00
+};
 
+// ==========================================
+// GLOBAL ERROR HANDLERS
+// ==========================================
+window.addEventListener('error', (event) => {
+    console.error('System Error:', event.error);
+    if (typeof sysLog === 'function') {
+        sysLog(`System Fault: ${event.error?.message || 'Unknown Error'}`, true);
+    }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled Promise Rejection:', event.reason);
+    if (typeof sysLog === 'function') {
+        sysLog(`Network/Promise Fault: ${event.reason?.message || 'Unknown Reason'}`, true);
+    }
+});
+// ==========================================
+// SECURITY TOOLS
+// ==========================================
+window.safeHTML = function(dirtyHTML) {
+    if (typeof DOMPurify !== 'undefined') {
+        return DOMPurify.sanitize(dirtyHTML);
+    }
+    // Fallback if DOMPurify failed to load
+    console.warn("DOMPurify not loaded. Using fallback HTML escaper.");
+    const div = document.createElement('div');
+    div.innerText = dirtyHTML;
+    return div.innerHTML;
+};
+
+/**
+ * Recursively calculates the exact raw material and labor cost of any given Recipe.
+ * Uses optional chaining and null-coalescing to prevent faults on undefined references.
+ * @param {string} pName - The internal recipe name to resolve.
+ * @returns {{raw: number, labor: number, total: number}} Cost breakdown object.
+ */
 window.calculateProductBreakdown = function(pName) {
     let res = { raw: 0, labor: 0, total: 0 };
     if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return res;
     
-    productsDB[pName].forEach(item => {
-        let key = item.item_key || item.di_item_id || item.name;
-        let qty = parseFloat(item.quantity || item.qty) || 1;
+    const components = productsDB[pName] || [];
+    components.forEach(item => {
+        let key = item?.item_key || item?.di_item_id || item?.name;
+        if (!key) return; // Prevent crashes on empty objects
+
+        let qty = parseFloat(item?.quantity || item?.qty) || 1;
         if (key.startsWith('RECIPE:::')) {
             let sub = window.calculateProductBreakdown(key.replace('RECIPE:::', ''));
-            res.raw += sub.total * qty; 
+            res.raw += (sub?.total || 0) * qty; 
         } else if (typeof catalogCache !== 'undefined' && catalogCache[key]) {
-            res.raw += (parseFloat(catalogCache[key].avgUnitCost) || 0) * qty;
+            res.raw += (parseFloat(catalogCache[key]?.avgUnitCost) || 0) * qty;
         }
     });
     
     if (typeof laborDB !== 'undefined' && laborDB[pName]) {
         let l = laborDB[pName];
-        res.labor = ((parseFloat(l.time) || 0) / 60) * (parseFloat(l.rate) || 0);
+        res.labor = ((parseFloat(l?.time) || 0) / 60) * (parseFloat(l?.rate) || 0);
     }
     
     res.total = res.raw + res.labor;
     return res;
 };
+
+/**
+ * Convenience wrapper returning just the Total True Cost of Goods Sold.
+ * @param {string} pName - Internal recipe name.
+ * @returns {number} The total COGS.
+ */
 window.getEngineTrueCogs = function(pName) { return window.calculateProductBreakdown(pName).total; };
 window.calculateProductTotal = window.getEngineTrueCogs;
 
+/**
+ * Calculates platform transaction fees based dynamically on the parsed metric configurations.
+ * @param {number} amt - Total Capture Amount string stripped into pure float.
+ * @param {string} [source="web"] - Sales channel (eBay, web, etc.)
+ * @returns {number} The computed transaction overhead.
+ */
 window.getEngineStripeFee = function(amt, source) { 
     if (source && String(source).toLowerCase().includes('ebay')) {
-        return (amt * 0.2388); // Safe blended average accounting for 13.6% final value + ~10% Promoted Listings Ad Spend
+        return (parseFloat(amt) || 0) * window.NEOGLEAMZ_CONFIG.EBAY_BLENDED_FEE; 
     }
-    return (amt * 0.029) + 0.30; 
+    return ((parseFloat(amt) || 0) * window.NEOGLEAMZ_CONFIG.STRIPE_PERCENTAGE) + window.NEOGLEAMZ_CONFIG.STRIPE_FLAT_FEE; 
 };
-window.getEngineLiveMsrp = function(pName) { return typeof pricingDB !== 'undefined' && pricingDB[pName] ? parseFloat(pricingDB[pName].msrp) || 0 : 0; };
+
+window.getEngineLiveMsrp = function(pName) { return typeof pricingDB !== 'undefined' && pricingDB[pName] ? parseFloat(pricingDB[pName]?.msrp) || 0 : 0; };
+
+/**
+ * Primary engine formula for generating explicit Net Profit figures from raw CSV captures.
+ * @param {number} gross - The base gross revenue of the specific line items.
+ * @param {number} shipCol - Displayed shipping collected from the customer.
+ * @param {number} tax - Collected tax.
+ * @param {number} disc - Total promotional discount string.
+ * @param {number} actShip - The physical flat rate or calculated cost to ship the order.
+ * @param {string} pName - The specific tracked Recipe name.
+ * @param {number} [qty=1] - Quantity sold of this specific line item.
+ * @param {string} [source="web"] - Web/eBay source for Stripe fee modulation.
+ * @returns {number} Accurate single-instance net profit.
+ */
 window.getHistoricalNetProfit = function(gross, shipCol, tax, disc, actShip, pName, qty = 1, source = "web") {
-    let captured = gross + shipCol + tax - disc;
+    let captured = (parseFloat(gross) || 0) + (parseFloat(shipCol) || 0) + (parseFloat(tax) || 0) - (parseFloat(disc) || 0);
     let fee = window.getEngineStripeFee(captured, source);
-    let cogs = window.getEngineTrueCogs(pName) * qty;
-    return gross + shipCol - disc - fee - actShip - cogs;
+    let cogs = window.getEngineTrueCogs(pName) * (parseFloat(qty) || 1);
+    return (parseFloat(gross) || 0) + (parseFloat(shipCol) || 0) - (parseFloat(disc) || 0) - fee - (parseFloat(actShip) || 0) - cogs;
 };
+
+/**
+ * Generates forward-looking metrics anticipating marketing spend, warranty burden, and margin health.
+ */
 window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, warr) {
-    let sCol = msrp >= fsThreshold ? 0 : 8.00;
-    let aShip = 8.00; 
-    let fee = window.getEngineStripeFee(msrp + sCol, "web");
-    let net = msrp + sCol - cogs - fee - aShip - cac - aff - warr;
+    let sCol = (parseFloat(msrp) || 0) >= (parseFloat(fsThreshold) || 0) ? 0 : window.NEOGLEAMZ_CONFIG.DEFAULT_SHIPPING_COST;
+    let aShip = window.NEOGLEAMZ_CONFIG.DEFAULT_SHIPPING_COST; 
+    let fee = window.getEngineStripeFee((parseFloat(msrp) || 0) + sCol, "web");
+    let net = (parseFloat(msrp) || 0) + sCol - (parseFloat(cogs) || 0) - fee - aShip - (parseFloat(cac) || 0) - (parseFloat(aff) || 0) - (parseFloat(warr) || 0);
     let margin = msrp > 0 ? (net / msrp) * 100 : 0;
     return { net: net, stripe: fee, aff: aff, cac: cac, warr: warr, margin: margin, ship: sCol, oop: msrp + sCol, merchantShipMargin: sCol - aShip };
 };

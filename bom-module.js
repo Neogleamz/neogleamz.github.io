@@ -62,8 +62,97 @@ async function updateLaborCosts() {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
-async function renameCurrentProduct() { if(!currentProduct) return; let n = prompt("Enter new name:", currentProduct); if(!n || !n.trim() || n.trim() === currentProduct) return; n = n.trim(); if(productsDB[n]) return alert("A product with this name already exists."); sysLog(`Renaming ${currentProduct} to ${n}...`); setMasterStatus("Renaming...", "mod-working"); let o = currentProduct; let c = productsDB[o]; let l = laborDB[o] || {time:0, rate:0}; let pR = pricingDB[o] || {msrp:0, wholesale:0}; let isSub = isSubassemblyDB[o] || false; let is3D = c.is_3d_print || false; let pt = c.print_time_mins || 0; productsDB[n] = c; laborDB[n] = l; pricingDB[n] = pR; isSubassemblyDB[n] = isSub; await supabaseClient.from('product_recipes').upsert({product_name: n, components: c, labor_time_mins: l.time, labor_rate_hr: l.rate, msrp: pR.msrp, wholesale_price: pR.wholesale, is_subassembly: isSub, is_3d_print: is3D, print_time_mins: pt}); await supabaseClient.from('product_recipes').delete().eq('product_name', o); delete productsDB[o]; delete laborDB[o]; delete pricingDB[o]; delete isSubassemblyDB[o]; let ups = []; Object.keys(productsDB).forEach(k => { let changed = false; productsDB[k].forEach(p => { if(String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + o) { p.item_key = 'RECIPE:::' + n; changed = true; } }); if(changed) ups.push(supabaseClient.from('product_recipes').update({components: productsDB[k]}).eq('product_name', k)); }); if(ups.length > 0) await Promise.all(ups); currentProduct = n; if(typeof populateDropdowns === 'function') populateDropdowns(); renderProductList(); setMasterStatus("Renamed!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 3000); }
-async function syncRecipe(name) { try { sysLog(`Syncing recipe: ${name}`); const {error} = await supabaseClient.from('product_recipes').update({components: productsDB[name]}).eq('product_name', name); if(error) throw new Error(error.message); if(typeof populateDropdowns === 'function') populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
+async function renameCurrentProduct() { 
+    if (!currentProduct) return; 
+    let newName = prompt("Enter new name:", currentProduct); 
+    if (!newName || !newName.trim() || newName.trim() === currentProduct) return; 
+    
+    newName = newName.trim(); 
+    if (productsDB[newName]) {
+        return alert("A product with this name already exists.");
+    }
+
+    sysLog(`Renaming ${currentProduct} to ${newName}...`); 
+    setMasterStatus("Renaming...", "mod-working"); 
+
+    let oldName = currentProduct; 
+    let c = productsDB[oldName] || []; 
+    let l = laborDB[oldName] || {time:0, rate:0}; 
+    let pR = pricingDB[oldName] || {msrp:0, wholesale:0}; 
+    let isSub = isSubassemblyDB[oldName] || false; 
+    let is3D = c.is_3d_print || false; 
+    let pt = c.print_time_mins || 0; 
+    
+    productsDB[newName] = c; 
+    laborDB[newName] = l; 
+    pricingDB[newName] = pR; 
+    isSubassemblyDB[newName] = isSub; 
+
+    // API Call 1: Upsert the new duplicate product
+    const { error: upsertErr } = await supabaseClient.from('product_recipes').upsert({
+        product_name: newName, 
+        components: c, 
+        labor_time_mins: l.time, 
+        labor_rate_hr: l.rate, 
+        msrp: pR.msrp, 
+        wholesale_price: pR.wholesale, 
+        is_subassembly: isSub, 
+        is_3d_print: is3D, 
+        print_time_mins: pt
+    });
+    if (upsertErr) sysLog(`Upsert Rename Failed: ${upsertErr.message}`, true);
+
+    // API Call 2: Delete the old artifact
+    const { error: delErr } = await supabaseClient.from('product_recipes')
+        .delete()
+        .eq('product_name', oldName);
+    if (delErr) sysLog(`Delete Old Artifact Failed: ${delErr.message}`, true);
+
+    delete productsDB[oldName]; 
+    delete laborDB[oldName]; 
+    delete pricingDB[oldName]; 
+    delete isSubassemblyDB[oldName]; 
+
+    // Search and Replace internal components across the universe
+    let upserts = []; 
+    Object.keys(productsDB).forEach(k => { 
+        let changed = false; 
+        productsDB[k].forEach(p => { 
+            if (String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + oldName) { 
+                p.item_key = 'RECIPE:::' + newName; 
+                changed = true; 
+            } 
+        }); 
+        if (changed) {
+            upserts.push(supabaseClient.from('product_recipes').update({components: productsDB[k]}).eq('product_name', k)); 
+        }
+    }); 
+
+    if (upserts.length > 0) {
+        const results = await Promise.all(upserts);
+        results.forEach(res => {
+            if (res.error) sysLog(`Dependency Batch Sync Failed: ${res.error.message}`, true);
+        });
+    }
+
+    currentProduct = newName; 
+    if (typeof populateDropdowns === 'function') populateDropdowns(); 
+    renderProductList(); 
+    
+    setMasterStatus("Renamed!", "mod-success"); 
+    setTimeout(() => setMasterStatus("Ready.", "status-idle"), 3000); 
+}
+
+async function syncRecipe(name) { 
+    try { 
+        sysLog(`Syncing recipe: ${name}`); 
+        const {error} = await supabaseClient.from('product_recipes').update({components: productsDB[name]}).eq('product_name', name); 
+        if (error) throw new Error(error.message); 
+        if (typeof populateDropdowns === 'function') populateDropdowns(); 
+    } catch(e) { 
+        sysLog(`Recipe Sync Fault: ${e.message}`, true); 
+    } 
+}
 
 let productDraggedName = null;
 
@@ -81,7 +170,7 @@ function renderProductList() {
                 sysLog("Purged temp Retail Product: " + lbl);
             }
         });
-    } catch(e) { }
+    } catch(e) { sysLog(`Error in product list cleanup: ${e.message}`, true); }
     
     const ui = document.getElementById('productListUI'); ui.innerHTML = ""; 
     let allProds = Object.keys(productsDB);

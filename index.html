@@ -64,9 +64,9 @@
             width: 100%; 
             max-width: 100%; 
             margin: 0; 
-            background: var(--bg-container); 
-            padding: 20px; 
-            box-shadow: 0 4px 20px var(--shadow-color); 
+            background: transparent; 
+            padding: 8px; 
+            box-shadow: none; 
             transition: background-color 0.3s; 
             box-sizing: border-box; 
             flex-grow: 1; 
@@ -195,7 +195,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px; 
+            margin-bottom: 10px; 
             padding: 4px 32px; 
             background: var(--bg-glass);
             backdrop-filter: blur(12px);
@@ -297,6 +297,7 @@
             padding: clamp(6px, 0.8vh, 10px) clamp(16px, 2.5vw, 30px) clamp(4px, 0.5vh, 8px);
             background: transparent;
             border-bottom: none;
+            min-height: clamp(35px, 4vh, 45px);
             flex-shrink: 0;
             position: relative;
             z-index: 10;
@@ -304,8 +305,9 @@
         .pane-header-title {
             position: absolute;
             left: 50%;
-            transform: translateX(-50%);
-            font-size: clamp(11px, 1.0vw, 15px);
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(13px, 1.25vw, 18px);
             font-weight: 900;
             color: #FF8C00;
             text-transform: uppercase;
@@ -320,6 +322,7 @@
             gap: clamp(4px, 0.8vw, 10px);
             flex-wrap: wrap;
             justify-content: flex-end;
+            margin-left: auto;
         }
         .pane-header-actions button {
             width: auto !important;
@@ -458,14 +461,14 @@
         }
         .bom-layout {
             display: flex;
-            gap: 25px;
+            gap: clamp(12px, 1.5vw, 25px);
             height: 100%;
             width: 100%;
-            border-top: 1px solid var(--border-color);
-            padding-top: clamp(6px, 0.8vh, 10px);
+            padding: clamp(8px, 1.2vh, 16px) clamp(12px, 1.5vw, 20px);
             flex-grow: 1;
             min-height: 0;
             overflow: hidden;
+            box-sizing: border-box;
         }
         .bom-sidebar {
             flex: 0 0 clamp(220px, 28vw, 320px);
@@ -501,7 +504,7 @@
         .executive-pane .bom-main,
         .executive-pane [class^="bom-main"],
         .executive-pane .bom-layout .bom-main {
-            padding-top: clamp(6px, 0.8vh, 10px) !important;
+            padding: clamp(5px, 1vh, 12px) !important;
         }
         .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; flex-grow: 1; overflow-y: auto; }
         
@@ -638,7 +641,7 @@
         .resizer:hover { background-color: #0ea5e9; }
         .dragging { opacity: 0.4; background-color: #3b82f6 !important; }
 
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
         .st-queued { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
         .st-picking { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
         .st-production { background: #fefce8; color: #f59e0b; border: 1px solid #fde047; }
@@ -755,7 +758,7 @@
 
             .bom-layout { flex-direction: column; gap: 15px; }
             .bom-sidebar { width: 100% !important; min-width: 100% !important; max-width: 100% !important; flex: 0 0 auto !important; max-height: clamp(350px, 50vh, 500px); }
-            .bom-main { width: 100% !important; min-width: 100% !important; max-width: 100% !important; overflow-x: hidden; }
+            .bom-main { width: 100% !important; min-width: 100% !important; max-width: 100% !important; overflow-x: hidden; padding: clamp(5px, 1vh, 12px) !important; }
             .add-part-bar { flex-wrap: wrap; flex-direction: column; align-items: stretch; gap: 5px; }
             
             /* Stack side-by-side ledgers vertically on mobile */
@@ -1639,7 +1642,7 @@
                             <button class="btn-blue" onclick="openNewWOModal('create')" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ CreateBatch</button>
                             <button class="btn-green" onclick="openMultiBatchModal()" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
                         </div>
-                        <button class="btn-blue" onclick="openSOPMasterModal('production')" style="padding:6px 10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 Production SOP Editor</button>
+                        <button class="btn-blue" onclick="openSOPMasterModal('production')" style="padding:6px 10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 BATCHEZ SOP EDITOR</button>
                         <div style="display:flex; gap:6px;">
                             <button class="btn-blue" style="flex:1; padding:6px 4px; font-size:13px; background:#475569; border-color:#475569; color:#fff; display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap;" onclick="openArchiveExplorer('batchez')"><span>📂</span> Archives</button>
                         </div>
@@ -1655,8 +1658,8 @@
                         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                             <h2 id="woTitle" style="margin:0; font-size:22px; color:var(--text-heading);">WO-1234: Product Name</h2>
                             <div style="display:flex; align-items:center; gap:10px;">
-                                <span id="woStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none;">START: --/-- --:--</span>
-                                <span id="woEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none;">FINISH: --/-- --:--</span>
+                                <span id="woStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">START: --/-- --:--</span>
+                                <span id="woEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">FINISH: --/-- --:--</span>
                                 <span id="woBadge" class="status-badge st-queued">Queued</span>
                                 <button onclick="deleteWorkOrder()" title="Delete Work Order" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#ef4444'">🗑️ DELETE</button>
                             </div>
@@ -1684,9 +1687,10 @@
 
                     <div id="sect-Production" class="wo-section">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
+                            <div></div>
                             <div style="display:flex; gap: 10px;">
-                                <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color);">🔒</button>
-                                <button class="print-btn" onclick="printSOP()">🖨️ Full View</button>
+                                <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color); padding: 6px 12px; font-family:'Righteous'; font-size:12px; font-weight:900;">🔒 EDIT</button>
+                                <button class="print-btn" onclick="printSOP()">🖨️ Print SOP</button>
                             </div>
                         </div>
                         <div id="inlineSOPContainer" style="display:flex; flex-direction:column; position:relative;">
@@ -1726,8 +1730,11 @@
                         </div>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px; width:100%;">
-                        <button class="btn-blue" onclick="openManualPrintModal()" style="padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ New Manual Print</button>
-                        <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="padding:6px 10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 Print SOP Editor</button>
+                        <div style="display:flex; gap:10px; width:100%;">
+                            <button class="btn-blue" onclick="openManualPrintModal()" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ PRINTBATCH</button>
+                            <button class="btn-green" onclick="openMultiBatchModal('3d')" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
+                        </div>
+                        <button class="btn-blue" onclick="openSOPMasterModal('3d')" style="padding:6px 10px; background:#8b5cf6; border-color:#8b5cf6; color:#fff; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 LAYERZ SOP EDITOR</button>
                         <div style="display:flex; gap:6px;">
                             <button class="btn-blue" style="flex:1; padding:6px 4px; font-size:13px; background:#475569; border-color:#475569; color:#fff; display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap;" onclick="openArchiveExplorer('layerz')"><span>📂</span> Archives</button>
                         </div>
@@ -1743,8 +1750,8 @@
                             <h2 id="printJobTitle" style="margin:0; font-size:22px; color:var(--text-heading);">Item Name</h2>
                         <div id="printJobLabelBadge" style="display:none; font-size:12px; color:#f59e0b; font-style:italic; font-weight:600; margin-top:3px;"></div>
                             <div style="display:flex; align-items:center; gap:10px;">
-                                <span id="printJobStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none;">START: --/-- --:--</span>
-                                <span id="printJobEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none;">FINISH: --/-- --:--</span>
+                                <span id="printJobStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">START: --/-- --:--</span>
+                                <span id="printJobEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">FINISH: --/-- --:--</span>
                                 <span id="printJobBadge" class="status-badge st-queued">Queued</span>
                                 <button onclick="deletePrintJob()" title="Delete Print Job" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#ef4444'">🗑️ DELETE</button>
                             </div>
@@ -1770,7 +1777,10 @@
                     <div id="sect-P-Printing" class="wo-section">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                             <h3 style="margin:0; color:var(--text-heading);">🖨️ Printing Instructions (SOP)</h3>
-                            <button class="print-btn" onclick="openPrintSOP(currentPrintJob.part_name)">🖨️ Full View</button>
+                            <div style="display:flex; gap: 10px;">
+                                <button class="icon-btn" id="sopLockBtn3d" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color); padding: 6px 12px; font-family:'Righteous'; font-size:12px; font-weight:900;">🔒 EDIT</button>
+                                <button class="print-btn" onclick="openPrintSOP(currentPrintJob.part_name)">🖨️ Print SOP</button>
+                            </div>
                         </div>
                         <div id="printSOPList" style="margin-bottom:20px;"></div>
                         <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:15px; border-radius:8px; border-left:4px solid #f97316;">
@@ -2008,7 +2018,7 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">PACKERZ</span>
             <div class="pane-header-actions">
-                    <button class="btn-blue" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';">⚙️ BLUEPRINTS</button>
+                    <button class="btn-blue" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';">📝 PACKERZ SOP EDITOR</button>
                     <button class="btn-green" onclick="openSOPAuditLog()">🗃️ COMPLETED ORDERS ARCHIVE</button>
                 </div>
             </div>
@@ -2863,7 +2873,7 @@
                 <select id="multiBatchProductSub" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductRetail').value=''; document.getElementById('multiBatchProductPrint').value='';}"><option value="">⚙️ Select Sub-Assembly</option></select>
                 <select id="multiBatchProductPrint" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductRetail').value=''; document.getElementById('multiBatchProductSub').value='';}"><option value="">🖨️ Select 3D Print</option></select>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div style="display:flex; justify-content:flex-start; gap:15px; align-items:center; width:100%;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <label style="font-weight:bold; font-size:14px; margin-left:5px;">Qty:</label>
                     <input type="number" id="multiBatchQty" value="1" min="1" step="any" style="padding:8px; width:65px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;">
@@ -2902,7 +2912,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 2px solid #10b981;">
             <div style="display:flex; align-items:center; gap:15px;">
                 <span style="font-size:24px;">🏭</span>
-                <h2 id="sopMasterTitle" style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#10b981; text-align:center;">PRODUCTION ADMIN: SOP BLUEPRINTS</h2>
+                <h2 id="sopMasterTitle" style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#10b981; text-align:center;">SOP EDITOR</h2>
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
@@ -2923,7 +2933,7 @@
                 <!-- Column 1: Config & Input -->
                 <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Audited Telemetry Checklist</h3>
+                        <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                         <div style="display:flex; gap:6px;">
                             <button onclick="openSOPMediaPicker('productionAdminQA')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📎 MEDIA</button>
                             <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
@@ -2944,7 +2954,7 @@
 
                 <!-- Column 2: Live Preview Render -->
                 <div style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">Live Telemetry Preview</div>
+                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
                     <div id="productionAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
                     </div>
@@ -3057,14 +3067,13 @@
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:var(--bg-glass); border-bottom: 2px solid #3b82f6;">
             <div style="display:flex; align-items:center; gap:15px;">
                 <span style="font-size:24px;">⚙️</span>
-                <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#3b82f6; text-align:center;">PACKERZ ADMIN: SOP BLUEPRINTS</h2>
+                <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:1px; color:#3b82f6; text-align:center;">PACKERZ SOP EDITOR</h2>
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
                 <select id="packerzAdminRecipeSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" onchange="loadPackerzSopFromDB()">
                     <option value="">-- Loading Recipes... --</option>
                 </select>
-                <input type="text" id="packerzAdminBoxSku" placeholder="Box Sku (e.g. 8x8x4_corrugated)" style="width:200px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-family:monospace;">
                 <button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" onclick="savePackerzSOPToDB()" id="btnSavePackerzSOP">
                     💾 SAVE MASTER BLUEPRINT
                 </button>
@@ -3080,7 +3089,7 @@
                     <!-- Column 1: Config & Input -->
                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. Audited Telemetry Checklist</h3>
+                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
                             <div style="display:flex; gap:6px;">
                                 <button onclick="openSOPMediaPicker('packerzAdminQA')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📎 MEDIA</button>
                                 <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
@@ -3101,7 +3110,7 @@
                     
                     <!-- Column 2: Live Preview Render -->
                     <div style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">Live Telemetry Preview</div>
+                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
                         <div id="packerzAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
                             <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
                         </div>
@@ -3561,7 +3570,7 @@
         }
     }
 
-    async function loadData() {
+    async function loadData(silentUpdate = false) {
         try {
             setSysProgress(10, 'working');
             const [lR, pR, cR, wR, sR, saleR, aliasR, socR] = await Promise.all([ 
@@ -3655,8 +3664,12 @@
 
             renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); renderSalesTable(); renderAnalyticsDashboard(); renderAliasManager(); 
             if (typeof updateHubStats === 'function') updateHubStats();
-            let savedTab = sessionStorage.getItem('activeTab') || 'invhub';
-            switchTab(savedTab, true);
+            
+            if (!silentUpdate) {
+                let savedTab = sessionStorage.getItem('activeTab') || 'invhub';
+                switchTab(savedTab, true);
+            }
+
             const savedVer = localStorage.getItem('NEOGLEAMZ_VER');
             const currentVer = typeof NEOGLEAMZ_VERSION !== 'undefined' ? NEOGLEAMZ_VERSION : "Unknown";
             if (savedVer && savedVer !== currentVer) {
@@ -4250,7 +4263,10 @@
                 </h2>
                 <div id="packerzSopViewerSubtitle" style="font-size:12px; color:var(--text-muted); font-family:monospace; margin-top:5px;">Awaiting Recipe Target...</div>
             </div>
-            <button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" onclick="closePackerzSopViewer()">X</button>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="print-btn" onclick="printPackerzSOP()" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>
+                <button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" onclick="closePackerzSopViewer()">X</button>
+            </div>
         </div>
 
         <!-- Split Scrollable SOP Content & QA Gate Footer -->
@@ -4313,7 +4329,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 26px; background:linear-gradient(135deg,rgba(14,165,233,0.12) 0%,var(--bg-bar) 100%); border-bottom:1px solid rgba(14,165,233,0.25); flex-shrink:0;">
             <div>
                 <div style="font-size:17px; font-weight:900; color:#0ea5e9;">❓ SOP Token Reference Guide</div>
-                <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">All syntax tokens available in the Audited Telemetry Checklist editor</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">All syntax tokens available in the CHECKLIST editor</div>
             </div>
             <button onclick="closeSOPTokenGuide()" class="btn-red" style="width:auto; padding:7px 16px; font-size:13px;">✕ Close</button>
         </div>

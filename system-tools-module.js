@@ -135,7 +135,7 @@ async function syncAndCalculate() {
         });
         sysLog(`Pushing ${dI.length} rows...`); setSysProgress(80, 'working');
         const {error} = await supabaseClient.from('full_landed_costs').upsert(dI, {onConflict:'parcel_no, di_item_id'}); if(error) throw new Error(error.message);
-        if(typeof loadData === 'function') await loadData(); setSysProgress(100, 'success'); setMasterStatus(`✅ Calculated!`, "mod-success"); setTimeout(()=>{setSysProgress(0,'working');}, 3000);
+        if(typeof loadData === 'function') await loadData(true); setSysProgress(100, 'success'); setMasterStatus(`✅ Calculated!`, "mod-success"); setTimeout(()=>{setSysProgress(0,'working');}, 3000);
     } catch (error) { setSysProgress(100, 'error'); sysLog(error.message, true); setMasterStatus("❌ Calc Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'), 3000); }
     if(btnCalc) btnCalc.disabled = false;
 }
@@ -236,6 +236,6 @@ async function executeRestore() {
                 if (error) throw error;
             }
         }
-        setMasterStatus("Complete!", "mod-success"); closeBackupModal(); if(typeof loadData === 'function') await loadData();
+        setMasterStatus("Complete!", "mod-success"); closeBackupModal(); if(typeof loadData === 'function') await loadData(true);
     } catch(e) { sysLog(e.message, true); setMasterStatus("Restore Error", "mod-error"); }
 }

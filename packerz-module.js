@@ -1,4 +1,4 @@
-﻿// ==========================================
+// ==========================================
 // NEXUZ: PACKERZ TERMINAL LOGIC
 // ==========================================
 
@@ -56,6 +56,7 @@ async function fetchUnfulfilledOrders() {
         queueContainer.innerHTML = ''; 
 
         // 4. Architect Physical Order Cards in the DOM Container
+        const fragment = document.createDocumentFragment();
         distinctOrderIds.forEach(id => {
             const order = groupedOrders[id];
             
@@ -80,8 +81,9 @@ async function fetchUnfulfilledOrders() {
             card.onmouseout = () => card.style.borderColor = 'var(--border-color)';
             
             card.onclick = () => openPackerzSopTerminal(order);
-            queueContainer.appendChild(card);
+            fragment.appendChild(card);
         });
+        queueContainer.appendChild(fragment);
 
         loadSOPAuditLog();
 
@@ -201,6 +203,7 @@ function validatePackerzAssemblyButton(orderId) {
 let currentPackerzQaOrderId = null;
 let currentPackerzQaSku = null;
 let currentPackerzQaRecipe = null;
+let currentPackerzSopData = null;
 
 async function loadPackerzActiveSOP(orderId, sku, recipe) {
     currentPackerzQaOrderId = orderId;
@@ -226,6 +229,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         if(error || !data) throw new Error("No SOP Matrix officially bound to this Master Recipe.");
         
         const instructionJson = JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}');
+        currentPackerzSopData = instructionJson;
         const steps = instructionJson.steps || [];
         const qaChecks = instructionJson.qaChecks || [];
                  // 1. Render Read-Only Steps
@@ -427,6 +431,51 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         body.innerHTML = `<div style='padding:40px 20px; text-align:center; color:#ef4444; font-weight:900;'>SOP Hook Failed: ${err.message}<br><br><span style="color:var(--text-muted); font-size:12px; font-weight:normal;">If this item does not strictly require a physical procedure (e.g. Raw Materials or Legacy Orders), you may click COMPLETE below to securely bypass this check.</span></div>`;
         qaList.innerHTML = '';
         checkPackerzSopSignoffState();
+    }
+}
+
+function printPackerzSOP() {
+    try {
+        if(!currentPackerzQaRecipe || !currentPackerzSopData) {
+            sysLog("No active Packerz SOP data available to print.", true);
+            return;
+        }
+        
+        let pName = currentPackerzQaRecipe;
+        let steps = currentPackerzSopData.steps || [];
+        let qaChecks = currentPackerzSopData.qaChecks || [];
+        
+        // Safety check
+        if(!Array.isArray(steps)) steps = Object.keys(steps).map(k => steps[k]);
+        if(!Array.isArray(qaChecks)) qaChecks = Object.keys(qaChecks).map(k => qaChecks[k]);
+        
+        let html = `<html><head><title>Packing SOP - ${pName}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #F59E0B;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#F59E0B; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px; color:#10b981;} .qa-item{font-weight:bold; font-size:13px; color:#10b981; margin-bottom:5px;} </style></head><body>`;
+        html += `<h2>Fulfillment & Packing SOP</h2><h3>Master Recipe: ${pName}</h3><hr>`;
+        
+        if(qaChecks.length > 0) {
+            html += `<h3 style="color:#F59E0B;">MANDATORY QA CHECKS:</h3>`;
+            qaChecks.forEach((qa) => {
+                html += `<div class="qa-item">[ ] ${qa}</div>`;
+            });
+            html += `<br><hr>`;
+        }
+        
+        if(steps.length === 0) {
+            html += `<p>No visual steps configured. Proceed strictly to QA Checks.</p>`;
+        } else {
+            let stepCounter = 1;
+            steps.forEach((s) => {
+                html += `<div class="step"><strong style="color:#F59E0B; font-size:14px;">Pack Step ${stepCounter++}:</strong><br> ${s.text || ''}</div>`;
+            });
+        }
+        
+        html += `</body></html>`;
+        let win = window.open('', '', 'width=800,height=600');
+        win.document.write(html);
+        win.document.close();
+        setTimeout(() => win.print(), 500);
+    } catch(e) { 
+        sysLog(`Print Packerz SOP Error: ${e.message}`, true); 
     }
 }
 
@@ -892,7 +941,7 @@ function renderPackerzTelemetryPreview() {
             html += `
                 <label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:2px 8px 2px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'">
                     <input type="checkbox" disabled style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;">
-                    <span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column;">${content}</span>
+                    <span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex:1;">${content}</span>
                 </label>
             `;
         }
@@ -902,7 +951,7 @@ function renderPackerzTelemetryPreview() {
             html += `
                 <label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); cursor:pointer; padding:4px 8px; margin-bottom:0; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'">
                     <input type="checkbox" disabled style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:2px;">
-                    <span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column;">${content}</span>
+                    <span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex:1;">${content}</span>
                 </label>
             `;
         }
@@ -948,13 +997,13 @@ async function loadPackerzSopFromDB() {
         
         let steps = [{}];
         if(data) {
-            document.getElementById('packerzAdminBoxSku').value = data.required_box_sku || '';
+
             const instructionJson = JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}');
             steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
             document.getElementById('packerzAdminQA').value = (instructionJson.qaChecks || []).join('\n');
             if(typeof renderPackerzTelemetryPreview === 'function') renderPackerzTelemetryPreview();
         } else {
-            document.getElementById('packerzAdminBoxSku').value = '';
+
             document.getElementById('packerzAdminQA').value = '';
             if(typeof renderPackerzTelemetryPreview === 'function') renderPackerzTelemetryPreview();
         }
@@ -967,9 +1016,10 @@ async function loadPackerzSopFromDB() {
 
     } catch(e) {
         console.error("SOP Fetch Bound Error:", e);
+        if(typeof sysLog === 'function') sysLog(`Packerz SOP Load Error: ${e.message}`, true);
         if(e.code === 'PGRST116') {
             // Null record perfectly fine (new SOP)
-            document.getElementById('packerzAdminBoxSku').value = '';
+
             document.getElementById('packerzAdminQA').value = '';
             let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">` + generatePackerzEditableSOPRow({}, 0) + `</div>`;
             area.innerHTML = h;
@@ -1003,11 +1053,10 @@ async function savePackerzSOPToDB() {
 
         let rawQa = document.getElementById('packerzAdminQA').value;
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
-        let boxSku = document.getElementById('packerzAdminBoxSku').value.trim();
 
         const payload = {
             internal_recipe_name: sku,
-            required_box_sku: boxSku,
+            required_box_sku: null,
             instruction_json: JSON.stringify({ steps: stepsArray, qaChecks: qaLines })
         };
 
@@ -1020,6 +1069,7 @@ async function savePackerzSOPToDB() {
 
     } catch(e) {
         console.error(e);
+        if(typeof sysLog === 'function') sysLog(`Packerz Save Error: ${e.message}`, true);
         alert("CRITICAL SAVE ERROR: " + e.message);
         btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.opacity="1";
     }

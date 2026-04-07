@@ -1,4 +1,4 @@
-﻿// --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
+// --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
 function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
 function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = `<video src="${url}" style="max-width:100%; max-height:100%; outline:none; box-shadow:0 0 40px rgba(0,0,0,0.5);" controls autoplay controlsList="nodownload"></video>`; } else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
 function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = ''; } catch(e) { sysLog(e.message, true); } }
@@ -16,7 +16,7 @@ let currentSopMode = 'production'; // 'production' or '3d'
 
 function openSOPMasterModal(mode = 'production') { 
     currentSopMode = mode;
-    document.getElementById('sopMasterTitle').innerText = (mode === '3d') ? '📝 3D Print SOP Editor' : '📝 Production SOP Editor';
+    document.getElementById('sopMasterTitle').innerText = (mode === '3d') ? '📝 LAYERZ SOP EDITOR' : '📝 BATCHEZ SOP EDITOR';
     populateSOPDropdown();
     document.getElementById('sopMasterModal').style.display = 'flex'; 
     renderMasterSOP();
@@ -182,12 +182,17 @@ function openNewWOModal() {
 
 let multiBatchItems = [];
 
-function openMultiBatchModal() {
+function openMultiBatchModal(mode = 'all') {
     multiBatchItems = [];
     document.getElementById('multiBatchQty').value = 1;
     let r = document.getElementById('multiBatchProductRetail'); if(r) r.value = '';
     let s = document.getElementById('multiBatchProductSub'); if(s) s.value = '';
     let p = document.getElementById('multiBatchProductPrint'); if(p) p.value = '';
+    
+    if(r) r.style.display = 'block';
+    if(s) s.style.display = 'block';
+    if(p) p.style.display = 'block';
+
     renderStagedBatchItems();
     document.getElementById('multiBatchOrderModal').style.display = 'flex';
 }
@@ -436,7 +441,9 @@ function sortReportTable(th, n, isNumeric) {
         return isAsc ? valA - valB : valB - valA;
     });
 
-    rows.forEach(r => tbody.appendChild(r));
+    const frag = document.createDocumentFragment();
+    rows.forEach(r => frag.appendChild(r));
+    tbody.appendChild(frag);
 }
 
 function generateMultiBatchOrderReport() {
@@ -898,94 +905,144 @@ function renderActiveWO(id) {
         }
         else if(wo.status === 'In Production') { 
             document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active'); 
-            let stepsToRender = [];
-            if(wo.routing) {
-                Object.keys(wo.routing).forEach(sub => {
-                    if(wo.routing[sub].build > 0) {
-                        let subPayload = sopsDB[sub];
-                        let subSteps = []; let subQa = [];
-                        if (subPayload) {
-                            if (Array.isArray(subPayload)) subSteps = subPayload;
-                            else if (typeof subPayload === 'object') { subSteps = subPayload.steps || []; subQa = subPayload.qaChecks || []; }
-                        }
-                        if(subQa.length > 0) {
-                            stepsToRender.push({ isHeader: true, text: `📋 Telemetry / Checks: ${sub}` });
-                            subQa.forEach(q => stepsToRender.push({ isTele: true, text: q }));
-                        }
-                        if(subSteps.length > 0) {
-                            stepsToRender.push({ isHeader: true, text: `⚙️ Build Sub-Assembly: ${sub} (Quantity: ${wo.routing[sub].build})` });
-                            stepsToRender = stepsToRender.concat(subSteps);
-                        }
-                    }
-                });
-            }
-            let mainPayload = sopsDB[wo.product_name];
-            let mainSteps = []; let mainQa = [];
-            if (mainPayload) {
-                if (Array.isArray(mainPayload)) mainSteps = mainPayload;
-                else if (typeof mainPayload === 'object') { mainSteps = mainPayload.steps || []; mainQa = mainPayload.qaChecks || []; }
-            }
-            if(mainQa.length > 0) {
-                stepsToRender.push({ isHeader: true, text: `📋 Main Assembly Telemetry / Checks: ${wo.product_name}` });
-                mainQa.forEach(q => stepsToRender.push({ isTele: true, text: q }));
-            }
-            if(mainSteps.length > 0 || stepsToRender.length > 0) {
-                if(mainSteps.length > 0) {
-                    stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${wo.product_name}` });
-                    stepsToRender = stepsToRender.concat(mainSteps);
-                }
-            }
+            
             let sList = document.getElementById('woSOPList'); sList.innerHTML = ""; let saveContainer = document.getElementById('inlineSaveContainer');
+            
             if(!isSOPLocked) {
+                let mainPayload = sopsDB[wo.product_name];
+                let mainSteps = [];
+                if (mainPayload) {
+                    if (Array.isArray(mainPayload)) mainSteps = mainPayload;
+                    else if (typeof mainPayload === 'object') { mainSteps = mainPayload.steps || []; }
+                }
                 let mappedSteps = mainSteps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s);
                 if(mappedSteps.length === 0) mappedSteps = [{}]; let editHtml = `<div style="background:var(--bg-container); padding:15px; border-radius:8px; border:2px solid #0ea5e9;">`;
                 mappedSteps.forEach((s, idx) => { editHtml += generateEditableSOPRow(s, idx); }); editHtml += `<button class="btn-blue" style="width:auto; padding:8px 15px; font-size:13px;" onclick="addSOPRow('woSOPList')">+ Add New Step</button></div>`;
                 sList.innerHTML = editHtml; saveContainer.style.display = 'block';
             } else {
                 saveContainer.style.display = 'none'; 
-                let mappedSteps = stepsToRender.map(s => (s.isHeader || s.isTele || typeof s !== 'string') ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
-                if(mappedSteps.length === 0) sList.innerHTML = `<div style="padding:15px; color:var(--text-muted);">No SOPs written for this product or its sub-assemblies yet.</div>`;
-                else {
-                    let stepCounter = 1;
-                    mappedSteps.forEach((s, idx) => {
-                        if(s.isHeader) {
-                            sList.innerHTML += `<div style="background:var(--bg-bar); padding:10px 15px; margin:20px 0 10px 0; border-radius:6px; border-left:4px solid #0ea5e9; font-weight:bold; font-size:16px; color:var(--text-heading);">${s.text}</div>`;
-                        } else if(s.isTele) {
-                            let chkKey = `sop_tele_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                            let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(s.text, idx) : s.text;
-                            if (s.text.startsWith('> ')) {
-                                sList.innerHTML += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:4px 8px 4px 28px; width:100%; transition:all 0.2s;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;">${parsed}</label>`;
-                            } else if (!s.text.startsWith('[INPUT]') && !s.text.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(s.text)) {
-                                sList.innerHTML += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:6px 10px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); width:100%; transition:all 0.2s;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:16px; height:16px; flex-shrink:0; cursor:pointer; margin-top:2px;">${parsed}</label>`;
-                            } else {
-                                sList.innerHTML += `<div style="width:100%; margin-bottom:8px;">${parsed}</div>`;
+                
+                let sopGroups = [];  
+                
+                // Fetch Sub-Assembly SOPs
+                if(wo.routing) {
+                    Object.keys(wo.routing).forEach(sub => {
+                        if(wo.routing[sub].build > 0) {
+                            let subPayload = sopsDB[sub];
+                            let subSteps = []; let subQa = [];
+                            if (subPayload) {
+                                if (Array.isArray(subPayload)) subSteps = subPayload;
+                                else if (typeof subPayload === 'object') { subSteps = subPayload.steps || []; subQa = subPayload.qaChecks || []; }
                             }
-                        } else {
-                            let chkKey = `sop_${idx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : ''; let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">`;
-                            [s.m1, s.m2, s.m3].forEach(m => {
-                                if(m && m.url) {
-                                    let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
-                                    if (m.type === 'img') { 
-                                        let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; 
-                                        attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb" style="object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; 
-                                    } else { 
-                                        let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
-                                        if (isNativeVid) {
-                                            attachmentHtml += `<div class="media-thumb" style="background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
-                                        } else {
-                                            let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
-                                            if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
-                                            attachmentHtml += `<div class="media-thumb" style="border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`;
-                                        }
-                                    }
-                                }
+                            sopGroups.push({
+                                id: encodeURIComponent(sub.replace(/\s+/g,'_')),
+                                rawName: sub,
+                                title: `⚙️ Build Sub-Assembly: ${sub} (Quantity: ${wo.routing[sub].build})`,
+                                qa: subQa,
+                                steps: subSteps
                             });
-                            attachmentHtml += `</div>`;
-                            sList.innerHTML += `<div class="checklist-item ${doneCls}"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%;"><strong style="color:#0ea5e9; font-size:16px;">Step ${stepCounter++}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
                         }
                     });
-                    if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
                 }
+                
+                // Fetch Main Assembly SOPs
+                let mainPayload = sopsDB[wo.product_name];
+                let mainSteps = []; let mainQa = [];
+                if (mainPayload) {
+                    if (Array.isArray(mainPayload)) mainSteps = mainPayload;
+                    else if (typeof mainPayload === 'object') { mainSteps = mainPayload.steps || []; mainQa = mainPayload.qaChecks || []; }
+                }
+                sopGroups.push({
+                    id: "main_assembly",
+                    rawName: wo.product_name,
+                    title: `📦 Final Assembly: ${wo.product_name}`,
+                    qa: mainQa,
+                    steps: mainSteps
+                });
+                
+                // Sort Groups based on saved localStorage order
+                let savedSort = [];
+                try { savedSort = JSON.parse(localStorage.getItem('batchezSopSort_' + wo.product_name)) || []; } catch(e){}
+                
+                if (savedSort.length > 0) {
+                    sopGroups.sort((a,b) => {
+                        let idxA = savedSort.indexOf(a.id);
+                        let idxB = savedSort.indexOf(b.id);
+                        if(idxA === -1) idxA = 999;
+                        if(idxB === -1) idxB = 999;
+                        return idxA - idxB;
+                    });
+                }
+                
+                let htmlOut = '';
+                sopGroups.forEach((grp, grpIdx) => {
+                    let isExpanded = localStorage.getItem('batchezSopExpanded_' + grp.id) === 'true';
+                    let disp = isExpanded ? 'block' : 'none';
+                    let chev = isExpanded ? '▼' : '▶';
+                    
+                    htmlOut += `
+                    <div class="sop-grp-card" id="sopgrp_${grp.id}" draggable="true" ondragstart="batchezSopDragStart(event, '${grp.id}')" ondragover="batchezSopDragOver(event)" ondrop="batchezSopDrop(event, '${grp.id}', '${wo.product_name.replace(/'/g, "\\'")}')" ondragend="batchezSopDragEnd(event)" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
+                        <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:grab; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #0ea5e9; font-weight:bold; font-size:13px; color:var(--text-heading);" >
+                            <div style="flex-grow:1;" onclick="toggleBatchezSopGroup('${grp.id}')">
+                                ${grp.title}
+                            </div>
+                            <div style="cursor:pointer; padding:0 8px; font-size:11px;" onclick="toggleBatchezSopGroup('${grp.id}')" id="sopgrp_icon_${grp.id}">${chev}</div>
+                        </div>
+                        <div id="sopgrp_body_${grp.id}" style="display:${disp}; padding:10px 15px; border-top:1px solid var(--border-color);">
+                    `;
+                    
+                    if (grp.qa.length === 0 && grp.steps.length === 0) {
+                        htmlOut += `<div style="color:var(--text-muted); font-size:11px; font-style:italic;">No steps configured.</div>`;
+                    } else {
+                        if (grp.qa.length > 0) {
+                            htmlOut += `<div style="font-weight:bold; color:var(--text-heading); font-size:12px; margin-bottom:5px; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:3px;">📋 Telemetry / Checks</div>`;
+                            grp.qa.forEach((q, qIdx) => {
+                                let chkKey = `sop_tele_${grp.id}_${qIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                                let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, qIdx) : q;
+                                if (q.startsWith('> ')) {
+                                    htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:2px 8px 2px 28px; width:100%; transition:all 0.2s; margin-bottom:2px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;"><span style="font-size:11px;">${parsed}</span></label>`;
+                                } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
+                                    htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:4px 8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-container); width:100%; transition:all 0.2s; margin-bottom:4px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:0px;"><span style="font-size:11px;">${parsed}</span></label>`;
+                                } else {
+                                    htmlOut += `<div style="width:100%; margin-bottom:6px; font-size:11px;">${parsed}</div>`;
+                                }
+                            });
+                            htmlOut += `<div style="height:6px;"></div>`;
+                        }
+                        
+                        if (grp.steps.length > 0) {
+                            let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
+                            let stepCounter = 1;
+                            mappedSteps.forEach((s, sIdx) => {
+                                let chkKey = `sop_step_${grp.id}_${sIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : ''; 
+                                let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">`;
+                                [s.m1, s.m2, s.m3].forEach(m => {
+                                    if(m && m.url) {
+                                        let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
+                                        if (m.type === 'img') { 
+                                            let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; 
+                                            attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; 
+                                        } else { 
+                                            let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
+                                            if (isNativeVid) {
+                                                attachmentHtml += `<div class="media-thumb" style="max-height:100px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:24px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:10px; font-weight:bold;">VIDEO</span></div></div>`;
+                                            } else {
+                                                let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
+                                                if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
+                                                attachmentHtml += `<div class="media-thumb" style="max-height:100px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`;
+                                            }
+                                        }
+                                    }
+                                });
+                                attachmentHtml += `</div>`;
+                                htmlOut += `<div class="checklist-item ${doneCls}" style="padding:4px 8px; margin-bottom:4px;"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%; font-size:11px;"><strong style="color:#0ea5e9; font-size:12px;">Step ${stepCounter++}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
+                            });
+                        }
+                    }
+                    htmlOut += `</div></div>`;
+                });
+                sList.innerHTML = htmlOut;
+                if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
             }
         }
         else if(wo.status === 'Completed') { 
@@ -1436,7 +1493,7 @@ function parseProductionTelemetryLine(q, contextIdx) {
     } else {
         if(q.startsWith('- ')) q = q.substring(2).trim();
         let content = parseAll(q);
-        html = `<span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column; line-height:1.4; font-size:13px; font-weight:700; color:var(--text-heading); width:100%;">${content}</span>`;
+        html = `<span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex-direction:column; line-height:1.4; font-size:13px; font-weight:700; color:var(--text-heading); flex:1;">${content}</span>`;
     }
     return html;
 }
@@ -1519,7 +1576,54 @@ function stopProductionSopResize() {
 
 
 
+let batchezDraggedGrpId = null;
 
+function batchezSopDragStart(e, grpId) {
+    batchezDraggedGrpId = grpId;
+    e.target.style.opacity = '0.4';
+    e.dataTransfer.effectAllowed = 'move';
+}
 
+function batchezSopDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
 
+function batchezSopDragEnd(e) {
+    e.target.style.opacity = '1';
+}
+
+function batchezSopDrop(e, targetGrpId, prodName) {
+    e.preventDefault();
+    e.target.style.opacity = '1';
+    if (!batchezDraggedGrpId || batchezDraggedGrpId === targetGrpId) return;
+    
+    const container = document.getElementById('woSOPList');
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.sop-grp-card'));
+    let srcIdx = cards.findIndex(c => c.id === 'sopgrp_' + batchezDraggedGrpId);
+    let tgtIdx = cards.findIndex(c => c.id === 'sopgrp_' + targetGrpId);
+    if (srcIdx < 0 || tgtIdx < 0) return;
+    
+    let currentSort = cards.map(c => c.id.replace('sopgrp_', ''));
+    let movedItem = currentSort.splice(srcIdx, 1)[0];
+    currentSort.splice(tgtIdx, 0, movedItem);
+    
+    localStorage.setItem('batchezSopSort_' + prodName, JSON.stringify(currentSort));
+    if (currentWO) renderActiveWO(currentWO.wo_id);
+}
+
+function toggleBatchezSopGroup(grpId) {
+    let body = document.getElementById('sopgrp_body_' + grpId);
+    let icon = document.getElementById('sopgrp_icon_' + grpId);
+    if(body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.innerText = '▼';
+        localStorage.setItem('batchezSopExpanded_' + grpId, 'true');
+    } else {
+        body.style.display = 'none';
+        icon.innerText = '▶';
+        localStorage.setItem('batchezSopExpanded_' + grpId, 'false');
+    }
+}
 
