@@ -78,10 +78,12 @@ function syncTrace(msg, isErr=false) {
     }
 }
 
-async function processSalesCSV() {
+async function processSalesCSV(isTestMode = false) {
     let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
     syncTrace("INITIALIZING SYNC PROTOCOL...", false);
-    const fileInput = document.getElementById('salesCsvFile'); const file = fileInput.files[0];
+    const fileId = isTestMode ? 'salesCsvFileTest' : 'salesCsvFile';
+    if(isTestMode) syncTrace("🧪 DRY RUN SANDBOX ENGAGED: Bypassing Supabase Connection.", false);
+    const fileInput = document.getElementById(fileId); const file = fileInput.files[0];
     if(!file) { syncTrace("ERROR: No CSV payload selected.", true); return alert("Please select a CSV file first."); }
     syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
     sysLog("Reading Sales CSV..."); setMasterStatus("Parsing...", "mod-working"); setSysProgress(20, 'working');
@@ -90,12 +92,12 @@ async function processSalesCSV() {
         const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(firstSheet, {defval: ""});
-        processParsedSales(rows);
+        processParsedSales(rows, isTestMode);
     };
     reader.readAsArrayBuffer(file);
 }
 
-function processParsedSales(rows) {
+function processParsedSales(rows, isTestMode = false) {
     syncTrace(`File parsed successfully. Target rows length: ${rows.length}`);
     syncTrace("Scanning for missing Storefront SKUs inside Local Dictionary...");
     pendingSalesRows = []; let unmapped = new Set();
@@ -109,7 +111,7 @@ function processParsedSales(rows) {
         let rawDate = r['Created at'] || r['Date'] || r['Sale Date'] || new Date().toISOString();
         
         if(!orderId || !skuName || qty <= 0) return;
-        if(salesDB.some(s => s.order_id === String(orderId) && s.storefront_sku === String(skuName))) return;
+        if(!isTestMode && salesDB.some(s => s.order_id === String(orderId) && s.storefront_sku === String(skuName))) return;
 
         let dateStr = "";
         if (typeof rawDate === 'number') {
@@ -136,6 +138,10 @@ function processParsedSales(rows) {
         }
 
         let internalName = aliasDB[skuName] || (productsDB[skuName] ? skuName : null);
+        if (isTestMode && !internalName) {
+            internalName = "[UNMAPPED_SANDBOX_SKU]";
+        }
+        
         pendingSalesRows.push({ 
             order_id: String(orderId), sale_date: dateStr, storefront_sku: String(skuName), 
             qty_sold: qty, actual_sale_price: price, internal_recipe_name: internalName, 
@@ -165,7 +171,7 @@ function processParsedSales(rows) {
         return;
     }
 
-    executeSalesSync();
+    executeSalesSync(isTestMode);
 }
 
 function openAliasModal(sku) { document.getElementById('aliasUnknownSku').innerText = sku; document.getElementById('aliasRecipeSelect').value = ""; document.getElementById('aliasModal').style.display = 'flex'; }
@@ -193,7 +199,7 @@ async function saveAliasMapping() {
     if (typeof renderAliasManager === 'function') renderAliasManager();
 }
 
-async function executeSalesSync() {
+async function executeSalesSync(isTestMode = false) {
     try {
         syncTrace(`Mapping verified. Preparing Database Payload structure for ${pendingSalesRows.length} internal components...`);
         sysLog(`Pushing ${pendingSalesRows.length} sales...`); setMasterStatus("Syncing Sales...", "mod-working"); setSysProgress(60, 'working');
@@ -216,6 +222,25 @@ async function executeSalesSync() {
         // --------------------------------
 
         syncTrace(`Injecting aggregated Sales Ledger objects to network array...`);
+        
+        // --- DRY RUN SANDBOX OVERRIDE ---
+        if (isTestMode) {
+            syncTrace(`🧪 SANDBOX INTERCEPT: Supabase connection physically bypassed.`, true);
+            syncTrace(`Payload matrix cleanly routed directly to Global Data Modal.`, false);
+            setSysProgress(100, 'success'); setMasterStatus("🧪 Test Parsed!", "mod-success");
+            
+            if (typeof window.openSandboxModal === 'function') {
+                window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS");
+            }
+            
+            let elFile = document.getElementById('salesCsvFileTest');
+            if (elFile) elFile.value = "";
+            pendingSalesRows = [];
+            setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 4000);
+            return;
+        }
+        // --------------------------------
+        
         const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
         if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 

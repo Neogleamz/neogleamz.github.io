@@ -4,7 +4,8 @@ description: Formal Git Branching Strategy for all code modifications
 
 # Neogleamz - Zero-Risk Branching Workflow
 
-**⛔ CRITICAL SAFETY RULE: You are strictly forbidden from pushing ANY changes to the `main` branch, no matter how small or trivial, without receiving explicit verbal consent from the USER. There are zero exceptions to this rule.**
+**⛔ CRITICAL SAFETY RULE 1: You are strictly forbidden from reading, altering, parsing, renaming, or deleting ANY files contained within the `.git/hooks/` directory. AI manipulation of system locks is strictly prohibited.**
+**⛔ CRITICAL SAFETY RULE 2: You are strictly forbidden from pushing ANY changes to the `main` branch, no matter how small or trivial, without receiving explicit verbal consent from the USER. There are zero exceptions to this rule.**
 
 Any time the USER requests code changes, new features, or bug fixes, you **MUST** follow this exact branching strategy:
 
