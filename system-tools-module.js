@@ -63,7 +63,12 @@ async function extractOrders(files) {
             let hiddenFee = oTot - tBaseCost; if (hiddenFee < 0) hiddenFee = 0; let feePerItem = tq > 0 ? (hiddenFee / tq) : 0;
             trs.forEach(r => {
                 let m = r.innerText.match(/DI\d+/); if(m && !r.innerText.includes("Order No：")){
-                    let id = m[0], pn = ""; Array.from(r.querySelectorAll('a')).forEach(l=>{let t=l.getAttribute('title'),x=l.innerText.trim(); if(t&&t.length>10){pn=t;return;} if(x&&x.length>15&&!x.includes("DI26")){pn=x;return;}});
+                    let id = m[0], pn = ""; 
+                    for (let l of Array.from(r.querySelectorAll('a'))) {
+                        let t = l.getAttribute('title'), x = l.innerText.trim();
+                        if (t && t.length > 10) { pn = t; break; }
+                        if (x && x.length > 15 && !x.includes("DI26") && !x.toLowerCase().includes("superbuy") && !x.toLowerCase().includes("contact")) { pn = x; break; }
+                    }
                     if(!pn || pn.toLowerCase().includes("product-img")) Array.from(r.querySelectorAll('img')).forEach(i=>{let a=i.getAttribute('alt'); if(a&&a.length>10&&!a.includes("代购商品")){pn=a;return;}});
                     pn = pn.replace('代购商品','').trim(); let sm = r.innerText.match(/(?:Specification model|specification|Product specifications|model|Color|size|power|Light color|Applicable Model)[：:]\s*([^\n\t\r]+)/i);
                     let sp = sm ? sm[1].trim().replace(/(?:Specification model|specification|Product specifications|model|Color|size|power|Light color|Applicable Model)[：:]/gi,'').trim() : "";
@@ -158,6 +163,10 @@ async function executeExport() {
                 exportData = data.map(r => ({ product_name: r.product_name, steps: JSON.stringify(r.steps) }));
             } else if (tableName === 'work_orders') {
                 exportData = data.map(r => ({ ...r, wip_state: JSON.stringify(r.wip_state), routing: JSON.stringify(r.routing || {}) }));
+            } else if (tableName === 'pack_ship_sops') {
+                exportData = data.map(r => ({ ...r, instruction_json: typeof r.instruction_json === 'object' ? JSON.stringify(r.instruction_json) : r.instruction_json }));
+            } else if (tableName === 'sop_archives') {
+                exportData = data.map(r => ({ ...r, telemetry_json: typeof r.telemetry_json === 'object' ? JSON.stringify(r.telemetry_json) : r.telemetry_json }));
             }
             const ws = XLSX.utils.json_to_sheet(exportData); XLSX.utils.book_append_sheet(wb, ws, sheetName);
         }
@@ -170,6 +179,12 @@ async function executeExport() {
         await addSheet('storefront_aliases', 'Storefront_Aliases');
         await addSheet('print_queue', 'Print_Queue');
         await addSheet('app_settings', 'App_Settings');
+        await addSheet('socialz_audience', 'Socialz_Users');
+        await addSheet('pack_ship_sops', 'Pack_Ship_SOPs');
+        await addSheet('sop_archives', 'SOP_Archives');
+        await addSheet('raw_orders', 'Raw_Orders');
+        await addSheet('raw_parcel_summary', 'Raw_Parcel_Summary');
+        await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
@@ -210,6 +225,12 @@ async function executeRestore() {
             else if (sheetName === 'Storefront_Aliases') { tableName = 'storefront_aliases'; conflictKey = 'storefront_sku'; }
             else if (sheetName === 'Print_Queue') { tableName = 'print_queue'; conflictKey = 'id'; }
             else if (sheetName === 'App_Settings') { tableName = 'app_settings'; conflictKey = 'id'; }
+            else if (sheetName === 'Socialz_Users') { tableName = 'socialz_audience'; conflictKey = 'name'; }
+            else if (sheetName === 'Pack_Ship_SOPs') { tableName = 'pack_ship_sops'; conflictKey = 'internal_recipe_name'; parsedData = rawData.map(r => ({ ...r, instruction_json: typeof r.instruction_json === 'string' && r.instruction_json.startsWith('{') ? JSON.parse(r.instruction_json) : r.instruction_json })); }
+            else if (sheetName === 'SOP_Archives') { tableName = 'sop_archives'; conflictKey = 'id'; parsedData = rawData.map(r => ({ ...r, telemetry_json: typeof r.telemetry_json === 'string' && r.telemetry_json.startsWith('[') ? JSON.parse(r.telemetry_json) : r.telemetry_json })); }
+            else if (sheetName === 'Raw_Orders') { tableName = 'raw_orders'; conflictKey = 'di_item_id'; }
+            else if (sheetName === 'Raw_Parcel_Summary') { tableName = 'raw_parcel_summary'; conflictKey = 'parcel_no'; }
+            else if (sheetName === 'Raw_Parcel_Items') { tableName = 'raw_parcel_items'; conflictKey = 'parcel_no, di_item_id'; }
             if (tableName) {
                 const { error } = await supabaseClient.from(tableName).upsert(parsedData, { onConflict: conflictKey });
                 if (error) throw error;
