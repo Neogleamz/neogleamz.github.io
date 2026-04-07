@@ -15,12 +15,12 @@ When building or restructuring top-level module dashboards (e.g., `DATAZ`, `PACK
 - Responsive padding should be configured centrally via CSS `clamp()` bounds on layout wrappers, avoiding hardcoded pixel values.
 
 ## Scope of Rules
-**IMPORTANT:** The Action Button Anchoring rule below is now **GLOBAL** and applies to all executive module headers across the system (via `.pane-header-actions`). 
+**IMPORTANT:** The Button Positioning rules below apply **EXCLUSIVELY** to SOP Editor Modals (e.g. `BATCHEZ`, `LAYERZ`, `PACKERZ` SOP editing interfaces). General website pages and modals (e.g., standard work order generation, sales dashboards) should not have their existing positioning structures forcibly modified unless specifically requested by the user.
 
-## Action Button Anchoring (Global Module Headers)
-When building or modifying module headers and command panels:
+## Button Positioning (SOP Editors Only)
+When building or modifying SOP Interfaces (Inline Edit Modes, Modal Editors):
 - All command buttons (e.g., "Print SOP", "SAVE MASTER BLUEPRINT", "🔒 EDIT") must be anchored strictly to the **top-right** corner of their respective container or modal header.
-- For flex containers like `.pane-header-actions`, this is strictly enforced via `justify-content: flex-end;` AND `margin-left: auto;` to prevent optical centering failures against absolute title elements.
+- Left-side header real estate must be reserved exclusively for titles, module descriptions, or breadcrumbs.
 
 ## Form and Telemetry Elements (Sitewide)
 - Checkboxes, Radio toggles, and any adjacent dynamic text must be styled as a singular `flex` line. 
