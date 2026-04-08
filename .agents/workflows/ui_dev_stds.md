@@ -1,5 +1,5 @@
 ---
-description: Mandatory UI Design and Layout Protocol for Neogleamz Web Platform
+description: 💥 CRITICAL: YOU MUST READ THIS WORKFLOW FILE BEFORE WRITING ANY UI, HTML, CSS, OR JS MODIFICATIONS. THIS IS NEVER OPTIONAL.
 ---
 
 # UI Development Standards for Neogleamz
@@ -32,3 +32,35 @@ If you encounter UI components (e.g., empty `<input>` bars, useless `<button>` o
 1. **DO NOT auto-delete.**
 2. **Checks and Balances Protocol:** You must alert the user that a ghost element was found. Present the name/ID of the ghost module and ask for explicit permission to prune it from the file.
 3. Keep a logged record of the component before proceeding with the removal to ensure the user is aware of what structural properties were just altered.
+
+## Globally Standardized Button Utility Classes
+When adding secondary or "ghost" action buttons (such as DELETE, EDIT, or PDF view buttons), they MUST utilize the dual-class architecture to inherit structural integrity and visual design:
+1. **Always apply `.btn-ghost-base`** to inject core formatting (padding, border radius, flex layout, font family, geometric constraints).
+2. **Append the specific color utility** (e.g., `.btn-ghost-red`, `.btn-ghost-blue`, `.btn-ghost-emerald`, `.btn-ghost-brand`) to dictate the stroke, subtle background hue, and hover animation profile.
+- Example: `<button class="btn-ghost-base btn-ghost-red">`: Ensures the button displays a distinct geometric outline while retaining a glassy, transparent aesthetic until hovered.
+
+## Fulfillz Core Layout Standardization
+When modifying or adding new panels for the Fulfillz execution suite:
+1. **The Grid Base:** You MUST use `<div class="bom-layout">` as the foundational wrapper to construct the vertical/horizontal grid. Do NOT manually construct flex or padding properties for main wrappers that deviate from this class. It mathematically ties edge gaps and vertical bounds to the viewport globally.
+2. **Sidebars:** Navigational left-columns must apply `class="bom-sidebar"`.
+3. **Memory Integrity:** When establishing a new sidebar with a resizer grip, you MUST register the sidebar's CSS `id` inside `neogleamz-engine.js` within the `idsToRestore` array. Failure to do this means the user's dragged widths are immediately wiped out on refresh.
+
+## Command Center KPI Normalization
+- All Module Cards rendering data arrays on the Fulfillz Home Hub MUST use the `.kpi-row` hierarchy structurally.
+- **Prohibited Aesthetics:** DO NOT apply inline arbitrary text-colors (like `color: #F59E0B;`) to primary metric quantities. They must default strictly to `var(--text-heading)` to maintain a disciplined, neutral visual environment.
+
+## Kanban Active Selection Protocol
+When applying active selection states to kanban objects or operational rows:
+- **Zero Partial Borders:** Do not highlight the item with a single "left-edge" border strip. You must cast a full geometric outline around the object (e.g., `border: 1px solid var(--primary-color)`).
+- **Depth Preservation:** Highlight states MUST also feature ambient `box-shadow` glows matching the border. Critically, ensure that "deselected" or inactive items still maintain their underlying dark shadow depths so the UI does not flatten out when shifting focus.
+
+## AI Automation Best Practices
+- **Temporary Scripts for Dom Parsing:** When making extensive, cross-file DOM manipulations or regex replacements inside large Javascript template literals, the AI should write its modifications safely via temporary executable scripts locally, run them, and then **IMMEDIATELY DELETE** them to avoid cluttering the repository.
+  - **Tool Selection (Crucial):** Always prefer **Python** (`.py` files utilizing `re` or simple `f.read().replace()`) over Node.js for these macros. JavaScript template literals (using backticks and `${var}` syntax) severely clash with Node/shell execution engines when passed dynamically. Python triple-quotes (`\"\"\"`) provide absolute impunity from template syntax collisions and prevent wasting time on escaping errors.
+  - **PowerShell Precautions:** Do not attempt complex string-based `Select-String` lookups directly in the terminal if HTML contains nested quotes or escape sequences. Use the built-in `grep_search` tool to isolate line numbers safely.
+
+## SOP Editor Standardization Framework
+When modifying or creating new SOP Editor interfaces (whether Full Master Modals or Live Inline Editors like those in Batchez, Layerz, or Packerz), complete UI and logic parity MUST be maintained:
+1. **Unified Telemetry Parsing:** ALL checklist previews MUST utilize the global `parseProductionTelemetryLine` logic (or its exact architectural equivalent) to process `# Headers`, `> Subtext`, `[INPUT]`, `[SCAN]`, `[IMG]`, `[BARCODE]`, and `[QR]` tokens. Do not write local, stripped-down clone functions for telemetry parsing.
+2. **Token Syntax Legend:** A full UI cheatsheet/token legend detailing the definitions of telemetry markdown MUST be embedded above every single Read/Write checklist interface. The legend must contain the complete standard set (including interactive guide buttons) to ensure floor operators have a reference.
+3. **Crush-Proof Layouts:** All SOP split-pane architectures MUST include the `h-resizer` component for dynamic width adjustment. However, layout bounds and standard padding must enforce a minimum width safety threshold to prevent editors or previews from being "crushed" or visually broken during resize.

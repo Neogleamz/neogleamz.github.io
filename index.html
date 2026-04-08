@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.07.2156"></script>
+    <script src="system-version.js?v=v.2026.04.08.0211"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.07.2156"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.08.0211"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.08.0211"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.08.0211"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -138,6 +138,19 @@
         .hub-card p { margin: 0 0 15px 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; max-width: 90%; flex-shrink: 0; }
         
         .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: auto; }
+
+        /* Globally Standardized Button Utility Classes */
+        .btn-ghost-base {
+            cursor: pointer; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 4px 10px; border-radius: 6px; border: 1px solid transparent; font-family: 'Righteous', sans-serif; font-weight: bold; transition: all 0.2s ease; outline: none; flex-shrink: 0; box-sizing: border-box; width: max-content;
+        }
+        .btn-ghost-emerald { color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .btn-ghost-emerald:hover { background: rgba(16, 185, 129, 0.2); transform: scale(1.02); }
+        .btn-ghost-blue { color: #3b82f6; border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .btn-ghost-blue:hover { background: rgba(59, 130, 246, 0.2); transform: scale(1.02); }
+        .btn-ghost-red { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .btn-ghost-red:hover { background: rgba(239, 68, 68, 0.2); transform: scale(1.02); }
+        .btn-ghost-brand { color: #f97316; border-color: #f97316; background: rgba(249, 115, 22, 0.1); }
+        .btn-ghost-brand:hover { background: rgba(249, 115, 22, 0.2); transform: scale(1.02); }
         .hub-kpi-grid {
             display: flex;
             flex-direction: column;
@@ -204,15 +217,15 @@
             border-radius: 20px;
             box-shadow: var(--glass-shadow);
             flex-shrink: 0; 
-            gap: 24px; 
-            flex-wrap: nowrap;
+            gap: 20px; 
+            flex-wrap: wrap;
             position: relative;
             z-index: 10000; /* Absolute Authority */
             overflow: visible;
         }
-        .title-block { flex: 1 1 280px; min-width: 0; }
+        .title-block { flex: 0 1 auto; min-width: 260px; }
         .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .title-block .subtitle { font-size: 8px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; white-space: nowrap; }
+        .title-block .subtitle { font-size: 8px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; min-width: 0; max-width: 100%; }
         
         .tabs { 
             flex: 1 1 auto; 
@@ -230,10 +243,10 @@
         .tabs::-webkit-scrollbar { display: none; } /* §3 EXCEPTION: intentionally hidden for horizontal tab strip */
 
         .tab-btn { 
-            padding: 10px 18px; 
+            padding: 8px 12px; 
             background: transparent; 
             color: var(--text-muted); 
-            font-size: 13px; /* Restored to 13px */
+            font-size: 12px; 
             border: 1px solid transparent; 
             cursor: pointer; 
             font-weight: 700; 
@@ -266,7 +279,7 @@
         .tab-btn span { font-size: 16px; transition: transform 0.2s ease; display: inline-block; }
         .tab-btn:hover span { transform: scale(1.2) rotate(5deg); }
 
-        .top-controls { flex: 1 1 350px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+        .top-controls { flex: 1 1 auto; display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
         
         /* ============================================================
          * .pane-title — DEPRECATED for layout use.
@@ -294,10 +307,10 @@
             align-items: center;
             justify-content: space-between;
             gap: clamp(8px, 1.5vw, 20px);
-            padding: clamp(6px, 0.8vh, 10px) clamp(16px, 2.5vw, 30px) clamp(4px, 0.5vh, 8px);
+            padding: 4px 16px;
             background: transparent;
             border-bottom: none;
-            min-height: clamp(35px, 4vh, 45px);
+            min-height: 28px;
             flex-shrink: 0;
             position: relative;
             z-index: 10;
@@ -322,11 +335,18 @@
             gap: clamp(4px, 0.8vw, 10px);
             flex-wrap: wrap;
         }
-        .pane-header-actions button {
+        .pane-header-actions button,
+        .pane-header-actions select {
             width: auto !important;
-            padding: clamp(3px, 0.4vh, 5px) clamp(8px, 0.9vw, 13px);
-            font-size: clamp(10px, 0.75vw, 12px);
+            height: 30px !important;
+            padding: 0 12px !important;
+            font-size: 12px !important;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            border-radius: 6px;
         }
 
         /* Full-Page Margin Navigation Zones */
@@ -373,12 +393,15 @@
             background: var(--bg-container); 
             border: 1px solid var(--border-color); 
             color: var(--text-main); 
-            padding: 10px 18px; 
+            padding: 6px 12px; 
             border-radius: 50px; 
             display: flex; 
             align-items: center; 
-            gap: 8px; 
-            font-size: 13px; 
+            justify-content: center;
+            flex-direction: row;
+            white-space: nowrap;
+            gap: 6px; 
+            font-size: 11px; 
             font-weight: 700; 
             cursor: pointer; 
             transition: all 0.3s; 
@@ -397,7 +420,7 @@
         .tab-content { display: none; animation: fadeIn 0.2s ease; flex-direction: column; flex-grow: 1; min-height: 0; }
         .tab-content.active { display: flex; }
         
-        button { color: white; border: none; padding: 10px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
+        button { border: none; padding: 10px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
         button:disabled { background-color: var(--text-muted) !important; cursor: not-allowed; box-shadow: none; transform: none !important; }
         button:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
 
@@ -408,7 +431,13 @@
             .no-print { display: none !important; }
             @page { margin: 0; }
         }
-        .btn-orange { background-color: #f97316; } .btn-blue { background-color: #3b82f6; } .btn-green { background-color: #10b981; } .btn-red { background-color: #ef4444; }
+        
+        .btn-orange { color: #f97316 !important; background-color: rgba(249, 115, 22, 0.1) !important; border: 1px solid #f97316 !important; } .btn-orange:hover { background-color: rgba(249, 115, 22, 0.2) !important; }
+        .btn-blue { color: #3b82f6 !important; background-color: rgba(59, 130, 246, 0.1) !important; border: 1px solid #3b82f6 !important; } .btn-blue:hover { background-color: rgba(59, 130, 246, 0.2) !important; }
+        .btn-green { color: #10b981 !important; background-color: rgba(16, 185, 129, 0.1) !important; border: 1px solid #10b981 !important; } .btn-green:hover { background-color: rgba(16, 185, 129, 0.2) !important; }
+        .btn-red { color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.1) !important; border: 1px solid #ef4444 !important; } .btn-red:hover { background-color: rgba(239, 68, 68, 0.2) !important; }
+        .btn-purple { color: #a855f7 !important; background-color: rgba(168, 85, 247, 0.1) !important; border: 1px solid #a855f7 !important; } .btn-purple:hover { background-color: rgba(168, 85, 247, 0.2) !important; }
+        
         .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
         .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
 
@@ -462,7 +491,7 @@
             gap: clamp(12px, 1.5vw, 25px);
             height: 100%;
             width: 100%;
-            padding: clamp(8px, 1.2vh, 16px) clamp(12px, 1.5vw, 20px);
+            padding: 4px clamp(12px, 1.5vw, 20px);
             flex-grow: 1;
             min-height: 0;
             overflow: hidden;
@@ -471,12 +500,12 @@
         .bom-sidebar {
             flex: 0 0 clamp(220px, 28vw, 320px);
             width: clamp(220px, 28vw, 320px);
-            min-width: 0 !important;
+            min-width: 280px !important;
             max-width: none !important;
             background: var(--bg-panel); 
             border: 1px solid var(--border-color); 
             border-radius: 12px; 
-            padding: 20px; 
+            padding: 10px; 
             box-sizing: border-box; 
             height: 100%;
             overflow-y: auto;
@@ -502,7 +531,7 @@
         .executive-pane .bom-main,
         .executive-pane [class^="bom-main"],
         .executive-pane .bom-layout .bom-main {
-            padding: clamp(5px, 1vh, 12px) !important;
+            padding: 4px !important;
         }
         .product-list { list-style: none; padding: 0; margin: 0 0 15px 0; flex-grow: 1; overflow-y: auto; }
         
@@ -1377,10 +1406,10 @@
         </div>
         <div class="top-controls">
             <button id="tipzBtn" class="top-action-btn" onclick="openTipzModal()" style="border-color: #f97316; color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">💡 Tipz</button>
-            <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark</button>
             <button class="top-action-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
             <div class="terminal-wrapper" style="position: relative;">
-                <div id="termHeader" class="sys-good" onclick="toggleTerminal()" style="width: 200px; min-width: 200px; max-width: 200px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div id="termHeader" class="sys-good" onclick="toggleTerminal()" style="width: 140px; min-width: 140px; max-width: 140px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
                     <span id="termStatusIcon" style="flex-grow: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right:10px; text-align: left;">🟢 System Online</span>
                     <span id="termToggle" style="flex-shrink: 0;">▼</span>
                     <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
@@ -1445,7 +1474,7 @@
             <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
-                <div class="bom-main" style="padding:20px;">
+                <div class="bom-main">
 
                     <div class="table-wrap" id="results" style="flex-grow:1;"></div>
                 </div>
@@ -1659,7 +1688,7 @@
                                 <span id="woStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">START: --/-- --:--</span>
                                 <span id="woEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">FINISH: --/-- --:--</span>
                                 <span id="woBadge" class="status-badge st-queued">Queued</span>
-                                <button onclick="deleteWorkOrder()" title="Delete Work Order" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#ef4444'">🗑️ DELETE</button>
+                                <button onclick="deleteWorkOrder()" title="Delete Work Order" class="btn-ghost-base btn-ghost-red">🗑️ DELETE</button>
                             </div>
                         </div>
                         <div style="font-size:14px; color:var(--text-muted);">Target Quantity: <strong id="woQtyTarget" style="color:var(--text-main);">0</strong> units</div>
@@ -1687,7 +1716,6 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                             <div></div>
                             <div style="display:flex; gap: 10px;">
-                                <button class="icon-btn" id="sopLockBtn" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color); padding: 6px 12px; font-family:'Righteous'; font-size:12px; font-weight:900;">🔒 EDIT</button>
                                 <button class="print-btn" onclick="printSOP()">🖨️ Print SOP</button>
                             </div>
                         </div>
@@ -1751,7 +1779,7 @@
                                 <span id="printJobStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">START: --/-- --:--</span>
                                 <span id="printJobEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">FINISH: --/-- --:--</span>
                                 <span id="printJobBadge" class="status-badge st-queued">Queued</span>
-                                <button onclick="deletePrintJob()" title="Delete Print Job" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#ef4444'">🗑️ DELETE</button>
+                                <button onclick="deletePrintJob()" title="Delete Print Job" class="btn-ghost-base btn-ghost-red">🗑️ DELETE</button>
                             </div>
                         </div>
                         <div style="font-size:14px; color:var(--text-muted);">Quantity: <strong id="printJobQty" style="color:var(--text-main);">0</strong> | Source: <strong id="printJobSource" style="font-family:monospace;">Manual</strong></div>
@@ -1776,7 +1804,6 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                             <h3 style="margin:0; color:var(--text-heading);">🖨️ Printing Instructions (SOP)</h3>
                             <div style="display:flex; gap: 10px;">
-                                <button class="icon-btn" id="sopLockBtn3d" onclick="toggleSOPLock()" title="Toggle Inline Edit Mode" style="border-color:var(--border-color); padding: 6px 12px; font-family:'Righteous'; font-size:12px; font-weight:900;">🔒 EDIT</button>
                                 <button class="print-btn" onclick="openPrintSOP(currentPrintJob.part_name)">🖨️ Print SOP</button>
                             </div>
                         </div>
@@ -1989,6 +2016,10 @@
                 <p>Internal Fulfillment Terminal &amp; SOP Quality-Assurance Desk.</p>
                 <div class="hub-kpi-grid">
                     <div class="kpi-row"><span>Awaiting Assembly</span><strong id="kpiUnfulfilledCount">0</strong></div>
+                    <div class="kpi-row"><span>Orders Assembled</span><strong id="statPackerzCompleted">--</strong></div>
+                    <div class="kpi-row"><span>QA Exceptions</span><strong id="statPackerzErrors">0</strong></div>
+                    <div class="kpi-row"><span>Blocked By Stock</span><strong id="statPackerzMissing">--</strong></div>
+                    <div class="kpi-row"><span>Telemetry Links</span><strong id="statPackerzTelemetry">ACTV</strong></div>
                 </div>
             </div>
             
@@ -1998,6 +2029,10 @@
                 <p>Global Catalog Barcode Directory and Thermal Label Spooler.</p>
                 <div class="hub-kpi-grid">
                     <div class="kpi-row"><span>Catalog Entropy</span><strong id="kpiBarcodzCount">Active</strong></div>
+                    <div class="kpi-row"><span>Missing Targets</span><strong id="statBarcodzMissing">--</strong></div>
+                    <div class="kpi-row"><span>Scanner Tethers</span><strong id="statBarcodzScanners">1</strong></div>
+                    <div class="kpi-row"><span>Spool Queue</span><strong id="statBarcodzSpool">--</strong></div>
+                    <div class="kpi-row"><span>Engine Health</span><strong id="statBarcodzHealth">NOMINAL</strong></div>
                 </div>
             </div>
             <div class="hub-card" onclick="showFulfillzPane('labelz')">
@@ -2006,6 +2041,10 @@
                 <p>Custom Label Designer, File Manager &amp; Thermal Print Engine.</p>
                 <div class="hub-kpi-grid">
                     <div class="kpi-row"><span>Label Designs</span><strong id="kpiLabelzCount">0</strong></div>
+                    <div class="kpi-row"><span>Thermal API</span><strong id="statLabelzApi">HOOKED</strong></div>
+                    <div class="kpi-row"><span>Canvas Overload</span><strong id="statLabelzMem">--</strong></div>
+                    <div class="kpi-row"><span>Print Agents</span><strong id="statLabelzAgents">--</strong></div>
+                    <div class="kpi-row"><span>Lifetime Outputs</span><strong id="statLabelzOutputs">--</strong></div>
                 </div>
             </div>
         </div>
@@ -2024,9 +2063,9 @@
             <div class="nav-zone left" onclick="showFulfillzPane('labelz')"><i>‹</i></div>
             <div class="nav-zone right" onclick="showFulfillzPane('barcodz')"><i>›</i></div>
             
-            <div id="packerzKanbanWrapper" class="packerz-kanban-wrapper" style="display:flex; flex-grow:1; padding:clamp(8px,1.2vh,16px) clamp(12px,1.5vw,20px); gap:clamp(12px,1.5vw,20px); overflow:hidden;">
+            <div id="packerzKanbanWrapper" class="bom-layout" style="flex-grow:1; min-height:0;">
                 <!-- Column 1: AWAITING -->
-                <div id="packerzKanbanLeftCol" class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width: 280px;">
+                <div id="packerzKanbanLeftCol" class="packerz-kanban-col" style="flex: 0 0 clamp(220px, 28vw, 320px); width: clamp(220px, 28vw, 320px); min-width: 280px !important; max-width: none !important; background:var(--bg-panel); border-radius:12px; padding:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; overflow-x:hidden;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:var(--text-muted); border-bottom:2px solid var(--border-color); padding-bottom:12px;">AWAITING ASSEMBLY</h3>
                     <div id="packerzAwaitingQueue" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <!-- JS INJECT -->
@@ -2036,7 +2075,7 @@
                 <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
                 
                 <!-- Column 2: IN PROGRESS -->
-                <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:16px; padding:20px; border:1px solid rgba(245,158,11,0.3); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(245,158,11,0.05); min-width: 280px;">
+                <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(0,0,0,0.05); min-width: 280px;">
                     <h3 style="margin-top:0; font-size:15px; font-weight:900; letter-spacing:1px; color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.3); padding-bottom:12px;">IN PROGRESS (PICK & PACK)</h3>
                     <div id="packerzActiveQueue" style="flex-grow:1; overflow-y:auto; padding-top:15px; display:flex; flex-direction:column; gap:15px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to open the SOP terminal.</div>
@@ -2078,7 +2117,7 @@
             <div class="nav-zone right" onclick="showFulfillzPane('labelz')"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
-                <div id="barcodzSidebar" class="bom-sidebar" style="display:flex; flex-direction:column; min-width:280px; width:320px;">
+                <div id="barcodzSidebar" class="bom-sidebar" style="display:flex; flex-direction:column; min-width:280px !important; width:320px; overflow-x:hidden;">
                     <div style="padding:16px; border-bottom:1px solid var(--border-color); flex-shrink:0;">
                         <h3 style="margin:0; font-size:14px; color:var(--text-heading); text-transform:uppercase;">🖨️ Print Spooler</h3>
                         <p style="margin:4px 0 0 0; font-size:10px; color:var(--text-muted);">Queue items here for batch printing.</p>
@@ -2092,7 +2131,7 @@
                     </div>
                     
                     <div style="padding:16px; border-top:1px solid var(--border-color); flex-shrink:0; display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.2);">
-                        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold; color:var(--text-heading);">
+                        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; font-size:13px; font-weight:bold; color:var(--text-heading);">
                             <span>Total Labels:</span>
                             <span id="spoolTotalCount">0</span>
                         </div>
@@ -2398,7 +2437,7 @@
                                 <input type="file" id="parcelFilesTest" multiple accept=".html" style="width:100%; font-size:11px;">
                             </div>
                             <div id="statusParcels" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
-                            <button class="btn-orange" style="background:#f59e0b; width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParcelConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
+                            <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParcelConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
                         </div>
                     </div>
 
@@ -2528,10 +2567,10 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">SOCIALZ AUDIENCE</span>
                 <div class="pane-header-actions">
-                    <button onclick="openAnalyticsDashboard()" class="btn-blue"><i class="fa-solid fa-chart-simple"></i> Analytics</button>
-                    <button onclick="document.getElementById('csv-input').click()" class="btn-blue" style="background:#475569; border-color:#475569;"><i class="fa-solid fa-file-import"></i> Import</button>
+                    <button onclick="openAnalyticsDashboard()" class="btn-purple"><i class="fa-solid fa-chart-simple"></i> Analytics</button>
+                    <button onclick="document.getElementById('csv-input').click()" class="btn-blue"><i class="fa-solid fa-file-import"></i> Import</button>
                     <input type="file" id="csv-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleCSVImport(this)" style="display:none;">
-                    <button onclick="exportCSV()" class="btn-blue" style="background:#475569; border-color:#475569;"><i class="fa-solid fa-file-export"></i> Export</button>
+                    <button onclick="exportCSV()" class="btn-blue"><i class="fa-solid fa-file-export"></i> Export</button>
                     <button onclick="openModal()" class="btn-orange"><i class="fa-solid fa-plus"></i> Add Skater</button>
                 </div>
             </div>
@@ -2637,22 +2676,6 @@
 
         <!-- Skater List/Grid Container -->
         <div id="skater-grid-wrapper" class="rounded-xl overflow-hidden">
-            <!-- Row View Header Layer -->
-            <div id="row-view-header" class="hidden grid items-center gap-2 px-3 py-1 mb-2 text-[10px] font-bold uppercase tracking-wider text-center border-b border-transparent" style="color: var(--text-muted); grid-template-columns: 36px minmax(90px, 0.8fr) minmax(80px, 0.6fr) 70px 60px 90px repeat(4, 85px) 30px 65px 36px;">
-                <div></div>
-                <div class="text-left pr-1 cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('alpha')" title="Sort by Name">Name</div>
-                <div class="text-left pl-1 cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('location')" title="Sort by Location">Location</div>
-                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('region')" title="Sort by Region">Region</div>
-                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('type')" title="Sort by Type">Type</div>
-                <div>Status</div>
-                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('ig')" title="Sort by Instagram">Instagram</div>
-                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('tt')" title="Sort by TikTok">TikTok</div>
-                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('yt')" title="Sort by YouTube">YouTube</div>
-                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('fb')" title="Sort by Facebook">Facebook</div>
-                <div>Viral</div>
-                <div class="text-right pr-1 cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('total')" title="Sort by Reach">Total Reach</div>
-                <div></div>
-            </div>
             <div id="skater-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full">
                 <!-- Cards/Rows rendered here via JS -->
             </div>
@@ -2691,7 +2714,7 @@
                 
                 <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--bg-panel); display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="padding: 1rem; background-color: #6366f1; border-radius: 1rem; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);">
+                        <div style="padding: 1rem; background-color: #a855f7; border-radius: 1rem; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.2);">
                             <i class="fa-solid fa-chart-line text-2xl"></i>
                         </div>
                         <div>
@@ -2699,8 +2722,8 @@
                             <p class="text-xs uppercase font-bold tracking-widest mt-1" style="color: var(--text-muted); margin: 0;">Real-time Performance Metrics</p>
                         </div>
                     </div>
-                    <button onclick="closeAnalyticsDashboard()" class="transition-all hover:scale-110" style="width: 3rem; height: 3rem; border-radius: 0.75rem; color: white; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border: none; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.4);">
-                        <i class="fa-solid fa-times text-2xl"></i>
+                    <button onclick="closeAnalyticsDashboard()" class="btn-red" style="width: max-content; padding: 10px 24px; font-size: 14px;">
+                        CLOSE
                     </button>
                 </div>
                 
@@ -2830,8 +2853,8 @@
 
                     <div class="flex justify-between pt-6 border-t border-slate-200 dark:border-slate-700 mt-5">
                         <button type="button" class="hidden"></button>
-                        <button type="button" id="btn-delete-modal" onclick="deleteSkaterFromModal()" class="px-4 py-2 rounded-lg font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2 text-sm"><i class="fa-solid fa-trash"></i> <span class="hidden sm:inline">Delete Skater</span></button>
-                        <div class="flex gap-3"><button type="button" onclick="closeModal()" class="px-5 py-2 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm">Cancel</button><button type="submit" class="px-6 py-2 rounded-lg font-bold bg-brand text-white shadow-lg shadow-orange-500/25 hover:bg-orange-600 transition-all transform hover:scale-105 text-sm">Save Changes</button></div>
+                        <button type="button" id="btn-delete-modal" onclick="deleteSkaterFromModal()" class="btn-red" style="width: max-content; padding: 6px 12px; font-size: 13px;"><i class="fa-solid fa-trash"></i> <span class="hidden sm:inline">Delete Skater</span></button>
+                        <div class="flex gap-3"><button type="button" onclick="closeModal()" class="btn-red" style="width: max-content; padding: 8px 16px;">Cancel</button><button type="submit" class="btn-orange" style="width: max-content; padding: 8px 16px;">Save Changes</button></div>
                     </div>
                 </form>
             </div>
@@ -2844,7 +2867,7 @@
         <p id="recipeModalText" style="color:var(--text-main); margin-bottom:15px; font-size:15px;"></p>
         <input type="text" id="recipeModalInput" style="width:100%; padding:10px; margin-bottom:20px; border-radius:4px; border:1px solid var(--border-input); background:var(--bg-input); color:white; display:none; outline:none;" placeholder="Recipe Name">
         <div style="display:flex; justify-content:center; gap:10px;">
-            <button class="btn-blue" style="background:#64748b; border-color:#64748b; width:100px;" onclick="document.getElementById('recipeActionModal').style.display='none'">Cancel</button>
+            <button class="btn-blue" style="width:100px;" onclick="document.getElementById('recipeActionModal').style.display='none'">Cancel</button>
             <button id="recipeModalConfirmBtn" class="btn-green" style="width:100px;" onclick="submitRecipeModal()">Confirm</button>
         </div>
     </div>
@@ -2982,9 +3005,10 @@
                 <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
-                        <div style="display:flex; gap:6px;">
-                            <button onclick="openSOPMediaPicker('productionAdminQA')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📎 MEDIA</button>
+                        <div style="display:flex; gap:8px;">
+                            <button onclick="openMediaManager('telemetry')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
                             <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
+                            <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('productionSopLeftPane', 'masterSopPreviewCol', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                         </div>
                     </div>
                     <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -2995,13 +3019,13 @@
                         <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
                         <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
                         <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
-                        &nbsp;— <span style="color:#F59E0B; cursor:pointer; font-weight:700;" onclick="openSOPTokenGuide()">❓ Full Guide</span>
+                        &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="openSOPTokenGuide()">❓ Full Guide</span>
                     </div>
                     <textarea id="productionAdminQA" oninput="renderProductionTelemetryPreview()" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;"></textarea>
                 </div>
 
                 <!-- Column 2: Live Preview Render -->
-                <div style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                <div id="masterSopPreviewCol" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                     <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
                     <div id="productionAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
@@ -3104,7 +3128,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.07.2156"></script>
+    <script src="socialz-module.js?v=v.2026.04.08.0211"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -3138,9 +3162,10 @@
                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
-                            <div style="display:flex; gap:6px;">
-                                <button onclick="openSOPMediaPicker('packerzAdminQA')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📎 MEDIA</button>
+                            <div style="display:flex; gap:8px;">
+                                <button onclick="openMediaManager('telemetry')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
                                 <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
+                                <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('packerzSopLeftPane', 'packerzSopPreviewCol', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -3151,13 +3176,13 @@
                             <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
                             <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
                             <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
-                            &nbsp;— <span style="color:#F59E0B; cursor:pointer; font-weight:700;" onclick="openSOPTokenGuide()">❓ Full Guide</span>
+                            &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="openSOPTokenGuide()">❓ Full Guide</span>
                         </div>
                         <textarea id="packerzAdminQA" oninput="renderPackerzTelemetryPreview()" placeholder="# Gather SOULZ Parts&#10;- 2 x SK8Lytz Units&#10;[BARCODE:SK8LYTZ-4x6-STICKER]&#10;[IMG:https://your-bucket.supabase.co/...]&#10;[QR:https://zengge.app]&#10;[INPUT] Enter Serial Number" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px;"></textarea>
                     </div>
                     
                     <!-- Column 2: Live Preview Render -->
-                    <div style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                    <div id="packerzSopPreviewCol" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                         <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
                         <div id="packerzAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
                             <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
@@ -3257,7 +3282,7 @@
     let hiddenSimpleCols = new Set(); let simpleColsInitialized = false; const defaultVisibleSimpleCols = new Set(['Item Name', 'Specification', 'Neogleamz Name', 'Neogleamz Product', 'Lot Multiplier', 'Order Unit Price', 'Unit China Landed Price', 'Unit Shipping Cost ($)', 'Final Landed Cost ($)', 'Total Landed Cost ($)']);
     let productsDB = {}; let laborDB = {}; let pricingDB = {}; let isSubassemblyDB = {}; let currentProduct = null; let catalogCache = {}; let inventoryDB = {}; 
     let workOrdersDB = []; let currentWO = null; let sopsDB = {}; window.cloudTablePrefs = {}; 
-    let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; let isSOPLocked = true;
+    let oldValTemp = ""; let dragSrcTh = null; let isResizing = false; window.activeInlineSopEditors = {};
     let prefs = { widths: {}, order: [] };
     
     function hideAllExecutivePanes() {
@@ -3290,8 +3315,8 @@
     function mapToUI(dbData) { return dbData.map(r => ({ '_RowKey': String(r.parcel_no) + ':::' + String(r.di_item_id), 'Order Date': r.order_date, 'Order No': r.order_no, 'Parcel No': r.parcel_no, 'DI Item ID': r.di_item_id, 'Alibaba Order': r.alibaba_order, 'Item Name': r.item_name, 'Specification': r.specification, 'Neogleamz Name': r.neogleamz_name || '', 'Neogleamz Product': r.neogleamz_product || '', 'Quantity': r.quantity, 'Lot Multiplier': r.lot_multiplier || 1, 'Order Unit Price': r.order_unit_price, 'Unit China Landed Price': r.unit_china_landed_price, 'Unit Shipping Cost ($)': r.unit_ship_weight, 'Final Landed Cost ($)': r.final_cost_weight, 'Order Total': r.order_total, 'Total Landed Cost ($)': r.total_cost_weight, 'Unit Weight (g)': r.unit_weight_g, 'Total Dist Weight (g)': r.total_dist_weight_g, 'Order Postage': r.order_postage, 'Actual Paid (Parcel)': r.actual_paid, 'Actual Chargeable Weight (g)': r.actual_chargeable_weight_g, 'Actual Shipping Fee': r.actual_shipping_fee, '1st Tier Cost': r.first_tier_cost, '2nd Tier Cost': r.second_tier_cost, 'Custom Clearance Fee': r.custom_clearance_fee, 'Remote Area Surcharge': r.remote_area_surcharge, 'Fuel Surcharge': r.fuel_surcharge, 'Operating Cost': r.operating_cost, 'Tax': r.tax, 'Insurance': r.insurance, 'Storage Fee': r.storage_fee, 'EPE Loose Filling': r.epe_loose_filling, 'Corner Protector': r.corner_protector, 'Moister-Barrier Bag': r.moister_barrier_bag, 'Packing Video': r.packing_video, '1% Discount': r.one_percent_discount, 'Points Discount': r.points_discount, 'Coupon Discount': r.coupon_discount, 'Discount Code': r.discount_code })); }
 
     // --- 2. THEME & SAFETY NET ---
-    window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; });
-    function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); }
+    window.addEventListener('DOMContentLoaded', () => { document.getElementById("themeToggle").innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️ Light" : "🌙 Dark"; });
+    function toggleTheme() { const nt = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nt); localStorage.setItem("theme", nt); document.getElementById("themeToggle").innerText = nt === "dark" ? "☀️ Light" : "🌙 Dark"; sysLog(`Theme switched to ${nt}.`); saveCloudPrefs(); }
 
     let systemErrorState = false;
 
@@ -3447,7 +3472,7 @@
 
     window.onload = async () => { try { const { data: { session } } = await supabaseClient.auth.getSession(); if (session) { document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; await launchApp(); } else { document.getElementById('loginUI').style.display = 'flex'; document.getElementById('appUI').style.display = 'none'; } } catch(e) { sysLog(e.message, true); } };
 
-    async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; if (p.ceoBoard && typeof ceoActiveProducts !== 'undefined') ceoActiveProducts = p.ceoBoard; } } catch(e) { window.cloudTablePrefs = {}; } }
+    async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light" : "🌙 Dark"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; if (p.ceoBoard && typeof ceoActiveProducts !== 'undefined') ceoActiveProducts = p.ceoBoard; } } catch(e) { window.cloudTablePrefs = {}; } }
     async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {}, ceoBoard: typeof ceoActiveProducts !== 'undefined' ? ceoActiveProducts : [] }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
 
     function initHorizontalResizer() {
@@ -4199,16 +4224,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.07.2156"></script>
-<script src="system-tools-module.js?v=v.2026.04.07.2156"></script>
-<script src="bom-module.js?v=v.2026.04.07.2156"></script>
-<script src="inventory-module.js?v=v.2026.04.07.2156"></script>
-<script src="packerz-module.js?v=v.2026.04.07.2156"></script>
-<script src="production-module.js?v=v.2026.04.07.2156"></script>
-<script src="sales-module.js?v=v.2026.04.07.2156"></script>
-<script src="analytics-module.js?v=v.2026.04.07.2156"></script>
-<script src="ceo-module.js?v=v.2026.04.07.2156"></script>
-<script src="print-module.js?v=v.2026.04.07.2156"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.08.0211"></script>
+<script src="system-tools-module.js?v=v.2026.04.08.0211"></script>
+<script src="bom-module.js?v=v.2026.04.08.0211"></script>
+<script src="inventory-module.js?v=v.2026.04.08.0211"></script>
+<script src="packerz-module.js?v=v.2026.04.08.0211"></script>
+<script src="production-module.js?v=v.2026.04.08.0211"></script>
+<script src="sales-module.js?v=v.2026.04.08.0211"></script>
+<script src="analytics-module.js?v=v.2026.04.08.0211"></script>
+<script src="ceo-module.js?v=v.2026.04.08.0211"></script>
+<script src="print-module.js?v=v.2026.04.08.0211"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4312,7 +4337,8 @@
                 <div id="packerzSopViewerSubtitle" style="font-size:12px; color:var(--text-muted); font-family:monospace; margin-top:5px;">Awaiting Recipe Target...</div>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
-                <button class="print-btn" onclick="printPackerzSOP()" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>
+                <button class="btn-ghost-base btn-ghost-blue" onclick="printPackerzSOP()" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>
+                <button class="btn-blue" id="btnPackerzLiveToggleEdit" onclick="if(typeof togglePackerzLiveInlineSOP==='function') togglePackerzLiveInlineSOP();" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>
                 <button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" onclick="closePackerzSopViewer()">X</button>
             </div>
         </div>
@@ -4330,7 +4356,7 @@
                 </div>
                 
                 <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
-                    <button id="btnPackerzSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; background:#10b981; color:white; border:none; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
+                    <button id="btnPackerzSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
                         COMPLETE QA CHECKS
                     </button>
                 </div>
@@ -4365,7 +4391,7 @@
     </div>
     <div id="sopCameraStatus" style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); min-height:20px; text-align:center;">Point at the QR code on the bin label...</div>
     <div style="display:flex; gap:12px;">
-        <button onclick="closeCameraScanner()" style="padding:10px 28px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:800; font-size:14px; cursor:pointer;">✕ Cancel</button>
+        <button onclick="closeCameraScanner()" class="btn-red" style="padding:10px 28px; width:max-content; border-radius:8px; font-weight:800; font-size:14px;">✕ Cancel</button>
     </div>
 </div>
 
@@ -4665,18 +4691,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.08.0211"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.08.0211"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.08.0211"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.07.2156"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.07.2156"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.08.0211"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.08.0211"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.08.0211"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.07.2156"></script>
-    <script src="labelz-module.js?v=v.2026.04.07.2156"></script>
+    <script src="barcodz-module.js?v=v.2026.04.08.0211"></script>
+    <script src="labelz-module.js?v=v.2026.04.08.0211"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-panel); border:1px dashed #f59e0b; border-radius:12px; width:90%; max-width:1200px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">

@@ -908,21 +908,7 @@ function renderActiveWO(id) {
             
             let sList = document.getElementById('woSOPList'); sList.innerHTML = ""; let saveContainer = document.getElementById('inlineSaveContainer');
             
-            if(!isSOPLocked) {
-                let mainPayload = sopsDB[wo.product_name];
-                let mainSteps = [];
-                if (mainPayload) {
-                    if (Array.isArray(mainPayload)) mainSteps = mainPayload;
-                    else if (typeof mainPayload === 'object') { mainSteps = mainPayload.steps || []; }
-                }
-                let mappedSteps = mainSteps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s);
-                if(mappedSteps.length === 0) mappedSteps = [{}]; let editHtml = `<div style="background:var(--bg-container); padding:15px; border-radius:8px; border:2px solid #0ea5e9;">`;
-                mappedSteps.forEach((s, idx) => { editHtml += generateEditableSOPRow(s, idx); }); editHtml += `<button class="btn-blue" style="width:auto; padding:8px 15px; font-size:13px;" onclick="addSOPRow('woSOPList')">+ Add New Step</button></div>`;
-                sList.innerHTML = editHtml; saveContainer.style.display = 'block';
-            } else {
-                saveContainer.style.display = 'none'; 
-                
-                let sopGroups = [];  
+                            let sopGroups = [];  
                 
                 // Fetch Sub-Assembly SOPs
                 if(wo.routing) {
@@ -979,71 +965,195 @@ function renderActiveWO(id) {
                     let isExpanded = localStorage.getItem('batchezSopExpanded_' + grp.id) === 'true';
                     let disp = isExpanded ? 'block' : 'none';
                     let chev = isExpanded ? '▼' : '▶';
+                    let isEditing = window.activeInlineSopEditors && window.activeInlineSopEditors[grp.id] === true;
+                    if(isEditing) { disp = 'block'; chev = '▼'; }
                     
                     htmlOut += `
                     <div class="sop-grp-card" id="sopgrp_${grp.id}" draggable="true" ondragstart="batchezSopDragStart(event, '${grp.id}')" ondragover="batchezSopDragOver(event)" ondrop="batchezSopDrop(event, '${grp.id}', '${wo.product_name.replace(/'/g, "\\'")}')" ondragend="batchezSopDragEnd(event)" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
-                        <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:grab; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #0ea5e9; font-weight:bold; font-size:13px; color:var(--text-heading);" >
-                            <div style="flex-grow:1;" onclick="toggleBatchezSopGroup('${grp.id}')">
-                                ${grp.title}
+                        <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);" onclick="if(!${isEditing}){ toggleBatchezSopGroup('${grp.id}'); }">
+                            <div style="flex-grow:1;">
+                                ${grp.title} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                             </div>
-                            <div style="cursor:pointer; padding:0 8px; font-size:11px;" onclick="toggleBatchezSopGroup('${grp.id}')" id="sopgrp_icon_${grp.id}">${chev}</div>
+                            <div style="display:flex; align-items:center; gap:8px;" onclick="event.stopPropagation()">
+                                <button class="btn-ghost-base btn-ghost-blue" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${grp.rawName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
+                                <button onclick="toggleInlineEditor('${grp.id}')" class="btn-ghost-base ${isEditing ? 'btn-ghost-red' : 'btn-ghost-brand'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
+                                <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" onclick="toggleBatchezSopGroup('${grp.id}')" id="sopgrp_icon_${grp.id}">${chev}</div>
+                            </div>
                         </div>
                         <div id="sopgrp_body_${grp.id}" style="display:${disp}; padding:10px 15px; border-top:1px solid var(--border-color);">
                     `;
                     
-                    if (grp.qa.length === 0 && grp.steps.length === 0) {
-                        htmlOut += `<div style="color:var(--text-muted); font-size:11px; font-style:italic;">No steps configured.</div>`;
-                    } else {
-                        if (grp.qa.length > 0) {
-                            htmlOut += `<div style="font-weight:bold; color:var(--text-heading); font-size:12px; margin-bottom:5px; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:3px;">📋 Telemetry / Checks</div>`;
-                            grp.qa.forEach((q, qIdx) => {
-                                let chkKey = `sop_tele_${grp.id}_${qIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                                let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, qIdx) : q;
-                                if (q.startsWith('> ')) {
-                                    htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:2px 8px 2px 28px; width:100%; transition:all 0.2s; margin-bottom:2px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;"><span style="font-size:11px;">${parsed}</span></label>`;
-                                } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
-                                    htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:4px 8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-container); width:100%; transition:all 0.2s; margin-bottom:4px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:0px;"><span style="font-size:11px;">${parsed}</span></label>`;
-                                } else {
-                                    htmlOut += `<div style="width:100%; margin-bottom:6px; font-size:11px;">${parsed}</div>`;
-                                }
-                            });
-                            htmlOut += `<div style="height:6px;"></div>`;
-                        }
+                    if(isEditing) {
+                        let qaText = grp.qa.join('\\n');
+                        let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
+                        if(mappedSteps.length === 0) mappedSteps = [{}];
+                        let stepsHtml = '';
+                        mappedSteps.forEach((s, idx) => {
+                            let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
+                            let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
+                            stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+                        });
                         
-                        if (grp.steps.length > 0) {
-                            let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
-                            let stepCounter = 1;
-                            mappedSteps.forEach((s, sIdx) => {
-                                let chkKey = `sop_step_${grp.id}_${sIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : ''; 
-                                let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">`;
-                                [s.m1, s.m2, s.m3].forEach(m => {
-                                    if(m && m.url) {
-                                        let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
-                                        if (m.type === 'img') { 
-                                            let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; 
-                                            attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; 
-                                        } else { 
-                                            let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
-                                            if (isNativeVid) {
-                                                attachmentHtml += `<div class="media-thumb" style="max-height:100px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:24px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:10px; font-weight:bold;">VIDEO</span></div></div>`;
-                                            } else {
-                                                let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
-                                                if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
-                                                attachmentHtml += `<div class="media-thumb" style="max-height:100px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`;
-                                            }
-                                        }
+                        htmlOut += `
+                            <!-- Layout Container (Side-by-side with resizer) -->
+                            <div id="inlineContainer_${grp.id}" style="display:flex; flex-direction:row; width:100%; border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
+                                
+                                <!-- Pane 1: Telemetry & Live Preview (Side-by-side like Master SOP) -->
+                                <div id="inlineLeftPane_${grp.id}" style="flex: 0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:15px; background:var(--bg-body); border-right:1px solid var(--border-color);  overflow:hidden;">
+                                    
+                                    <!-- Column 1: Config & Input -->
+                                    <div id="inlineInputCol_${grp.id}" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
+                                            <div style="display:flex; gap:8px;">
+                                                <button onclick="openMediaManager('telemetry')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                                                <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
+                                                <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('inlineLeftPane_${grp.id}', 'inlinePreviewContainer_${grp.id}', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                                            </div>
+                                        </div>
+                                        <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
+                                            <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;&middot;&nbsp;
+                                            <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;&middot;&nbsp;
+                                            <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;&middot;&nbsp;
+                                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;&middot;&nbsp;
+                                            <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
+                                            <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
+                                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
+                                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="if(typeof openSOPTokenGuide==='function') openSOPTokenGuide()">&#10067; Full Guide</span>
+                                        </div>
+                                        <textarea id="inlineSopQA_${grp.id}" oninput="if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}')" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaText}</textarea>
+                                    </div>
+                                    
+                                    <!-- Column 2: Live Preview Render -->
+                                    <div id="inlinePreviewContainer_${grp.id}" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
+                                        <div id="inlineSopQAPreview_${grp.id}" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;"></div>
+                                    </div>
+
+                                </div>
+                                
+                                <!-- Dedicated Vertical Resizer Handle -->
+                                <div id="inlineResizer_{grp.id}" class="h-resizer" onmousedown="if(typeof initInlineResize===\'function\'){initInlineResize(event, \'${grp.id}\');}"></div>
+                                
+                                <!-- Pane 2: Rich Text Steps -->
+                                <div id="inlineRightPane_${grp.id}" style="flex: 1; min-width:30px; display:flex; flex-direction:column; padding:15px; background:var(--bg-body); border-left:1px solid var(--border-color);  overflow:hidden;">
+                                    <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Rich Text Instructions</h3>
+                                        </div>
+                                        <div id="inlineSopSteps_${grp.id}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${stepsHtml}</div>
+                                        <button class="btn-green" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" onclick="if(typeof addInlineSOPRow==='function') addInlineSOPRow('${grp.id}')">+ ADD PROCEDURE STEP</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Save Actions -->
+                            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
+                                <button class="btn-red" style="padding:8px 15px; font-size:12px;" onclick="toggleInlineEditor('${grp.id}')">✕ Cancel Changes</button>
+                                <button class="btn-green" style="padding:8px 25px; font-size:14px; font-weight:900;" onclick="saveInlineSopBlock('${grp.id}', '${grp.rawName.replace(/'/g, "\\'")}')">💾 SAVE SOP MASTER BLUEPRINT</button>
+                            </div>
+                        </div>
+                        <script>
+                        setTimeout(() => { 
+                            if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}'); 
+                            
+                            let savedOrder = localStorage.getItem('inlineSopSwapOrder_${grp.id}');
+                            if(savedOrder === 'right-left') {
+                                let c = document.getElementById('inlineContainer_${grp.id}');
+                                let l = document.getElementById('inlineLeftPane_${grp.id}');
+                                let r = document.getElementById('inlineRightPane_${grp.id}');
+                                let z = document.getElementById('inlineResizer_${grp.id}');
+                                if(c && l && r && z) { c.insertBefore(r, z); c.insertBefore(z, l); }
+                            }
+                            
+                            let rz = document.getElementById('inlineResizer_${grp.id}');
+                            let lp = document.getElementById('inlineLeftPane_${grp.id}');
+                            let rp = document.getElementById('inlineRightPane_${grp.id}');
+                            let isDragging = false;
+                            
+                            if(rz && lp && rp) {
+                                rz.addEventListener('mousedown', (e) => {
+                                    isDragging = true;
+                                    document.body.style.cursor = 'col-resize';
+                                    e.preventDefault();
+                                });
+                                document.addEventListener('mousemove', (e) => {
+                                    if(!isDragging) return;
+                                    let container = rz.parentElement;
+                                    let totalW = container.getBoundingClientRect().width;
+                                    let rect = container.getBoundingClientRect();
+                                    let newLeftW = e.clientX - rect.left;
+                                    
+                                    if(newLeftW < 100) newLeftW = 100;
+                                    if(totalW - newLeftW < 100) newLeftW = totalW - 100;
+                                    
+                                    lp.style.flex = \`0 0 \${newLeftW}px\`;
+                                    rp.style.flex = \`1 1 0\`;
+                                });
+                                document.addEventListener('mouseup', () => {
+                                    if(isDragging) {
+                                        isDragging = false;
+                                        document.body.style.cursor = '';
                                     }
                                 });
-                                attachmentHtml += `</div>`;
-                                htmlOut += `<div class="checklist-item ${doneCls}" style="padding:4px 8px; margin-bottom:4px;"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%; font-size:11px;"><strong style="color:#0ea5e9; font-size:12px;">Step ${stepCounter++}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
-                            });
+                            }
+                        }, 20);
+                        <\/script>
+                        `;
+                    } else {
+                        if (grp.qa.length === 0 && grp.steps.length === 0) {
+                            htmlOut += `<div style="color:var(--text-muted); font-size:11px; font-style:italic;">No steps configured.</div>`;
+                        } else {
+                            if (grp.qa.length > 0) {
+                                htmlOut += `<div style="font-weight:bold; color:var(--text-heading); font-size:12px; margin-bottom:5px; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:3px;">📋 Telemetry / Checks</div>`;
+                                grp.qa.forEach((q, qIdx) => {
+                                    let chkKey = `sop_tele_${grp.id}_${qIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
+                                    let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, qIdx) : q;
+                                    if (q.startsWith('> ')) {
+                                        htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:2px 8px 2px 28px; width:100%; transition:all 0.2s; margin-bottom:2px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
+                                    } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
+                                        htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:4px 8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-container); width:100%; transition:all 0.2s; margin-bottom:4px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:0px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
+                                    } else {
+                                        htmlOut += `<div style="width:100%; margin-bottom:6px; font-size:11px;">${parsed}</div>`;
+                                    }
+                                });
+                                htmlOut += `<div style="height:6px;"></div>`;
+                            }
+                            
+                            if (grp.steps.length > 0) {
+                                let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
+                                let stepCounter = 1;
+                                mappedSteps.forEach((s, sIdx) => {
+                                    let chkKey = `sop_step_${grp.id}_${sIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : ''; 
+                                    let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">`;
+                                    [s.m1, s.m2, s.m3].forEach(m => {
+                                        if(m && m.url) {
+                                            let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\\\'").replace(/"/g, '"');
+                                            if (m.type === 'img') { 
+                                                let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; 
+                                                attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; 
+                                            } else { 
+                                                let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
+                                                if (isNativeVid) {
+                                                    attachmentHtml += `<div class="media-thumb" style="max-height:100px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:24px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:10px; font-weight:bold;">VIDEO</span></div></div>`;
+                                                } else {
+                                                    let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
+                                                    if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
+                                                    attachmentHtml += `<div class="media-thumb" style="max-height:100px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`;
+                                                }
+                                            }
+                                        }
+                                    });
+                                    attachmentHtml += `</div>`;
+                                    htmlOut += `<div class="checklist-item ${doneCls}" style="padding:4px 8px; margin-bottom:4px;"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%; font-size:11px;"><strong style="color:#0ea5e9; font-size:12px;">Step ${stepCounter++}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
+                                });
+                            }
                         }
                     }
                     htmlOut += `</div></div>`;
                 });
                 sList.innerHTML = htmlOut;
                 if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
-            }
         }
         else if(wo.status === 'Completed') { 
             document.getElementById('pipe-Completed').classList.add('active'); 
@@ -1557,12 +1667,20 @@ function doProductionSopResize(e) {
     if(!isProductionResizing) return;
     const wrapper = document.getElementById('productionSopSplitWrapper');
     const leftPane = document.getElementById('productionSopLeftPane');
+    const previewCol = document.getElementById('productionAdminQAPreviewCol');
     if(!wrapper || !leftPane) return;
+    
     const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 30;
+    let newWidth = e.clientX - rect.left - 20;
+    
+    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
+    let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
+    
     if(newWidth < 300) newWidth = 300;
-    if(newWidth > rect.width - 60 - 300) newWidth = rect.width - 60 - 300;
+    if(newWidth > maxBound) newWidth = maxBound;
+    
     leftPane.style.flex = '0 0 ' + newWidth + 'px';
+    leftPane.style.width = newWidth + 'px';
 }
 
 function stopProductionSopResize() {
@@ -1627,3 +1745,174 @@ function toggleBatchezSopGroup(grpId) {
     }
 }
 
+
+window.activeInlineSopEditors = window.activeInlineSopEditors || {};
+window.toggleInlineEditor = function(id) {
+    window.activeInlineSopEditors[id] = !window.activeInlineSopEditors[id];
+    if(typeof currentPrintJob !== "undefined" && currentPrintJob && currentPrintJob.id && document.getElementById("paneProdPrint") && document.getElementById("paneProdPrint").style.display !== "none") {
+        if(typeof renderActivePrintJob === "function") renderActivePrintJob(currentPrintJob.id);
+    } else {
+        if(typeof renderActiveWO === "function" && typeof currentWO !== "undefined" && currentWO) renderActiveWO(currentWO.wo_id);
+    }
+    setTimeout(() => {
+        if(window.activeInlineSopEditors[id] && typeof inlineRenderTelemetryPreview === 'function') {
+            inlineRenderTelemetryPreview(id);
+        }
+    }, 150);
+};
+
+window.saveInlineSopBlock = async function(grpId, productName) {
+    try {
+        let stepsContainer = 'inlineSopSteps_' + grpId;
+        // Check if extractSOPDataFromUI is available globally, which it is in production-module.js
+        let steps = typeof extractSOPDataFromUI === 'function' ? extractSOPDataFromUI(stepsContainer) : [];
+        if (typeof extractSOPDataFromUI !== 'function') {
+            console.error('extractSOPDataFromUI is not defined!');
+        }
+        
+        let rawQa = document.getElementById('inlineSopQA_' + grpId)?.value || '';
+        let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
+        
+        const payload = { qaChecks: qaLines, steps: steps };
+        if(typeof sopsDB !== 'undefined') sopsDB[productName] = payload;
+        if(typeof sysLog === 'function') sysLog('Saving Inline SOP for ' + productName);
+        
+        if(typeof supabaseClient !== 'undefined') {
+            const {error} = await supabaseClient.from('production_sops').upsert({product_name: productName, steps: payload}, {onConflict: 'product_name'});
+            if(error) throw new Error(error.message);
+        }
+        
+        // Turn off inline edit mode for this item
+        window.activeInlineSopEditors[grpId] = false;
+        
+        // Rerender view
+        if(typeof currentPrintJob !== "undefined" && currentPrintJob && currentPrintJob.id && document.getElementById("paneProdPrint") && document.getElementById("paneProdPrint").style.display !== "none") {
+            if(typeof renderActivePrintJob === "function") renderActivePrintJob(currentPrintJob.id);
+        } else {
+            if(typeof renderActiveWO === "function" && typeof currentWO !== "undefined" && currentWO) renderActiveWO(currentWO.wo_id);
+        }
+        
+    } catch(e) {
+        if(typeof sysLog === 'function') sysLog(e.message, true);
+        alert("Failed to save SOP: " + e.message);
+    }
+};
+
+window.addInlineSOPRow = function(grpId) {
+    try {
+        let newRow = document.createElement('div');
+        newRow.innerHTML = typeof generateEditableSOPRow === 'function' ? generateEditableSOPRow({}, 999) : '';
+        let rowNode = newRow.firstChild;
+        let area = document.getElementById('inlineSopSteps_' + grpId);
+        if(area && rowNode) area.appendChild(rowNode);
+    } catch(e) {}
+};
+
+window.toggleHorizontalPreview = function(paneId, colId, btnEl) {
+    let pane = document.getElementById(paneId);
+    let col = document.getElementById(colId);
+    if (!pane || !col) return;
+    
+    let inputCol = col.previousElementSibling;
+    let currentInputWidth = inputCol.getBoundingClientRect().width;
+    let wrapper = pane.parentElement;
+    let wrapperWidth = wrapper.getBoundingClientRect().width;
+    
+    if (col.style.display === 'none') {
+        col.style.display = 'flex';
+        btnEl.style.background = 'rgba(59,130,246,0.1)';
+        
+        let newPaneWidth = currentInputWidth * 2 + 15; 
+        if(newPaneWidth > wrapperWidth * 0.70) newPaneWidth = wrapperWidth * 0.70;
+        
+        pane.style.flex = '0 0 ' + newPaneWidth + 'px';
+        pane.style.width = newPaneWidth + 'px';
+    } else {
+        col.style.display = 'none';
+        btnEl.style.background = 'transparent';
+        
+        let targetWidth = currentInputWidth;
+        if(targetWidth > wrapperWidth * 0.35) targetWidth = wrapperWidth * 0.35;
+        
+        pane.style.flex = '0 0 ' + targetWidth + 'px';
+        pane.style.width = targetWidth + 'px';
+    }
+};
+
+window.isInlineResizing = false;
+window.currentInlineResizeGrp = null;
+
+window.initInlineResize = function(e, grpId) {
+    if(e) e.preventDefault();
+    window.isInlineResizing = true;
+    window.currentInlineResizeGrp = grpId;
+    document.body.style.cursor = 'col-resize';
+    document.addEventListener('mousemove', window.doInlineResize);
+    document.addEventListener('mouseup', window.stopInlineResize);
+};
+
+window.doInlineResize = function(e) {
+    if(!window.isInlineResizing) return;
+    let grpId = window.currentInlineResizeGrp;
+    const wrapper = document.getElementById('inlineContainer_' + grpId);
+    const leftPane = document.getElementById('inlineLeftPane_' + grpId);
+    if(!wrapper || !leftPane) return;
+    const rect = wrapper.getBoundingClientRect();
+    let newWidth = e.clientX - rect.left - 15;
+    const previewCol = document.getElementById('inlinePreviewContainer_' + grpId);
+    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
+    
+    let minBound = isPreviewOpen ? 640 : 320;
+    let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
+    
+    if(newWidth < minBound) newWidth = minBound;
+    if(newWidth > maxBound) newWidth = maxBound;
+    
+    leftPane.style.flex = '0 0 ' + newWidth + 'px';
+    leftPane.style.width = newWidth + 'px';
+};
+
+window.stopInlineResize = function() {
+    if(window.isInlineResizing) {
+        window.isInlineResizing = false;
+        window.currentInlineResizeGrp = null;
+        document.body.style.cursor = 'default';
+        document.removeEventListener('mousemove', window.doInlineResize);
+        document.removeEventListener('mouseup', window.stopInlineResize);
+    }
+};
+
+window.inlineRenderTelemetryPreview = function(grpId) {
+    const rawText = document.getElementById('inlineSopQA_' + grpId)?.value || '';
+    const previewContainer = document.getElementById('inlineSopQAPreview_' + grpId);
+    if(!previewContainer) return;
+
+    if(!rawText.trim()) {
+        previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
+        return;
+    }
+
+    const qaChecks = rawText.split('\n').filter(x => x.trim() !== '');
+    let html = '';
+
+    qaChecks.forEach((line, idx) => {
+        let q = line.trim();
+        if(!q) return;
+        
+        let contentHtml = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, idx) : q;
+
+        if (q.startsWith('> ')) {
+            html += `<label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:4px 8px 4px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s; width:100%;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'"><input type="checkbox" disabled style="width:12px; height:12px; flex-shrink:0; cursor:not-allowed; margin-top:2px;">${contentHtml}</label>`;
+        } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
+            html += `<label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:6px 10px; margin-bottom:4px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); transition:all 0.2s; width:100%;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'"><input type="checkbox" disabled style="width:16px; height:16px; flex-shrink:0; cursor:not-allowed; margin-top:2px;">${contentHtml}</label>`;
+        } else {
+            html += `<div style="width:100%; pointer-events:none; opacity:0.8;">${contentHtml}</div>`;
+        }
+    });
+
+    previewContainer.innerHTML = html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`;
+    
+    if (typeof processTelemetryCanvasRendering === 'function') {
+        processTelemetryCanvasRendering(previewContainer);
+    }
+};

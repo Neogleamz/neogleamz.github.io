@@ -21,14 +21,14 @@
             setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
         }
 
-        function getRegionClass(region) {
+        function getRegionStyleConfig(region) {
             const r = (region || '').toLowerCase();
-            if (r === 'east') return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300';
-            if (r === 'west') return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300';
-            if (r === 'midwest') return 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300';
-            if (r === 'south') return 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300';
-            if (r === 'international') return 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-300';
-            return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
+            if (r === 'east') return 'background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2);';
+            if (r === 'west') return 'background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);';
+            if (r === 'midwest') return 'background: rgba(99, 102, 241, 0.1); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.2);';
+            if (r === 'south') return 'background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2);';
+            if (r === 'international') return 'background: rgba(6, 182, 212, 0.1); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.2);';
+            return 'background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-color);';
         }
 
         // --- Data & State ---
@@ -109,7 +109,20 @@
             if (e) e.stopPropagation();
             if (index > -1 && index < socialzSkaters.length) {
                 socialzSkaters[index].isFavorite = !socialzSkaters[index].isFavorite;
-                renderSkaters();
+                
+                // Visually update the button without re-rendering the whole table or grid layout to prevent snapping/flicker
+                if (e && e.currentTarget) {
+                    const btn = e.currentTarget;
+                    if (socialzSkaters[index].isFavorite) {
+                        btn.className = btn.className.replace('text-slate-400', 'text-red-500');
+                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                    } else {
+                        btn.className = btn.className.replace('text-red-500', 'text-slate-400');
+                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                    }
+                } else {
+                    renderSkaters(); // fallback if called programmatically
+                }
                 sysLog(socialzSkaters[index].isFavorite ? 'Added to favorites' : 'Removed from favorites');
                 try {
                     const skaterId = socialzSkaters[index].id;
@@ -132,14 +145,14 @@
         function renderDashboardCharts() {
             const isDark = document.documentElement.classList.contains('dark'), tc = isDark ? '#94a3b8' : '#64748b', gc = isDark ? '#334155' : '#e2e8f0';
             const topSkaters = [...socialzSkaters].sort((a, b) => b.rawFollowers - a.rawFollowers).slice(0, 10);
-            updateChart('chart-top-skaters', { type: 'bar', data: { labels: topSkaters.map(s => s.name), datasets: [{ data: topSkaters.map(s => s.rawFollowers), backgroundColor: '#FF6B00', borderRadius: 8 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gc }, ticks: { color: tc, callback: v => formatCountShort(v) } }, y: { grid: { display: false }, ticks: { color: tc } } } } });
+            updateChart('chart-top-skaters', { type: 'bar', data: { labels: topSkaters.map(s => s.name), datasets: [{ data: topSkaters.map(s => s.rawFollowers), backgroundColor: '#a855f7', borderRadius: 8 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gc }, ticks: { color: tc, callback: v => formatCountShort(v) } }, y: { grid: { display: false }, ticks: { color: tc } } } } });
             const styleCounts = {}; socialzSkaters.forEach(s => { if(s.style) s.style.split(';').forEach(st => { const c = st.trim(); if(c) styleCounts[c] = (styleCounts[c]||0)+1; }); });
             const topStyles = Object.entries(styleCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-            updateChart('chart-top-styles', { type: 'bar', data: { labels: topStyles.map(s => s[0]), datasets: [{ data: topStyles.map(s => s[1]), backgroundColor: '#6366f1', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: gc }, ticks: { color: tc, stepSize: 1 } }, x: { grid: { display: false }, ticks: { color: tc } } } } });
+            updateChart('chart-top-styles', { type: 'bar', data: { labels: topStyles.map(s => s[0]), datasets: [{ data: topStyles.map(s => s[1]), backgroundColor: '#8b5cf6', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: gc }, ticks: { color: tc, stepSize: 1 } }, x: { grid: { display: false }, ticks: { color: tc } } } } });
             const regCounts = {}; socialzSkaters.forEach(s => { const r = toTitleCase(s.region) || 'Unknown'; regCounts[r] = (regCounts[r]||0)+1; });
-            updateChart('chart-regions', { type: 'doughnut', data: { labels: Object.keys(regCounts), datasets: [{ data: Object.values(regCounts), backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: tc } } } } });
+            updateChart('chart-regions', { type: 'doughnut', data: { labels: Object.keys(regCounts), datasets: [{ data: Object.values(regCounts), backgroundColor: ['#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#c084fc'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: tc } } } } });
             let pt = { IG: 0, TT: 0, YT: 0, FB: 0 }; socialzSkaters.forEach(s => { pt.IG += parseFollowerCount(s.followers.ig); pt.TT += parseFollowerCount(s.followers.tt); pt.YT += parseFollowerCount(s.followers.yt); pt.FB += parseFollowerCount(s.followers.fb); });
-            updateChart('chart-platforms', { type: 'doughnut', data: { labels: ['Instagram', 'TikTok', 'YouTube', 'Facebook'], datasets: [{ data: [pt.IG, pt.TT, pt.YT, pt.FB], backgroundColor: ['#ec4899', '#06b6d4', '#ef4444', '#3b82f6'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: tc } } } } });
+            updateChart('chart-platforms', { type: 'doughnut', data: { labels: ['Instagram', 'TikTok', 'YouTube', 'Facebook'], datasets: [{ data: [pt.IG, pt.TT, pt.YT, pt.FB], backgroundColor: ['#a855f7', '#9333ea', '#7e22ce', '#c084fc'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: tc } } } } });
         }
 
         // --- Filter Logic ---
@@ -217,13 +230,11 @@
 
             // Update Layout Container
             const container = document.getElementById('skater-grid');
-            const rowHeader = document.getElementById('row-view-header');
+
             if (!isCompact) {
                 container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full";
-                if(rowHeader) rowHeader.classList.add('hidden');
             } else {
-                container.className = "flex flex-col gap-2 transition-all duration-300 min-w-full";
-                if(rowHeader) rowHeader.classList.remove('hidden');
+                container.className = "block transition-all duration-300 min-w-full overflow-x-auto";
             }
             renderSkaters();
         };
@@ -281,24 +292,23 @@
                 grid.innerHTML = ''; emptyState.classList.remove('hidden');
             } else {
                 emptyState.classList.add('hidden');
-                grid.innerHTML = filtered.map(s => {
-                    const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
-                    const styleList = s.style ? s.style.split(';').map(st => st.trim()).filter(st => st).slice(0, 3) : [];
-                    const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
-                    const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
+                if (viewMode === 'grid') {
+                    grid.innerHTML = filtered.map(s => {
+                        const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
+                        const styleList = s.style ? s.style.split(';').map(st => st.trim()).filter(st => st).slice(0, 3) : [];
+                        const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
+                        const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
 
-                    let src = ''; let prov = '';
-                    if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; prov = 'tiktok'; }
-                    else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; prov = 'youtube'; }
-                    else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; prov = 'facebook'; }
-                    
-                    const typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
-                        'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
-                        ((s.type || '').toLowerCase() === 'indoor' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300');
+                        let src = ''; let prov = '';
+                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; prov = 'tiktok'; }
+                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; prov = 'youtube'; }
+                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; prov = 'facebook'; }
+                        
+                        const typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
+                            'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
+                            ((s.type || '').toLowerCase() === 'indoor' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300');
 
-                    const regClass = getRegionClass(s.region);
-
-                    if (viewMode === 'grid') {
+                        const regStyles = getRegionStyleConfig(s.region);
                         const igHtml = generateSocial(s.links.ig, s.followers.ig, 'fa-instagram', 'pink', s.handles.ig);
                         const ttHtml = generateSocial(s.links.tt, s.followers.tt, 'fa-tiktok', 'cyan', s.handles.tt);
                         const ytHtml = generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);
@@ -313,7 +323,7 @@
                         ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="absolute top-4 w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-transform hover:scale-110" style="z-index: 20; right: 54px; background: var(--bg-main); color: #FBBF24; border: 1px solid var(--border-color); filter: drop-shadow(0 0 2px rgba(251,191,36,0.3));" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : ''}
 
                          <div class="p-4 pt-3 pb-4 relative flex-grow flex flex-col">
-                        <div class="flex items-center gap-4 mb-4"><div class="w-16 h-16 relative rounded-full overflow-hidden shadow-lg shrink-0 border" style="border-color: var(--border-color);"><div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-2xl font-bold z-0">${s.name.charAt(0)}</div>${src ? `<img loading="lazy" src="${src}" class="absolute inset-0 w-full h-full object-cover z-10" style="background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}</div><div class="overflow-hidden flex-grow"><h2 class="font-bold text-xl leading-tight truncate pr-2" style="color: var(--text-heading);">${s.name}</h2><div class="flex flex-wrap items-center gap-1.5 mt-1 text-sm truncate" style="color: var(--text-muted);"><i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} ${s.region ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${regClass}">${s.region}</span>` : ''} <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${typeClass}">${s.type || ''}</span></div></div></div><p class="text-sm mt-3 line-clamp-3 leading-relaxed mb-4 min-h-[4.5em]" style="color: var(--text-main);">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p><div class="text-sm pt-3 mt-auto min-h-[44px]" style="border-top: 1px solid var(--border-color); display: block; width: 100%; position: relative;">
+                        <div class="flex items-center gap-4 mb-4"><div class="w-16 h-16 relative rounded-full overflow-hidden shadow-lg shrink-0 border" style="border-color: var(--border-color);"><div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-2xl font-bold z-0">${s.name.charAt(0)}</div>${src ? `<img loading="lazy" src="${src}" class="absolute inset-0 w-full h-full object-cover z-10" style="background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}</div><div class="overflow-hidden flex-grow"><h2 class="font-bold text-xl leading-tight truncate pr-2" style="color: var(--text-heading);">${s.name}</h2><div class="flex flex-wrap items-center gap-1.5 mt-1 text-sm truncate" style="color: var(--text-muted);"><i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} ${s.region ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase" style="${regStyles}">${s.region}</span>` : ''} <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${typeClass}">${s.type || ''}</span></div></div></div><p class="text-sm mt-3 line-clamp-3 leading-relaxed mb-4 min-h-[4.5em]" style="color: var(--text-main);">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p><div class="text-sm pt-3 mt-auto min-h-[44px]" style="border-top: 1px solid var(--border-color); display: block; width: 100%; position: relative;">
                             <!-- Right: Edit Action (Floated FIRST) -->
                             <div style="float: right; display: flex; align-items: center; position: relative; z-index: 10; margin-top: 5px;">
                                 <button onclick="editSkater(${originalIndex})" class="text-xs font-bold text-slate-400 hover:text-orange-400 flex items-center gap-1 shrink-0"><i class="fa-solid fa-pen"></i> EDIT</button>
@@ -333,83 +343,75 @@
 
                             <div style="clear: both;"></div>
                         </div></div><div class="mt-auto p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto" style="background: var(--bg-input); border-top: 1px solid var(--border-color);">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
-                    } else {
-                        // COMPACT LIST VIEW
-                        return `
-                        <div class="p-2 px-4 rounded-lg border shadow-sm hover:shadow-md transition-all grid items-center gap-2 overflow-hidden hover:border-[#f97316]" style="background: var(--bg-panel); border-color: var(--border-color); box-shadow: 0 4px 6px var(--shadow-color); grid-template-columns: 36px minmax(90px, 0.8fr) minmax(80px, 0.6fr) 70px 60px 90px repeat(4, 85px) 30px 65px 36px;">
-                            <!-- Avatar -->
-                            <div class="w-8 h-8 relative rounded-full overflow-hidden border" style="border-color: var(--border-color);">
-                                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style="background: var(--bg-input); color: var(--text-muted);">${s.name.charAt(0)}</div>
-                                ${src ? `<img loading="lazy" src="${src}" class="absolute inset-0 w-full h-full object-cover z-10" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}
-                            </div>
-                            
-                            <!-- Name & Favorite -->
-                            <div class="min-w-0 flex items-center gap-1.5 pr-1">
-                                <h3 class="font-bold text-xs truncate" style="color: var(--text-heading);" title="${s.name}">${s.name}</h3>
-                                <button onclick="toggleFavorite(${s.id}, event)" class="hover:scale-110 transition-transform flex items-center justify-center shrink-0 ${s.isFavorite ? 'text-red-500' : 'text-slate-400'}">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
-                            </div>
+                    }).join('');
+                } else {
+                    // COMPACT LIST VIEW - TABLE MODE
+                    let tCols = [
+                        {k: 'fav', label: ''},
+                        {k: 'alpha', label: 'Name'},
+                        {k: 'location', label: 'Location'},
+                        {k: 'region', label: 'Region'},
+                        {k: 'style', label: 'Styles'},
+                        {k: 'ig', label: 'Instagram'},
+                        {k: 'tt', label: 'TikTok'},
+                        {k: 'yt', label: 'YouTube'},
+                        {k: 'fb', label: 'Facebook'},
+                        {k: 'viral', label: 'Viral'},
+                        {k: 'total', label: 'Total Reach'},
+                        {k: 'edit', label: 'Edit', min: '80px'}
+                    ];
+                    let ths = tCols.map(c => `<th onclick="${['fav','viral','edit'].includes(c.k) ? '' : `handleSortChange('${c.k}')`}" class="${c.k === socialzCurrentSort ? (socialzSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} ${c.label==='Name'||c.label==='Location'?'text-left':'text-center'}" style="padding:10px; cursor:pointer; ${c.min ? 'min-width:'+c.min+';' : ''}" title="Sort by ${c.label}">${c.label}</th>`).join('');
+                    
+                    let tableHtml = `<div style="overflow-x:auto; width:100%;"><table class="neo-table" id="socialzListTable" style="width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; text-align:left;">
+                        <thead style="position:sticky; top:0; z-index:40; background:var(--bg-panel);"><tr style="color:var(--text-heading); border-bottom:1px solid var(--border-color); font-weight:800;">${ths}</tr></thead><tbody id="socialz-table-body">`;
+                    
+                    tableHtml += filtered.map(s => {
+                        const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
+                        const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
+                        const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
 
-                            <!-- Location -->
-                            <div class="min-w-0 flex items-center pl-1">
-                                <span class="text-[10px] truncate" style="color: var(--text-muted);" title="${s.location || ''}">${s.location || '-'}</span>
-                            </div>
+                        let src = ''; let prov = '';
+                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; prov = 'tiktok'; }
+                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; prov = 'youtube'; }
+                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; prov = 'facebook'; }
+                        
+                        const typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
+                            'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
+                            ((s.type || '').toLowerCase() === 'indoor' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300');
 
-                            <!-- Region -->
-                            <div class="text-center px-1">
-                                <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase truncate inline-block w-full ${regClass}">${s.region || '-'}</span>
-                            </div>
-
-                            <!-- Type -->
-                            <div class="text-center px-1">
-                                <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase inline-block w-full ${typeClass}">${s.type || '-'}</span>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="text-center px-1">
-                                ${s.collabStatus ? `<span class="px-2 py-0.5 rounded-full text-[8px] font-bold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 uppercase truncate inline-block w-full">${s.collabStatus}</span>` : '-'}
-                            </div>
-                            
-                            <!-- IG -->
-                            <a href="${s.links.ig || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
-                                <i class="fa-brands fa-instagram text-pink-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.ig || '0'}</span>
-                            </a>
-
-                            <!-- TikTok -->
-                            <a href="${s.links.tt || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
-                                <i class="fa-brands fa-tiktok text-cyan-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.tt || '0'}</span>
-                            </a>
-
-                            <!-- YouTube -->
-                            <a href="${s.links.yt || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
-                                <i class="fa-brands fa-youtube text-red-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.yt || '0'}</span>
-                            </a>
-
-                            <!-- Facebook -->
-                            <a href="${s.links.fb || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
-                                <i class="fa-brands fa-facebook text-blue-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.fb || '0'}</span>
-                            </a>
-
-                            <!-- Viral rocket/star -->
-                            <div class="flex justify-center">
-                                ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="hover:scale-125 transition-transform flex items-center justify-center shrink-0 w-full h-full" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}
-                            </div>
-
-                            <!-- Total -->
-                            <div class="font-bold text-sm text-red-500 text-right truncate pr-1">
-                                ${formatCountShort(s.rawFollowers)}
-                            </div>
-
-                            <!-- Edit button -->
-                            <div class="flex justify-end">
-                                <button onclick="editSkater(${originalIndex})" class="p-1.5 rounded-lg transition-colors hover:text-[#f97316]" style="background: var(--bg-input); color: var(--text-muted);"><i class="fa-solid fa-pen text-[10px] mt-[1px]"></i></button>
-                            </div>
-                        </div>`;
-                    }
-                }).join('');
+                        const regStyles = getRegionStyleConfig(s.region);
+                        const parsedStyles = s.style ? s.style.split(';').map(st => `<span class="bg-[var(--bg-input)] px-1.5 py-0.5 rounded mx-0.5 text-[9px] uppercase font-bold border" style="border-color:var(--border-color)">${st.trim()}</span>`).join('') : '-';
+                        
+                        return `<tr style="border-bottom:1px solid var(--border-color); background:var(--bg-panel);" onmouseover="this.style.background='rgba(59, 130, 246, 0.05)'" onmouseout="this.style.background='var(--bg-panel)'">
+                            <td style="padding:4px; text-align:center; width:40px;">
+                                <button onclick="toggleFavorite(${originalIndex}, event)" class="hover:scale-110 transition-transform flex items-center justify-center shrink-0 w-full ${s.isFavorite ? 'text-red-500' : 'text-slate-400'}">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
+                            </td>
+                            <td style="padding:4px; font-weight:bold; color:var(--text-heading); text-align:left; min-width:140px;">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full overflow-hidden border shadow-sm flex items-center justify-center text-[10px] relative" style="background:var(--bg-input); border-color:var(--border-color); color:var(--text-muted); flex-shrink:0;">
+                                        <div class="absolute inset-0 flex items-center justify-center z-0">${s.name.charAt(0)}</div>
+                                        ${src ? `<img loading="lazy" src="${src}" class="w-full h-full object-cover relative z-10" onerror="this.style.display='none'">` : ''}
+                                    </div>
+                                    <span class="truncate" style="max-width:180px;">${s.name}</span>
+                                </div>
+                            </td>
+                            <td style="padding:4px; color:var(--text-muted); text-align:left;">${s.location || '-'}</td>
+                            <td style="padding:4px; text-align:center;"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="${regStyles}">${s.region || '-'}</span></td>
+                            <td style="padding:4px; text-align:center;">${parsedStyles}</td>
+                            <td style="padding:4px; text-align:center;"><a href="${s.links.ig||'#'}" target="_blank" style="font-weight:800; color:#ec4899;">${s.followers.ig||'0'}</a></td>
+                            <td style="padding:4px; text-align:center;"><a href="${s.links.tt||'#'}" target="_blank" style="font-weight:800; color:#06b6d4;">${s.followers.tt||'0'}</a></td>
+                            <td style="padding:4px; text-align:center;"><a href="${s.links.yt||'#'}" target="_blank" style="font-weight:800; color:#ef4444;">${s.followers.yt||'0'}</a></td>
+                            <td style="padding:4px; text-align:center;"><a href="${s.links.fb||'#'}" target="_blank" style="font-weight:800; color:#3b82f6;">${s.followers.fb||'0'}</a></td>
+                            <td style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="hover:scale-125 transition-transform flex items-center justify-center shrink-0 w-full h-full" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
+                            <td style="padding:4px; text-align:right; font-weight:900; color:var(--text-heading); font-size:13px;">${formatCountShort(s.rawFollowers)}</td>
+                            <td style="padding:4px; text-align:center;"><button onclick="editSkater(${originalIndex})" class="px-2 py-1 rounded transition-colors hover:text-[#f97316] font-bold text-[9px] flex items-center gap-1 mx-auto" style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color);"><i class="fa-solid fa-pen"></i> EDIT</button></td>
+                        </tr>`;
+                    }).join('');
+                    
+                    tableHtml += `</tbody></table></div>`;
+                    grid.innerHTML = tableHtml;
+                    setTimeout(() => { if(typeof applyTableInteractivity === 'function') applyTableInteractivity('skater-grid-wrapper'); }, 50);
+                }
             }
         }
 
@@ -619,7 +621,7 @@
             const topSkaters = [...socialzSkaters].sort((a,b)=> (b.rawFollowers||0) - (a.rawFollowers||0)).slice(0, 10);
             socialzChartInstances['top'] = new Chart(ctxTop, {
                 type: 'bar',
-                data: { labels: topSkaters.map(s=>s.name), datasets: [{ label: 'Total Followers', data: topSkaters.map(s=>s.rawFollowers), backgroundColor: '#f59e0b', borderRadius: 4 }] },
+                data: { labels: topSkaters.map(s=>s.name), datasets: [{ label: 'Total Followers', data: topSkaters.map(s=>s.rawFollowers), backgroundColor: '#a855f7', borderRadius: 4 }] },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false } } }
             });
         }
@@ -647,7 +649,7 @@
         if(ctxRegions) {
             if(socialzChartInstances['regions']) socialzChartInstances['regions'].destroy();
             const regions = {}; socialzSkaters.forEach(s => { const r = s.region||'Unknown'; regions[r] = (regions[r]||0)+1; });
-            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#64748b', '#ec4899', '#06b6d4'];
+            const colors = ['#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#c084fc', '#d8b4fe', '#f3e8ff', '#581c87'];
             socialzChartInstances['regions'] = new Chart(ctxRegions, {
                 type: 'doughnut',
                 data: { labels: Object.keys(regions), datasets: [{ data: Object.values(regions), backgroundColor: colors.slice(0, Object.keys(regions).length), borderWidth:0, hoverOffset: 10 }] },
@@ -670,7 +672,7 @@
             });
             socialzChartInstances['plat'] = new Chart(ctxPlat, {
                 type: 'doughnut',
-                data: { labels: Object.keys(plat), datasets: [{ data: Object.values(plat), backgroundColor: ['#ec4899', '#06b6d4', '#ef4444', '#3b82f6'], borderWidth:0, hoverOffset: 10 }] },
+                data: { labels: Object.keys(plat), datasets: [{ data: Object.values(plat), backgroundColor: ['#a855f7', '#9333ea', '#7e22ce', '#c084fc'], borderWidth:0, hoverOffset: 10 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
             });
         }

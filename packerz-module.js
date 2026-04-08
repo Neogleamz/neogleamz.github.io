@@ -1,3 +1,4 @@
+window.isPackerzLiveEditing = false;
 // ==========================================
 // NEXUZ: PACKERZ TERMINAL LOGIC
 // ==========================================
@@ -62,7 +63,8 @@ async function fetchUnfulfilledOrders() {
             
             const card = document.createElement('div');
             card.className = 'packerz-order-card';
-            card.style.cssText = 'background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 15px var(--shadow-color); border-left: 5px solid #F59E0B;';
+            card.id = 'packerz-card-' + order.order_id;
+            card.style.cssText = 'background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 15px var(--shadow-color); border-left: 1px solid var(--border-color);';
             
             const shortDate = new Date(order.sale_date).toLocaleDateString();
             const itemsPreview = order.items.map(i => `<span style="display:block; margin-top:4px;"><b>${i.qty}x</b> ${i.recipe}</span>`).join('');
@@ -76,9 +78,6 @@ async function fetchUnfulfilledOrders() {
                     ${itemsPreview}
                 </div>
             `;
-            
-            card.onmouseover = () => card.style.borderColor = '#F59E0B';
-            card.onmouseout = () => card.style.borderColor = 'var(--border-color)';
             
             card.onclick = () => openPackerzSopTerminal(order);
             fragment.appendChild(card);
@@ -111,11 +110,23 @@ function openPackerzSopTerminal(orderGroup) {
     const activeQueue = document.getElementById('packerzActiveQueue');
     if (!activeQueue) return;
 
+    // Remove orange selection styling from all cards, and apply full outline to the newly active one
+    document.querySelectorAll('.packerz-order-card').forEach(c => {
+        c.style.border = '1px solid var(--border-color)';
+        c.style.boxShadow = '0 4px 15px var(--shadow-color)';
+        c.style.transform = 'scale(1)';
+    });
+    const activeCard = document.getElementById('packerz-card-' + orderGroup.order_id);
+    if(activeCard) {
+        activeCard.style.border = '1px solid #F59E0B';
+        activeCard.style.boxShadow = '0 0 15px rgba(245, 158, 11, 0.2)';
+    }
+
     let itemsHtml = orderGroup.items.map(i => {
         let t = i.transaction_type || 'Standard';
         let safeRecipe = i.recipe.replace(/'/g,"\\'");
         let selectHtml = `
-            <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px; font-size:10px; font-weight:800; cursor:pointer;" onchange="updatePackerzItemType('${orderGroup.order_id}', '${i.sku}', this.value, '${safeRecipe}')">
+            <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; width:160px; max-width:100%;" onchange="updatePackerzItemType('${orderGroup.order_id}', '${i.sku}', this.value, '${safeRecipe}')">
                 <option value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
                 <option value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
                 <option value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
@@ -126,14 +137,26 @@ function openPackerzSopTerminal(orderGroup) {
             </select>
         `;
         return `
-        <div id="qa-row-${orderGroup.order_id}-${i.sku}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; gap:15px;">
-            <div style="flex-grow:1; min-width:0;">
-                <span style="font-weight:900; color:var(--text-heading); font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${i.recipe}</span>
-                <span style="font-size:11px; color:var(--text-muted); font-family:monospace; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Source Alias: ${i.sku || 'N/A'}</span>
+        <div id="qa-row-${orderGroup.order_id}-${i.sku}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:10px; padding:15px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:15px;">
+                <div style="flex-grow:1; min-width:0;">
+                    <span style="font-weight:900; color:var(--text-heading); font-size:14px; letter-spacing:0.5px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${i.recipe}</span>
+                    <span style="font-size:11px; color:var(--text-muted); font-family:monospace; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px;">Alias: ${i.sku || 'N/A'}</span>
+                </div>
+                <div style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-weight:900; font-size:13px; padding:4px 12px; border-radius:6px; flex-shrink:0;">QTY: ${i.qty}</div>
             </div>
-            ${selectHtml}
-            <div style="background:#10b981; color:white; font-weight:900; font-size:14px; padding:6px 14px; border-radius:6px; flex-shrink:0;">${i.qty}</div>
-            <button id="qa-btn-${orderGroup.order_id}-${i.sku}" style="padding:6px 15px; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; flex-shrink:0; width:auto;" onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${safeRecipe}')">VIEW SOP: ${i.recipe.length > 20 ? i.recipe.substring(0,20)+'...' : i.recipe}</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:10px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">TYPE:</span>
+                    ${selectHtml}
+                </div>
+                <button id="qa-btn-${orderGroup.order_id}-${i.sku}" 
+                    class="btn-ghost-base btn-ghost-blue" 
+                    style="flex-shrink:0; white-space:nowrap;"
+                    onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${safeRecipe}')">
+                    &#128065; VIEW SOP
+                </button>
+            </div>
         </div>
         `;
     }).join('');
@@ -205,6 +228,94 @@ let currentPackerzQaSku = null;
 let currentPackerzQaRecipe = null;
 let currentPackerzSopData = null;
 
+window.togglePackerzLiveInlineSOP = function() {
+    window.isPackerzLiveEditing = !window.isPackerzLiveEditing;
+    if(typeof loadPackerzActiveSOP === 'function' && currentPackerzQaRecipe) {
+        loadPackerzActiveSOP(currentPackerzQaOrderId, currentPackerzQaSku, currentPackerzQaRecipe);
+    }
+};
+
+window.savePackerzLiveInlineSOP = async function() {
+    if(!currentPackerzQaRecipe) return alert("SOP Target Unknown!");
+    const btn = document.getElementById('btnSavePackerzInlineSOP');
+    if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity="0.5"; }
+    
+    try {
+        let rows = document.querySelectorAll('#packerzLiveInlineRowsWrapper .sop-step-row');
+        let stepsArray = [];
+        rows.forEach(r => {
+            let richText = r.querySelector('.sop-text-rich').innerHTML;
+            let m1t = r.querySelector('.m1-type').value; let m1u = r.querySelector('.m1-url').value;
+            let m2t = r.querySelector('.m2-type').value; let m2u = r.querySelector('.m2-url').value;
+            let m3t = r.querySelector('.m3-type').value; let m3u = r.querySelector('.m3-url').value;
+            
+            stepsArray.push({
+                text: richText,
+                m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u}
+            });
+        });
+
+        let rawQa = document.getElementById('packerzLiveInlineQA')?.value || '';
+        let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
+
+        const payload = {
+            internal_recipe_name: currentPackerzQaRecipe,
+            required_box_sku: currentPackerzSopData?.required_box_sku || null,
+            instruction_json: JSON.stringify({ steps: stepsArray, qaChecks: qaLines })
+        };
+
+        const { error } = await supabaseClient.from('pack_ship_sops').upsert(payload, { onConflict: 'internal_recipe_name' });
+        if(error) throw error;
+        
+        if(btn) { btn.innerText = "💾 SAVED SUCCESSFULLY!"; btn.style.background = "#059669"; }
+        setTimeout(() => { 
+            window.isPackerzLiveEditing = false;
+            loadPackerzActiveSOP(currentPackerzQaOrderId, currentPackerzQaSku, currentPackerzQaRecipe);
+        }, 1200);
+
+    } catch(e) {
+        console.error(e);
+        if(typeof sysLog === 'function') sysLog(`Packerz Inline Save Error: ${e.message}`, true);
+        alert("CRITICAL SAVE ERROR: " + e.message);
+        if(btn) { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.opacity="1"; btn.style.background = ""; }
+    }
+};
+
+window.renderPackerzLiveInlineTelemetryPreview = function() {
+    const rawText = document.getElementById('packerzLiveInlineQA')?.value || '';
+    const previewContainer = document.getElementById('packerzLiveInlinePreviewCol');
+    if(!previewContainer) return;
+
+    if(!rawText.trim()) {
+        previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
+        return;
+    }
+
+    const qaChecks = rawText.split('\n').filter(x => x.trim() !== '');
+    let html = '';
+
+    qaChecks.forEach((line, idx) => {
+        let q = line.trim();
+        if(!q) return;
+
+        let contentHtml = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, idx) : q;
+
+        if (q.startsWith('> ')) {
+            html += `<label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:4px 8px 4px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s; width:100%;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'"><input type="checkbox" disabled style="width:12px; height:12px; flex-shrink:0; cursor:not-allowed; margin-top:2px;">${contentHtml}</label>`;
+        } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
+            html += `<label style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:6px 10px; margin-bottom:4px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); transition:all 0.2s; width:100%;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'"><input type="checkbox" disabled style="width:16px; height:16px; flex-shrink:0; cursor:not-allowed; margin-top:2px;">${contentHtml}</label>`;
+        } else {
+            html += `<div style="width:100%; pointer-events:none; opacity:0.8;">${contentHtml}</div>`;
+        }
+    });
+
+    previewContainer.innerHTML = html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`;
+    
+    if (typeof processTelemetryCanvasRendering === 'function') {
+        processTelemetryCanvasRendering(previewContainer);
+    }
+};
+
 async function loadPackerzActiveSOP(orderId, sku, recipe) {
     currentPackerzQaOrderId = orderId;
     currentPackerzQaSku = sku;
@@ -212,26 +323,118 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     scanConfirmations.clear();
     
     document.getElementById('packerzSopViewerModal').style.display = 'flex';
-    document.getElementById('packerzSopViewerTitle').innerHTML = `🎯 ACTIVE SOP: ${recipe}`;
+    document.getElementById('packerzSopViewerTitle').innerHTML = window.isPackerzLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`;
     document.getElementById('packerzSopViewerSubtitle').innerText = `Target Alias: ${sku}`;
     
-    const body = document.getElementById('packerzSopViewerBody');
-    const qaList = document.getElementById('packerzSopViewerQAList');
-    const btnSignoff = document.getElementById('btnPackerzSopSignoff');
+    // We target the outer wrapper directly when editing so we can overwrite its layout
+    const wrapper = document.getElementById('packerzLiveSopSplitWrapper');
+    let body = document.getElementById('packerzSopViewerBody');
+    let qaList = document.getElementById('packerzSopViewerQAList');
+    let btnSignoff = document.getElementById('btnPackerzSopSignoff');
     
-    body.innerHTML = `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`;
-    qaList.innerHTML = '';
-    btnSignoff.style.opacity = '0.5'; btnSignoff.style.cursor = 'not-allowed';
-    btnSignoff.onclick = null;
+    if(!window.isPackerzLiveEditing) {
+        // Normal split-pane setup restored strictly
+        wrapper.innerHTML = `
+            <div id="packerzLiveSopLeftPane" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container);">
+                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
+                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
+                    <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
+                </div>
+                <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
+                    <button id="btnPackerzSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
+                        COMPLETE QA CHECKS
+                    </button>
+                </div>
+            </div>
+            <div id="packerzLiveSopResizer" class="h-resizer" onmousedown="initPackerzLiveSopResize(event)"></div>
+            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
+                <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
+            </div>
+        `;
+        // re-grab references after DOM recreation
+        body = document.getElementById('packerzSopViewerBody');
+        qaList = document.getElementById('packerzSopViewerQAList');
+        btnSignoff = document.getElementById('btnPackerzSopSignoff');
+        
+        body.innerHTML = `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`;
+        qaList.innerHTML = '';
+        btnSignoff.style.opacity = '0.5';
+        btnSignoff.style.cursor = 'not-allowed';
+        btnSignoff.onclick = null;
+    } else {
+        wrapper.innerHTML = `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`;
+        btnSignoff.style.display = 'none';
+    }
     
     try {
         const { data, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe).single();
-        if(error || !data) throw new Error("No SOP Matrix officially bound to this Master Recipe.");
-        
-        const instructionJson = JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}');
+        // Allow fallback data if error (so we can create a new one inline)
+        const instructionJson = data ? JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}') : {steps: [], qaChecks: []};
         currentPackerzSopData = instructionJson;
-        const steps = instructionJson.steps || [];
+        const steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
         const qaChecks = instructionJson.qaChecks || [];
+        
+        if(window.isPackerzLiveEditing) {
+            let qaText = (qaChecks || []).join('\n');
+            let rowsHtml = '';
+            steps.forEach((s, idx) => { rowsHtml += generatePackerzEditableSOPRow(s, idx); });
+            
+            let editHtml = `
+            <div style="display:flex; flex-direction:row; gap:15px; width:100%; height:100%; padding:20px; background:var(--bg-body); overflow:hidden;">
+                <!-- Left Pane: Telemetry Editor & Live Preview -->
+                <div id="packerzInlineSopLeftPane" style="flex:0 0 65%; min-width:600px; padding-right:20px; display:flex; flex-direction:row; gap:15px; border-right:1px solid transparent;">
+                    
+                    <!-- Column 1: Config & Input -->
+                    <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
+                            <div style="display:flex; gap:8px;">
+                                <button onclick="window.activeSOPTextAreaId='packerzLiveInlineQA'; if(typeof openSOPMediaPicker==='function') openSOPMediaPicker('packerzLiveInlineQA')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖼️ MEDIA</button>
+                                <button onclick="if(typeof openSOPTokenGuide==='function') openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">⚡ GUIDE</button>
+                                <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('packerzInlineSopLeftPane', 'packerzLiveInlinePreviewCol', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                            </div>
+                        </div>
+                        <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
+                            <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;&middot;&nbsp;
+                            <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;&middot;&nbsp;
+                            <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;&middot;&nbsp;
+                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;&middot;&nbsp;
+                            <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
+                            <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
+                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
+                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="if(typeof openSOPTokenGuide==='function') openSOPTokenGuide()">&#10067; Full Guide</span>
+                        </div>
+                        <textarea id="packerzLiveInlineQA" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;" oninput="if(typeof renderPackerzLiveInlineTelemetryPreview==='function') renderPackerzLiveInlineTelemetryPreview()">${qaText}</textarea>
+                    </div>
+
+                    <!-- Column 2: Live Preview Render -->
+                    <div id="packerzLiveInlinePreviewCol" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
+                        <div id="packerzLiveInlinePreviewContainer" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;"></div>
+                    </div>
+                </div>
+
+                <!-- Resizer Divider -->
+                <div id="packerzLiveInlineResizerHandle" class="h-resizer packerz-h-resizer" onmousedown="initPackerzLiveSopResize(event)"></div>
+
+                <!-- Column 3: Rich Text Row Builders -->
+                <div id="packerzInlineSopRightPane" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:25px; border:1px solid var(--border-color); display:flex; flex-direction:column; overflow-y:auto;">
+                    <h3 style="margin:0 0 15px 0; color:var(--text-heading); font-size:16px;">4. Packing Instructions (Rich Text)</h3>
+                    <div id="packerzLiveInlineRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px; flex-grow:1;">
+                        ${rowsHtml}
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px; padding-top:20px; border-top:1px dashed rgba(255,255,255,0.1);">
+                        <button class="btn-green" id="btnSavePackerzInlineSOP" style="padding:10px 25px; font-size:14px; font-weight:900; width:100%;" onclick="if(typeof savePackerzLiveInlineSOP==='function') savePackerzLiveInlineSOP()">💾 SAVE SOP MASTER BLUEPRINT</button>
+                    </div>
+                </div>
+            </div>
+            `;
+            wrapper.innerHTML = editHtml;
+            setTimeout(() => { if(typeof renderPackerzLiveInlineTelemetryPreview==='function') renderPackerzLiveInlineTelemetryPreview(); }, 150);
+            return; // EXIT here so we don't render read-only checkboxes!
+        }
+    
                  // 1. Render Read-Only Steps
           let h = '';
           
@@ -1089,19 +1292,21 @@ function doPackerzSopResize(e) {
     if(!isPackerzResizing) return;
     const wrapper = document.getElementById('packerzSopSplitWrapper');
     const leftPane = document.getElementById('packerzSopLeftPane');
+    const previewCol = document.getElementById('packerzSopPreviewCol');
     if(!wrapper || !leftPane) return;
     
     const rect = wrapper.getBoundingClientRect();
-    // 30 is the left padding on the wrapper, minus it strictly
-    let newWidth = e.clientX - rect.left - 30; 
+    let newWidth = e.clientX - rect.left - 20; 
+    
+    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
+    let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
+    
     let minWidth = 300;
-    
-    const maxAvailable = rect.width - 60; // subtracting l/r padding 30*2
     if(newWidth < minWidth) newWidth = minWidth;
-    if(newWidth > maxAvailable - minWidth) newWidth = maxAvailable - minWidth;
+    if(newWidth > maxBound) newWidth = maxBound;
     
-    let percentage = (newWidth / maxAvailable) * 100;
-    leftPane.style.flex = `0 0 ${percentage}%`;
+    leftPane.style.flex = `0 0 ${newWidth}px`;
+    leftPane.style.width = newWidth + 'px';
 }
 
 function stopPackerzSopResize() {
@@ -1124,20 +1329,21 @@ function initPackerzLiveSopResize(e) {
 function doPackerzLiveSopResize(e) {
     if(!isPackerzLiveResizing) return;
     const wrapper = document.getElementById('packerzLiveSopSplitWrapper');
-    const leftPane = document.getElementById('packerzLiveSopLeftPane');
+    const leftPane = document.getElementById('packerzLiveSopLeftPane') || document.getElementById('packerzInlineSopLeftPane');
     if(!wrapper || !leftPane) return;
     
     const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left; 
-    let minWidth = 280; // Standardized Fulfillz panel collision barrier
+    let newWidth = e.clientX - rect.left - 20; 
+    let minWidth = 300;
+    
+    let isInline = !!document.getElementById('packerzInlineSopLeftPane');
+    let maxBound = isInline ? (rect.width * 0.70) : (rect.width - 300);
     
     if(newWidth < minWidth) newWidth = minWidth;
-    if(newWidth > rect.width - 250) newWidth = rect.width - 250;
+    if(newWidth > maxBound) newWidth = maxBound;
     
-    // Aggressive flex overwrite matches the global standard exactly
-    leftPane.style.width = newWidth + 'px';
-    leftPane.style.minWidth = newWidth + 'px';
     leftPane.style.flex = `0 0 ${newWidth}px`;
+    leftPane.style.width = newWidth + 'px';
 }
 
 function stopPackerzLiveSopResize() {

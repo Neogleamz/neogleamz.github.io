@@ -625,9 +625,11 @@ window.restoreNeoSidebarSizes = function() {
         'packerzKanbanLeftCol', 
         'packerzLiveSopLeftPane', 
         'barcodzSidebar', 
+        'labelzSidebar',
         'recipezSidebar', 
         'batchezSidebar', 
-        'layerzSidebar'
+        'layerzSidebar',
+        'ceo-sidebar'
     ];
     
     for (let id of idsToRestore) {

@@ -1355,14 +1355,15 @@ window.openGlobalRegexPlayground = function(type) {
     if (!conf) return;
 
     let h = `<div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; width:98vw; height:94vh; margin-top:30px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
-        <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; background:rgba(56, 189, 248, 0.1); border-radius:12px 12px 0 0; position:relative;">
+        <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; background:rgba(56, 189, 248, 0.1); border-radius:12px 12px 0 0; position:relative;">
             <div style="flex:1;">
-                <h2 style="margin:0; font-size:18px; color:#38bdf8; display:flex; align-items:center; gap:10px;">⚙️ <span>${conf.title}</span>
-                    <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://regex101.com/', '_blank'); return false;" style="cursor:pointer; margin-left:auto; margin-right:30px; font-size:13px; color:#10b981; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; border:1px solid #10b981; padding:4px 10px; border-radius:6px; background:rgba(16, 185, 129, 0.1); max-width:max-content; flex:0 0 auto;">📚 REGEX HELPER ENGINE ↗</button>
-                </h2>
+                <h2 style="margin:0; font-size:18px; color:#38bdf8; display:flex; align-items:center; gap:10px;">⚙️ <span>${conf.title}</span></h2>
                 <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted); padding-right:30px;">Visually verify logic mappings. As you type, the engine evaluates your strings instantly against the cached target.</p>
             </div>
-            <button onclick="window.${conf.closeModalFn}()" class="btn-red" style="width:max-content; padding:6px 15px; margin-left:15px; border-radius:4px; font-size:13px; font-weight:bold; height:32px; align-self:center; flex:0 0 auto;" title="Close Window">Close</button>
+            <div style="display:flex; align-items:center; gap:15px; margin-top:-6px;">
+                <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://regex101.com/', '_blank'); return false;" style="cursor:pointer; font-size:13px; color:#10b981; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; border:1px solid #10b981; padding:0 15px; border-radius:6px; background:rgba(16, 185, 129, 0.1); max-width:max-content; height:32px;">📚 REGEX HELPER ENGINE ↗</button>
+                <button onclick="window.${conf.closeModalFn}()" class="btn-ghost-base btn-ghost-red" style="font-size:13px; font-weight:bold; height:32px; width: max-content; padding: 0 15px;" title="Close Window">Close</button>
+            </div>
         </div>
         
         <div style="display:flex; flex:1; overflow:hidden;">
@@ -1373,9 +1374,9 @@ window.openGlobalRegexPlayground = function(type) {
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:11px; color:#fff; font-weight:bold;">Active Regex Profile</span>
                         <div style="display:flex; gap:6px;">
-                            <button onclick="window.${conf.saveNewFn}()" class="btn-blue btn-sm" style="font-size:9px; padding:3px 6px;">💾 Save As New</button>
-                            <button id="btnOverwritePreset" onclick="window.${conf.overwriteFn}()" class="btn-orange btn-sm" style="font-size:9px; padding:3px 6px; display:none;">🔄 Overwrite</button>
-                            <button id="btnDeletePreset" onclick="window.${conf.deleteFn}()" class="btn-primary btn-sm" style="background:#ef4444; border-color:#ef4444; color:white; font-size:9px; padding:3px 6px; display:none;">🗑️ Delete</button>
+                            <button onclick="window.${conf.saveNewFn}()" class="btn-ghost-base btn-ghost-blue btn-sm" style="font-size:9px;">💾 Save As New</button>
+                            <button id="btnOverwritePreset" onclick="window.${conf.overwriteFn}()" class="btn-ghost-base btn-ghost-brand btn-sm" style="font-size:9px; display:none;">🔄 Overwrite</button>
+                            <button id="btnDeletePreset" onclick="window.${conf.deleteFn}()" class="btn-ghost-base btn-ghost-red btn-sm" style="font-size:9px; display:none;">🗑️ Delete</button>
                         </div>
                     </div>
                     <select id="${conf.presetDropdownId}" class="input-dark" style="font-size:11px; padding:4px; width:100%; border:1px solid ${type==='orders'?'#38bdf8':'#f59e0b'};" onchange="window.${conf.onDropdownChangeFn}()"></select>
@@ -1414,8 +1415,8 @@ window.openGlobalRegexPlayground = function(type) {
                 <h3 style="margin:0 0 10px 0; color:#f59e0b; display:flex; justify-content:space-between; align-items:center;">
                     🎯 Live Target Text Payload
                     <div style="display:flex; gap:6px;">
-                        <button id="btnToggleView" onclick="window.${conf.toggleViewFn}()" class="btn-blue btn-sm" style="font-size:10px;">👁️ VIEW SOURCE HTML</button>
-                        <button onclick="window.${conf.resetFn}()" class="btn-primary btn-sm" style="background:#ef4444; border:1px solid #ef4444; color:white; font-size:10px;">RESET TO DEFAULTS</button>
+                        <button id="btnToggleView" onclick="window.${conf.toggleViewFn}()" class="btn-ghost-base btn-ghost-blue btn-sm" style="font-size:10px;">👁️ VIEW SOURCE HTML</button>
+                        <button onclick="window.${conf.resetFn}()" class="btn-ghost-base btn-ghost-red btn-sm" style="font-size:10px;">RESET TO DEFAULTS</button>
                     </div>
                 </h3>
                 <input type="text" id="${conf.searchBoxId}" class="input-dark" style="margin-bottom:10px; font-size:12px; font-family:monospace; width:100%;" placeholder="🔍 Search:   Type to instantly find and highlight string matches..." onkeyup="window.${conf.evaluatorAllFn}()">
