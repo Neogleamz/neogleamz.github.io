@@ -6,18 +6,37 @@ window.toggleFgiCategory = function(cat) {
     localStorage.setItem('fgiCategoryState', JSON.stringify(window.fgiCategoryState));
     renderFgiTable(); 
 };
-function sortFGI(c) { if(isResizing) return; currentFgiSort = { column: c, direction: currentFgiSort.column===c && currentFgiSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentFgiSort', currentFgiSort); renderFgiTable(); }
+function sortFGI(cat, c) { if(isResizing) return; let base=currentFgiSort[cat]||{column:'n',direction:'asc'}; currentFgiSort[cat] = { column: c, direction: base.column===c && base.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentFgiSort', currentFgiSort); renderFgiTable(); }
 function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentInvSort', currentInvSort); renderInventoryTable(); }
 
 function renderFgiTable() {
     const wrap = document.getElementById('fgiTableWrap'); if(!wrap) return;
-    let ths = ` <th class="${currentFgiSort.column==='n'?'sorted-'+currentFgiSort.direction:''}" onclick="sortFGI('n')">Product Name</th> <th class="${currentFgiSort.column==='b'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('b')" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentFgiSort.column==='pb'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('pb')" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentFgiSort.column==='sold'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('sold')" style="border-bottom:2px solid #ef4444;">Sold</th> <th class="${currentFgiSort.column==='s'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('s')" style="border-bottom:2px solid #10b981;">Stock</th> <th class="${currentFgiSort.column==='ms'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('ms')" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentFgiSort.column==='net'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('net')">NET</th> <th class="${currentFgiSort.column==='msrpv'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('msrpv')">MSRP</th> <th class="${currentFgiSort.column==='tv'?'sorted-'+currentFgiSort.direction:''} text-right" onclick="sortFGI('tv')">Assets</th> `;
-    let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
+    if (!currentFgiSort || typeof currentFgiSort.column !== 'undefined') {
+        currentFgiSort = {
+            'cat-retail': { column: 'n', direction: 'asc' },
+            'cat-sub': { column: 'n', direction: 'asc' },
+            'cat-print': { column: 'n', direction: 'asc' },
+            'cat-label': { column: 'n', direction: 'asc' }
+        };
+    }
+
+    const getTh = (cat, col, label, color) => `<th class="${currentFgiSort[cat].column===col?'sorted-'+currentFgiSort[cat].direction:''} text-right" onclick="sortFGI('${cat}', '${col}')" style="${color ? 'border-bottom:2px solid '+color+';' : ''}">${label}</th>`;
+    const getNameTh = (cat) => `<th class="${currentFgiSort[cat].column==='n'?'sorted-'+currentFgiSort[cat].direction:''}" onclick="sortFGI('${cat}', 'n')">Product Name</th>`;
+
+    const schemas = {
+        'cat-retail': `<tr>${getNameTh('cat-retail')} ${getTh('cat-retail','b','PROD','#3b82f6')} ${getTh('cat-retail','pb','PROTO','#8b5cf6')} ${getTh('cat-retail','sold','SOLD','#ef4444')} ${getTh('cat-retail','warranty','WRTY','#fbbf24')} ${getTh('cat-retail','s','STOCK','#10b981')} ${getTh('cat-retail','ms','MIN','#f97316')} ${getTh('cat-retail','tv','ASSETS')} ${getTh('cat-retail','net','NET')} ${getTh('cat-retail','msrpv','MSRP')}</tr>`,
+        'cat-sub': `<tr>${getNameTh('cat-sub')} ${getTh('cat-sub','b','PROD','#3b82f6')} ${getTh('cat-sub','pb','PROTO','#8b5cf6')} ${getTh('cat-sub','c_prod','CONS','#ef4444')} ${getTh('cat-sub','yld','YLD %','#ec4899')} ${getTh('cat-sub','scrap','SCRAP','#ef4444')} ${getTh('cat-sub','warranty','WRTY','#fbbf24')} ${getTh('cat-sub','s','STOCK','#10b981')} ${getTh('cat-sub','ms','MIN','#f97316')} ${getTh('cat-sub','tv','ASSETS')}</tr>`,
+        'cat-print': `<tr>${getNameTh('cat-print')} ${getTh('cat-print','b','PROD','#3b82f6')} ${getTh('cat-print','pb','PROTO','#8b5cf6')} ${getTh('cat-print','yld','YLD %','#ec4899')} ${getTh('cat-print','scrap','SCRAP','#ef4444')} ${getTh('cat-print','s','STOCK','#10b981')} ${getTh('cat-print','ms','MIN','#f97316')} ${getTh('cat-print','tv','ASSETS')}</tr>`,
+        'cat-label': `<tr>${getNameTh('cat-label')} ${getTh('cat-label','b','PROD','#3b82f6')} ${getTh('cat-label','c_prod','CONS','#ef4444')} ${getTh('cat-label','s','STOCK','#10b981')} ${getTh('cat-label','ms','MIN','#f97316')} ${getTh('cat-label','tv','ASSETS')}</tr>`
+    };
+
+    let h = ``;
     let a = Object.keys(productsDB).map(p => { 
         let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0, consumed_qty: 0, prototype_produced_qty: 0, scrap_qty: 0, manual_adjustment: 0}; 
         let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; 
         let c_prod = parseFloat(i.production_consumed_qty) || 0; let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
-        let s = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+        let warranty = 0; if (typeof salesDB !== 'undefined') { warranty = salesDB.filter(s => s.internal_recipe_name === p && (s.transaction_type === 'Replacement / Warranty' || s.transaction_type === 'Warranty' || s.transaction_type === 'Post-Ship Exchange')).reduce((sum, s) => sum + (parseFloat(s.qty_sold) || 0), 0); }
+        let s = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);
         let breakdown = calculateProductBreakdown(p);
         let tv = s * breakdown.total;
         let is3D = !!(productsDB[p] && productsDB[p].is_3d_print);
@@ -26,40 +45,93 @@ function renderFgiTable() {
         let msrpv = s * unit_msrp;
         let total_net = unit_msrp > 0 ? (unit_msrp - breakdown.total) * s : 0;
         let isLabel = !!(productsDB[p] && productsDB[p].is_label);
-        return { k: k, n: p, b: b, pb: pb, sold: sold, s: s, ms: ms, tc: breakdown.total, msrpv: msrpv, tv: tv, net: total_net, isSub: !!isSubassemblyDB[p], is3D: is3D, isLabel: isLabel }; 
+        let yld = 100; let total_attempt = b + pb; let good_qty = total_attempt - scrap; if (total_attempt > 0) yld = (good_qty / total_attempt) * 100;
+        return { k: k, n: p, b: b, pb: pb, yld: yld, scrap: scrap, warranty: warranty, sold: sold, c_prod: c_prod, s: s, ms: ms, tc: breakdown.total, msrpv: msrpv, tv: tv, net: total_net, isSub: !!isSubassemblyDB[p], is3D: is3D, isLabel: isLabel }; 
     });
-    if(a.length===0){ h += "<tr><td colspan='10' style='text-align:center;'>No finished goods.</td></tr>"; }
+    if(a.length===0){ h += "<div style='text-align:center; padding: 20px; color:var(--text-muted);'>No finished goods.</div>"; }
     else {
-        let sortFn = (x,y) => { let u = x[currentFgiSort.column]; let v = y[currentFgiSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentFgiSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentFgiSort.direction==='asc'?-1:1; if(u>v) return currentFgiSort.direction==='asc'?1:-1; return 0; };
+        let sortFn = (cat) => (x,y) => { let cfg = currentFgiSort[cat] || {column:'n', direction:'asc'}; let u = x[cfg.column]; let v = y[cfg.column]; if (typeof u === 'number' && typeof v === 'number') return cfg.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return cfg.direction==='asc'?-1:1; if(u>v) return cfg.direction==='asc'?1:-1; return 0; };
         let groups = [
-            { id: 'cat-retail', name: 'Retail Products', icn: '📦', items: a.filter(x => !x.is3D && !x.isSub && !x.isLabel).sort(sortFn) },
-            { id: 'cat-sub',    name: 'Sub-Assemblies',  icn: '⚙️',  items: a.filter(x => x.isSub && !x.is3D).sort(sortFn) },
-            { id: 'cat-print',  name: '3D Prints',       icn: '🖨️',  items: a.filter(x => x.is3D).sort(sortFn) },
-            { id: 'cat-label',  name: 'Custom Labels',   icn: '🏷️',  items: a.filter(x => x.isLabel).sort(sortFn) }
+            { id: 'cat-retail', name: 'Retail Products', icn: '📦', items: a.filter(x => !x.is3D && !x.isSub && !x.isLabel).sort(sortFn('cat-retail')) },
+            { id: 'cat-sub',    name: 'Sub-Assemblies',  icn: '⚙️',  items: a.filter(x => x.isSub && !x.is3D).sort(sortFn('cat-sub')) },
+            { id: 'cat-print',  name: '3D Prints',       icn: '🖨️',  items: a.filter(x => x.is3D).sort(sortFn('cat-print')) },
+            { id: 'cat-label',  name: 'Custom Labels',   icn: '🏷️',  items: a.filter(x => x.isLabel).sort(sortFn('cat-label')) }
         ];
 
         groups.forEach(g => {
             if(g.items.length === 0) return;
             let isExp = window.fgiCategoryState[g.id] !== false;
             let chevron = isExp ? '▼' : '▶';
-            h += `<tr class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><td colspan="9" style="font-weight:900; color:var(--primary-color); padding:10px 15px; font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1);"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></td></tr>`;
             
-            g.items.forEach(x => { 
-                let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); 
-                let netColor = x.net > 0 ? '#10b981' : (x.net < 0 ? '#ef4444' : 'var(--text-muted)');
-                let isLow = x.ms > 0 && x.s < x.ms; 
-                let sc = x.s < 0 ? 'negative-stock' : (isLow ? 'low-stock' : 'highlight-calc');
-                h += `<tr class="${g.id}" style="display:${isExp?'table-row':'none'};"><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:${netColor};">$${x.net.toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:var(--text-main);">$${(x.msrpv||0).toFixed(2)}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td></tr>`; 
-            });
+            h += `<div class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s; padding:10px 15px; border-bottom:1px solid rgba(255,255,255,0.1); margin-top:20px; border-radius: 6px 6px 0 0;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><span style="font-weight:900; color:var(--primary-color); font-size:13px; text-transform:uppercase; letter-spacing:1px;"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></span></div>`;
+            
+            if(isExp) {
+                h += `<table class="neo-table" style="width:100%; margin-bottom:0; background:rgba(0,0,0,0.1); border-top:none; border-radius: 0 0 6px 6px;">`;
+                h += `<thead>${schemas[g.id]}</thead><tbody>`;
+                
+                g.items.forEach(x => { 
+                    let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); 
+                    let netColor = x.net > 0 ? '#10b981' : (x.net < 0 ? '#ef4444' : 'var(--text-muted)');
+                    let isLow = x.ms > 0 && x.s < x.ms; 
+                    let sc = x.s < 0 ? 'negative-stock' : (isLow ? 'low-stock' : 'highlight-calc');
+                    let yldColor = x.yld >= 90 ? '#10b981' : (x.yld >= 75 ? '#f59e0b' : '#ef4444');
+                    
+                    let trHtml = `<tr class="${g.id}">`;
+                    trHtml += `<td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td>`;
+                    
+                    if (g.id === 'cat-retail') {
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#fbbf24; font-weight:bold;">${x.warranty.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
+                        trHtml += `<td class="text-right" style="font-weight:bold; color:${netColor};">$${x.net.toFixed(2)}</td>`;
+                        trHtml += `<td class="text-right" style="font-weight:bold; color:var(--text-main);">$${(x.msrpv||0).toFixed(2)}</td>`;
+                    }
+                    else if (g.id === 'cat-sub') {
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'production_consumed_qty')">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'scrap_qty')">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#fbbf24; font-weight:bold;">${x.warranty.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
+                    }
+                    else if (g.id === 'cat-print') {
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'scrap_qty')">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
+                    }
+                    else if (g.id === 'cat-label') {
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'production_consumed_qty')">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
+                    }
+                    
+                    trHtml += `</tr>`;
+                    h += trHtml;
+                });
+                h += `</tbody></table>`;
+            }
         });
     }
-    wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('fgiTableWrap');
+    wrap.innerHTML = h; applyTableInteractivity('fgiTableWrap');
 }
 
 function renderInventoryTable() {
     const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
     renderFgiTable();
-    let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:2px solid #ef4444;">CONSUMED</th> <th class="${currentInvSort.column==='pc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('pc')" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentInvSort.column==='prc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('prc')" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentInvSort.column==='sq'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('sq')" style="border-bottom:2px solid #b91c1c;">LOSS</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')" style="border-bottom:2px solid #0ea5e9;">ADJMT</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('ms')" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:2px solid #f59e0b;">Current Stock</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">Total Value</th> `;
+    let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:2px solid #ef4444;">CONS</th> <th class="${currentInvSort.column==='pc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('pc')" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentInvSort.column==='prc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('prc')" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentInvSort.column==='sq'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('sq')" style="border-bottom:2px solid #b91c1c;">SCRAP</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')" style="border-bottom:2px solid #0ea5e9;">ADJMT</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('ms')" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:2px solid #f59e0b;">STOCK</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">ASSETS</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, n:c.itemName, p:c.totalQty, c:i.consumed_qty, sq:i.scrap_qty, a:i.manual_adjustment, ms:i.min_stock, s:s, up:up, tp:tp, pc: (i.prototype_consumed_qty||0), prc: (i.production_consumed_qty||0) }; });
     if(a.length===0){ h += "<tr><td colspan='12' style='text-align:center;'>No raw inventory.</td></tr>"; }
@@ -107,7 +179,7 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         else if(mode === 'stock') { payload.manual_adjustment = v - (p - c - sq); if(payload.manual_adjustment === a) return; }
         else if(mode === 'manual_adjustment') { payload.manual_adjustment = v; if(payload.manual_adjustment === a) return; }
         else if(mode === 'min_stock') { payload.min_stock = Math.abs(v); if(payload.min_stock === inventoryDB[rKey].min_stock) return; }
-        else if(mode === 'scrap_qty') { payload.scrap_qty = Math.abs(v); if(payload.scrap_qty === sq) return; }
+        else if(mode === 'scrap_qty') { payload.scrap_qty = Math.abs(v); if(payload.scrap_qty === (inventoryDB[rKey].scrap_qty||0)) return; }
 
         sysLog(`Inv Edit: [${rKey}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); 
         const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
@@ -334,7 +406,7 @@ function printReorderReport() {
             html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px; background:#f8fafc;">✅ All monitored raw stock levels are optimal.</p>`; 
         } 
         else {
-            html += `<table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>Current Stock</th><th>Dep. Req</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
+            html += `<table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>STOCK</th><th>Dep. Req</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
             let grandTotal = 0;
             items.sort((a,b) => b.cost - a.cost).forEach(x => { grandTotal += x.cost; let displaySpec = x.sp === '(Mixed Specs)' ? '' : x.sp; html += `<tr><td>${x.nn || ''}</td><td>${x.n}</td><td>${displaySpec}</td><td style="color:#ef4444; font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td style="color:#64748b;">${x.depDemand > 0 ? x.depDemand.toFixed(2).replace(/\.?0+$/,'') : '-'}</td><td>${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td style="font-weight:bold;">${x.short.toFixed(2).replace(/\.?0+$/,'')}</td><td>$${x.cost.toFixed(2)}</td></tr>`; });
             html += `<tr><td colspan="7" style="text-align:right; font-weight:bold; padding-top: 15px;">Total Capital Required:</td><td style="font-weight:bold; padding-top: 15px;">$${grandTotal.toFixed(2)}</td></tr>`;
