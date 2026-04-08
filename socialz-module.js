@@ -247,7 +247,23 @@
             renderSkaters();
         }
 
-        function handleSortChange(v) { socialzCurrentSort = v; if (window.saveSort) window.saveSort('socialzCurrentSort', socialzCurrentSort); renderSkaters(); }
+        function handleSortChange(v) { 
+            if (typeof isResizing !== 'undefined' && isResizing) return; 
+            if (socialzCurrentSort === v) {
+                socialzSortDirection = socialzSortDirection === 'asc' ? 'desc' : 'asc';
+                if (window.saveSort) window.saveSort('socialzSortDirection', socialzSortDirection);
+            } else {
+                socialzCurrentSort = v; 
+                socialzSortDirection = 'desc'; // Default numerical sorts to desc layout priority visually
+                if (window.saveSort) {
+                    window.saveSort('socialzCurrentSort', socialzCurrentSort);
+                    window.saveSort('socialzSortDirection', socialzSortDirection);
+                }
+            }
+            const icon = document.getElementById('sort-dir-icon');
+            if (icon) icon.className = socialzSortDirection === 'asc' ? 'fa-solid fa-arrow-up-wide-short' : 'fa-solid fa-arrow-down-short-wide';
+            renderSkaters(); 
+        }
 
         // --- Core Rendering ---
         function renderSkaters() {
@@ -270,11 +286,14 @@
                 let res = 0;
                 switch(socialzCurrentSort) {
                     case 'alpha': res = a.name.localeCompare(b.name); break;
+                    case 'location': res = (a.location || '').localeCompare(b.location || ''); break;
+                    case 'region': res = (a.region || '').localeCompare(b.region || ''); break;
+                    case 'style': res = (a.style || '').localeCompare(b.style || ''); break;
                     case 'total': res = a.rawFollowers - b.rawFollowers; break;
-                    case 'ig': res = parseFollowerCount(a.followers.ig) - parseFollowerCount(b.followers.ig); break;
-                    case 'tt': res = parseFollowerCount(a.followers.tt) - parseFollowerCount(b.followers.tt); break;
-                    case 'yt': res = parseFollowerCount(a.followers.yt) - parseFollowerCount(b.followers.yt); break;
-                    case 'fb': res = parseFollowerCount(a.followers.fb) - parseFollowerCount(b.followers.fb); break;
+                    case 'ig': res = a.followers.ig - b.followers.ig; break;
+                    case 'tt': res = a.followers.tt - b.followers.tt; break;
+                    case 'yt': res = a.followers.yt - b.followers.yt; break;
+                    case 'fb': res = a.followers.fb - b.followers.fb; break;
                 }
                 return socialzSortDirection === 'asc' ? res : -res;
             });
