@@ -318,26 +318,26 @@ function executeBatchPrint() {
             if (sizeSelect === '2.25x1.25') {
                 wrapper.style.cssText = `width: 2.25in; height: 1.25in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 const shortName = item.name.length > 28 ? item.name.substring(0, 26) + '...' : item.name;
-                wrapper.innerHTML = `<div style="font-size:8pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.8in;"></svg>`;
+                wrapper.innerHTML = `<div style="font-size:8pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:0.8in; height:0.8in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:0.8in;'}">${isQR ? '' : '</svg>'}`;
             }
             else if (sizeSelect === '1.125x3.5') {
                 wrapper.style.cssText = `width: 3.5in; height: 1.125in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.1in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 const shortName = item.name.length > 40 ? item.name.substring(0, 38) + '...' : item.name;
-                wrapper.innerHTML = `<div style="font-size:10pt; font-weight:900; line-height:1; margin-bottom:4px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.75in;"></svg>`;
+                wrapper.innerHTML = `<div style="font-size:10pt; font-weight:900; line-height:1; margin-bottom:4px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:0.75in; height:0.75in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:0.75in;'}">${isQR ? '' : '</svg>'}`;
             }
             else if (sizeSelect === '0.75x2') {
                 wrapper.style.cssText = `width: 2in; height: 0.75in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.02in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 const shortName = item.name.length > 22 ? item.name.substring(0, 20) + '...' : item.name;
-                wrapper.innerHTML = `<div style="font-size:6pt; font-weight:900; line-height:1; margin-bottom:1px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.5in;"></svg>`;
+                wrapper.innerHTML = `<div style="font-size:6pt; font-weight:900; line-height:1; margin-bottom:1px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:0.5in; height:0.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:0.5in;'}">${isQR ? '' : '</svg>'}`;
             }
             else if (sizeSelect === '2.125x1') {
                 wrapper.style.cssText = `width: 2.125in; height: 1in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 const shortName = item.name.length > 24 ? item.name.substring(0, 22) + '...' : item.name;
-                wrapper.innerHTML = `<div style="font-size:7pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div><svg id="${svgId}" style="width:100%; height:0.6in;"></svg>`;
+                wrapper.innerHTML = `<div style="font-size:7pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:0.6in; height:0.6in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:0.6in;'}">${isQR ? '' : '</svg>'}`;
             }
             else if (sizeSelect === '4x6') {
                 wrapper.style.cssText = `width: 4in; height: 6in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.25in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
-                wrapper.innerHTML = `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div><svg id="${svgId}" style="width:100%; height:2.5in;"></svg><div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`;
+                wrapper.innerHTML = `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`;
             }
             else if (sizeSelect === '1x1') {
                 wrapper.style.cssText = `width: 1in; height: 1in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.02in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
@@ -345,39 +345,57 @@ function executeBatchPrint() {
             }
             else if (sizeSelect === '3x1') {
                 wrapper.style.cssText = `width: 3in; height: 1in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.1in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
-                wrapper.innerHTML = `<div style="font-size:10pt; font-weight:900; line-height:1; margin-bottom:4px;">${item.name}</div><svg id="${svgId}" style="width:100%; height:0.6in;"></svg>`;
+                wrapper.innerHTML = `<div style="font-size:10pt; font-weight:900; line-height:1; margin-bottom:4px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:0.6in; height:0.6in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:0.6in;'}">${isQR ? '' : '</svg>'}`;
             }
             else {
                 wrapper.style.cssText = `width: 100%; height: auto; display: flex; flex-direction: column; align-items: flex-start; padding: 20px; background: white; color: black;`;
-                wrapper.innerHTML = `<div style="font-size:18px; font-weight:bold; margin-bottom:10px;">${item.name}</div><svg id="${svgId}" style="max-width:300px; height:100px; padding:10px; border:1px dashed #ccc;"></svg>`;
+                wrapper.innerHTML = `<div style="font-size:18px; font-weight:bold; margin-bottom:10px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:100px; height:100px; object-fit:contain; margin:0 auto; padding:10px; border:1px dashed #ccc; display:block;' : 'max-width:300px; height:100px; padding:10px; border:1px dashed #ccc;'}">${isQR ? '' : '</svg>'}`;
             }
 
             printArea.appendChild(wrapper);
 
             // Execute barcode rendering based on selected type
             if (isQR) {
-                // QR Code — always render to canvas regardless of size
-                const canvas = document.getElementById(svgId);
-                if (canvas && typeof QRCode !== 'undefined') {
-                    const qrSize = sizeSelect === '4x6' ? 280 : sizeSelect === '1x1' ? 80 : 120;
-                    QRCode.toCanvas(canvas, item.slug, { margin: 1, width: qrSize }, function(err) { if(err) console.error(err); });
+                if (typeof bwipjs !== 'undefined') {
+                    try {
+                        const offC = document.createElement('canvas');
+                        bwipjs.toCanvas(offC, { bcid: 'qrcode', text: item.slug, scale: 3 });
+                        const imgEl = document.getElementById(svgId);
+                        if (imgEl) imgEl.src = offC.toDataURL('image/png');
+                    } catch(e) {
+                        const imgEl = document.getElementById(svgId);
+                        if (imgEl) imgEl.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID QR]</div>`;
+                    }
                 }
             } else if (sizeSelect !== '1x1') {
                 if (typeof JsBarcode !== 'undefined') {
-                    JsBarcode(`#${svgId}`, item.slug, {
-                        format: typeSelect,
-                        lineColor: "#000",
-                        width: 2,
-                        height: 40,
-                        displayValue: true,
-                        fontSize: 12,
-                        margin: 0
-                    });
+                    try {
+                        JsBarcode(`#${svgId}`, item.slug, {
+                            format: typeSelect,
+                            lineColor: "#000",
+                            width: 2,
+                            height: 40,
+                            displayValue: true,
+                            fontSize: 12,
+                            margin: 0
+                        });
+                    } catch(e) {
+                        const ele = document.getElementById(svgId);
+                        if(ele) ele.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID FORMAT:\n${typeSelect}]</div>`;
+                    }
                 }
             } else {
                 // 1x1 size default = QR
-                if (typeof QRCode !== 'undefined') {
-                    QRCode.toCanvas(document.getElementById(svgId), item.slug, { margin: 1, width: 80 }, function (err) { if(err) console.error(err); });
+                if (typeof bwipjs !== 'undefined') {
+                    try {
+                        const offC = document.createElement('canvas');
+                        bwipjs.toCanvas(offC, { bcid: 'qrcode', text: item.slug, scale: 3 });
+                        const ele = document.getElementById(svgId);
+                        if (ele) ele.src = offC.toDataURL('image/png');
+                    } catch(e) {
+                        const ele = document.getElementById(svgId);
+                        if (ele) ele.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold;">[INVALID QR]</div>`;
+                    }
                 }
             }
             
@@ -399,7 +417,7 @@ function executeBatchPrint() {
             // Auto Clear Queue as defined in standard operating logic
             clearBarcodzSpool();
         }, 1500); // cleanup delay allowing OS to snapshot
-    }, 200);
+    }, 750); // Increased DOM paint delay to guarantee async QR canvas finishes generating before Print Snapshot!
 }
 
 async function consumeThermalMedia(qty, activeSizeSelectId) {

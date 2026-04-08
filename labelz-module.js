@@ -453,12 +453,27 @@ function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
                 isBarcode: true,
                 barcodeOpts: { bcid: format, text: codeStr } // store state for regeneration
             });
-            img.scaleToWidth(Math.min(150, fCanvas.width * 0.8));
+            img.scaleToWidth(fCanvas.width * 0.6);
             fCanvas.add(img);
             fCanvas.setActiveObject(img);
         });
     } catch(e) {
         console.error(e);
+        tmpCanvas.width = 150; tmpCanvas.height = 30;
+        const ctx = tmpCanvas.getContext('2d');
+        ctx.fillStyle = '#ff0000'; ctx.fillRect(0,0,150,30);
+        ctx.fillStyle = '#ffffff'; ctx.font = '12px Arial'; ctx.textAlign = 'center'; ctx.fillText('INVALID FORMAT', 75, 20);
+        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), function(img) {
+            img.set({
+                left: fCanvas.width / 2, top: fCanvas.height / 2,
+                originX: 'center', originY: 'center',
+                isBarcode: true,
+                barcodeOpts: { bcid: format, text: codeStr }
+            });
+            img.scaleToWidth(fCanvas.width * 0.6);
+            fCanvas.add(img);
+            fCanvas.setActiveObject(img);
+        });
         alert('Could not render barcode: ' + e.message);
     }
 }
@@ -479,7 +494,7 @@ function addLabelzQR(codeStr = 'NEOGLEAMZ') {
                 isBarcode: true,
                 barcodeOpts: { bcid: 'qrcode', text: codeStr }
             });
-            img.scaleToWidth(Math.min(80, fCanvas.width * 0.5));
+            img.scaleToWidth(fCanvas.width * 0.3);
             fCanvas.add(img);
             fCanvas.setActiveObject(img);
         });
@@ -510,7 +525,16 @@ function regenerateBarcodeImage(obj, text, format) {
         });
     } catch(e) {
         console.warn('Barcode gen error:', e);
-        alert('Barcode gen error: ' + e.message);
+        // Draw visual error indicator
+        tmpCanvas.width = 150; tmpCanvas.height = 30;
+        const ctx = tmpCanvas.getContext('2d');
+        ctx.fillStyle = '#ff0000'; ctx.fillRect(0,0,150,30);
+        ctx.fillStyle = '#ffffff'; ctx.font = '12px Arial'; ctx.textAlign = 'center'; ctx.fillText('INVALID FORMAT', 75, 20);
+        obj.setSrc(tmpCanvas.toDataURL('image/png'), function() {
+            obj.set({ barcodeOpts: { bcid: format, text: text }});
+            fCanvas.renderAll();
+        });
+        alert('Format Constraint Violation: \n' + e.message);
     }
 }
 
@@ -583,8 +607,7 @@ function onCanvasSelection(e) {
             <select id="lblzBcFormat" onchange="updBc()" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
                 <option value="code128" ${opts.bcid==='code128'?'selected':''}>CODE 128 (Universal)</option>
                 <option value="qrcode" ${opts.bcid==='qrcode'?'selected':''}>QR Code</option>
-                <option value="ean13" ${opts.bcid==='ean13'?'selected':''}>EAN-13 (Retail)</option>
-                <option value="upca" ${opts.bcid==='upca'?'selected':''}>UPC-A</option>
+                <option value="code39" ${opts.bcid==='code39'?'selected':''}>CODE 39</option>
             </select></div>
             <div>
                 <label style="font-size:10px; color:#0ea5e9;">Encoded Data</label>

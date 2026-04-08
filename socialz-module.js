@@ -97,7 +97,7 @@
             return `
                 <a href="${link}" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg transition-all ${hb} group flex-1 min-w-0 border shadow-sm hover:shadow-md" style="background: var(--bg-panel); border-color: var(--border-color);">
                     <span class="text-sm ${tc} mb-1 truncate w-full font-medium tracking-tight text-center px-1">${handle}</span>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 min-w-0 w-full">
                         <i class="fa-brands ${icon} ${tc} text-4xl group-hover:scale-110 transition-transform"></i>
                         <span class="text-base font-bold dark:text-slate-300">${followers}</span>
                     </div>
@@ -379,9 +379,9 @@
                         {k: 'total', label: 'Total Reach'},
                         {k: 'edit', label: 'Edit', min: '80px'}
                     ];
-                    let ths = tCols.map(c => `<th onclick="${['fav','viral','edit'].includes(c.k) ? '' : `handleSortChange('${c.k}')`}" class="${c.k === socialzCurrentSort ? (socialzSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} ${c.label==='Name'||c.label==='Location'?'text-left':'text-center'}" style="padding:10px; cursor:pointer; ${c.min ? 'min-width:'+c.min+';' : ''}" title="Sort by ${c.label}">${c.label}</th>`).join('');
+                    let ths = tCols.map(c => `<th onclick="${['fav','viral','edit'].includes(c.k) ? '' : `handleSortChange('${c.k}')`}" class="${c.k === socialzCurrentSort ? (socialzSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} ${c.label==='Name'||c.label==='Location'?'text-left':'text-center'} px-3 py-2 cursor-pointer select-none" title="Sort by ${c.label}">${c.label}</th>`).join('');
                     
-                    let tableHtml = `<div style="overflow-x:auto; width:100%;"><table class="neo-table" id="socialzListTable" style="width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; text-align:left;">
+                    let tableHtml = `<div style="overflow-x:auto; width:100%;"><table class="neo-table hover-rows" id="socialzListTable" style="width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; text-align:left;">
                         <thead style="position:sticky; top:0; z-index:40; background:var(--bg-panel);"><tr style="color:var(--text-heading); border-bottom:1px solid var(--border-color); font-weight:800;">${ths}</tr></thead><tbody id="socialz-table-body">`;
                     
                     tableHtml += filtered.map(s => {
@@ -402,28 +402,28 @@
                         const parsedStyles = s.style ? s.style.split(';').map(st => `<span class="bg-[var(--bg-input)] px-1.5 py-0.5 rounded mx-0.5 text-[9px] uppercase font-bold border" style="border-color:var(--border-color)">${st.trim()}</span>`).join('') : '-';
                         
                         return `<tr style="border-bottom:1px solid var(--border-color); background:var(--bg-panel);" onmouseover="this.style.background='rgba(59, 130, 246, 0.05)'" onmouseout="this.style.background='var(--bg-panel)'">
-                            <td style="padding:4px; text-align:center; width:40px;">
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;">
                                 <button onclick="toggleFavorite(${originalIndex}, event)" class="hover:scale-110 transition-transform flex items-center justify-center shrink-0 w-full ${s.isFavorite ? 'text-red-500' : 'text-slate-400'}">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
                             </td>
-                            <td style="padding:4px; font-weight:bold; color:var(--text-heading); text-align:left; min-width:140px;">
-                                <div class="flex items-center gap-2">
+                            <td class="trunc-col" style="padding:4px 12px; font-weight:bold; color:var(--text-heading); text-align:left;">
+                                <div class="flex items-center gap-2 min-w-0 w-full">
                                     <div class="w-8 h-8 rounded-full overflow-hidden border shadow-sm flex items-center justify-center text-[10px] relative" style="background:var(--bg-input); border-color:var(--border-color); color:var(--text-muted); flex-shrink:0;">
                                         <div class="absolute inset-0 flex items-center justify-center z-0">${s.name.charAt(0)}</div>
                                         ${src ? `<img loading="lazy" src="${src}" class="w-full h-full object-cover relative z-10" onerror="this.style.display='none'">` : ''}
                                     </div>
-                                    <span class="truncate" style="max-width:180px;">${s.name}</span>
+                                    <span class="truncate w-full block">${s.name}</span>
                                 </div>
                             </td>
-                            <td style="padding:4px; color:var(--text-muted); text-align:left;">${s.location || '-'}</td>
-                            <td style="padding:4px; text-align:center;"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="${regStyles}">${s.region || '-'}</span></td>
-                            <td style="padding:4px; text-align:center;">${parsedStyles}</td>
-                            <td style="padding:4px; text-align:center;"><a href="${s.links.ig||'#'}" target="_blank" style="font-weight:800; color:#ec4899;">${s.followers.ig||'0'}</a></td>
-                            <td style="padding:4px; text-align:center;"><a href="${s.links.tt||'#'}" target="_blank" style="font-weight:800; color:#06b6d4;">${s.followers.tt||'0'}</a></td>
-                            <td style="padding:4px; text-align:center;"><a href="${s.links.yt||'#'}" target="_blank" style="font-weight:800; color:#ef4444;">${s.followers.yt||'0'}</a></td>
-                            <td style="padding:4px; text-align:center;"><a href="${s.links.fb||'#'}" target="_blank" style="font-weight:800; color:#3b82f6;">${s.followers.fb||'0'}</a></td>
-                            <td style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="hover:scale-125 transition-transform flex items-center justify-center shrink-0 w-full h-full" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
-                            <td style="padding:4px; text-align:right; font-weight:900; color:var(--text-heading); font-size:13px;">${formatCountShort(s.rawFollowers)}</td>
-                            <td style="padding:4px; text-align:center;"><button onclick="editSkater(${originalIndex})" class="px-2 py-1 rounded transition-colors hover:text-[#f97316] font-bold text-[9px] flex items-center gap-1 mx-auto" style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color);"><i class="fa-solid fa-pen"></i> EDIT</button></td>
+                            <td class="trunc-col" style="padding:4px 12px; color:var(--text-muted); text-align:left;">${s.location || '-'}</td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="${regStyles}">${s.region || '-'}</span></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;">${parsedStyles}</td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.ig||'#'}" target="_blank" style="font-weight:800; color:#ec4899; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.ig||'0'}</a></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.tt||'#'}" target="_blank" style="font-weight:800; color:#06b6d4; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.tt||'0'}</a></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.yt||'#'}" target="_blank" style="font-weight:800; color:#ef4444; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.yt||'0'}</a></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.fb||'#'}" target="_blank" style="font-weight:800; color:#3b82f6; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.fb||'0'}</a></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="hover:scale-125 transition-transform flex items-center justify-center shrink-0 w-full h-full" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:right; font-weight:900; color:var(--text-heading); font-size:13px;">${formatCountShort(s.rawFollowers)}</td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><button onclick="editSkater(${originalIndex})" class="px-2 py-1 rounded transition-colors hover:text-[#f97316] font-bold text-[9px] flex items-center gap-1 mx-auto" style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color);"><i class="fa-solid fa-pen"></i> EDIT</button></td>
                         </tr>`;
                     }).join('');
                     
