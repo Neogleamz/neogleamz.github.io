@@ -370,7 +370,26 @@ function updateHubStats() {
                 mat += (wt * (p.qty || 1));
             });
             setStat('statLayerzMat', fmtNum(Math.round(mat)));
-            setStat('statLayerzScrap', fmtNum(Math.round(hrs/60)));
+
+            let total_farm_produced = 0;
+            let total_farm_scrap = 0;
+            if (typeof productsDB !== 'undefined' && typeof inventoryDB !== 'undefined') {
+                Object.keys(productsDB).forEach(pName => {
+                    let is3D = !!(productsDB[pName] && productsDB[pName].is_3d_print);
+                    if(is3D) {
+                        let k = `RECIPE:::${pName}`;
+                        let i = inventoryDB[k] || {};
+                        total_farm_produced += (parseFloat(i.produced_qty) || 0) + (parseFloat(i.prototype_produced_qty) || 0);
+                        total_farm_scrap += parseFloat(i.scrap_qty) || 0;
+                    }
+                });
+            }
+            if(total_farm_produced > 0) {
+                let farm_yield = ((total_farm_produced - total_farm_scrap) / total_farm_produced) * 100;
+                setStat('statLayerzScrap', farm_yield.toFixed(1) + '%');
+            } else {
+                setStat('statLayerzScrap', '100%');
+            }
         }
 
         // --- ORDERZ ---

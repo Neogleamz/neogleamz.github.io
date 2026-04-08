@@ -388,9 +388,36 @@ function renderActivePrintJob(id) {
     }
 }
 
-async function advancePrintStatus(newStatus) {
+window.submitFinalizePrint = function() {
+    let success = parseFloat(document.getElementById('finalizePrintSuccess').value) || 0;
+    let failed = parseFloat(document.getElementById('finalizePrintFailed').value) || 0;
+    document.getElementById('finalizePrintModal').style.display = 'none';
+    advancePrintStatus('Completed', true, success, failed);
+};
+
+async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess = null, finalFailed = null) {
     if (!currentPrintJob) return;
     try {
+        if (newStatus === 'Completed' && !bypassModal) {
+            document.getElementById('finalizePrintName').value = currentPrintJob.part_name;
+            document.getElementById('finalizePrintJobId').value = currentPrintJob.id;
+            let qty = parseFloat(currentPrintJob.qty) || 0;
+            document.getElementById('finalizePrintSuccess').value = qty;
+            document.getElementById('finalizePrintFailed').value = 0;
+            
+            document.getElementById('finalizePrintSuccess').oninput = function() {
+                let v = parseFloat(this.value)||0;
+                document.getElementById('finalizePrintFailed').value = Math.max(0, qty - v);
+            };
+            document.getElementById('finalizePrintFailed').oninput = function() {
+                let v = parseFloat(this.value)||0;
+                document.getElementById('finalizePrintSuccess').value = Math.max(0, qty - v);
+            };
+            
+            document.getElementById('finalizePrintModal').style.display = 'flex';
+            return;
+        }
+
         sysLog(`Print Job ${currentPrintJob.id} -> ${newStatus}`);
         setMasterStatus("Updating Status...", "mod-working");
 
@@ -405,24 +432,66 @@ async function advancePrintStatus(newStatus) {
             let manualUpserts = [];
             
             if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
-            inventoryDB[k].produced_qty += (parseFloat(currentPrintJob.qty) || 0);
+            
+            let successQ = finalSuccess !== null ? finalSuccess : (parseFloat(currentPrintJob.qty) || 0);
+            let failedQ = finalFailed !== null ? finalFailed : 0;
+            let totalAttempts = successQ + failedQ;
+            
+            let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
 
-            if (currentPrintJob.wo_id === "Manual Entry" || !currentPrintJob.wo_id) {
-                let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
-                if (typeof getDirectMaterials === 'function' && productsDB[cleanPartName]) {
-                    let exactRaws = getDirectMaterials(cleanPartName, parseFloat(currentPrintJob.qty) || 1);
-                    Object.keys(exactRaws).forEach(rawK => {
-                        let req = exactRaws[rawK];
-                        if(!inventoryDB[rawK]) inventoryDB[rawK] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+            inventoryDB[k].produced_qty += totalAttempts;
+            inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + failedQ;
+
+            let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+            if (typeof getDirectMaterials === 'function' && productsDB[cleanPartName]) {
+                let exactRaws = getDirectMaterials(cleanPartName, totalAttempts);
+                Object.keys(exactRaws).forEach(rawK => {
+                    let req = exactRaws[rawK];
+                    if(!inventoryDB[rawK]) inventoryDB[rawK] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+                    
+                    if (isScrapTicket) {
+                        inventoryDB[rawK].scrap_qty = (inventoryDB[rawK].scrap_qty || 0) + req;
+                    } else {
                         inventoryDB[rawK].consumed_qty += req;
-                        manualUpserts.push({ item_key: rawK, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
-                    });
-                }
+                    }
+                    
+                    manualUpserts.push({ item_key: rawK, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
+                });
             }
 
             manualUpserts.push({ item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
             const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert(manualUpserts, { onConflict: 'item_key' });
             if (invErr) throw new Error("Inventory update failed: " + invErr.message);
+
+            if (failedQ > 0) {
+                let isYieldEnforced = false;
+                let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
+                
+                if (isScrapTicket || (currentPrintJob.label && currentPrintJob.label.includes('[PRINT FAILURE RECOVERY]'))) {
+                    isYieldEnforced = true;
+                } else if (currentPrintJob.wo_id && currentPrintJob.wo_id !== 'Manual Entry') {
+                    let parentWO = typeof workOrdersDB !== 'undefined' ? workOrdersDB.find(w => String(w.wo_id) === String(currentPrintJob.wo_id)) : null;
+                    if (!parentWO) {
+                        try {
+                            const { data } = await supabaseClient.from('work_orders').select('*').eq('wo_id', currentPrintJob.wo_id).single();
+                            parentWO = data;
+                        } catch(e) {}
+                    }
+                    if (parentWO) {
+                        let pNameClean = parentWO.product_name.replace('RECIPE:::', '');
+                        let isSub = typeof isSubassemblyDB !== 'undefined' && !!isSubassemblyDB[pNameClean];
+                        let is3DP = typeof productsDB !== 'undefined' && !!(productsDB[pNameClean] && productsDB[pNameClean].is_3d_print);
+                        if (!isSub && !is3DP) isYieldEnforced = true;
+                    }
+                }
+                
+                if (isYieldEnforced) {
+                    let recoveryLabel = isScrapTicket ? currentPrintJob.label : `[PRINT FAILURE RECOVERY]`;
+                    if (typeof addPrintJob === 'function') {
+                        await addPrintJob(currentPrintJob.part_name, failedQ, currentPrintJob.wo_id, recoveryLabel);
+                    }
+                }
+            }
 
             // 🔄 REFRESH UI: Make sure inventory tab reflects the new stock
             if (typeof renderInventoryTable === 'function') renderInventoryTable();

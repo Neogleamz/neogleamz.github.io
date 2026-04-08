@@ -10,12 +10,12 @@ Work your way down these blocks. You can check off items `[x]`, edit them, or ad
 *Goal: Ensure baseline data is 100% accurate and prevent hidden margin bleed.*
 
 ### MAKERZ (Print Farm & Production)
-- [ ] **Feature:** Scrap & Yield Rate Logging
+- [x] **Feature:** Scrap & Yield Rate Logging
   - *Why:* True hardware cost is hidden inside failed 3D prints (spaghetti/warp). You MUST track this.
   - *Steps Needed:*
-    - [ ] Add a "Scrap/Failure" button next to "Pull" inside Work Orders.
-    - [ ] Update `production-module.js` to log failures to Supabase.
-    - [ ] Add algorithm: `(Successful Prints / Total Prints) = Yield Rate`.
+    - [x] Add a "Scrap/Failure" button next to "Pull" inside Work Orders.
+    - [x] Update `production-module.js` to log failures to Supabase.
+    - [x] Add algorithm: `(Successful Prints / Total Prints) = Yield Rate`.
 
 ### STOCKZ (Inventory Management)
 - [ ] **Feature:** Dynamic Reorder Points (ROP) & Safety Stock Alerts

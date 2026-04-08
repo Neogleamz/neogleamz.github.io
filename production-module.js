@@ -262,38 +262,61 @@ function checkWORouting() {
     if(!p || q <= 0) { rArea.style.display = 'none'; return; }
 
     let subsNeeded = {};
-    (productsDB[p] || []).forEach(part => {
-        let k = String(part.item_key || part.di_item_id || part.name || "");
-        let pq = (parseFloat(part.quantity || part.qty) || 1) * q;
-        if (k.startsWith('RECIPE:::')) {
-            let subName = k.replace('RECIPE:::', '');
-            if(isSubassemblyDB[subName]) { subsNeeded[subName] = (subsNeeded[subName] || 0) + pq; }
-        }
-    });
+    function hunt(recipeName, q_mult, depth = 0) {
+        (productsDB[recipeName] || []).forEach(part => {
+            let k = String(part.item_key || part.di_item_id || part.name || "");
+            let pq = (parseFloat(part.quantity || part.qty) || 1) * q_mult;
+            if (k.startsWith('RECIPE:::')) {
+                let subName = k.replace('RECIPE:::', '');
+                let isSub = typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[subName];
+                let is3DP = typeof productsDB !== 'undefined' && productsDB[subName] && productsDB[subName].is_3d_print;
+                if(isSub || is3DP) { 
+                    if (!subsNeeded[subName]) {
+                        subsNeeded[subName] = { req: 0, depth: depth };
+                    }
+                    subsNeeded[subName].req += pq; 
+                    hunt(subName, pq, depth + 1);
+                }
+            }
+        });
+    }
+    hunt(p, q, 0);
 
     let keys = Object.keys(subsNeeded);
-    if(keys.length === 0) { rArea.style.display = 'none'; return; }
-
+    if(keys.length === 0) { 
+        rList.innerHTML = '';
+        rArea.style.display = 'none'; 
+        return; 
+    }
     rArea.style.display = 'block'; let h = "";
     keys.forEach(k => {
-        let req = subsNeeded[k]; let invKey = `RECIPE:::${k}`; let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
+        let node = subsNeeded[k];
+        let req = node.req; let curDepth = node.depth;
+        let invKey = `RECIPE:::${k}`; let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
         let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
         let onHand = (i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb);
         let autoPull = Math.min(req, Math.max(0, onHand)); let autoBuild = req - autoPull;
+        
+        let is3DPUI = typeof productsDB !== 'undefined' && productsDB[k] && productsDB[k].is_3d_print;
+        let icon = is3DPUI ? '🖨️' : '⚙️';
+        
+        let marginLeft = curDepth * 25;
+        let indentPrefix = curDepth > 0 ? `<span style="color:var(--border-color); margin-right:5px; font-size:10px;">└─</span>` : '';
+        
         let safeK = k.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g, '');
-        h += `<div class="route-row" data-subname="${k}">
+        h += `<div class="route-row" data-subname="${k}" style="margin-left: ${marginLeft}px;">
                 <div style="display:flex; flex-direction:column;">
-                    <strong style="color:var(--text-heading); font-size:13px;">⚙️ ${k}</strong>
-                    <span style="font-size:11px; color:var(--text-muted);">Need: ${req.toFixed(2)} | On Shelf: ${onHand.toFixed(2)}</span>
+                    <strong style="color:var(--text-heading); font-size:13px;">${indentPrefix}${icon} ${k}</strong>
+                    <span style="font-size:11px; color:var(--text-muted); ${curDepth > 0 ? 'margin-left:18px;' : ''}">Need: ${req.toFixed(2)} | On Shelf: ${onHand.toFixed(2)}</span>
                 </div>
                 <div class="route-inputs">
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <span class="route-label" style="color:#10b981;">Pull Shelf</span>
-                        <input type="number" class="route-pull-input" id="route_pull_${safeK}" value="${autoPull.toFixed(2)}" min="0" max="${req}" step="any" oninput="balanceRoute('${safeK}', ${req}, 'pull')">
+                        <input type="number" class="route-pull-input" id="route_pull_${safeK}" value="${autoPull.toFixed(2)}" min="0" max="${Math.max(0, onHand)}" step="any" oninput="balanceRoute('${safeK}', ${req}, 'pull', ${Math.max(0, onHand)})">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <span class="route-label" style="color:#f59e0b;">Build Scratch</span>
-                        <input type="number" class="route-build-input" id="route_build_${safeK}" value="${autoBuild.toFixed(2)}" min="0" max="${req}" step="any" oninput="balanceRoute('${safeK}', ${req}, 'build')">
+                        <input type="number" class="route-build-input" id="route_build_${safeK}" value="${autoBuild.toFixed(2)}" min="0" max="${req}" step="any" oninput="balanceRoute('${safeK}', ${req}, 'build', ${Math.max(0, onHand)})">
                     </div>
                 </div>
               </div>`;
@@ -301,14 +324,23 @@ function checkWORouting() {
     rList.innerHTML = h;
 }
 
-function balanceRoute(safeKey, total, changed) {
+function balanceRoute(safeKey, total, changed, maxPull) {
     let pullEl = document.getElementById(`route_pull_${safeKey}`); let buildEl = document.getElementById(`route_build_${safeKey}`);
     if(changed === 'pull') {
-        let val = parseFloat(pullEl.value) || 0; if(val > total) { val = total; pullEl.value = val; }
-        buildEl.value = (total - val).toFixed(2);
+        let val = parseFloat(pullEl.value) || 0; 
+        if(val > maxPull) { val = maxPull; pullEl.value = val; }
+        if(val > total) { val = total; pullEl.value = val; }
+        buildEl.value = (Math.max(0, total - val)).toFixed(2);
     } else {
-        let val = parseFloat(buildEl.value) || 0; if(val > total) { val = total; buildEl.value = val; }
-        pullEl.value = (total - val).toFixed(2);
+        let val = parseFloat(buildEl.value) || 0; 
+        if(val > total) { val = total; buildEl.value = val; }
+        let theoreticalPull = total - val;
+        if(theoreticalPull > maxPull) {
+            theoreticalPull = maxPull;
+            val = total - maxPull;
+            buildEl.value = val.toFixed(2);
+        }
+        pullEl.value = (Math.max(0, theoreticalPull)).toFixed(2);
     }
 }
 
@@ -317,7 +349,10 @@ function getDirectMaterials(name, amount) {
     (productsDB[name] || []).forEach(part => {
         let k = String(part.item_key || part.di_item_id || part.name); let q = (parseFloat(part.quantity || part.qty) || 1) * amount;
         
-        if(!k.startsWith('RECIPE:::')) { 
+        let subName = k.replace('RECIPE:::', '');
+        let is3DPrint = productsDB[subName] && productsDB[subName].is_3d_print;
+
+        if(!k.startsWith('RECIPE:::') || is3DPrint) { 
             res[k] = (res[k] || 0) + q; 
         }
     });
@@ -327,13 +362,15 @@ function getDirectMaterials(name, amount) {
 function calculateExactWODeductions(wo) {
     let raws_production = {}; let raws_assembly = {}; let pulls = {}; let raws_total = {};
     let built_subs = {};
-    
     function traverseBOM(recipeName, qty, isTopLevel) {
         (productsDB[recipeName] || []).forEach(part => {
             let k = String(part.item_key || part.di_item_id || part.name); 
             let q = (parseFloat(part.quantity || part.qty) || 1) * qty;
             
-            if(!k.startsWith('RECIPE:::')) { 
+            let subName = k.replace('RECIPE:::', '');
+            let is3DPrint = productsDB[subName] && productsDB[subName].is_3d_print;
+
+            if(!k.startsWith('RECIPE:::') || is3DPrint) { 
                 if (isTopLevel) {
                     raws_production[k] = (raws_production[k] || 0) + q;
                 } else {
@@ -341,12 +378,11 @@ function calculateExactWODeductions(wo) {
                 }
                 raws_total[k] = (raws_total[k] || 0) + q; 
             } else {
-                let subName = k.replace('RECIPE:::', '');
                 let pullQty = 0;
                 let buildQty = q;
                 
-                // Allow dynamic override from the first-level map for manually stated shelf pulls
-                if (isTopLevel && wo.routing && wo.routing[subName]) {
+                // Allow dynamic override from the routing map for manually stated shelf pulls, regardless of structural depth
+                if (wo.routing && wo.routing[subName]) {
                     pullQty = parseFloat(wo.routing[subName].pull || 0);
                     buildQty = parseFloat(wo.routing[subName].build || 0);
                 } 
@@ -357,7 +393,6 @@ function calculateExactWODeductions(wo) {
                 
                 if (buildQty > 0) {
                     built_subs[k] = (built_subs[k] || 0) + buildQty;
-                    // Recurse heavily into the defined dependencies to guarantee deep material alignment
                     traverseBOM(subName, buildQty, false);
                 }
             }
@@ -394,7 +429,7 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
                     prints[subName] = (prints[subName] || 0) + buildQty;
                 } else {
                     // Otherwise, recurse to find its 3D printed components
-                    const subPrints = find3DPrintedComponents(subName, buildQty, null);
+                    const subPrints = find3DPrintedComponents(subName, buildQty, routingMap);
                     for (let s in subPrints) {
                         prints[s] = (prints[s] || 0) + (parseFloat(subPrints[s]) || 0);
                     }
@@ -653,10 +688,23 @@ async function validateAndCreateWO() {
         let shortfalls = [];
 
         Object.keys(exactDeductions.raws).forEach(k => {
-            let req = exactDeductions.raws[k]; let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
+            let cleanK = k.replace('RECIPE:::', '');
+            let is3DPrint = productsDB[cleanK] && productsDB[cleanK].is_3d_print;
+
+            let req = exactDeductions.raws[k]; 
+            let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; 
+            let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
+            
             let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment; 
+            
+            if (is3DPrint) {
+                let FGI = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
+                let c_prod = parseFloat(FGI.production_consumed_qty)||0; let c_proto = parseFloat(FGI.prototype_consumed_qty)||0; let pb = parseFloat(FGI.prototype_produced_qty)||0;
+                onHand = (FGI.produced_qty||0) - (FGI.sold_qty||0) - c_prod - (FGI.scrap_qty||0) + (FGI.manual_adjustment||0) - Math.max(0, c_proto - pb);
+            }
+
             if(req > onHand) { 
-                if (!c.is_3d_print) {
+                if (!is3DPrint) {
                     let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); 
                 }
             }
@@ -694,17 +742,9 @@ async function validateAndCreateWO() {
             
             let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
             
-            // Calculate active on-shelf stock for this exact 3D printed component
-            let rawOnHand = isLegacyRaw ? ((catalogCache[part] ? catalogCache[part].totalQty : 0) - (i.consumed_qty||0) - (i.scrap_qty||0) + (i.manual_adjustment||0)) : 0;
-            let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
-            let onHand = isLegacyRaw ? rawOnHand : ((i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb));
-            
             let amountToPrint = totalNeeded;
-            if (onHand > 0) {
-                amountToPrint = Math.max(0, totalNeeded - onHand);
-            }
             
-            // Only queue a print job for structural fallback/shortfalls instead of unconditionally spooling full amounts
+            // Strictly deploy print jobs based exclusively on the routing map calculations (Pulls vs Builds), eliminating rogue autonomous logic out of sync with Batchez.
             if (amountToPrint > 0) {
                 if (typeof addPrintJob === 'function') {
                     printPromises.push(addPrintJob(prefix + part, amountToPrint, woId, label || null));
@@ -802,11 +842,57 @@ async function toggleWIPCheckbox(chk, key) { try { if(!currentWO) return; let is
 async function checkAllInGroup(grpId) { try { if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {}; chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } }); if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: JSON.stringify(currentWO.wip_state) }).eq('wo_id', currentWO.wo_id); } } catch(e) { sysLog("Failed to save group check.", true); } }
 function toggleSOPLock() { isSOPLocked = !isSOPLocked; const btn = document.getElementById('sopLockBtn'); if(btn) btn.innerText = isSOPLocked ? '🔒' : '🔓'; if(currentWO) renderActiveWO(currentWO.wo_id); }
 
+async function editWOQty(id) {
+    let wo = workOrdersDB.find(w => w.wo_id === id);
+    if (!wo) return;
+    if (wo.materials_pulled || wo.status === 'Completed') return alert("Cannot edit quantity after materials have been physically pulled from shelf stock!");
+    
+    let ans = prompt(`Current Target Quantity: ${wo.qty}\n\nEnter the new corrected quantity for this Work Order:`, wo.qty);
+    if (ans === null) return;
+    let newQty = parseFloat(ans);
+    if (isNaN(newQty) || newQty <= 0) return alert("Invalid quantity limit.");
+    if (newQty === wo.qty) return;
+
+    if (!confirm(`Are you sure you want to adjust the Work Order yield from ${wo.qty} to ${newQty}?\n\nThis will proportionally scale all Sub-Assembly routing allocations attached to this batch.`)) return;
+
+    setMasterStatus("Updating Quantity...", "mod-working");
+    let oldQty = parseFloat(wo.qty);
+    let ratio = newQty / oldQty;
+    
+    let clonedRouting = JSON.parse(JSON.stringify(wo.routing || {}));
+    Object.keys(clonedRouting).forEach(sub => {
+        clonedRouting[sub].pull = parseFloat((parseFloat(clonedRouting[sub].pull || 0) * ratio).toFixed(4));
+        clonedRouting[sub].build = parseFloat((parseFloat(clonedRouting[sub].build || 0) * ratio).toFixed(4));
+    });
+
+    try {
+        const { error } = await supabaseClient.from('work_orders').update({
+            qty: newQty,
+            routing: clonedRouting
+        }).eq('wo_id', id);
+        
+        if (error) throw error;
+        
+        wo.qty = newQty;
+        wo.routing = clonedRouting;
+        sysLog(`Adjusted WO ${wo.wo_id} quantity ${oldQty} -> ${newQty}`);
+        setMasterStatus("Quantity Updated!", "mod-success");
+        setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
+        renderActiveWO(id);
+        renderWOList();
+    } catch(e) {
+        sysLog(e.message, true);
+        setMasterStatus("Error", "mod-error");
+    }
+}
+
 function renderActiveWO(id) {
     try {
         let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
         document.getElementById('woMainArea').style.display = 'flex';
-        document.getElementById('woTitle').innerText = (wo.label ? `[${wo.label}] ` : '') + `${wo.wo_id}: ${wo.product_name} - [ ${wo.qty} UNITS ]`;
+        let isEditableQty = !wo.materials_pulled && wo.status !== 'Completed';
+        let qtyDisplay = isEditableQty ? `<span onclick="editWOQty('${wo.wo_id}')" title="Edit WO Yield Target" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(14,165,233,0.15); border:1px dashed #0ea5e9; padding:2px 10px; border-radius:6px; color:#0ea5e9; transition:all 0.2s; position:relative; top:-2px;" onmouseover="this.style.background='rgba(14,165,233,0.3)'" onmouseout="this.style.background='rgba(14,165,233,0.15)'">${wo.qty} ✏️</span>` : wo.qty;
+        document.getElementById('woTitle').innerHTML = (wo.label ? `[${wo.label}] ` : '') + `${wo.wo_id}: ${wo.product_name} - [ ${qtyDisplay} UNITS ]`;
         document.getElementById('woQtyTarget').innerText = wo.qty;
         let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
         if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
@@ -865,36 +951,64 @@ function renderActiveWO(id) {
             let directRaws = getDirectMaterials(wo.product_name, wo.qty);
             if(Object.keys(directRaws).length > 0) {
                 let currentGrpId = `pickgrp_${grpCounter++}`;
-                html += `<div class="kitting-card"><h4>📦 Direct Raw Materials <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                
+                let isTopSub = typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[wo.product_name];
+                let isTop3D = typeof productsDB !== 'undefined' && productsDB[wo.product_name] && productsDB[wo.product_name].is_3d_print;
+                let topLevelTitle = isTop3D ? `🟠 Build: 🖨️ ${wo.product_name} (x${wo.qty})` : (isTopSub ? `🟠 Build: ⚙️ ${wo.product_name} (x${wo.qty})` : `📦 Direct Raw Materials`);
+                
+                html += `<div class="kitting-card"><h4>${topLevelTitle} <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
                 Object.keys(directRaws).forEach(k => {
-                    let req = directRaws[k]; let f = fmtKey(k); let c = catalogCache[k] || {}; let name = f.nn ? f.nn : (c.itemName || f.in); let displaySpec = c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec ? `⚙️ ${c.spec}` : "");
+                    let req = directRaws[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); 
+                    let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
+                    let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
+                    let name = `${emojiPrefix} ${cleanName}`.trim();
+                    let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
+                    
                     let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
+                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                 });
                 html += `</div>`;
             }
+            
+            let exactDeds = calculateExactWODeductions(wo);
             let shelfPulls = [];
-            if(wo.routing) { Object.keys(wo.routing).forEach(sub => { if(wo.routing[sub].pull > 0) shelfPulls.push({name: sub, q: wo.routing[sub].pull}); }); }
+            Object.keys(exactDeds.pulls).forEach(k => {
+                let cleanName = k.replace('RECIPE:::', '');
+                let isPart3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
+                let emojiPrefix = isPart3D ? '🖨️' : '⚙️';
+                shelfPulls.push({name: `${emojiPrefix} ${cleanName}`, q: exactDeds.pulls[k]});
+            });
             if(shelfPulls.length > 0) {
                 let currentGrpId = `pickgrp_${grpCounter++}`;
                 html += `<div class="kitting-card route-card-pull"><h4>🟢 Pull Pre-Built from Shelf <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
                 shelfPulls.forEach(sub => {
                     let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; color:#15803d;"><strong>${sub.q.toFixed(2)}x</strong> ⚙️ ${sub.name}</div></div>`;
+                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; color:#15803d; flex-grow:1;"><strong>${sub.q.toFixed(2)}x</strong> ${sub.name}</div></div>`;
                 });
                 html += `</div>`;
             }
-            if(wo.routing) {
-                Object.keys(wo.routing).forEach(sub => {
-                    if(wo.routing[sub].build > 0) {
-                        let subDirect = getDirectMaterials(sub, wo.routing[sub].build);
+            
+            if(exactDeds.built_subs) {
+                Object.keys(exactDeds.built_subs).forEach(subK => {
+                    let qty = exactDeds.built_subs[subK];
+                    if(qty > 0) {
+                        let cleanSubName = subK.replace('RECIPE:::', '');
+                        let isTop3D = productsDB[cleanSubName] && productsDB[cleanSubName].is_3d_print;
+                        let titleEmoji = isTop3D ? '🖨️' : '⚙️';
+                        
+                        let subDirect = getDirectMaterials(cleanSubName, qty);
                         if(Object.keys(subDirect).length > 0) {
                             let currentGrpId = `pickgrp_${grpCounter++}`;
-                            html += `<div class="kitting-card route-card-build"><h4>🟠 Build: ⚙️ ${sub} (x${wo.routing[sub].build}) <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                            html += `<div class="kitting-card route-card-build"><h4>🟠 Build: ${titleEmoji} ${cleanSubName} (x${qty}) <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
                             Object.keys(subDirect).forEach(k => {
-                                let req = subDirect[k]; let f = fmtKey(k); let c = catalogCache[k] || {}; let name = f.nn ? f.nn : (c.itemName || f.in); let displaySpec = c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec ? `⚙️ ${c.spec}` : "");
+                                let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); 
+                                let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
+                                let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
+                                let name = `${emojiPrefix} ${cleanName}`.trim();
+                                let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
+                                
                                 let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                                html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
+                                html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                             });
                             html += `</div>`;
                         }
@@ -1162,13 +1276,36 @@ function renderActiveWO(id) {
     } catch(e) { sysLog(e.message, true); }
 }
 
-async function advanceWO(newStatus) {
+async function advanceWO(newStatus, bypassModal = false) {
     try {
         if(!currentWO) return; 
         if(currentWO.status === 'Completed') return showToast('This Work Order is already archived.', 'error');
         
         if (currentWO.materials_pulled && (newStatus === 'Queued' || newStatus === 'Picking')) {
             return alert("Materials have already been pulled for this Work Order. You cannot revert to previous planning stages.");
+        }
+
+        if (newStatus === 'Completed' && !bypassModal) {
+            let w = currentWO.wip_state || {};
+            let drafts = w.scrap_draft || {};
+            let tableHtml = buildDraftModalHtml(currentWO, drafts);
+            
+            document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(16, 185, 129, 0.1)';
+            document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
+            document.getElementById('finalizeWoTitle').innerHTML = '✅ Verify Batch Finalization';
+            document.getElementById('finalizeWoTitle').style.color = '#10b981';
+            
+            let btn = document.getElementById('finalizeWoActionBtn');
+            btn.className = 'btn-green';
+            btn.innerHTML = 'Finalize & Deduct';
+            btn.onclick = window.submitFinalizeWo;
+            
+            let m = document.getElementById('finalizeWoItemsList');
+            if (m) {
+                m.innerHTML = tableHtml;
+                document.getElementById('finalizeWoModal').style.display = 'flex';
+            }
+            return;
         }
 
         sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
@@ -1178,31 +1315,36 @@ async function advanceWO(newStatus) {
                 let exactDeductions = calculateExactWODeductions(currentWO);
                 let upsKeys = new Set();
                 let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
+                let isScrapTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
                 
                 Object.keys(exactDeductions.raws_production).forEach(k => {
                     let req = exactDeductions.raws_production[k];
                     if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
-                    inventoryDB[k].consumed_qty += req; 
-                    if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
-                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                    if (isScrapTicket) { inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty||0) + req; } else {
+                        inventoryDB[k].consumed_qty += req; 
+                        if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
+                        else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                    }
                     upsKeys.add(k);
                 });
                 Object.keys(exactDeductions.raws_assembly).forEach(k => {
                     let req = exactDeductions.raws_assembly[k];
                     if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
-                    inventoryDB[k].consumed_qty += req; 
-                    if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
-                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req; // Rerouted from assembly
+                    if (isScrapTicket) { inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty||0) + req; } else {
+                        inventoryDB[k].consumed_qty += req; 
+                        if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
+                        else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                    }
                     upsKeys.add(k);
                 });
                 Object.keys(exactDeductions.pulls).forEach(k => {
                     let req = exactDeductions.pulls[k];
                     if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
-                    
-                    inventoryDB[k].consumed_qty += req; 
-                    if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
-                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
-                    
+                    if (isScrapTicket) { inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty||0) + req; } else {
+                        inventoryDB[k].consumed_qty += req; 
+                        if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
+                        else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                    }
                     upsKeys.add(k);
                 });
                 
@@ -1221,13 +1363,18 @@ async function advanceWO(newStatus) {
             let exactDeductions = calculateExactWODeductions(currentWO);
             let upsKeys = new Set();
             
+            let isScrapTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
             Object.keys(exactDeductions.built_subs).forEach(k => {
                 let req = exactDeductions.built_subs[k];
                 if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
                 
-                inventoryDB[k].consumed_qty += req;
-                if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
-                else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                if (isScrapTicket) {
+                    inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + req;
+                } else {
+                    inventoryDB[k].consumed_qty += req;
+                    if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
+                    else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
+                }
                 
                 let cleanName = k.replace('RECIPE:::', '');
                 let is3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
@@ -1492,6 +1639,35 @@ async function hardDeleteArchive(type, id) {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
+async function deleteAllArchive() {
+    if(!confirm(`⚠️ DANGER: Are you sure you want to permanently delete ALL archived records in the ${currentArchiveTab === 'batchez' ? 'Batchez' : 'Layerz'} tab?\n\nThis action cannot be undone.`)) return;
+    sysLog(`Hard deleting ALL archives from ${currentArchiveTab}`);
+    setMasterStatus("Deleting Archive...", "mod-working");
+    
+    const btn = document.querySelector('.btn-red[onclick="deleteAllArchive()"]');
+    if (btn) { btn.innerText = "Deleting..."; btn.disabled = true; }
+    
+    try {
+        if(currentArchiveTab === 'batchez') {
+            const {error} = await supabaseClient.from('work_orders').delete().eq('status', 'Archived');
+            if (error) throw new Error(error.message);
+            workOrdersDB = workOrdersDB.filter(w => w.status !== 'Archived');
+        } else {
+            const {error} = await supabaseClient.from('print_queue').delete().eq('status', 'Archived');
+            if (error) throw new Error(error.message);
+            printQueueDB = printQueueDB.filter(p => p.status !== 'Archived');
+        }
+        setMasterStatus("Archive Cleared!", "mod-success");
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        renderArchiveList();
+    } catch(e) { 
+        sysLog(e.message, true); 
+        setMasterStatus("Error", "mod-error"); 
+    } finally {
+        if (btn) { btn.innerText = "🗑️ Clear Archive"; btn.disabled = false; }
+    }
+}
+
 function printPickList() {
     try {
         if(!currentWO) return;
@@ -1501,10 +1677,12 @@ function printPickList() {
         let directRaws = getDirectMaterials(currentWO.product_name, currentWO.qty);
         if(Object.keys(directRaws).length > 0) {
             html += `<tr><td colspan="4" class="group-header">📦 Direct Raw Materials</td></tr>`;
-            Object.keys(directRaws).forEach(k => { let req = directRaws[k]; let f = fmtKey(k); let c = catalogCache[k] || {}; let name = f.nn ? f.nn : (c.itemName || f.in); let sp = c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || ""); html += `<tr><td>[   ]</td><td>${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; });
+            Object.keys(directRaws).forEach(k => { let req = directRaws[k]; let c = catalogCache[k] || {}; let is3D = k.startsWith('RECIPE:::'); let f = fmtKey(k); let name = is3D ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); let sp = is3D ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || "")); html += `<tr><td>[   ]</td><td>${is3D ? '🖨️ ' : ''}${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; });
         }
-        if(currentWO.routing) {
-            let pulls = []; Object.keys(currentWO.routing).forEach(sub => { if(currentWO.routing[sub].pull > 0) pulls.push({name: sub, q: currentWO.routing[sub].pull}); });
+        let exactDeds = calculateExactWODeductions(currentWO);
+        if(Object.keys(exactDeds.pulls).length > 0) {
+            let pulls = [];
+            Object.keys(exactDeds.pulls).forEach(k => pulls.push({name: k.replace('RECIPE:::', ''), q: exactDeds.pulls[k]}));
             if(pulls.length > 0) {
                 html += `<tr><td colspan="4" class="group-header" style="background:#d1fae5; color:#15803d;">🟢 Pull Pre-Built from Shelf</td></tr>`;
                 pulls.forEach(sub => { html += `<tr><td>[   ]</td><td colspan="2">⚙️ ${sub.name}</td><td><strong>${sub.q.toFixed(2)}</strong></td></tr>`; });
@@ -1514,7 +1692,7 @@ function printPickList() {
                     let subDirect = getDirectMaterials(sub, currentWO.routing[sub].build);
                     if(Object.keys(subDirect).length > 0) {
                         html += `<tr><td colspan="4" class="group-header" style="background:#fef3c7; color:#b45309;">🟠 Build: ⚙️ ${sub} (x${currentWO.routing[sub].build})</td></tr>`;
-                        Object.keys(subDirect).forEach(k => { let req = subDirect[k]; let f = fmtKey(k); let c = catalogCache[k] || {}; let name = f.nn ? f.nn : (c.itemName || f.in); let sp = c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || ""); html += `<tr><td>[   ]</td><td>${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; });
+                        Object.keys(subDirect).forEach(k => { let req = subDirect[k]; let c = catalogCache[k] || {}; let is3D = k.startsWith('RECIPE:::'); let f = fmtKey(k); let name = is3D ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); let sp = is3D ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || "")); html += `<tr><td>[   ]</td><td>${is3D ? '🖨️ ' : ''}${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; });
                     }
                 }
             });
@@ -1915,4 +2093,304 @@ window.inlineRenderTelemetryPreview = function(grpId) {
     if (typeof processTelemetryCanvasRendering === 'function') {
         processTelemetryCanvasRendering(previewContainer);
     }
+};
+
+function buildDraftModalHtml(wo, drafts) {
+    let ht = '';
+    
+    // Direct Raws
+    let directRaws = getDirectMaterials(wo.product_name, wo.qty);
+    if(Object.keys(directRaws).length > 0) {
+        ht += `<div class="kitting-card" style="box-sizing:border-box; flex: 1 1 400px;"><h4>📦 Direct Raw Materials</h4>`;
+        Object.keys(directRaws).forEach(k => {
+            let req = directRaws[k]; let c = catalogCache[k] || {}; let is3D = k.startsWith('RECIPE:::'); let f = fmtKey(k); let name = is3D ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); let displaySpec = is3D ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec ? `⚙️ ${c.spec}` : ""));
+            let curVal = drafts[k] ? drafts[k] : '';
+            ht += `<div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <div class="chk-text" style="font-size:14px; flex-grow:1; font-weight:bold;">${name} <div style="color:var(--text-muted); font-size:11px; font-weight:normal; margin-top:2px;">${displaySpec}</div></div>
+                <div style="display:flex; gap:12px;">
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Pulled</span>
+                        <input type="text" disabled value="${req.toFixed(2)}" style="width:65px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); text-align:center; padding:6px; border-radius:6px; font-weight:bold; cursor:not-allowed;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                        <input type="number" class="wo-scrap-input" data-key="${k}" min="0" step="any" placeholder="0" value="${curVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
+                    </div>
+                </div>
+            </div>`;
+        });
+        ht += `</div>`;
+    }
+    
+    let exactDeds = calculateExactWODeductions(wo);
+    let shelfPulls = [];
+    Object.keys(exactDeds.pulls).forEach(k => {
+        shelfPulls.push({name: k.replace('RECIPE:::', ''), q: exactDeds.pulls[k]});
+    });
+    
+    if(shelfPulls.length > 0) {
+        ht += `<div class="kitting-card route-card-pull" style="box-sizing:border-box; flex: 1 1 400px;"><h4>🟢 Pull Pre-Built from Shelf</h4>`;
+        shelfPulls.forEach(sub => {
+            let is3D = typeof productsDB !== 'undefined' && productsDB[sub.name] && productsDB[sub.name].is_3d_print;
+            let icon = is3D ? '🖨️' : '⚙️';
+            let k = `RECIPE:::${sub.name}`;
+            let curVal = drafts[k] ? drafts[k] : '';
+            ht += `<div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <div class="chk-text" style="font-size:14px; color:#10b981; flex-grow:1; font-weight:bold;">${icon} ${sub.name}</div>
+                <div style="display:flex; gap:12px;">
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Pulled</span>
+                        <input type="text" disabled value="${sub.q.toFixed(2)}" style="width:65px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); text-align:center; padding:6px; border-radius:6px; font-weight:bold; cursor:not-allowed;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                        <input type="number" class="wo-scrap-input" data-key="${k}" min="0" step="any" placeholder="0" value="${curVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
+                    </div>
+                </div>
+            </div>`;
+        });
+        ht += `</div>`;
+    }
+    
+    // Build from Scratch Sub-assemblies
+    if(exactDeds.built_subs) {
+        let sortedSubs = Object.keys(exactDeds.built_subs).sort((a, b) => {
+            let cleanA = a.replace('RECIPE:::', '');
+            let cleanB = b.replace('RECIPE:::', '');
+            let is3DA = typeof productsDB !== 'undefined' && productsDB[cleanA] && productsDB[cleanA].is_3d_print ? 1 : 0;
+            let is3DB = typeof productsDB !== 'undefined' && productsDB[cleanB] && productsDB[cleanB].is_3d_print ? 1 : 0;
+            if (is3DA !== is3DB) return is3DA - is3DB; // 0 for Sub, 1 for 3D Print, so Subs come first
+            return cleanA.localeCompare(cleanB);
+        });
+
+        sortedSubs.forEach(subK => {
+            let qty = exactDeds.built_subs[subK];
+            if(qty > 0) {
+                let cleanSubName = subK.replace('RECIPE:::', '');
+                let isTop3D = typeof productsDB !== 'undefined' && productsDB[cleanSubName] && productsDB[cleanSubName].is_3d_print;
+                let titleEmoji = isTop3D ? '🖨️' : '⚙️';
+                
+                let subDirect = getDirectMaterials(cleanSubName, qty);
+                if(Object.keys(subDirect).length > 0) {
+                    let topScrapKey = subK;
+                    let topCurVal = drafts[topScrapKey + '__BUILD'] ? drafts[topScrapKey + '__BUILD'] : '';
+                    ht += `<div class="kitting-card route-card-build" style="box-sizing:border-box; flex: 1 1 400px;"><h4>🟠 Build: ${titleEmoji} ${cleanSubName}</h4>`;
+                    
+                    // Add top-level loss row for the entire sub-assembly
+                    ht += `<div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #ef4444; background-color: rgba(239, 68, 68, 0.05); margin-bottom: 5px;">
+                        <div class="chk-text" style="font-size:14px; flex-grow:1; font-weight:bold; color:#ef4444;">🚨 SCRAP ENTIRE: ${cleanSubName} <div style="font-size:10px; color:var(--text-muted); font-weight:normal; margin-top:2px;">Scrapping this will forcefully deduct its required raw materials from stock.</div></div>
+                        <div style="display:flex; gap:12px;">
+                            <div style="display:flex; flex-direction:column; align-items:center;">
+                                <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                                <input type="number" class="wo-scrap-input" data-key="${topScrapKey}__BUILD" min="0" step="any" placeholder="0" value="${topCurVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
+                            </div>
+                        </div>
+                    </div>`;
+
+                    Object.keys(subDirect).forEach(k => {
+                        let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
+                        let isPart3D = isRecipe && typeof productsDB !== 'undefined' && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
+                        let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
+                        let name = `${emojiPrefix} ${cleanName}`.trim();
+                        let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
+                        let curVal = drafts[k] ? drafts[k] : '';
+                        ht += `<div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <div class="chk-text" style="font-size:14px; flex-grow:1; font-weight:bold;">${name} <div style="color:var(--text-muted); font-size:11px; font-weight:normal; margin-top:2px;">${displaySpec}</div></div>
+                            <div style="display:flex; gap:12px;">
+                                <div style="display:flex; flex-direction:column; align-items:center;">
+                                    <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Pulled</span>
+                                    <input type="text" disabled value="${req.toFixed(2)}" style="width:65px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); text-align:center; padding:6px; border-radius:6px; font-weight:bold; cursor:not-allowed;">
+                                </div>
+                                <div style="display:flex; flex-direction:column; align-items:center;">
+                                    <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                                    <input type="number" class="wo-scrap-input" data-key="${k}" min="0" step="any" placeholder="0" value="${curVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                    ht += `</div>`;
+                }
+            }
+        });
+    }
+    
+    if (ht === '') {
+        ht = `<div style="text-align:center; padding:15px; width:100%; color:var(--text-muted);">No materials pulled for this batch.</div>`;
+    }
+    
+    return ht;
+}
+
+window.submitFinalizeWo = async function() {
+    try {
+        let scrapInputs = document.querySelectorAll('.wo-scrap-input');
+        let upsKeys = new Set();
+        let totalScrapEntries = 0;
+        let directUpserts = {};
+        
+        scrapInputs.forEach(input => {
+            let v = parseFloat(input.value) || 0;
+            if (v > 0) {
+                let k = input.getAttribute('data-key');
+                directUpserts[k] = (directUpserts[k] || 0) + v;
+            }
+        });
+        
+        let spawnedScrapWOs = [];
+        let spawnedScrapPrints = [];
+        
+        let pNameClean = currentWO.product_name.replace('RECIPE:::', '');
+        let isTopLevelSub = typeof isSubassemblyDB !== 'undefined' && !!isSubassemblyDB[pNameClean];
+        let isTopLevel3D = typeof productsDB !== 'undefined' && !!(productsDB[pNameClean] && productsDB[pNameClean].is_3d_print);
+        let isScrapRebuildTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
+        let isYieldEnforced = isScrapRebuildTicket ? true : (!isTopLevelSub && !isTopLevel3D);
+        
+        Object.keys(directUpserts).forEach(k => {
+            let v = directUpserts[k];
+            let actualK = k.endsWith('__BUILD') ? k.replace('__BUILD', '') : k;
+            
+            if(!inventoryDB[actualK]) inventoryDB[actualK]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
+            
+            inventoryDB[actualK].scrap_qty = (inventoryDB[actualK].scrap_qty || 0) + v;
+            upsKeys.add(actualK);
+            totalScrapEntries++;
+            
+            if (isYieldEnforced) {
+                let cleanK = actualK.replace('RECIPE:::', '');
+                let is3D = productsDB[cleanK] && productsDB[cleanK].is_3d_print;
+                
+                if (k.endsWith('__BUILD')) {
+                    // Instantly spawn a Scrap Rebuild recovery ticket instead of magically mapping inventory loss below.
+                    let recoveryWoId = "WO-" + Date.now().toString().slice(-4) + "-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+                    
+                    spawnedScrapWOs.push({
+                        wo_id: recoveryWoId,
+                        product_name: cleanK,
+                        qty: v,
+                        label: `[SCRAP REBUILD] (fr: ${currentWO.wo_id})`,
+                        status: 'Queued',
+                        wip_state: { batch_type: currentWO.batch_type || 'Production' },
+                        routing: {}
+                    });
+                } else if (is3D) {
+                    let recoveryWoId = "WO-" + Date.now().toString().slice(-4) + "-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+                    spawnedScrapPrints.push({
+                        part_name: cleanK,
+                        qty: v,
+                        wo_id: recoveryWoId,
+                        label: `[SCRAP REBUILD] (fr: ${currentWO.wo_id})`
+                    });
+                }
+            }
+        });
+        
+        if(upsKeys.size > 0) {
+            setMasterStatus("Logging Scrap...", "mod-working");
+            let ups = Array.from(upsKeys).map(k => ({
+                item_key: k, 
+                consumed_qty: inventoryDB[k].consumed_qty, 
+                manual_adjustment: inventoryDB[k].manual_adjustment, 
+                produced_qty: inventoryDB[k].produced_qty, 
+                sold_qty: inventoryDB[k].sold_qty, 
+                min_stock: inventoryDB[k].min_stock, 
+                scrap_qty: inventoryDB[k].scrap_qty, 
+                prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, 
+                assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, 
+                production_consumed_qty: inventoryDB[k].production_consumed_qty||0, 
+                prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0
+            }));
+            await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
+        }
+
+        if (spawnedScrapWOs.length > 0 || spawnedScrapPrints.length > 0) {
+            setMasterStatus("Deploying Replacements...", "mod-working");
+            if (spawnedScrapWOs.length > 0) {
+                const {error: scrapErr} = await supabaseClient.from('work_orders').insert(
+                    spawnedScrapWOs.map(s => ({
+                        wo_id: s.wo_id, product_name: s.product_name, qty: s.qty, label: s.label, status: s.status,
+                        wip_state: JSON.stringify(s.wip_state), routing: JSON.stringify(s.routing)
+                    }))
+                );
+                if (scrapErr) throw new Error("Scrap WO Deploy Error: " + scrapErr.message);
+                
+                spawnedScrapWOs.forEach(s => workOrdersDB.unshift(s));
+                
+                // Queue any nested 3D prints required by these auto-recovery tickets
+                for (let s of spawnedScrapWOs) {
+                    if (productsDB[s.product_name] && productsDB[s.product_name].is_3d_print) {
+                        if (typeof addPrintJob === 'function') {
+                            await addPrintJob("RECIPE:::" + s.product_name, s.qty, s.wo_id, s.label);
+                        }
+                    } else {
+                        const printsToSpawn = find3DPrintedComponents(s.product_name, s.qty, s.routing);
+                        for (let part of Object.keys(printsToSpawn)) {
+                            if (typeof addPrintJob === 'function') {
+                                await addPrintJob("RECIPE:::" + part, printsToSpawn[part], s.wo_id, s.label);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Queue component-level 3D prints that were explicitly scrapped explicitly
+            for (let p of spawnedScrapPrints) {
+                if (typeof addPrintJob === 'function') {
+                    await addPrintJob("RECIPE:::" + p.part_name, p.qty, p.wo_id, p.label);
+                }
+            }
+        }
+        
+        document.getElementById('finalizeWoModal').style.display = 'none';
+        sysLog(`Batch verified. ${totalScrapEntries} scrap line(s) logged.`);
+        
+        // Push payload forward into actual completion
+        advanceWO('Completed', true);
+        
+    } catch (e) {
+        sysLog(e.message, true);
+        alert("Failed to submit Work Order finals.");
+    }
+};
+
+window.openDraftScrapModal = function() {
+    if (!currentWO) return;
+    let w = currentWO.wip_state || {};
+    let drafts = w.scrap_draft || {};
+    let tableHtml = buildDraftModalHtml(currentWO, drafts);
+    
+    document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(239, 68, 68, 0.1)';
+    document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
+    document.getElementById('finalizeWoTitle').innerHTML = '🗑️ Update Scrap Tally';
+    document.getElementById('finalizeWoTitle').style.color = '#ef4444';
+    
+    let btn = document.getElementById('finalizeWoActionBtn');
+    btn.className = 'btn-red';
+    btn.innerHTML = 'Save Tally Draft';
+    btn.onclick = window.saveDraftScrap;
+    
+    let m = document.getElementById('finalizeWoItemsList');
+    if (m) {
+        m.innerHTML = tableHtml;
+        document.getElementById('finalizeWoModal').style.display = 'flex';
+    }
+};
+
+window.saveDraftScrap = async function() {
+    if (!currentWO) return;
+    let scrapInputs = document.querySelectorAll('.wo-scrap-input');
+    let drafts = {};
+    scrapInputs.forEach(input => {
+        let v = parseFloat(input.value) || 0;
+        if (v > 0) drafts[input.getAttribute('data-key')] = v;
+    });
+    
+    if(!currentWO.wip_state) currentWO.wip_state = {};
+    currentWO.wip_state.scrap_draft = drafts;
+    
+    setMasterStatus("Saving Scrap Draft...", "mod-working");
+    await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id);
+    
+    document.getElementById('finalizeWoModal').style.display = 'none';
+    setMasterStatus("Draft Saved", "mod-success");
+    setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
 };
