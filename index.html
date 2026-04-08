@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.07.2008"></script>
+    <script src="system-version.js?v=v.2026.04.07.2156"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.07.2008"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.07.2008"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.07.2156"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.07.2008"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.07.2156"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -2540,13 +2540,13 @@
                 <div style="width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 15px 15px 15px; background: rgba(15, 23, 42, 0.4); border-radius: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
                     <!-- Controls and Grid extracted from V5 -->
                     
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md" style="position: sticky; top: 15px; z-index: 50; margin-top: 15px; margin-bottom: 25px; padding: 18px 18px;">
+        <div class="rounded-lg shadow-md border hover:border-[#f97316] transition-all duration-300 group" style="background: var(--bg-panel); border-color: var(--border-color); position: sticky; top: 0px; z-index: 50; margin-top: 0px; margin-bottom: 25px; padding: 12px 14px;">
             <!-- Search & Sort Row -->
             <div class="flex flex-row gap-3 justify-between items-center w-full">
                 <div class="relative flex-1">
-                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-muted); font-size: 12px;"></i>
                     <input type="text" id="search-input" placeholder="Search by name, style, or location..." 
-                        class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all text-sm">
+                        class="w-full pl-9 pr-4 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] transition-all text-xs border" style="background: var(--bg-input); border-color: var(--border-input); color: var(--text-main);">
                 </div>
                 
                 <div class="flex items-center gap-3 shrink-0">
@@ -2569,15 +2569,15 @@
                         </button>
                     </div>
 
-                    <div class="flex items-center gap-0 w-full lg:w-auto bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group">
+                    <div class="flex items-center gap-0 w-full lg:w-auto border rounded-lg overflow-hidden transition-colors group" style="background: var(--bg-input); border-color: var(--border-input);">
                         <!-- Sort Direction Toggle -->
-                        <button id="sort-dir-btn" onclick="toggleSortDirection()" class="p-2.5 bg-transparent border-r border-slate-200 dark:border-slate-600 transition-all text-slate-500 dark:text-slate-400 hover:text-brand" title="Toggle Sort Direction">
+                        <button id="sort-dir-btn" onclick="toggleSortDirection()" class="px-2.5 py-1.5 border-r hover:text-[#f97316] transition-all outline-none" style="background: transparent; color: var(--text-muted); border-color: var(--border-input);" title="Toggle Sort Direction">
                             <i id="sort-dir-icon" class="fa-solid fa-arrow-up-wide-short transition-transform group-hover:scale-110"></i>
                         </button>
 
                         <!-- Sort Select -->
-                        <div class="relative w-48 shrink-0">
-                            <select id="sort-select" onchange="handleSortChange(this.value)" class="w-full pl-4 pr-10 py-2 bg-transparent text-slate-700 dark:text-slate-200 focus:outline-none text-sm appearance-none cursor-pointer">
+                        <div class="relative w-40 shrink-0">
+                            <select id="sort-select" onchange="handleSortChange(this.value)" class="w-full pl-3 pr-8 py-1.5 focus:outline-none text-[11px] appearance-none cursor-pointer transition-colors" style="background: transparent; color: var(--text-main);">
                                 <option value="alpha">Alphabetical</option>
                                 <option value="total">Total Followers</option>
                                 <option value="ig">Instagram Followers</option>
@@ -2586,7 +2586,7 @@
                                 <option value="fb">Facebook Followers</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 pr-1"></i>
+                                <i class="fa-solid fa-chevron-down text-[9px]" style="color: var(--text-muted); margin-right: 2px;"></i>
                             </div>
                         </div>
                     </div>
@@ -2598,19 +2598,19 @@
             <div class="grid grid-cols-3 gap-3">
                 <!-- Filter: Region -->
                 <div class="relative">
-                    <i class="fa-solid fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <select id="filter-region" onchange="renderSkaters()" class="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand text-xs appearance-none cursor-pointer">
+                    <i class="fa-solid fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-muted); font-size: 11px;"></i>
+                    <select id="filter-region" onchange="renderSkaters()" class="w-full pl-8 pr-6 py-1.5 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] text-[11px] appearance-none cursor-pointer transition-colors" style="background: var(--bg-input); border-color: var(--border-input); color: var(--text-main);">
                         <option value="">All Regions</option>
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                        <i class="fa-solid fa-filter text-[10px] text-slate-400"></i>
+                        <i class="fa-solid fa-chevron-down text-[9px]" style="color: var(--text-muted);"></i>
                     </div>
                 </div>
 
                 <!-- Multi-select Filter: Style -->
                 <div class="relative" id="multi-select-style-container" style="position:relative;">
-                    <i class="fa-solid fa-tag" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:11px; z-index:10; pointer-events:none;"></i>
-                    <button onclick="toggleMultiSelect('style')" id="style-multi-btn" style="width:100%; padding:6px 28px 6px 28px; background:var(--bg-input); border:1px solid var(--border-input); border-radius:6px; text-align:left; font-size:11px; color:var(--text-main); cursor:pointer; display:flex; justify-content:space-between; align-items:center; overflow:hidden; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-input)'">
+                    <i class="fa-solid fa-tag" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:11px; z-index:10; pointer-events:none;"></i>
+                    <button onclick="toggleMultiSelect('style')" id="style-multi-btn" style="width:100%; padding:5px 24px 5px 28px; background:var(--bg-input); border:1px solid var(--border-input); border-radius:8px; text-align:left; font-size:11px; color:var(--text-main); cursor:pointer; display:flex; justify-content:space-between; align-items:center; overflow:hidden; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-input)'">
                         <span id="style-btn-text" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">All Styles</span>
                         <i class="fa-solid fa-chevron-down" style="font-size:9px; color:var(--text-muted); flex-shrink:0; margin-left:4px;"></i>
                     </button>
@@ -2624,12 +2624,12 @@
 
                 <!-- Filter: Type -->
                 <div class="relative">
-                    <i class="fa-solid fa-skating absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <select id="filter-type" onchange="renderSkaters()" class="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand text-xs appearance-none cursor-pointer">
+                    <i class="fa-solid fa-skating absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-muted); font-size: 11px;"></i>
+                    <select id="filter-type" onchange="renderSkaters()" class="w-full pl-8 pr-6 py-1.5 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] text-[11px] appearance-none cursor-pointer transition-colors" style="background: var(--bg-input); border-color: var(--border-input); color: var(--text-main);">
                         <option value="">All Types</option>
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                        <i class="fa-solid fa-filter text-[10px] text-slate-400"></i>
+                        <i class="fa-solid fa-chevron-down text-[9px]" style="color: var(--text-muted);"></i>
                     </div>
                 </div>
             </div>
@@ -2637,6 +2637,22 @@
 
         <!-- Skater List/Grid Container -->
         <div id="skater-grid-wrapper" class="rounded-xl overflow-hidden">
+            <!-- Row View Header Layer -->
+            <div id="row-view-header" class="hidden grid items-center gap-2 px-3 py-1 mb-2 text-[10px] font-bold uppercase tracking-wider text-center border-b border-transparent" style="color: var(--text-muted); grid-template-columns: 36px minmax(90px, 0.8fr) minmax(80px, 0.6fr) 70px 60px 90px repeat(4, 85px) 30px 65px 36px;">
+                <div></div>
+                <div class="text-left pr-1 cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('alpha')" title="Sort by Name">Name</div>
+                <div class="text-left pl-1 cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('location')" title="Sort by Location">Location</div>
+                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('region')" title="Sort by Region">Region</div>
+                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('type')" title="Sort by Type">Type</div>
+                <div>Status</div>
+                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('ig')" title="Sort by Instagram">Instagram</div>
+                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('tt')" title="Sort by TikTok">TikTok</div>
+                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('yt')" title="Sort by YouTube">YouTube</div>
+                <div class="cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('fb')" title="Sort by Facebook">Facebook</div>
+                <div>Viral</div>
+                <div class="text-right pr-1 cursor-pointer hover:text-[#f97316] transition-colors select-none" onclick="handleSortChange('total')" title="Sort by Reach">Total Reach</div>
+                <div></div>
+            </div>
             <div id="skater-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full">
                 <!-- Cards/Rows rendered here via JS -->
             </div>
@@ -2664,27 +2680,32 @@
 </div>
 
     <!-- Analytics Dashboard Modal -->
-    <div id="analytics-modal" class="fixed inset-0 z-50 hidden overflow-hidden">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAnalyticsDashboard()"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="glass-panel w-full max-w-7xl h-[90vh] rounded-3xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/20">
+    <div id="analytics-modal" class="hidden overflow-hidden" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 99999;">
+        <!-- Backdrop -->
+        <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);" onclick="closeAnalyticsDashboard()"></div>
+        
+        <!-- Modal Window Container -->
+        <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; pointer-events: auto; padding: 0;">
+            <!-- Inner Panel (FULLSCREEN TAKEOVER) -->
+            <div class="w-full shadow-2xl overflow-hidden" style="height: 100vh; width: 100vw; max-width: 100vw; background: var(--bg-main); display: flex; flex-direction: column;">
+                
+                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--bg-panel); display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="padding: 1rem; background-color: #6366f1; border-radius: 1rem; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);">
                             <i class="fa-solid fa-chart-line text-2xl"></i>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold">Analytics Dashboard</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-widest">Real-time Performance Metrics</p>
+                            <h2 class="text-2xl md:text-3xl font-bold tracking-tight" style="margin: 0; line-height: 1.2;">Analytics Dashboard</h2>
+                            <p class="text-xs uppercase font-bold tracking-widest mt-1" style="color: var(--text-muted); margin: 0;">Real-time Performance Metrics</p>
                         </div>
                     </div>
-                    <button onclick="closeAnalyticsDashboard()" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center">
-                        <i class="fa-solid fa-times text-lg"></i>
+                    <button onclick="closeAnalyticsDashboard()" class="transition-all hover:scale-110" style="width: 3rem; height: 3rem; border-radius: 0.75rem; color: white; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border: none; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.4);">
+                        <i class="fa-solid fa-times text-2xl"></i>
                     </button>
                 </div>
                 
-                <div class="flex-grow overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-900/20">
-                    <div class="grid grid-cols-2 gap-4 md:gap-6">
+                <div class="flex-grow overflow-y-auto p-6 md:p-8" style="background: var(--bg-main);">
+                    <div class="grid grid-cols-2 gap-4 md:gap-6" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem;">
                         <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
                             <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-2 md:mb-4 flex items-center gap-2 text-sm md:text-base"><i class="fa-solid fa-crown text-amber-500"></i> Top 10 Skaters</h3>
                             <div class="flex-grow w-full relative min-h-[180px] h-[30vh]"><canvas id="chart-top-skaters"></canvas></div>
@@ -2715,22 +2736,22 @@
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
             <div class="glass-panel w-full max-w-5xl rounded-2xl shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700">
-                <form id="skater-form" onsubmit="handleFormSubmit(event)" class="p-5">
-                    <div class="flex justify-between items-center mb-5 border-b border-slate-200 dark:border-slate-700 pb-3">
-                        <h2 class="text-2xl font-bold" id="modal-title">Add New Skater</h2>
-                        <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                            <i class="fa-solid fa-times text-xl"></i>
-                        </button>
+                <form id="skater-form" onsubmit="handleFormSubmit(event)" class="p-4 pt-2">
+                    <div class="relative flex justify-between items-center mb-1 mt-1">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider border-l-4 border-brand pl-2 shrink-0 m-0 relative z-10 block">Profile Information</h3>
+                        <h2 class="absolute text-xl md:text-2xl font-bold leading-none whitespace-nowrap m-0 p-0 tracking-tight pointer-events-none z-0" id="modal-title" style="left: 50%; transform: translateX(-50%); margin: 0 !important; padding: 0 !important; line-height: 1 !important;">Add New Skater</h2>
+                        <div class="flex items-center justify-end gap-5 shrink-0 pr-8 relative z-10">
+                            <label class="flex items-center gap-2 cursor-pointer group m-0">
+                                <input type="checkbox" id="input-favorite" class="w-4 h-4 accent-red-500 rounded border-slate-300 m-0">
+                                <span class="text-xs font-bold text-slate-500 uppercase group-hover:text-red-500 transition-colors hidden sm:block">Favorite Skater</span>
+                            </label>
+                            <button type="button" onclick="closeModal()" class="absolute right-0 text-slate-400 hover:text-red-500 transition-colors border-0 p-0 m-0 bg-transparent flex items-center justify-center top-1/2 transform -translate-y-1/2">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
                     </div>
                     <input type="hidden" id="edit-index">
-                    <div class="mb-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider border-l-4 border-brand pl-2">Profile Information</h3>
-                            <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" id="input-favorite" class="w-4 h-4 accent-red-500 rounded border-slate-300">
-                                <span class="text-xs font-bold text-slate-500 uppercase group-hover:text-red-500 transition-colors">Favorite Skater</span>
-                            </label>
-                        </div>
+                    <div class="mb-2 mt-4">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div class="space-y-3">
                                 <div><label class="block text-xs font-medium mb-1 text-slate-500 uppercase text-[10px]">Full Name</label><input required type="text" id="input-name" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand focus:outline-none text-sm"></div>
@@ -3083,7 +3104,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.07.2008"></script>
+    <script src="socialz-module.js?v=v.2026.04.07.2156"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4178,16 +4199,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.07.2008"></script>
-<script src="system-tools-module.js?v=v.2026.04.07.2008"></script>
-<script src="bom-module.js?v=v.2026.04.07.2008"></script>
-<script src="inventory-module.js?v=v.2026.04.07.2008"></script>
-<script src="packerz-module.js?v=v.2026.04.07.2008"></script>
-<script src="production-module.js?v=v.2026.04.07.2008"></script>
-<script src="sales-module.js?v=v.2026.04.07.2008"></script>
-<script src="analytics-module.js?v=v.2026.04.07.2008"></script>
-<script src="ceo-module.js?v=v.2026.04.07.2008"></script>
-<script src="print-module.js?v=v.2026.04.07.2008"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.07.2156"></script>
+<script src="system-tools-module.js?v=v.2026.04.07.2156"></script>
+<script src="bom-module.js?v=v.2026.04.07.2156"></script>
+<script src="inventory-module.js?v=v.2026.04.07.2156"></script>
+<script src="packerz-module.js?v=v.2026.04.07.2156"></script>
+<script src="production-module.js?v=v.2026.04.07.2156"></script>
+<script src="sales-module.js?v=v.2026.04.07.2156"></script>
+<script src="analytics-module.js?v=v.2026.04.07.2156"></script>
+<script src="ceo-module.js?v=v.2026.04.07.2156"></script>
+<script src="print-module.js?v=v.2026.04.07.2156"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4644,18 +4665,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.07.2008"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.07.2156"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.07.2008"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.07.2156"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.07.2008"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.07.2156"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.07.2008"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.07.2008"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.07.2008"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.07.2156"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.07.2156"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.07.2008"></script>
-    <script src="labelz-module.js?v=v.2026.04.07.2008"></script>
+    <script src="barcodz-module.js?v=v.2026.04.07.2156"></script>
+    <script src="labelz-module.js?v=v.2026.04.07.2156"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-panel); border:1px dashed #f59e0b; border-radius:12px; width:90%; max-width:1200px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">

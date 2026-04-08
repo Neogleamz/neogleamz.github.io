@@ -95,7 +95,7 @@
             else if(colorClass === 'blue') { tc = 'text-blue-500'; hb = 'hover:bg-blue-500/10'; }
             
             return `
-                <a href="${link}" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg transition-colors ${hb} group flex-1 min-w-0">
+                <a href="${link}" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg transition-all ${hb} group flex-1 min-w-0 border shadow-sm hover:shadow-md" style="background: var(--bg-panel); border-color: var(--border-color);">
                     <span class="text-sm ${tc} mb-1 truncate w-full font-medium tracking-tight text-center px-1">${handle}</span>
                     <div class="flex items-center gap-2">
                         <i class="fa-brands ${icon} ${tc} text-4xl group-hover:scale-110 transition-transform"></i>
@@ -105,13 +105,18 @@
             `;
         }
 
-        function toggleFavorite(id, e) {
+        async function toggleFavorite(index, e) {
             if (e) e.stopPropagation();
-            const index = socialzSkaters.findIndex(s => s.id === id);
-            if (index > -1) {
+            if (index > -1 && index < socialzSkaters.length) {
                 socialzSkaters[index].isFavorite = !socialzSkaters[index].isFavorite;
                 renderSkaters();
                 sysLog(socialzSkaters[index].isFavorite ? 'Added to favorites' : 'Removed from favorites');
+                try {
+                    const skaterId = socialzSkaters[index].id;
+                    if(skaterId) await supabaseClient.from('socialz_audience').update({ is_favorite: socialzSkaters[index].isFavorite }).eq('id', skaterId);
+                } catch(err) {
+                    console.error('Failed to sync favorite status to DB', err);
+                }
             }
         }
 
@@ -212,10 +217,13 @@
 
             // Update Layout Container
             const container = document.getElementById('skater-grid');
+            const rowHeader = document.getElementById('row-view-header');
             if (!isCompact) {
                 container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full";
+                if(rowHeader) rowHeader.classList.add('hidden');
             } else {
                 container.className = "flex flex-col gap-2 transition-all duration-300 min-w-full";
+                if(rowHeader) rowHeader.classList.remove('hidden');
             }
             renderSkaters();
         };
@@ -296,47 +304,54 @@
                         const ytHtml = generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);
                         const fbHtml = generateSocial(s.links.fb, s.followers.fb, 'fa-facebook', 'blue', s.handles.fb);
 
-                        return `<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col group relative">
+                        return `<div class="rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border overflow-hidden flex flex-col group relative hover:border-[#f97316]" style="background: var(--bg-panel); border-color: var(--border-color); box-shadow: 0 4px 6px var(--shadow-color);">
                         <!-- Favorite Heart -->
-                        <button onclick="toggleFavorite(${s.id}, event)" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur shadow-sm flex items-center justify-center transition-all ${s.isFavorite ? 'opacity-100 text-red-500' : 'opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400'}">
-                            <i class="${s.isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                        <button onclick="toggleFavorite(${originalIndex}, event)" class="absolute top-4 right-4 w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-all ${s.isFavorite ? 'opacity-100' : 'opacity-100 hover:text-red-400'}" style="z-index: 20; background: var(--bg-main); border: 1px solid var(--border-color); color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};">
+                            ${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}
                         </button>
+                        <!-- Viral Star -->
+                        ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="absolute top-4 w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-transform hover:scale-110" style="z-index: 20; right: 54px; background: var(--bg-main); color: #FBBF24; border: 1px solid var(--border-color); filter: drop-shadow(0 0 2px rgba(251,191,36,0.3));" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : ''}
 
-                         <div class="p-6 pb-4 relative flex-grow">
-                        <div class="flex items-center gap-4 mb-4"><div class="w-16 h-16 relative rounded-full overflow-hidden shadow-lg shrink-0"><div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-2xl font-bold z-0">${s.name.charAt(0)}</div>${src ? `<img loading="lazy" src="${src}" class="absolute inset-0 w-full h-full object-cover z-10 bg-white dark:bg-slate-800" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}</div><div class="overflow-hidden flex-grow"><h2 class="font-bold text-xl text-slate-900 dark:text-white leading-tight truncate pr-2">${s.name}</h2><div class="flex flex-wrap items-center gap-1.5 mt-1 text-sm text-slate-500 dark:text-slate-400 truncate"><i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} ${s.region ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${regClass}">${s.region}</span>` : ''} <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${typeClass}">${s.type || ''}</span></div></div></div><p class="text-sm text-slate-600 dark:text-slate-300 mt-3 line-clamp-3 leading-relaxed mb-4 min-h-[4.5em]">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p><div class="flex justify-between items-center text-sm border-t border-slate-100 dark:border-slate-700 pt-3 mt-auto gap-2">
+                         <div class="p-4 pt-3 pb-4 relative flex-grow flex flex-col">
+                        <div class="flex items-center gap-4 mb-4"><div class="w-16 h-16 relative rounded-full overflow-hidden shadow-lg shrink-0 border" style="border-color: var(--border-color);"><div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-2xl font-bold z-0">${s.name.charAt(0)}</div>${src ? `<img loading="lazy" src="${src}" class="absolute inset-0 w-full h-full object-cover z-10" style="background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}</div><div class="overflow-hidden flex-grow"><h2 class="font-bold text-xl leading-tight truncate pr-2" style="color: var(--text-heading);">${s.name}</h2><div class="flex flex-wrap items-center gap-1.5 mt-1 text-sm truncate" style="color: var(--text-muted);"><i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} ${s.region ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${regClass}">${s.region}</span>` : ''} <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${typeClass}">${s.type || ''}</span></div></div></div><p class="text-sm mt-3 line-clamp-3 leading-relaxed mb-4 min-h-[4.5em]" style="color: var(--text-main);">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p><div class="text-sm pt-3 mt-auto min-h-[44px]" style="border-top: 1px solid var(--border-color); display: block; width: 100%; position: relative;">
+                            <!-- Right: Edit Action (Floated FIRST) -->
+                            <div style="float: right; display: flex; align-items: center; position: relative; z-index: 10; margin-top: 5px;">
+                                <button onclick="editSkater(${originalIndex})" class="text-xs font-bold text-slate-400 hover:text-orange-400 flex items-center gap-1 shrink-0"><i class="fa-solid fa-pen"></i> EDIT</button>
+                            </div>
                             <!-- Left: Status and Styles -->
-                            <div class="flex flex-wrap items-center gap-1.5 flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5" style="float: left; max-width: 45%; position: relative; z-index: 10;">
                                 ${s.collabStatus ? `<span class="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded uppercase">${s.collabStatus}</span>` : ''}
-                                ${styleList.map(st => `<div class="bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">${st}</div>`).join('')}
+                                ${styleList.map(st => `<div class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide" style="background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-color);">${st}</div>`).join('')}
                             </div>
                             
-                            <!-- Center Group: Reach and Viral -->
-                            <div class="flex items-center gap-2 shrink-0">
-                                <div class="bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <!-- Center Group: Reach -->
+                            <div class="flex items-center gap-2" style="position: absolute; left: 50%; transform: translateX(-50%); top: 12px; z-index: 5;">
+                                <div class="px-3 py-1 rounded-lg border shadow-sm" style="background: var(--bg-input); border-color: var(--border-color);">
                                     <span class="text-xs font-black text-brand uppercase tracking-tight">${formatCountShort(s.rawFollowers)} REACH</span>
                                 </div>
-                                ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="bg-gradient-to-r from-amber-400 to-amber-600 text-white p-2 rounded-lg flex items-center justify-center shadow-sm hover:shadow-amber-500/20 transition-all" title="View Viral Video"><i class="fa-solid fa-rocket text-xs"></i></a>` : ''}
                             </div>
 
-                            <!-- Right: Edit Action -->
-                            <div class="flex-1 flex justify-end">
-                                <button onclick="editSkater(${originalIndex})" class="text-xs font-bold text-brand hover:text-orange-400 flex items-center gap-1 shrink-0 ml-2"><i class="fa-solid fa-pen"></i> EDIT</button>
-                            </div>
-                        </div></div><div class="mt-auto bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
+                            <div style="clear: both;"></div>
+                        </div></div><div class="mt-auto p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto" style="background: var(--bg-input); border-top: 1px solid var(--border-color);">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
                     } else {
                         // COMPACT LIST VIEW
                         return `
-                        <div class="bg-white dark:bg-slate-800 p-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all grid items-center gap-2 overflow-hidden" style="grid-template-columns: 36px minmax(100px, 0.8fr) 70px 60px 90px repeat(4, 85px) 30px 65px 36px;">
+                        <div class="p-2 px-4 rounded-lg border shadow-sm hover:shadow-md transition-all grid items-center gap-2 overflow-hidden hover:border-[#f97316]" style="background: var(--bg-panel); border-color: var(--border-color); box-shadow: 0 4px 6px var(--shadow-color); grid-template-columns: 36px minmax(90px, 0.8fr) minmax(80px, 0.6fr) 70px 60px 90px repeat(4, 85px) 30px 65px 36px;">
                             <!-- Avatar -->
-                            <div class="w-8 h-8 relative rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
-                                <div class="absolute inset-0 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 text-[10px] font-bold">${s.name.charAt(0)}</div>
+                            <div class="w-8 h-8 relative rounded-full overflow-hidden border" style="border-color: var(--border-color);">
+                                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style="background: var(--bg-input); color: var(--text-muted);">${s.name.charAt(0)}</div>
                                 ${src ? `<img loading="lazy" src="${src}" class="absolute inset-0 w-full h-full object-cover z-10" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}
                             </div>
                             
                             <!-- Name & Favorite -->
                             <div class="min-w-0 flex items-center gap-1.5 pr-1">
-                                <h3 class="font-bold text-xs truncate dark:text-white" title="${s.name}">${s.name}</h3>
-                                ${s.isFavorite ? '<i class="fa-solid fa-heart text-[9px] text-red-500 shrink-0"></i>' : ''}
+                                <h3 class="font-bold text-xs truncate" style="color: var(--text-heading);" title="${s.name}">${s.name}</h3>
+                                <button onclick="toggleFavorite(${s.id}, event)" class="hover:scale-110 transition-transform flex items-center justify-center shrink-0 ${s.isFavorite ? 'text-red-500' : 'text-slate-400'}">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="min-w-0 flex items-center pl-1">
+                                <span class="text-[10px] truncate" style="color: var(--text-muted);" title="${s.location || ''}">${s.location || '-'}</span>
                             </div>
 
                             <!-- Region -->
@@ -357,30 +372,30 @@
                             <!-- IG -->
                             <a href="${s.links.ig || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
                                 <i class="fa-brands fa-instagram text-pink-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${s.followers.ig || '0'}</span>
+                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.ig || '0'}</span>
                             </a>
 
                             <!-- TikTok -->
                             <a href="${s.links.tt || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
                                 <i class="fa-brands fa-tiktok text-cyan-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${s.followers.tt || '0'}</span>
+                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.tt || '0'}</span>
                             </a>
 
                             <!-- YouTube -->
                             <a href="${s.links.yt || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
                                 <i class="fa-brands fa-youtube text-red-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${s.followers.yt || '0'}</span>
+                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.yt || '0'}</span>
                             </a>
 
                             <!-- Facebook -->
                             <a href="${s.links.fb || '#'}" target="_blank" class="flex items-center gap-1.5 justify-center group/soc">
                                 <i class="fa-brands fa-facebook text-blue-500 text-2xl group-hover/soc:scale-110 transition-transform"></i>
-                                <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${s.followers.fb || '0'}</span>
+                                <span class="text-xs font-bold" style="color: var(--text-heading);">${s.followers.fb || '0'}</span>
                             </a>
 
-                            <!-- Viral rocket -->
+                            <!-- Viral rocket/star -->
                             <div class="flex justify-center">
-                                ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="bg-gradient-to-r from-amber-400 to-amber-600 text-white p-1 rounded-md flex items-center justify-center shadow-sm hover:scale-110 transition-all" title="View Viral Video"><i class="fa-solid fa-rocket text-[8px]"></i></a>` : '-'}
+                                ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="hover:scale-125 transition-transform flex items-center justify-center shrink-0 w-full h-full" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}
                             </div>
 
                             <!-- Total -->
@@ -390,7 +405,7 @@
 
                             <!-- Edit button -->
                             <div class="flex justify-end">
-                                <button onclick="editSkater(${originalIndex})" class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-brand transition-colors"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                                <button onclick="editSkater(${originalIndex})" class="p-1.5 rounded-lg transition-colors hover:text-[#f97316]" style="background: var(--bg-input); color: var(--text-muted);"><i class="fa-solid fa-pen text-[10px] mt-[1px]"></i></button>
                             </div>
                         </div>`;
                     }
