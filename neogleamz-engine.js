@@ -136,23 +136,31 @@ function updateHubStats() {
 
         // --- DATAZ ---
         if (typeof finalResults !== 'undefined') {
-            let parcels = new Set(), totalPaid = 0, totalWt = 0;
+            let parcels = new Set(), totalWt = 0;
+            let absoluteRawSpend = 0, pureGoodsCost = 0;
             finalResults.forEach(s => {
                 let pno = s['Parcel No'];
                 if (pno && String(pno).trim().toUpperCase() !== 'MANUAL') {
                     if (!parcels.has(pno)) {
                         parcels.add(pno);
-                        totalPaid += parseFloat(s['Actual Paid (Parcel)']) || 0;
                         totalWt += parseFloat(s['Actual Chargeable Weight (g)']) || 0;
                     }
                 }
+                
+                absoluteRawSpend += parseFloat(s['Total Landed Cost ($)']) || 0;
+                
+                let uCost = parseFloat(s['Order Unit Price']) || parseFloat(s.order_unit_price) || 0;
+                let qVal = parseFloat(s['Quantity']) || parseFloat(s.quantity) || 1;
+                pureGoodsCost += uCost > 0 ? (uCost * qVal) : (parseFloat(s['Order Total']) || parseFloat(s.order_total) || 0);
             });
+            
+            let totalLogisticsSpend = absoluteRawSpend - pureGoodsCost;
+            if (totalLogisticsSpend < 0) totalLogisticsSpend = 0; // Safeguard
+            
             setStat('statDatazRecords', fmtNum(finalResults.length));
             setStat('statDatazParcels', fmtNum(parcels.size));
-            setStat('statDatazPaid', fmtMoney(totalPaid));
+            setStat('statDatazPaid', fmtMoney(totalLogisticsSpend));
             setStat('statDatazWt', fmtNum(totalWt));
-            let absoluteRawSpend = 0;
-            finalResults.forEach(s => absoluteRawSpend += parseFloat(s['Total Landed Cost ($)']) || 0);
             setStat('statDatazTotalCost', fmtMoney(absoluteRawSpend));
         }
 
@@ -457,16 +465,30 @@ function updateHubStats() {
         setStat('statImpzSyncs', fmtNum(parseInt(syncCount)));
         if (typeof finalResults !== 'undefined') {
             let capex = 0, customs = 0, freight = 0, weight = 0, pkgs = new Set();
+            let absoluteRawSpend = 0, pureGoodsCost = 0;
+            
             finalResults.forEach(r => {
-                capex += parseFloat(r['Order Total']) || parseFloat(r.order_total) || 0;
+                let uCost = parseFloat(r['Order Unit Price']) || parseFloat(r.order_unit_price) || 0;
+                let qVal = parseFloat(r['Quantity']) || parseFloat(r.quantity) || 1;
+                let goodsCost = uCost > 0 ? (uCost * qVal) : (parseFloat(r['Order Total']) || parseFloat(r.order_total) || 0);
+                capex += goodsCost;
+                
+                absoluteRawSpend += parseFloat(r['Total Landed Cost ($)']) || parseFloat(r.total_cost_weight) || 0;
+                pureGoodsCost += goodsCost;
+
                 let pno = r['Parcel No'] || r.parcel_no;
-                if (pno && !pkgs.has(pno)) {
-                    pkgs.add(pno);
-                    customs += parseFloat(r['Custom Clearance Fee']) || parseFloat(r.custom_clearance_fee) || 0;
-                    freight += parseFloat(r['Actual Shipping Fee']) || parseFloat(r.actual_shipping_fee) || 0;
-                    weight += parseFloat(r['Actual Chargeable Weight (g)']) || parseFloat(r.actual_chargeable_weight_g) || 0;
+                if (pno && String(pno).trim().toUpperCase() !== 'MANUAL') {
+                    if (!pkgs.has(pno)) {
+                        pkgs.add(pno);
+                        customs += parseFloat(r['Custom Clearance Fee']) || parseFloat(r.custom_clearance_fee) || 0;
+                        weight += parseFloat(r['Actual Chargeable Weight (g)']) || parseFloat(r.actual_chargeable_weight_g) || 0;
+                    }
                 }
             });
+            
+            freight = absoluteRawSpend - pureGoodsCost;
+            if (freight < 0) freight = 0;
+            
             setStat('statImpzSpend', fmtMoney(capex));
             setStat('statImpzCus', fmtMoney(customs));
             setStat('statImpzShip', fmtMoney(freight));

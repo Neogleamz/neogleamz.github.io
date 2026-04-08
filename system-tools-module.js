@@ -9,7 +9,9 @@ const DEFAULT_PARSER_RULES = {
     regexPostage: "Postage Inclusive:.*?[￥$]\\s*([\\d.]+)",
     regexMakeup: "\\(Make up[：:]\\s*(?:US\\s*\\$|CN\\s*￥)\\s*([\\d.]+)\\)",
     regexLineItemNum: "DI\\d{11}",
+    regexItemName: "DI\\d{11}\\s+([^\\n]+)",
     regexUnitPrice: "(?:US \\$|CN ￥)\\s*([\\d.]+)",
+    regexQuantity: "(?:US \\$|CN ￥).*?\\n(\\d+)",
     regexSpecs: "(?:Specification model|specification|Product specifications|model|Color|size|power|Light color|Applicable Model)[：:]\\s*([^\\n\\t\\r]+)"
 };
 const DEFAULT_PARCEL_RULES = {
@@ -19,7 +21,20 @@ const DEFAULT_PARCEL_RULES = {
     regexFeeStructure: "{FEE_NAME}\\s*(?:US \\$|CN ￥)\\s*([\\d.]+)",
     regexDeductionStructure: "{FEE_NAME}\\s*-\\s*(?:US \\$|CN ￥)\\s*([\\d.]+)",
     regexLineItemNum: "DI\\d{11}",
+    regexItemName: "DI\\d{11}\\s+([^\\n]+)",
+    regexQuantity: "\\n(\\d+)\\n\\d+(?:\\n|$)",
+    regexGroupWeight: "\\n\\d+\\n(\\d+)(?:\\n|$)",
     regexSpecs: "(?:specification|Color|model|Product specifications|Specification model|size|power|Light color|Applicable Model)[：:]\\s*(.*)"
+};
+
+window.escapeHtmlForRegex = function(text) {
+    if (!text) return "";
+    return text.toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 };
 
 window.PARSER_PROFILES = [];
@@ -36,6 +51,20 @@ window.loadParserConfig = function() {
         if (stored) {
             let data = JSON.parse(stored);
             window.PARSER_PROFILES = data.profiles || [{name: "Factory Default", rules: {...DEFAULT_PARSER_RULES}}];
+            
+            // Auto-repair missing essential keys that were wiped in v.2026.04.07.bug
+            window.PARSER_PROFILES.forEach(p => {
+                if(!p.rules.regexItemName) p.rules.regexItemName = DEFAULT_PARSER_RULES.regexItemName;
+                if(!p.rules.regexQuantity) p.rules.regexQuantity = DEFAULT_PARSER_RULES.regexQuantity;
+            });
+            window.PARCEL_PROFILES.forEach(p => {
+                if(!p.rules.regexGroupWeight) p.rules.regexGroupWeight = DEFAULT_PARCEL_RULES.regexGroupWeight;
+            });
+            // Force strict adherence on memory block 0
+            if (window.PARSER_PROFILES[0] && window.PARSER_PROFILES[0].name === "Factory Default") {
+                window.PARSER_PROFILES[0].rules = {...DEFAULT_PARSER_RULES};
+            }
+
             window.ACTIVE_PROFILE_INDEX = data.active !== undefined ? data.active : 0;
             if(!window.PARSER_PROFILES[window.ACTIVE_PROFILE_INDEX]) window.ACTIVE_PROFILE_INDEX = 0;
             window.PARSER_RULES = window.PARSER_PROFILES[window.ACTIVE_PROFILE_INDEX].rules;
@@ -76,25 +105,30 @@ window.getCurrentUIRules = function() {
         regexPostage: document.getElementById('regexPostage').value.trim(),
         regexMakeup: document.getElementById('regexMakeup').value.trim(),
         regexLineItemNum: document.getElementById('regexLineItemNum').value.trim(),
+        regexItemName: document.getElementById('regexItemName').value.trim(),
+        regexQuantity: document.getElementById('regexQuantity').value.trim(),
         regexUnitPrice: document.getElementById('regexUnitPrice').value.trim(),
         regexSpecs: document.getElementById('regexSpecs').value.trim()
     };
 };
 
-window.openParserConfig = function() {
-    if(!window.PARSER_RULES) loadParserConfig();
-    document.getElementById('regexOrderNum').value = window.PARSER_RULES.regexOrderNum || "";
-    document.getElementById('regexOrderDate').value = window.PARSER_RULES.regexOrderDate || "";
-    document.getElementById('regexOrderTotal').value = window.PARSER_RULES.regexOrderTotal || "";
-    document.getElementById('regexPostage').value = window.PARSER_RULES.regexPostage || "";
-    document.getElementById('regexMakeup').value = window.PARSER_RULES.regexMakeup || "";
-    document.getElementById('regexLineItemNum').value = window.PARSER_RULES.regexLineItemNum || "";
-    document.getElementById('regexUnitPrice').value = window.PARSER_RULES.regexUnitPrice || "";
-    document.getElementById('regexSpecs').value = window.PARSER_RULES.regexSpecs || "";
-    document.getElementById('liveRegexPlaygroundPayload').value = window.__LATEST_RAW_ORDER_DUMP || "";
-    document.getElementById('parserConfigModal').style.display = 'flex';
-    window.renderPresetDropdown();
+window.toggleRawOrderView = function() {
+    let ta = document.getElementById('liveRegexPlaygroundPayload');
+    let btn = document.getElementById('btnToggleView');
+    if (window._isOrderRawView) {
+        ta.value = window.__LATEST_RAW_ORDER_DUMP || "";
+        window._isOrderRawView = false;
+        if (btn) btn.innerHTML = "👁️ VIEW SOURCE HTML";
+    } else {
+        ta.value = window.__LATEST_RAW_ORDER_HTML_DUMP || "No HTML source cached. Please run a test or import sandbox.";
+        window._isOrderRawView = true;
+        if (btn) btn.innerHTML = "👁️ VIEW EXTRACTED TEXT";
+    }
     window.evaluateAllRegex();
+};
+
+window.openParserConfig = function() {
+    window.openGlobalRegexPlayground("orders");
 };
 
 window.renderPresetDropdown = function() {
@@ -118,8 +152,12 @@ window.renderPresetDropdown = function() {
         if(btnOver) btnOver.style.display = 'inline-block';
     }
 };
+window.closeParserConfig = function() { document.getElementById('globalRegexPlaygroundModalContainer').style.display = 'none'; };
 
-window.closeParserConfig = function() { document.getElementById('parserConfigModal').style.display = 'none'; };
+window.restoreDefaultParserRules = function() {
+    let sel = document.getElementById('regexPresetSelect');
+    if (sel) { sel.value = 0; window.loadSelectedRegexPreset(); }
+};
 
 window.loadSelectedRegexPreset = function() {
     let sel = document.getElementById('regexPresetSelect');
@@ -165,37 +203,160 @@ window.deleteRegexPreset = function() {
 
 window.__LATEST_RAW_ORDER_DUMP = "";
 
-window.evaluateAllRegex = function() {
-    const ids = ['regexOrderNum', 'regexOrderDate', 'regexOrderTotal', 'regexPostage', 'regexMakeup', 'regexLineItemNum', 'regexUnitPrice', 'regexSpecs'];
-    ids.forEach(id => window.evaluateLiveRegex(id));
+window.UI_COLOR_MAP = {
+    regexOrderNum: { text: '#ec4899', bg: 'rgba(236,72,153,0.4)' },
+    regexParcelNum: { text: '#ec4899', bg: 'rgba(236,72,153,0.4)' },
+    regexOrderDate: { text: '#8b5cf6', bg: 'rgba(139,92,246,0.4)' },
+    regexActualPaid: { text: '#8b5cf6', bg: 'rgba(139,92,246,0.4)' },
+    regexOrderTotal: { text: '#10b981', bg: 'rgba(16,185,129,0.4)' },
+    regexChargeableWeight: { text: '#10b981', bg: 'rgba(16,185,129,0.4)' },
+    regexPostage: { text: '#f43f5e', bg: 'rgba(244,63,94,0.4)' },
+    regexSecondaryFee: { text: '#d946ef', bg: 'rgba(217,70,239,0.4)' },
+    regexFeeStructure: { text: '#f43f5e', bg: 'rgba(244,63,94,0.4)' },
+    regexDeductionStructure: { text: '#d946ef', bg: 'rgba(217,70,239,0.4)' },
+    regexLineItemNum: { text: '#06b6d4', bg: 'rgba(6,182,212,0.4)' },
+    regexParcelLineItemNum: { text: '#06b6d4', bg: 'rgba(6,182,212,0.4)' },
+    regexItemName: { text: '#eab308', bg: 'rgba(234,179,8,0.4)' },
+    regexParcelItemName: { text: '#eab308', bg: 'rgba(234,179,8,0.4)' },
+    regexUnitPrice: { text: '#84cc16', bg: 'rgba(132,204,22,0.4)' },
+    regexQuantity: { text: '#3b82f6', bg: 'rgba(59,130,246,0.4)' },
+    regexParcelQuantity: { text: '#3b82f6', bg: 'rgba(59,130,246,0.4)' },
+    regexGroupWeight: { text: '#a855f7', bg: 'rgba(168,85,247,0.4)' },
+    regexSpecs: { text: '#f59e0b', bg: 'rgba(245,158,11,0.4)' },
+    regexParcelSpecs: { text: '#f59e0b', bg: 'rgba(245,158,11,0.4)' }
 };
 
-window.evaluateLiveRegex = function(id) {
-    let inputStr = document.getElementById(id).value;
-    let targetTxt = document.getElementById('liveRegexPlaygroundPayload').value;
+window._regexParseTimer = null;
+window.evaluateAllRegex = function() {
+    clearTimeout(window._regexParseTimer);
+    window._regexParseTimer = setTimeout(() => {
+        let ids = [];
+        if (window.EXTRACTOR_CONFIGS && window.EXTRACTOR_CONFIGS.orders) {
+            window.EXTRACTOR_CONFIGS.orders.groups.forEach(g => g.fields.forEach(f => ids.push(f.id)));
+        }
+        
+        let targetTxt = document.getElementById('liveRegexPlaygroundPayload').value || "";
+        let searchQ = (document.getElementById('liveRegexSearchBox')?.value || "").trim();
+        
+        let regionsToHighlight = [];
+        if (searchQ) {
+            try {
+                let searchRegex = new RegExp(searchQ.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                let searchIter;
+                if(String.prototype.matchAll) searchIter = targetTxt.matchAll(searchRegex);
+                if (searchIter) {
+                    for (const m of searchIter) {
+                        regionsToHighlight.push({ start: m.index, end: m.index + m[0].length, id: 'SEARCH' });
+                    }
+                }
+            } catch(e) {}
+        }
+
+        ids.forEach(id => {
+            let extractedArray = window.evaluateLiveRegex(id, targetTxt, true); // true = raw array bypass
+            if (extractedArray && extractedArray.length > 0) {
+                extractedArray.forEach(extObj => {
+                    if(extObj.str && extObj.str.trim() !== '') {
+                        regionsToHighlight.push({ start: extObj.start, end: extObj.end, id: id });
+                    }
+                });
+            }
+        });
+
+        // Sort descending because we insert spans index-forward
+        regionsToHighlight.sort((a,b) => a.start - b.start);
+
+        let safeTxt = "";
+        let lastIndex = 0;
+        
+        regionsToHighlight.forEach(region => {
+            if (region.start < lastIndex) return; // skip overlap
+            if (region.end <= region.start) return; // skip empty
+            
+            let cID = region.id;
+            let textColor = '#10b981';
+            let bgColor = 'rgba(16,185,129,0.4)';
+            
+            if (cID === 'SEARCH') {
+                textColor = '#f59e0b';
+                bgColor = 'rgba(245,158,11,0.6)';
+            } else if (window.UI_COLOR_MAP[cID]) {
+                textColor = window.UI_COLOR_MAP[cID].text;
+                bgColor = window.UI_COLOR_MAP[cID].bg;
+            }
+
+            safeTxt += window.escapeHtmlForRegex(targetTxt.substring(lastIndex, region.start));
+            let matchText = window.escapeHtmlForRegex(targetTxt.substring(region.start, region.end));
+            safeTxt += `<mark style="background:${bgColor}; color:${textColor}; border-radius:3px; box-shadow:0 0 5px ${bgColor.replace('0.4','0.5').replace('0.6','0.8')}; padding:1px 0;">${matchText}</mark>`;
+            lastIndex = region.end;
+        });
+        
+        safeTxt += window.escapeHtmlForRegex(targetTxt.substring(lastIndex));
+
+        let hlLayer = document.getElementById('liveRegexHighlightLayer');
+        if(hlLayer) hlLayer.innerHTML = safeTxt;
+
+    }, 300);
+};
+
+window.evaluateLiveRegex = function(id, manualTargetTxt = null, returnAll = false) {
+    let el = document.getElementById(id);
+    let inputStr = el ? (el.value || "") : "";
+    let targetTxt = manualTargetTxt !== null ? manualTargetTxt : document.getElementById('liveRegexPlaygroundPayload').value;
     let badge = document.getElementById('eval_' + id);
     
-    if(!badge) return;
+    if(!badge) return null;
 
     if(!inputStr || inputStr.trim() === "") {
-        badge.innerText = "Empty Rule"; badge.style.color = "#cbd5e1"; return;
+        badge.innerText = "Empty Rule"; badge.style.color = "#cbd5e1"; return null;
     }
     
     try {
-        let regex = new RegExp(inputStr, "i");
-        let match = targetTxt.match(regex);
+        let regexSingle = new RegExp(inputStr, "di");
+        let singleMatch = targetTxt.match(regexSingle);
         
-        if(match) {
-            let result = match[1] !== undefined ? match[1] : match[0];
-            badge.innerText = `Result: [ ${result} ]`;
-            badge.style.color = "#10b981"; // green
+        // Setup global iterator map safely
+        let globalRegex = new RegExp(inputStr, "dgi");
+        let allMatchesIter;
+        if(String.prototype.matchAll) {
+            allMatchesIter = targetTxt.matchAll(globalRegex);
+        } else {
+            // Polyfill if matchAll somehow fails
+            return null;
+        }
+
+        let allResults = [];
+        for (const m of allMatchesIter) {
+            if (returnAll) {
+                let val = m[1] !== undefined ? m[1] : m[0];
+                let sIndex = m.index;
+                if (m.indices && m.indices[1]) {
+                    sIndex = m.indices[1][0];
+                } else if (m[1] !== undefined && m[0] && m[1]) {
+                    let offset = m[0].lastIndexOf(m[1]);
+                    if (offset !== -1) sIndex += offset;
+                }
+                allResults.push({ str: val, start: sIndex, end: sIndex + val.length });
+            } else {
+                allResults.push(m[1] !== undefined ? m[1] : m[0]);
+            }
+        }
+
+        if(singleMatch && allResults.length > 0) {
+            let result = singleMatch[1] !== undefined ? singleMatch[1] : singleMatch[0];
+            badge.innerText = `Matched (${allResults.length}): [ ${result} ]`;
+            badge.style.color = window.UI_COLOR_MAP[id] ? window.UI_COLOR_MAP[id].text : "#10b981";
+            
+            return returnAll ? allResults : result;
         } else {
             badge.innerText = "NO MATCH";
             badge.style.color = "#ef4444"; // red
+            return null;
         }
     } catch(e) {
         badge.innerText = "SYNTAX ERR";
         badge.style.color = "#ef4444";
+        return null;
     }
 };
 
@@ -238,23 +399,29 @@ window.getCurrentParcelUIRules = function() {
         regexFeeStructure: document.getElementById('regexFeeStructure').value.trim(),
         regexDeductionStructure: document.getElementById('regexDeductionStructure').value.trim(),
         regexLineItemNum: document.getElementById('regexParcelLineItemNum').value.trim(),
+        regexItemName: document.getElementById('regexParcelItemName').value.trim(),
+        regexQuantity: document.getElementById('regexParcelQuantity').value.trim(),
         regexSpecs: document.getElementById('regexParcelSpecs').value.trim()
     };
 };
 
-window.openParcelConfig = function() {
-    if(!window.PARCEL_RULES) loadParcelConfig();
-    document.getElementById('regexParcelNum').value = window.PARCEL_RULES.regexParcelNum || "";
-    document.getElementById('regexActualPaid').value = window.PARCEL_RULES.regexActualPaid || "";
-    document.getElementById('regexChargeableWeight').value = window.PARCEL_RULES.regexChargeableWeight || "";
-    document.getElementById('regexFeeStructure').value = window.PARCEL_RULES.regexFeeStructure || "";
-    document.getElementById('regexDeductionStructure').value = window.PARCEL_RULES.regexDeductionStructure || "";
-    document.getElementById('regexParcelLineItemNum').value = window.PARCEL_RULES.regexLineItemNum || "";
-    document.getElementById('regexParcelSpecs').value = window.PARCEL_RULES.regexSpecs || "";
-    document.getElementById('liveParcelRegexPlaygroundPayload').value = window.__LATEST_RAW_PARCEL_DUMP || "";
-    document.getElementById('parcelConfigModal').style.display = 'flex';
-    window.renderParcelPresetDropdown();
+window.toggleRawParcelView = function() {
+    let ta = document.getElementById('liveParcelRegexPlaygroundPayload');
+    let btn = document.getElementById('btnToggleView');
+    if (window._isParcelRawView) {
+        ta.value = window.__LATEST_RAW_PARCEL_DUMP || "";
+        window._isParcelRawView = false;
+        if (btn) btn.innerHTML = "👁️ VIEW SOURCE HTML";
+    } else {
+        ta.value = window.__LATEST_RAW_PARCEL_HTML_DUMP || "No HTML source cached. Please run a test or import sandbox.";
+        window._isParcelRawView = true;
+        if (btn) btn.innerHTML = "👁️ VIEW EXTRACTED TEXT";
+    }
     window.evaluateAllParcelRegex();
+};
+
+window.openParcelConfig = function() {
+    window.openGlobalRegexPlayground("parcels");
 };
 
 window.renderParcelPresetDropdown = function() {
@@ -278,8 +445,12 @@ window.renderParcelPresetDropdown = function() {
         if(btnOver) btnOver.style.display = 'inline-block';
     }
 };
+window.closeParcelConfig = function() { document.getElementById('globalRegexPlaygroundModalContainer').style.display = 'none'; };
 
-window.closeParcelConfig = function() { document.getElementById('parcelConfigModal').style.display = 'none'; };
+window.restoreDefaultParcelRules = function() {
+    let sel = document.getElementById('parcelPresetSelect');
+    if (sel) { sel.value = 0; window.loadSelectedParcelRegexPreset(); }
+};
 
 window.loadSelectedParcelRegexPreset = function() {
     let sel = document.getElementById('parcelPresetSelect');
@@ -325,20 +496,107 @@ window.deleteParcelRegexPreset = function() {
 
 window.__LATEST_RAW_PARCEL_DUMP = "";
 
+window._parcelRegexParseTimer = null;
 window.evaluateAllParcelRegex = function() {
-    const ids = ['regexParcelNum', 'regexActualPaid', 'regexChargeableWeight', 'regexFeeStructure', 'regexDeductionStructure', 'regexParcelLineItemNum', 'regexParcelSpecs'];
-    ids.forEach(id => window.evaluateLiveParcelRegex(id));
+    clearTimeout(window._parcelRegexParseTimer);
+    window._parcelRegexParseTimer = setTimeout(() => {
+        let ids = [];
+        if (window.EXTRACTOR_CONFIGS && window.EXTRACTOR_CONFIGS.parcels) {
+            window.EXTRACTOR_CONFIGS.parcels.groups.forEach(g => g.fields.forEach(f => ids.push(f.id)));
+        }
+        
+        let targetTxt = document.getElementById('liveParcelRegexPlaygroundPayload').value || "";
+        let searchQ = (document.getElementById('liveParcelRegexSearchBox')?.value || "").trim();
+        
+        let regionsToHighlight = [];
+        if (searchQ) {
+            try {
+                let searchRegex = new RegExp(searchQ.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                let searchIter;
+                if(String.prototype.matchAll) searchIter = targetTxt.matchAll(searchRegex);
+                if (searchIter) {
+                    for (const m of searchIter) {
+                        regionsToHighlight.push({ start: m.index, end: m.index + m[0].length, id: 'SEARCH' });
+                    }
+                }
+            } catch(e) {}
+        }
+
+        ids.forEach(id => {
+            let extractedArray = window.evaluateLiveParcelRegex(id, targetTxt, true); // true = raw array bypass
+            if (extractedArray && extractedArray.length > 0) {
+                extractedArray.forEach(extObj => {
+                    if(extObj.str && extObj.str.trim() !== '') {
+                        regionsToHighlight.push({ start: extObj.start, end: extObj.end, id: id });
+                    }
+                });
+            }
+        });
+
+        // Sort descending because we insert spans index-forward
+        regionsToHighlight.sort((a,b) => a.start - b.start);
+
+        // Map distributed weights dynamically
+        let distributedWeightIndexes = new Set();
+        let lastWeightIdx = -1;
+        let itemsSince = 0;
+        
+        for (let i = 0; i < regionsToHighlight.length; i++) {
+            let r = regionsToHighlight[i];
+            if (r.id === 'regexParcelItemName') {
+                if (lastWeightIdx !== -1) itemsSince++;
+            } else if (r.id === 'regexGroupWeight') {
+                if (lastWeightIdx !== -1 && itemsSince > 1) distributedWeightIndexes.add(lastWeightIdx);
+                lastWeightIdx = i;
+                itemsSince = 0;
+            }
+        }
+        if (lastWeightIdx !== -1 && itemsSince > 0) distributedWeightIndexes.add(lastWeightIdx);
+
+        let safeTxt = "";
+        let lastIndex = 0;
+        
+        regionsToHighlight.forEach((region, rIdx) => {
+            if (region.start < lastIndex) return; // skip overlap
+            if (region.end <= region.start) return; // skip empty
+            
+            let cID = region.id;
+            let textColor = '#10b981';
+            let bgColor = 'rgba(16,185,129,0.4)';
+            
+            if (cID === 'SEARCH') {
+                textColor = '#f59e0b';
+                bgColor = 'rgba(245,158,11,0.6)';
+            } else if (window.UI_COLOR_MAP[cID]) {
+                textColor = window.UI_COLOR_MAP[cID].text;
+                bgColor = window.UI_COLOR_MAP[cID].bg;
+            }
+
+            safeTxt += window.escapeHtmlForRegex(targetTxt.substring(lastIndex, region.start));
+            let matchText = window.escapeHtmlForRegex(targetTxt.substring(region.start, region.end));
+            let emojiPrefix = (cID === 'regexGroupWeight' && distributedWeightIndexes.has(rIdx)) ? `<span style="font-size:11px; margin-right:4px;">🧮</span>` : "";
+            safeTxt += `<mark style="background:${bgColor}; color:${textColor}; border-radius:3px; box-shadow:0 0 5px ${bgColor.replace('0.4','0.5').replace('0.6','0.8')}; padding:1px 0;">${emojiPrefix}${matchText}</mark>`;
+            lastIndex = region.end;
+        });
+        
+        safeTxt += window.escapeHtmlForRegex(targetTxt.substring(lastIndex));
+
+        let hlLayer = document.getElementById('liveParcelRegexHighlightLayer');
+        if(hlLayer) hlLayer.innerHTML = safeTxt;
+
+    }, 300);
 };
 
-window.evaluateLiveParcelRegex = function(id) {
-    let inputStr = document.getElementById(id).value;
-    let targetTxt = document.getElementById('liveParcelRegexPlaygroundPayload').value;
+window.evaluateLiveParcelRegex = function(id, manualTargetTxt = null, returnAll = false) {
+    let el = document.getElementById(id);
+    let inputStr = el ? (el.value || "") : "";
+    let targetTxt = manualTargetTxt !== null ? manualTargetTxt : document.getElementById('liveParcelRegexPlaygroundPayload').value;
     let badge = document.getElementById('eval_' + id);
     
-    if(!badge) return;
+    if(!badge) return null;
 
     if(!inputStr || inputStr.trim() === "") {
-        badge.innerText = "Empty Rule"; badge.style.color = "#cbd5e1"; return;
+        badge.innerText = "Empty Rule"; badge.style.color = "#cbd5e1"; return null;
     }
     
     try {
@@ -346,20 +604,52 @@ window.evaluateLiveParcelRegex = function(id) {
         if(id === 'regexFeeStructure' || id === 'regexDeductionStructure') {
              regexStr = regexStr.replace("{FEE_NAME}", "Actual Shipping Fee"); // test interpolation
         }
-        let regex = new RegExp(regexStr, "i");
-        let match = targetTxt.match(regex);
         
-        if(match) {
-            let result = match[1] !== undefined ? match[1] : match[0];
-            badge.innerText = `Result: [ ${result} ]`;
-            badge.style.color = "#10b981"; // green
+        let regexSingle = new RegExp(regexStr, "di");
+        let singleMatch = targetTxt.match(regexSingle);
+        
+        // Setup global iterator map safely
+        let globalRegex = new RegExp(regexStr, "dgi");
+        let allMatchesIter;
+        if(String.prototype.matchAll) {
+            allMatchesIter = targetTxt.matchAll(globalRegex);
+        } else {
+            // Polyfill if matchAll somehow fails
+            return null;
+        }
+
+        let allResults = [];
+        for (const m of allMatchesIter) {
+            if (returnAll) {
+                let val = m[1] !== undefined ? m[1] : m[0];
+                let sIndex = m.index;
+                if (m.indices && m.indices[1]) {
+                    sIndex = m.indices[1][0];
+                } else if (m[1] !== undefined && m[0] && m[1]) {
+                    let offset = m[0].lastIndexOf(m[1]);
+                    if (offset !== -1) sIndex += offset;
+                }
+                allResults.push({ str: val, start: sIndex, end: sIndex + val.length });
+            } else {
+                allResults.push(m[1] !== undefined ? m[1] : m[0]);
+            }
+        }
+
+        if(singleMatch && allResults.length > 0) {
+            let result = singleMatch[1] !== undefined ? singleMatch[1] : singleMatch[0];
+            badge.innerText = `Matched (${allResults.length}): [ ${result} ]`;
+            badge.style.color = window.UI_COLOR_MAP[id] ? window.UI_COLOR_MAP[id].text : "#10b981";
+            
+            return returnAll ? allResults : result;
         } else {
             badge.innerText = "NO MATCH";
             badge.style.color = "#ef4444"; // red
+            return null;
         }
     } catch(e) {
         badge.innerText = "SYNTAX ERR";
         badge.style.color = "#ef4444";
+        return null;
     }
 };
 
@@ -379,34 +669,80 @@ if (parcelFilesTestEl) parcelFilesTestEl.addEventListener('change', async(e)=>{i
 
 // Global Sandbox Visualization Engine
 window.__sandboxData = [];
+window.__sandboxData2 = null;
 window.__sandboxSortCol = null;
+window.__sandboxSortCol2 = null;
 window.__sandboxSortAsc = true;
+window.__sandboxSortAsc2 = true;
 window.__sandboxTitle = "";
+window.__sandboxTitle2 = "";
+window.__sandboxTable1Title = "Table 1 (Primary)";
+window.__sandboxTable2Title = "Table 2 (Secondary)";
 
-window.openSandboxModal = function(payload, title) {
+window.openSandboxModal = function(payload, title, payload2=null, table1Title="Table 1 (Primary)", table2Title="Table 2 (Secondary)", liveImportMeta=null) {
     window.__sandboxData = payload && payload.length ? [...payload] : [];
+    window.__sandboxData2 = payload2 && payload2.length ? [...payload2] : null;
     window.__sandboxTitle = title || "data_payload";
+    window.__pendingLiveImportMeta = liveImportMeta;
+    
+    let actionFooter = document.getElementById('sandboxActionFooter');
+    let btnDiscard = document.getElementById('btnSandboxDiscard');
+    let btnSync = document.getElementById('btnSandboxSync');
+    let btnClose = document.getElementById('btnSandboxClose');
+    let titleEl = document.getElementById('sandboxModalTitle');
+    let hdrBg = document.getElementById('sandboxDataModal').querySelector('div > div:first-child');
+    let modalWrapper = document.getElementById('sandboxDataModal').firstElementChild;
+
+    if(actionFooter) actionFooter.style.display = "flex";
+
+    if (liveImportMeta) {
+        window.__sandboxTitle += " [⚠️ LIVE STAGING]";
+        titleEl.style.color = "#ef4444"; 
+        if(hdrBg) hdrBg.style.background = "rgba(239, 68, 68, 0.1)"; 
+        if(modalWrapper) modalWrapper.style.border = "1px solid #ef4444";
+        if(btnDiscard) btnDiscard.style.display = "block";
+        if(btnSync) btnSync.style.display = "block";
+        if(btnClose) btnClose.style.display = "none";
+    } else {
+        titleEl.style.color = "#f59e0b"; 
+        if(hdrBg) hdrBg.style.background = "rgba(245, 158, 11, 0.1)"; 
+        if(modalWrapper) modalWrapper.style.border = "1px dashed #f59e0b";
+        if(btnDiscard) btnDiscard.style.display = "none";
+        if(btnSync) btnSync.style.display = "none";
+        if(btnClose) btnClose.style.display = "block";
+    }
+
+    window.__sandboxTable1Title = table1Title;
+    window.__sandboxTable2Title = table2Title;
     window.__sandboxSortCol = null;
+    window.__sandboxSortCol2 = null;
     window.__sandboxSortAsc = true;
+    window.__sandboxSortAsc2 = true;
     window._renderSandboxModal();
     document.getElementById('sandboxDataModal').style.display = 'flex';
 };
 
-window.sortSandboxModal = function(col) {
-    if(!window.__sandboxData || !window.__sandboxData.length) return;
-    if (window.__sandboxSortCol === col) {
-        window.__sandboxSortAsc = !window.__sandboxSortAsc;
+window.sortSandboxModal = function(col, tableNum=1) {
+    let targetData = tableNum === 2 ? window.__sandboxData2 : window.__sandboxData;
+    if(!targetData || !targetData.length) return;
+    
+    let isAsc = true;
+    if (tableNum === 2) {
+        if (window.__sandboxSortCol2 === col) window.__sandboxSortAsc2 = !window.__sandboxSortAsc2;
+        else { window.__sandboxSortCol2 = col; window.__sandboxSortAsc2 = true; }
+        isAsc = window.__sandboxSortAsc2;
     } else {
-        window.__sandboxSortCol = col;
-        window.__sandboxSortAsc = true;
+        if (window.__sandboxSortCol === col) window.__sandboxSortAsc = !window.__sandboxSortAsc;
+        else { window.__sandboxSortCol = col; window.__sandboxSortAsc = true; }
+        isAsc = window.__sandboxSortAsc;
     }
     
-    window.__sandboxData.sort((a,b) => {
+    targetData.sort((a,b) => {
         let v1 = a[col]; let v2 = b[col];
         if(typeof v1 === 'string') v1 = v1.toLowerCase();
         if(typeof v2 === 'string') v2 = v2.toLowerCase();
-        if (v1 < v2) return window.__sandboxSortAsc ? -1 : 1;
-        if (v1 > v2) return window.__sandboxSortAsc ? 1 : -1;
+        if (v1 < v2) return isAsc ? -1 : 1;
+        if (v1 > v2) return isAsc ? 1 : -1;
         return 0;
     });
     
@@ -420,25 +756,61 @@ window._renderSandboxModal = function() {
     if (!payload || payload.length === 0) {
         body.innerHTML = "<div style='color:#ef4444; font-weight:bold;'>Error: Evaluated payload array is physically empty.</div>";
     } else {
-        let cols = Object.keys(payload[0] || {});
-        let h = `<table style="width:100%; text-align:left; border-collapse:collapse; white-space:nowrap;">`;
-        h += `<thead><tr>`;
-        cols.forEach(c => {
-            let indicator = window.__sandboxSortCol === c ? (window.__sandboxSortAsc ? " <span style='color:#fff;'>▲</span>" : " <span style='color:#fff;'>▼</span>") : "";
-            h += `<th onclick="window.sortSandboxModal('${c}')" style="padding:10px 15px; border-bottom:2px solid rgba(245,158,11,0.5); color:#f59e0b; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer;" title="Sort by ${c}">${c}${indicator}</th>`;
-        });
-        h += `</tr></thead><tbody>`;
-        payload.forEach(row => {
-            h += `<tr>`;
+        let renderTable = (data, title, tableNum) => {
+            let sortCol = tableNum === 2 ? window.__sandboxSortCol2 : window.__sandboxSortCol;
+            let sortAsc = tableNum === 2 ? window.__sandboxSortAsc2 : window.__sandboxSortAsc;
+            let cols = Object.keys(data[0] || {}).filter(k => !k.startsWith('_'));
+            
+            let h = ``;
+            if(title) h += `<h3 style="color:#10b981; margin: 15px 0 10px 0;">${title}</h3>`;
+            
+            h += `<table style="width:100%; text-align:left; border-collapse:collapse; white-space:nowrap; margin-bottom: 20px;">`;
+            h += `<thead><tr>`;
             cols.forEach(c => {
-                let rawVal = row[c];
-                let val = typeof rawVal === 'object' && rawVal !== null ? JSON.stringify(rawVal) : String(rawVal === undefined || rawVal === null ? "" : rawVal);
-                h += `<td style="padding:8px 15px; border-bottom:1px solid rgba(255,255,255,0.05); color:#cbd5e1; font-family:monospace; max-width:250px; overflow:hidden; text-overflow:ellipsis;">${val}</td>`
+                let indicator = sortCol === c ? (sortAsc ? " <span style='color:#fff;'>▲</span>" : " <span style='color:#fff;'>▼</span>") : "";
+                let displayC = c;
+                let colorRule = "color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.5);"; 
+                if (['total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price'].includes(c.toLowerCase())) {
+                    displayC = "🧮 " + c;
+                    colorRule = "color:#c084fc; border-bottom:2px solid rgba(192,132,252,0.6);";
+                }
+                h += `<th onclick="window.sortSandboxModal('${c}', ${tableNum})" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
             });
-            h += `</tr>`;
-        });
-        h += `</tbody></table>`;
-        body.innerHTML = h;
+            h += `</tr></thead><tbody>`;
+            data.forEach(row => {
+                h += `<tr>`;
+                cols.forEach(c => {
+                    let rawVal = row[c];
+                    let val = typeof rawVal === 'object' && rawVal !== null ? JSON.stringify(rawVal) : String(rawVal === undefined || rawVal === null ? "" : rawVal);
+                    
+                    let cellColor = "color:#cbd5e1;";
+                    let prefix = "";
+                    let cLow = c.toLowerCase();
+                    
+                    if (cLow === 'unit_weight_g' || cLow === 'unit_china_landed_price') {
+                        cellColor = "color:#e9d5ff; font-weight:800; background:rgba(168,85,247,0.05);";
+                        prefix = `<span style="font-size:10px; margin-right:4px;">🧮</span>`;
+                    } else if (cLow === 'total_dist_weight_g' && row._is_distributed) {
+                        cellColor = "color:#e9d5ff; font-weight:800; background:rgba(168,85,247,0.05);";
+                        prefix = `<span style="font-size:10px; margin-right:4px;">🧮</span>`;
+                    } else if (cLow === 'order_total' && (parseFloat(row.makeup_fee) > 0)) {
+                        cellColor = "color:#e9d5ff; font-weight:800; background:rgba(168,85,247,0.05);";
+                        prefix = `<span style="font-size:10px; margin-right:4px;">🧮</span>`;
+                    }
+                    
+                    h += `<td style="padding:8px 15px; border-bottom:1px solid rgba(255,255,255,0.05); font-family:monospace; max-width:250px; overflow:hidden; text-overflow:ellipsis; ${cellColor}" title="${val.replace(/"/g, '&quot;')}">${prefix}${val}</td>`
+                });
+                h += `</tr>`;
+            });
+            h += `</tbody></table>`;
+            return h;
+        };
+        
+        let finalHtml = renderTable(window.__sandboxData, window.__sandboxTable1Title, 1);
+        if (window.__sandboxData2 && window.__sandboxData2.length > 0) {
+            finalHtml += renderTable(window.__sandboxData2, window.__sandboxTable2Title, 2);
+        }
+        body.innerHTML = finalHtml;
     }
 };
 
@@ -488,7 +860,7 @@ async function runFileImport(inputNode, type, isTestMode = false) {
     let statId = type === 'orders' ? 'statusOrders' : 'statusParcels';
     setSysProgress(20, 'working'); setModuleStatus(statId, "⏳ Parsing...", "mod-working"); inputNode.disabled = true;
     try {
-        let resObj = type === 'orders' ? await extractOrders(inputNode.files, isTestMode) : await extractParcels(inputNode.files);
+        let resObj = type === 'orders' ? await extractOrders(inputNode.files, isTestMode) : await extractParcels(inputNode.files, isTestMode);
         if (resObj.count > 0) {
             importTrace(`Data successfully extracted globally! Detected ${resObj.count} valid dictionary instances.`, false, termId);
             
@@ -496,45 +868,104 @@ async function runFileImport(inputNode, type, isTestMode = false) {
                 importTrace(`🧪 SANDBOX INTERCEPT: Array diverted directly to visual inspector.`, true, termId);
                 setSysProgress(100, 'success'); setModuleStatus(statId, "🧪 Test Parsed!", "mod-success"); 
                 
-                // Show modal overlay via helper function
                 if (typeof window.openSandboxModal === 'function') {
-                    let targetArray = resObj.data2 ? resObj.data2 : resObj.data;
-                    window.openSandboxModal(targetArray, `SANDBOX_${type.toUpperCase()}_RESULTS`);
+                    if (resObj.data2) {
+                        window.openSandboxModal(resObj.data, `SANDBOX_${type.toUpperCase()}_RESULTS`, resObj.data2, `${resObj.table} (Primary)`, `${resObj.table2} (Secondary)`);
+                    } else {
+                        window.openSandboxModal(resObj.data, `SANDBOX_${type.toUpperCase()}_RESULTS`, null, `${resObj.table} (Primary)`);
+                    }
                 }
                 
                 inputNode.value = ""; 
                 setTimeout(()=> { setModuleStatus(statId, "Ready.", "status-idle"); setSysProgress(0,'working'); }, 3000);
                 inputNode.disabled = false;
-                return;
+            } else {
+                importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Array diverted to visual inspector for approval.`, true, termId);
+                setSysProgress(100, 'success'); setModuleStatus(statId, "⚠️ Waiting for Sync...", "mod-working"); 
+                
+                let liveImportContext = { resObj: resObj, statId: statId, termId: termId, type: type, inputNodeId: inputNode.id };
+                if (typeof window.openSandboxModal === 'function') {
+                    if (resObj.data2) window.openSandboxModal(resObj.data, `PRODUCTION_${type.toUpperCase()}_TARGETS`, resObj.data2, `${resObj.table} (Primary)`, `${resObj.table2} (Secondary)`, liveImportContext);
+                    else window.openSandboxModal(resObj.data, `PRODUCTION_${type.toUpperCase()}_TARGETS`, null, `${resObj.table} (Primary)`, null, liveImportContext);
+                }
+                // We keep inputNode disabled during staging block. It releases during the commit phase.
             }
-
-            importTrace(`Transmitting [${resObj.table}] insertion payload -> supabaseClient...`, false, termId);
-            sysLog(`Pushing ${resObj.count} items...`); setSysProgress(80, 'working');
-            const {error} = await supabaseClient.from(resObj.table).upsert(resObj.data, {onConflict: resObj.conflict}); if(error) throw new Error(error.message);
-            if (resObj.data2) { 
-                importTrace(`Secondary relation payload found! Transmitting [${resObj.table2}] insertion payload...`, false, termId);
-                const {error2} = await supabaseClient.from(resObj.table2).upsert(resObj.data2, {onConflict: resObj.conflict2}); if(error2) throw new Error(error2.message); 
-            }
-            importTrace(`Upload Cycle Completed Successfully! Local data sync triggered.`, false, termId);
-            setSysProgress(100, 'success'); setModuleStatus(statId, `✅ Synced!`, 'mod-success'); inputNode.value = ""; setTimeout(()=>{setSysProgress(0,'working');syncAndCalculate();}, 1000);
         } else { 
             importTrace(`HALT WARNING: Zero valid DOM items located in the payload targets.`, true, termId);
             setSysProgress(100, 'error'); setModuleStatus(statId, "❌ No data.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'),3000); 
+            inputNode.disabled = false;
         }
     } catch(e) { 
         importTrace(`CRITICAL FAULT: ${e.message}`, true, termId);
         sysLog(e.message, true); setSysProgress(100, 'error'); setModuleStatus(statId, "❌ Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        inputNode.disabled = false;
     }
-    inputNode.disabled = false;
 }
+
+window.commitSandboxImport = async function() {
+    let ctx = window.__pendingLiveImportMeta;
+    if (!ctx) return;
+    
+    document.getElementById('sandboxDataModal').style.display = 'none';
+    let termId = ctx.termId; let statId = ctx.statId; let resObj = ctx.resObj;
+    
+    try {
+        importTrace(`Transmitting [${resObj.table}] staged payload -> supabaseClient...`, false, termId);
+        sysLog(`Pushing ${resObj.count} items...`); setSysProgress(80, 'working');
+        const {error} = await supabaseClient.from(resObj.table).upsert(resObj.data, {onConflict: resObj.conflict}); if(error) throw new Error(error.message);
+        
+        if (resObj.data2) { 
+            importTrace(`Secondary relation array found! Transmitting [${resObj.table2}] insertion payload...`, false, termId);
+            const {error2} = await supabaseClient.from(resObj.table2).upsert(resObj.data2, {onConflict: resObj.conflict2}); if(error2) throw new Error(error2.message); 
+        }
+        
+        importTrace(`Upload Cycle Completed Successfully! Local data sync triggered.`, false, termId);
+        setSysProgress(100, 'success'); setModuleStatus(statId, `✅ Synced!`, 'mod-success'); 
+        
+        let fileInput = document.getElementById(ctx.inputNodeId);
+        if(fileInput) { fileInput.value = ""; fileInput.disabled = false; }
+        
+        setTimeout(() => { setSysProgress(0,'working'); if(typeof syncAndCalculate === 'function') syncAndCalculate(); }, 1000);
+    } catch(e) {
+        importTrace(`CRITICAL STAGING FAULT: ${e.message}`, true, termId);
+        sysLog(e.message, true); setSysProgress(100, 'error'); setModuleStatus(statId, "❌ Sync Error.", "mod-error"); 
+        
+        let fileInput = document.getElementById(ctx.inputNodeId);
+        if(fileInput) fileInput.disabled = false;
+        setTimeout(()=>setSysProgress(0,'working'),3000); 
+    }
+    window.__pendingLiveImportMeta = null;
+};
+
+window.cancelSandboxImport = function() {
+    let ctx = window.__pendingLiveImportMeta;
+    document.getElementById('sandboxDataModal').style.display = 'none';
+    window.__pendingLiveImportMeta = null;
+    
+    if (ctx) {
+        let termId = ctx.termId;
+        let statId = ctx.statId;
+        importTrace(`🗑️ STAGING ABORTED: Payload discarded securely.`, true, termId);
+        setModuleStatus(statId, "Cancelled.", "status-idle");
+        setSysProgress(0, 'working');
+        
+        let fileInput = document.getElementById(ctx.inputNodeId);
+        if(fileInput) { 
+            fileInput.value = ""; 
+            fileInput.disabled = false; 
+        }
+    }
+};
 
 async function extractOrders(files, isTestMode=false) {
     let a = [];
     for(let f of files) {
-        const d = new DOMParser().parseFromString(await f.text(), 'text/html');
+        let _fText = await f.text();
+        window.__LATEST_RAW_ORDER_HTML_DUMP = _fText;
+        const d = new DOMParser().parseFromString(_fText, 'text/html');
         let validBlocks = Array.from(d.querySelectorAll('tbody, table, .order-list-item')).filter(el=>el.innerText.includes("Order No：") || el.innerText.match(new RegExp(window.PARSER_RULES.regexOrderNum)));
         
-        if (isTestMode && validBlocks.length > 0) {
+        if (validBlocks.length > 0) {
             window.__LATEST_RAW_ORDER_DUMP = validBlocks.map((b, idx) => {
                 let cleaned = b.innerText.split('\n').map(l=>l.trim()).filter(l=>l.length>0).join('\n');
                 return `[📦 ORDER INSTANCE ${idx + 1}]\n---------------------------------------\n` + cleaned;
@@ -562,7 +993,9 @@ async function extractOrders(files, isTestMode=false) {
             trs.forEach(r=>{ 
                 let cs=r.querySelectorAll('td'); 
                 if(cs.length>=3) { 
-                    let q = parseInt(cs[2].innerText.replace(/[^0-9]/g,''))||1; 
+                    let qMatch = r.innerText.match(new RegExp(window.PARSER_RULES.regexQuantity, "i"));
+                    let q = qMatch && qMatch[1] ? parseInt(qMatch[1]) : (parseInt(cs[2].innerText.replace(/[^0-9]/g,''))||1);
+                    
                     let upMatch = r.innerText.match(new RegExp(window.PARSER_RULES.regexUnitPrice)); 
                     let up = upMatch ? parseFloat(upMatch[1]) : 0; 
                     tq += q; tBaseCost += (up * q); 
@@ -577,12 +1010,18 @@ async function extractOrders(files, isTestMode=false) {
                 let m = r.innerText.match(new RegExp(window.PARSER_RULES.regexLineItemNum)); 
                 if(m && !r.innerText.includes("Order No：")){
                     let id = m[0], pn = ""; 
-                    for (let l of Array.from(r.querySelectorAll('a'))) {
-                        let t = l.getAttribute('title'), x = l.innerText.trim();
-                        if (t && t.length > 10) { pn = t; break; }
-                        if (x && x.length > 15 && !x.includes("DI26") && !x.toLowerCase().includes("superbuy") && !x.toLowerCase().includes("contact")) { pn = x; break; }
+                    
+                    let nameMatch = r.innerText.match(new RegExp(window.PARSER_RULES.regexItemName, "i"));
+                    if(nameMatch && nameMatch[1]) pn = nameMatch[1].trim();
+                    
+                    if(!pn) {
+                        for (let l of Array.from(r.querySelectorAll('a'))) {
+                            let t = l.getAttribute('title'), x = l.innerText.trim();
+                            if (t && t.length > 10) { pn = t; break; }
+                            if (x && x.length > 15 && !x.includes("DI26") && !x.toLowerCase().includes("superbuy") && !x.toLowerCase().includes("contact")) { pn = x; break; }
+                        }
+                        if(!pn || pn.toLowerCase().includes("product-img")) Array.from(r.querySelectorAll('img')).forEach(i=>{let a=i.getAttribute('alt'); if(a&&a.length>10&&!a.includes("代购商品")){pn=a;return;}});
                     }
-                    if(!pn || pn.toLowerCase().includes("product-img")) Array.from(r.querySelectorAll('img')).forEach(i=>{let a=i.getAttribute('alt'); if(a&&a.length>10&&!a.includes("代购商品")){pn=a;return;}});
                     
                     pn = pn.replace('代购商品','').trim(); 
                     
@@ -600,22 +1039,32 @@ async function extractOrders(files, isTestMode=false) {
                     // USER REQUEST: Fold the invoice logic directly into the raw unit_price baseline
                     up = up + (tq > 0 ? (makeup / tq) : 0);
                     
-                    let q = parseInt(r.querySelectorAll('td')[2]?.innerText.replace(/[^0-9]/g,''))||1;
+                    let qMatchLast = r.innerText.match(new RegExp(window.PARSER_RULES.regexQuantity, "i"));
+                    let q = qMatchLast && qMatchLast[1] ? parseInt(qMatchLast[1]) : (parseInt(r.querySelectorAll('td')[2]?.innerText.replace(/[^0-9]/g,''))||1);
+                    
                     let uclp = up + feePerItem;
                     
-                    a.push({di_item_id:id, order_date:dt, order_no:oNo, alibaba_order:tId, item_name:pn, specification:sp, unit_price:parseFloat(up.toFixed(4)), quantity:q, postage:post, order_total:oTot, unit_china_landed_price:parseFloat(uclp.toFixed(4))});
+                    a.push({di_item_id:id, order_date:dt, order_no:oNo, alibaba_order:tId, item_name:pn, specification:sp, unit_price:parseFloat(up.toFixed(4)), quantity:q, postage:post, order_total:oTot, unit_china_landed_price:parseFloat(uclp.toFixed(4)), makeup_fee: makeup});
                 }
             });
         });
     } return { count: a.length, table: 'raw_orders', conflict: 'di_item_id', data: a };
 }
 
-async function extractParcels(files) {
+async function extractParcels(files, isTestMode=false) {
     let sum=[], itm=[];
     for(let f of files) {
-        const d = new DOMParser().parseFromString(await f.text(), 'text/html'); const bt = d.body.textContent.replace(/\s+/g,' ');
+        let _fText = await f.text();
+        window.__LATEST_RAW_PARCEL_HTML_DUMP = _fText;
+        const d = new DOMParser().parseFromString(_fText, 'text/html'); const bt = d.body.textContent.replace(/\s+/g,' ');
         let pm = bt.match(new RegExp(window.PARCEL_RULES.regexParcelNum, "i")); if(!pm) continue; let pNo = pm[0];
-        window.__LATEST_RAW_PARCEL_DUMP = bt; // Cache for Sandbox test engine
+        
+        // UNCONDITIONAL CACHING FOR PLAYGROUND: Force physical line breaks between all table cells/rows
+        let vHtml = _fText.replace(/<\/(td|tr|div|p|li)>/gi, '</$1>\n').replace(/<br\s*\/?>/gi, '\n');
+        let vD = new DOMParser().parseFromString(vHtml, 'text/html');
+        let cleaned = vD.body.innerText.split('\n').map(l=>l.trim()).filter(l=>l.length>0).join('\n');
+        window.__LATEST_RAW_PARCEL_DUMP = `[📦 PARCEL INSTANCE]\n---------------------------------------\n` + cleaned;
+
         let am = bt.match(new RegExp(window.PARCEL_RULES.regexActualPaid, "i")); if(!am) continue; let aP = parseFloat(am[1]); 
         let ab = bt.substring(bt.indexOf(am[0]) + am[0].length);
         let awMatch = ab.match(new RegExp(window.PARCEL_RULES.regexChargeableWeight, "i")); let aW = awMatch ? parseInt(awMatch[1]) : 0;
@@ -630,7 +1079,7 @@ async function extractParcels(files) {
         
         d.querySelectorAll('table').forEach(t=>{
             if(t.rows[0]&&t.rows[0].textContent.toLowerCase().includes('item name')&&t.rows[0].textContent.toLowerCase().includes('operation')) {
-                let cb=[], cbw=0; const pb=()=>{ if(cb.length>0){ let tq=cb.reduce((s,i)=>s+i.q,0); if(tq===0) tq=1; cb.forEach(i=>itm.push({parcel_no:pNo, di_item_id:i.d, item_name:i.n, specification:i.s, quantity:i.q, total_dist_weight_g:Math.round(cbw*(i.q/tq)), unit_weight_g:Math.round((cbw*(i.q/tq))/(i.q||1)*100)/100})); cb=[]; } };
+                let cb=[], cbw=0; const pb=()=>{ if(cb.length>0){ let tq=cb.reduce((s,i)=>s+i.q,0); if(tq===0) tq=1; let isDist = cb.length>1; cb.forEach(i=>itm.push({parcel_no:pNo, di_item_id:i.d, item_name:i.n, specification:i.s, quantity:i.q, total_dist_weight_g:Math.round(cbw*(i.q/tq)), unit_weight_g:Math.round((cbw*(i.q/tq))/(i.q||1)*100)/100, _is_distributed:isDist})); cb=[]; } };
                 for(let j=1; j<t.rows.length; j++){
                     let cs=t.rows[j].cells; if(cs.length>=3){
                         let rn=cs[0]?cs[0].textContent.replace(/View Inspection/g,'').replace(/\s+/g,' ').trim():''; if(!rn) continue;
@@ -642,11 +1091,20 @@ async function extractParcels(files) {
                         let sm = rw.match(new RegExp(window.PARCEL_RULES.regexSpecs, "i"));
                         let sp = sm && sm[1] ? sm[1].trim() : ''; 
                         let fn = rw;
-                        if(sm && sm[0]) { fn = rw.replace(sm[0], '').trim(); }
-                        if(sp && fn.includes(sp)) { fn = fn.replace(sp,'').trim(); }
+                        
+                        let nameMatch = rn.match(new RegExp(window.PARCEL_RULES.regexItemName, "i"));
+                        if (nameMatch && nameMatch[1]) {
+                            fn = nameMatch[1].trim();
+                        } else {
+                            if(sm && sm[0]) { fn = rw.replace(sm[0], '').trim(); }
+                            if(sp && fn.includes(sp)) { fn = fn.replace(sp,'').trim(); }
+                        }
                         fn = fn.replace(/[-\s,：:]+$/,'').trim();
                         
-                        let q=parseInt(cs[1]?cs[1].textContent.trim():0)||0; let pw=parseInt(cs[2]?cs[2].textContent.trim():'');
+                        let qMatch = rn.match(new RegExp(window.PARCEL_RULES.regexQuantity, "i"));
+                        let q = qMatch && qMatch[1] ? parseInt(qMatch[1]) : (parseInt(cs[1]?cs[1].textContent.trim():0)||0);
+                        
+                        let pw=parseInt(cs[2]?cs[2].textContent.trim():'');
                         if(!isNaN(pw)){pb(); cbw=pw; cb.push({d:dc,n:fn,s:sp,q:q});} else cb.push({d:dc,n:fn,s:sp,q:q});
                     }
                 } pb();
@@ -784,3 +1242,237 @@ async function executeRestore() {
         setMasterStatus("Complete!", "mod-success"); closeBackupModal(); if(typeof loadData === 'function') await loadData(true);
     } catch(e) { sysLog(e.message, true); setMasterStatus("Restore Error", "mod-error"); }
 }
+
+// ----------------------------------------------------
+// UNIFIED TEMPLATE-DRIVEN REGEX PLAYGROUND BUILDER
+// ----------------------------------------------------
+window.EXTRACTOR_CONFIGS = {
+    orders: {
+        title: "Orderz RegEx Playground",
+        rulesKey: "PARSER_RULES",
+        profilesKey: "PARSER_PROFILES",
+        activeProfileIdxKey: "ACTIVE_PROFILE_INDEX",
+        evaluatorFn: "evaluateLiveRegex",
+        evaluatorAllFn: "evaluateAllRegex",
+        saveNewFn: "saveRegexPresetAsNew",
+        overwriteFn: "overwriteCurrentRegexPreset",
+        deleteFn: "deleteRegexPreset",
+        onDropdownChangeFn: "loadSelectedRegexPreset",
+        closeModalFn: "closeParserConfig",
+        applyBtnFn: "window.PARSER_RULES=window.getCurrentUIRules(); window.closeParserConfig();",
+        livePlaygroundPayloadId: "liveRegexPlaygroundPayload",
+        searchBoxId: "liveRegexSearchBox",
+        toggleViewFn: "toggleRawOrderView",
+        resetFn: "restoreDefaultParserRules",
+        presetDropdownId: "regexPresetSelect",
+        groups: [
+            {
+                table: "raw_orders",
+                label_suffix: "ORDER METADATA",
+                icon: "🗂️",
+                color: "#38bdf8",
+                fields: [
+                    { id: "regexOrderNum", prop: "regexOrderNum", label: "Order Number (DO String)", type: "input", color: "#ec4899", placeholder: "/DO\\\\d+/" },
+                    { id: "regexOrderDate", prop: "regexOrderDate", label: "Order Date Structure", type: "input", color: "#8b5cf6", placeholder: "/\\\\d{4}-\\\\d{2}-\\\\d{2}/" },
+                    { id: "regexOrderTotal", prop: "regexOrderTotal", label: "Total Amount Parser (Capture Group 1)", type: "input", color: "#10b981", placeholder: "/Total Amount:.*?[￥$]\\\\s*([\\\\d.]+)/i" },
+                    { id: "regexFeeStructure", prop: "regexPostage", label: "Postage Deductions ({FEE_NAME} intercepts string)", type: "input", color: "#f43f5e", placeholder: "/{FEE_NAME}\\\\s*-\\\\s*(?:US \\\\$|CN ￥)\\\\s*([\\\\d.]+)/" },
+                    { id: "regexSecondaryFee", prop: "regexMakeup", label: "Secondary Make Up Fee (Capture Group 1)", type: "input", color: "#d946ef", placeholder: "/Make up the postage\\\\s*(?:US \\\\$|CN ￥)\\\\s*([\\\\d.]+)/" }
+                ]
+            },
+            {
+                table: "raw_orders",
+                label_suffix: "LINE ITEMS",
+                icon: "📦",
+                color: "#ec4899",
+                fields: [
+                    { id: "regexLineItemNum", prop: "regexLineItemNum", label: "Line Item Internal Number (DI String)", type: "input", color: "#06b6d4", placeholder: "/DI\\\\d+/" },
+                    { id: "regexAlibabaOrder", prop: "regexAlibabaOrder", label: "Alibaba Target Order ID", type: "readonly", color: "#64748b", placeholder: "🤖 System Auto-Extracted via (?:ALIBABA|TB|Order) pattern." },
+                    { id: "regexUnitPrice", prop: "regexUnitPrice", label: "Unit Price Identifier (Capture Group 1)", type: "input", color: "#6366f1", placeholder: "/Unit\\\\s*Price.*?([\\\\d.]+)/i" },
+                    { id: "regexItemName", prop: "regexItemName", label: "Item Name Parser (Capture Group 1)", type: "input", color: "#eab308", placeholder: "/DI\\\\d+\\\\s+([^\\\\n]+)/" },
+                    { id: "regexQuantity", prop: "regexQuantity", label: "Quantity Identifier (Capture Group 1)", type: "input", color: "#3b82f6", placeholder: "/(?:US \\\\$|CN ￥).*?\\\\n(\\\\d+)/" },
+                    { id: "regexSpecs", prop: "regexSpecs", label: "Product Specification Tag (Capture Group 1)", type: "textarea", height: "50px", color: "#f59e0b", placeholder: "/(?:Specification model|specification|Product specifications.../" },
+                    { id: "regexChinaLanded", prop: "regexChinaLanded", label: "Unit China Landed Price (Calculated)", type: "readonly", color: "#94a3b8", placeholder: "🧮 Math Object: (Unit Price) + (Fees ÷ Total Qty)." }
+                ]
+            }
+        ]
+    },
+    parcels: {
+        title: "Parcelz RegEx Playground",
+        rulesKey: "PARCEL_RULES",
+        profilesKey: "PARCEL_PROFILES",
+        activeProfileIdxKey: "ACTIVE_PARCEL_PROFILE_INDEX",
+        evaluatorFn: "evaluateLiveParcelRegex",
+        evaluatorAllFn: "evaluateAllParcelRegex",
+        saveNewFn: "saveParcelRegexPresetAsNew",
+        overwriteFn: "overwriteCurrentParcelRegexPreset",
+        deleteFn: "deleteParcelRegexPreset",
+        onDropdownChangeFn: "loadSelectedParcelRegexPreset",
+        closeModalFn: "closeParcelConfig",
+        applyBtnFn: "window.PARCEL_RULES=window.getCurrentParcelUIRules(); window.closeParcelConfig();",
+        livePlaygroundPayloadId: "liveParcelRegexPlaygroundPayload",
+        searchBoxId: "liveParcelRegexSearchBox",
+        toggleViewFn: "toggleRawParcelView",
+        resetFn: "restoreDefaultParcelRules",
+        presetDropdownId: "parcelPresetSelect",
+        groups: [
+            {
+                table: "raw_parcel_summary",
+                label_suffix: "METADATA",
+                icon: "🗂️",
+                color: "#38bdf8",
+                fields: [
+                    { id: "regexParcelNum", prop: "regexParcelNum", label: "Parcel Number", type: "input", color: "#ec4899", placeholder: "/PN\\\\d{11}/" },
+                    { id: "regexActualPaid", prop: "regexActualPaid", label: "Total Actual Paid", type: "input", color: "#8b5cf6", placeholder: "/Actual Paid\\\\s*:\\\\s*US \\\\$\\\\s*([\\\\d.]+)/" },
+                    { id: "regexChargeableWeight", prop: "regexChargeableWeight", label: "Chargeable Weight", type: "input", color: "#10b981", placeholder: "/Actual Chargeable Weight\\\\s*(\\\\d+)\\\\s*g/" },
+                    { id: "regexFeeStructure", prop: "regexFeeStructure", label: "Base Fee Extractor ({FEE_NAME} intercepts string)", type: "input", color: "#f43f5e", placeholder: "/{FEE_NAME}\\\\s*(?:US \\\\$|CN ￥)\\\\s*([\\\\d.]+)/" },
+                    { id: "regexDeductionStructure", prop: "regexDeductionStructure", label: "Base Deduction Extractor ({FEE_NAME} intercepts string)", type: "input", color: "#d946ef", placeholder: "/{FEE_NAME}\\\\s*-\\\\s*(?:US \\\\$|CN ￥)\\\\s*([\\\\d.]+)/" }
+                ]
+            },
+            {
+                table: "raw_parcel_items",
+                label_suffix: "LINE ITEMS",
+                icon: "📦",
+                color: "#ec4899",
+                fields: [
+                    { id: "regexParcelLineItemNum", prop: "regexLineItemNum", label: "Line Item Number (DI String)", type: "input", color: "#06b6d4", placeholder: "/DI\\\\d+/" },
+                    { id: "regexParcelItemName", prop: "regexItemName", label: "Item Name Parser (Capture Group 1)", type: "input", color: "#eab308", placeholder: "/DI\\\\d+\\\\s+([^\\\\n]+)/" },
+                    { id: "regexParcelQuantity", prop: "regexQuantity", label: "Quantity Identifier (Capture Group 1)", type: "input", color: "#3b82f6", placeholder: "/\\\\n(\\\\d+)\\\\n\\\\d+(?:\\\\n|$)/" },
+                    { id: "regexGroupWeight", prop: "regexGroupWeight", label: "Base Group Weight Extractor (Capture Group 1)", type: "input", color: "#a855f7", placeholder: "/\\\\n\\\\d+\\\\n(\\\\d+)(?:\\\\n|$)/" },
+                    { id: "regexParcelSpecs", prop: "regexSpecs", label: "Product Specification Tag", type: "textarea", height: "50px", color: "#f59e0b", placeholder: "/(?:specification|Color|model)[：:]\\\\s*(.*)/" },
+                    { id: "regexTotalDistWeight", prop: "regexTotalDistWeight", label: "Total Dist. Weight (Calculated G)", type: "readonly", color: "#7c3aed", placeholder: "🧮 Math Object: Base Weight split dynamically by Unit Array." },
+                    { id: "regexUnitWeight", prop: "regexUnitWeight", label: "Unit Weight (Calculated G)", type: "readonly", color: "#c084fc", placeholder: "🧮 Math Object: (Total Dist. Weight) ÷ (Quantity)." }
+                ]
+            }
+        ]
+    }
+};
+
+window.openGlobalRegexPlayground = function(type) {
+    if (type === "orders" && !window.PARSER_RULES) loadParserConfig();
+    if (type === "parcels" && !window.PARCEL_RULES) loadParcelConfig();
+    
+    let conf = window.EXTRACTOR_CONFIGS[type];
+    if (!conf) return;
+
+    let h = `<div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; width:98vw; height:94vh; margin-top:30px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
+        <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; background:rgba(56, 189, 248, 0.1); border-radius:12px 12px 0 0; position:relative;">
+            <div style="flex:1;">
+                <h2 style="margin:0; font-size:18px; color:#38bdf8; display:flex; align-items:center; gap:10px;">⚙️ <span>${conf.title}</span>
+                    <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://regex101.com/', '_blank'); return false;" style="cursor:pointer; margin-left:auto; margin-right:30px; font-size:13px; color:#10b981; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; border:1px solid #10b981; padding:4px 10px; border-radius:6px; background:rgba(16, 185, 129, 0.1); max-width:max-content; flex:0 0 auto;">📚 REGEX HELPER ENGINE ↗</button>
+                </h2>
+                <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted); padding-right:30px;">Visually verify logic mappings. As you type, the engine evaluates your strings instantly against the cached target.</p>
+            </div>
+            <button onclick="window.${conf.closeModalFn}()" class="btn-red" style="width:max-content; padding:6px 15px; margin-left:15px; border-radius:4px; font-size:13px; font-weight:bold; height:32px; align-self:center; flex:0 0 auto;" title="Close Window">Close</button>
+        </div>
+        
+        <div style="display:flex; flex:1; overflow:hidden;">
+            <!-- Left Column: Input Fields -->
+            <div style="flex:1; padding:15px; overflow-y:auto; border-right:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; max-width:400px; font-size:11px;">
+                
+                <div style="padding:10px; border:1px solid rgba(${type==='orders'?'56, 189, 248':'245, 158, 11'}, 0.3); background:rgba(${type==='orders'?'56, 189, 248':'245, 158, 11'}, 0.05); border-radius:8px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:#fff; font-weight:bold;">Active Regex Profile</span>
+                        <div style="display:flex; gap:6px;">
+                            <button onclick="window.${conf.saveNewFn}()" class="btn-blue btn-sm" style="font-size:9px; padding:3px 6px;">💾 Save As New</button>
+                            <button id="btnOverwritePreset" onclick="window.${conf.overwriteFn}()" class="btn-orange btn-sm" style="font-size:9px; padding:3px 6px; display:none;">🔄 Overwrite</button>
+                            <button id="btnDeletePreset" onclick="window.${conf.deleteFn}()" class="btn-primary btn-sm" style="background:#ef4444; border-color:#ef4444; color:white; font-size:9px; padding:3px 6px; display:none;">🗑️ Delete</button>
+                        </div>
+                    </div>
+                    <select id="${conf.presetDropdownId}" class="input-dark" style="font-size:11px; padding:4px; width:100%; border:1px solid ${type==='orders'?'#38bdf8':'#f59e0b'};" onchange="window.${conf.onDropdownChangeFn}()"></select>
+                </div>`;
+
+    conf.groups.forEach((g, gIdx) => {
+        let suffixHTML = g.label_suffix ? `<span style="opacity:0.7; font-size:10px;">(${g.label_suffix})</span>` : ``;
+        h += `<div style="margin: 10px 0 0 0; padding-bottom:5px; border-bottom:2px solid ${g.color}; cursor:pointer;" onclick="let el=document.getElementById('dynGrp_${type}_${gIdx}'); el.style.display=el.style.display==='none'?'flex':'none';">
+            <h3 style="margin:0; font-size:12px; color:${g.color}; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center;">
+                <span>${g.icon} ${g.table} ${suffixHTML}</span> <span style="font-size:10px; opacity:0.5;">▼</span>
+            </h3>
+        </div>
+        <div id="dynGrp_${type}_${gIdx}" style="display:flex; flex-direction:column; gap:8px;">`;
+        
+        g.fields.forEach(f => {
+            h += `<div style="padding-bottom:10px; border-bottom:1px dashed rgba(255,255,255,0.1);">
+                    <h4 style="margin:0 0 4px 0; color:${f.color}; font-size:11px;">${f.label}</h4>`;
+            
+            
+            if (f.type === "textarea") {
+                 h += `<textarea id="${f.id}" onkeyup="window.${conf.evaluatorFn}('${f.id}')" style="width:100%; height:${f.height}; font-family:monospace; background:black; color:#10b981; resize:vertical; padding:6px; border:1px solid var(--border-color); border-radius:6px; font-size:10px;" placeholder="${f.placeholder}"></textarea>`;
+            } else if (f.type === "readonly") {
+                 h += `<div style="width:100%; font-family:monospace; background:rgba(0,0,0,0.5); color:${f.color}; font-size:11px; padding:6px; border:1px solid ${f.color}40; border-radius:4px; display:flex; align-items:center; gap:6px;">${f.placeholder}</div>`;
+            } else {
+                 h += `<input type="text" id="${f.id}" onkeyup="window.${conf.evaluatorFn}('${f.id}')" style="width:100%; font-family:monospace; background:black; color:#10b981; font-size:11px;" placeholder="${f.placeholder}">`;
+            }
+            if (f.type !== "readonly") h += `<div id="eval_${f.id}" style="font-size:10px; margin-top:4px; min-height:12px; color:#cbd5e1;"></div>`;
+            h += `</div>`;
+        });
+        h += `</div>`;
+    });
+
+    h += `</div>
+            <!-- Right Column: Live Target Payload -->
+            <div style="flex:1; padding:20px; background:rgba(0,0,0,0.3); border-radius: 0 0 12px 0; display:flex; flex-direction:column;">
+                <h3 style="margin:0 0 10px 0; color:#f59e0b; display:flex; justify-content:space-between; align-items:center;">
+                    🎯 Live Target Text Payload
+                    <div style="display:flex; gap:6px;">
+                        <button id="btnToggleView" onclick="window.${conf.toggleViewFn}()" class="btn-blue btn-sm" style="font-size:10px;">👁️ VIEW SOURCE HTML</button>
+                        <button onclick="window.${conf.resetFn}()" class="btn-primary btn-sm" style="background:#ef4444; border:1px solid #ef4444; color:white; font-size:10px;">RESET TO DEFAULTS</button>
+                    </div>
+                </h3>
+                <input type="text" id="${conf.searchBoxId}" class="input-dark" style="margin-bottom:10px; font-size:12px; font-family:monospace; width:100%;" placeholder="🔍 Search:   Type to instantly find and highlight string matches..." onkeyup="window.${conf.evaluatorAllFn}()">
+                
+                <div style="position:relative; flex:1; border:1px solid rgba(255,255,255,0.1); border-radius:6px; overflow:hidden;">
+                    <textarea id="${conf.livePlaygroundPayloadId}" style="position:absolute; top:0; left:0; width:100%; height:100%; background:transparent; color:transparent; caret-color:#10b981; font-family:monospace; font-size:11px; padding:10px; resize:none; border:none; z-index:1;" oninput="window.${conf.evaluatorAllFn}()" spellcheck="false"></textarea>
+                    
+                    <!-- Visualization Layer below the transparent text -->
+                    <div id="${type}liveRegexHighlightLayer" style="position:absolute; top:0; left:0; width:100%; height:100%; font-family:monospace; font-size:11px; padding:10px; pointer-events:none; z-index:0; overflow:hidden; white-space:pre-wrap; word-wrap:break-word; color:#cbd5e1; background:black;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Footer -->
+        <div style="padding:15px 25px; background:var(--bg-panel); border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:flex-end; gap:10px; border-radius:0 0 12px 12px;">
+            <button class="btn-blue" style="background:transparent; border:1px solid var(--border-color); color:var(--text-color);" onclick="window.${conf.closeModalFn}()">Cancel</button>
+            <button class="btn-green" style="padding:10px 25px; font-weight:bold;" onclick="${conf.applyBtnFn}">✅ APPLY ACTIVE RULES (TEMPORARY)</button>
+        </div>
+    </div>`;
+
+    document.getElementById("globalRegexPlaygroundModalContainer").innerHTML = h;
+    document.getElementById("globalRegexPlaygroundModalContainer").style.display = "flex";
+
+    // Bind scroll syncing between textarea and highlight layer safely
+    let payloadBox = document.getElementById(conf.livePlaygroundPayloadId);
+    let hlLayer = document.getElementById(type + "liveRegexHighlightLayer");
+    if (payloadBox && hlLayer) {
+        payloadBox.addEventListener("scroll", function() {
+            hlLayer.scrollTop = payloadBox.scrollTop;
+            hlLayer.scrollLeft = payloadBox.scrollLeft;
+        });
+    }
+
+    // Explicit backward compatibility for older hardcoded spans
+    // Note: older evaluateLiveRegex functions look directly for 'liveRegexHighlightLayer'
+    if (type === "orders") hlLayer.id = "liveRegexHighlightLayer";
+    if (type === "parcels") hlLayer.id = "liveParcelRegexHighlightLayer";
+
+    // Now populate the generated interface with the current active rules mapped in JSON
+    let activeRules = window[conf.rulesKey];
+    conf.groups.forEach(g => {
+        g.fields.forEach(f => {
+            let el = document.getElementById(f.id);
+            if(el) el.value = activeRules[f.prop] || "";
+        });
+    });
+
+    if (type === "orders") {
+        document.getElementById(conf.livePlaygroundPayloadId).value = window.__LATEST_RAW_ORDER_DUMP || "";
+        window._isOrderRawView = false;
+        if(typeof window.renderPresetDropdown === 'function') window.renderPresetDropdown();
+        if(typeof window.evaluateAllRegex === 'function') setTimeout(window.evaluateAllRegex, 50);
+    } else {
+        document.getElementById(conf.livePlaygroundPayloadId).value = window.__LATEST_RAW_PARCEL_DUMP || "";
+        window._isParcelRawView = false;
+        if(typeof window.renderParcelPresetDropdown === 'function') window.renderParcelPresetDropdown();
+        if(typeof window.evaluateAllParcelRegex === 'function') setTimeout(window.evaluateAllParcelRegex, 50);
+    }
+};
+
