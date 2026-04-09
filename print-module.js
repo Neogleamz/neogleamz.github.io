@@ -222,7 +222,7 @@ function renderActivePrintJob(id) {
         <div class="sop-grp-card" id="sopgrp_${grpId}" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
             <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);" onclick="if(!${isEditing}){ let d=document.getElementById('sopgrp_body_${grpId}'); let ic=document.getElementById('sopgrp_icon_${grpId}'); if(d.style.display==='none'){d.style.display='block';ic.innerText='▼';localStorage.setItem('layerzSopExpanded_${grpId}','true');}else{d.style.display='none';ic.innerText='▶';localStorage.setItem('layerzSopExpanded_${grpId}','false');} }">
                 <div style="flex-grow:1;">
-                    ⚙️ Machine Instructions: ${cleanPartName} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
+                    🖨️ 3D Print Instructions: ${cleanPartName} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;" onclick="event.stopPropagation()">
                     <button class="btn-ghost-base btn-ghost-blue" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${cleanPartName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
