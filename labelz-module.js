@@ -61,12 +61,7 @@ function loadLabelzHistory(jsonStr) {
     });
 }
 
-// Template Definitions
-const labelzTemplates = {
-    basic_product: {"version":"5.3.0","objects":[{"type":"textbox","version":"5.3.0","originX":"center","originY":"top","left":108,"top":15,"width":160,"height":20.34,"fill":"#000000","text":"Product Name","fontSize":18,"fontWeight":"bold","fontFamily":"Arial","textAlign":"center","editable":true},{"type":"image","version":"5.3.0","originX":"center","originY":"top","left":108,"top":45,"width":150,"height":40,"scaleX":1,"scaleY":1,"barcodeOpts":{"bcid":"code128","text":"PRD-001","scale":2,"height":10,"includetext":true},"isBarcode":true,"crossOrigin":"anonymous"}]},
-    barcode_only: {"version":"5.3.0","objects":[{"type":"image","version":"5.3.0","originX":"center","originY":"center","left":108,"top":60,"width":150,"height":60,"scaleX":1,"scaleY":1,"barcodeOpts":{"bcid":"code128","text":"1234567890","scale":3,"height":15,"includetext":true,"textxalign":"center"},"isBarcode":true,"crossOrigin":"anonymous"}]},
-    shipping: {"version":"5.3.0","objects":[{"type":"textbox","version":"5.3.0","originX":"left","originY":"top","left":20,"top":20,"width":300,"height":22.6,"fill":"#000000","text":"SHIP TO:","fontSize":20,"fontWeight":"bold","fontFamily":"Arial"},{"type":"textbox","version":"5.3.0","originX":"left","originY":"top","left":20,"top":55,"width":300,"height":67.8,"fill":"#000000","text":"John Doe\n123 Logistics Way\nWarehouse District, NY 10001","fontSize":16,"fontFamily":"Arial"},{"type":"image","version":"5.3.0","originX":"center","originY":"bottom","left":192,"top":550,"width":300,"height":80,"barcodeOpts":{"bcid":"code128","text":"TRACK123456789","scale":3,"height":15,"includetext":true},"isBarcode":true}]}
-};
+
 
 // ============================================================
 // DATA LAYER
@@ -135,14 +130,14 @@ function renderLabelzGrid() {
                     </div>
                     
                     <!-- Spool Button Top Right (Matched to Barcodz Blue) -->
-                    <button onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer; display:flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
+                    <button class="btn-blue" onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                 </div>
                 
                 <!-- Content & Edit Base -->
                 <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
                     <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
                     
-                    <button onclick="openEditLabelModal('${cleanName}')" style="width:100%; background:var(--bg-bar); color:var(--text-main); border:1px solid var(--border-color); padding:4px 0; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='var(--border-color)'" onmouseout="this.style.background='var(--bg-bar)'"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Canvas</button>
+                    <button class="btn-slate-muted" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Canvas</button>
                 </div>
             </div>
         `;
@@ -850,31 +845,6 @@ function closeLabelzDesigner() {
     labelzCurrentEdit = null;
 }
 
-function loadLabelzTemplate(tName) {
-    if(!tName) return;
-    if(!labelzTemplates[tName]) return;
-    if(!confirm("Loading a template will overwrite current canvas. Continue?")) {
-        document.getElementById('labelzTemplateSelect').value = '';
-        return;
-    }
-    
-    // Auto-set size roughly based on template type if needed, or keep current
-    if(tName === 'shipping') {
-        document.getElementById('labelzDesignerSize').value = '4x6';
-        updateLabelCanvasSize();
-    }
-
-    fCanvas.loadFromJSON(labelzTemplates[tName], function() {
-        fCanvas.renderAll();
-        // Fire regen for barcodes inside template
-        fCanvas.getObjects().forEach(o => {
-            if(o.isBarcode && o.barcodeOpts) {
-                regenerateBarcodeImage(o, o.barcodeOpts.text, o.barcodeOpts.bcid);
-            }
-        });
-    });
-    document.getElementById('labelzTemplateSelect').value = '';
-}
 
 // ============================================================
 // SAVE & EXPORT

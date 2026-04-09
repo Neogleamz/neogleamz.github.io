@@ -58,12 +58,15 @@ function renderFgiTable() {
             { id: 'cat-label',  name: 'Custom Labels',   icn: '🏷️',  items: a.filter(x => x.isLabel).sort(sortFn('cat-label')) }
         ];
 
+        let isFirstGroup = true;
         groups.forEach(g => {
             if(g.items.length === 0) return;
             let isExp = window.fgiCategoryState[g.id] !== false;
             let chevron = isExp ? '▼' : '▶';
             
-            h += `<div class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s; padding:10px 15px; border-bottom:1px solid rgba(255,255,255,0.1); margin-top:20px; border-radius: 6px 6px 0 0;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><span style="font-weight:900; color:var(--primary-color); font-size:13px; text-transform:uppercase; letter-spacing:1px;"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></span></div>`;
+            let mt = isFirstGroup ? '0px' : '20px';
+            h += `<div class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s; padding:10px 15px; border-bottom:1px solid rgba(255,255,255,0.1); margin-top:${mt}; border-radius: 6px 6px 0 0;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><span style="font-weight:900; color:var(--primary-color); font-size:13px; text-transform:uppercase; letter-spacing:1px;"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></span></div>`;
+            isFirstGroup = false;
             
             if(isExp) {
                 h += `<table class="neo-table" style="width:100%; margin-bottom:0; background:rgba(0,0,0,0.1); border-top:none; border-radius: 0 0 6px 6px;">`;

@@ -151,7 +151,7 @@ function openPackerzSopTerminal(orderGroup) {
                     ${selectHtml}
                 </div>
                 <button id="qa-btn-${orderGroup.order_id}-${i.sku}" 
-                    class="btn-ghost-base btn-ghost-blue" 
+                    class="btn-slate-muted" 
                     style="flex-shrink:0; white-space:nowrap;"
                     onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${safeRecipe}')">
                     &#128065; VIEW SOP
@@ -174,7 +174,7 @@ function openPackerzSopTerminal(orderGroup) {
             ${itemsHtml}
         </div>
         
-        <button id="btnCompleteAssembly_${orderGroup.order_id}" style="width:100%; padding:16px; background:#F59E0B; color:white; border:none; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; font-size:14px; transition:transform 0.2s; box-shadow:0 6px 20px rgba(245,158,11,0.3);">
+        <button id="btnCompleteAssembly_${orderGroup.order_id}" class="btn-orange-neon" style="width:100%; padding:16px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; font-size:14px; transition:transform 0.2s;">
             AWAITING QA CLEARANCE
         </button>
     </div>`;
@@ -204,8 +204,8 @@ function validatePackerzAssemblyButton(orderId) {
         if(allPassed) {
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
-            btn.style.background = '#10b981';
-            btn.style.boxShadow = '0 6px 20px rgba(16,185,129,0.3)';
+            btn.className = 'btn-green-neon';
+            
             btn.innerText = 'ASSEMBLY COMPLETE';
             btn.onmouseover = () => btn.style.transform='scale(1.02)';
             btn.onmouseout = () => btn.style.transform='scale(1)';
@@ -213,8 +213,8 @@ function validatePackerzAssemblyButton(orderId) {
         } else {
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
-            btn.style.background = '#F59E0B';
-            btn.style.boxShadow = '0 6px 20px rgba(245,158,11,0.3)';
+            btn.className = 'btn-orange-neon';
+            
             btn.innerText = 'AWAITING QA CLEARANCE';
             btn.onmouseover = null;
             btn.onmouseout = null;
@@ -341,7 +341,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
                 </div>
                 <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
-                    <button id="btnPackerzSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
+                    <button id="btnPackerzSopSignoff" class="btn-green-neon" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
                         COMPLETE QA CHECKS
                     </button>
                 </div>
@@ -757,7 +757,7 @@ async function signoffPackerzQA() {
     const btn = document.getElementById(btnId);
     if(btn) {
         btn.innerText = 'QA PASSED ✓';
-        btn.style.background = '#10b981';
+        btn.className = 'btn-green-neon';
         btn.style.color = 'white';
     }
     
@@ -1955,7 +1955,7 @@ async function handleScanResult(decodedText, expectedValue, rowId) {
         closeCameraScanner();
         if (row)    { row.dataset.confirmed = 'true'; row.style.borderColor = '#10b981'; row.style.background = 'rgba(16,185,129,0.06)'; }
         if (status) { status.innerText = '✅ Confirmed'; status.style.color = '#10b981'; }
-        if (btn)    { btn.innerText = '✓ SCANNED'; btn.style.background = '#10b981'; btn.disabled = true; }
+        if (btn)    { btn.innerText = '✓ SCANNED'; btn.className = 'btn-green-neon'; btn.disabled = true; }
         // Record in the telemetry Map
         scanConfirmations.set(rowId, true);
         checkPackerzSopSignoffState();

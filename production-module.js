@@ -9,7 +9,7 @@ function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" 
 function generateEditableSOPRow(s, idx) {
     let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
     let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-    return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">✕</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+    return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">✕</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
 }
 
 let currentSopMode = 'production'; // 'production' or '3d'
@@ -248,7 +248,7 @@ function renderStagedBatchItems() {
         let f = fmtKey(item.p); let name = f.nn ? f.nn : f.in;
         h += `<li style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:10px 15px; border-radius:6px; border:1px solid var(--border-color);">
             <div style="font-weight:bold; color:var(--text-heading); font-size:14px;">${item.q}x <span style="color:#0ea5e9;">${name}</span></div>
-            <button class="btn-red btn-xs" onclick="removeBatchItem(${index})">✕</button>
+            <button class="btn-red-muted btn-xs" onclick="removeBatchItem(${index})">✕</button>
         </li>`;
     });
     list.innerHTML = h;
@@ -288,28 +288,41 @@ function checkWORouting() {
         rArea.style.display = 'none'; 
         return; 
     }
-    rArea.style.display = 'block'; let h = "";
-    keys.forEach(k => {
+    rArea.style.display = 'block'; 
+    let h = "";
+    let openKeys = [];
+    
+    keys.forEach((k, i) => {
         let node = subsNeeded[k];
         let req = node.req; let curDepth = node.depth;
-        let invKey = `RECIPE:::${k}`; let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
-        let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
-        let onHand = (i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb);
+        let invKey = `RECIPE:::${k}`; let inv = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
+        let c_prod = parseFloat(inv.production_consumed_qty)||0; let c_proto = parseFloat(inv.prototype_consumed_qty)||0; let pb = parseFloat(inv.prototype_produced_qty)||0;
+        let onHand = (inv.produced_qty||0) - (inv.sold_qty||0) - c_prod - (inv.scrap_qty||0) + (inv.manual_adjustment||0) - Math.max(0, c_proto - pb);
         let autoPull = Math.min(req, Math.max(0, onHand)); let autoBuild = req - autoPull;
         
         let is3DPUI = typeof productsDB !== 'undefined' && productsDB[k] && productsDB[k].is_3d_print;
         let icon = is3DPUI ? '🖨️' : '⚙️';
-        
-        let marginLeft = curDepth * 25;
-        let indentPrefix = curDepth > 0 ? `<span style="color:var(--border-color); margin-right:5px; font-size:10px;">└─</span>` : '';
-        
         let safeK = k.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g, '');
-        h += `<div class="route-row" data-subname="${k}" style="margin-left: ${marginLeft}px;">
-                <div style="display:flex; flex-direction:column;">
-                    <strong style="color:var(--text-heading); font-size:13px;">${indentPrefix}${icon} ${k}</strong>
-                    <span style="font-size:11px; color:var(--text-muted); ${curDepth > 0 ? 'margin-left:18px;' : ''}">Need: ${req.toFixed(2)} | On Shelf: ${onHand.toFixed(2)}</span>
+
+        let hasChildren = (i + 1 < keys.length && subsNeeded[keys[i+1]].depth > curDepth);
+
+        // Close depth scopes if we went up the tree
+        while (openKeys.length > 0 && subsNeeded[openKeys[openKeys.length - 1]].depth >= curDepth) {
+            h += `</div>`;
+            openKeys.pop();
+        }
+
+        let chevron = hasChildren ? `<span id="route_icon_${safeK}" style="display:inline-block; transition:transform 0.2s; transform:rotate(-90deg); margin-right:6px; font-size:10px; color:var(--text-muted);">▼</span>` : `<span style="display:inline-block; width:16px; margin-right:6px;"></span>`;
+        let clickAttr = hasChildren ? `onclick="let el = document.getElementById('route_children_${safeK}'); let ic = document.getElementById('route_icon_${safeK}'); if(el.style.display==='none'){el.style.display='flex';ic.style.transform='rotate(0deg)';}else{el.style.display='none';ic.style.transform='rotate(-90deg)';}" style="cursor:pointer; display:flex; flex-direction:column; flex:1; padding:4px 0;"` : `style="display:flex; flex-direction:column; flex:1; padding:4px 0;"`;
+
+        let rowHtml = `<div class="route-row" data-subname="${k}">
+                <div ${clickAttr}>
+                    <strong style="color:var(--text-heading); font-size:13px; display:flex; align-items:center; user-select:none;">
+                        ${chevron} ${icon} ${k}
+                    </strong>
+                    <span style="font-size:11px; color:var(--text-muted); margin-left:22px;">Need: ${req.toFixed(2)} | On Shelf: ${onHand.toFixed(2)}</span>
                 </div>
-                <div class="route-inputs">
+                <div class="route-inputs" style="margin-left:15px;">
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <span class="route-label" style="color:#10b981;">Pull Shelf</span>
                         <input type="number" class="route-pull-input" id="route_pull_${safeK}" value="${autoPull.toFixed(2)}" min="0" max="${Math.max(0, onHand)}" step="any" oninput="balanceRoute('${safeK}', ${req}, 'pull', ${Math.max(0, onHand)})">
@@ -320,7 +333,21 @@ function checkWORouting() {
                     </div>
                 </div>
               </div>`;
+        
+        if (hasChildren) {
+            h += rowHtml;
+            h += `<div id="route_children_${safeK}" style="display:none; flex-direction:column; margin-left:11px; padding-left:11px; border-left:1px dashed var(--border-color); gap:0px;">`;
+            openKeys.push(k);
+        } else {
+            h += rowHtml;
+        }
     });
+
+    while (openKeys.length > 0) {
+        h += `</div>`;
+        openKeys.pop();
+    }
+
     rList.innerHTML = h;
 }
 
@@ -1093,8 +1120,8 @@ function renderActiveWO(id) {
                                 ${grp.title} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;" onclick="event.stopPropagation()">
-                                <button class="btn-ghost-base btn-ghost-blue" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${grp.rawName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
-                                <button onclick="toggleInlineEditor('${grp.id}')" class="btn-ghost-base ${isEditing ? 'btn-ghost-red' : 'btn-ghost-brand'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
+                                <button class="btn-slate" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${grp.rawName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
+                                <button onclick="toggleInlineEditor('${grp.id}')" class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
                                 <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" onclick="toggleBatchezSopGroup('${grp.id}')" id="sopgrp_icon_${grp.id}">${chev}</div>
                             </div>
                         </div>
@@ -1109,7 +1136,7 @@ function renderActiveWO(id) {
                         mappedSteps.forEach((s, idx) => {
                             let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
                             let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-                            stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+                            stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
                         });
                         
                         htmlOut += `
@@ -1160,15 +1187,15 @@ function renderActiveWO(id) {
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Rich Text Instructions</h3>
                                         </div>
                                         <div id="inlineSopSteps_${grp.id}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${stepsHtml}</div>
-                                        <button class="btn-green" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" onclick="if(typeof addInlineSOPRow==='function') addInlineSOPRow('${grp.id}')">+ ADD PROCEDURE STEP</button>
+                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" onclick="if(typeof addInlineSOPRow==='function') addInlineSOPRow('${grp.id}')">+ ADD PROCEDURE STEP</button>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Save Actions -->
                             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
-                                <button class="btn-red" style="padding:8px 15px; font-size:12px;" onclick="toggleInlineEditor('${grp.id}')">✕ Cancel Changes</button>
-                                <button class="btn-green" style="padding:8px 25px; font-size:14px; font-weight:900;" onclick="saveInlineSopBlock('${grp.id}', '${grp.rawName.replace(/'/g, "\\'")}')">💾 SAVE SOP MASTER BLUEPRINT</button>
+                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" onclick="toggleInlineEditor('${grp.id}')">✕ Cancel Changes</button>
+                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" onclick="saveInlineSopBlock('${grp.id}', '${grp.rawName.replace(/'/g, "\\'")}')">💾 SAVE SOP MASTER BLUEPRINT</button>
                             </div>
                         </div>
                         <script>
@@ -1580,7 +1607,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-id">${wo.wo_id}</div>
                     <div class="archive-card-title">${wo.label ? `"${wo.label}" — ` : ''}${wo.product_name}</div>
                     <div class="archive-card-meta">x${wo.qty} · ${fmtShort(wo.completed_at || wo.created_at)}</div>
-                    <button onclick="event.stopPropagation(); hardDeleteArchive('batchez', '${wo.wo_id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex:none; white-space:nowrap; width:max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">🗑️ DELETE</button>
+                    <button onclick="event.stopPropagation(); hardDeleteArchive('batchez', '${wo.wo_id}')" class="btn-red-neon">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
@@ -1608,7 +1635,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-id">${displayID}</div>
                     <div class="archive-card-title">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
                     <div class="archive-card-meta">x${job.qty} · ${fmtShort(job.completed_at || job.created_at)}</div>
-                    <button onclick="event.stopPropagation(); hardDeleteArchive('layerz', '${job.id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex:none; white-space:nowrap; width:max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">🗑️ DELETE</button>
+                    <button onclick="event.stopPropagation(); hardDeleteArchive('layerz', '${job.id}')" class="btn-red-neon">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
@@ -1750,12 +1777,12 @@ function parseProductionTelemetryLine(q, contextIdx) {
     function parseInputs(text) { return text.replace(/\[INPUT\]/gi, `<input type="text" placeholder="..." style="padding:4px 8px; border-radius:4px; background:rgba(255,255,255,0.1); border:1px solid #10b981; color:#fff; font-family:monospace; font-size:12px; width:120px; font-weight:bold; margin:0 6px;">`); }
 
     function parseImgs(text) {
-        text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`; });
-        text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`; });
+        text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" class="btn-slate-muted">📄 View PDF</button>`; });
+        text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" class="btn-blue-muted">🎥 Play Video</button>`; });
         text = text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
             const safe = url.replace(/'/g, "\\'");
-            if(url.toLowerCase().endsWith('.pdf')) { return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`; }
-            if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) { return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`; }
+            if(url.toLowerCase().endsWith('.pdf')) { return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" class="btn-slate-muted">📄 View PDF</button>`; }
+            if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) { return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" class="btn-blue-muted">🎥 Play Video</button>`; }
             return `<img src="${url}" loading="lazy" style="max-height:80px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
         });
         return text;

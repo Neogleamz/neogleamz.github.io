@@ -225,8 +225,8 @@ function renderActivePrintJob(id) {
                     🖨️ 3D Print Instructions: ${cleanPartName} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;" onclick="event.stopPropagation()">
-                    <button class="btn-ghost-base btn-ghost-blue" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${cleanPartName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
-                    <button onclick="toggleInlineEditor('${grpId}')" class="btn-ghost-base ${isEditing ? 'btn-ghost-red' : 'btn-ghost-brand'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
+                    <button class="btn-slate" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${cleanPartName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
+                    <button onclick="toggleInlineEditor('${grpId}')" class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
                     <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" onclick="let d=document.getElementById('sopgrp_body_${grpId}'); if(d.style.display==='none'){d.style.display='block';this.innerText='▼';localStorage.setItem('layerzSopExpanded_${grpId}','true');}else{d.style.display='none';this.innerText='▶';localStorage.setItem('layerzSopExpanded_${grpId}','false');}" id="sopgrp_icon_${grpId}">${chev}</div>
                 </div>
             </div>
@@ -241,7 +241,7 @@ function renderActivePrintJob(id) {
             mappedSteps.forEach((s, idx) => {
                 let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
                 let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-                stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${typeof getRTToolbar === 'function' ? getRTToolbar() : ''}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+                stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${typeof getRTToolbar === 'function' ? getRTToolbar() : ''}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
             });
             
             htmlOut += `
@@ -288,15 +288,15 @@ function renderActivePrintJob(id) {
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Rich Text Instructions</h3>
                                         </div>
                                         <div id="inlineSopSteps_${grpId}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${stepsHtml}</div>
-                                        <button class="btn-green" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" onclick="if(typeof addInlineSOPRow==='function') addInlineSOPRow('${grpId}')">+ ADD PROCEDURE STEP</button>
+                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" onclick="if(typeof addInlineSOPRow==='function') addInlineSOPRow('${grpId}')">+ ADD PROCEDURE STEP</button>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Save Actions -->
                             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
-                                <button class="btn-red" style="padding:8px 15px; font-size:12px;" onclick="if(typeof toggleInlineEditor==='function') toggleInlineEditor('${grpId}')">✕ Cancel Changes</button>
-                                <button class="btn-green" style="padding:8px 25px; font-size:14px; font-weight:900;" onclick="if(typeof saveInlineSopBlock==='function') { saveInlineSopBlock('${grpId}', '${cleanPartName.replace(/'/g, "\\'")}'); setTimeout(()=>renderActivePrintJob(currentPrintJob.id), 500); }">💾 SAVE SOP MASTER BLUEPRINT</button>
+                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" onclick="if(typeof toggleInlineEditor==='function') toggleInlineEditor('${grpId}')">✕ Cancel Changes</button>
+                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" onclick="if(typeof saveInlineSopBlock==='function') { saveInlineSopBlock('${grpId}', '${cleanPartName.replace(/'/g, "\\'")}'); setTimeout(()=>renderActivePrintJob(currentPrintJob.id), 500); }">💾 SAVE SOP MASTER BLUEPRINT</button>
                             </div>
 
                             <!-- Injecting Drag Handlers for Resizer -->

@@ -1362,7 +1362,7 @@ window.openGlobalRegexPlayground = function(type) {
             </div>
             <div style="display:flex; align-items:center; gap:15px; margin-top:-6px;">
                 <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://regex101.com/', '_blank'); return false;" style="cursor:pointer; font-size:13px; color:#10b981; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; border:1px solid #10b981; padding:0 15px; border-radius:6px; background:rgba(16, 185, 129, 0.1); max-width:max-content; height:32px;">📚 REGEX HELPER ENGINE ↗</button>
-                <button onclick="window.${conf.closeModalFn}()" class="btn-ghost-base btn-ghost-red" style="font-size:13px; font-weight:bold; height:32px; width: max-content; padding: 0 15px;" title="Close Window">Close</button>
+                <button onclick="window.${conf.closeModalFn}()" class="btn-red-muted" style="font-size:13px; font-weight:bold; height:32px; width: max-content; padding: 0 15px;" title="Close Window">Close</button>
             </div>
         </div>
         
@@ -1374,9 +1374,9 @@ window.openGlobalRegexPlayground = function(type) {
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:11px; color:#fff; font-weight:bold;">Active Regex Profile</span>
                         <div style="display:flex; gap:6px;">
-                            <button onclick="window.${conf.saveNewFn}()" class="btn-ghost-base btn-ghost-blue btn-sm" style="font-size:9px;">💾 Save As New</button>
-                            <button id="btnOverwritePreset" onclick="window.${conf.overwriteFn}()" class="btn-ghost-base btn-ghost-brand btn-sm" style="font-size:9px; display:none;">🔄 Overwrite</button>
-                            <button id="btnDeletePreset" onclick="window.${conf.deleteFn}()" class="btn-ghost-base btn-ghost-red btn-sm" style="font-size:9px; display:none;">🗑️ Delete</button>
+                            <button onclick="window.${conf.saveNewFn}()" class="btn-blue-muted btn-sm" style="font-size:9px;">💾 Save As New</button>
+                            <button id="btnOverwritePreset" onclick="window.${conf.overwriteFn}()" class="btn-orange-muted btn-sm" style="font-size:9px; display:none;">🔄 Overwrite</button>
+                            <button id="btnDeletePreset" onclick="window.${conf.deleteFn}()" class="btn-red-muted btn-sm" style="font-size:9px; display:none;">🗑️ Delete</button>
                         </div>
                     </div>
                     <select id="${conf.presetDropdownId}" class="input-dark" style="font-size:11px; padding:4px; width:100%; border:1px solid ${type==='orders'?'#38bdf8':'#f59e0b'};" onchange="window.${conf.onDropdownChangeFn}()"></select>
@@ -1415,8 +1415,8 @@ window.openGlobalRegexPlayground = function(type) {
                 <h3 style="margin:0 0 10px 0; color:#f59e0b; display:flex; justify-content:space-between; align-items:center;">
                     🎯 Live Target Text Payload
                     <div style="display:flex; gap:6px;">
-                        <button id="btnToggleView" onclick="window.${conf.toggleViewFn}()" class="btn-ghost-base btn-ghost-blue btn-sm" style="font-size:10px;">👁️ VIEW SOURCE HTML</button>
-                        <button onclick="window.${conf.resetFn}()" class="btn-ghost-base btn-ghost-red btn-sm" style="font-size:10px;">RESET TO DEFAULTS</button>
+                        <button id="btnToggleView" onclick="window.${conf.toggleViewFn}()" class="btn-slate-muted btn-sm" style="font-size:10px;">👁️ VIEW SOURCE HTML</button>
+                        <button onclick="window.${conf.resetFn}()" class="btn-red-muted btn-sm" style="font-size:10px;">RESET TO DEFAULTS</button>
                     </div>
                 </h3>
                 <input type="text" id="${conf.searchBoxId}" class="input-dark" style="margin-bottom:10px; font-size:12px; font-family:monospace; width:100%;" placeholder="🔍 Search:   Type to instantly find and highlight string matches..." onkeyup="window.${conf.evaluatorAllFn}()">
@@ -1432,8 +1432,8 @@ window.openGlobalRegexPlayground = function(type) {
         
         <!-- Modal Footer -->
         <div style="padding:15px 25px; background:var(--bg-panel); border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:flex-end; gap:10px; border-radius:0 0 12px 12px;">
-            <button class="btn-blue" style="background:transparent; border:1px solid var(--border-color); color:var(--text-color);" onclick="window.${conf.closeModalFn}()">Cancel</button>
-            <button class="btn-green" style="padding:10px 25px; font-weight:bold;" onclick="${conf.applyBtnFn}">✅ APPLY ACTIVE RULES (TEMPORARY)</button>
+            <button class="btn-red-muted" onclick="window.${conf.closeModalFn}()">Cancel</button>
+            <button class="btn-green-neon" style="padding:10px 25px; font-weight:bold;" onclick="${conf.applyBtnFn}">✅ APPLY ACTIVE RULES (TEMPORARY)</button>
         </div>
     </div>`;
 

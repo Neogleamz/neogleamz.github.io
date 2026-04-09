@@ -10,9 +10,10 @@ This workflow establishes the mandatory structural rules for building, modifying
 When building or restructuring top-level module dashboards (e.g., `DATAZ`, `PACKERZ`, `BATCHEZ`, `STATZ`):
 - All executive panes **MUST** utilize `<div class="pane-header-bar">` and anchor their module titles inside `<span class="pane-header-title">`.
 - **Absolute Title Centering:** To prevent horizontal and vertical baseline jumping between modules with varying command buttons, `.pane-header-title` elements must strictly use full geometric centering (`left: 50%; top: 50%; transform: translate(-50%, -50%);`).
-- **Header Structure:** `.pane-header-bar` wrappers handling interactive flex content MUST apply fixed minimal bounds (e.g., `min-height: clamp(35px, 4vh, 45px);`) to strictly enforce a static vertical center.
+- **Header Structure:** `.pane-header-bar` wrappers handling interactive flex content MUST apply fixed exact bounds (e.g., `height: 26px; min-height: 26px; max-height: 26px;`) with ZERO vertical padding (`padding: 0 10px;`) to strictly enforce a static vertical center. Elements inside `.pane-header-actions` must be tightly bound (e.g., `height: 24px !important; margin: 0 !important; font-size: 11px !important;`) to fit mathematically inside this bar. This guarantees the absolute centered title NEVER jumps vertically across pages, and achieves a universally unified, ultra-compact aesthetic.
 - **Prohibited Aesthetics:** Structural wrappers handling internal core content (such as `.bom-layout`) **MUST NOT** deploy full horizontal boundaries (e.g. `border-top: 1px solid var(--border-color);`) beneath the pane index. The intended look is a borderless, floating content area directly beneath the large title.
-- Responsive padding should be configured centrally via CSS `clamp()` bounds on layout wrappers, avoiding hardcoded pixel values.
+- **Strict Spatial Economy:** Do NOT use empty HTML `<div>` elements as visual spacers or layout controls (such as empty `.control-panel` blocks with `margin-bottom` hacks), as they create dead-zones in the UI layout when unpopulated. Any non-populated or placeholder block element MUST be explicitly initialized with `display: none;` until required by its DOM injection logic. Likewise, dynamic DOM injections (e.g., repeating category headers) should use localized looping logic to prevent `margin-top` gaps on the very first child against a parent container roof.
+- Responsive padding should be configured centrally via CSS `clamp()` bounds on layout wrappers, avoiding inline hardcoded pixel values (e.g., explicitly scrub `style="padding: 20px;"` from `.bom-main` instances in favor of central core CSS).
 
 ## Scope of Rules
 **IMPORTANT:** The Button Positioning rules below apply **EXCLUSIVELY** to SOP Editor Modals (e.g. `BATCHEZ`, `LAYERZ`, `PACKERZ` SOP editing interfaces). General website pages and modals (e.g., standard work order generation, sales dashboards) should not have their existing positioning structures forcibly modified unless specifically requested by the user.
@@ -33,11 +34,19 @@ If you encounter UI components (e.g., empty `<input>` bars, useless `<button>` o
 2. **Checks and Balances Protocol:** You must alert the user that a ghost element was found. Present the name/ID of the ghost module and ask for explicit permission to prune it from the file.
 3. Keep a logged record of the component before proceeding with the removal to ensure the user is aware of what structural properties were just altered.
 
+## Global Modal Patterns
+- **Close Button Alignment:** Modal or Dialog "Close" buttons must follow a strict "Icon Left, Text Right" layout structure (`<i class="fa-solid fa-times"></i> Close`). Do not position the "X" symbol to the right of the word "Close" or position the symbol randomly above the text by using unchecked flex-wrap containers. Implement `.btn-red-muted` alongside horizontal centering (`display:flex; align-items:center; gap:6px;`) to guarantee the layout format never breaks.
+
 ## Globally Standardized Button Utility Classes
-When adding secondary or "ghost" action buttons (such as DELETE, EDIT, or PDF view buttons), they MUST utilize the dual-class architecture to inherit structural integrity and visual design:
-1. **Always apply `.btn-ghost-base`** to inject core formatting (padding, border radius, flex layout, font family, geometric constraints).
-2. **Append the specific color utility** (e.g., `.btn-ghost-red`, `.btn-ghost-blue`, `.btn-ghost-emerald`, `.btn-ghost-brand`) to dictate the stroke, subtle background hue, and hover animation profile.
-- Example: `<button class="btn-ghost-base btn-ghost-red">`: Ensures the button displays a distinct geometric outline while retaining a glassy, transparent aesthetic until hovered.
+When adding action buttons across the software, you MUST adhere to the global 6-color functional mapping palette. Buttons are divided into solid counterparts (e.g., `.btn-green`) and ghost variants (`.btn-ghost-emerald`). 
+1. **🟢 Emerald/Green (`.btn-green` / `.btn-ghost-emerald`)**: *Positive Commits & Creation*. Use for saving ledgers, submitting forms, or adding rows (e.g. `SAVE MASTER BLUEPRINT`).
+2. **🔵 Blue (`.btn-blue` / `.btn-ghost-blue`)**: *Neutral Tools & Navigation*. Use for toggling views, opening tools, or basic system utility (e.g. `BATCHEZ SOP EDITOR`).
+3. **🟠 Orange/Brand (`.btn-orange` / `.btn-ghost-brand`)**: *High-Level Engine Execution*. The system identity color. Use for major sync operations and database pushes (e.g. `🚀 INITIATE SYNC`).
+4. **🔴 Red (`.btn-red` / `.btn-ghost-red`)**: *Destructive Actions & Overrides*. Use for wiping configurations, deleting rows, or force resets (e.g. `⚠️ RESET STOCK LEVELS`).
+5. **🟣 Purple (`.btn-purple`)**: *A.I. Intelligence & Smart Mapping*. Use for intelligent data generation or cross-referencing utilities (e.g. `✨ AUTO-FILL LEDGER`).
+6. **⚪ Slate/Grey (`.print-btn` / `.btn-ghost-slate`)**: *Physical Reporting & Documentation*. Strictly reserved for triggering browser print dialogs or viewing static files (e.g. `🖨️ PRINT SOP`).
+
+**Special Allowances:** Structural buttons building the global web shell (`.login-btn`, `.tab-btn`, `.top-action-btn`) and specific UI micro-icons (`.icon-btn`) are exempt from forced color mapping. Do NOT attempt to rewrite the isolated `SOCIALZ` Tailwind strings.
 
 ## Fulfillz Core Layout Standardization
 When modifying or adding new panels for the Fulfillz execution suite:
