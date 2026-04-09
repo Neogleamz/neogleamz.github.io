@@ -137,7 +137,7 @@ function renderLabelzGrid() {
                 <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
                     <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
                     
-                    <button class="btn-slate-muted" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Canvas</button>
+                    <button class="btn-slate-muted" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
                 </div>
             </div>
         `;
