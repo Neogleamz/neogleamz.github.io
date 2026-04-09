@@ -1,0 +1,347 @@
+# Neogleamz Master Architecture & Reference
+
+*The Canonical Source of Truth for the Neogleamz ecosystem.*
+
+## 1. Product Philosophies & Anti-Goals
+- **Browser-First Architecture**: We prioritize heavy, expansive desktop layouts utilizing pure css-grid and flexbox. We reject compiled Native-Mobile logic in favor of massively scalable Web UX interfaces.
+- **Aggressive Edge Processing**: Data normalization and fulfillment triggers should happen on Edge Functions asynchronously so the UI terminal retains absolute responsiveness. 
+- **Scope of UI Rules**: The Button Positioning rules below apply EXCLUSIVELY to SOP Editor Modals (e.g. BATCHEZ, LAYERZ, PACKERZ). General website pages should not have their existing positioning structures forcibly modified natively.
+- **Deletion of Ghost Modules / Legacy Code**: If you encounter UI components that do not possess functionally mapped JavaScript payloads DO NOT auto-delete. You must alert the user that a ghost element was found and ask for explicit permission to prune it. Keep a logged record of the component before proceeding.
+
+## 2. Global System Invariants
+
+### Global Standardized Button Utility Classes
+When adding action buttons across the software, you MUST adhere to the global 6-color functional mapping palette (`.btn-[color]-muted/standard/neon`). 
+1. **🟢 Emerald/Green**: *Positive Commits & Creation*. (e.g. `SAVE MASTER BLUEPRINT`).
+2. **🔵 Blue**: *Neutral Tools & Navigation*. (e.g. `BATCHEZ SOP EDITOR`).
+3. **🟠 Orange/Brand**: *High-Level Engine Execution*. (e.g. `🚀 INITIATE SYNC`).
+4. **🔴 Red**: *Destructive Actions & Overrides*. (e.g. `⚠️ RESET STOCK LEVELS`).
+5. **🟣 Purple**: *A.I. Intelligence & Smart Mapping*. (e.g. `✨ AUTO-FILL LEDGER`).
+6. **⚪ Slate/Grey**: *Physical Reporting*. (e.g. `🖨️ PRINT SOP`).
+
+### Executive Pane Layout Standards
+- Dashboard module panes **MUST** utilize `<div class="pane-header-bar">` and anchor titles inside `<span class="pane-header-title">`.
+- **Absolute Title Centering:** Elements must strictly use full geometric centering (`left: 50%; top: 50%; transform: translate(-50%, -50%);`).
+- Structural wrappers handling internal core content **MUST NOT** deploy full horizontal boundaries beneath the pane index. The intended look is a borderless, floating content area.
+- Do NOT use empty HTML `<div>` elements as visual spacers or layout controls. Responsive padding should be configured centrally via CSS `clamp()` bounds.
+
+### Fulfillz Core Layout & Kanban Normalize
+- **The Grid Base:** You MUST use `<div class="bom-layout">` as the foundational wrapper. Sidebars must apply `class="bom-sidebar"`.
+- Modifying sidebars with a resizer grip MUST register the sidebar's CSS `id` inside `neogleamz-engine.js` within the `idsToRestore` array.
+- Dashboard cards MUST use the `.kpi-row` hierarchy structurally. DO NOT apply arbitrary text-colors to primary metric quantities (use `var(--text-heading)`).
+- Kanban active selections must cast a full geometric outline around the object ensuring "deselected" items still maintain their underlying dark shadow depths.
+
+### SOP Editor Standardization Framework
+- All command buttons must be anchored strictly to the **top-right** corner of their respective container or modal header.
+- ALL checklist previews MUST utilize the global `parseProductionTelemetryLine` logic to process `# Headers`, `> Subtext`, `[INPUT]`, `[SCAN]`, `[IMG]`, `[BARCODE]`, and `[QR]` tokens.
+- A full UI cheatsheet/token legend detailing the definitions of telemetry markdown MUST be embedded above every master interface.
+- All SOP split-pane architectures MUST include the `h-resizer` component for dynamic width adjustment.
+
+### Global Modal Patterns & Telemetry Elements
+- Checkboxes, Radio toggles, and any adjacent dynamic text must be styled as a singular `flex` line using `flex: 1` rather than absolute widths.
+- Modal "Close" buttons must follow a strict "Icon Left, Text Right" layout structure (`<i class="fa-solid fa-times"></i> Close`).
+
+## 3. Persistent Hardware Tokens
+- *(Empty: Reserved for future Bluetooth LE hex structures or Zebra TCP sockets)*
+
+## 4. Current DB Schemas & Backup Protocol
+
+### DB Row Level Security Matrix
+The system natively deploys 16 tables. RLS explicitly dictates that **Authenticated Users** possess full universal bypass `USING (true) WITH CHECK (true)`, and **Anon Users** are strictly denied across the board with the sole exception of the `sop-media` cloud-bucket fetch protocols.
+
+### Active Logical Tables (Schema Definitions)
+
+#### `app_settings`
+```sql
+-- TABLE: app_settings
+-- created_at: string
+-- setting_key: string
+-- setting_value: Json | null
+```
+
+#### `full_landed_costs`
+```sql
+-- TABLE: full_landed_costs
+-- actual_chargeable_weight_g: number | null
+-- actual_paid: number | null
+-- actual_shipping_fee: number | null
+-- alibaba_order: string | null
+-- corner_protector: number | null
+-- coupon_discount: number | null
+-- created_at: string | null
+-- custom_clearance_fee: number | null
+-- di_item_id: string | null
+-- discount_code: number | null
+-- epe_loose_filling: number | null
+-- final_cost_weight: number | null
+-- first_tier_cost: number | null
+-- fuel_surcharge: number | null
+-- id: number
+-- insurance: number | null
+-- is_3d_print: boolean | null
+-- is_filament: boolean | null
+-- item_name: string | null
+-- lot_multiplier: number | null
+-- moister_barrier_bag: number | null
+-- neogleamz_name: string | null
+-- neogleamz_product: string | null
+-- one_percent_discount: number | null
+-- operating_cost: number | null
+-- order_date: string | null
+-- order_no: string | null
+-- order_postage: number | null
+-- order_total: number | null
+-- order_unit_price: number | null
+-- packing_video: number | null
+-- parcel_no: string | null
+-- points_discount: number | null
+-- print_grams: number | null
+-- print_time_mins: number | null
+-- quantity: number | null
+-- remote_area_surcharge: number | null
+-- second_tier_cost: number | null
+-- specification: string | null
+-- storage_fee: number | null
+-- tax: number | null
+-- total_cost_weight: number | null
+-- total_dist_weight_g: number | null
+-- unit_china_landed_price: number | null
+-- unit_ship_weight: number | null
+-- unit_weight_g: number | null
+```
+
+#### `inventory_consumption`
+```sql
+-- TABLE: inventory_consumption
+-- assembly_consumed_qty: number | null
+-- consumed_qty: number | null
+-- item_key: string
+-- manual_adjustment: number | null
+-- min_stock: number | null
+-- produced_qty: number | null
+-- production_consumed_qty: number | null
+-- prototype_consumed_qty: number | null
+-- prototype_produced_qty: number | null
+-- scrap_qty: number | null
+-- sold_qty: number | null
+```
+
+#### `label_designs`
+```sql
+CREATE TABLE IF NOT EXISTS label_designs (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_name text NOT NULL UNIQUE,
+  emoji text DEFAULT 'dY?,?',
+  file_url text,
+  file_name text,
+  layout_json jsonb,
+  label_size text DEFAULT '2.25x1.25',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+```
+
+#### `pack_ship_sops` & `production_sops`
+```sql
+-- TABLE: pack_ship_sops
+-- created_at: string | null
+-- id: string
+-- instruction_json: Json
+-- internal_recipe_name: string
+-- required_box_sku: string | null
+-- updated_at: string | null
+-- TABLE: production_sops
+-- created_at: string
+-- product_name: string
+-- steps: Json | null
+```
+
+#### `print_queue`
+```sql
+-- TABLE: print_queue
+-- completed_at: string | null
+-- created_at: string | null
+-- id: string
+-- label: string | null
+-- part_name: string
+-- qty: number
+-- started_at: string | null
+-- status: string
+-- wo_id: string | null
+```
+
+#### `product_recipes`
+```sql
+-- TABLE: product_recipes
+-- affiliate_pct: number | null
+-- components: Json | null
+-- created_at: string | null
+-- filament_item_key: string | null
+-- is_3d_print: boolean | null
+-- is_label: boolean | null
+-- is_subassembly: boolean | null
+-- label_emoji: string | null
+-- labor_rate_hr: number | null
+-- labor_time_mins: number | null
+-- msrp: number | null
+-- old_msrp: number | null
+-- print_grams: number | null
+-- print_time_mins: number | null
+-- product_name: string
+-- warranty_pct: number | null
+-- wholesale_price: number | null
+```
+
+#### `raw_orders`, `raw_parcel_items`, `raw_parcel_summary`
+```sql
+-- TABLE: raw_orders
+-- alibaba_order: string | null
+-- di_item_id: string
+-- item_name: string | null
+-- order_date: string | null
+-- order_no: string | null
+-- order_total: number | null
+-- postage: number | null
+-- quantity: number | null
+-- specification: string | null
+-- unit_china_landed_price: number | null
+-- unit_price: number | null
+-- TABLE: raw_parcel_items
+-- di_item_id: string | null
+-- id: number
+-- item_name: string | null
+-- parcel_no: string | null
+-- quantity: number | null
+-- specification: string | null
+-- total_dist_weight_g: number | null
+-- unit_weight_g: number | null
+-- TABLE: raw_parcel_summary
+-- actual_chargeable_weight_g: number | null
+-- actual_paid: number | null
+-- actual_shipping_fee: number | null
+-- corner_protector: number | null
+-- coupon_discount: number | null
+-- custom_clearance_fee: number | null
+-- discount_code: number | null
+-- epe_loose_filling: number | null
+-- first_tier_cost: number | null
+-- fuel_surcharge: number | null
+-- insurance: number | null
+-- moister_barrier_bag: number | null
+-- one_percent_discount: number | null
+-- operating_cost: number | null
+-- packing_video: number | null
+-- parcel_no: string
+-- points_discount: number | null
+-- remote_area_surcharge: number | null
+-- second_tier_cost: number | null
+-- storage_fee: number | null
+-- tax: number | null
+```
+
+#### `sales_ledger`
+```sql
+-- TABLE: sales_ledger
+-- actual_sale_price: number | null
+-- assembly_completed_at: string | null
+-- cogs_at_sale: number | null
+-- created_at: string
+-- discount: number | null
+-- discount_amount: number | null
+-- discount_code: string | null
+-- exchange_value: number | null
+-- id: string
+-- internal_fulfillment_status: string | null
+-- internal_recipe_name: string | null
+-- linked_order_id: string | null
+-- net_profit: number | null
+-- order_id: string
+-- "Outstanding Balance": number | null
+-- qa_cleared_at: string | null
+-- qty_sold: number | null
+-- sale_date: string | null
+-- shipping: number | null
+-- Source: string | null
+-- storefront_sku: string | null
+-- subtotal: number | null
+-- taxes: number | null
+-- total: number | null
+-- transaction_fees: number | null
+-- transaction_type: string | null
+```
+
+#### `socialz_audience`
+```sql
+-- TABLE: socialz_audience
+-- collab_status: string | null
+-- collab_tier: string | null
+-- contact_info: string | null
+-- created_at: string
+-- followers_fb: number | null
+-- followers_ig: number | null
+-- followers_tt: number | null
+-- followers_yt: number | null
+-- handle_fb: string | null
+-- handle_ig: string | null
+-- handle_tt: string | null
+-- handle_yt: string | null
+-- id: string
+-- is_favorite: boolean | null
+-- link_fb: string | null
+-- link_ig: string | null
+-- link_tt: string | null
+-- link_yt: string | null
+-- location: string | null
+-- name: string
+-- raw_followers: number | null
+-- region: string | null
+-- skater_type: string | null
+-- style: string | null
+-- summary: string | null
+-- updated_at: string
+-- viral_url: string | null
+```
+
+#### `storefront_aliases` & `tipz`
+```sql
+-- TABLE: storefront_aliases
+-- created_at: string
+-- internal_recipe_name: string | null
+-- platform: string | null
+-- storefront_sku: string
+-- TABLE: tipz
+-- created_at: string
+-- id: number
+-- priority: string | null
+-- status: string | null
+-- suggestion: string
+-- user_email: string | null
+```
+
+#### `work_orders`
+```sql
+-- TABLE: work_orders
+-- completed_at: string | null
+-- created_at: string
+-- label: string | null
+-- product_name: string | null
+-- qty: number | null
+-- routing: Json | null
+-- started_at: string | null
+-- status: string | null
+-- wip_state: Json | null
+-- wo_id: string
+```
+
+### Supabase Backup & Disaster Recovery Protocol
+1. **Automated Point-in-Time Recovery (PITR)**
+ Supabase inherently takes daily physical database backups. To Restore: Log in to the Supabase Dashboard -> Navigate to Neogleamz Project -> Database -> Backups -> Click Restore on the most recent known healthy state.
+2. **Hard Data Exports (The local safety net)**
+ Perform a monthly manual logical extraction: Open Supabase Table Editor -> Select core ledgers (`product_recipes`, `sales_ledger`, `inventory_consumption`) -> Click Export to CSV -> Store natively on `OneDrive - Neogleamz`.
+3. **High-Concurrency Racing Check**
+ Strict distributed locks (`SELECT FOR UPDATE`) are unnecessary overhead. If a partial network drop occurs in a multi-batch call, local `.catch()` hooks will log the structural failure allowing safe manual UI repair.
+
+## 5. AI Automation Best Practices
+- **Priority Native Inline Editors:** Always prioritize utilizing native workspace file editing tools over routing operations through external terminals to eliminate subprocess ping times.
+- **Temporary Scripts for Dom Parsing:** When making extensive cross-file DOM manipulations, the AI may write temporary executable `.py` scripts locally, run them, and then **IMMEDIATELY DELETE** them. Use python triple-quotes for impurity.
+- **PowerShell Precautions:** Do not attempt complex string-based lookup in terminals if HTML contains nested quotes. Use the built-in search tools to isolate lines securely.
