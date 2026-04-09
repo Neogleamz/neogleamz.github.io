@@ -55,9 +55,10 @@ When applying active selection states to kanban objects or operational rows:
 - **Depth Preservation:** Highlight states MUST also feature ambient `box-shadow` glows matching the border. Critically, ensure that "deselected" or inactive items still maintain their underlying dark shadow depths so the UI does not flatten out when shifting focus.
 
 ## AI Automation Best Practices
-- **Temporary Scripts for Dom Parsing:** When making extensive, cross-file DOM manipulations or regex replacements inside large Javascript template literals, the AI should write its modifications safely via temporary executable scripts locally, run them, and then **IMMEDIATELY DELETE** them to avoid cluttering the repository.
-  - **Tool Selection (Crucial):** Always prefer **Python** (`.py` files utilizing `re` or simple `f.read().replace()`) over Node.js for these macros. JavaScript template literals (using backticks and `${var}` syntax) severely clash with Node/shell execution engines when passed dynamically. Python triple-quotes (`\"\"\"`) provide absolute impunity from template syntax collisions and prevent wasting time on escaping errors.
-  - **PowerShell Precautions:** Do not attempt complex string-based `Select-String` lookups directly in the terminal if HTML contains nested quotes or escape sequences. Use the built-in `grep_search` tool to isolate line numbers safely.
+- **Priority Native Inline Editors:** Always prioritize utilizing native workspace file editing tools (`replace_file_content`) over routing operations through external terminal shells, Python snippets, or PowerShell lookups. Directly rewriting text locally inside the IDE eliminates subprocess ping times and ensures instantaneous UI injections.
+- **Temporary Scripts for Dom Parsing:** When making extensive, cross-file DOM manipulations or regex replacements inside large Javascript template literals that native string replacement cannot accurately hit, the AI may write temporary executable scripts locally, run them, and then **IMMEDIATELY DELETE** them.
+  - **Tool Selection (Crucial):** Always prefer **Python** (`.py` files utilizing `re`) over Node.js for these macros. Python triple-quotes (`"""`) provide absolute impunity from template syntax collisions.
+  - **PowerShell Precautions:** Do not attempt complex string-based `Select-String` lookups directly in the terminal if HTML contains nested quotes. Use the built-in `grep_search` or `view_file` tool to isolate line numbers safely.
 
 ## SOP Editor Standardization Framework
 When modifying or creating new SOP Editor interfaces (whether Full Master Modals or Live Inline Editors like those in Batchez, Layerz, or Packerz), complete UI and logic parity MUST be maintained:

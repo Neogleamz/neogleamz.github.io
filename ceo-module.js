@@ -1,6 +1,6 @@
 // --- CEO TERMINAL: OPERATION APEX 2.1 ---
 
-let ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;
+let ceoWaterfallChart, ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 // Global Drag & Drop + Sorting State
@@ -50,7 +50,7 @@ function get30DayVolume(productName) {
 
 function autoPopulateCeoBoard() {
     if (ceoActiveProducts.length > 0) return; 
-    let prods = Object.keys(productsDB).filter(p => !isSubassemblyDB[p]);
+    let prods = Object.keys(productsDB).filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
     prods.forEach(pName => {
         let vol = get30DayVolume(pName);
         if (vol > 0) {
@@ -67,6 +67,66 @@ function initCeoCharts() {
     Chart.defaults.color = '#e0e0e0'; Chart.defaults.font.family = "'JetBrains Mono', monospace";
     if(ceoExpenseChart) ceoExpenseChart.destroy();
     if(ceoUnitChart) ceoUnitChart.destroy(); if(ceoEfficiencyChart) ceoEfficiencyChart.destroy(); if(ceoCurEfficiencyChart) ceoCurEfficiencyChart.destroy();
+    if(ceoWaterfallChart) ceoWaterfallChart.destroy();
+
+    let elWaterfall = document.getElementById('ceoWaterfallChart');
+    if (elWaterfall) {
+        try {
+            ceoWaterfallChart = new Chart(elWaterfall.getContext('2d'), {
+                type: 'bar', plugins: [ChartDataLabels],
+                data: { 
+                    labels: ['Gross Sales', 'COGS', 'Stripe', 'Shipping', 'Warranty', 'Affiliate', 'Ads (CAC)', 'Net Profit'], 
+                    datasets: [{ 
+                        label: 'Financial Flow', 
+                        data: [
+                            {x: 'Gross Sales', y: 0, base: 0},
+                            {x: 'COGS', y: 0, base: 0},
+                            {x: 'Stripe', y: 0, base: 0},
+                            {x: 'Shipping', y: 0, base: 0},
+                            {x: 'Warranty', y: 0, base: 0},
+                            {x: 'Affiliate', y: 0, base: 0},
+                            {x: 'Ads (CAC)', y: 0, base: 0},
+                            {x: 'Net Profit', y: 0, base: 0}
+                        ], 
+                        backgroundColor: ['#10b981', '#8b5cf6', '#06b6d4', '#3b82f6', '#f59e0b', '#facc15', '#ef4444', '#00ff66'], 
+                        borderRadius: 4, barPercentage: 0.8 
+                    }] 
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 30 } }, 
+                    plugins: { 
+                        legend: { display: false }, 
+                        datalabels: {
+                            color: '#fff',
+                            align: 'center',
+                            anchor: 'center',
+                            font: { weight: 'bold' },
+                            formatter: (v) => {
+                                if (!v || typeof v.y === 'undefined' || typeof v.base === 'undefined') return '';
+                                let diff = Math.abs(v.y - v.base);
+                                return diff > 5 ? ceoFmt.format(diff).split('.')[0] : '';
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    let v = ctx.raw;
+                                    if (!v || typeof v.y === 'undefined' || typeof v.base === 'undefined') return '';
+                                    return ceoFmt.format(Math.abs(v.y - v.base));
+                                }
+                            }
+                        }
+                    }, 
+                    scales: { 
+                        y: { grid: {color:'#222'} }, 
+                        x: { grid: { display: false } } 
+                    } 
+                }
+            });
+        } catch (e) {
+            sysLog("Waterfall Init Fault: " + (e.message || e), true);
+        }
+    }
 
     let elExpense = document.getElementById('expenseChart');
     if (elExpense) {
@@ -75,8 +135,8 @@ function initCeoCharts() {
             data: { 
                 labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Net Profit'], 
                 datasets: [
-                    { label: 'Current MSRP', data: [0,0,0,0,0,0,0], backgroundColor: '#555555', borderRadius: 4 },
-                    { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'], borderRadius: 4 }
+                    { label: 'Current MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['rgba(139,92,246,0.3)', 'rgba(239,68,68,0.3)', 'rgba(250,204,21,0.3)', 'rgba(245,158,11,0.3)', 'rgba(59,130,246,0.3)', 'rgba(6,182,212,0.3)', 'rgba(0,255,102,0.3)'], borderRadius: 4 },
+                    { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'], borderRadius: 4 }
                 ] 
             },
             options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
@@ -85,7 +145,7 @@ function initCeoCharts() {
 
     let elUnit = document.getElementById('unitChart');
     if (elUnit) {
-        ceoUnitChart = new Chart(elUnit.getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: '#aaaaaa', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
+        ceoUnitChart = new Chart(elUnit.getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{label: 'Current Net', backgroundColor: 'rgba(0,255,102,0.3)', data: []}, {label: 'Test Net', backgroundColor: '#00ff66', data: []}] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: {color:'#222'} } }, plugins: { legend: { position: 'bottom' } } } });
     }
     const efficiencyOptions = (isCurrent) => ({
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
@@ -152,7 +212,7 @@ function renderCeoTerminal() {
 
     let slidersHtml = controlHtml;
     ceoActiveProducts.forEach((p, index) => {
-        const toggleStyle = (active) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; background: ${active ? 'rgba(0,255,102,0.1)' : 'rgba(255,0,51,0.1)'}; color: ${active ? 'var(--neon-green)' : 'var(--neon-red)'}; margin-right: 4px;`;
+        const toggleStyle = (active, color) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? color : '#444'}; background: ${active ? color+'22' : '#222'}; color: ${active ? color : '#666'}; margin-right: 4px;`;
         
         slidersHtml += `
         <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px; cursor:grab;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
@@ -164,9 +224,9 @@ function renderCeoTerminal() {
                 </div>
             </div>
             <div style="display:flex; margin-bottom: 8px;">
-                <span style="${toggleStyle(p.applyCac)}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
-                <span style="${toggleStyle(p.applyAff)}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
-                <span style="${toggleStyle(p.applyWarr)}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
+                <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
+                <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
+                <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
             </div>
         </div>`;
     });
@@ -310,7 +370,28 @@ function updateCeoEngine() {
         
         let elKpiSaved = document.getElementById('kpiSaved');
         if (elKpiSaved) elKpiSaved.innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
-        
+        // True Profit Waterfall Engine Arithmetic
+        let rem1 = totals.gross - totals.cogs;
+        let rem2 = rem1 - totals.stripe;
+        let rem3 = rem2 - totals.ship;
+        let remWarr = rem3 - totals.warr; 
+        let remAff = remWarr - totals.aff;
+        let rem4 = remAff - totals.cac;
+
+        if(ceoWaterfallChart) {
+            ceoWaterfallChart.data.datasets[0].data = [
+                { x: 'Gross Sales', y: totals.gross, base: 0 },
+                { x: 'COGS', y: totals.gross, base: rem1 },
+                { x: 'Stripe', y: rem1, base: rem2 },
+                { x: 'Shipping', y: rem2, base: rem3 },
+                { x: 'Warranty', y: rem3, base: remWarr },
+                { x: 'Affiliate', y: remWarr, base: remAff },
+                { x: 'Ads (CAC)', y: remAff, base: rem4 },
+                { x: 'Net Profit', y: Math.max(0, totals.testNet), base: 0 }
+            ];
+            ceoWaterfallChart.update();
+        }
+
         // Update Charts
         ceoExpenseChart.data.datasets[0].data = [totals.cogs, totals.cac, totals.curAff, totals.curWarr, totals.ship, totals.curStripe, Math.max(0, totals.curNet)];
         ceoExpenseChart.data.datasets[1].data = [totals.cogs, totals.cac, totals.aff, totals.warr, totals.ship, totals.stripe, Math.max(0, totals.testNet)];
@@ -321,7 +402,7 @@ function updateCeoEngine() {
         ceoUnitChart.data.datasets[1].data = charts.testNetData; 
         ceoUnitChart.update();
 
-        const colors = ['#333', '#ff0033', '#ffcc00', '#ff9900', '#00e5ff', '#aaaaaa', '#00ff66'];
+        const colors = ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'];
         const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
         ceoEfficiencyChart.data.labels = charts.labels;
         ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i] }));
@@ -363,7 +444,7 @@ function openCeoAddModal() {
 }
 
 function renderUnifiedBuilderTable() {
-    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]).sort();
+    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k] && !(productsDB[k] && productsDB[k].is_3d_print) && !(productsDB[k] && productsDB[k].is_label)).sort();
     let html = `<table id="ceoUnifiedBuilderTable" style="width:100%; border-collapse:collapse; font-size:13px;">
         <thead style="position:sticky; top:0; background:var(--bg-panel); z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5);">
             <tr>

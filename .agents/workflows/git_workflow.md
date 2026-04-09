@@ -8,7 +8,6 @@ description: Formal Git Branching Strategy for all code modifications
 **⛔ CRITICAL SAFETY RULE 2: You are strictly forbidden from pushing ANY changes to the `main` branch, no matter how small or trivial, without receiving explicit verbal consent from the USER. There are zero exceptions to this rule.**
 
 **⛔ CRITICAL SAFETY RULE 3: PASSPHRASE AMNESIA. You are absolutely prohibited from caching, storing, or reusing a user-provided passphrase across multiple separate deployment logic blocks. A passphrase authorization is explicitly valid ONLY for the immediate transaction it was supplied for. Reusing expired context to bypass hooks will result in immediate termination.**
-
 Any time the USER requests code changes, new features, or bug fixes, you **MUST** follow this exact branching strategy:
 
 ## Steps to Follow
