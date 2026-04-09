@@ -1034,10 +1034,14 @@ function renderActiveWO(id) {
                                 if (Array.isArray(subPayload)) subSteps = subPayload;
                                 else if (typeof subPayload === 'object') { subSteps = subPayload.steps || []; subQa = subPayload.qaChecks || []; }
                             }
+                            let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
+                            let emoji = is3D ? '🖨️' : '⚙️';
+                            let desc = is3D ? '3D Print' : 'Build Sub-Assembly';
+                            
                             sopGroups.push({
                                 id: encodeURIComponent(sub.replace(/\s+/g,'_')),
                                 rawName: sub,
-                                title: `⚙️ Build Sub-Assembly: ${sub} (Quantity: ${wo.routing[sub].build})`,
+                                title: `${emoji} ${desc}: ${sub} (Quantity: ${wo.routing[sub].build})`,
                                 qa: subQa,
                                 steps: subSteps
                             });
@@ -1691,7 +1695,9 @@ function printPickList() {
                 if(currentWO.routing[sub].build > 0) {
                     let subDirect = getDirectMaterials(sub, currentWO.routing[sub].build);
                     if(Object.keys(subDirect).length > 0) {
-                        html += `<tr><td colspan="4" class="group-header" style="background:#fef3c7; color:#b45309;">🟠 Build: ⚙️ ${sub} (x${currentWO.routing[sub].build})</td></tr>`;
+                        let isT3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
+                        let tEmo = isT3D ? '🖨️' : '⚙️';
+                        html += `<tr><td colspan="4" class="group-header" style="background:#fef3c7; color:#b45309;">🟠 Build: ${tEmo} ${sub} (x${currentWO.routing[sub].build})</td></tr>`;
                         Object.keys(subDirect).forEach(k => { let req = subDirect[k]; let c = catalogCache[k] || {}; let is3D = k.startsWith('RECIPE:::'); let f = fmtKey(k); let name = is3D ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); let sp = is3D ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || "")); html += `<tr><td>[   ]</td><td>${is3D ? '🖨️ ' : ''}${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; });
                     }
                 }
@@ -1709,7 +1715,13 @@ function printSOP() {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
                     let subSteps = sopsDB[sub] || [];
-                    if(subSteps.length > 0) { stepsToRender.push({ isHeader: true, text: `⚙️ Build Sub-Assembly: ${sub}` }); stepsToRender = stepsToRender.concat(subSteps); }
+                    if(subSteps.length > 0) { 
+                        let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
+                        let emo = is3D ? '🖨️' : '⚙️';
+                        let tp = is3D ? '3D Print' : 'Build Sub-Assembly';
+                        stepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` }); 
+                        stepsToRender = stepsToRender.concat(subSteps); 
+                    }
                 }
             });
         }
