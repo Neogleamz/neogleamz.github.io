@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.09.1816"></script>
+    <script src="system-version.js?v=v.2026.04.09.1827"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.09.1816"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.09.1816"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.09.1827"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.09.1827"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.09.1816"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.09.1827"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -144,13 +144,13 @@
             cursor: pointer; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 4px 10px; border-radius: 6px; border: 1px solid transparent; font-family: 'Righteous', sans-serif; font-weight: bold; transition: all 0.2s ease; outline: none; flex-shrink: 0; box-sizing: border-box; width: max-content;
         }
         /* TIER 2: GHOST BUTTONS */
-        .btn-ghost-emerald { color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.1); } .btn-ghost-emerald:hover { background: rgba(16, 185, 129, 0.2); transform: scale(1.02); }
-        .btn-ghost-blue { color: #3b82f6; border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); } .btn-ghost-blue:hover { background: rgba(59, 130, 246, 0.2); transform: scale(1.02); }
-        .btn-ghost-red { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); } .btn-ghost-red:hover { background: rgba(239, 68, 68, 0.2); transform: scale(1.02); }
-        .btn-ghost-brand { color: #f97316; border-color: #f97316; background: rgba(249, 115, 22, 0.1); } .btn-ghost-brand:hover { background: rgba(249, 115, 22, 0.2); transform: scale(1.02); }
-        .btn-ghost-purple { color: #a855f7; border-color: #a855f7; background: rgba(168, 85, 247, 0.1); } .btn-ghost-purple:hover { background: rgba(168, 85, 247, 0.2); transform: scale(1.02); }
-        .btn-ghost-amber { color: #f59e0b; border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); } .btn-ghost-amber:hover { background: rgba(245, 158, 11, 0.2); transform: scale(1.02); }
-        .btn-ghost-slate { color: #64748b; border-color: #cbd5e1; background: transparent; } .btn-ghost-slate:hover { background: #f8fafc; color: #334155; transform: scale(1.02); }
+        .btn-ghost-emerald { color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.25); } .btn-ghost-emerald:hover { background: rgba(16, 185, 129, 0.25); transform: scale(1.02); }
+        .btn-ghost-blue { color: #3b82f6; border-color: #3b82f6; background: rgba(59, 130, 246, 0.25); } .btn-ghost-blue:hover { background: rgba(59, 130, 246, 0.25); transform: scale(1.02); }
+        .btn-ghost-red { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.25); } .btn-ghost-red:hover { background: rgba(239, 68, 68, 0.25); transform: scale(1.02); }
+        .btn-ghost-brand { color: #f97316; border-color: #f97316; background: rgba(249, 115, 22, 0.25); } .btn-ghost-brand:hover { background: rgba(249, 115, 22, 0.25); transform: scale(1.02); }
+        .btn-ghost-purple { color: #a855f7; border-color: #a855f7; background: rgba(168, 85, 247, 0.25); } .btn-ghost-purple:hover { background: rgba(168, 85, 247, 0.25); transform: scale(1.02); }
+        .btn-ghost-amber { color: #f59e0b; border-color: #f59e0b; background: rgba(245, 158, 11, 0.25); } .btn-ghost-amber:hover { background: rgba(245, 158, 11, 0.25); transform: scale(1.02); }
+        .btn-ghost-slate { color: #64748b; border-color: #cbd5e1; background: transparent; } .btn-ghost-slate:hover { background: rgba(100, 116, 139, 0.25); color: #334155; transform: scale(1.02); }
 
         /* TIER 3: FLAT BUTTONS */
         .btn-flat-emerald { color: #10b981; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-emerald:hover { color: #34d399; transform: none; box-shadow: none; }
@@ -454,31 +454,31 @@
            ======================================================== */
            
         /* TIER 1: MUTED (Low Stakes) */
-        .btn-orange-muted { color: #fdba74 !important; background-color: rgba(249, 115, 22, 0.05) !important; border: 1px solid rgba(249, 115, 22, 0.3) !important; filter: brightness(0.8); } .btn-orange-muted:hover { filter: brightness(1); }
-        .btn-blue-muted { color: #93c5fd !important; background-color: rgba(59, 130, 246, 0.05) !important; border: 1px solid rgba(59, 130, 246, 0.3) !important; filter: brightness(0.8); } .btn-blue-muted:hover { filter: brightness(1); }
-        .btn-green-muted { color: #6ee7b7 !important; background-color: rgba(16, 185, 129, 0.05) !important; border: 1px solid rgba(16, 185, 129, 0.3) !important; filter: brightness(0.8); } .btn-green-muted:hover { filter: brightness(1); }
-        .btn-red-muted { color: #fca5a5 !important; background-color: rgba(239, 68, 68, 0.05) !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; filter: brightness(0.8); } .btn-red-muted:hover { filter: brightness(1); }
-        .btn-purple-muted { color: #d8b4fe !important; background-color: rgba(168, 85, 247, 0.05) !important; border: 1px solid rgba(168, 85, 247, 0.3) !important; filter: brightness(0.8); } .btn-purple-muted:hover { filter: brightness(1); }
-        .btn-amber-muted { color: #fcd34d !important; background-color: rgba(245, 158, 11, 0.05) !important; border: 1px solid rgba(245, 158, 11, 0.3) !important; filter: brightness(0.8); } .btn-amber-muted:hover { filter: brightness(1); }
-        .btn-slate-muted { color: #cbd5e1 !important; background-color: rgba(100, 116, 139, 0.05) !important; border: 1px solid rgba(100, 116, 139, 0.3) !important; filter: brightness(0.8); } .btn-slate-muted:hover { filter: brightness(1); }
+        .btn-orange-muted { color: #fdba74 !important; background-color: rgba(249, 115, 22, 0.25) !important; border: 1px solid rgba(249, 115, 22, 0.25) !important; filter: brightness(0.8); } .btn-orange-muted:hover { filter: brightness(1); }
+        .btn-blue-muted { color: #93c5fd !important; background-color: rgba(59, 130, 246, 0.25) !important; border: 1px solid rgba(59, 130, 246, 0.25) !important; filter: brightness(0.8); } .btn-blue-muted:hover { filter: brightness(1); }
+        .btn-green-muted { color: #6ee7b7 !important; background-color: rgba(16, 185, 129, 0.25) !important; border: 1px solid rgba(16, 185, 129, 0.25) !important; filter: brightness(0.8); } .btn-green-muted:hover { filter: brightness(1); }
+        .btn-red-muted { color: #fca5a5 !important; background-color: rgba(239, 68, 68, 0.25) !important; border: 1px solid rgba(239, 68, 68, 0.25) !important; filter: brightness(0.8); } .btn-red-muted:hover { filter: brightness(1); }
+        .btn-purple-muted { color: #d8b4fe !important; background-color: rgba(168, 85, 247, 0.25) !important; border: 1px solid rgba(168, 85, 247, 0.25) !important; filter: brightness(0.8); } .btn-purple-muted:hover { filter: brightness(1); }
+        .btn-amber-muted { color: #fcd34d !important; background-color: rgba(245, 158, 11, 0.25) !important; border: 1px solid rgba(245, 158, 11, 0.25) !important; filter: brightness(0.8); } .btn-amber-muted:hover { filter: brightness(1); }
+        .btn-slate-muted { color: #cbd5e1 !important; background-color: rgba(100, 116, 139, 0.25) !important; border: 1px solid rgba(100, 116, 139, 0.25) !important; filter: brightness(0.8); } .btn-slate-muted:hover { filter: brightness(1); }
 
         /* TIER 2: STANDARD (Default Executions) */
-        .btn-orange { color: #f97316 !important; background-color: rgba(249, 115, 22, 0.1) !important; border: 1px solid #f97316 !important; } .btn-orange:hover { background-color: rgba(249, 115, 22, 0.2) !important; transform: scale(1.02); }
-        .btn-blue { color: #3b82f6 !important; background-color: rgba(59, 130, 246, 0.1) !important; border: 1px solid #3b82f6 !important; } .btn-blue:hover { background-color: rgba(59, 130, 246, 0.2) !important; transform: scale(1.02); }
-        .btn-green { color: #10b981 !important; background-color: rgba(16, 185, 129, 0.1) !important; border: 1px solid #10b981 !important; } .btn-green:hover { background-color: rgba(16, 185, 129, 0.2) !important; transform: scale(1.02); }
-        .btn-red { color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.1) !important; border: 1px solid #ef4444 !important; } .btn-red:hover { background-color: rgba(239, 68, 68, 0.2) !important; transform: scale(1.02); }
-        .btn-purple { color: #a855f7 !important; background-color: rgba(168, 85, 247, 0.1) !important; border: 1px solid #a855f7 !important; } .btn-purple:hover { background-color: rgba(168, 85, 247, 0.2) !important; transform: scale(1.02); }
-        .btn-amber { color: #f59e0b !important; background-color: rgba(245, 158, 11, 0.1) !important; border: 1px solid #f59e0b !important; } .btn-amber:hover { background-color: rgba(245, 158, 11, 0.2) !important; transform: scale(1.02); }
-        .btn-slate { color: #64748b !important; background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid #64748b !important; } .btn-slate:hover { background-color: rgba(100, 116, 139, 0.2) !important; transform: scale(1.02); }
+        .btn-orange { color: #f97316 !important; background-color: rgba(249, 115, 22, 0.25) !important; border: 1px solid #f97316 !important; } .btn-orange:hover { background-color: rgba(249, 115, 22, 0.25) !important; transform: scale(1.02); }
+        .btn-blue { color: #3b82f6 !important; background-color: rgba(59, 130, 246, 0.25) !important; border: 1px solid #3b82f6 !important; } .btn-blue:hover { background-color: rgba(59, 130, 246, 0.25) !important; transform: scale(1.02); }
+        .btn-green { color: #10b981 !important; background-color: rgba(16, 185, 129, 0.25) !important; border: 1px solid #10b981 !important; } .btn-green:hover { background-color: rgba(16, 185, 129, 0.25) !important; transform: scale(1.02); }
+        .btn-red { color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.25) !important; border: 1px solid #ef4444 !important; } .btn-red:hover { background-color: rgba(239, 68, 68, 0.25) !important; transform: scale(1.02); }
+        .btn-purple { color: #a855f7 !important; background-color: rgba(168, 85, 247, 0.25) !important; border: 1px solid #a855f7 !important; } .btn-purple:hover { background-color: rgba(168, 85, 247, 0.25) !important; transform: scale(1.02); }
+        .btn-amber { color: #f59e0b !important; background-color: rgba(245, 158, 11, 0.25) !important; border: 1px solid #f59e0b !important; } .btn-amber:hover { background-color: rgba(245, 158, 11, 0.25) !important; transform: scale(1.02); }
+        .btn-slate { color: #64748b !important; background-color: rgba(100, 116, 139, 0.25) !important; border: 1px solid #64748b !important; } .btn-slate:hover { background-color: rgba(100, 116, 139, 0.25) !important; transform: scale(1.02); }
 
         /* TIER 3: NEON (High Stakes / Major Execution) */
-        .btn-orange-neon { color: #ff983f !important; background-color: rgba(255, 152, 63, 0.15) !important; border: 1px solid #ff983f !important; box-shadow: 0 0 10px rgba(255, 152, 63, 0.4), inset 0 0 5px rgba(255, 152, 63, 0.2) !important; text-shadow: 0 0 5px #ff983f; font-weight: 900 !important; } .btn-orange-neon:hover { background-color: rgba(255, 152, 63, 0.25) !important; transform: scale(1.03); }
-        .btn-blue-neon { color: #60a5fa !important; background-color: rgba(96, 165, 250, 0.15) !important; border: 1px solid #60a5fa !important; box-shadow: 0 0 10px rgba(96, 165, 250, 0.4), inset 0 0 5px rgba(96, 165, 250, 0.2) !important; text-shadow: 0 0 5px #60a5fa; font-weight: 900 !important; } .btn-blue-neon:hover { background-color: rgba(96, 165, 250, 0.25) !important; transform: scale(1.03); }
-        .btn-green-neon { color: #34d399 !important; background-color: rgba(52, 211, 153, 0.15) !important; border: 1px solid #34d399 !important; box-shadow: 0 0 10px rgba(52, 211, 153, 0.4), inset 0 0 5px rgba(52, 211, 153, 0.2) !important; text-shadow: 0 0 5px #34d399; font-weight: 900 !important; } .btn-green-neon:hover { background-color: rgba(52, 211, 153, 0.25) !important; transform: scale(1.03); }
-        .btn-red-neon { color: #ff3333 !important; background-color: rgba(255, 51, 51, 0.15) !important; border: 1px solid #ff3333 !important; box-shadow: 0 0 10px rgba(255, 51, 51, 0.4), inset 0 0 5px rgba(255, 51, 51, 0.2) !important; text-shadow: 0 0 5px #ff3333; font-weight: 900 !important; } .btn-red-neon:hover { background-color: rgba(255, 51, 51, 0.25) !important; transform: scale(1.03); }
-        .btn-purple-neon { color: #c084fc !important; background-color: rgba(192, 132, 252, 0.15) !important; border: 1px solid #c084fc !important; box-shadow: 0 0 10px rgba(192, 132, 252, 0.4), inset 0 0 5px rgba(192, 132, 252, 0.2) !important; text-shadow: 0 0 5px #c084fc; font-weight: 900 !important; } .btn-purple-neon:hover { background-color: rgba(192, 132, 252, 0.25) !important; transform: scale(1.03); }
-        .btn-amber-neon { color: #fbbf24 !important; background-color: rgba(251, 191, 36, 0.15) !important; border: 1px solid #fbbf24 !important; box-shadow: 0 0 10px rgba(251, 191, 36, 0.4), inset 0 0 5px rgba(251, 191, 36, 0.2) !important; text-shadow: 0 0 5px #fbbf24; font-weight: 900 !important; } .btn-amber-neon:hover { background-color: rgba(251, 191, 36, 0.25) !important; transform: scale(1.03); }
-        .btn-slate-neon { color: #94a3b8 !important; background-color: rgba(148, 163, 184, 0.15) !important; border: 1px solid #94a3b8 !important; box-shadow: 0 0 10px rgba(148, 163, 184, 0.4), inset 0 0 5px rgba(148, 163, 184, 0.2) !important; text-shadow: 0 0 5px #94a3b8; font-weight: 900 !important; } .btn-slate-neon:hover { background-color: rgba(148, 163, 184, 0.25) !important; transform: scale(1.03); }
+        .btn-orange-neon { color: #ff983f !important; background-color: rgba(255, 152, 63, 0.25) !important; border: 1px solid #ff983f !important; box-shadow: 0 0 10px rgba(255, 152, 63, 0.25), inset 0 0 5px rgba(255, 152, 63, 0.25) !important; text-shadow: 0 0 5px #ff983f; font-weight: 900 !important; } .btn-orange-neon:hover { background-color: rgba(255, 152, 63, 0.25) !important; transform: scale(1.03); }
+        .btn-blue-neon { color: #60a5fa !important; background-color: rgba(96, 165, 250, 0.25) !important; border: 1px solid #60a5fa !important; box-shadow: 0 0 10px rgba(96, 165, 250, 0.25), inset 0 0 5px rgba(96, 165, 250, 0.25) !important; text-shadow: 0 0 5px #60a5fa; font-weight: 900 !important; } .btn-blue-neon:hover { background-color: rgba(96, 165, 250, 0.25) !important; transform: scale(1.03); }
+        .btn-green-neon { color: #34d399 !important; background-color: rgba(52, 211, 153, 0.25) !important; border: 1px solid #34d399 !important; box-shadow: 0 0 10px rgba(52, 211, 153, 0.25), inset 0 0 5px rgba(52, 211, 153, 0.25) !important; text-shadow: 0 0 5px #34d399; font-weight: 900 !important; } .btn-green-neon:hover { background-color: rgba(52, 211, 153, 0.25) !important; transform: scale(1.03); }
+        .btn-red-neon { color: #ff3333 !important; background-color: rgba(255, 51, 51, 0.25) !important; border: 1px solid #ff3333 !important; box-shadow: 0 0 10px rgba(255, 51, 51, 0.25), inset 0 0 5px rgba(255, 51, 51, 0.25) !important; text-shadow: 0 0 5px #ff3333; font-weight: 900 !important; } .btn-red-neon:hover { background-color: rgba(255, 51, 51, 0.25) !important; transform: scale(1.03); }
+        .btn-purple-neon { color: #c084fc !important; background-color: rgba(192, 132, 252, 0.25) !important; border: 1px solid #c084fc !important; box-shadow: 0 0 10px rgba(192, 132, 252, 0.25), inset 0 0 5px rgba(192, 132, 252, 0.25) !important; text-shadow: 0 0 5px #c084fc; font-weight: 900 !important; } .btn-purple-neon:hover { background-color: rgba(192, 132, 252, 0.25) !important; transform: scale(1.03); }
+        .btn-amber-neon { color: #fbbf24 !important; background-color: rgba(251, 191, 36, 0.25) !important; border: 1px solid #fbbf24 !important; box-shadow: 0 0 10px rgba(251, 191, 36, 0.25), inset 0 0 5px rgba(251, 191, 36, 0.25) !important; text-shadow: 0 0 5px #fbbf24; font-weight: 900 !important; } .btn-amber-neon:hover { background-color: rgba(251, 191, 36, 0.25) !important; transform: scale(1.03); }
+        .btn-slate-neon { color: #94a3b8 !important; background-color: rgba(148, 163, 184, 0.25) !important; border: 1px solid #94a3b8 !important; box-shadow: 0 0 10px rgba(148, 163, 184, 0.25), inset 0 0 5px rgba(148, 163, 184, 0.25) !important; text-shadow: 0 0 5px #94a3b8; font-weight: 900 !important; } .btn-slate-neon:hover { background-color: rgba(148, 163, 184, 0.25) !important; transform: scale(1.03); }
         
         .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
         .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
@@ -3165,7 +3165,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.09.1816"></script>
+    <script src="socialz-module.js?v=v.2026.04.09.1827"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4323,16 +4323,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.09.1816"></script>
-<script src="system-tools-module.js?v=v.2026.04.09.1816"></script>
-<script src="bom-module.js?v=v.2026.04.09.1816"></script>
-<script src="inventory-module.js?v=v.2026.04.09.1816"></script>
-<script src="packerz-module.js?v=v.2026.04.09.1816"></script>
-<script src="production-module.js?v=v.2026.04.09.1816"></script>
-<script src="sales-module.js?v=v.2026.04.09.1816"></script>
-<script src="analytics-module.js?v=v.2026.04.09.1816"></script>
-<script src="ceo-module.js?v=v.2026.04.09.1816"></script>
-<script src="print-module.js?v=v.2026.04.09.1816"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.09.1827"></script>
+<script src="system-tools-module.js?v=v.2026.04.09.1827"></script>
+<script src="bom-module.js?v=v.2026.04.09.1827"></script>
+<script src="inventory-module.js?v=v.2026.04.09.1827"></script>
+<script src="packerz-module.js?v=v.2026.04.09.1827"></script>
+<script src="production-module.js?v=v.2026.04.09.1827"></script>
+<script src="sales-module.js?v=v.2026.04.09.1827"></script>
+<script src="analytics-module.js?v=v.2026.04.09.1827"></script>
+<script src="ceo-module.js?v=v.2026.04.09.1827"></script>
+<script src="print-module.js?v=v.2026.04.09.1827"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4790,18 +4790,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.09.1816"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.09.1827"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.09.1816"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.09.1827"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.09.1816"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.09.1827"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.09.1816"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.09.1816"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.09.1816"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.09.1827"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.09.1827"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.09.1827"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.09.1816"></script>
-    <script src="labelz-module.js?v=v.2026.04.09.1816"></script>
+    <script src="barcodz-module.js?v=v.2026.04.09.1827"></script>
+    <script src="labelz-module.js?v=v.2026.04.09.1827"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-panel); border:1px dashed #f59e0b; border-radius:12px; width:90%; max-width:1200px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
