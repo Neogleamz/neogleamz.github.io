@@ -7,15 +7,15 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟢 Phase 1: Precision & Foundation
 
 ### Target: `epic/stockz-rop-alerts`
-- [ ] `feat/inventory-velocity` : In `inventory-module.js`, calculate daily velocity of filament usage.
-- [ ] `feat/supplier-lead-time` : Hardcode a "Supplier Lead Time" (e.g., 5 days for Amazon Prime).
-- [ ] `feat/rop-warning-banner` : Build a red warning banner that flashes when stock hits `(Velocity * Lead Time) + 10% Safety`.
+- [x] `feat/inventory-velocity` : In `inventory-module.js`, calculate daily velocity of filament usage.
+- [x] `feat/supplier-lead-time` : Hardcode a "Supplier Lead Time" (e.g., 5 days for Amazon Prime).
+- [x] `feat/rop-warning-banner` : Build a red warning banner that flashes when stock hits `(Velocity * Lead Time) + 10% Safety`.
 
 ### Target: `epic/stockz-velocity-dashboard`
-- [ ] `feat/velocityz-button` : Create a "Velocityz" button next to the Low Stockz Report.
-- [ ] `feat/velocity-forecasting-modal` : Build a forecasting modal that visualizes mathematical reorder constraints based on current raw sales velocity.
-- [ ] `feat/velocity-filters` : Add filters to slice and analyze velocity by day, week, and month.
-- [ ] `feat/sandbox-manipulation` : Enable "sandbox" manipulation where users can overwrite sold amounts to forecast hypothetical demand spikes, while strictly retaining the raw real sold velocity data unharmed.
+- [x] `feat/velocityz-button` : Create a "Velocityz" button next to the Low Stockz Report.
+- [x] `feat/velocity-forecasting-modal` : Build a forecasting modal that visualizes mathematical reorder constraints based on current raw sales velocity.
+- [x] `feat/velocity-filters` : Add filters to slice and analyze velocity by day, week, and month.
+- [x] `feat/sandbox-manipulation` : Enable "sandbox" manipulation where users can overwrite sold amounts to forecast hypothetical demand spikes, while strictly retaining the raw real sold velocity data unharmed.
 
 ---
 
