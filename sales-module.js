@@ -430,7 +430,13 @@ async function executeSalesSync(isTestMode = false) {
         }
         // --------------------------------
         
-        const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
+        const dbSafePayload = salesPayload.map(r => {
+            let clone = { ...r };
+            delete clone.isFirstRow;
+            return clone;
+        });
+
+        const { error: e1 } = await supabaseClient.from('sales_ledger').insert(dbSafePayload); 
         if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
         syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
