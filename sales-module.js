@@ -491,10 +491,10 @@ function renderSalesTable() {
         let d = parseFloat(x.discount_amount) || 0;
         
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name) * qty;
-        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE');
+        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
         
         // --- CUSTOM EXCEPTION OVERRIDES ---
-        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') {
+        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
             liveCogs = 0;
         }
         if (isCostOnlyItem) {
@@ -512,7 +512,7 @@ function renderSalesTable() {
                              (s > 0 ? s : SHIP_COST); // All valid items cleanly map actual ship cost to what the customer paid, OR default to flat-rate if Free Shipping
         let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
         
-        if (type === 'IGNORE') {
+        if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
             net = 0;
         } else if (type === 'Pre-Ship Exchange') {
             net += liveCogs; // refund the dynamic COGS that engine deducted
@@ -528,15 +528,32 @@ function renderSalesTable() {
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
     
+    // CALCULATE GHOST REVENUE
+    let voidedRevenueByOrder = {};
+    Object.values(orderGroups).forEach(group => {
+        let voidRev = 0;
+        group.forEach(r => {
+            if (r.transaction_type === 'Cancelled') {
+                let qty = parseFloat(r.qty_sold || 1);
+                let price = parseFloat(r.actual_sale_price || 0);
+                voidRev += (price * qty);
+            }
+        });
+        voidedRevenueByOrder[group[0].order_id] = voidRev;
+    });
+
     // DEDUPLICATE OUTBOUND SHIPPING OVERHEAD FOR MULTI-ITEM ORDERS
     Object.values(orderGroups).forEach(group => {
         let primaryFound = false;
         let refundDeducted = false;
         group.forEach(r => {
             let refAmt = parseFloat(r.refunded_amount) || 0;
-            if (refAmt > 0 && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && !refundDeducted) {
-                r.net -= refAmt;
-                r.exchAdj = (r.exchAdj || 0) - refAmt;
+            let voidedRev = voidedRevenueByOrder[r.order_id] || 0;
+            let actualDeductibleRefund = Math.max(0, refAmt - voidedRev);
+            
+            if (actualDeductibleRefund > 0 && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && !refundDeducted) {
+                r.net -= actualDeductibleRefund;
+                r.exchAdj = (r.exchAdj || 0) - actualDeductibleRefund;
                 refundDeducted = true;
             }
             if (r.transaction_type !== 'Pre-Ship Exchange' && r.transaction_type !== 'Gift') {
