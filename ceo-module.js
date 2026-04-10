@@ -48,6 +48,10 @@ function get30DayVolume(productName) {
     } catch (e) { return 0; }
 }
 
+/**
+ * Automatically populates the CEO simulation board with recent 30-day top-selling retail SKUs.
+ * Skips 3D prints, labels, and subassemblies to ensure only valid customer-facing volume is simulated.
+ */
 function autoPopulateCeoBoard() {
     if (ceoActiveProducts.length > 0) return; 
     let prods = Object.keys(productsDB).filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
@@ -370,6 +374,46 @@ function updateCeoEngine() {
         
         let elKpiSaved = document.getElementById('kpiSaved');
         if (elKpiSaved) elKpiSaved.innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
+
+        // --- LTV & Acquisition Analysis ---
+        if (typeof window._ltvCacheLength === 'undefined') window._ltvCacheLength = -1;
+        if (typeof window._ltvCachedRepeatRate === 'undefined') window._ltvCachedRepeatRate = 0;
+        if (typeof window._ltvCachedAvg === 'undefined') window._ltvCachedAvg = 0;
+
+        if (typeof salesDB !== 'undefined' && Array.isArray(salesDB) && salesDB.length !== window._ltvCacheLength) {
+            let ltvNetSum = 0;
+            let customerHashCounts = {};
+            
+            salesDB.forEach(s => {
+                let qty = parseFloat(s.qty_sold) || 1;
+                let cogs = (typeof getEngineTrueCogs === 'function') ? getEngineTrueCogs(s.internal_recipe_name || s.item_name) * qty : 0;
+                let rev = parseFloat(s.total_received) || 0;
+                let shp = parseFloat(s.shipping_paid) || 0;
+                let stf = (rev * 0.029) + 0.30;
+                let net = rev - (cogs + shp + stf);
+                ltvNetSum += net;
+
+                let h = s.customer_email_hash || s.customer_phone_hash;
+                if (h && h.trim() !== '') {
+                    customerHashCounts[h] = (customerHashCounts[h] || 0) + 1;
+                }
+            });
+            
+            let totalUniqueHashes = Object.keys(customerHashCounts).length;
+            let repeatBuyers = Object.values(customerHashCounts).filter(c => c > 1).length;
+            
+            window._ltvCachedRepeatRate = totalUniqueHashes > 0 ? (repeatBuyers / totalUniqueHashes) * 100 : 0;
+            window._ltvCachedAvg = totalUniqueHashes > 0 ? (ltvNetSum / totalUniqueHashes) : 0;
+            window._ltvCacheLength = salesDB.length;
+        }
+
+        let elKpiRepeat = document.getElementById('kpiRepeatRate');
+        if(elKpiRepeat) elKpiRepeat.innerText = window._ltvCachedRepeatRate.toFixed(1) + "%";
+
+        let elKpiLTV = document.getElementById('kpiAvgLTV');
+        if(elKpiLTV) elKpiLTV.innerText = ceoFmt.format(window._ltvCachedAvg).split('.')[0];
+        // ----------------------------------
+
         // True Profit Waterfall Engine Arithmetic
         let rem1 = totals.gross - totals.cogs;
         let rem2 = rem1 - totals.stripe;

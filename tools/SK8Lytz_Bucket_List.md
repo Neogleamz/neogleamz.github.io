@@ -42,7 +42,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `feat/cfo-waterfall-mapping` : Map Gross Sales → minus COGS → minus Gateway Fees (Shopify takes 2.9% + 30c) → minus Shipping Costs → minus Social Ads.
 
 ### Target: `epic/ltv-cac-metrics`
-- [ ] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
+- [x] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
 - [ ] `feat/cac-adspend-comparison` : Compare total ad spend (Meta/TT) to new customers acquired.
 
 ---
