@@ -38,8 +38,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🔴 Phase 3: The A.I. CFO
 
 ### Target: `epic/cfo-waterfall`
-- [ ] `feat/cfo-waterfall-chart` : In `ceo-module.js` (Chart.js block), build a Waterfall Chart.
-- [ ] `feat/cfo-waterfall-mapping` : Map Gross Sales → minus COGS → minus Gateway Fees (Shopify takes 2.9% + 30c) → minus Shipping Costs → minus Social Ads.
+- [x] `feat/cfo-waterfall-chart` : In `ceo-module.js` (Chart.js block), build a Waterfall Chart.
+- [x] `feat/cfo-waterfall-mapping` : Map Gross Sales → minus COGS → minus Gateway Fees (Shopify takes 2.9% + 30c) → minus Shipping Costs → minus Social Ads.
 
 ### Target: `epic/ltv-cac-metrics`
 - [ ] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
