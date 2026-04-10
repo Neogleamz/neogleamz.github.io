@@ -411,9 +411,6 @@ async function executeSalesSync(isTestMode = false) {
 
         syncTrace(`Injecting aggregated Sales Ledger objects to network array...`);
         
-        // Ensure payload is rigorously cleansed of localized footprints before visual or database injection
-        salesPayload.forEach(r => delete r.isFirstRow);
-        
         // --- DRY RUN SANDBOX OVERRIDE ---
         if (isTestMode) {
             syncTrace(`🧪 SANDBOX INTERCEPT: Supabase connection physically bypassed.`, true);
@@ -541,7 +538,6 @@ function renderSalesTable() {
 
     // DEDUPLICATE OUTBOUND SHIPPING OVERHEAD FOR MULTI-ITEM ORDERS
     Object.values(orderGroups).forEach(group => {
-        let primaryFound = false;
         let refundDeducted = false;
         group.forEach(r => {
             let refAmt = parseFloat(r.refunded_amount) || 0;
@@ -554,9 +550,7 @@ function renderSalesTable() {
                 refundDeducted = true;
             }
             if (r.transaction_type !== 'Pre-Ship Exchange' && r.transaction_type !== 'Gift' && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && r.transaction_type !== 'NEEDS ATTENTION') {
-                if (!primaryFound) {
-                    primaryFound = true;
-                } else {
+                if (r.isFirstRow === false) {
                     // Refund the redundant standalone SHIP_COST from secondary items sharing the box ONLY if it was forced by the algorithm
                     if (r.actualShipCost === (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00)) {
                         r.net += r.actualShipCost;
