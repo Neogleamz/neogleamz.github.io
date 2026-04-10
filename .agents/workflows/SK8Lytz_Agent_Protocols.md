@@ -108,5 +108,5 @@ stateDiagram-v2
 1. **The Anti-Hallucination Rule**: I cannot invent payloads or guess behavior. If it involves BLE hardware or DB queries, I must verify against the Master Reference and show the math.
 2. **The Boy Scout Rule**: Every file I touch leaves with at least one minor, zero-risk technical debt improvement.
 3. **Semantic Commits**: All automated check-ins follow strict `type(scope): subject` structures.
-4. **Browser-First Responsive**: UI tasks will prioritize web portals, implementing css-grid/flexbox units, while retaining mobile web touch targets (44x44).
+4. **Browser-First Responsive**: UI tasks will prioritize web portals, implementing css-grid/flexbox units, while retaining mobile web touch targets (44x44). **However, 44x44 structures MUST be exclusively bound inside CSS @media (max-width: 768px) breakpoints. NEVER inject 44px bounds globally via inline HTML style= attributes, as this destroys dense desktop layouts.**
 5. **Supabase Sync**: If I touch the DB, I automatically trigger `generate_typescript_types` to keep the frontend types aligned.

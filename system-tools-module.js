@@ -1477,3 +1477,139 @@ window.openGlobalRegexPlayground = function(type) {
     }
 };
 
+
+
+// ==================== PAPER PROFILES MGR ====================
+window.activePaperProfiles = [
+    { n: 'Dymo 2.25" x 1.25"', w: 2.25, h: 1.25 },
+    { n: 'Dymo Address 1.125" x 3.5"', w: 3.5, h: 1.125 },
+    { n: 'Dymo Return 0.75" x 2"', w: 2, h: 0.75 },
+    { n: 'Dymo Multi 2.125" x 1"', w: 2.125, h: 1 },
+    { n: 'Square 1.0" x 1.0"', w: 1, h: 1 },
+    { n: 'Standard 3.0" x 1.0"', w: 3, h: 1 },
+    { n: 'Shipping 4.0" x 6.0"', w: 4, h: 6 },
+    { n: 'A4 Sheet List', w: 8.5, h: 11 }
+];
+
+async function loadPaperProfiles() {
+    try {
+        const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'paper_profiles').single();
+        if (data && data.setting_value) {
+            window.activePaperProfiles = data.setting_value;
+        } else {
+            await savePaperProfiles(false);
+        }
+    } catch(e) {
+        console.warn("No paper profiles cloud config found. Initializing defaults.");
+    }
+    renderPaperProfileTable();
+    renderPaperProfileDropdowns();
+}
+
+async function savePaperProfiles(silent = false) {
+    if (!silent) setMasterStatus("Saving Papers...", "mod-working");
+    try {
+        await supabaseClient.from('app_settings').upsert({ setting_key: 'paper_profiles', setting_value: window.activePaperProfiles });
+        if (!silent) {
+            setMasterStatus("Profiles Saved!", "mod-success");
+            setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
+            renderPaperProfileDropdowns();
+        }
+    } catch(e) {
+        if (!silent) setMasterStatus("Error Saving", "mod-error");
+    }
+}
+
+let editingPaperIdx = -1;
+
+function renderPaperProfileTable() {
+    const tbody = document.getElementById('paperProfileTableBody');
+    if (!tbody) return;
+    let h = '';
+    window.activePaperProfiles.forEach((p, idx) => {
+        if (editingPaperIdx === idx) {
+             h += `<tr>`;
+             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"><input type="text" id="inlineEditN_${idx}" value="${p.n.replace(/"/g, '&quot;')}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;"></td>`;
+             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"><input type="number" id="inlineEditW_${idx}" value="${p.w}" style="width:60px; padding:4px; font-size:12px; text-align:right; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;"></td>`;
+             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"><input type="number" id="inlineEditH_${idx}" value="${p.h}" style="width:60px; padding:4px; font-size:12px; text-align:right; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;"></td>`;
+             h += `<td style="padding:10px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1);">
+                      <div style="display:flex; justify-content:center; gap:6px;">
+                          <button class="btn-green btn-action-dense" style="display:flex; justify-content:center; align-items:center;" onclick="saveInlineEditPaper(${idx})">SAVE</button>
+                      </div>
+                   </td>`;
+             h += `</tr>`;
+        } else {
+             h += `<tr>`;
+             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1); font-weight:bold;">${p.n}</td>`;
+             h += `<td style="padding:10px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.1);">${p.w}"</td>`;
+             h += `<td style="padding:10px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.1);">${p.h}"</td>`;
+             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);">
+                      <div style="display:flex; justify-content:center; gap:6px;">
+                          <button class="btn-ghost-base btn-ghost-brand btn-action-dense" style="display:flex; justify-content:center; align-items:center;" onclick="editPaperProfile(${idx})">✏️</button>
+                          <button class="btn-red-muted btn-action-dense" style="display:flex; justify-content:center; align-items:center;" onclick="deletePaperProfile(${idx})">🗑️</button>
+                      </div>
+                   </td>`;
+             h += `</tr>`;
+        }
+    });
+    tbody.innerHTML = h;
+}
+
+function editPaperProfile(idx) {
+    editingPaperIdx = idx;
+    renderPaperProfileTable();
+}
+
+function saveInlineEditPaper(idx) {
+    const n = document.getElementById(`inlineEditN_${idx}`).value.trim();
+    const w = parseFloat(document.getElementById(`inlineEditW_${idx}`).value);
+    const h = parseFloat(document.getElementById(`inlineEditH_${idx}`).value);
+    if (!n || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return alert('Invalid paper dimensions.');
+    
+    window.activePaperProfiles[idx] = { n, w, h };
+    editingPaperIdx = -1;
+    renderPaperProfileTable();
+    savePaperProfiles(false);
+}
+
+function addPaperProfile() {
+    const n = document.getElementById('newPaperName').value.trim();
+    const w = parseFloat(document.getElementById('newPaperW').value);
+    const h = parseFloat(document.getElementById('newPaperH').value);
+    if (!n || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return alert('Invalid paper dimensions.');
+    
+    window.activePaperProfiles.push({ n, w, h });
+    
+    document.getElementById('newPaperName').value = '';
+    document.getElementById('newPaperW').value = '';
+    document.getElementById('newPaperH').value = '';
+    renderPaperProfileTable();
+    savePaperProfiles(false);
+}
+
+function deletePaperProfile(idx) {
+    if(!confirm("Delete this Paper Profile?")) return;
+    window.activePaperProfiles.splice(idx, 1);
+    renderPaperProfileTable();
+    savePaperProfiles(false);
+}
+
+function renderPaperProfileDropdowns() {
+    const lists = ['barcodzSizeSelect', 'labelzSizeSelect', 'labelzDesignerSize'];
+    lists.forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        let pValStr = sel.value; 
+        let pName = "";
+        try { pName = JSON.parse(pValStr).n; } catch(e) {}
+        
+        let h = '';
+        window.activePaperProfiles.forEach(p => {
+            let jsonStr = JSON.stringify(p).replace(/"/g, '&quot;');
+            let selStr = p.n === pName ? ' selected' : '';
+            h += `<option value="${jsonStr}"${selStr}>${p.n}</option>`;
+        });
+        sel.innerHTML = h;
+    });
+}
+// ============================================================

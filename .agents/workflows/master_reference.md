@@ -31,6 +31,11 @@ When adding action buttons across the software, you MUST adhere to the global 6-
 - Dashboard cards MUST use the `.kpi-row` hierarchy structurally. DO NOT apply arbitrary text-colors to primary metric quantities (use `var(--text-heading)`).
 - Kanban active selections must cast a full geometric outline around the object ensuring "deselected" items still maintain their underlying dark shadow depths.
 
+
+### Dynamic Paper Profiles & Canvas Rendering
+- **No Hardcoded Dimensions:** Avoid hardcoded if/else logic for physical paper media. The global pp_settings : paper_profiles mapped to window.activePaperProfiles serves as the absolute source of truth.
+- **Dynamic Geometry:** Canvas elements and @page rules must generate geometry dynamically by parsing the dimensional structure stored in the associated profile configuration. 
+
 ### SOP Editor Standardization Framework
 - All command buttons must be anchored strictly to the **top-right** corner of their respective container or modal header.
 - ALL checklist previews MUST utilize the global `parseProductionTelemetryLine` logic to process `# Headers`, `> Subtext`, `[INPUT]`, `[SCAN]`, `[IMG]`, `[BARCODE]`, and `[QR]` tokens.

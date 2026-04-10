@@ -218,32 +218,20 @@ function handleLabelzKeyboard(e) {
     }
 }
 
-function parseSize(sizeStr) {
-    if(!sizeStr || sizeStr === 'custom') return {w: 2.25, h: 1.25};
-    let parts = sizeStr.toLowerCase().split('x');
-    if(parts.length !== 2) return {w: 2.25, h: 1.25};
-    return {w: parseFloat(parts[0]), h: parseFloat(parts[1])};
-}
-
 function updateLabelCanvasSize() {
     if (!fCanvas) initFabricCanvas();
-    let sizeStr = document.getElementById('labelzDesignerSize').value;
-    if(sizeStr === 'custom') {
-        let cw = parseFloat(prompt('Width in inches:', '2.25'));
-        let ch = parseFloat(prompt('Height in inches:', '1.25'));
-        if(isNaN(cw) || isNaN(ch)) return alert('Invalid dimensions');
-        document.getElementById('labelzDesignerSize').options[document.getElementById('labelzDesignerSize').selectedIndex].text = `Custom ${cw}" x ${ch}"`;
-        sizeStr = `${cw}x${ch}`;
-        document.getElementById('labelzDesignerSize').value = 'custom';
-        document.getElementById('labelzDesignerSize').dataset.customSize = sizeStr;
-    } else {
-        document.getElementById('labelzDesignerSize').dataset.customSize = sizeStr;
-    }
     
-    let {w, h} = parseSize(document.getElementById('labelzDesignerSize').dataset.customSize);
+    let sizeStr = document.getElementById('labelzDesignerSize').value;
+    let pObj = {w: 2.25, h: 1.25};
+    try { pObj = JSON.parse(sizeStr); } catch(e) {}
+    
+    let pxWidth = pObj.w * PPI;
+    let pxHeight = pObj.h * PPI;
+    
+    // Store active metadata back so print engine knows
+    document.getElementById('labelzDesignerSize').dataset.customSize = `${pObj.w}x${pObj.h}`;
 
-    let pxWidth = w * PPI;
-    let pxHeight = h * PPI;
+
 
     fCanvas.setWidth(pxWidth);
     fCanvas.setHeight(pxHeight);
