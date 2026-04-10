@@ -411,6 +411,9 @@ async function executeSalesSync(isTestMode = false) {
 
         syncTrace(`Injecting aggregated Sales Ledger objects to network array...`);
         
+        // Ensure payload is rigorously cleansed of localized footprints before visual or database injection
+        salesPayload.forEach(r => delete r.isFirstRow);
+        
         // --- DRY RUN SANDBOX OVERRIDE ---
         if (isTestMode) {
             syncTrace(`🧪 SANDBOX INTERCEPT: Supabase connection physically bypassed.`, true);
@@ -430,13 +433,7 @@ async function executeSalesSync(isTestMode = false) {
         }
         // --------------------------------
         
-        const dbSafePayload = salesPayload.map(r => {
-            let clone = { ...r };
-            delete clone.isFirstRow;
-            return clone;
-        });
-
-        const { error: e1 } = await supabaseClient.from('sales_ledger').insert(dbSafePayload); 
+        const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
         if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
         syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
