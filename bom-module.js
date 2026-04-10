@@ -158,11 +158,7 @@ let productDraggedName = null;
 
 function renderProductList() { 
     try {
-        const labelsToClean = [
-            'Dymo 2.25" x 1.25"', 'Dymo Address 1.125" x 3.5"', 'Dymo Return 0.75" x 2"',
-            'Dymo Multi 2.125" x 1"', 'Square 1.0" x 1.0"', 'Standard 3.0" x 1.0"',
-            'Shipping 4.0" x 6.0"', 'A4 Sheet List'
-        ];
+        const labelsToClean = window.activePaperProfiles ? window.activePaperProfiles.map(p => p.n) : [];
         labelsToClean.forEach(lbl => {
             if (productsDB[lbl]) {
                 delete productsDB[lbl];
