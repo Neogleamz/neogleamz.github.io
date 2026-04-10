@@ -12,7 +12,7 @@ const newVersion = `v.${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.
 function updateSystemVersion() {
   const content = fs.readFileSync(versionFile, 'utf8');
   const updated = content.replace(/const\s+NEOGLEAMZ_VERSION\s*=\s*".*?";/, `const NEOGLEAMZ_VERSION = "${newVersion}";`);
-  if (content === updated) throw new Error('Unable to find NEOGLEAMZ_VERSION line in system-version.js');
+  if (!content.includes('NEOGLEAMZ_VERSION')) throw new Error('Unable to find NEOGLEAMZ_VERSION line in system-version.js');
   fs.writeFileSync(versionFile, updated, 'utf8');
 }
 
