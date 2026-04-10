@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const root = path.resolve(__dirname);
+const root = path.resolve(__dirname, '..');
 const versionFile = path.join(root, 'system-version.js');
 const indexFile = path.join(root, 'index.html');
 

@@ -4,7 +4,8 @@
   "description": "",
   "main": "analytics-module.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "version:bump": "node scripts/bump-system-version.js"
   },
   "repository": {
     "type": "git",
