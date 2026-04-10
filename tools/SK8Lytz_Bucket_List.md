@@ -22,12 +22,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 Phase 2: Logistics & Tracking
 
 ### Target: `epic/shopify-sync-v2`
-- [ ] `chore/deprecate-file-readers` : Strip out the `SheetJS (XLSX)` parsing functions hitting `NEWORDERS.xlsx` and `ShopifySales.csv` currently sitting inside `sales-module.js` and `system-tools-module.js`.
 - [x] `feat/auth-app-security` : Auth & App Security
 - [x] `feat/orders-create-hook` : `orders/create` Inbound Edge Function
 - [x] `feat/payload-normalization` : Payload Normalization
 - [x] `feat/idempotent-db-insert` : Idempotent Database Insert
-- [ ] `feat/reverse-fulfillment-push` : Build an outbound API hook triggered directly from `NEXUZ`. When a packer clicks "Mark as Fulfilled", fire a specialized Edge Function that runs a `POST /admin/api/2023-10/orders/{order_id}/fulfillments.json` back to Shopify, passing the tracking number and carrier name so Shopify emails the customer automatically.
 - [ ] `feat/bidirectional-hw-deduction` : Ensure the successful order insert triggers the STOCKZ Bill of Materials logic instantly upon creation, dynamically subtracting raw filament/hardware from the system the second a customer checks out.
 
 ### Target: `epic/dim-weight-router`
