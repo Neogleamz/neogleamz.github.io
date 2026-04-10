@@ -26,10 +26,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `feat/orders-create-hook` : `orders/create` Inbound Edge Function
 - [x] `feat/payload-normalization` : Payload Normalization
 - [x] `feat/idempotent-db-insert` : Idempotent Database Insert
-- [ ] `feat/bidirectional-hw-deduction` : Ensure the successful order insert triggers the STOCKZ Bill of Materials logic instantly upon creation, dynamically subtracting raw filament/hardware from the system the second a customer checks out.
 
 ### Target: `epic/dim-weight-router`
-- [ ] `feat/log-physical-dims` : Log physical dimensions (L x W x H) for every finished board config.
 - [ ] `feat/dim-weight-script` : Write a script that checks USPS Ground Advantage vs UPS Priority based on the `(L*W*H) / DIM Divisor` formula.
 - [ ] `feat/cheapest-carrier-ui` : Visually highlight the cheapest carrier for the warehouse packer.
 
