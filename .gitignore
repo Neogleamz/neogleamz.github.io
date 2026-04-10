@@ -23,3 +23,6 @@ supabase/.branches/
 *.sln
 *.sw?
 .DS_Store
+
+# Prevent CSV exports from uploading
+*.csv

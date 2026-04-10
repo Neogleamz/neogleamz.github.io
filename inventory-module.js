@@ -131,6 +131,41 @@ function renderFgiTable() {
     wrap.innerHTML = h; applyTableInteractivity('fgiTableWrap');
 }
 
+const SUPPLIER_LEAD_TIME_DAYS = 5;
+const SAFETY_STOCK_MULTIPLIER = 1.10;
+
+window.calculateTrailingVelocity = function(item_key, days=30) {
+    if (typeof salesDB === 'undefined' || salesDB.length === 0) return 0;
+    let cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    
+    let totalQty = 0;
+    salesDB.forEach(s => {
+        let rawDate = s.sale_date || s['Created at'] || s['Date'] || new Date().toISOString();
+        let sDate = new Date(rawDate);
+        if (isNaN(sDate.getTime())) return;
+        
+        let type = s.transaction_type;
+        if (sDate >= cutoff && type !== 'Refund' && type !== 'Return') {
+            let pName = s.internal_recipe_name;
+            let qty = parseFloat(s.qty_sold) || parseFloat(s['Lineitem quantity']) || 1;
+            
+            if (pName && productsDB[pName]) {
+                if (item_key === `RECIPE:::${pName}`) {
+                    totalQty += qty;
+                } else if (typeof getRawMaterials === 'function') {
+                    let required = getRawMaterials(pName, qty);
+                    if (required[item_key]) {
+                        totalQty += required[item_key];
+                    }
+                }
+            }
+        }
+    });
+
+    return totalQty / days;
+};
+
 function renderInventoryTable() {
     const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
     renderFgiTable();
@@ -140,7 +175,20 @@ function renderInventoryTable() {
     if(a.length===0){ h += "<tr><td colspan='12' style='text-align:center;'>No raw inventory.</td></tr>"; }
     else {
         a.sort((x,y) => { let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
-        a.forEach(x => { let isLow = x.ms > 0 && x.s < x.ms; let sc = x.s<0 ? 'negative-stock' : (isLow ? 'low-stock' : 'highlight-calc'); let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td><td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'consumed_qty')">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'prototype_consumed_qty')">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'production_consumed_qty')">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#b91c1c;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'scrap_qty')">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'manual_adjustment')">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable" style="color:#f97316;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; });
+        a.forEach(x => { 
+            let vel = window.calculateTrailingVelocity(x.k, 30);
+            let dynamicROP = vel > 0 ? (vel * SUPPLIER_LEAD_TIME_DAYS) * SAFETY_STOCK_MULTIPLIER : 0;
+            // Use MS as fallback, but if ROP is higher, that is critical baseline
+            let finalTarget = Math.max(x.ms, dynamicROP);
+            
+            let isLow = finalTarget > 0 && x.s <= finalTarget; 
+            let sc = x.s<0 ? 'negative-stock' : (isLow ? 'low-stock' : 'highlight-calc'); 
+            let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); 
+            
+            let ropPill = (dynamicROP > 0 && isLow) ? `<span style="background:#ef4444; color:#fff; border-radius:12px; font-size:10px; padding:1px 6px; font-weight:bold; margin-left:8px; animation: ropPulse 1.5s infinite;">🚨 ROP: ${dynamicROP.toFixed(1).replace(/\.?0+$/,'')}</span>` : '';
+            
+            h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn} ${ropPill}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td><td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'consumed_qty')">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'prototype_consumed_qty')">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'production_consumed_qty')">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#b91c1c;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'scrap_qty')">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'manual_adjustment')">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable" style="color:#f97316;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; 
+        });
     }
     wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('invTableWrap');
 }
@@ -418,3 +466,261 @@ function printReorderReport() {
         html += `</body></html>`; let win = window.open('', '', 'width=900,height=700'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
     } catch (e) { sysLog(e.message, true); }
 }
+
+// ========================================================
+
+// ========================================================
+// ========================================================
+// ========================================================
+// ========================================================
+// ========================================================
+// VELOCITYZ FORECASTING & ROP MODAL LOGIC
+// ========================================================
+let velocityzState = {};
+window.velocityzTreeState = window.velocityzTreeState || {};
+
+window.openVelocityzModal = function() {
+    let matrixInput = document.getElementById('velocityzMatrixDays');
+    let multiInput = document.getElementById('velocityzMultiplier');
+    if(matrixInput) matrixInput.value = 30;
+    if(multiInput) multiInput.value = 1.0;
+    
+    window.recomputeVelocityzBaseline();
+    document.getElementById('velocityzModal').style.display = 'flex';
+};
+
+window.recomputeVelocityzBaseline = function() {
+    let matrixInput = document.getElementById('velocityzMatrixDays');
+    let multiInput = document.getElementById('velocityzMultiplier');
+    let matrixDays = matrixInput ? parseFloat(matrixInput.value) : 30;
+    let multiplier = multiInput ? parseFloat(multiInput.value) : 1.0;
+    
+    if (isNaN(matrixDays) || matrixDays < 1) matrixDays = 30;
+    if (isNaN(multiplier) || multiplier <= 0) multiplier = 1.0;
+
+    velocityzState = {};
+
+    if (typeof salesDB !== 'undefined' && salesDB.length > 0) {
+        let baselineCutoff = new Date();
+        baselineCutoff.setDate(baselineCutoff.getDate() - 30);
+        
+        let matrixCutoff = new Date();
+        matrixCutoff.setDate(matrixCutoff.getDate() - matrixDays);
+        
+        salesDB.forEach(s => {
+            let rawDate = s.sale_date || s['Created at'] || s['Date'] || new Date().toISOString();
+            let saleDate = new Date(rawDate);
+            if (isNaN(saleDate.getTime())) return;
+
+            let type = s.transaction_type;
+            if (type !== 'Refund' && type !== 'Return' && type !== 'IGNORE' && type !== 'Pre-Ship Exchange') {
+                let pName = s.internal_recipe_name;
+                let qtySold = parseFloat(s.qty_sold) || parseFloat(s['Lineitem quantity']) || 1;
+                
+                if (pName && productsDB[pName]) {
+                    if (!velocityzState[pName]) {
+                        velocityzState[pName] = { baselineDaily: 0, matrixDaily: 0, forecastQty: 0 };
+                    }
+                    
+                    if (saleDate >= baselineCutoff) {
+                        velocityzState[pName].baselineDaily += (qtySold / 30);
+                    }
+                    if (saleDate >= matrixCutoff) {
+                        velocityzState[pName].matrixDaily += (qtySold / matrixDays);
+                    }
+                }
+            }
+        });
+    }
+
+    // Only compute forecasts for items that actually have valid FGI sales data
+    Object.keys(velocityzState).forEach(pName => {
+        let customTotal = velocityzState[pName].matrixDaily * matrixDays * multiplier;
+        velocityzState[pName].forecastQty = Math.ceil(customTotal);
+    });
+
+    window.renderVelocityzFGI();
+    window.runVelocityzExplosion();
+};
+
+window.closeVelocityzModal = function() {
+    document.getElementById('velocityzModal').style.display = 'none';
+};
+
+window.resetVelocityzForecast = function() {
+    let matrixInput = document.getElementById('velocityzMatrixDays');
+    let multiInput = document.getElementById('velocityzMultiplier');
+    if(matrixInput) matrixInput.value = 30;
+    if(multiInput) multiInput.value = 1.0;
+
+    window.velocityzTreeState = {}; // Fold everything back up
+    window.recomputeVelocityzBaseline();
+};
+
+window.updateVelocityzForecast = function(pName, val) {
+    let parsed = parseFloat(val);
+    if (isNaN(parsed) || parsed < 0) parsed = 0;
+    if (velocityzState[pName]) {
+        velocityzState[pName].forecastQty = parsed;
+        window.runVelocityzExplosion();
+    }
+};
+
+window.renderVelocityzFGI = function() {
+    let tbody = document.getElementById('velocityzFgiList');
+    if (!tbody) return;
+    
+    let html = '';
+    let keys = Object.keys(velocityzState).sort();
+    
+    if (keys.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">No FGI history found.</td></tr>';
+        return;
+    }
+
+    let matrixInput = document.getElementById('velocityzMatrixDays');
+    let multiInput = document.getElementById('velocityzMultiplier');
+    let matrixDays = matrixInput ? parseFloat(matrixInput.value) || 30 : 30;
+    let multiplier = multiInput ? parseFloat(multiInput.value) || 1.0 : 1.0;
+
+    keys.forEach(pName => {
+        let st = velocityzState[pName];
+        let bDaily = st.baselineDaily;
+        let mDaily = st.matrixDaily;
+        let mTotal = mDaily * matrixDays * multiplier;
+        
+        let is3D = !!(productsDB[pName] && productsDB[pName].is_3d_print);
+        let isLabel = !!(productsDB[pName] && productsDB[pName].is_label);
+        let isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]);
+        let icn = is3D ? "🖨️" : (isLabel ? "🏷️" : (isSub ? "⚙️" : "📦"));
+        
+        html += `<tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="font-weight: bold; color: var(--text-heading); display: flex; align-items: center; gap: 6px;">
+                <span>${icn}</span> <span>${pName}</span>
+            </td>
+            <td class="text-right" style="color: var(--text-muted);">${bDaily.toFixed(2).replace(/\.?0+$/,'')}</td>
+            <td class="text-right" style="color: #10b981; font-weight: bold;">${mDaily.toFixed(2).replace(/\.?0+$/,'')}</td>
+            <td class="text-right" style="color: #8b5cf6; font-weight: bold;">${mTotal.toFixed(1).replace(/\.?0+$/,'')}</td>
+            <td class="text-right">
+                <input type="number" min="0" value="${st.forecastQty}" 
+                       oninput="window.updateVelocityzForecast('${pName.replace(/'/g, "\\'")}', this.value)" 
+                       style="width: 70px; text-align: right; background: var(--bg-input); border: 1px solid #f59e0b; color: #f59e0b; font-weight: bold; padding: 4px;">
+            </td>
+        </tr>`;
+    });
+    
+    tbody.innerHTML = html;
+};
+
+window.buildVelocityzTreeHTML = function(pName, reqQty, isRoot = false, idPath = "") {
+    let recipe = productsDB[pName] || [];
+    if (recipe.length === 0) {
+        if (isRoot) return `<div style="padding: 15px; color: #ef4444; font-size: 12px; font-weight: bold; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-top: 10px;">⚠️ No Bill of Materials (Recipe) defined for this product in the catalog.</div>`;
+        return "";
+    }
+    
+    let html = `<ul style="list-style-type:none; padding-left: ${isRoot ? '0' : '20px'}; border-left: ${isRoot ? 'none' : '1px dashed var(--border-color)'}; margin: ${isRoot ? '0' : '5px 0 0 10px'};">`;
+    
+    recipe.forEach(comp => {
+        let subK = comp.item_key || comp.di_item_id || comp.name;
+        let qPer = parseFloat(comp.quantity || comp.qty) || 1;
+        let totalReq = qPer * reqQty;
+        
+        let isProd = subK.startsWith('RECIPE:::');
+        let displayName = subK;
+        
+        if (isProd) {
+            let s = subK.replace('RECIPE:::', '');
+            let is3D = !!(productsDB[s] && productsDB[s].is_3d_print);
+            let isLabel = !!(productsDB[s] && productsDB[s].is_label);
+            let isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[s]);
+            let icn = is3D ? "🖨️ " : (isLabel ? "🏷️ " : (isSub ? "⚙️ " : "📦 "));
+            displayName = icn + s;
+            
+            let childId = idPath + '_' + s.replace(/\W/g, '_');
+            let childHtml = window.buildVelocityzTreeHTML(s, totalReq, false, childId);
+            
+            if (childHtml) {
+                let isOpen = window.velocityzTreeState && window.velocityzTreeState[childId] ? "open" : "";
+                html += `<li style="margin-bottom: 8px;">
+                    <details id="${childId}" ${isOpen}>
+                        <summary style="cursor: pointer; display: inline-flex; align-items: center; user-select: none;">
+                            <span style="font-weight: bold; color: var(--text-heading); font-size: 13px;">${displayName}</span>
+                            <span style="background: var(--bg-panel); color: #f97316; font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 12px; border: 1px solid #f97316; margin-left: 10px;">${totalReq.toFixed(2).replace(/\.?0+$/,'')}</span>
+                        </summary>
+                        ${childHtml}
+                    </details>
+                </li>`;
+            } else {
+                html += `<li style="margin-bottom: 5px; padding: 4px 0; display: flex; align-items: center;">
+                    <span style="color: var(--text-heading); font-size: 13px;">${displayName}</span>
+                    <span style="color: #f97316; font-size: 12px; font-weight: bold; margin-left: auto;">${totalReq.toFixed(2).replace(/\.?0+$/,'')}</span>
+                </li>`;
+            }
+        } else {
+            let c = typeof catalogCache !== 'undefined' ? catalogCache[subK] : null;
+            if (c) displayName = '🧵 ' + (c.neoName || c.itemName);
+            else displayName = '🧵 ' + subK;
+            
+            html += `<li style="margin-bottom: 5px; padding: 4px 0; display: flex; align-items: center;">
+                <span style="color: var(--text-muted); font-size: 13px;">${displayName}</span>
+                <span style="color: #0ea5e9; font-size: 12px; font-weight: bold; margin-left: auto;">${totalReq.toFixed(2).replace(/\.?0+$/,'')}</span>
+            </li>`;
+        }
+    });
+    
+    html += `</ul>`;
+    return html;
+};
+
+window.runVelocityzExplosion = function() {
+    let outContainer = document.getElementById('velocityzBOMList');
+    if (!outContainer) return;
+
+    window.velocityzTreeState = window.velocityzTreeState || {};
+    outContainer.querySelectorAll('details').forEach(det => {
+        if (det.id) {
+            window.velocityzTreeState[det.id] = det.hasAttribute('open');
+        }
+    });
+
+    let html = '';
+    let hasData = false;
+
+    Object.keys(velocityzState).forEach(pName => {
+        let fcast = velocityzState[pName].forecastQty;
+        if (fcast > 0) {
+            hasData = true;
+            let rootId = 'vel_rt_' + pName.replace(/\W/g, '_');
+            
+            let is3D = !!(productsDB[pName] && productsDB[pName].is_3d_print);
+            let isLabel = !!(productsDB[pName] && productsDB[pName].is_label);
+            let isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]);
+            let icn = is3D ? "🖨️ " : (isLabel ? "🏷️ " : (isSub ? "⚙️ " : "📦 "));
+            let typeTag = is3D ? "3D PRINT" : (isLabel ? "CUSTOM LABEL" : (isSub ? "SUB-ASSEMBLY" : "RETAIL GOOD"));
+
+            let treeHtml = window.buildVelocityzTreeHTML(pName, fcast, true, rootId);
+            
+            let isOpen = window.velocityzTreeState[rootId] ? "open" : "";
+            
+            html += `<div style="background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px var(--shadow-color);">
+                <details id="${rootId}" ${isOpen}>
+                    <summary style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 5px;">
+                        <span style="font-weight: 900; color: #f97316; font-size: 16px; text-transform: uppercase; display: flex; align-items: center;">
+                            ${icn} ${pName} 
+                            <span style="font-size: 10px; margin-left: 10px; padding: 2px 6px; background: rgba(0,0,0,0.2); border-radius: 4px; border: 1px solid #f97316; color: #f97316;">${typeTag}</span>
+                        </span>
+                        <span style="background: rgba(249, 115, 22, 0.1); color: #f97316; font-size: 14px; font-weight: 900; padding: 4px 12px; border-radius: 20px; border: 1px solid #f97316;">${fcast} TARGET</span>
+                    </summary>
+                    ${treeHtml}
+                </details>
+            </div>`;
+        }
+    });
+
+    if (!hasData) {
+        html = '<div style="text-align: center; color: var(--text-muted); padding: 50px;">Input forecast targets to explode BOM</div>';
+    }
+
+    outContainer.innerHTML = html;
+};

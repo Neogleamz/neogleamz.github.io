@@ -770,9 +770,12 @@ window._renderSandboxModal = function() {
                 let indicator = sortCol === c ? (sortAsc ? " <span style='color:#fff;'>▲</span>" : " <span style='color:#fff;'>▼</span>") : "";
                 let displayC = c;
                 let colorRule = "color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.5);"; 
-                if (['total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price'].includes(c.toLowerCase())) {
+                if (['transaction_type', 'total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price', 'net_profit', 'transaction_fees', 'cogs_at_sale'].includes(c.toLowerCase())) {
                     displayC = "🧮 " + c;
                     colorRule = "color:#c084fc; border-bottom:2px solid rgba(192,132,252,0.6);";
+                } else if (c.toLowerCase().endsWith("_hash")) {
+                    displayC = "🔐 " + c;
+                    colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);"; // amber logic for secure keys
                 }
                 h += `<th onclick="window.sortSandboxModal('${c}', ${tableNum})" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
             });
@@ -787,7 +790,7 @@ window._renderSandboxModal = function() {
                     let prefix = "";
                     let cLow = c.toLowerCase();
                     
-                    if (cLow === 'unit_weight_g' || cLow === 'unit_china_landed_price') {
+                    if (cLow === 'transaction_type' || cLow === 'unit_weight_g' || cLow === 'unit_china_landed_price' || cLow === 'net_profit' || cLow === 'transaction_fees' || cLow === 'cogs_at_sale') {
                         cellColor = "color:#e9d5ff; font-weight:800; background:rgba(168,85,247,0.05);";
                         prefix = `<span style="font-size:10px; margin-right:4px;">🧮</span>`;
                     } else if (cLow === 'total_dist_weight_g' && row._is_distributed) {
@@ -796,6 +799,9 @@ window._renderSandboxModal = function() {
                     } else if (cLow === 'order_total' && (parseFloat(row.makeup_fee) > 0)) {
                         cellColor = "color:#e9d5ff; font-weight:800; background:rgba(168,85,247,0.05);";
                         prefix = `<span style="font-size:10px; margin-right:4px;">🧮</span>`;
+                    } else if (cLow.endsWith("_hash") && row[c]) {
+                        cellColor = "color:#fde68a; font-family:'Courier New', monospace; font-size:9px;";
+                        prefix = `<span style="font-size:10px; margin-right:4px;">🔐</span>`;
                     }
                     
                     h += `<td style="padding:8px 15px; border-bottom:1px solid rgba(255,255,255,0.05); font-family:monospace; max-width:250px; overflow:hidden; text-overflow:ellipsis; ${cellColor}" title="${val.replace(/"/g, '&quot;')}">${prefix}${val}</td>`

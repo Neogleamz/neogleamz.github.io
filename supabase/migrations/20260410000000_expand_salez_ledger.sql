@@ -1,0 +1,19 @@
+-- ==============================================
+-- NEXUZ TERMINAL: SALES LEDGER EXPANSION MIGRATION
+-- ==============================================
+
+-- 1. Add new advanced tracking, fulfillment, and financial columns to sales_ledger
+ALTER TABLE sales_ledger
+ADD COLUMN IF NOT EXISTS financial_status VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS fulfillment_status VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS lineitem_compare_at_price NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS lineitem_fulfillment_status VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS tags TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS currency VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS shipping_method VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS shipping_city VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS shipping_province VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS shipping_zip VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS shipping_country VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS payment_method VARCHAR DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS risk_level VARCHAR DEFAULT NULL;
