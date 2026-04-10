@@ -556,7 +556,7 @@ function renderSalesTable() {
                 r.exchAdj = (r.exchAdj || 0) - actualDeductibleRefund;
                 refundDeducted = true;
             }
-            if (r.transaction_type !== 'Pre-Ship Exchange' && r.transaction_type !== 'Gift') {
+            if (r.transaction_type !== 'Pre-Ship Exchange' && r.transaction_type !== 'Gift' && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && r.transaction_type !== 'NEEDS ATTENTION') {
                 if (!primaryFound) {
                     primaryFound = true;
                 } else {
