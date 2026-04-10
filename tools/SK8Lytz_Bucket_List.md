@@ -27,9 +27,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `feat/payload-normalization` : Payload Normalization
 - [x] `feat/idempotent-db-insert` : Idempotent Database Insert
 
-### Target: `epic/dim-weight-router`
-- [ ] `feat/dim-weight-script` : Write a script that checks USPS Ground Advantage vs UPS Priority based on the `(L*W*H) / DIM Divisor` formula.
-- [ ] `feat/cheapest-carrier-ui` : Visually highlight the cheapest carrier for the warehouse packer.
 
 ### Target: `epic/socialz-yield-api`
 - [ ] `feat/social-scraping-api` : Connect a low-cost social scraping API (like PhantomBuster or Apify).
