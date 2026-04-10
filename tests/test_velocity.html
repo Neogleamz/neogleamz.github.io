@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ROP Velocity Test</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: #fff; padding: 20px; }
+        .negative-stock { color: #ef4444; }
+        .low-stock { color: #f97316; }
+        .highlight-calc { color: #10b981; }
+        th, td { border-bottom: 1px solid #334155; padding: 10px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>STOCKZ ROP Testing Ground</h1>
+    <div id="fgiTableWrap"></div>
+    <div id="invTableWrap"></div>
+
+    <script>
+        // MOCK GLOBALS
+        window.isResizing = false;
+        window.currentFgiSort = {};
+        window.currentInvSort = {column: 'n', direction: 'asc'};
+        window.applyTableInteractivity = function(){}
+        window.sysLog = console.log;
+        
+        window.catalogCache = {
+            'PLA-BLK-01': { neoName: 'NeoPLA Blk', itemName: 'Black PLA 1kg', totalQty: 50, avgUnitCost: 15 },
+            'HRD-SCRW-M3': { neoName: 'M3 Screws', itemName: 'Screws Pack', totalQty: 1000, avgUnitCost: 0.05 }
+        };
+
+        window.productsDB = {
+            'Pro Deck Board': [
+                { item_key: 'PLA-BLK-01', quantity: 2 },
+                { item_key: 'HRD-SCRW-M3', quantity: 10 }
+            ]
+        };
+
+        window.inventoryDB = {
+            'PLA-BLK-01': { consumed_qty: 48, scrap_qty: 0, manual_adjustment: 0, min_stock: 0 }, // 50 - 48 = 2 in stock
+            'HRD-SCRW-M3': { consumed_qty: 200, scrap_qty: 0, manual_adjustment: 0, min_stock: 0 } // 1000 - 200 = 800 in stock
+        };
+
+        // MOCK getRawMaterials to unroll BOM
+        window.getRawMaterials = function(recipeName, qtySold) {
+            let res = {};
+            if(productsDB[recipeName]) {
+                productsDB[recipeName].forEach(comp => {
+                    res[comp.item_key] = (comp.quantity || 1) * qtySold;
+                });
+            }
+            return res;
+        };
+
+        // Inject 30-day velocity dataset
+        let d = new Date(); d.setDate(d.getDate() - 5); // 5 days ago = valid
+        window.salesDB = [
+            { sale_date: d.toISOString(), qty_sold: 10, transaction_type: 'Sale', internal_recipe_name: 'Pro Deck Board' }
+        ];
+        // Velocity math expected for PLA-BLK-01: (10 boards * 2 PLA = 20 consumed over 30 days) = 0.66 daily velocity
+        // ROP expected: (0.66 * 5 days) * 1.10 = 3.66 ROP limit.
+        // Since Physical Stock = 2, and 2 < 3.66, the RED ALERT should pulse!
+    </script>
+
+    <!-- Load the target module -->
+    <script src="../inventory-module.js"></script>
+
+    <script>
+        // Trigger Engine
+        document.addEventListener('DOMContentLoaded', () => {
+            renderInventoryTable();
+            setTimeout(() => {
+                const text = document.getElementById('invTableWrap').innerHTML;
+                if(text.includes('ROP: 3.7')) {
+                    document.body.innerHTML += `<div id="TEST_RESULT_SUCCESS" style="margin-top:20px; font-weight:bold; color:#10b981; font-size: 24px;">TEST PASSED: ROP Pulsing Active!</div>`;
+                } else {
+                    document.body.innerHTML += `<div id="TEST_RESULT_FAILED" style="margin-top:20px; font-weight:bold; color:#ef4444; font-size: 24px;">TEST FAILED: Target ROP pill missing</div>`;
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

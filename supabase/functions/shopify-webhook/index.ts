@@ -4,6 +4,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+async function hashPII(rawStr) {
+    if (rawStr === null || rawStr === undefined) return null;
+    let str = String(rawStr);
+    if (str.trim() === '') return null;
+    const msgUint8 = new TextEncoder().encode(str.trim().toLowerCase());
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
@@ -83,7 +93,26 @@ serve(async (req) => {
             Source: order.source_name || 'API Event',
             'Outstanding Balance': rowBalance,
             transaction_fees: rowFee,
-            net_profit: net
+            net_profit: net,
+            // EXTENDED ORDER DATA (NON-PII)
+            financial_status: order.financial_status || null,
+            fulfillment_status: order.fulfillment_status || null,
+            lineitem_compare_at_price: parseFloat(item.compare_at_price) || 0,
+            lineitem_fulfillment_status: item.fulfillment_status || null,
+            tags: order.tags || null,
+            currency: order.currency || null,
+            shipping_method: order.shipping_lines && order.shipping_lines.length > 0 ? order.shipping_lines[0].title : null,
+            shipping_city: order.shipping_address ? order.shipping_address.city : null,
+            shipping_province: order.shipping_address ? order.shipping_address.province : null,
+            shipping_zip: order.shipping_address ? order.shipping_address.zip : null,
+            shipping_country: order.shipping_address ? order.shipping_address.country : null,
+            payment_method: order.payment_gateway_names ? order.payment_gateway_names.join(', ') : null,
+            risk_level: null,
+            customer_email_hash: piiEmail,
+            customer_phone_hash: piiPhone,
+            shipping_name_hash: piiShipName,
+            shipping_address_hash: piiShipAddr,
+            refunded_amount: 0
           });
 
           invUpdates.push({

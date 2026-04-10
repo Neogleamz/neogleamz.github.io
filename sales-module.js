@@ -1,3 +1,13 @@
+async function hashPII(rawStr) {
+    if (rawStr === null || rawStr === undefined) return null;
+    let str = String(rawStr);
+    if (str.trim() === '') return null;
+    const msgUint8 = new TextEncoder().encode(str.trim().toLowerCase());
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 // --- 9. SALES SYNC ENGINE ---
 async function addManualSale() {
     try {
@@ -97,21 +107,21 @@ async function processSalesCSV(isTestMode = false) {
     reader.readAsArrayBuffer(file);
 }
 
-function processParsedSales(rows, isTestMode = false) {
+async function processParsedSales(rows, isTestMode = false) {
     syncTrace(`File parsed successfully. Target rows length: ${rows.length}`);
     syncTrace("Scanning for missing Storefront SKUs inside Local Dictionary...");
     pendingSalesRows = []; let unmapped = new Set();
     let orderFirstRowFlags = {};
 
-    rows.forEach(r => {
+    for (const r of rows) {
         let orderId = r['Name'] || r['Order Name'] || r['Order ID'] || r['Order Number'] || r['Order'] || '';
         let skuName = r['Lineitem name'] || r['Item Name'] || r['Title'] || r['Product Name'] || '';
         let qty = parseFloat(r['Lineitem quantity'] || r['Quantity'] || r['Qty'] || 0);
         let price = parseFloat(r['Lineitem price'] || r['Price'] || r['Item Price'] || 0);
         let rawDate = r['Created at'] || r['Date'] || r['Sale Date'] || new Date().toISOString();
         
-        if(!orderId || !skuName || qty <= 0) return;
-        if(!isTestMode && salesDB.some(s => s.order_id === String(orderId) && s.storefront_sku === String(skuName))) return;
+        if(!orderId || !skuName || qty <= 0) continue;
+        if(!isTestMode && salesDB.some(s => s.order_id === String(orderId) && s.storefront_sku === String(skuName))) continue;
 
         let dateStr = "";
         if (typeof rawDate === 'number') {
@@ -134,7 +144,34 @@ function processParsedSales(rows, isTestMode = false) {
             tot = parseFloat(String(r['Total'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
             let src = String(r['Source'] || "").trim();
             let bal = parseFloat(String(r['Outstanding Balance'] || r['Balance'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
-            orderFirstRowFlags[orderId] = { source: src, balance: bal }; 
+            
+            // Extract Extra ORDERZ Columns strictly on the first row
+            let fStatus = String(r['Financial Status'] || "").trim();
+            let pfStatus = String(r['Fulfillment Status'] || "").trim();
+            let tags = String(r['Tags'] || "").trim();
+            let currency = String(r['Currency'] || "").trim();
+            let shippingMethod = String(r['Shipping Method'] || "").trim();
+            let shippingCity = String(r['Shipping City'] || "").trim();
+            let shippingProvince = String(r['Shipping Province'] || "").trim();
+            let shippingZip = String(r['Shipping Zip'] || "").trim();
+            let shippingCountry = String(r['Shipping Country'] || "").trim();
+            let paymentMethod = String(r['Payment Method'] || "").trim();
+            let riskLevel = String(r['Risk Level'] || "").trim();
+            let refundedAmt = parseFloat(String(r['Refunded Amount'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
+            
+            let hEmail = await hashPII(r['Email'] || "");
+            let hPhone = await hashPII(r['Shipping Phone'] || r['Phone'] || r['Billing Phone'] || "");
+            let hName = await hashPII(r['Shipping Name'] || r['Billing Name'] || "");
+            let hAddr = await hashPII(String(r['Shipping Street'] || r['Shipping Address1'] || "") + String(r['Shipping Zip'] || ""));
+            
+            orderFirstRowFlags[orderId] = { 
+                hEmail, hPhone, hName, hAddr,
+                firstRowTotal: tot,
+                refundedAmount: refundedAmt,
+                source: src, balance: bal, 
+                fStatus, pfStatus, tags, currency, shippingMethod, 
+                shippingCity, shippingProvince, shippingZip, shippingCountry, paymentMethod, riskLevel 
+            }; 
         }
 
         let internalName = aliasDB[skuName] || (productsDB[skuName] ? skuName : null);
@@ -146,11 +183,58 @@ function processParsedSales(rows, isTestMode = false) {
             order_id: String(orderId), sale_date: dateStr, storefront_sku: String(skuName), 
             qty_sold: qty, actual_sale_price: price, internal_recipe_name: internalName, 
             subtotal: subTot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: tot,
-            "Source": orderFirstRowFlags[orderId].source, "Outstanding Balance": isFirstRow ? orderFirstRowFlags[orderId].balance : 0
+            "Source": orderFirstRowFlags[orderId].source, "Outstanding Balance": isFirstRow ? orderFirstRowFlags[orderId].balance : 0,
+            
+            // Map Extra ORDERZ Elements
+            financial_status: orderFirstRowFlags[orderId].fStatus,
+            fulfillment_status: orderFirstRowFlags[orderId].pfStatus,
+            lineitem_compare_at_price: parseFloat(r['Lineitem compare at price']) || 0,
+            lineitem_fulfillment_status: String(r['Lineitem fulfillment status'] || "").trim(),
+            tags: orderFirstRowFlags[orderId].tags,
+            currency: orderFirstRowFlags[orderId].currency,
+            shipping_method: orderFirstRowFlags[orderId].shippingMethod,
+            shipping_city: orderFirstRowFlags[orderId].shippingCity,
+            shipping_province: orderFirstRowFlags[orderId].shippingProvince,
+            shipping_zip: orderFirstRowFlags[orderId].shippingZip,
+            shipping_country: orderFirstRowFlags[orderId].shippingCountry,
+            payment_method: orderFirstRowFlags[orderId].paymentMethod,
+            risk_level: orderFirstRowFlags[orderId].riskLevel,
+            customer_email_hash: isFirstRow ? orderFirstRowFlags[orderId].hEmail : null,
+            customer_phone_hash: isFirstRow ? orderFirstRowFlags[orderId].hPhone : null,
+            shipping_name_hash: isFirstRow ? orderFirstRowFlags[orderId].hName : null,
+            shipping_address_hash: isFirstRow ? orderFirstRowFlags[orderId].hAddr : null,
+            isFirstRow: isFirstRow, // temporary tag
+            transaction_type: (function() {
+                let fStat = orderFirstRowFlags[orderId].fStatus || "";
+                let lFulfill = String(r['Lineitem fulfillment status'] || "").trim().toLowerCase();
+                let oTot = orderFirstRowFlags[orderId].firstRowTotal || 0;
+                let oBal = orderFirstRowFlags[orderId].balance || 0;
+                let lPrice = parseFloat(r['Lineitem price'] || r['Price'] || r['Item Price'] || 0) || parseFloat(r.actual_sale_price) || 0;
+                
+                if (oTot === 0 && fStat.toLowerCase() !== 'refunded') return 'NEEDS ATTENTION';
+
+
+                
+                // If they technically paid for it but we never shipped it, it was almost certainly a Pre-Ship Exchange or cancellation!
+                if (lFulfill === 'pending' || lFulfill === 'unfulfilled') {
+                    if (fStat.toLowerCase() === 'paid') return 'Pre-Ship Exchange';
+                }
+
+                if (fStat.toLowerCase() === 'refunded') {
+                    if (lFulfill === 'pending' || lFulfill === 'unfulfilled') return 'Cancelled';
+                    return 'Refund';
+                }
+                if (fStat.toLowerCase() === 'partially_refunded') {
+                    if (lFulfill === 'pending' || lFulfill === 'unfulfilled') return 'Cancelled';
+                    return 'Refund';
+                }
+                return 'Standard';
+            })(),
+            refunded_amount: orderFirstRowFlags[orderId].refundedAmount || 0
         });
         
         if(!internalName) unmapped.add(String(skuName));
-    });
+    } // End of for loop
 
     if(unmapped.size > 0) {
         let uList = Array.from(unmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
@@ -204,21 +288,125 @@ async function executeSalesSync(isTestMode = false) {
         syncTrace(`Mapping verified. Preparing Database Payload structure for ${pendingSalesRows.length} internal components...`);
         sysLog(`Pushing ${pendingSalesRows.length} sales...`); setMasterStatus("Syncing Sales...", "mod-working"); setSysProgress(60, 'working');
 
+        // DYNAMIC MULTI-ITEM EXCHANGE DETECTOR (Pre-Map Mutation)
+        let preGroups = {};
+        pendingSalesRows.forEach(x => { if(!preGroups[x.order_id]) preGroups[x.order_id] = []; preGroups[x.order_id].push(x); });
+        Object.values(preGroups).forEach(group => {
+            if (group.length > 1) {
+                let bal = parseFloat(group[0]['Outstanding Balance'] || 0) || parseFloat(group.find(x=>x["Outstanding Balance"])?.["Outstanding Balance"] || 0);
+                if (bal > 0) {
+                    let orig = group[0];
+                    let repl = group[group.length - 1]; 
+                    if (orig && repl) {
+                        let oFulfill = String(orig.lineitem_fulfillment_status || "").trim().toLowerCase();
+                        let rFulfill = String(repl.lineitem_fulfillment_status || "").trim().toLowerCase();
+                        if ((oFulfill === 'pending' || oFulfill === 'unfulfilled') && (rFulfill === 'fulfilled' || rFulfill === '')) {
+                            orig.transaction_type = 'Pre-Ship Exchange';
+                            repl.transaction_type = 'Exchange Replacement';
+                        } else if (oFulfill === 'fulfilled' && (rFulfill === 'fulfilled' || rFulfill === '')) {
+                            orig.transaction_type = 'Post-Ship Exchange';
+                            repl.transaction_type = 'Exchange Replacement';
+                        }
+                    }
+                }
+            }
+        });
+
         // --- POWERED BY MASTER ENGINE ---
+        // Extract natively erased ghost revenue so we don't double-penalize the primary item's refund deduction
+        let voidedRevenueByOrder = {};
+        pendingSalesRows.forEach(r => {
+            if (r.transaction_type === 'Cancelled') {
+                voidedRevenueByOrder[r.order_id] = (voidedRevenueByOrder[r.order_id] || 0) + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+            }
+        });
+
+        // Clear execution deduplicator hash per import batch
+        window._refundDeductedDB = {};
         let salesPayload = pendingSalesRows.map(r => { 
+            let type = r.transaction_type || 'Standard';
             let cogs = getEngineTrueCogs(r.internal_recipe_name);
-            let trueLineCaptured = (r.actual_sale_price * r.qty_sold) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0) - parseFloat(r.discount_amount || 0);
-            let fee = getEngineStripeFee(trueLineCaptured, r["Source"]);
-            const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-            let actualShipCost = SHIP_COST * r.qty_sold;
-            let net = getHistoricalNetProfit(r.actual_sale_price * r.qty_sold, r.shipping, r.taxes, r.discount_amount, actualShipCost, r.internal_recipe_name, r.qty_sold, r["Source"]);
+            let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
             
+            if (type === 'Cancelled') { cogs = 0; }
+            if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') { cogs = 0; }
+            
+            let trueLineCaptured = isCostOnlyItem ? 0 : (r.actual_sale_price * r.qty_sold) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0) - parseFloat(r.discount_amount || 0);
+            let outBal = parseFloat(r['Outstanding Balance']) || 0;
+            let stripeCaptureTarget = trueLineCaptured - outBal;
+            
+            let fee = (isCostOnlyItem || type === 'Cancelled') ? 0 : getEngineStripeFee(stripeCaptureTarget, r["Source"]);
+            
+            const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (parseFloat(r.shipping || 0) > 0 ? parseFloat(r.shipping) : (SHIP_COST * r.qty_sold));
+            
+            // Calculate true net strictly honoring the rules.
+            let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
+            let shipRev = isCostOnlyItem ? 0 : parseFloat(r.shipping || 0);
+            let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
+            let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
+            
+            let rawNet = getHistoricalNetProfit(gross, shipRev, taxRev, disc, actualShipCost, r.internal_recipe_name, r.qty_sold, r["Source"]);
+            let refAmt = parseFloat(r.refunded_amount) || 0;
+            // Erase the cancelled line-item values from the global refund penalty to prevent double-dipping ghost loops
+            let voidedRev = voidedRevenueByOrder[r.order_id] || 0;
+            let actualDeductibleRefund = Math.max(0, refAmt - voidedRev);
+            
+            let net = rawNet; 
+            
+            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') net = 0;
+            if (type === 'Pre-Ship Exchange') net += getEngineTrueCogs(r.internal_recipe_name); // Re-add the true COGS (engine deducted it, but we didn't physically ship this)
+            if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') net = 0 - actualShipCost - cogs; // Complete loss
+            
+            // DEDUPLICATE DATABASE REFUNDS
+            if (!window._refundDeductedDB) window._refundDeductedDB = {};
+            if (actualDeductibleRefund > 0 && type !== 'Cancelled' && type !== 'IGNORE' && !window._refundDeductedDB[r.order_id]) {
+                net -= actualDeductibleRefund;
+                window._refundDeductedDB[r.order_id] = true;
+            }
+
             let cS = Math.round(cogs * 100) / 100;
             let fS = Math.round(fee * 100) / 100;
             let nS = Math.round(net * 100) / 100;
             
-            return { ...r, cogs_at_sale: cS, transaction_fees: fS, net_profit: nS }; 
+            return { ...r, cogs_at_sale: cS, transaction_fees: fS, net_profit: nS, transaction_type: type }; 
         });
+
+        // REVENUE TRANSFER BATCH
+        let pg = {};
+        // DEFENSIVE SHIP COST RESOLVER
+        const LOCAL_SHIP = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+        
+        salesPayload.forEach(x => { if(!pg[x.order_id]) pg[x.order_id] = []; pg[x.order_id].push(x); });
+        Object.values(pg).forEach(group => {
+            let primes = group.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
+            let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
+            if (primes.length > 0 && replacements.length > 0) {
+                let u = primes[0]; let r = replacements[0];
+                
+                // DECOUPLED PHYSICAL REALITY ACCOUNTING
+                if (u.transaction_type === 'Post-Ship Exchange') {
+                    // 1. Shift the purely positive raw revenue component onto the replacement.
+                    let uRawRev = (parseFloat(u.actual_sale_price || 0) * parseFloat(u.qty_sold || 0)) + parseFloat(u.shipping || 0) - parseFloat(u.discount_amount || 0);
+                    r.net_profit += uRawRev; // Replacement absorbs the pure revenue
+                    
+                    // 2. Original row loses the revenue (shipped to r), and loses its COGS (restocked), leaving ONLY the pure logistical losses:
+                    let activeShipValue = parseFloat(u.shipping || 0) > 0 ? parseFloat(u.shipping || 0) : LOCAL_SHIP;
+                    let uStripeValue = parseFloat(u.transaction_fees || 0);
+                    
+                    let secureNet = 0 - activeShipValue - uStripeValue;
+                    u.net_profit = isNaN(secureNet) ? 0 : secureNet; 
+                } else {
+                    // Ghost Transfer for Unshipped
+                    r.net_profit += (parseFloat(u.net_profit) || 0); 
+                    u.net_profit = 0; 
+                }
+                
+                r.net_profit = Math.round((parseFloat(r.net_profit) || 0) * 100) / 100;
+                u.net_profit = Math.round((parseFloat(u.net_profit) || 0) * 100) / 100;
+            }
+        });
+
         // --------------------------------
 
         syncTrace(`Injecting aggregated Sales Ledger objects to network array...`);
@@ -230,6 +418,7 @@ async function executeSalesSync(isTestMode = false) {
             setSysProgress(100, 'success'); setMasterStatus("🧪 Test Parsed!", "mod-success");
             
             if (typeof window.openSandboxModal === 'function') {
+                // Pass raw salesPayload so native Sandbox visualizer picks up raw schema names
                 window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS");
             }
             
@@ -266,11 +455,11 @@ async function executeSalesSync(isTestMode = false) {
         setTimeout(() => showToast(`✅ Success! ${count} sales synced. Inventory deduction deferred until Packerz Assembly Completion.`), 10);
         setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000);
     } catch(e) { 
-        syncTrace(`CRITICAL FAULT: ${e.message}`, true);
-        sysLog(e.message, true); 
+        syncTrace(`CRITICAL FAULT: ${e.stack || e.message}`, true);
+        sysLog(e.stack || e.message, true); 
         setMasterStatus("Sync Error", "mod-error"); 
         setSysProgress(100, 'error'); 
-        setTimeout(() => showToast("Database Error during Sync:\n\n" + e.message + "\n\nPlease check your Supabase columns.", 'error'), 10);
+        setTimeout(() => showToast("Database Error during Sync:\n\n" + (e.stack || e.message) + "\n\nPlease check your Supabase columns.", 'error'), 10);
     }
 }
 
@@ -296,10 +485,10 @@ function renderSalesTable() {
         let d = parseFloat(x.discount_amount) || 0;
         
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name) * qty;
-        let isCostOnlyItem = (type === 'Replacement / Warranty' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE');
+        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE');
         
         // --- CUSTOM EXCEPTION OVERRIDES ---
-        if (type === 'Pre-Ship Exchange' || type === 'IGNORE') {
+        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') {
             liveCogs = 0;
         }
         if (isCostOnlyItem) {
@@ -313,6 +502,7 @@ function renderSalesTable() {
         // --- POWERED BY MASTER ENGINE ---
         let actualShipCost = type === 'Pre-Ship Exchange' ? 0 : 
                              type === 'IGNORE' ? 0 :
+                             type === 'NEEDS ATTENTION' ? 0 :
                              (s > 0 ? s : SHIP_COST); // All valid items cleanly map actual ship cost to what the customer paid, OR default to flat-rate if Free Shipping
         let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
         
@@ -331,11 +521,18 @@ function renderSalesTable() {
     // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
-
+    
     // DEDUPLICATE OUTBOUND SHIPPING OVERHEAD FOR MULTI-ITEM ORDERS
     Object.values(orderGroups).forEach(group => {
         let primaryFound = false;
+        let refundDeducted = false;
         group.forEach(r => {
+            let refAmt = parseFloat(r.refunded_amount) || 0;
+            if (refAmt > 0 && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && !refundDeducted) {
+                r.net -= refAmt;
+                r.exchAdj = (r.exchAdj || 0) - refAmt;
+                refundDeducted = true;
+            }
             if (r.transaction_type !== 'Pre-Ship Exchange' && r.transaction_type !== 'Gift') {
                 if (!primaryFound) {
                     primaryFound = true;
@@ -350,39 +547,61 @@ function renderSalesTable() {
         });
     });
 
-    // 100% PAYLOAD TRANSFER: Shift all Shopify Captured Cash from Unshipped -> Replacement
+    // DECOUPLED LOGISTICS TRANSFER: Accurately map true financial footprints natively in UI
     Object.values(orderGroups).forEach(group => {
-        let unshipped = group.filter(x => x.transaction_type === 'Pre-Ship Exchange');
-        let replacements = group.filter(x => x.transaction_type === 'Replacement / Warranty');
-        
-        if (unshipped.length > 0 && replacements.length > 0) {
-            let u = unshipped[0];
-            let r = replacements[0];
+        let primes = group.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
+        let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
+        if (primes.length > 0 && replacements.length > 0) {
+            let u = primes[0]; let r = replacements[0];
 
-            // Transfer Revenue metrics
-            r.actual_sale_price = u.actual_sale_price;
-            r.shipping = parseFloat(u.shipping || 0);
-            r.taxes = parseFloat(u.taxes || 0);
-            r.total = parseFloat(u.total || 0);
-            r.stripeFee = u.stripeFee;
-            r.discount_amount = parseFloat(u.discount_amount || 0);
-            r.isRevenueTransfer = true; // Protects UI from treating the transferred shipping as a warranty expense override
+            // Replacements natively evaluate locally, then absorb the original revenue.
+            let rRawRev = (parseFloat(r.actual_sale_price || 0) * (parseFloat(r.qty_sold) || 0)) + parseFloat(r.shipping || 0) - parseFloat(r.discount_amount || 0);
+            let rawRNet = rRawRev - (parseFloat(r.liveCogs) || 0) - (parseFloat(r.actualShipCost) || 0) - (parseFloat(r.stripeFee) || 0);
+            r.net = isNaN(rawRNet) ? 0 : rawRNet;
+            
+            if (u.transaction_type === 'Post-Ship Exchange') {
+                // Physical Reality Decoupling
+                let uRawRev = (parseFloat(u.actual_sale_price || 0) * (parseFloat(u.qty_sold) || 0)) + parseFloat(u.shipping || 0) - parseFloat(u.discount_amount || 0);
+                
+                // 1. Shift Customer Payment Revenue to Replacement
+                r.net += (parseFloat(uRawRev) || 0);
+                r.actual_sale_price = u.actual_sale_price; 
+                r.discount_amount = u.discount_amount;
+                r.shipping = u.shipping;
+                r.taxes = u.taxes;
+                
+                // 2. Original Item is left isolated as a pure loss string (burns ship cost + stripe fee)
+                u.actual_sale_price = 0; 
+                u.shipping = 0;
+                u.discount_amount = 0;
+                u.taxes = 0;
+                u.liveCogs = 0; // Restocked
+                
+                let secureNetLoss = 0 - (parseFloat(u.actualShipCost) || 0) - (parseFloat(u.stripeFee) || 0);
+                u.net = isNaN(secureNetLoss) ? 0 : secureNetLoss;
+            } else {
+                // Ghost Transfer for Unshipped (Pre-Ship)
+                r.net += (parseFloat(u.net) || 0);
+                r.stripeFee += (parseFloat(u.stripeFee) || 0); 
+                r.actual_sale_price = u.actual_sale_price; 
+                r.discount_amount = u.discount_amount;
+                r.shipping = u.shipping;
 
-            // Re-calculate the Replacement's Net using pure physical attributes and true revenue, bypassing Shopify's merged 'total' string
-            let rawRev = (parseFloat(r.actual_sale_price || 0) * (parseFloat(r.qty_sold) || 0)) + parseFloat(r.shipping || 0) - parseFloat(r.discount_amount || 0);
-            r.net = rawRev - r.liveCogs - r.actualShipCost - r.stripeFee;
-
-            // Zero out all metrics on the Unshipped row entirely (so it doesn't keep Revenue)
-            u.actual_sale_price = 0;
-            u.shipping = 0;
-            u.taxes = 0;
-            u.total = 0;
-            u.stripeFee = 0;
-            u.discount_amount = 0;
-            u.liveCogs = 0; // Ensure 0
-            u.net = 0;
-            u.exchAdj = 0; // Clear any visual adjustments
+                u.actual_sale_price = 0;
+                u.stripeFee = 0;
+                u.net = 0;
+                u.discount_amount = 0;
+                u.shipping = 0;
+                u.taxes = 0;
+                u.actualShipCost = 0;
+                u.liveCogs = 0;
+            }
+            
+            u.isExchanged = true;
         }
+
+        // Failsafe Net Cast for All Unprocessed Rows
+        group.forEach(it => { if(isNaN(it.net)) it.net = 0; });
     });
 
     let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0, burdenUnits: 0, burdenPct: 0 };
@@ -471,10 +690,14 @@ function renderSalesTable() {
             <td class="trunc-col">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
             <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')">
+                <option style="background:var(--bg-panel); color:var(--text-main); font-weight:bold; color:#ef4444;" value="NEEDS ATTENTION" ${x.transaction_type==='NEEDS ATTENTION'?'selected':''}>⚠️ NEEDS ATTENTION</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Refund" ${x.transaction_type==='Refund'?'selected':''}>Refund</option>
+                <option style="background:var(--bg-panel); color:var(--text-main); color:#8b5cf6;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled (Void)</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Partial Refund" ${x.transaction_type==='Partial Refund'?'selected':''}>Partial Refund</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Replacement / Warranty" ${x.transaction_type==='Replacement / Warranty'?'selected':''}>Exchange Replacement</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${x.transaction_type==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${x.transaction_type==='IGNORE'?'selected':''}>IGNORE</option>
