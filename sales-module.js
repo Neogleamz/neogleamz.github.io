@@ -576,12 +576,8 @@ function renderSalesTable() {
         let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
         if (primes.length > 0 && replacements.length > 0) {
             let u = primes[0]; let r = replacements[0];
-
-            // Replacements natively evaluate locally, then absorb the original revenue.
-            let rRawRev = (parseFloat(r.actual_sale_price || 0) * (parseFloat(r.qty_sold) || 0)) + parseFloat(r.shipping || 0) - parseFloat(r.discount_amount || 0);
-            let rawRNet = rRawRev - (parseFloat(r.liveCogs) || 0) - (parseFloat(r.actualShipCost) || 0) - (parseFloat(r.stripeFee) || 0);
-            r.net = isNaN(rawRNet) ? 0 : rawRNet;
             
+
             if (u.transaction_type === 'Post-Ship Exchange') {
                 // Physical Reality Decoupling
                 let uRawRev = (parseFloat(u.actual_sale_price || 0) * (parseFloat(u.qty_sold) || 0)) + parseFloat(u.shipping || 0) - parseFloat(u.discount_amount || 0);
