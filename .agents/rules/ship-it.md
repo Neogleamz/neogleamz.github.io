@@ -1,10 +1,7 @@
 ---
 description: "Auto-migrated Core A.I. Rule"
 mode: "always"
----
-
----
-trigger: always_on
+trigger: "always_on"
 ---
 
 # Ship It Workflow Rule -- "ship it", "merge task", or "finalize branch"

@@ -1,5 +1,7 @@
 ---
-trigger: always_on
+description: "Auto-migrated Core A.I. Rule"
+mode: "always"
+trigger: "always_on"
 ---
 
 # The Rubber Duck (ELI5) Rule

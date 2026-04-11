@@ -1,10 +1,7 @@
 ---
 description: "Auto-migrated Core A.I. Rule"
 mode: "always"
----
-
----
-trigger: always_on
+trigger: "always_on"
 ---
 
 # Auto-Branching Workflow Rule -- "start working on the bucket list", "start bucket list", "what's next", "what's next on the list?"

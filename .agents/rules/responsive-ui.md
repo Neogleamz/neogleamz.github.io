@@ -1,5 +1,7 @@
 ---
-glob: "**/*.{html,css,js,ts,jsx,tsx}"
+description: "Auto-migrated Core A.I. Rule"
+mode: "always"
+trigger: "always_on"
 ---
 
 # Desktop-First Browser Standards Rule

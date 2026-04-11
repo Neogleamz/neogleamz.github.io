@@ -1,10 +1,7 @@
 ---
 description: "Auto-migrated Core A.I. Rule"
 mode: "always"
----
-
----
-trigger: always_on
+trigger: "always_on"
 ---
 
 # Status Update Workflow Rule -- "whats up","status update", "where are we", "what's happening", or "current status"

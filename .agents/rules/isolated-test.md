@@ -1,10 +1,7 @@
 ---
 description: "Auto-migrated Core A.I. Rule"
 mode: "always"
----
-
----
-trigger: always_on
+trigger: "always_on"
 ---
 
 # Isolated Test & Verify Protocol

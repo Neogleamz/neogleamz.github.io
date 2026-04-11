@@ -1,5 +1,7 @@
 ---
-glob: "**/*.{js,ts,tsx,html,css,py}"
+description: "Auto-migrated Core A.I. Rule"
+mode: "always"
+trigger: "always_on"
 ---
 
 # The Boy Scout (Tech Debt) Rule

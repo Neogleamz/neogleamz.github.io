@@ -1,5 +1,7 @@
 ---
-glob: "**/*.{js,ts,jsx,tsx,html,css}"
+description: "Auto-migrated Core A.I. Rule"
+mode: "always"
+trigger: "always_on"
 ---
 
 # Modern UI/UX Architect Protocol

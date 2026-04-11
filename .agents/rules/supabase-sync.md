@@ -1,5 +1,7 @@
 ---
-trigger: always_on
+description: "Auto-migrated Core A.I. Rule"
+mode: "always"
+trigger: "always_on"
 ---
 
 # Supabase Schema Sync Rule

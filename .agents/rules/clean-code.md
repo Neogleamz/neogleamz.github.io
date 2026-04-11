@@ -1,5 +1,7 @@
 ---
-glob: "**/*.{js,ts,tsx,html,css,py,json,md}"
+description: "Auto-migrated Core A.I. Rule"
+mode: "always"
+trigger: "always_on"
 ---
 
 # Coding Standards & Clean Code Rule
