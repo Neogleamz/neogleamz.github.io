@@ -1223,24 +1223,33 @@ async function executeExport() {
         await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         const buffer = await wb.xlsx.writeBuffer();
-        // By forcing the MIME type to generic octet-stream, we prevent the browser from attempting to 
-        // handle the object natively and bypassing the anchor tag's download attribute.
-        const blob = new Blob([buffer], { type: 'application/octet-stream' });
-        const downloadUrl = URL.createObjectURL(blob);
+        
+        // Restore correct MIME type
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        
         const downloadAnchor = document.createElement('a');
         downloadAnchor.style.display = 'none';
-        downloadAnchor.setAttribute('href', downloadUrl);
-        downloadAnchor.setAttribute('download', `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
+        downloadAnchor.href = downloadUrl;
+        
+        // Some older browser engines/WebViews fail with template literals in the download attribute
+        const fileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
+        downloadAnchor.download = fileName;
+        downloadAnchor.rel = "noopener";
+        
         document.body.appendChild(downloadAnchor);
         
-        // Give the DOM a frame to register the anchor before clicking
+        // Let the DOM update before clicking
         setTimeout(() => {
             downloadAnchor.click();
+            
+            // Clean up extendedly
             setTimeout(() => {
                 document.body.removeChild(downloadAnchor);
                 window.URL.revokeObjectURL(downloadUrl);
-            }, 30000); // 30 seconds to ensure large exports finish initiating
-        }, 50);
+            }, 5000);
+        }, 100);
+
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
 }
