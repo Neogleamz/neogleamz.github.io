@@ -1,26 +1,25 @@
----
-description: "Auto-migrated Core A.I. Rule"
-mode: "always"
-trigger: "always_on"
+﻿---
+trigger: always_on
+description: "Strictly enforced coding standard for all UI logic and rendering."
 ---
 
-# Skill: Vanilla DOM Mastery
+# Vanilla DOM Mastery
 
-When instructed to build UI logic, manipulate rendering, or attach interactions within our desktop-first `.js` environment, you must deploy these vanilla Javascript skills:
+When instructed to build UI logic, manipulate rendering, or attach interactions within our client-side `.js` environment, you must strictly adhere to these vanilla Javascript constraints:
 
 1. **Framework Prohibition**:
    - You must NOT generate or import React hooks (`useState`, `useEffect`), Vue components, or jQuery (`$()`).
-   - We rely exclusively on the native Browser DOM API.
+   - Rely exclusively on the native Browser DOM API.
 
 2. **Strict Element Selection**:
    - Prioritize `document.getElementById('unique-id')` for maximum performance.
    - Use `document.querySelector('.class')` or `document.querySelectorAll()` when handling dynamic lists or components.
 
-3. **Event Binding & Cleanup**:
+3. **Event Binding & Cleanup (Memory Leak Prevention)**:
    - Always bind interactions using native listeners: `element.addEventListener('click', functionName)`.
-   - Never use inline HTML callbacks like `<button onclick="...">`.
-   - If UI elements are being dynamically destroyed and recreated (like modals), ensure you pass named functions to `addEventListener` so they can theoretically be removed to prevent memory leaks if required.
+   - NEVER use inline HTML callbacks (e.g., `<button onclick="...">`).
+   - When attaching events to UI elements that will be dynamically destroyed and recreated, you must pass named functions to `addEventListener` and provide the explicit logic to `removeEventListener` prior to element destruction.
 
 4. **DOM Mutation Techniques**:
    - For simple text changes: Use `element.textContent`.
-   - For injecting complex dynamic fragments: Use `element.insertAdjacentHTML()` over heavy `.innerHTML` wipes where possible to maintain speed and state in adjacent elements.
+   - For injecting complex dynamic fragments: Use `element.insertAdjacentHTML()` over heavy `.innerHTML` wipes to maintain speed and preserve state in adjacent elements.

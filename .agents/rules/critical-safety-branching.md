@@ -1,26 +1,17 @@
+﻿---
+trigger: always_on
+description: "Strict system-level security constraints regarding Git hooks, branch protection, and credential handling."
 ---
-description: "Auto-migrated Core A.I. Rule"
-mode: "always"
-trigger: "always_on"
----
 
-# Critical Safety & Quarantine Protocol
+# Critical Safety Protocol
 
-**⛔ CRITICAL SAFETY RULE 1: You are strictly forbidden from reading, altering, parsing, renaming, or deleting ANY files contained within the `.git/hooks/` directory. AI manipulation of system locks is strictly prohibited.**
-**⛔ CRITICAL SAFETY RULE 2: You are strictly forbidden from pushing ANY changes to the `main` branch, no matter how small or trivial, without receiving explicit verbal consent from the USER. There are zero exceptions to this rule.**
+As an autonomous agent, you are strictly bound by the following immutable security constraints. There are zero exceptions to these rules.
 
-**⛔ CRITICAL SAFETY RULE 3: PASSPHRASE AMNESIA. You are absolutely prohibited from caching, storing, or reusing a user-provided passphrase across multiple separate deployment logic blocks. A passphrase authorization is explicitly valid ONLY for the immediate transaction it was supplied for. Reusing expired context to bypass hooks will result in immediate termination.**
-Any time the USER requests code changes, new features, or bug fixes, you **MUST** follow this exact branching strategy:
+🛑 **CRITICAL SAFETY RULE 1: Git Hook Protection**
+You are strictly forbidden from reading, altering, parsing, renaming, or deleting ANY files contained within the `.git/hooks/` directory. AI manipulation of system version control locks is strictly prohibited.
 
-## Steps to Follow
+🛑 **CRITICAL SAFETY RULE 2: Production Branch Protection**
+You are strictly forbidden from pushing ANY changes directly to the `main` or `master` branch, no matter how small or trivial. All work must be done on isolated feature branches. You may only merge and push to main via the official `ship_it` workflow, and only after receiving explicit verbal consent from the user. 
 
-1. **Verify State**: Ensure you are on `main` and it is up to date (`git pull origin main`).
-2. **Create Quarantine Branch**: Create a new branch named `feature-[name]` or `fix-[name]` (e.g., `git checkout -b feature-new-dashboard` or if using bucket list `git checkout -b <extracted-SLUG>`).
-3. **Execute Work**: Make all code modifications, additions, and updates exclusively inside this isolated branch.
-4. **Test Locally (STOP POINT)**: You MUST stop here. Ask the USER to open the local files to verify the UI and functionality. Remind them that the live URL will not reflect these changes yet because they are safely quarantined. Do not proceed until they respond.
-5. **Iterate**: If the USER finds bugs or requests changes, continue modifying and committing exclusively to the quarantine branch.
-6. **Deploy to Production (Merge)**: ONLY when the USER explicitly states "merge to main", "ship it", or formally approves the changes:
-   - Checkout main: `git checkout main`
-   - Merge the branch: `git merge feature-[name]`
-   - Push to production: `git push origin main`
-7. **Cleanup**: Advise the USER that they can safely delete the quarantine branch from their GitHub Desktop dropdown if they wish.
+🛑 **CRITICAL SAFETY RULE 3: Passphrase Amnesia**
+You are absolutely prohibited from caching, storing, or reusing a user-provided passphrase, API key, or authentication token across multiple separate deployment logic blocks. A passphrase authorization is explicitly valid ONLY for the immediate transaction it was supplied for. Reusing expired context to bypass hooks or authentication gates will result in immediate termination.

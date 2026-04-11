@@ -1,22 +1,24 @@
+﻿---
+trigger: always_on
+description: "Strict Vanilla JS rendering constraints, memory-management, and update methodologies for Chart.js."
 ---
-description: "Auto-migrated Core A.I. Rule"
-mode: "always"
-trigger: "always_on"
----
 
-# Skill: Chart.js Rendering
+# Chart.js Rendering Rule
 
-When instructed to deploy data visualizations, modify the CFO Waterfall charts, or inject new `<canvas>` reporting grids, you must deploy these strict Chart.js skills to prevent rendering collisions in our vanilla architecture:
+When instructed to deploy data visualizations, modify dashboard charts, or inject new `<canvas>` reporting grids, you must adhere to these strict Chart.js constraints to prevent rendering collisions in our Vanilla JS architecture:
 
-1. **The Destruction Mandate (Anti-Ghosting)**:
-   - You must never instantiate `new Chart()` on a canvas without first checking if an instance already exists.
-   - If you overwrite a canvas without calling `.destroy()` on the existing chart instance, Chart.js will trigger a "ghosting" bug where the old chart flashes when the user hovers over it.
-   - *Implementation*: Store your active chart in a global or scoped variable (e.g., `let activeCfoChart = null`). Run `if (activeCfoChart) activeCfoChart.destroy();` before rendering.
+1. **Dependency Diet Check**:
+   - Before implementing Chart.js for a new feature, verify it has already been approved for this project space. If not, trigger the *Dependency Diet & Anti-Bloat Protocol* first to justify its weight.
 
-2. **Canvas ID Namespace Guarding**:
-   - If building multiple dashboards that share a single `.html` view, you must enforce incredibly unique canvas IDs (e.g., `canvas_cfo_waterfall_june` instead of `chart_canvas`).
+2. **The Destruction Mandate (Anti-Ghosting)**:
+   - You must NEVER instantiate a `new Chart()` on a canvas without first checking if an instance already exists.
+   - If you overwrite a canvas without calling `.destroy()` on the existing chart instance, Chart.js will trigger a "ghosting" memory-leak bug where the old chart flashes on hover.
+   - *Implementation*: Store your active chart in a tightly scoped ES6 module variable or class property (e.g., `let activeDashboardChart = null;`). Run `if (activeDashboardChart) activeDashboardChart.destroy();` before rendering the new instance.
+
+3. **Canvas ID Namespace Guarding**:
+   - Because our application uses vanilla HTML views, you must enforce highly specific, unique canvas IDs to prevent DOM collisions (e.g., `<canvas id="chart_cfo_waterfall_june"></canvas>` instead of `<canvas id="chart_canvas"></canvas>`).
    
-3. **Data Mutation Methodology**:
-   - Rather than destroying and completely redrawing a chart for minor data tweaks (like changing a single metric), target the exact dataset array:
-     `activeCfoChart.data.datasets[0].data = newDataArray;`
-     `activeCfoChart.update();`
+4. **Data Mutation Methodology (Performance)**:
+   - Rather than destroying and completely redrawing a chart for minor real-time data tweaks, target the exact dataset array to trigger a CSS transition:
+     `activeDashboardChart.data.datasets[0].data = newDataArray;`
+     `activeDashboardChart.update();`

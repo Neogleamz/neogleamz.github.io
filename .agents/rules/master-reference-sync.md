@@ -1,19 +1,19 @@
----
-description: "Auto-migrated Core A.I. Rule"
-mode: "always"
-trigger: "always_on"
+﻿---
+trigger: always_on
+description: "Strict constraints for updating and maintaining corporate memory documents without duplication or data loss."
 ---
 
 # Corporate Memory Synchronization Rule
 
-Whenever you solve a complex bug, establish a new architectural pattern, modify the Supabase database schema, or reverse-engineer hardware payloads, you MUST document these findings in the Master Reference to build long-term corporate memory.
+Whenever you are instructed (e.g., via the Midnight Oil or Ship It workflows) to document a complex bug fix, architectural pattern, DB schema, or hardware payload, you MUST adhere to these documentation standards:
 
-1. **Primary Reference**: `tools/SK8Lytz_App_Master_Reference.md` (Hardware protocols, DB schemas, architecture, core hooks).
-2. **Assets Reference**: `tools/SK8Lytz_Image_Cross_Reference.txt` (Image and string asset mappings).
+1. **Primary Reference**: `@/tools/SK8Lytz_App_Master_Reference.md` (Hardware protocols, DB schemas, Vanilla JS architecture, core modules).
+2. **Assets Reference**: `@/tools/SK8Lytz_Image_Cross_Reference.txt` (Image and string asset mappings).
 
 ### Important: Keeping the Reference Clean
-To prevent the Master Reference from filling up with duplicates and junk:
-- **Search Before Write**: NEVER blindly append to the end of the document. You must search the document first to see if the topic (e.g. `0x51 Payload` or `Users Table`) already exists.
-- **Update, Don't Duplicate**: If the topic exists, securely *edit* that exact section rather than creating a secondary entry.
-- **Strict Headers**: Place your findings strictly under the appropriate structured Markdown heading (e.g., `## BLE Protocols`, `## Database Schemas`, `## Context Providers`).
+To prevent the Master Reference from filling up with duplicates, or breaking due to file size limits:
+- **Chunking Awareness**: The Master Reference is a large file. Always process it in chunks of ~30,000 characters to avoid context loss or character-limit errors.
+- **Search Before Write**: NEVER blindly append to the end of the document. You must use `grep_search` or `view_file` to see if the topic (e.g., `0x51 Payload` or `Users Table`) already exists.
+- **Update, Don't Duplicate**: If the topic exists, strictly use native tools like `replace_file_content` to edit that exact section rather than creating a secondary entry.
+- **Strict Headers**: Place your findings under the appropriate structured Markdown heading (e.g., `## BLE Protocols`, `## Database Schemas`, `## Core API Services`). Do NOT use React-specific headers like Context Providers or Hooks.
 - **Prune Old Assumptions**: If your new discovery proves an old note wrong, delete the old incorrect assumption from the reference file entirely.
