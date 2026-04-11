@@ -54,6 +54,11 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **Data Table Memory:** Header sorting events must hook into `window.saveSort()` and initialize with `window.getSavedSort()` to persist grid layouts across caching refreshes.
 * **Version Bumping:** When altering core logic, `system-version.js` MUST be bumped manually to purge live `.com` clients.
 
+### G. Modal Close Button Standard
+* **Positioning:** All modal headers must use `position: relative`. The close button is `position: absolute; top: 50%; right: 16px; transform: translateY(-50%)`.
+* **Style:** MUST use `class="btn-red"` with a plain `✕` character (no FontAwesome icon dependency, no "Close" text label).
+* **Why:** Consistent with §2B (Red = destructive/close), and the absolute-position pattern ensures the title remains visually centered regardless of header padding.
+
 ---
 
 ## 🗄️ 3. Database Schemas (Supabase)
