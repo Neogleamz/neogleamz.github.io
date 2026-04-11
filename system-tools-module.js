@@ -1182,8 +1182,18 @@ function openBackupModal() {
 
 function closeBackupModal() { document.getElementById('backupModal').style.display = 'none'; }
 
-async function executeExport() {
+let pendingRestoreData = {};
+let preparedBackupBlob = null;
+let preparedBackupFileName = "";
+
+async function executeExport(btnObj) {
     try {
+        if (!btnObj) btnObj = document.getElementById('btnExportSync');
+        btnObj.disabled = true;
+        const originalText = btnObj.innerHTML;
+        btnObj.innerHTML = "⏳ GENERATING... (PLEASE WAIT)";
+        btnObj.style.background = "#f59e0b"; // warning orange
+        
         setMasterStatus("Exporting...", "mod-working"); sysLog("Exporting full system backup...");
         const wb = new ExcelJS.Workbook();
         async function addSheet(tableName, sheetName) {
@@ -1195,8 +1205,6 @@ async function executeExport() {
             ws.addRow(Object.keys(exportData[0]));
             
             exportData.forEach(rowObj => {
-                // ExcelJS will crash/corrupt the output if fed raw JS Objects/Arrays in the addRow array.
-                // We must stringify everything that isn't a primitive to prevent the 126KB truncated file bug.
                 const cleanRow = Object.values(rowObj).map(val => {
                     if (val === null || val === undefined) return '';
                     if (val instanceof Date) return val;
@@ -1225,25 +1233,33 @@ async function executeExport() {
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         const buffer = await wb.xlsx.writeBuffer();
         
-        // CRITICAL BUGFIX: exceljs in the browser returns a 'Buffer' polyfill object.
-        // Putting this polyfill directly into new Blob([buffer]) wraps it with Javascript object 
-        // byte headers, corrupting the physical ZIP container signature of the XLSX file.
-        // Chrome's security manager detects the signature mismatch, strips the .xlsx extension,
-        // and quarantines the download as a raw "UUID".
-        // We MUST cast it strictly to a raw Uint8Array before placing it in the Blob to preserve the clean ZIP signature.
         const rawArray = new Uint8Array(buffer);
+        preparedBackupBlob = new Blob([rawArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        preparedBackupFileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
         
-        const blob = new Blob([rawArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const fileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
-        
-        // Hand off to FileSaver.js to bypass any leftover custom anchor bugs
-        window.saveAs(blob, fileName);
+        // --- 2-STEP SYNCHRONOUS UI BYPASS ---
+        // Chrome blocks programmatic .download filenames if they happen >2sec after a click event.
+        // We halt here, update the button, and force the user to click again. The second click is 
+        // 100% synchronous, ensuring FileSaver is fully trusted by the OS.
+        btnObj.innerHTML = "💾 READY - CLICK TO SAVE";
+        btnObj.style.background = "#10b981"; // success green
+        btnObj.disabled = false;
+        btnObj.onclick = function() {
+            window.saveAs(preparedBackupBlob, preparedBackupFileName);
+            
+            // Reset button after download
+            btnObj.innerHTML = originalText;
+            btnObj.style.background = ""; // revert to CSS default
+            btnObj.onclick = function() { executeExport(this); };
+        };
 
-        setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-    } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
+        setMasterStatus("Backup Ready for Download", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+    } catch (e) { 
+        sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); 
+        if(btnObj) { btnObj.innerHTML = "⬇️ EXPORT BACKUP"; btnObj.disabled = false; btnObj.style.background = ""; }
+    }
 }
 
-let pendingRestoreData = {};
 function handleFileSelect(input) {
     const file = input.files[0]; if (!file) return;
     const reader = new FileReader();
