@@ -7,7 +7,7 @@ window.toggleFgiCategory = function(cat) {
     renderFgiTable(); 
 };
 function sortFGI(cat, c) { if(isResizing) return; let base=currentFgiSort[cat]||{column:'n',direction:'asc'}; currentFgiSort[cat] = { column: c, direction: base.column===c && base.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentFgiSort', currentFgiSort); renderFgiTable(); }
-function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentInvSort', currentInvSort); renderInventoryTable(); }
+function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentInvSort', currentInvSort); window.renderInventoryTable(); window.updateCcMngrStock(); }
 
 function renderFgiTable() {
     const wrap = document.getElementById('fgiTableWrap'); if(!wrap) return;
@@ -239,7 +239,7 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         inventoryDB[rKey] = payload;
         setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); 
         setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),2000); 
-        renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') renderAnalyticsDashboard();
+        window.renderInventoryTable(); window.updateCcMngrStock(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') renderAnalyticsDashboard();
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
 }
 
@@ -277,7 +277,7 @@ async function runProductionBatch() {
         if(error) throw new Error(error.message); 
         
         setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); showToast(`✅ Built ${q}x ${n} (${batchType}) and deducted materials.`); 
-        document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        document.getElementById('batchQty').value=1; window.renderInventoryTable(); window.updateCcMngrStock(); setTimeout(()=>setSysProgress(0,'working'),3000); 
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
 }
 
@@ -287,7 +287,7 @@ async function resetInventoryConsumption() {
         sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); 
         const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); 
         if(error) throw new Error(error.message); 
-        inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        inventoryDB={}; window.renderInventoryTable(); window.updateCcMngrStock(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); 
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
 }
 
@@ -1060,7 +1060,8 @@ window.saveManualCycleCount = async function(event) {
     if(error){ alert("DB Error: " + error.message); return; }
     
     inventoryDB[rKey] = payload;
-    renderInventoryTable();
+    window.renderInventoryTable();
+    window.updateCcMngrStock();
     
     if(btn) {
         btn.innerText = "✅ Count Saved!";
@@ -1104,7 +1105,7 @@ window.saveCycleCount = async function() {
     if(error){ alert("DB Error: " + error.message); document.getElementById('scanner-prompt-title').innerText = currentScanKey; return; }
     
     inventoryDB[rKey] = payload;
-    renderInventoryTable();
+    window.renderInventoryTable(); window.updateCcMngrStock();
     
     window.resumeCycleCount();
 };
