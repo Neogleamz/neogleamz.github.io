@@ -835,24 +835,38 @@ window.resumeCycleCount = function() {
 
 window.filterCcMngrItems = function() {
     let term = document.getElementById('ccMngrSearch').value.toLowerCase().trim();
-    let sel = document.getElementById('ccMngrItemSelect');
+    let dropdown = document.getElementById('ccMngrDropdown');
     
     if(!window.cachedCcMngrOptions) return;
-    sel.innerHTML = window.cachedCcMngrOptions; // Restore full list
-    if(term === '') return;
     
-    let groups = sel.querySelectorAll('optgroup');
-    groups.forEach(g => {
-        let opts = g.querySelectorAll('option');
-        opts.forEach(o => {
-            if(!o.innerText.toLowerCase().includes(term)) {
-                o.remove();
-            }
-        });
-        if(g.querySelectorAll('option').length === 0) {
-            g.remove();
+    if(term === '') {
+        dropdown.innerHTML = window.cachedCcMngrOptions;
+        dropdown.style.display = 'none';
+        return;
+    }
+    
+    dropdown.innerHTML = window.cachedCcMngrOptions;
+    
+    let items = dropdown.querySelectorAll('.cc-dropdown-item');
+    items.forEach(o => {
+        if(!o.innerText.toLowerCase().includes(term)) {
+            o.remove();
         }
     });
+    
+    if(dropdown.querySelectorAll('.cc-dropdown-item').length > 0) {
+        dropdown.style.display = 'block';
+    } else {
+        dropdown.innerHTML = '<div style="padding:10px; color:var(--text-muted); text-align:center;">No items found.</div>';
+        dropdown.style.display = 'block';
+    }
+};
+
+window.selectCcMngrItem = function(val, text) {
+    document.getElementById('ccMngrItemSelect').value = val;
+    document.getElementById('ccMngrSearch').value = text;
+    document.getElementById('ccMngrDropdown').style.display = 'none';
+    window.updateCcMngrStock();
 };
 
 window.openCycleCountManager = function() {
@@ -868,17 +882,23 @@ window.openCycleCountManager = function() {
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
     
     let optGroups = {
-        retail: '<optgroup label="📦 RETAIL PRODUCTS">',
-        sub: '<optgroup label="⚙️ SUB-ASSEMBLIES">',
-        print: '<optgroup label="🖨️ 3D PRINTS">',
-        label: '<optgroup label="🏷️ CUSTOM LABELZ">',
-        raw: '<optgroup label="🔩 RAW MATERIALS">'
+        retail: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">📦 RETAIL PRODUCTS</div>',
+        sub: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">⚙️ SUB-ASSEMBLIES</div>',
+        print: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🖨️ 3D PRINTS</div>',
+        label: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🏷️ CUSTOM LABELZ</div>',
+        raw: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🔩 RAW MATERIALS</div>'
     };
     
-    retailProds.forEach(k => optGroups.retail += `<option value="RECIPE:::${k}">📦 ${k}</option>`);
-    subProds.forEach(k => optGroups.sub += `<option value="RECIPE:::${k}">⚙️ ${k}</option>`);
-    realPrintProds.forEach(k => optGroups.print += `<option value="RECIPE:::${k}">🖨️ ${k}</option>`);
-    labelProds.forEach(k => optGroups.label += `<option value="RECIPE:::${k}">🏷️ ${k}</option>`);
+    let mkItem = (val, txt) => {
+        let safeVal = String(val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        let safeTxt = String(txt).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        return `<div class="cc-dropdown-item" style="padding:8px 10px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border-color);" onclick="window.selectCcMngrItem('${safeVal}', '${safeTxt}')" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='transparent'">${txt}</div>`;
+    };
+    
+    retailProds.forEach(k => optGroups.retail += mkItem(`RECIPE:::${k}`, `📦 ${k}`));
+    subProds.forEach(k => optGroups.sub += mkItem(`RECIPE:::${k}`, `⚙️ ${k}`));
+    realPrintProds.forEach(k => optGroups.print += mkItem(`RECIPE:::${k}`, `🖨️ ${k}`));
+    labelProds.forEach(k => optGroups.label += mkItem(`RECIPE:::${k}`, `🏷️ ${k}`));
     
     // sort raw
     let rawArr = Object.entries(catalogCache).sort((a,b) => {
@@ -888,23 +908,17 @@ window.openCycleCountManager = function() {
     });
     rawArr.forEach(([itemKey, r]) => {
         let n = r.neoName || r.itemName;
-        optGroups.raw += `<option value="${itemKey}">🔩 ${n}</option>`;
+        optGroups.raw += mkItem(itemKey, `🔩 ${n}`);
     });
     
-    optGroups.retail += '</optgroup>';
-    optGroups.sub += '</optgroup>';
-    optGroups.print += '</optgroup>';
-    optGroups.label += '</optgroup>';
-    optGroups.raw += '</optgroup>';
-    
-    let finalHtml = '<option value="" disabled selected>-- Select an Item --</option>';
+    let finalHtml = '';
     if (retailProds.length > 0) finalHtml += optGroups.retail;
     if (subProds.length > 0) finalHtml += optGroups.sub;
     if (realPrintProds.length > 0) finalHtml += optGroups.print;
     if (labelProds.length > 0) finalHtml += optGroups.label;
     if (rawArr.length > 0) finalHtml += optGroups.raw;
     
-    select.innerHTML = finalHtml;
+    document.getElementById('ccMngrDropdown').innerHTML = finalHtml;
     window.cachedCcMngrOptions = finalHtml;
     
     let searchEl = document.getElementById('ccMngrSearch');
