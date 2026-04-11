@@ -648,3 +648,14 @@ async function submitManualPrint() {
     setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
 }
 
+
+// ====== GLOBAL BINDINGS ======
+if (typeof window !== 'undefined') {
+    window.advancePrintStatus = typeof advancePrintStatus !== 'undefined' ? advancePrintStatus : undefined;
+    window.deletePrintJob = typeof deletePrintJob !== 'undefined' ? deletePrintJob : undefined;
+    window.openManualPrintModal = typeof openManualPrintModal !== 'undefined' ? openManualPrintModal : undefined;
+    window.closeManualPrintModal = typeof closeManualPrintModal !== 'undefined' ? closeManualPrintModal : undefined;
+    window.submitManualPrint = typeof submitManualPrint !== 'undefined' ? submitManualPrint : undefined;
+    window.executeBatchPrint = typeof executeBatchPrint !== 'undefined' ? executeBatchPrint : undefined;
+    window.submitFinalizePrint = typeof submitFinalizePrint !== 'undefined' ? submitFinalizePrint : undefined;
+}

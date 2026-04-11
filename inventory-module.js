@@ -1109,3 +1109,13 @@ window.saveCycleCount = async function() {
     
     window.resumeCycleCount();
 };
+
+// ====== GLOBAL BINDINGS ======
+if (typeof window !== 'undefined') {
+    window.resetInventoryConsumption = typeof resetInventoryConsumption !== 'undefined' ? resetInventoryConsumption : undefined;
+    window.renderInventoryTable = typeof renderInventoryTable !== 'undefined' ? renderInventoryTable : undefined;
+    window.renderFgiTable = typeof renderFgiTable !== 'undefined' ? renderFgiTable : undefined;
+    window.sortInventory = typeof sortInventory !== 'undefined' ? sortInventory : undefined;
+    window.sortFGI = typeof sortFGI !== 'undefined' ? sortFGI : undefined;
+    window.runProductionBatch = typeof runProductionBatch !== 'undefined' ? runProductionBatch : undefined;
+}
