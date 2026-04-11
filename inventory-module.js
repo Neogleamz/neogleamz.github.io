@@ -833,6 +833,28 @@ window.resumeCycleCount = function() {
 // CYCLE COUNT MANAGER MODAL LOGIC
 // ========================================================
 
+window.filterCcMngrItems = function() {
+    let term = document.getElementById('ccMngrSearch').value.toLowerCase().trim();
+    let sel = document.getElementById('ccMngrItemSelect');
+    
+    if(!window.cachedCcMngrOptions) return;
+    sel.innerHTML = window.cachedCcMngrOptions; // Restore full list
+    if(term === '') return;
+    
+    let groups = sel.querySelectorAll('optgroup');
+    groups.forEach(g => {
+        let opts = g.querySelectorAll('option');
+        opts.forEach(o => {
+            if(!o.innerText.toLowerCase().includes(term)) {
+                o.remove();
+            }
+        });
+        if(g.querySelectorAll('option').length === 0) {
+            g.remove();
+        }
+    });
+};
+
 window.openCycleCountManager = function() {
     let select = document.getElementById('ccMngrItemSelect');
     select.innerHTML = '';
@@ -883,6 +905,10 @@ window.openCycleCountManager = function() {
     if (rawArr.length > 0) finalHtml += optGroups.raw;
     
     select.innerHTML = finalHtml;
+    window.cachedCcMngrOptions = finalHtml;
+    
+    let searchEl = document.getElementById('ccMngrSearch');
+    if(searchEl) searchEl.value = '';
     
     document.getElementById('ccMngrQtyInput').value = '';
     document.getElementById('cycleCountManagerModal').style.display = 'flex';
