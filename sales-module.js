@@ -163,14 +163,16 @@ async function processSalesCSV(isTestMode = false) {
         };
         reader.readAsText(file);
     } else {
-        // XLSX path: use ExcelJS (requires a valid ZIP/XLSX container)
-        reader.onload = async function(e) {
+        // XLSX path: use SheetJS
+        reader.onload = function(e) {
             try {
-                const workbook = new ExcelJS.Workbook();
-                await workbook.xlsx.load(e.target.result);
-                const worksheet = workbook.getWorksheet(1);
-                const rows = excelSheetToJson(worksheet);
-                processParsedSales(rows, isTestMode);
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const roa = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { raw: false });
+                
+                if (roa.length === 0) return alert("The selected sheet is empty or improperly formatted.");
+                processParsedSales(roa, isTestMode);
             } catch (err) {
                 syncTrace('XLSX parse error: ' + err.message, true);
                 setMasterStatus('Parse Error', 'mod-error');

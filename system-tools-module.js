@@ -1149,30 +1149,6 @@ async function syncAndCalculate() {
     if(btnCalc) btnCalc.disabled = false;
 }
 
-// --- XLSX UTILITY: Converts an ExcelJS Worksheet to an array of plain row objects,
-// matching the output format of the legacy XLSX.utils.sheet_to_json() call.
-/**
- * @param {object} worksheet - An ExcelJS Worksheet instance
- * @returns {Object[]} Array of row data objects keyed by header row values
- */
-function excelSheetToJson(worksheet) {
-    const headers = [];
-    const rows = [];
-    worksheet.eachRow((row, rowNumber) => {
-        if (rowNumber === 1) {
-            row.eachCell((cell) => headers.push(cell.value !== null && cell.value !== undefined ? String(cell.value) : ''));
-        } else {
-            const rowObj = {};
-            row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-                const header = headers[colNumber - 1];
-                if (header) rowObj[header] = (cell.value instanceof Date) ? cell.value.toISOString() : (cell.value ?? '');
-            });
-            if (Object.values(rowObj).some(v => v !== '')) rows.push(rowObj);
-        }
-    });
-    return rows;
-}
-
 // --- 13. NEW BACKUP & RESTORE SYSTEM ---
 function openBackupModal() {
     document.getElementById('backupModal').style.display = 'flex';
@@ -1181,10 +1157,6 @@ function openBackupModal() {
 }
 
 function closeBackupModal() { document.getElementById('backupModal').style.display = 'none'; }
-
-let pendingRestoreData = {};
-let preparedBackupBlob = null;
-let preparedBackupFileName = "";
 
 async function executeExport(btnObj) {
     try {
@@ -1195,24 +1167,18 @@ async function executeExport(btnObj) {
         btnObj.style.background = "#f59e0b"; // warning orange
         
         setMasterStatus("Exporting...", "mod-working"); sysLog("Exporting full system backup...");
-        const wb = new ExcelJS.Workbook();
+        const wb = XLSX.utils.book_new();
         async function addSheet(tableName, sheetName) {
             const { data, error } = await supabaseClient.from(tableName).select('*');
             if (error) throw error;
             let exportData = data;
+            if (tableName === 'app_settings') {
+                exportData = data.map(r => ({ ...r, config_json: typeof r.config_json === 'object' ? JSON.stringify(r.config_json) : r.config_json }));
+            } else if (tableName === 'sop_archives') {
+                exportData = data.map(r => ({ ...r, telemetry_json: typeof r.telemetry_json === 'object' ? JSON.stringify(r.telemetry_json) : r.telemetry_json }));
+            }
             if (!exportData || exportData.length === 0) return;
-            const ws = wb.addWorksheet(sheetName);
-            ws.addRow(Object.keys(exportData[0]));
-            
-            exportData.forEach(rowObj => {
-                const cleanRow = Object.values(rowObj).map(val => {
-                    if (val === null || val === undefined) return '';
-                    if (val instanceof Date) return val;
-                    if (typeof val === 'object') return JSON.stringify(val);
-                    return val;
-                });
-                ws.addRow(cleanRow);
-            });
+            const ws = XLSX.utils.json_to_sheet(exportData); XLSX.utils.book_append_sheet(wb, ws, sheetName);
         }
         await addSheet('full_landed_costs', 'Master_Ledger');
         await addSheet('product_recipes', 'Recipes');
@@ -1231,41 +1197,13 @@ async function executeExport(btnObj) {
         await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
         
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-        const buffer = await wb.xlsx.writeBuffer();
+        XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
         
-        const rawArray = new Uint8Array(buffer);
-        preparedBackupBlob = new Blob([rawArray], { type: 'application/octet-stream' });
-        preparedBackupFileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
-        
-        // --- 2-STEP SYNCHRONOUS UI BYPASS ---
-        // Chrome blocks programmatic .download filenames if they happen >2sec after a click event.
-        // We halt here, update the button, and force the user to click again. The second click is 
-        // 100% synchronous, ensuring trust is fully established with the OS.
-        btnObj.innerHTML = "💾 READY - CLICK TO SAVE";
-        btnObj.style.background = "#10b981"; // success green
+        btnObj.innerHTML = originalText;
+        btnObj.style.background = ""; // revert to CSS default
         btnObj.disabled = false;
-        btnObj.onclick = function() {
-            // Native, battle-tested anchor injection (Matching old SheetJS method explicitly)
-            const url = window.URL.createObjectURL(preparedBackupBlob);
-            const anchor = document.createElement('a');
-            anchor.style.display = 'none';
-            anchor.href = url;
-            anchor.download = preparedBackupFileName;
-            document.body.appendChild(anchor);
-            anchor.click();
-            
-            setTimeout(() => {
-                document.body.removeChild(anchor);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-            
-            // Reset button after download
-            btnObj.innerHTML = originalText;
-            btnObj.style.background = ""; // revert to CSS default
-            btnObj.onclick = function() { executeExport(this); };
-        };
 
-        setMasterStatus("Backup Ready for Download", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { 
         sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); 
         if(btnObj) { btnObj.innerHTML = "⬇️ EXPORT BACKUP"; btnObj.disabled = false; btnObj.style.background = ""; }
@@ -1277,14 +1215,13 @@ function handleFileSelect(input) {
     const reader = new FileReader();
     reader.onload = async function(e) {
         try {
-            const workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(e.target.result);
+            const data = new Uint8Array(e.target.result); 
+            const workbook = XLSX.read(data, {type: 'array'});
             pendingRestoreData = {}; let html = '';
-            for (const worksheet of workbook.worksheets) {
-                const sheetName = worksheet.name;
-                const roa = excelSheetToJson(worksheet);
-                if (roa.length > 0) { pendingRestoreData[sheetName] = roa; html += `<label style="display:flex; align-items:center; justify-content:flex-start; gap:10px; font-size:13px; margin:6px 0; color:var(--text-main); font-weight:bold;"><input type="checkbox" class="restore-chk" value="${sheetName}" checked style="width:16px; height:16px; margin:0; flex-shrink:0; cursor:pointer;"> Restore ${sheetName.replace(/_/g, ' ')} (${roa.length} rows)</label>`; }
-            }
+            workbook.SheetNames.forEach(sheetName => {
+                const roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                if(roa.length > 0) { pendingRestoreData[sheetName] = roa; html += `<label style="display:flex; align-items:center; justify-content:flex-start; gap:10px; font-size:13px; margin:6px 0; color:var(--text-main); font-weight:bold;"><input type="checkbox" class="restore-chk" value="${sheetName}" checked style="width:16px; height:16px; margin:0; flex-shrink:0; cursor:pointer;"> Restore ${sheetName.replace(/_/g, ' ')} (${roa.length} rows)</label>`; }
+            });
             document.getElementById('restoreCheckboxes').innerHTML = html; document.getElementById('restorePreview').style.display = 'block';
         } catch (err) { sysLog('Restore file parse error: ' + err.message, true); }
     };

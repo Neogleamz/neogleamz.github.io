@@ -460,11 +460,10 @@
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
-                    const workbook = new ExcelJS.Workbook();
-                    await workbook.xlsx.load(e.target.result);
-                    const worksheet = workbook.worksheets[0];
-                    if (!worksheet) throw new Error('ExcelJS could not locate a valid worksheet in the uploaded file');
-                    const rows = excelSheetToJson(worksheet);
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
                     
                     const newS = rows.map(r => {
                         const m = (k) => {
