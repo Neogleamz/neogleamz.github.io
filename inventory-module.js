@@ -892,6 +892,40 @@ window.closeCycleCountManager = function() {
     document.getElementById('cycleCountManagerModal').style.display = 'none';
 };
 
+window.updateCcMngrStock = function() {
+    let key = document.getElementById('ccMngrItemSelect').value;
+    let display = document.getElementById('ccMngrStockDisplay');
+    let valEl = document.getElementById('ccMngrStockVal');
+    
+    if (!key) { display.style.display = 'none'; return; }
+    
+    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'");
+    let inv = inventoryDB[rKey] || {};
+    let stock = 0;
+    
+    if (rKey.startsWith('RECIPE:::')) {
+        let p    = parseFloat(inv.produced_qty) || 0;
+        let pb   = parseFloat(inv.prototype_produced_qty) || 0;
+        let sold = parseFloat(inv.sold_qty) || 0;
+        let cp   = parseFloat(inv.production_consumed_qty) || 0;
+        let cpr  = parseFloat(inv.prototype_consumed_qty) || 0;
+        let sq   = parseFloat(inv.scrap_qty) || 0;
+        let adj  = parseFloat(inv.manual_adjustment) || 0;
+        stock = p - sold - cp - sq - Math.max(0, cpr - pb) + adj;
+    } else {
+        let c    = catalogCache[rKey] ? catalogCache[rKey].totalQty : 0;
+        let cq   = parseFloat(inv.consumed_qty) || 0;
+        let sq   = parseFloat(inv.scrap_qty) || 0;
+        let adj  = parseFloat(inv.manual_adjustment) || 0;
+        stock = c - cq - sq + adj;
+    }
+    
+    let rounded = Math.round(stock * 100) / 100;
+    valEl.innerText = rounded;
+    valEl.style.color = rounded <= 0 ? '#ef4444' : '#f97316';
+    display.style.display = 'flex';
+};
+
 window.saveManualCycleCount = async function(event) {
     let key = document.getElementById('ccMngrItemSelect').value;
     if(!key) return alert("Please select an item first.");
