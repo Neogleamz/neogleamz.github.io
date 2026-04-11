@@ -1225,28 +1225,19 @@ async function executeExport() {
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         const buffer = await wb.xlsx.writeBuffer();
         
-        // Convert the ArrayBuffer to a Base64 string natively
-        let binaryString = '';
-        const bytes = new Uint8Array(buffer);
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binaryString += String.fromCharCode(bytes[i]);
-        }
-        const b64 = window.btoa(binaryString);
+        // CRITICAL BUGFIX: exceljs in the browser returns a 'Buffer' polyfill object.
+        // Putting this polyfill directly into new Blob([buffer]) wraps it with Javascript object 
+        // byte headers, corrupting the physical ZIP container signature of the XLSX file.
+        // Chrome's security manager detects the signature mismatch, strips the .xlsx extension,
+        // and quarantines the download as a raw "UUID".
+        // We MUST cast it strictly to a raw Uint8Array before placing it in the Blob to preserve the clean ZIP signature.
+        const rawArray = new Uint8Array(buffer);
         
-        // Use a Base64 Data URI instead of a Blob object. 
-        // This makes it physically impossible for the browser to spawn a "UUID" blob name,
-        // violently forcing it to respect the anchor tag's download attribute.
-        const dataUrl = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + b64;
-        
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.style.display = 'none';
-        downloadAnchor.href = dataUrl;
+        const blob = new Blob([rawArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const fileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
-        downloadAnchor.download = fileName;
         
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        document.body.removeChild(downloadAnchor);
+        // Hand off to FileSaver.js to bypass any leftover custom anchor bugs
+        window.saveAs(blob, fileName);
 
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
