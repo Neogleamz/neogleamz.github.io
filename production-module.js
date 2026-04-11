@@ -2433,3 +2433,28 @@ window.saveDraftScrap = async function() {
     setMasterStatus("Draft Saved", "mod-success");
     setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
 };
+
+// ====== GLOBAL BINDINGS ======
+if (typeof window !== 'undefined') {
+    window.openNewWOModal = typeof openNewWOModal !== 'undefined' ? openNewWOModal : undefined;
+    window.openMultiBatchModal = typeof openMultiBatchModal !== 'undefined' ? openMultiBatchModal : undefined;
+    window.openSOPMasterModal = typeof openSOPMasterModal !== 'undefined' ? openSOPMasterModal : undefined;
+    window.openArchiveExplorer = typeof openArchiveExplorer !== 'undefined' ? openArchiveExplorer : undefined;
+    window.deleteWorkOrder = typeof deleteWorkOrder !== 'undefined' ? deleteWorkOrder : undefined;
+    window.advanceWO = typeof advanceWO !== 'undefined' ? advanceWO : undefined;
+    window.printPickList = typeof printPickList !== 'undefined' ? printPickList : undefined;
+    window.printSOP = typeof printSOP !== 'undefined' ? printSOP : undefined;
+    window.openPrintSOP = typeof openPrintSOP !== 'undefined' ? openPrintSOP : undefined;
+    window.deleteAllArchive = typeof deleteAllArchive !== 'undefined' ? deleteAllArchive : undefined;
+    window.closeArchiveExplorer = typeof closeArchiveExplorer !== 'undefined' ? closeArchiveExplorer : undefined;
+    window.switchArchiveTab = typeof switchArchiveTab !== 'undefined' ? switchArchiveTab : undefined;
+    window.hardDeleteArchive = typeof hardDeleteArchive !== 'undefined' ? hardDeleteArchive : undefined;
+    window.closeSOPMasterModal = typeof closeSOPMasterModal !== 'undefined' ? closeSOPMasterModal : undefined;
+    window.toggleInlineEditor = typeof toggleInlineEditor !== 'undefined' ? toggleInlineEditor : undefined;
+    window.saveInlineSopBlock = typeof saveInlineSopBlock !== 'undefined' ? saveInlineSopBlock : undefined;
+    window.addInlineSOPRow = typeof addInlineSOPRow !== 'undefined' ? addInlineSOPRow : undefined;
+    window.toggleBatchezSopGroup = typeof toggleBatchezSopGroup !== 'undefined' ? toggleBatchezSopGroup : undefined;
+    window.submitFinalizeWo = typeof submitFinalizeWo !== 'undefined' ? submitFinalizeWo : undefined;
+    window.openDraftScrapModal = typeof openDraftScrapModal !== 'undefined' ? openDraftScrapModal : undefined;
+    window.validateAndCreateWO = typeof validateAndCreateWO !== 'undefined' ? validateAndCreateWO : undefined;
+}

@@ -56,7 +56,8 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 
 ### G. Modal Close Button Standard
 * **Positioning:** All modal headers must use `position: relative`. The close button is `position: absolute; top: 50%; right: 16px; transform: translateY(-50%)`.
-* **Style:** MUST use `class="btn-red"` with a plain `✕` character (no FontAwesome icon dependency, no "Close" text label).
+* **Style:** MUST use `class="modal-close-btn"` with the explicit text `✕ CLOSE`.
+* **Dimensions:** Standardized at `height: 32px` with `padding: 0 16px` to ensure a clear touch target and premium aesthetic.
 * **Why:** Consistent with §2B (Red = destructive/close), and the absolute-position pattern ensures the title remains visually centered regardless of header padding.
 
 ---

@@ -1,15 +1,15 @@
-// --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
+﻿// --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
 const savedFgiState = JSON.parse(localStorage.getItem('fgiCategoryState') || "null");
 window.fgiCategoryState = savedFgiState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true, 'cat-label': true };
 window.toggleFgiCategory = function(cat) { 
     window.fgiCategoryState[cat] = !window.fgiCategoryState[cat]; 
     localStorage.setItem('fgiCategoryState', JSON.stringify(window.fgiCategoryState));
-    renderFgiTable(); 
+    window.renderFgiTable(); 
 };
-function sortFGI(cat, c) { if(isResizing) return; let base=currentFgiSort[cat]||{column:'n',direction:'asc'}; currentFgiSort[cat] = { column: c, direction: base.column===c && base.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentFgiSort', currentFgiSort); renderFgiTable(); }
-function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentInvSort', currentInvSort); renderInventoryTable(); }
+function sortFGI(cat, c) { if(isResizing) return; let base=currentFgiSort[cat]||{column:'n',direction:'asc'}; currentFgiSort[cat] = { column: c, direction: base.column===c && base.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentFgiSort', currentFgiSort); window.renderFgiTable(); }
+function sortInventory(c) { if(isResizing) return; currentInvSort = { column: c, direction: currentInvSort.column===c && currentInvSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentInvSort', currentInvSort); window.renderInventoryTable(); }
 
-function renderFgiTable() {
+window.renderFgiTable = function() {
     const wrap = document.getElementById('fgiTableWrap'); if(!wrap) return;
     if (!currentFgiSort || typeof currentFgiSort.column !== 'undefined') {
         currentFgiSort = {
@@ -52,17 +52,17 @@ function renderFgiTable() {
     else {
         let sortFn = (cat) => (x,y) => { let cfg = currentFgiSort[cat] || {column:'n', direction:'asc'}; let u = x[cfg.column]; let v = y[cfg.column]; if (typeof u === 'number' && typeof v === 'number') return cfg.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return cfg.direction==='asc'?-1:1; if(u>v) return cfg.direction==='asc'?1:-1; return 0; };
         let groups = [
-            { id: 'cat-retail', name: 'Retail Products', icn: '📦', items: a.filter(x => !x.is3D && !x.isSub && !x.isLabel).sort(sortFn('cat-retail')) },
-            { id: 'cat-sub',    name: 'Sub-Assemblies',  icn: '⚙️',  items: a.filter(x => x.isSub && !x.is3D).sort(sortFn('cat-sub')) },
-            { id: 'cat-print',  name: '3D Prints',       icn: '🖨️',  items: a.filter(x => x.is3D).sort(sortFn('cat-print')) },
-            { id: 'cat-label',  name: 'Custom Labels',   icn: '🏷️',  items: a.filter(x => x.isLabel).sort(sortFn('cat-label')) }
+            { id: 'cat-retail', name: 'Retail Products', icn: 'ðŸ“¦', items: a.filter(x => !x.is3D && !x.isSub && !x.isLabel).sort(sortFn('cat-retail')) },
+            { id: 'cat-sub',    name: 'Sub-Assemblies',  icn: 'âš™ï¸',  items: a.filter(x => x.isSub && !x.is3D).sort(sortFn('cat-sub')) },
+            { id: 'cat-print',  name: '3D Prints',       icn: 'ðŸ–¨ï¸',  items: a.filter(x => x.is3D).sort(sortFn('cat-print')) },
+            { id: 'cat-label',  name: 'Custom Labels',   icn: 'ðŸ·ï¸',  items: a.filter(x => x.isLabel).sort(sortFn('cat-label')) }
         ];
 
         let isFirstGroup = true;
         groups.forEach(g => {
             if(g.items.length === 0) return;
             let isExp = window.fgiCategoryState[g.id] !== false;
-            let chevron = isExp ? '▼' : '▶';
+            let chevron = isExp ? 'â–¼' : 'â–¶';
             
             let mt = isFirstGroup ? '0px' : '20px';
             h += `<div class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s; padding:10px 15px; border-bottom:1px solid rgba(255,255,255,0.1); margin-top:${mt}; border-radius: 6px 6px 0 0;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><span style="font-weight:900; color:var(--primary-color); font-size:13px; text-transform:uppercase; letter-spacing:1px;"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></span></div>`;
@@ -129,7 +129,7 @@ function renderFgiTable() {
         });
     }
     wrap.innerHTML = h; applyTableInteractivity('fgiTableWrap');
-}
+};
 
 const SUPPLIER_LEAD_TIME_DAYS = 5;
 const SAFETY_STOCK_MULTIPLIER = 1.10;
@@ -166,9 +166,9 @@ window.calculateTrailingVelocity = function(item_key, days=30) {
     return totalQty / days;
 };
 
-function renderInventoryTable() {
+window.renderInventoryTable = function() {
     const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
-    renderFgiTable();
+    window.renderFgiTable();
     let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:2px solid #ef4444;">CONS</th> <th class="${currentInvSort.column==='pc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('pc')" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentInvSort.column==='prc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('prc')" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentInvSort.column==='sq'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('sq')" style="border-bottom:2px solid #b91c1c;">SCRAP</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')" style="border-bottom:2px solid #0ea5e9;">ADJMT</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('ms')" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:2px solid #f59e0b;">STOCK</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">ASSETS</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, n:c.itemName, p:c.totalQty, c:i.consumed_qty, sq:i.scrap_qty, a:i.manual_adjustment, ms:i.min_stock, s:s, up:up, tp:tp, pc: (i.prototype_consumed_qty||0), prc: (i.production_consumed_qty||0) }; });
@@ -185,13 +185,13 @@ function renderInventoryTable() {
             let sc = x.s<0 ? 'negative-stock' : (isLow ? 'low-stock' : 'highlight-calc'); 
             let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); 
             
-            let ropPill = (dynamicROP > 0 && isLow) ? `<span style="background:#ef4444; color:#fff; border-radius:12px; font-size:10px; padding:1px 6px; font-weight:bold; margin-left:8px; animation: ropPulse 1.5s infinite;">🚨 ROP: ${dynamicROP.toFixed(1).replace(/\.?0+$/,'')}</span>` : '';
+            let ropPill = (dynamicROP > 0 && isLow) ? `<span style="background:#ef4444; color:#fff; border-radius:12px; font-size:10px; padding:1px 6px; font-weight:bold; margin-left:8px; animation: ropPulse 1.5s infinite;">ðŸš¨ ROP: ${dynamicROP.toFixed(1).replace(/\.?0+$/,'')}</span>` : '';
             
             h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn} ${ropPill}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td><td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'consumed_qty')">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'prototype_consumed_qty')">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'production_consumed_qty')">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#b91c1c;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'scrap_qty')">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'manual_adjustment')">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable" style="color:#f97316;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; 
         });
     }
     wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('invTableWrap');
-}
+};
 
 async function handleInvEdit(cell, key, p, c, a, sq, mode) {
     try { 
@@ -239,7 +239,7 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         inventoryDB[rKey] = payload;
         setMasterStatus("Adjusted!", "mod-success"); cell.classList.add('edited-success'); 
         setTimeout(()=>cell.classList.remove('edited-success'),1000); setTimeout(()=>setMasterStatus("Ready.", "status-idle"),2000); 
-        renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') renderAnalyticsDashboard();
+        window.renderInventoryTable(); if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') renderAnalyticsDashboard();
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
 }
 
@@ -276,25 +276,25 @@ async function runProductionBatch() {
         const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
         if(error) throw new Error(error.message); 
         
-        setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); showToast(`✅ Built ${q}x ${n} (${batchType}) and deducted materials.`); 
-        document.getElementById('batchQty').value=1; renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); showToast(`âœ… Built ${q}x ${n} (${batchType}) and deducted materials.`); 
+        document.getElementById('batchQty').value=1; window.renderInventoryTable(); setTimeout(()=>setSysProgress(0,'working'),3000); 
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
 }
 
-async function resetInventoryConsumption() {
+window.resetInventoryConsumption = async function() {
     try { 
-        if(!confirm("⚠️ DANGER: Reset ALL consumption, adjustments, min stocks, scrap, built, and sold quantities to zero?")) return; 
+        if(!confirm("âš ï¸ DANGER: Reset ALL consumption, adjustments, min stocks, scrap, built, and sold quantities to zero?")) return; 
         sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); 
         const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); 
         if(error) throw new Error(error.message); 
-        inventoryDB={}; renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        inventoryDB={}; window.renderInventoryTable(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); 
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
 }
 
 function printReorderReport() {
     try {
         let html = `<html><head><title>Neogleamz Reorder Report</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; font-size:14px; margin-top: 15px;} th,td{border:1px solid #ccc; padding:8px; text-align:left;} th{background:#f1f5f9;}</style></head><body>`;
-        html += `<h2>🚨 Low Stock Reorder Report</h2><p style="color:#64748b; font-size:14px;">Date: ${new Date().toLocaleDateString()}</p>`;
+        html += `<h2>ðŸš¨ Low Stock Reorder Report</h2><p style="color:#64748b; font-size:14px;">Date: ${new Date().toLocaleDateString()}</p>`;
         
         let items = [];
         
@@ -362,7 +362,7 @@ function printReorderReport() {
         }
 
         // --- Production Targets Build List (Tree View) ---
-        html += `<h3>🏭 Production Targets Build List</h3><div style="margin-bottom:20px; padding:15px; background:#fffbdd; border:1px solid #fde047; border-radius:5px; font-size:12px;"><strong>Note:</strong> "On Hand" indicates physical stock at the time of report generation. It does not dynamically deplete for shared components across multiple builds. Refer to the Low Inventory Supply Chain Report below for aggregate raw material ordering deficits.</div>`;
+        html += `<h3>ðŸ­ Production Targets Build List</h3><div style="margin-bottom:20px; padding:15px; background:#fffbdd; border:1px solid #fde047; border-radius:5px; font-size:12px;"><strong>Note:</strong> "On Hand" indicates physical stock at the time of report generation. It does not dynamically deplete for shared components across multiple builds. Refer to the Low Inventory Supply Chain Report below for aggregate raw material ordering deficits.</div>`;
 
         let deficits = [];
         Object.keys(productsDB).forEach(p => {
@@ -380,7 +380,7 @@ function printReorderReport() {
         });
 
         if (deficits.length === 0) {
-            html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px; background:#f8fafc;">✅ All production products are at or above optimal stock levels.</p>`;
+            html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px; background:#f8fafc;">âœ… All production products are at or above optimal stock levels.</p>`;
         } else {
             function getStockLocal(k, isProd) {
                 let i = inventoryDB[k] || {};
@@ -407,22 +407,22 @@ function printReorderReport() {
                     let isProd = subK.startsWith('RECIPE:::');
                     let stock = getStockLocal(subK, isProd);
                     let ok = stock >= totalReq;
-                    let statStr = ok ? `<span class="stock-badge" style="background:#d1fae5; color:#065f46; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">✅ OK</span>` : `<span class="stock-badge" style="background:#fee2e2; color:#991b1b; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">🔴 SHORT ${ (totalReq - stock).toFixed(2).replace(/\.?0+$/,'') }</span>`;
+                    let statStr = ok ? `<span class="stock-badge" style="background:#d1fae5; color:#065f46; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">âœ… OK</span>` : `<span class="stock-badge" style="background:#fee2e2; color:#991b1b; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">ðŸ”´ SHORT ${ (totalReq - stock).toFixed(2).replace(/\.?0+$/,'') }</span>`;
                     
                     let displayName = subK;
                     if (isProd) {
                         let s = subK.replace('RECIPE:::', '');
                         let is3D = !!(productsDB[s] && productsDB[s].is_3d_print);
                         let isSub = !!isSubassemblyDB[s];
-                        let icn = is3D ? "🖨️ " : (isSub ? "⚙️ " : "📦 ");
+                        let icn = is3D ? "ðŸ–¨ï¸ " : (isSub ? "âš™ï¸ " : "ðŸ“¦ ");
                         displayName = icn + s;
-                        thtml += `<li style='margin:5px 0; font-size:14px; padding-left:25px; position:relative;'><span style='position:absolute; left:0; top:-5px; font-size:18px; color:#cbd5e1;'>⌞</span><strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}`;
+                        thtml += `<li style='margin:5px 0; font-size:14px; padding-left:25px; position:relative;'><span style='position:absolute; left:0; top:-5px; font-size:18px; color:#cbd5e1;'>âŒž</span><strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}`;
                         if (!ok) thtml += buildTree(s, totalReq - stock);
                         thtml += `</li>`;
                     } else {
                         let c = catalogCache[subK];
                         displayName = c ? (c.neoName || c.itemName) : subK;
-                        thtml += `<li style='margin:5px 0; font-size:14px; padding-left:25px; position:relative;'><span style='position:absolute; left:0; top:-5px; font-size:18px; color:#cbd5e1;'>⌞</span>🧵 <strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}</li>`;
+                        thtml += `<li style='margin:5px 0; font-size:14px; padding-left:25px; position:relative;'><span style='position:absolute; left:0; top:-5px; font-size:18px; color:#cbd5e1;'>âŒž</span>ðŸ§µ <strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}</li>`;
                     }
                 });
                 thtml += "</ul>";
@@ -432,7 +432,7 @@ function printReorderReport() {
             deficits.sort((a,b) => b.short - a.short).forEach(d => {
                 let is3D = !!(productsDB[d.n] && productsDB[d.n].is_3d_print);
                 let isSub = !!isSubassemblyDB[d.n];
-                let icn = is3D ? "🖨️ " : (isSub ? "⚙️ " : "📦 ");
+                let icn = is3D ? "ðŸ–¨ï¸ " : (isSub ? "âš™ï¸ " : "ðŸ“¦ ");
                 html += `<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:5px; padding:15px; margin-bottom:15px;">`;
                 html += `<div style="font-size:16px; font-weight:bold; color:#0f172a;">${icn} ${d.n} <span style="font-size:13px; font-weight:normal; color:#64748b; margin-left:10px;">(Target: ${d.ms.toFixed(2).replace(/\.?0+$/,'')} | Current: ${d.s.toFixed(2).replace(/\.?0+$/,'')} | Must Build: <span style="color:#f97316; font-weight:bold;">${d.short.toFixed(2).replace(/\.?0+$/,'')}</span>)</span></div>`;
                 html += buildTree(d.n, d.short);
@@ -442,7 +442,7 @@ function printReorderReport() {
         
         html += `<br><hr style="border:none; border-top:1px solid #cbd5e1; margin:20px 0;">`;
 
-        html += `<h3>📦 Supply Chain Deficits (Order These)</h3>`;
+        html += `<h3>ðŸ“¦ Supply Chain Deficits (Order These)</h3>`;
         
         Object.keys(purchaseTargets).forEach(k => {
             let c = catalogCache[k] || {}; let f = fmtKey(k); let i = inventoryDB[k] || {};
@@ -454,7 +454,7 @@ function printReorderReport() {
         });
 
         if(items.length === 0) { 
-            html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px; background:#f8fafc;">✅ All monitored raw stock levels are optimal.</p>`; 
+            html += `<p style="padding:20px; font-weight:bold; color:#10b981; border:1px solid #cbd5e1; border-radius:5px; background:#f8fafc;">âœ… All monitored raw stock levels are optimal.</p>`; 
         } 
         else {
             html += `<table><thead><tr><th>Neogleamz Name</th><th>Item Name</th><th>Spec</th><th>STOCK</th><th>Dep. Req</th><th>Min Target</th><th>Shortfall</th><th>Est. Cost to Restock</th></tr></thead><tbody>`;
@@ -592,7 +592,7 @@ window.renderVelocityzFGI = function() {
         let is3D = !!(productsDB[pName] && productsDB[pName].is_3d_print);
         let isLabel = !!(productsDB[pName] && productsDB[pName].is_label);
         let isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]);
-        let icn = is3D ? "🖨️" : (isLabel ? "🏷️" : (isSub ? "⚙️" : "📦"));
+        let icn = is3D ? "ðŸ–¨ï¸" : (isLabel ? "ðŸ·ï¸" : (isSub ? "âš™ï¸" : "ðŸ“¦"));
         
         html += `<tr style="border-bottom: 1px solid var(--border-color);">
             <td style="font-weight: bold; color: var(--text-heading); display: flex; align-items: center; gap: 6px;">
@@ -615,7 +615,7 @@ window.renderVelocityzFGI = function() {
 window.buildVelocityzTreeHTML = function(pName, reqQty, isRoot = false, idPath = "") {
     let recipe = productsDB[pName] || [];
     if (recipe.length === 0) {
-        if (isRoot) return `<div style="padding: 15px; color: #ef4444; font-size: 12px; font-weight: bold; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-top: 10px;">⚠️ No Bill of Materials (Recipe) defined for this product in the catalog.</div>`;
+        if (isRoot) return `<div style="padding: 15px; color: #ef4444; font-size: 12px; font-weight: bold; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-top: 10px;">âš ï¸ No Bill of Materials (Recipe) defined for this product in the catalog.</div>`;
         return "";
     }
     
@@ -634,7 +634,7 @@ window.buildVelocityzTreeHTML = function(pName, reqQty, isRoot = false, idPath =
             let is3D = !!(productsDB[s] && productsDB[s].is_3d_print);
             let isLabel = !!(productsDB[s] && productsDB[s].is_label);
             let isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[s]);
-            let icn = is3D ? "🖨️ " : (isLabel ? "🏷️ " : (isSub ? "⚙️ " : "📦 "));
+            let icn = is3D ? "ðŸ–¨ï¸ " : (isLabel ? "ðŸ·ï¸ " : (isSub ? "âš™ï¸ " : "ðŸ“¦ "));
             displayName = icn + s;
             
             let childId = idPath + '_' + s.replace(/\W/g, '_');
@@ -659,8 +659,8 @@ window.buildVelocityzTreeHTML = function(pName, reqQty, isRoot = false, idPath =
             }
         } else {
             let c = typeof catalogCache !== 'undefined' ? catalogCache[subK] : null;
-            if (c) displayName = '🧵 ' + (c.neoName || c.itemName);
-            else displayName = '🧵 ' + subK;
+            if (c) displayName = 'ðŸ§µ ' + (c.neoName || c.itemName);
+            else displayName = 'ðŸ§µ ' + subK;
             
             html += `<li style="margin-bottom: 5px; padding: 4px 0; display: flex; align-items: center;">
                 <span style="color: var(--text-muted); font-size: 13px;">${displayName}</span>
@@ -696,7 +696,7 @@ window.runVelocityzExplosion = function() {
             let is3D = !!(productsDB[pName] && productsDB[pName].is_3d_print);
             let isLabel = !!(productsDB[pName] && productsDB[pName].is_label);
             let isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]);
-            let icn = is3D ? "🖨️ " : (isLabel ? "🏷️ " : (isSub ? "⚙️ " : "📦 "));
+            let icn = is3D ? "ðŸ–¨ï¸ " : (isLabel ? "ðŸ·ï¸ " : (isSub ? "âš™ï¸ " : "ðŸ“¦ "));
             let typeTag = is3D ? "3D PRINT" : (isLabel ? "CUSTOM LABEL" : (isSub ? "SUB-ASSEMBLY" : "RETAIL GOOD"));
 
             let treeHtml = window.buildVelocityzTreeHTML(pName, fcast, true, rootId);
@@ -846,17 +846,17 @@ window.openCycleCountManager = function() {
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
     
     let optGroups = {
-        retail: '<optgroup label="📦 RETAIL PRODUCTS">',
-        sub: '<optgroup label="⚙️ SUB-ASSEMBLIES">',
-        print: '<optgroup label="🖨️ 3D PRINTS">',
-        label: '<optgroup label="🏷️ CUSTOM LABELZ">',
-        raw: '<optgroup label="🔩 RAW MATERIALS">'
+        retail: '<optgroup label="ðŸ“¦ RETAIL PRODUCTS">',
+        sub: '<optgroup label="âš™ï¸ SUB-ASSEMBLIES">',
+        print: '<optgroup label="ðŸ–¨ï¸ 3D PRINTS">',
+        label: '<optgroup label="ðŸ·ï¸ CUSTOM LABELZ">',
+        raw: '<optgroup label="ðŸ”© RAW MATERIALS">'
     };
     
-    retailProds.forEach(k => optGroups.retail += `<option value="RECIPE:::${k}">📦 ${k}</option>`);
-    subProds.forEach(k => optGroups.sub += `<option value="RECIPE:::${k}">⚙️ ${k}</option>`);
-    realPrintProds.forEach(k => optGroups.print += `<option value="RECIPE:::${k}">🖨️ ${k}</option>`);
-    labelProds.forEach(k => optGroups.label += `<option value="RECIPE:::${k}">🏷️ ${k}</option>`);
+    retailProds.forEach(k => optGroups.retail += `<option value="RECIPE:::${k}">ðŸ“¦ ${k}</option>`);
+    subProds.forEach(k => optGroups.sub += `<option value="RECIPE:::${k}">âš™ï¸ ${k}</option>`);
+    realPrintProds.forEach(k => optGroups.print += `<option value="RECIPE:::${k}">ðŸ–¨ï¸ ${k}</option>`);
+    labelProds.forEach(k => optGroups.label += `<option value="RECIPE:::${k}">ðŸ·ï¸ ${k}</option>`);
     
     // sort raw
     let rawArr = Object.entries(catalogCache).sort((a,b) => {
@@ -866,7 +866,7 @@ window.openCycleCountManager = function() {
     });
     rawArr.forEach(([itemKey, r]) => {
         let n = r.neoName || r.itemName;
-        optGroups.raw += `<option value="${itemKey}">🔩 ${n}</option>`;
+        optGroups.raw += `<option value="${itemKey}">ðŸ”© ${n}</option>`;
     });
     
     optGroups.retail += '</optgroup>';
@@ -958,10 +958,10 @@ window.saveManualCycleCount = async function(event) {
     }
     
     let btn = event ? event.target : document.querySelector('#cycleCountManagerModal .btn-green');
-    let oldTxt = "💾 Save Manual Count";
+    let oldTxt = "ðŸ’¾ Save Manual Count";
     if(btn) {
         oldTxt = btn.innerText;
-        btn.innerText = "⏳ Saving...";
+        btn.innerText = "â³ Saving...";
         btn.disabled = true;
     }
     
@@ -975,12 +975,12 @@ window.saveManualCycleCount = async function(event) {
     if(error){ alert("DB Error: " + error.message); return; }
     
     inventoryDB[rKey] = payload;
-    renderInventoryTable();
+    window.renderInventoryTable();
     
     if(btn) {
-        btn.innerText = "✅ Count Saved!";
+        btn.innerText = "âœ… Count Saved!";
         btn.style.background = "#059669";
-        setTimeout(() => { btn.innerText = "💾 Save Manual Count"; btn.style.background = ""; btn.disabled = false; }, 2500);
+        setTimeout(() => { btn.innerText = "ðŸ’¾ Save Manual Count"; btn.style.background = ""; btn.disabled = false; }, 2500);
     }
     document.getElementById('ccMngrQtyInput').value = ''; // clear for next entry
 };
@@ -1019,7 +1019,7 @@ window.saveCycleCount = async function() {
     if(error){ alert("DB Error: " + error.message); document.getElementById('scanner-prompt-title').innerText = currentScanKey; return; }
     
     inventoryDB[rKey] = payload;
-    renderInventoryTable();
+    window.renderInventoryTable();
     
     window.resumeCycleCount();
 };

@@ -41,6 +41,18 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: Inventory Data Grid & ROP Management)*
 - [ ] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
 - [ ] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
+
+### Target: `main`
+*(Epic: Master Reference Compliance Audit)*
+- [ ] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
+
+### Target: `feat/webrtc-cycle-counts`
+*(Epic: Cycle Count Scanner Standardization)*
+- [ ] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure consistent behavior across all scanning entry points.
+
+### Target: `main`
+*(Epic: Sitewide Performance Optimization)*
+- [ ] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
@@ -48,6 +60,18 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Tailwind Modal Migration)*
 - [ ] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
+
+### Target: `main`
+*(Epic: Sitewide Code Quality Audit)*
+- [ ] `chore/code-quality-audit` : Perform a full sitewide audit of current coding practices across all JS modules and index.html — cross-reference against industry standard best practices (e.g. event delegation, memory leaks, function scoping, global var hygiene, DOM query caching) and produce a prioritized list of refactor targets.
+
+### Target: `main`
+*(Epic: Competitive Feature Benchmarking)*
+- [ ] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
+
+### Target: `main`
+*(Epic: Sitewide Security Audit)*
+- [ ] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
 
 ---
 
