@@ -8,6 +8,56 @@ async function hashPII(rawStr) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+/**
+ * RFC 4180-compliant CSV parser. Handles Shopify exports with quoted fields,
+ * embedded commas, and quoted newlines. Returns an array of row objects keyed
+ * by the header row, matching the output format of excelSheetToJson().
+ * @param {string} text - Raw CSV file content as a UTF-8 string
+ * @returns {Object[]}
+ */
+function parseCsvText(text) {
+    // Normalize line endings
+    const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const cells = [];
+    let currentCell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < normalized.length; i++) {
+        const ch = normalized[i];
+        const next = normalized[i + 1];
+        if (inQuotes) {
+            if (ch === '"' && next === '"') { currentCell += '"'; i++; } // escaped quote
+            else if (ch === '"') { inQuotes = false; }
+            else { currentCell += ch; }
+        } else {
+            if (ch === '"') { inQuotes = true; }
+            else if (ch === ',') { cells.push(currentCell); currentCell = ''; }
+            else if (ch === '\n') { cells.push(currentCell); currentCell = ''; cells.push('\n'); }
+            else { currentCell += ch; }
+        }
+    }
+    cells.push(currentCell); // final cell
+
+    // Reconstruct rows from the flat cell + newline-marker array
+    const allRows = [];
+    let currentRow = [];
+    for (const cell of cells) {
+        if (cell === '\n') { allRows.push(currentRow); currentRow = []; }
+        else { currentRow.push(cell); }
+    }
+    if (currentRow.length > 0 && currentRow.some(c => c !== '')) allRows.push(currentRow);
+
+    if (allRows.length < 2) return [];
+    const headers = allRows[0];
+    return allRows.slice(1)
+        .filter(row => row.some(c => c.trim() !== ''))
+        .map(row => {
+            const obj = {};
+            headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
+            return obj;
+        });
+}
+
 // --- 9. SALES SYNC ENGINE ---
 async function addManualSale() {
     try {
@@ -97,15 +147,37 @@ async function processSalesCSV(isTestMode = false) {
     if(!file) { syncTrace("ERROR: No CSV payload selected.", true); return alert("Please select a CSV file first."); }
     syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
     sysLog("Reading Sales CSV..."); setMasterStatus("Parsing...", "mod-working"); setSysProgress(20, 'working');
+    const isCsv = file.name.toLowerCase().endsWith('.csv');
     const reader = new FileReader();
-    reader.onload = async function(e) {
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.load(e.target.result);
-        const worksheet = workbook.getWorksheet(1);
-        const rows = excelSheetToJson(worksheet);
-        processParsedSales(rows, isTestMode);
-    };
-    reader.readAsArrayBuffer(file);
+
+    if (isCsv) {
+        // CSV path: read as text and parse manually (ExcelJS xlsx.load rejects non-ZIP files)
+        reader.onload = function(e) {
+            try {
+                const rows = parseCsvText(e.target.result);
+                processParsedSales(rows, isTestMode);
+            } catch (err) {
+                syncTrace('CSV parse error: ' + err.message, true);
+                setMasterStatus('Parse Error', 'mod-error');
+            }
+        };
+        reader.readAsText(file);
+    } else {
+        // XLSX path: use ExcelJS (requires a valid ZIP/XLSX container)
+        reader.onload = async function(e) {
+            try {
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(e.target.result);
+                const worksheet = workbook.getWorksheet(1);
+                const rows = excelSheetToJson(worksheet);
+                processParsedSales(rows, isTestMode);
+            } catch (err) {
+                syncTrace('XLSX parse error: ' + err.message, true);
+                setMasterStatus('Parse Error', 'mod-error');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
 }
 
 async function processParsedSales(rows, isTestMode = false) {
