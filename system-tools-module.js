@@ -1190,21 +1190,21 @@ async function executeExport() {
             const { data, error } = await supabaseClient.from(tableName).select('*');
             if (error) throw error;
             let exportData = data;
-            if (tableName === 'product_recipes') {
-                exportData = data.map(r => ({ product_name: r.product_name, components: JSON.stringify(r.components), labor_time_mins: r.labor_time_mins, labor_rate_hr: r.labor_rate_hr, msrp: r.msrp, wholesale_price: r.wholesale_price, is_subassembly: r.is_subassembly }));
-            } else if (tableName === 'production_sops') {
-                exportData = data.map(r => ({ product_name: r.product_name, steps: JSON.stringify(r.steps) }));
-            } else if (tableName === 'work_orders') {
-                exportData = data.map(r => ({ ...r, wip_state: JSON.stringify(r.wip_state), routing: JSON.stringify(r.routing || {}) }));
-            } else if (tableName === 'pack_ship_sops') {
-                exportData = data.map(r => ({ ...r, instruction_json: typeof r.instruction_json === 'object' ? JSON.stringify(r.instruction_json) : r.instruction_json }));
-            } else if (tableName === 'sop_archives') {
-                exportData = data.map(r => ({ ...r, telemetry_json: typeof r.telemetry_json === 'object' ? JSON.stringify(r.telemetry_json) : r.telemetry_json }));
-            }
             if (!exportData || exportData.length === 0) return;
             const ws = wb.addWorksheet(sheetName);
             ws.addRow(Object.keys(exportData[0]));
-            exportData.forEach(rowObj => ws.addRow(Object.values(rowObj)));
+            
+            exportData.forEach(rowObj => {
+                // ExcelJS will crash/corrupt the output if fed raw JS Objects/Arrays in the addRow array.
+                // We must stringify everything that isn't a primitive to prevent the 126KB truncated file bug.
+                const cleanRow = Object.values(rowObj).map(val => {
+                    if (val === null || val === undefined) return '';
+                    if (val instanceof Date) return val;
+                    if (typeof val === 'object') return JSON.stringify(val);
+                    return val;
+                });
+                ws.addRow(cleanRow);
+            });
         }
         await addSheet('full_landed_costs', 'Master_Ledger');
         await addSheet('product_recipes', 'Recipes');
@@ -1221,34 +1221,15 @@ async function executeExport() {
         await addSheet('raw_orders', 'Raw_Orders');
         await addSheet('raw_parcel_summary', 'Raw_Parcel_Summary');
         await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
+        
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         const buffer = await wb.xlsx.writeBuffer();
         
-        // Restore correct MIME type
+        // Use proper MIME type and the FileSaver.js utility to bypass all browser-specific blob issues
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const downloadUrl = window.URL.createObjectURL(blob);
-        
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.style.display = 'none';
-        downloadAnchor.href = downloadUrl;
-        
-        // Some older browser engines/WebViews fail with template literals in the download attribute
         const fileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
-        downloadAnchor.download = fileName;
-        downloadAnchor.rel = "noopener";
         
-        document.body.appendChild(downloadAnchor);
-        
-        // Let the DOM update before clicking
-        setTimeout(() => {
-            downloadAnchor.click();
-            
-            // Clean up extendedly
-            setTimeout(() => {
-                document.body.removeChild(downloadAnchor);
-                window.URL.revokeObjectURL(downloadUrl);
-            }, 5000);
-        }, 100);
+        window.saveAs(blob, fileName);
 
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
