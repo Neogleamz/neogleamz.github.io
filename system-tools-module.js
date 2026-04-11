@@ -1223,18 +1223,24 @@ async function executeExport() {
         await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         const buffer = await wb.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        // By forcing the MIME type to generic octet-stream, we prevent the browser from attempting to 
+        // handle the object natively and bypassing the anchor tag's download attribute.
+        const blob = new Blob([buffer], { type: 'application/octet-stream' });
         const downloadUrl = URL.createObjectURL(blob);
         const downloadAnchor = document.createElement('a');
-        downloadAnchor.href = downloadUrl;
-        downloadAnchor.download = `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`;
         downloadAnchor.style.display = 'none';
+        downloadAnchor.setAttribute('href', downloadUrl);
+        downloadAnchor.setAttribute('download', `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
         document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
+        
+        // Give the DOM a frame to register the anchor before clicking
         setTimeout(() => {
-            document.body.removeChild(downloadAnchor);
-            window.URL.revokeObjectURL(downloadUrl);
-        }, 1000);
+            downloadAnchor.click();
+            setTimeout(() => {
+                document.body.removeChild(downloadAnchor);
+                window.URL.revokeObjectURL(downloadUrl);
+            }, 30000); // 30 seconds to ensure large exports finish initiating
+        }, 50);
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
 }
