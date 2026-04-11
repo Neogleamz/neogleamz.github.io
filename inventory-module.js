@@ -859,14 +859,14 @@ window.openCycleCountManager = function() {
     labelProds.forEach(k => optGroups.label += `<option value="RECIPE:::${k}">🏷️ ${k}</option>`);
     
     // sort raw
-    let rawArr = Object.values(catalogCache).sort((a,b) => {
-        let na = a.neoName || a.itemName || '';
-        let nb = b.neoName || b.itemName || '';
+    let rawArr = Object.entries(catalogCache).sort((a,b) => {
+        let na = a[1].neoName || a[1].itemName || '';
+        let nb = b[1].neoName || b[1].itemName || '';
         return na.localeCompare(nb);
     });
-    rawArr.forEach(r => {
+    rawArr.forEach(([itemKey, r]) => {
         let n = r.neoName || r.itemName;
-        optGroups.raw += `<option value="${r.itemKey}">🔩 ${n}</option>`;
+        optGroups.raw += `<option value="${itemKey}">🔩 ${n}</option>`;
     });
     
     optGroups.retail += '</optgroup>';
@@ -957,7 +957,7 @@ window.saveManualCycleCount = async function(event) {
         payload.manual_adjustment = val - (c - cq - sq);    
     }
     
-    let btn = event ? event.target : document.querySelector('#cycleCountManagerModal .btn-purple');
+    let btn = event ? event.target : document.querySelector('#cycleCountManagerModal .btn-green');
     let oldTxt = "💾 Save Manual Count";
     if(btn) {
         oldTxt = btn.innerText;
