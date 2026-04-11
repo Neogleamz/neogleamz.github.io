@@ -37,10 +37,17 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: Socialz Outreach Kanban)*
 - [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
 
+### Target: `main`
+*(Epic: Inventory Data Grid & ROP Management)*
+- [ ] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
+- [ ] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
-*(No active backlog items).*
+
+### Target: `main`
+*(Epic: Tailwind Modal Migration)*
+- [ ] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
 
 ---
 
