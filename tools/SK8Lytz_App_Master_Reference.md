@@ -11,24 +11,48 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 
 ---
 
-## 🎨 2. UI / Styling Definitions
+## 🎨 2. UI & Front-End Architecture Standards
 The CSS system is hardcoded into the massive `index.html` style block using native CSS Variables.
 
-**Button Matrix (3-Intensity Hue System)**
-Always use the standardized CSS classes for buttons. Available colors are `emerald`, `blue`, `red`, `brand` (orange), `purple`, `amber`, and `slate`.
-* **Tier 1 (Muted)**: Dimmer, low priority actions (e.g. Cancel). Class: `.btn-orange-muted`
-* **Tier 2 (Ghost/Standard)**: The sleek glassy default. Class: `.btn-orange` or `.btn-ghost-orange`
-* **Tier 3 (Neon)**: High-stakes / Macro executions. Contains custom box shadows. Class: `.btn-orange-neon`
+### A. The Z-Index Authority Hierarchy
+* **0-1**: Base DOM Elements
+* **10**: Drag Resizers (`.h-resizer`, `.v-resizer`)
+* **20**: Sticky Table Headers (`<th>`)
+* **50**: Custom `.pane-header-bar`
+* **500**: Custom Dropdown Panels (Multi-Select wrappers)
+* **10000+**: `.modal-overlay` wrappers (Ensures Modals ALWAYS win over dropsdowns)
 
-**Pane/Panel Structure**
-* Executive Panes have header bars styled with `.pane-header-bar` and titles `.pane-header-title`.
-* **Absolute Title Centering:** To prevent horizontal and vertical baseline jumping between modules with varying command buttons, `.pane-header-title` elements must strictly use full geometric centering (`left: 50%; top: 50%; transform: translate(-50%, -50%);`).
-* **Strict Spatial Economy:** Do NOT use empty HTML `<div>` elements as visual spacers or layout controls. Unused blocks must be `display: none;`.
-* Resizers are designated with `.v-resizer` and `.h-resizer` with custom indicator accents (e.g., teal `#2dd4bf` drag points and `⋮` indicator).
+### B. Global Action Button Matrix
+Buttons follow a 3-intensity system (Muted, Ghost/Standard, Neon). Use the following semantic colors:
+* **🟢 Green (`.btn-green`)**: Positive commits, saves, submits, creations.
+* **🔴 Red (`.btn-red`)**: Destructive actions, resets, closes, deletes.
+* **🟠 Orange (`.btn-orange`)**: Inline properties, editing modes, and configuration tools.
+* **🔵 Blue (`.btn-blue`)**: Neutral tools, nav, safe auxiliary tasks.
+* **Special Rules:** All async Database/API buttons MUST inject tactile loading via the global wrapper `executeWithButtonAction('btnId', 'SYNCING...', '✅ SAVED!', async () => { ... })`. Silent payloads are strictly forbidden.
 
-**SOP Editor Standardization (Batchez, Layerz, Packerz)**
-* **Button Positioning:** All command buttons (e.g., "Print SOP", "SAVE MASTER BLUEPRINT") must be anchored strictly to the **top-right** corner of their respective container or modal header. Left side reserved for titles.
-* **Form & Telemetry Syntax:** ALL checklist previews MUST utilize the global macro tokens to read instructions: `# Headers`, `> Subtext`, `[INPUT]`, `[SCAN]`, `[IMG]`, `[BARCODE]`, and `[QR]`.
+### C. Executive Panes & Layout Geometry
+* **Split-Panes:** All split interfaces MUST use `<div class="bom-layout">` separated by an `.h-resizer` that explicitly binds to `onmousedown="initNeoSidebarResizer(event)"`.
+* **Zero-Padding Headers:** Executive headers (`.pane-header-bar`) must be bound tightly to `height: 26px`, `padding: 0 10px` so that `.pane-header-title` remains absolutely centered (`left: 50%; transform: translate(-50%, -50%)`) without visual jumping.
+* **No Spacers:** Do NOT use empty HTML `<div>` elements as visual spacers or layout controls. Unused blocks must be explicitly set to `display: none;`.
+
+### D. Master Emojis & Item Archetypes
+Consistently map these tokens globally across dropdowns, tables, and Hub cards:
+* 📦 Retail Products
+* ⚙️ Sub-Assemblies
+* 🖨️ 3D Prints
+* 🏷️ Custom Labelz
+* 🔩 Raw Materials
+
+### E. SOP Editor Standardization (Batchez, Layerz, Packerz)
+* **Button Anchoring:** All command buttons ("SAVE", "EDIT", "PRINT") must anchor exclusively to the **top-right** of the header `.pane-header-actions`. Left-side is reserved strictly for breadcrumbs.
+* **Unified Telemetry Parsing:** ALL checklist previews MUST utilize `parseProductionTelemetryLine` logic to process `# Headers`, `> Subtext`, `[INPUT]`, `[SCAN]`, `[IMG]`, `[BARCODE]`, and `[QR]`.
+* **Multi-Select Panels:** Never use raw `<select multiple>`. Use absolute-positioned custom `.ms-panel` wrappers with checkboxes to maintain aesthetic continuity.
+
+### F. Explorer Memory & Immutability
+* **Source-Aware Accounting:** Financial webhook data (Shopify, Parcels) is fundamentally Read-Only. Users cannot manually "type over" original ingested strings. Corrections must be derived algorithmically via engine transaction tags.
+* **Archive Explorer:** All archived/deleted records must use the `.archive-card` expandable accordion. Hard-delete UI nodes must utilize `stopPropagation()` to shield them from misclicks.
+* **Data Table Memory:** Header sorting events must hook into `window.saveSort()` and initialize with `window.getSavedSort()` to persist grid layouts across caching refreshes.
+* **Version Bumping:** When altering core logic, `system-version.js` MUST be bumped manually to purge live `.com` clients.
 
 ---
 

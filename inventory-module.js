@@ -724,3 +724,268 @@ window.runVelocityzExplosion = function() {
 
     outContainer.innerHTML = html;
 };
+
+// ========================================================
+// WEBRTC CYCLE SCANNER LOGIC
+// ========================================================
+let html5QrCode = null;
+let currentScanKey = null;
+let currentScanIsFgi = false;
+
+window.startCycleCount = function() {
+    document.getElementById('cycleCountModal').style.display = 'flex';
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("barcode-reader");
+    }
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText, decodedResult) => {
+            window.onScanSuccess(decodedText);
+        },
+        (errorMessage) => {
+            // ignore background parse errors
+        }
+    ).catch(err => {
+        alert("Camera error: " + err);
+        window.stopCycleCount();
+    });
+};
+
+window.stopCycleCount = function() {
+    if(html5QrCode && html5QrCode.getState() !== 1) { // 1 = NOT_STARTED
+        html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+        }).catch(err => console.log(err));
+    }
+    document.getElementById('cycleCountModal').style.display = 'none';
+};
+
+window.onScanSuccess = function(decodedText) {
+    if(html5QrCode && html5QrCode.getState() === 2) { // 2 = SCANNING
+        html5QrCode.pause(true); // pause camera and scanning
+    }
+    
+    let beep = document.getElementById('scanner-beep');
+    if (beep) {
+        beep.currentTime = 0;
+        beep.play().catch(()=>{});
+    }
+    
+    let flash = document.getElementById('scanner-success-flash');
+    if (flash) {
+        flash.style.display = 'block';
+        setTimeout(() => flash.style.display = 'none', 300);
+    }
+
+    let isFgi = false;
+    let name = "";
+    let expectedStock = 0;
+    let actualKey = "";
+    
+    let pName = decodedText.replace('RECIPE:::', '');
+    if(productsDB[pName]) {
+        isFgi = true;
+        name = pName;
+        actualKey = `RECIPE:::${pName}`;
+        
+        let i = inventoryDB[actualKey] || {};
+        let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; 
+        let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; 
+        let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; 
+        let adj = parseFloat(i.manual_adjustment) || 0;
+        expectedStock = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+    } else if(catalogCache[decodedText] || (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName])) {
+        isFgi = false;
+        name = catalogCache[decodedText] ? (catalogCache[decodedText].neoName || catalogCache[decodedText].itemName) : pName;
+        actualKey = decodedText;
+        
+        let i = inventoryDB[actualKey] || {};
+        expectedStock = (catalogCache[actualKey] ? catalogCache[actualKey].totalQty : 0) - (parseFloat(i.consumed_qty) || 0) - (parseFloat(i.scrap_qty) || 0) + (parseFloat(i.manual_adjustment) || 0);
+    } else {
+        alert("Barcode not recognized in system: " + decodedText);
+        if(html5QrCode) html5QrCode.resume();
+        return;
+    }
+    
+    currentScanKey = actualKey;
+    currentScanIsFgi = isFgi;
+    
+    document.getElementById('scanner-prompt-title').innerText = name;
+    document.getElementById('scanner-expected-stock').innerText = expectedStock.toFixed(2).replace(/\.?0+$/,'');
+    document.getElementById('scanner-physical-count').value = ""; 
+    
+    document.getElementById('scanner-overlay-prompt').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('scanner-physical-count').focus();
+    }, 100);
+};
+
+window.resumeCycleCount = function() {
+    document.getElementById('scanner-overlay-prompt').style.display = 'none';
+    currentScanKey = null;
+    if(html5QrCode && html5QrCode.getState() === 3) { // 3 = PAUSED
+        html5QrCode.resume();
+    }
+};
+
+// ========================================================
+// CYCLE COUNT MANAGER MODAL LOGIC
+// ========================================================
+
+window.openCycleCountManager = function() {
+    let select = document.getElementById('ccMngrItemSelect');
+    select.innerHTML = '';
+    
+    let allProds = Object.keys(productsDB).sort();
+    let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
+    let labelProds = allProds.filter(p => productsDB[p] && productsDB[p].is_label);
+    
+    let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let realPrintProds = printProds.filter(p => !labelProds.includes(p));
+    
+    let optGroups = {
+        retail: '<optgroup label="📦 RETAIL PRODUCTS">',
+        sub: '<optgroup label="⚙️ SUB-ASSEMBLIES">',
+        print: '<optgroup label="🖨️ 3D PRINTS">',
+        label: '<optgroup label="🏷️ CUSTOM LABELZ">',
+        raw: '<optgroup label="🔩 RAW MATERIALS">'
+    };
+    
+    retailProds.forEach(k => optGroups.retail += `<option value="RECIPE:::${k}">📦 ${k}</option>`);
+    subProds.forEach(k => optGroups.sub += `<option value="RECIPE:::${k}">⚙️ ${k}</option>`);
+    realPrintProds.forEach(k => optGroups.print += `<option value="RECIPE:::${k}">🖨️ ${k}</option>`);
+    labelProds.forEach(k => optGroups.label += `<option value="RECIPE:::${k}">🏷️ ${k}</option>`);
+    
+    // sort raw
+    let rawArr = Object.values(catalogCache).sort((a,b) => {
+        let na = a.neoName || a.itemName || '';
+        let nb = b.neoName || b.itemName || '';
+        return na.localeCompare(nb);
+    });
+    rawArr.forEach(r => {
+        let n = r.neoName || r.itemName;
+        optGroups.raw += `<option value="${r.itemKey}">🔩 ${n}</option>`;
+    });
+    
+    optGroups.retail += '</optgroup>';
+    optGroups.sub += '</optgroup>';
+    optGroups.print += '</optgroup>';
+    optGroups.label += '</optgroup>';
+    optGroups.raw += '</optgroup>';
+    
+    let finalHtml = '<option value="" disabled selected>-- Select an Item --</option>';
+    if (retailProds.length > 0) finalHtml += optGroups.retail;
+    if (subProds.length > 0) finalHtml += optGroups.sub;
+    if (realPrintProds.length > 0) finalHtml += optGroups.print;
+    if (labelProds.length > 0) finalHtml += optGroups.label;
+    if (rawArr.length > 0) finalHtml += optGroups.raw;
+    
+    select.innerHTML = finalHtml;
+    
+    document.getElementById('ccMngrQtyInput').value = '';
+    document.getElementById('cycleCountManagerModal').style.display = 'flex';
+};
+
+window.closeCycleCountManager = function() {
+    document.getElementById('cycleCountManagerModal').style.display = 'none';
+};
+
+window.saveManualCycleCount = async function(event) {
+    let key = document.getElementById('ccMngrItemSelect').value;
+    if(!key) return alert("Please select an item first.");
+    
+    let valInput = document.getElementById('ccMngrQtyInput').value;
+    if(valInput === "") return alert("Please enter the physical quantity.");
+    let val = parseFloat(valInput);
+    if(isNaN(val)) return alert("Please enter a valid number.");
+    
+    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); 
+    let isFgi = rKey.startsWith('RECIPE:::');
+    
+    if(!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
+    
+    let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0 };
+    
+    if(isFgi) {
+        let p = parseFloat(inventoryDB[rKey].produced_qty) || 0;
+        let pb = parseFloat(inventoryDB[rKey].prototype_produced_qty) || 0;
+        let sold = parseFloat(inventoryDB[rKey].sold_qty) || 0;
+        let c_prod = parseFloat(inventoryDB[rKey].production_consumed_qty) || 0;
+        let c_proto = parseFloat(inventoryDB[rKey].prototype_consumed_qty) || 0;
+        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
+        payload.manual_adjustment = val - (p - sold - c_prod - sq - Math.max(0, c_proto - pb));
+    } else {
+        let c = catalogCache[rKey] ? catalogCache[rKey].totalQty : 0;
+        let cq = parseFloat(inventoryDB[rKey].consumed_qty) || 0;
+        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
+        payload.manual_adjustment = val - (c - cq - sq);    
+    }
+    
+    let btn = event ? event.target : document.querySelector('#cycleCountManagerModal .btn-purple');
+    let oldTxt = "💾 Save Manual Count";
+    if(btn) {
+        oldTxt = btn.innerText;
+        btn.innerText = "⏳ Saving...";
+        btn.disabled = true;
+    }
+    
+    const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
+    
+    if(btn) {
+        btn.innerText = oldTxt;
+        btn.disabled = false;
+    }
+    
+    if(error){ alert("DB Error: " + error.message); return; }
+    
+    inventoryDB[rKey] = payload;
+    renderInventoryTable();
+    
+    if(btn) {
+        btn.innerText = "✅ Count Saved!";
+        btn.style.background = "#059669";
+        setTimeout(() => { btn.innerText = "💾 Save Manual Count"; btn.style.background = ""; btn.disabled = false; }, 2500);
+    }
+    document.getElementById('ccMngrQtyInput').value = ''; // clear for next entry
+};
+
+window.saveCycleCount = async function() {
+    let valInput = document.getElementById('scanner-physical-count').value;
+    if(valInput === "") { window.resumeCycleCount(); return; } // just hit cancel effectively or enter empty
+    let val = parseFloat(valInput);
+    if(isNaN(val)) return alert("Please enter a valid number");
+    
+    let key = currentScanKey;
+    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); 
+    
+    if(!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
+    
+    let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0 };
+    
+    if(currentScanIsFgi) {
+        let p = parseFloat(inventoryDB[rKey].produced_qty) || 0;
+        let pb = parseFloat(inventoryDB[rKey].prototype_produced_qty) || 0;
+        let sold = parseFloat(inventoryDB[rKey].sold_qty) || 0;
+        let c_prod = parseFloat(inventoryDB[rKey].production_consumed_qty) || 0;
+        let c_proto = parseFloat(inventoryDB[rKey].prototype_consumed_qty) || 0;
+        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
+        payload.manual_adjustment = val - (p - sold - c_prod - sq - Math.max(0, c_proto - pb));
+    } else {
+        let c = catalogCache[rKey] ? catalogCache[rKey].totalQty : 0;
+        let cq = parseFloat(inventoryDB[rKey].consumed_qty) || 0;
+        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
+        payload.manual_adjustment = val - (c - cq - sq);    
+    }
+    
+    document.getElementById('scanner-prompt-title').innerText = "Saving...";
+    
+    const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
+    if(error){ alert("DB Error: " + error.message); document.getElementById('scanner-prompt-title').innerText = currentScanKey; return; }
+    
+    inventoryDB[rKey] = payload;
+    renderInventoryTable();
+    
+    window.resumeCycleCount();
+};
