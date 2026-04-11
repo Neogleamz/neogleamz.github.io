@@ -1228,8 +1228,13 @@ async function executeExport() {
         const downloadAnchor = document.createElement('a');
         downloadAnchor.href = downloadUrl;
         downloadAnchor.download = `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`;
+        downloadAnchor.style.display = 'none';
+        document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
-        URL.revokeObjectURL(downloadUrl);
+        setTimeout(() => {
+            document.body.removeChild(downloadAnchor);
+            window.URL.revokeObjectURL(downloadUrl);
+        }, 1000);
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
 }
