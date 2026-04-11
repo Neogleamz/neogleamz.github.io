@@ -382,7 +382,7 @@ function updateCeoEngine() {
 
         if (typeof salesDB !== 'undefined' && Array.isArray(salesDB) && salesDB.length !== window._ltvCacheLength) {
             let ltvNetSum = 0;
-            let customerHashCounts = {};
+            window._ltvCustomerMap = {};
             
             salesDB.forEach(s => {
                 let qty = parseFloat(s.qty_sold) || 1;
@@ -395,12 +395,16 @@ function updateCeoEngine() {
 
                 let h = s.customer_email_hash || s.customer_phone_hash;
                 if (h && h.trim() !== '') {
-                    customerHashCounts[h] = (customerHashCounts[h] || 0) + 1;
+                    if (!window._ltvCustomerMap[h]) {
+                        window._ltvCustomerMap[h] = { orders: 0, totalNet: 0 };
+                    }
+                    window._ltvCustomerMap[h].orders += 1;
+                    window._ltvCustomerMap[h].totalNet += net;
                 }
             });
             
-            let totalUniqueHashes = Object.keys(customerHashCounts).length;
-            let repeatBuyers = Object.values(customerHashCounts).filter(c => c > 1).length;
+            let totalUniqueHashes = Object.keys(window._ltvCustomerMap).length;
+            let repeatBuyers = Object.values(window._ltvCustomerMap).filter(c => c.orders > 1).length;
             
             window._ltvCachedRepeatRate = totalUniqueHashes > 0 ? (repeatBuyers / totalUniqueHashes) * 100 : 0;
             window._ltvCachedAvg = totalUniqueHashes > 0 ? (ltvNetSum / totalUniqueHashes) : 0;
@@ -586,4 +590,63 @@ function addCeoUnifiedSelection() {
 
     document.getElementById('ceoAddModal').style.display = 'none';
     renderCeoTerminal();
+}
+
+// --- LTV MODAL LOGIC ---
+function openLtvModal() {
+    let map = window._ltvCustomerMap || {};
+    let hashes = Object.keys(map);
+    
+    // Distribution
+    let distribution = { 1: 0, 2: 0, 3: 0 };
+    let whales = [];
+
+    hashes.forEach(h => {
+        let orderCount = map[h].orders;
+        if (orderCount === 1) distribution[1]++;
+        else if (orderCount === 2) distribution[2]++;
+        else distribution[3]++;
+
+        whales.push({ hash: h, orders: orderCount, net: map[h].totalNet });
+    });
+
+    // Sort whales by descending net
+    whales.sort((a,b) => b.net - a.net);
+    let topWhales = whales.slice(0, 20);
+
+    // Update UI DOM Elements
+    let elOne = document.getElementById('ltv-dist-1');
+    let elTwo = document.getElementById('ltv-dist-2');
+    let elPlus = document.getElementById('ltv-dist-plus');
+
+    if(elOne) elOne.innerText = distribution[1];
+    if(elTwo) elTwo.innerText = distribution[2];
+    if(elPlus) elPlus.innerText = distribution[3];
+
+    let tBody = document.getElementById('ltv-whales-tbody');
+    if (tBody) {
+        let html = '';
+        if (topWhales.length === 0) {
+            html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No historical hashes found.</td></tr>';
+        } else {
+            topWhales.forEach(w => {
+                let shortHash = w.hash.substring(0, 8) + '...';
+                html += `
+                <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
+                    <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;" title="${w.hash}">[HASH_${shortHash}]</td>
+                    <td style="padding:12px 15px; font-weight:bold; color:white; text-align:center;">${w.orders}</td>
+                    <td style="padding:12px 15px; font-weight:bold; color:var(--neon-green); text-align:right;">${ceoFmt.format(Math.max(0, w.net))}</td>
+                </tr>`;
+            });
+        }
+        tBody.innerHTML = html;
+    }
+
+    let modal = document.getElementById('ltv-metrics-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeLtvModal() {
+    let modal = document.getElementById('ltv-metrics-modal');
+    if (modal) modal.style.display = 'none';
 }

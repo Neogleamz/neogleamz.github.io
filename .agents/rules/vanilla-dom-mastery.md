@@ -1,4 +1,9 @@
 ---
+description: "Auto-migrated Core A.I. Rule"
+mode: "always"
+---
+
+---
 glob: "**/*.js"
 ---
 

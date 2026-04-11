@@ -6,61 +6,56 @@ This document acts as the permanent, living task tracker integrated directly wit
 > **Archiving Protocol:** When all items in an Epic are marked `[x]`, the entire block is moved to the **🗄️ Completed & Archived Epics** section at the bottom of this file. This provides a clean active workspace while preserving a permanent historical record of our accomplishments!
 
 > [!IMPORTANT]
-> **Prioritization Protocol:** The AI executes tasks top-to-bottom. 
-> * **🟢 Phase 1 (Foundation):** Highest priority. Core math, data integrity, and physical realities (e.g. Inventory limits). Without this, the business breaks.
-> * **🟡 Phase 2 (Logistics):** Medium priority. Automating repetitive labor, API syncs, and shipping automation.
-> * **🔴 Phase 3 (The CFO):** Low priority / High impact. Data aggregation, historical analysis, and long-term planning (e.g. Lifetime Value).
-> * **🟣 Sandbox:** Brainstorming queue. Future ideas not yet greenlit for active development.
+> **Prioritization Protocol:** The AI executes tasks strictly top-to-bottom to guarantee stability.
+> * **🔴 P0 Critical:** System blockers, hotfixes, data corruption risks. Drop everything to fix.
+> * **🟠 P1 High Priority:** Core application features, necessary infrastructure, and major business logic. 
+> * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
+> * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 
 ---
 
-## 🟢 Phase 1: Precision & Foundation
-
-*(All current Phase 1 Epics have been completed and archived.)*
+## 🔴 P0 Critical (Blockers & Hotfixes)
+*(No active blockers).*
 
 ---
 
-## 🟡 Phase 2: Logistics & Tracking
+## 🟠 P1 High Priority (Core Features)
+
+### Target: `main`
+*(Epic: WebRTC Scanner Integration)*
+- [ ] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
+
+---
+
+## 🟡 P2 Medium Priority (Enhancements)
+
+### Target: `main`
+*(Epic: Automated Shippo Printing)*
+- [ ] `feat/shippo-auto-print` : Automated Label Printing: Direct Shippo/EasyPost API integration so clicking "Fulfilled" automatically prints a PDF layout to an attached Zebra thermal printer.
+
+### Target: `main`
+*(Epic: Socialz Outreach Kanban)*
+- [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
+
+---
+
+## 🟢 P3 Backlog (Ideas & Sandbox)
+*(No active backlog items).*
+
+---
+
+## 🗄️ Completed & Archived Epics
+
+### Target: `epic/ltv-cac-metrics`
+- [x] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
+- [x] `feat/repeat-customer-engine` : Implement backend logic to digest the historical Shopify dataset and track repeat customers using anonymized metrics.
+- [x] `feat/ltv-metrics-modal` : Design and build a new UI modal (or integrate into the CEO Terminal) to visualize Repeat Customer Rates and Lifetime Value insights.
 
 ### Target: `epic/shopify-sync-v2`
 - [x] `feat/auth-app-security` : Auth & App Security
 - [x] `feat/orders-create-hook` : `orders/create` Inbound Edge Function
 - [x] `feat/payload-normalization` : Payload Normalization
 - [x] `feat/idempotent-db-insert` : Idempotent Database Insert
-- [ ] `feat/reverse-fulfillment-push` : Build an outbound API hook triggered directly from `NEXUZ`. When a packer clicks "Mark as Fulfilled", fire a specialized Edge Function that runs a `POST` back to Shopify.
-- [ ] `feat/bi-directional-bom` : Bi-directional Hardware Deduction. Ensure successful order inset triggers STOCKZ BOM logic instantly.
-- [ ] `feat/shippo-dimensional-weight` : Dimensional Weight (DIM) Shipping Router logic to compare USPS Ground vs UPS Priority based on `(L*W*H) / DIM Divisor`.
-
-
-### Target: `epic/socialz-yield-api`
-- [ ] `feat/social-scraping-api` : Connect a low-cost social scraping API (like PhantomBuster or Apify).
-- [ ] `feat/auto-pull-engagement` : Auto-pull likes/comments on their last 10 posts.
-- [ ] `feat/engagement-vanity-score` : Display an "Engagement vs. Vanity" metric score on the skater cards.
-
----
-
-## 🔴 Phase 3: The A.I. CFO
-
-### Target: `epic/ltv-cac-metrics`
-- [x] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
-- [ ] `feat/cac-adspend-comparison` : Compare total ad spend (Meta/TT) to new customers acquired.
-
----
-
-## 🟣 Expansion Sandbox (Brainstorming)
-
-### Target: `epic/webrtc-barcode-app`
-- [ ] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
-
-### Target: `epic/socialz-kanban`
-- [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
-
-### Target: `epic/automated-shippo-printing`
-- [ ] `feat/shippo-auto-print` : Automated Label Printing: Direct Shippo/EasyPost API integration so clicking "Fulfilled" automatically prints a PDF layout to an attached Zebra thermal printer.
-
----
-
-## 🗄️ Completed & Archived Epics
 
 ### Target: `epic/stockz-rop-alerts`
 - [x] `feat/inventory-velocity` : In `inventory-module.js`, calculate daily velocity of filament usage.
