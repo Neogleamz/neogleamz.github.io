@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Test-First Standard
 
 Whenever you are tasked with creating a new utility function, data calculation, or hardware logic service, you must follow Test-Driven Development (TDD) principles:

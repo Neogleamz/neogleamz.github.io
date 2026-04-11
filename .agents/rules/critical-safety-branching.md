@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Critical Safety & Quarantine Protocol
 
 **⛔ CRITICAL SAFETY RULE 1: You are strictly forbidden from reading, altering, parsing, renaming, or deleting ANY files contained within the `.git/hooks/` directory. AI manipulation of system locks is strictly prohibited.**

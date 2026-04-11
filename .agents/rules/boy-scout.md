@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+glob: "**/*.{js,ts,tsx,html,css,py}"
 ---
 
 # The Boy Scout (Tech Debt) Rule

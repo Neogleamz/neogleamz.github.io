@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Whiteboard & Brainstorming Mode -- "let's brainstorm", "lets chat", or "just thinking out loud"
 
 When my prompt includes "let's brainstorm", "lets chat", or "just thinking out loud", you must immediately drop all project management workflows and adopt the following persona:

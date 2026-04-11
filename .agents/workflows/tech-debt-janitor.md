@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Tech Debt Janitor Workflow
 
 When I say "run health check" or "clean the house", you must execute the following maintenance sweep:

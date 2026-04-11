@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Surgical Strike Protocol (Anti-Collision Protocol)
 
 Whenever you are tasked with modifying an existing file, especially large React components, you must operate with extreme precision to avoid silently deleting unrelated features.

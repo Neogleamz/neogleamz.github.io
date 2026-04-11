@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Dependency Diet & Anti-Bloat Protocol
 
 Whenever your Implementation Plan requires adding a new external library, package, or dependency (e.g., via `npm install`), you must pause the execution workflow and execute the following justification check:

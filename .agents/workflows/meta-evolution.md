@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Meta-Evolution & Self-Correction Rule
 
 As an autonomous agent, you are responsible for maintaining the efficiency and accuracy of your own operating instructions.

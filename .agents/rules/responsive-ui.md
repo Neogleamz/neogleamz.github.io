@@ -1,25 +1,23 @@
 ---
-trigger: always_on
+glob: "**/*.{html,css,js,ts,jsx,tsx}"
 ---
 
-# Mobile-First & Cross-Platform Standards Rule
+# Desktop-First Browser Standards Rule
 
-Whenever you are tasked with generating an Implementation Plan, writing code, or refactoring anything involving User Interface (UI), frontend components, or device-specific APIs, you must strictly adhere to the following standards:
+Whenever you are tasked with generating an Implementation Plan, writing code, or refactoring anything involving User Interface (UI), frontend components, or layout structures, you must strictly adhere to the following standards:
 
-1. **Absolute Responsiveness**:
-   - Never use hardcoded pixel values for widths, heights, or positioning. 
-   - You must use flexible layout systems (like Flexbox or Grid) and relative units (%, vw, vh, rem) to ensure the UI scales fluidly from small mobile screens to large tablets.
-   - You must account for device "Safe Areas" (notches, dynamic islands, and bottom gesture bars) to prevent UI elements from being clipped.
+1. **Desktop-First Execution**:
+   - The primary consumption format for this application is a native Desktop Web Browser (e.g., Chrome/Edge/Firefox).
+   - Prioritize wide-aspect ratio layouts, data-dense tables, and robust sidebar navigation over collapsed mobile hamburger menus.
 
-2. **Cross-Platform Parity (iOS & Android)**:
-   - The codebase must compile and render natively on both iOS and Android. 
-   - Avoid platform-exclusive UI libraries unless absolutely necessary. 
-   - If a feature requires platform-specific native code (e.g., Bluetooth LE permissions for the lighting controller), you must implement conditional logic to handle both the iOS and Android execution paths gracefully without crashing.
+2. **Vanilla HTML/CSS/JS Exclusivity**:
+   - You are prohibited from injecting React, Vue, TypeScript, or any heavy Node-based framework build-chains.
+   - All styling and DOM interactions must execute cleanly using native Javascript and linked `.css` stylesheets without requiring a pre-compiler.
 
-3. **Touch-First Design**:
-   - All interactive elements (buttons, sliders, wheel selectors) must have a minimum touch target size of 44x44 points.
-   - Incorporate visual feedback (active states, ripples, or opacity changes) for all touch interactions.
+3. **Fluid Desktop Responsiveness**:
+   - While Desktop is the priority, the UI must still gracefully scale down for smaller browser windows or occasional tablet views.
+   - Use flexible layout systems (like Flexbox or CSS Grid) and relative units (%, vw, vh) to manage window resizing.
 
 4. **Planning Phase Requirement**:
-   - When drafting your Implementation Plan (as dictated by the Auto-Branching Rule), you must add a subsection under your Rationale titled `### UI & Platform Strategy`.
-   - In this section, briefly explain how your proposed code ensures responsive scaling and handles any iOS/Android differences.
+   - When drafting your Implementation Plan, you must add a subsection under your Rationale titled `### UI & Browser Strategy`.
+   - In this section, briefly explain how your proposed code ensures standard browser compatibility and maintains the vanilla HTML/JS ethos.

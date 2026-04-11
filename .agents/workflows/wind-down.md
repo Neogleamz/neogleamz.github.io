@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # The Midnight Oil Protocol (Wind Down Workflow)
 
 When my prompt includes "good night", "wrapping up", "wind down", or "done for the day", you must execute the following shutdown sequence:

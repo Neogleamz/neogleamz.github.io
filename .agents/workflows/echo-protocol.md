@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Echo Protocol (Context Verification)
 
 When my prompt includes "Are you following", "Do you understand", "Make sense?", or "Playback", you must immediately drop all other tasks and execute the following Active Listening workflow:

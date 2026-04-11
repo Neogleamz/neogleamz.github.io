@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Bug Hunter Workflow
 
 When my prompt contains a raw stack trace, an error message, or starts with "Fix this error:", you must execute the following diagnostic workflow:

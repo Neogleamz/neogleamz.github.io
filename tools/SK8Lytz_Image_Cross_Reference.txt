@@ -1,0 +1,8 @@
+# 🖼️ Image Cross Reference
+
+Maps physical image files and remote CDNs used in the application. Do not hallucinate image links.
+
+## Branding
+- **Light Theme**: `neo_logo_orange.png` (Local root)
+- **Dark Theme**: `neo_logo_white.png` (Local root)
+- **Favicon**: `https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111` (Shopify CDN)

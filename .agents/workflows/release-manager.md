@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Release Manager Workflow
 
 When I instruct you to "cut a release", "prepare release", or "draft release", you must execute the following workflow:

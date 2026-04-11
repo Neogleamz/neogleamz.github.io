@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Context Memory Compiler Rule
 
 When I instruct you to "sync architecture", "update memory", or "compile context", you must execute the following workflow to ensure our project documentation matches the reality of the codebase:

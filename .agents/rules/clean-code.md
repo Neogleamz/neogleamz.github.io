@@ -1,3 +1,7 @@
+---
+glob: "**/*.{js,ts,tsx,html,css,py,json,md}"
+---
+
 # Coding Standards & Clean Code Rule
 
 Whenever you generate an Implementation Plan, write code, or refactor an existing file, you must strictly adhere to the following engineering standards:

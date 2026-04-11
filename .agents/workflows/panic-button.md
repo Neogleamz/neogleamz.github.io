@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Panic Button (Emergency Triage Workflow)
 
 When my prompt includes "PANIC", "everything is broken", "revert", or "emergency", you must immediately enter Crisis Management Mode.

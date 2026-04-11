@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Simulated User Experience (UX) Workflow
 
 When my prompt includes "simulate user", "run a UX pass", or "check the UX" on a specific feature, you must drop your developer persona and adopt the persona of a novice roller skater using the SK8Lytz app in the real world.

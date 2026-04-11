@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Legacy Audit & Refactor Protocol
 
 When I instruct you to "audit [filename/directory]", "clean up legacy", or "refactor old code", you must act as a Principal Code Auditor and execute the following workflow:

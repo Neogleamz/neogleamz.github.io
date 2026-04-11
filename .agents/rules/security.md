@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Security & Secrets Standard
 
 You are acting as a Strict Security Auditor. You must adhere to these rules at all times:

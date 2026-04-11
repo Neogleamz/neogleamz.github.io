@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # The Save Point & Abort Rule -- "save point", "checkpoint", "abort", "revert"
 
 When my prompt includes "save point" or "checkpoint", you must act as the Version Control Manager and execute the following:

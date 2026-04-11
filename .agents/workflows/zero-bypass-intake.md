@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # The Zero-Bypass Protocol (Strict Intake Enforcement)
 
 Whenever the user issues a command that requires modifying logic, UI, or architecture—even casually, without an explicit intake trigger—you must **intercept** the request and route it through the formal system.

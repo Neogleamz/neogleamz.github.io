@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Isolated Test & Verify Protocol
 
 When my prompt includes "test this", "check the browser", "verify the change", or "does this work?", you must immediately halt development and execute the following QA workflow:
