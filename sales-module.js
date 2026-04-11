@@ -98,10 +98,11 @@ async function processSalesCSV(isTestMode = false) {
     syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
     sysLog("Reading Sales CSV..."); setMasterStatus("Parsing...", "mod-working"); setSysProgress(20, 'working');
     const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(firstSheet, {defval: ""});
+    reader.onload = async function(e) {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(e.target.result);
+        const worksheet = workbook.getWorksheet(1);
+        const rows = excelSheetToJson(worksheet);
         processParsedSales(rows, isTestMode);
     };
     reader.readAsArrayBuffer(file);
@@ -124,7 +125,11 @@ async function processParsedSales(rows, isTestMode = false) {
         if(!isTestMode && salesDB.some(s => s.order_id === String(orderId) && s.storefront_sku === String(skuName))) continue;
 
         let dateStr = "";
-        if (typeof rawDate === 'number') {
+        if (rawDate instanceof Date) {
+            // ExcelJS natively parses dates as Date objects
+            dateStr = rawDate.toISOString().split('T')[0];
+        } else if (typeof rawDate === 'number') {
+            // Legacy serial date fallback (safety net for any edge cases)
             let excelEpoch = new Date(1899, 11, 30);
             let jsDate = new Date(excelEpoch.getTime() + rawDate * 86400000);
             dateStr = jsDate.toISOString().split('T')[0];

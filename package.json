@@ -23,7 +23,6 @@
     "supabase": "^2.83.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.101.1",
-    "xlsx": "^0.18.5"
+    "@supabase/supabase-js": "^2.101.1"
   }
 }
