@@ -1225,11 +1225,28 @@ async function executeExport() {
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         const buffer = await wb.xlsx.writeBuffer();
         
-        // Use proper MIME type and the FileSaver.js utility to bypass all browser-specific blob issues
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const fileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
+        // Convert the ArrayBuffer to a Base64 string natively
+        let binaryString = '';
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binaryString += String.fromCharCode(bytes[i]);
+        }
+        const b64 = window.btoa(binaryString);
         
-        window.saveAs(blob, fileName);
+        // Use a Base64 Data URI instead of a Blob object. 
+        // This makes it physically impossible for the browser to spawn a "UUID" blob name,
+        // violently forcing it to respect the anchor tag's download attribute.
+        const dataUrl = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + b64;
+        
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.style.display = 'none';
+        downloadAnchor.href = dataUrl;
+        const fileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
+        downloadAnchor.download = fileName;
+        
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
 
         setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
