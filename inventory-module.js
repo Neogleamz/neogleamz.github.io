@@ -1,4 +1,4 @@
-﻿// --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
+// --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
 const savedFgiState = JSON.parse(localStorage.getItem('fgiCategoryState') || "null");
 window.fgiCategoryState = savedFgiState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true, 'cat-label': true };
 window.toggleFgiCategory = function(cat) { 
@@ -903,6 +903,11 @@ window.updateCcMngrStock = function() {
     let inv = inventoryDB[rKey] || {};
     let stock = 0;
     
+    let elL1 = document.getElementById('ccMngrL1'); let elV1 = document.getElementById('ccMngrV1');
+    let elL2 = document.getElementById('ccMngrL2'); let elV2 = document.getElementById('ccMngrV2');
+    let elL3 = document.getElementById('ccMngrL3'); let elV3 = document.getElementById('ccMngrV3');
+    let elV4 = document.getElementById('ccMngrV4'); let elV5 = document.getElementById('ccMngrV5');
+    
     if (rKey.startsWith('RECIPE:::')) {
         let p    = parseFloat(inv.produced_qty) || 0;
         let pb   = parseFloat(inv.prototype_produced_qty) || 0;
@@ -912,18 +917,98 @@ window.updateCcMngrStock = function() {
         let sq   = parseFloat(inv.scrap_qty) || 0;
         let adj  = parseFloat(inv.manual_adjustment) || 0;
         stock = p - sold - cp - sq - Math.max(0, cpr - pb) + adj;
+        
+        elL1.innerText = "PROD";
+        elV1.innerText = Math.round(p * 100) / 100;
+        elV1.contentEditable = "true"; elV1.className = "editable";
+        
+        elL2.innerText = "PROTO";
+        elV2.innerText = Math.round(pb * 100) / 100;
+        elV2.parentElement.style.visibility = "visible";
+        
+        elL3.innerText = "CONS";
+        elV3.innerText = Math.round(cp * 100) / 100;
+        elV3.contentEditable = "false"; elV3.className = "";
+        
+        elV4.innerText = Math.round(sq * 100) / 100;
+        elV5.innerText = Math.round(adj * 100) / 100;
     } else {
         let c    = catalogCache[rKey] ? catalogCache[rKey].totalQty : 0;
         let cq   = parseFloat(inv.consumed_qty) || 0;
         let sq   = parseFloat(inv.scrap_qty) || 0;
         let adj  = parseFloat(inv.manual_adjustment) || 0;
         stock = c - cq - sq + adj;
+        
+        elL1.innerText = "PURCH";
+        elV1.innerText = Math.round(c * 100) / 100;
+        elV1.contentEditable = "false"; elV1.className = "";
+        
+        elL2.innerText = "-";
+        elV2.innerText = "-";
+        elV2.parentElement.style.visibility = "hidden";
+        
+        elL3.innerText = "CONS";
+        elV3.innerText = Math.round(cq * 100) / 100;
+        elV3.contentEditable = "true"; elV3.className = "editable";
+        
+        elV4.innerText = Math.round(sq * 100) / 100;
+        elV5.innerText = Math.round(adj * 100) / 100;
     }
     
     let rounded = Math.round(stock * 100) / 100;
     valEl.innerText = rounded;
     valEl.style.color = rounded <= 0 ? '#ef4444' : '#f97316';
     display.style.display = 'flex';
+};
+
+window.handleCcMngrTelemetryEdit = async function(el, colIndex) {
+    let key = document.getElementById('ccMngrItemSelect').value;
+    if (!key) return;
+    
+    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'");
+    let isFgi = rKey.startsWith('RECIPE:::');
+    
+    let oldValStr = el.dataset.oldVal || "0";
+    let newValStr = el.innerText.trim() || "0";
+    let newVal = parseFloat(newValStr) || 0;
+    
+    if (newVal.toString() === oldValStr) return; // Unchanged
+    if (isNaN(newVal)) { el.innerText = oldValStr; return; }
+    
+    if (!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
+    
+    let field = "";
+    if (isFgi) {
+        if (colIndex === 1) field = "produced_qty";
+        if (colIndex === 2) field = "prototype_produced_qty";
+        if (colIndex === 4) field = "scrap_qty";
+        if (colIndex === 5) field = "manual_adjustment";
+    } else {
+        if (colIndex === 3) field = "consumed_qty";
+        if (colIndex === 4) field = "scrap_qty";
+        if (colIndex === 5) field = "manual_adjustment";
+    }
+    
+    if (!field) return;
+    
+    let oldDbVal = inventoryDB[rKey][field];
+    inventoryDB[rKey][field] = newVal;
+    
+    let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0 };
+    
+    el.style.background = "rgba(16, 185, 129, 0.2)";
+    const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'});
+    if(error) { 
+        alert("DB Error: " + error.message); 
+        inventoryDB[rKey][field] = oldDbVal; 
+        el.innerText = oldDbVal;
+        el.style.background = "rgba(239, 68, 68, 0.2)";
+        return; 
+    }
+    
+    setTimeout(() => { el.style.background = ""; }, 500);
+    window.updateCcMngrStock(); 
+    window.renderInventoryTable();
 };
 
 window.saveManualCycleCount = async function(event) {
