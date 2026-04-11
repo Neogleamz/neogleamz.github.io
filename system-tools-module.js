@@ -1234,18 +1234,30 @@ async function executeExport(btnObj) {
         const buffer = await wb.xlsx.writeBuffer();
         
         const rawArray = new Uint8Array(buffer);
-        preparedBackupBlob = new Blob([rawArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        preparedBackupBlob = new Blob([rawArray], { type: 'application/octet-stream' });
         preparedBackupFileName = "Neogleamz_Full_Backup_" + dateStr + "_" + timeStr + ".xlsx";
         
         // --- 2-STEP SYNCHRONOUS UI BYPASS ---
         // Chrome blocks programmatic .download filenames if they happen >2sec after a click event.
         // We halt here, update the button, and force the user to click again. The second click is 
-        // 100% synchronous, ensuring FileSaver is fully trusted by the OS.
+        // 100% synchronous, ensuring trust is fully established with the OS.
         btnObj.innerHTML = "💾 READY - CLICK TO SAVE";
         btnObj.style.background = "#10b981"; // success green
         btnObj.disabled = false;
         btnObj.onclick = function() {
-            window.saveAs(preparedBackupBlob, preparedBackupFileName);
+            // Native, battle-tested anchor injection (Matching old SheetJS method explicitly)
+            const url = window.URL.createObjectURL(preparedBackupBlob);
+            const anchor = document.createElement('a');
+            anchor.style.display = 'none';
+            anchor.href = url;
+            anchor.download = preparedBackupFileName;
+            document.body.appendChild(anchor);
+            anchor.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(anchor);
+                window.URL.revokeObjectURL(url);
+            }, 100);
             
             // Reset button after download
             btnObj.innerHTML = originalText;
