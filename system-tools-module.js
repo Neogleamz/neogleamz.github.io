@@ -1208,14 +1208,28 @@ async function executeExport(btnObj) {
         
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         
-        // Native, robust SheetJS explicit export
-        XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
-        
-        btnObj.innerHTML = originalText;
-        btnObj.style.background = ""; // revert to CSS default
+        // --- 2-STEP SYNCHRONOUS UI BYPASS ---
+        // Since Supabase fetches take >5 seconds, the browser's "trusted user gesture" token expires.
+        // If we call XLSX.writeFile() now, Chrome intercepts it as an unauthorized background download, stripping the name.
+        // By changing the button to Green and waiting for a fresh physical click, we renew the gesture token!
+        btnObj.innerHTML = "💾 CLICK HERE TO SAVE EXPORT";
+        btnObj.style.background = "#10b981"; // success green
         btnObj.disabled = false;
+        
+        btnObj.onclick = function() {
+            // NATIVE HISTORICAL SAVE AS POPUP
+            try { XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`); } 
+            catch(err) { sysLog("FileSave error: " + err.message, true); }
+            
+            // Reset button to initial state
+            btnObj.innerHTML = originalText;
+            btnObj.style.background = ""; 
+            btnObj.onclick = function() { executeExport(this); };
+            
+            setMasterStatus("Export Complete!", "mod-success"); 
+            setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        };
 
-        setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { 
         sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); 
         if(btnObj) { btnObj.innerHTML = "⬇️ EXPORT BACKUP"; btnObj.disabled = false; btnObj.style.background = ""; }
