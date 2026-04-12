@@ -1,5 +1,5 @@
 ---
-name: cut_release
+name: release
 description: "Executes the version bump, changelog generation, and tagging sequence to cut a new release."
 trigger: always_on
 ---

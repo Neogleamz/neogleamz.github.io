@@ -1,5 +1,5 @@
 ---
-name: next_task_auto_branch
+name: bucketlist
 description: "The primary project engine. Automates branching, planning, execution, and documentation for the next item on the Bucket List."
 trigger: always_on
 ---

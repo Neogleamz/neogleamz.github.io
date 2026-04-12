@@ -1,5 +1,5 @@
 ---
-name: repo_cleanup
+name: gitcleanup
 description: "Safely parses and prunes local Git branches that have already been merged."
 trigger: always_on
 ---
