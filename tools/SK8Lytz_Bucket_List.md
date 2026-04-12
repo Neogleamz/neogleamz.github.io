@@ -21,9 +21,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-### Target: `main`
-*(Epic: Master Reference Compliance Audit)*
-- [ ] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
 
 ### Target: `main`
 *(Epic: Sitewide Performance Optimization)*
@@ -142,6 +139,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `epic/redundant-tools-cleanup`
 - [x] `chore/audit-agents-tools` : Inspect `.agents/tools/` for outdated duplicates.
 - [x] `feat/consolidate-tools` : Compare files with root `tools/` directory to resolve data divergence, delete the redundant folder, and update pointers.
+
+### Target: `main`
+*(Epic: Master Reference Compliance Audit)*
+- [x] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
 
 ### Target: `main`
 *(Epic: Competitive Feature Benchmarking)*
