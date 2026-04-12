@@ -27,5 +27,6 @@ supabase/.branches/
 # Prevent CSV exports from uploading
 *.csv
 
-# Ignore AI tracking & planning docs
+# Ignore AI tracking, temporary scratch files, & planning docs
 docs/plans/
+scratch/
