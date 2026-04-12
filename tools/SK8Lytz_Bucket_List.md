@@ -21,9 +21,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-### Target: `main`
-*(Epic: WebRTC Scanner Integration)*
-- [x] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
+
 
 ### Target: `main`
 *(Epic: Full-Repo Legacy Audit)*
@@ -72,10 +70,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: Master Reference Compliance Audit)*
 - [ ] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
 
-### Target: `feat/webrtc-cycle-counts`
-*(Epic: Cycle Count Scanner Standardization)*
-- [x] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure the WebRTC constraint logic fully supports cross-platform execution specifically for iPhone iOS Safari, native Android, and PC webcams. Ensure consistent behavior across all scanning entry points.
-
 ### Target: `main`
 *(Epic: Sitewide Performance Optimization)*
 - [ ] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
@@ -116,6 +110,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `epic/webrtc-cycle-scanner`
+- [x] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
+- [x] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure the WebRTC constraint logic fully supports cross-platform execution specifically for iPhone iOS Safari, native Android, and PC webcams. Ensure consistent behavior across all scanning entry points.
 
 ### Target: `epic/tech-debt-clearance`
 - [x] `debt/security` : **[HIGH] RESOLVED ✅** `xlsx` (SheetJS) CVEs Prototype Pollution + ReDoS. Audited the repo to verify it wasn't required for compilation, and effectively eradicated the NPM ghost package via `npm uninstall xlsx`. `npm audit` returned 0 vulnerabilities.

@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.0.2] - 2026-04-11
+
+### Features & Refactors
+- **WebRTC Cycle Scanner Integration**: Built an iPhone camera-compatible WebRTC cycle count scanner directly into the STOCKZ module to allow rapid warehouse cycle counts using natively accessible camera hardware.
+- **Scanner Standardization & Dual-Card Layout**: Standardized the Cycle Count camera scanner engine with the SOP editor scanner. Completely eliminated the full-screen blackout modal layout in favor of a sleek side-by-side Dual-Card flex matrix. Implemented robust cross-platform stability checks for iOS Safari, native Android, and PC Webcams (`aspectRatio: 1.0` handling for 280x280 constraints) including dynamic auto-selection of the form upon successful QR barcode locking. 
+
 ## [1.0.1] - 2026-04-11
 
 ### Features & Refactors
