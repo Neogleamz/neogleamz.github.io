@@ -44,6 +44,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ### Target: `main`
+*(Epic: Backup & Restore Sandbox Style Standardization)*
+- [ ] `feat/backup-restore-sandbox` : Create a "Cancel" button for when you start a restore in the Brainz. Refactor the Backup & Restore module buttons to match the style/color of the Orders and Parcels Sync importers. Replicate "Test Mode" (Sandbox) functionality and "Normal Mode" so the Restore module has fully working modals and behaviors completely matching the standardized importer templates.
+
+### Target: `main`
 *(Epic: Socialz Outreach Kanban)*
 - [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
 
