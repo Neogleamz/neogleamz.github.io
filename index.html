@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.12.0916"></script>
+    <script src="system-version.js?v=v.2026.04.12.0938"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
@@ -9,10 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.0916"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.0938"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.0916"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.0938"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="system-event-delegator.js?v=v.2026.04.12.0938"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1274,19 +1275,19 @@
             <span class="subtitle" style="margin: 0; margin-top: 4px; margin-left: 65px; font-size: clamp(6.5px, 0.9vw, 12px); color: #f97316; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px;">Cloud-Native Ledger & Command Center</span>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('invhub')">📊 STOCKPILEZ</button>
-            <button class="tab-btn" onclick="switchTab('prodhub')">🏭 MAKERZ</button>
-            <button class="tab-btn" onclick="switchTab('fulfillzhub')">📦 FULFILLZ</button>
-            <button class="tab-btn" onclick="switchTab('salezhub')">🛒 REVENUEZ</button>
-            <button class="tab-btn" onclick="switchTab('socialzhub')">👥 SOCIALZ</button>
-            <button class="tab-btn" onclick="switchTab('synchub')">⚡ NEXUZ</button>
+            <button class="tab-btn active" data-click="click_switchTab_invhub">📊 STOCKPILEZ</button>
+            <button class="tab-btn" data-click="click_switchTab_prodhub">🏭 MAKERZ</button>
+            <button class="tab-btn" data-click="click_switchTab_fulfillzhub">📦 FULFILLZ</button>
+            <button class="tab-btn" data-click="click_switchTab_salezhub">🛒 REVENUEZ</button>
+            <button class="tab-btn" data-click="click_switchTab_socialzhub">👥 SOCIALZ</button>
+            <button class="tab-btn" data-click="click_switchTab_synchub">⚡ NEXUZ</button>
         </div>
         <div class="top-controls">
-            <button id="tipzBtn" class="top-action-btn" onclick="openTipzModal()" style="border-color: #f97316; color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">💡 Tipz</button>
-            <button id="themeToggle" class="top-action-btn" onclick="toggleTheme()">🌙 Dark</button>
-            <button class="top-action-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+            <button id="tipzBtn" class="top-action-btn" data-click="click_openTipzModal" style="border-color: #f97316; color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">💡 Tipz</button>
+            <button id="themeToggle" class="top-action-btn" data-click="click_toggleTheme">🌙 Dark</button>
+            <button class="top-action-btn logout-btn" data-click="click_handleLogout">🚪 Logout</button>
             <div class="terminal-wrapper" style="position: relative;">
-                <div id="termHeader" class="sys-good" onclick="toggleTerminal()" style="width: 140px; min-width: 140px; max-width: 140px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                <div id="termHeader" class="sys-good" data-click="click_toggleTerminal" style="width: 140px; min-width: 140px; max-width: 140px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
                     <span id="termStatusIcon" style="flex-grow: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right:10px; text-align: left;">🟢 System Online</span>
                     <span id="termToggle" style="flex-shrink: 0;">▼</span>
                     <progress id="sysProgress" class="prog-working" value="0" max="100"></progress>
@@ -1294,7 +1295,7 @@
                 <div id="debugLog">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
                         <span style="font-weight:bold; color:var(--text-muted); font-size:10px; text-transform:uppercase;">Command Center Diagnostics</span>
-                        <button onclick="clearLog()" style="width:auto; padding:2px 8px; font-size:10px; background:var(--bg-surface-light); color:var(--text-main); border-radius:4px; border:1px solid var(--border-color); cursor:pointer;">Clear Log</button>
+                        <button data-click="click_clearLog" style="width:auto; padding:2px 8px; font-size:10px; background:var(--bg-surface-light); color:var(--text-main); border-radius:4px; border:1px solid var(--border-color); cursor:pointer;">Clear Log</button>
                     </div>
                 </div>
             </div>
@@ -1304,7 +1305,7 @@
     <!-- INVENTORY HUBZ -->
     <div id="invhub-tab" class="tab-content active" style="padding:0;">
         <div id="invHubLanding" class="hub-landing hub-container" style="flex-grow:1; padding:40px;">
-            <div class="hub-card" onclick="showInventoryPane('pipeline')">
+            <div class="hub-card" data-click="click_showInventoryPane_pipeline">
                 <i>📖</i>
                 <h2>DATAZ</h2>
                 <p>Full database access, raw entry, and parcel syncing.</p>
@@ -1316,7 +1317,7 @@
                     <div class="kpi-row"><span>TOTAL RAW GOODS COST</span><strong id="statDatazTotalCost">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showInventoryPane('simple')">
+            <div class="hub-card" data-click="click_showInventoryPane_simple">
                 <i>📋</i>
                 <h2>EDITZ</h2>
                 <p>Fast editing for Neo Productz and 3D Printed itemz.</p>
@@ -1328,7 +1329,7 @@
                     <div class="kpi-row"><span>Orphan Componentz</span><strong id="statEditzOrphan">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showInventoryPane('inventory')">
+            <div class="hub-card" data-click="click_showInventoryPane_inventory">
                 <i>📊</i>
                 <h2>STOCKZ</h2>
                 <p>Real-time stock levelz, reorder pointz, and value tracking.</p>
@@ -1347,14 +1348,14 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">DATAZ</span>
             </div>
-            <div class="nav-zone left" onclick="showInventoryPane('inventory')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showInventoryPane('simple')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showInventoryPane_inventory"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showInventoryPane_simple"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
 
                     <div style="margin-bottom: 10px;">
-                        <input type="text" id="datazSearch" onkeyup="window.renderActiveTable()" placeholder="Search DATAZ ledger..." style="width: 100%; border: 1px solid var(--border-input); border-radius: 4px; padding: 8px; background: var(--bg-input); color: var(--text-color);">
+                        <input type="text" id="datazSearch" data-keyup="keyup_window_renderActiveTable" placeholder="Search DATAZ ledger..." style="width: 100%; border: 1px solid var(--border-input); border-radius: 4px; padding: 8px; background: var(--bg-input); color: var(--text-color);">
                     </div>
                     <div class="table-wrap" id="results" style="flex-grow:1;"></div>
                 </div>
@@ -1365,8 +1366,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">EDITZ</span>
             </div>
-            <div class="nav-zone left" onclick="showInventoryPane('pipeline')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showInventoryPane('inventory')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showInventoryPane_pipeline"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showInventoryPane_inventory"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
@@ -1379,11 +1380,11 @@
                         <div style="flex: 0.5; min-width: 70px;"><label>Order Qty</label><input id="m_qty" type="number" step="any" min="0.0001" value="1"></div>
                         <div style="flex: 0.5; min-width: 70px;"><label>Multiplier</label><input id="m_mult" type="number" step="any" min="1" value="1"></div>
                         <div style="flex: 0.5; min-width: 70px;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
-                        <button class="btn-purple" style="padding: 8px 10px; font-size: 13px; font-weight: bold; width:auto; height:35px; margin-right:5px;" onclick="autofillNeoNames()">🪄 Auto-Fill Ledger</button>
-                        <button class="btn-green" style="padding: 8px 15px; font-size: 13px; font-weight: bold; width:auto; height:35px;" onclick="addManualItem()">+ Add Row</button>
+                        <button class="btn-purple" style="padding: 8px 10px; font-size: 13px; font-weight: bold; width:auto; height:35px; margin-right:5px;" data-click="click_autofillNeoNames">🪄 Auto-Fill Ledger</button>
+                        <button class="btn-green" style="padding: 8px 15px; font-size: 13px; font-weight: bold; width:auto; height:35px;" data-click="click_addManualItem">+ Add Row</button>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <input type="text" id="editzSearch" onkeyup="window.renderActiveTable()" placeholder="Search EDITZ ledger..." style="width: 100%; border: 1px solid var(--border-input); border-radius: 4px; padding: 8px; background: var(--bg-input); color: var(--text-color);">
+                        <input type="text" id="editzSearch" data-keyup="keyup_window_renderActiveTable" placeholder="Search EDITZ ledger..." style="width: 100%; border: 1px solid var(--border-input); border-radius: 4px; padding: 8px; background: var(--bg-input); color: var(--text-color);">
                     </div>
                     <div class="table-wrap" id="simpleResults" style="flex-grow:1;"></div>
                 </div>
@@ -1394,15 +1395,15 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">STOCKZ</span>
                 <div class="pane-header-actions">
-                    <button class="btn-red-neon" onclick="window.resetInventoryConsumption()">⚠️ Reset Stock Levels</button>
-                    <button class="btn-green-neon" onclick="window.openCycleCountManager()" style="margin-left:5px;">📦 Cycle Counts</button>
-                    <button class="btn-purple" onclick="window.openVelocityzModal()">⏳ Velocityz</button>
-                    <button class="btn-blue" onclick="window.editGlobalLeadTime()" style="margin-left:5px;">⏱️ Edit Global Lead</button>
-                    <button class="btn-slate" onclick="printReorderReport()" style="margin-left:5px;">🖨️ Low Stockz Report</button>
+                    <button class="btn-red-neon" data-click="click_window_resetInventoryConsumpti">⚠️ Reset Stock Levels</button>
+                    <button class="btn-green-neon" data-click="click_window_openCycleCountManager" style="margin-left:5px;">📦 Cycle Counts</button>
+                    <button class="btn-purple" data-click="click_window_openVelocityzModal">⏳ Velocityz</button>
+                    <button class="btn-blue" data-click="click_window_editGlobalLeadTime" style="margin-left:5px;">⏱️ Edit Global Lead</button>
+                    <button class="btn-slate" data-click="click_printReorderReport" style="margin-left:5px;">🖨️ Low Stockz Report</button>
                 </div>
             </div>
-            <div class="nav-zone left" onclick="showInventoryPane('simple')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showInventoryPane('pipeline')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showInventoryPane_simple"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showInventoryPane_pipeline"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
@@ -1419,7 +1420,7 @@
     <!-- PRODUCTZ HUB -->
     <div id="prodhub-tab" class="tab-content" style="padding:0;">
         <div id="prodHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
-            <div class="hub-card" onclick="showProductionPane('builder')">
+            <div class="hub-card" data-click="click_showProductionPane_builder">
                 <i>🛠️</i>
                 <h2>RECIPEZ</h2>
                 <p>Define recipenz, labor, and BOM structurez.</p>
@@ -1431,7 +1432,7 @@
                     <div class="kpi-row"><span>Missing BOM Data</span><strong id="statRecipezMissing">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showProductionPane('production')">
+            <div class="hub-card" data-click="click_showProductionPane_production">
                 <i>🏭</i>
                 <h2>BATCHEZ</h2>
                 <p>Active Batchz, SOPz, and Work Orderz.</p>
@@ -1443,7 +1444,7 @@
                     <div class="kpi-row"><span>Batch MSRP Value ($)</span><strong id="statBatchezVal">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showProductionPane('print')">
+            <div class="hub-card" data-click="click_showProductionPane_print">
                 <i>🖨️</i>
                 <h2>LAYERZ</h2>
                 <p>Monitor live 3D Print queuez and taskz.</p>
@@ -1462,56 +1463,56 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">RECIPEZ</span>
             </div>
-            <div class="nav-zone left" onclick="showProductionPane('print')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showProductionPane('production')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showProductionPane_print"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showProductionPane_production"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div id="recipezSidebar" class="bom-sidebar">
-                    <button class="btn-green-neon" onclick="window.showRecipeModal('create')" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
+                    <button class="btn-green-neon" data-click="click_window_showRecipeModal_create" style="margin-bottom: 8px; flex-shrink:0; padding:8px; font-size:13px;">+ Create New</button>
                     <ul class="product-list" id="productListUI"></ul>
                 </div>
                 
-                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+                <div class="h-resizer" data-mousedown="mousedown_initNeoSidebarResizer_event"></div>
                 
                 <div class="bom-main" id="bomMainArea" style="display:none;">
                     <div class="bom-header" style="flex-wrap: wrap;">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <h2 id="bomTitle" style="margin:0; font-size:20px; color:var(--text-heading);">Product Name</h2>
-                            <button class="icon-btn" onclick="renameCurrentProduct()" title="Rename Product" style="width:28px!important; height:28px; font-size:14px; border-color:var(--border-input);">✏️</button>
+                            <button class="icon-btn" data-click="click_renameCurrentProduct" title="Rename Product" style="width:28px!important; height:28px; font-size:14px; border-color:var(--border-input);">✏️</button>
                         </div>
                         <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; justify-content:flex-end;">
                             <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
                                 <label style="font-size:11px; font-weight:bold; color:#f59e0b; cursor:pointer;" for="isSubassemblyInput">⚙️ Sub-Assembly</label>
-                                <input type="checkbox" id="isSubassemblyInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                                <input type="checkbox" id="isSubassemblyInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" data-change="change_updateLaborCosts">
                             </div>
                             <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
                                 <label style="font-size:11px; font-weight:bold; color:#38bdf8; cursor:pointer;" for="is3dPrintInput">🖨️ 3D Print</label>
-                                <input type="checkbox" id="is3dPrintInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                                <input type="checkbox" id="is3dPrintInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" data-change="change_updateLaborCosts">
                             </div>
                             <div style="display:flex; flex-direction:column; align-items:center; background:var(--bg-bar); padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
                                 <label style="font-size:11px; font-weight:bold; color:#10b981; cursor:pointer;" for="isLabelInput">🏷️ Label</label>
-                                <input type="checkbox" id="isLabelInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" onchange="updateLaborCosts()">
+                                <input type="checkbox" id="isLabelInput" style="width:16px; height:16px; cursor:pointer; margin-top:4px;" data-change="change_updateLaborCosts">
                             </div>
                             <div style="display:flex; flex-direction:column; align-items:flex-end;">
                                 <label style="font-size:11px; font-weight:bold; color:#38bdf8;">Print Time (m)</label>
-                                <input type="number" id="recipePrintTimeInput" style="width:70px; padding:4px; border-color:#38bdf8;" min="0" step="any" onchange="updateLaborCosts()">
+                                <input type="number" id="recipePrintTimeInput" style="width:70px; padding:4px; border-color:#38bdf8;" min="0" step="any" data-change="change_updateLaborCosts">
                             </div>
 
                             <div style="display:flex; flex-direction:column; align-items:flex-end;">
                                 <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Labor Time (Mins)</label>
-                                <input type="number" id="laborTimeInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                                <input type="number" id="laborTimeInput" style="width:80px; padding:4px;" min="0" step="any" data-change="change_updateLaborCosts">
                             </div>
                             <div style="display:flex; flex-direction:column; align-items:flex-end;">
                                 <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Shop Rate ($/Hr)</label>
-                                <input type="number" id="laborRateInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                                <input type="number" id="laborRateInput" style="width:80px; padding:4px;" min="0" step="any" data-change="change_updateLaborCosts">
                             </div>
                             <div style="display:flex; flex-direction:column; align-items:flex-end;">
                                 <label style="font-size:11px; font-weight:bold; color:#0ea5e9;">MSRP ($)</label>
-                                <input type="number" id="msrpInput" style="width:80px; padding:4px; border-color:#0ea5e9;" min="0" step="any" onchange="updateLaborCosts()">
+                                <input type="number" id="msrpInput" style="width:80px; padding:4px; border-color:#0ea5e9;" min="0" step="any" data-change="change_updateLaborCosts">
                             </div>
                             <div style="display:flex; flex-direction:column; align-items:flex-end;">
                                 <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">Wholesale ($)</label>
-                                <input type="number" id="wholesaleInput" style="width:80px; padding:4px;" min="0" step="any" onchange="updateLaborCosts()">
+                                <input type="number" id="wholesaleInput" style="width:80px; padding:4px;" min="0" step="any" data-change="change_updateLaborCosts">
                             </div>
                             <div class="total-badge" id="bomTotalCost">$0.00</div>
                         </div>
@@ -1519,12 +1520,12 @@
                     <div class="add-part-bar" style="margin-top: 15px;">
                         <select id="partSelector"></select>
                         <input id="partQty" type="number" step="any" min="0.0001" value="1">
-                        <button class="btn-green" onclick="addPartToProduct()">Add Part</button>
-                        <button class="btn-purple" onclick="openBulkAddModal()">📑 Bulk Add</button>
+                        <button class="btn-green" data-click="click_addPartToProduct">Add Part</button>
+                        <button class="btn-purple" data-click="click_openBulkAddModal">📑 Bulk Add</button>
                     </div>
                     <div class="table-wrap" id="bomTableWrap"></div>
                     <div style="margin-top: 15px; text-align: right; flex-shrink:0;">
-                        <button class="btn-red-neon" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="showRecipeModal('delete')">Delete Recipe</button>
+                        <button class="btn-red-neon" style="width: auto; padding: 6px 12px; font-size: 12px;" data-click="click_showRecipeModal_delete">Delete Recipe</button>
                     </div>
                 </div>
             </div>
@@ -1534,8 +1535,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">BATCHEZ</span>
             </div>
-            <div class="nav-zone left" onclick="showProductionPane('builder')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showProductionPane('print')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showProductionPane_builder"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showProductionPane_print"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div id="batchezSidebar" class="bom-sidebar">
@@ -1552,19 +1553,19 @@
 
                     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px; width:100%;">
                         <div style="display:flex; gap:8px;">
-                            <button class="btn-green" onclick="window.openNewWOModal('create')" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ CreateBatch</button>
-                            <button class="btn-green-neon" onclick="window.openMultiBatchModal()" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
+                            <button class="btn-green" data-click="click_window_openNewWOModal_create" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ CreateBatch</button>
+                            <button class="btn-green-neon" data-click="click_window_openMultiBatchModal" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
                         </div>
-                        <button class="btn-orange" onclick="window.openSOPMasterModal('production')" style="padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 BATCHEZ SOP EDITOR</button>
+                        <button class="btn-orange" data-click="click_window_openSOPMasterModal_prod" style="padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 BATCHEZ SOP EDITOR</button>
                         <div style="display:flex; gap:6px;">
-                            <button class="btn-amber-muted" style="flex:1; padding:6px 4px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap;" onclick="window.openArchiveExplorer('batchez')"><span>📂</span> Archives</button>
+                            <button class="btn-amber-muted" style="flex:1; padding:6px 4px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap;" data-click="click_window_openArchiveExplorer_bat"><span>📂</span> Archives</button>
                         </div>
                     </div>
                     <ul class="product-list" id="woListUI"></ul>
 
                 </div>
                 
-                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+                <div class="h-resizer" data-mousedown="mousedown_initNeoSidebarResizer_event"></div>
                 
                 <div class="bom-main" id="woMainArea" style="display:none; overflow-y:auto;">
                     <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
@@ -1574,17 +1575,17 @@
                                 <span id="woStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">START: --/-- --:--</span>
                                 <span id="woEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">FINISH: --/-- --:--</span>
                                 <span id="woBadge" class="status-badge st-queued">Queued</span>
-                                <button onclick="window.deleteWorkOrder()" title="Delete Work Order" class="btn-red-neon">🗑️ DELETE</button>
+                                <button data-click="click_window_deleteWorkOrder" title="Delete Work Order" class="btn-red-neon">🗑️ DELETE</button>
                             </div>
                         </div>
                         <div style="font-size:14px; color:var(--text-muted);">Target Quantity: <strong id="woQtyTarget" style="color:var(--text-main);">0</strong> units</div>
                     </div>
 
                     <div class="pipeline-bar" id="woPipeline">
-                        <div class="pipe-step" id="pipe-Queued" onclick="window.advanceWO('Queued')">1. Queued</div>
-                        <div class="pipe-step" id="pipe-Picking" onclick="window.advanceWO('Picking')">2. Start Picking Parts</div>
-                        <div class="pipe-step" id="pipe-Production" onclick="window.advanceWO('In Production')">3. Send to Production</div>
-                        <div class="pipe-step" id="pipe-Completed" onclick="window.advanceWO('Completed')">4. Finalize Batch</div>
+                        <div class="pipe-step" id="pipe-Queued" data-click="click_window_advanceWO_Queued">1. Queued</div>
+                        <div class="pipe-step" id="pipe-Picking" data-click="click_window_advanceWO_Picking">2. Start Picking Parts</div>
+                        <div class="pipe-step" id="pipe-Production" data-click="click_window_advanceWO_In_Production">3. Send to Production</div>
+                        <div class="pipe-step" id="pipe-Completed" data-click="click_window_advanceWO_Completed">4. Finalize Batch</div>
                     </div>
 
                     <div id="sect-Queued" class="wo-section">
@@ -1593,7 +1594,7 @@
 
                     <div id="sect-Picking" class="wo-section">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
-                            <button class="print-btn" onclick="window.printPickList()">🖨️ Print List</button>
+                            <button class="print-btn" data-click="click_window_printPickList">🖨️ Print List</button>
                         </div>
                         <div id="woPickList" style="margin-bottom:0px;"></div>
                     </div>
@@ -1602,14 +1603,14 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                             <div></div>
                             <div style="display:flex; gap: 10px;">
-                                <button class="btn-red-muted" style="padding:6px 12px; font-size:13px;" onclick="window.openDraftScrapModal()">🗑️ Update Scrap Tally</button>
-                                <button class="print-btn" onclick="window.printSOP()">🖨️ Print SOP</button>
+                                <button class="btn-red-muted" style="padding:6px 12px; font-size:13px;" data-click="click_window_openDraftScrapModal">🗑️ Update Scrap Tally</button>
+                                <button class="print-btn" data-click="click_window_printSOP">🖨️ Print SOP</button>
                             </div>
                         </div>
                         <div id="inlineSOPContainer" style="display:flex; flex-direction:column; position:relative;">
                             <div id="woSOPList" style="margin-bottom:20px;"></div>
                             <div id="inlineSaveContainer" style="text-align:right; margin-top:10px; border-top:1px solid var(--border-color); padding-top:15px; display:none; position:sticky; bottom:0; background:var(--bg-container); z-index:100; padding-bottom:15px;">
-                                <button id="btnSaveInlineSOP" class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveInlineSOP()">💾 Save Changes to Cloud</button>
+                                <button id="btnSaveInlineSOP" class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" data-click="click_saveInlineSOP">💾 Save Changes to Cloud</button>
                             </div>
                         </div>
                     </div>
@@ -1627,8 +1628,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">LAYERZ</span>
             </div>
-            <div class="nav-zone left" onclick="showProductionPane('production')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showProductionPane('builder')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showProductionPane_production"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showProductionPane_builder"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div id="layerzSidebar" class="bom-sidebar">
@@ -1644,18 +1645,18 @@
                     </div>
                     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px; width:100%;">
                         <div style="display:flex; gap:10px; width:100%;">
-                            <button class="btn-green" onclick="openManualPrintModal()" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ PRINTBATCH</button>
-                            <button class="btn-green-neon" onclick="window.openMultiBatchModal('3d')" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
+                            <button class="btn-green" data-click="click_openManualPrintModal" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ PRINTBATCH</button>
+                            <button class="btn-green-neon" data-click="click_window_openMultiBatchModal_3d" style="flex:1; padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">+ BatchOrder</button>
                         </div>
-                        <button class="btn-orange" onclick="window.openSOPMasterModal('3d')" style="padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 LAYERZ SOP EDITOR</button>
+                        <button class="btn-orange" data-click="click_window_openSOPMasterModal_3d" style="padding:6px 10px; font-family:'Righteous', sans-serif; font-size:14px; font-weight:900;">📝 LAYERZ SOP EDITOR</button>
                         <div style="display:flex; gap:6px;">
-                            <button class="btn-amber-muted" style="flex:1; padding:6px 4px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap;" onclick="window.openArchiveExplorer('layerz')"><span>📂</span> Archives</button>
+                            <button class="btn-amber-muted" style="flex:1; padding:6px 4px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap;" data-click="click_window_openArchiveExplorer_lay"><span>📂</span> Archives</button>
                         </div>
                     </div>
                     <ul class="product-list" id="printListUI"></ul>
                 </div>
                 
-                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+                <div class="h-resizer" data-mousedown="mousedown_initNeoSidebarResizer_event"></div>
                 
                 <div class="bom-main" id="printMainArea" style="display:none; overflow-y:auto;">
                     <div class="bom-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
@@ -1666,17 +1667,17 @@
                                 <span id="printJobStartTime" style="font-size:11px; font-weight:bold; color:#8b5cf6; background:rgba(139,92,246,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">START: --/-- --:--</span>
                                 <span id="printJobEndTime" style="font-size:11px; font-weight:bold; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; display:none; white-space:nowrap;">FINISH: --/-- --:--</span>
                                 <span id="printJobBadge" class="status-badge st-queued">Queued</span>
-                                <button onclick="deletePrintJob()" title="Delete Print Job" class="btn-red-neon">🗑️ DELETE</button>
+                                <button data-click="click_deletePrintJob" title="Delete Print Job" class="btn-red-neon">🗑️ DELETE</button>
                             </div>
                         </div>
                         <div style="font-size:14px; color:var(--text-muted);">Quantity: <strong id="printJobQty" style="color:var(--text-main);">0</strong> | Source: <strong id="printJobSource" style="font-family:monospace;">Manual</strong></div>
                     </div>
 
                     <div class="pipeline-bar" id="printPipeline">
-                        <div class="pipe-step" id="pipe-P-Queued" onclick="advancePrintStatus('Queued')">1. Queued</div>
-                        <div class="pipe-step" id="pipe-P-Printing" onclick="advancePrintStatus('Printing')">2. Start Print Job</div>
-                        <div class="pipe-step" id="pipe-P-Cleaned" onclick="advancePrintStatus('Cleaned')">3. Mark as Cleaned</div>
-                        <div class="pipe-step" id="pipe-P-Completed" onclick="advancePrintStatus('Completed')">4. Finalize Print</div>
+                        <div class="pipe-step" id="pipe-P-Queued" data-click="click_advancePrintStatus_Queued">1. Queued</div>
+                        <div class="pipe-step" id="pipe-P-Printing" data-click="click_advancePrintStatus_Printing">2. Start Print Job</div>
+                        <div class="pipe-step" id="pipe-P-Cleaned" data-click="click_advancePrintStatus_Cleaned">3. Mark as Cleaned</div>
+                        <div class="pipe-step" id="pipe-P-Completed" data-click="click_advancePrintStatus_Completed">4. Finalize Print</div>
                     </div>
 
                     <!-- Sections for each stage -->
@@ -1691,7 +1692,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--border-color); padding-bottom:5px; margin-bottom:15px;">
                             <h3 style="margin:0; color:var(--text-heading);">Printing Instructions (SOP)</h3>
                             <div style="display:flex; gap: 10px;">
-                                <button class="print-btn" onclick="window.openPrintSOP(currentPrintJob.part_name)">🖨️ Print SOP</button>
+                                <button class="print-btn" data-click="click_window_openPrintSOP_currentPri">🖨️ Print SOP</button>
                             </div>
                         </div>
                         <div id="printSOPList" style="margin-bottom:20px;"></div>
@@ -1724,7 +1725,7 @@
     <!-- SALEZ HUB -->
     <div id="salezhub-tab" class="tab-content" style="padding:0;">
         <div id="salezHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
-            <div class="hub-card" onclick="showSalezPane('bridge')">
+            <div class="hub-card" data-click="click_showSalezPane_bridge">
                 <i>📖</i>
                 <h2>ORDERZ</h2>
                 <p>Passive review of finalized outbound e-commerce salez.</p>
@@ -1736,7 +1737,7 @@
                     <div class="kpi-row"><span>Warranty Burden</span><strong id="statOrderzBurden" style="color:#ef4444;">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showSalezPane('analyticz')">
+            <div class="hub-card" data-click="click_showSalezPane_analyticz">
                 <i>📈</i>
                 <h2>STATZ</h2>
                 <p>Visual Profit Derivation, Trendz, and Insightz.</p>
@@ -1748,7 +1749,7 @@
                     <div class="kpi-row"><span>Raw Component Exp</span><strong id="statStatzRawExp">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showSalezPane('commandz')">
+            <div class="hub-card" data-click="click_showSalezPane_commandz">
                 <i>🕹️</i>
                 <h2>SIMULATORZ</h2>
                 <p>Executive Oversight: High-level financial controlz.</p>
@@ -1767,8 +1768,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">ORDERZ</span>
             </div>
-            <div class="nav-zone left" onclick="showSalezPane('commandz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSalezPane('analyticz')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showSalezPane_commandz"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showSalezPane_analyticz"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
@@ -1782,8 +1783,8 @@
                 <div class="pane-header-bar">
                     <span class="pane-header-title">STATZ</span>
                 </div>
-                <div class="nav-zone left" onclick="showSalezPane('bridge')"><i>‹</i></div>
-                <div class="nav-zone right" onclick="showSalezPane('commandz')"><i>›</i></div>
+                <div class="nav-zone left" data-click="click_showSalezPane_bridge"><i>‹</i></div>
+                <div class="nav-zone right" data-click="click_showSalezPane_commandz"><i>›</i></div>
                 
                 <div class="bom-layout" style="flex-grow:1; min-height:0; overflow: hidden;">
                     <div class="bom-main" id="analyticsContent" style="display:flex; flex-direction:column; height: 100%; overflow-x: hidden; overflow-y: auto;">
@@ -1836,8 +1837,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">SIMULATORZ</span>
             </div>
-            <div class="nav-zone left" onclick="showSalezPane('analyticz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showSalezPane('bridge')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showSalezPane_analyticz"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showSalezPane_bridge"><i>›</i></div>
             <!-- Contents of CEO Terminal -->
             <div id="ceoContent" class="executive-content">
                 <div id="ceo-tab-inner" style="--neon-green: #00ff66; --neon-red: #ff0033; --neon-cyan: #00e5ff; --neon-purple: #b000ff; --neon-yellow: #ffcc00; display:flex; flex-direction:column; height:100%;">
@@ -1862,7 +1863,7 @@
                                     <span style="color:var(--neon-cyan)">Free Ship Threshold</span> 
                                     <div style="display:flex; align-items:center;">
                                         <span style="color:var(--neon-cyan); margin-right:4px;">$</span>
-                                        <input type="number" id="ceo-fs-threshold" value="50" style="width: 50px; background: var(--bg-input); border: 1px solid var(--border-color); color: #fff; text-align: center; border-radius: 4px; padding: 2px;" onchange="updateCeoEngine()">
+                                        <input type="number" id="ceo-fs-threshold" value="50" style="width: 50px; background: var(--bg-input); border: 1px solid var(--border-color); color: #fff; text-align: center; border-radius: 4px; padding: 2px;" data-change="change_updateCeoEngine">
                                     </div>
                                 </div>
                             </div>
@@ -1887,7 +1888,7 @@
                             
                             <!-- Cohort Intelligence Action -->
                             <div style="margin-top: 15px; width: 100%;">
-                                <button class="btn-orange-neon" onclick="openLtvModal()" style="width:100%; padding: 12px; font-size:14px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                <button class="btn-orange-neon" data-click="click_openLtvModal" style="width:100%; padding: 12px; font-size:14px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
                                     <i class="fa-solid fa-users-viewfinder"></i> View Cohort Intelligence
                                 </button>
                             </div>
@@ -1914,7 +1915,7 @@
         <!-- FULFILLZ -->
     <div id="fulfillzhub-tab" class="tab-content" style="padding:0;">
         <div id="fulfillzhubLanding" class="hub-landing hub-container" style="display:flex; flex-grow:1; padding:40px;">
-            <div class="hub-card" onclick="showFulfillzPane('packerz')">
+            <div class="hub-card" data-click="click_showFulfillzPane_packerz">
                 <i style="color: #F59E0B;">📦</i>
                 <h2>PACKERZ</h2>
                 <p>Internal Fulfillment Terminal &amp; SOP Quality-Assurance Desk.</p>
@@ -1927,7 +1928,7 @@
                 </div>
             </div>
             
-            <div class="hub-card" onclick="showFulfillzPane('barcodz')">
+            <div class="hub-card" data-click="click_showFulfillzPane_barcodz">
                 <i style="color: #10b981;">📟</i>
                 <h2>BARCODZ</h2>
                 <p>Global Catalog Barcode Directory and Thermal Label Spooler.</p>
@@ -1939,7 +1940,7 @@
                     <div class="kpi-row"><span>Engine Health</span><strong id="statBarcodzHealth">NOMINAL</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showFulfillzPane('labelz')">
+            <div class="hub-card" data-click="click_showFulfillzPane_labelz">
                 <i style="color: #8b5cf6;">🏷️</i>
                 <h2>LABELZ</h2>
                 <p>Custom Label Designer, File Manager &amp; Thermal Print Engine.</p>
@@ -1959,13 +1960,13 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">PACKERZ</span>
             <div class="pane-header-actions">
-                    <button class="btn-orange" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='flex';">📝 PACKERZ SOP EDITOR</button>
-                    <button class="btn-amber-muted" onclick="openSOPAuditLog()">🗃️ COMPLETED ORDERS ARCHIVE</button>
+                    <button class="btn-orange" data-click="click_document_getElementById_paneFu">📝 PACKERZ SOP EDITOR</button>
+                    <button class="btn-amber-muted" data-click="click_openSOPAuditLog">🗃️ COMPLETED ORDERS ARCHIVE</button>
                 </div>
             </div>
             
-            <div class="nav-zone left" onclick="showFulfillzPane('labelz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showFulfillzPane('barcodz')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showFulfillzPane_labelz"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showFulfillzPane_barcodz"><i>›</i></div>
             
             <div id="packerzKanbanWrapper" class="bom-layout" style="flex-grow:1; min-height:0;">
                 <!-- Column 1: AWAITING -->
@@ -1976,7 +1977,7 @@
                     </div>
                 </div>
                 
-                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+                <div class="h-resizer" data-mousedown="mousedown_initNeoSidebarResizer_event"></div>
                 
                 <!-- Column 2: IN PROGRESS -->
                 <div class="packerz-kanban-col" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(0,0,0,0.05); min-width: 280px;">
@@ -1999,13 +2000,13 @@
                         <option value="QR">QR Code — 2D Square 📷</option>
                         <option value="CODE39">CODE 39 — Alphanumeric 1D</option>
                     </select>
-                                    <button class="btn-slate" onclick="document.getElementById('paperProfileModal').style.display='flex'" style="padding:6px 12px; font-size:12px; font-weight:bold; height:fit-content;">⚙️ PAPER SETTINGS</button>
+                                    <button class="btn-slate" data-click="click_document_getElementById_paperP" style="padding:6px 12px; font-size:12px; font-weight:bold; height:fit-content;">⚙️ PAPER SETTINGS</button>
                 </div>
 
             </div>
             
-            <div class="nav-zone left" onclick="showFulfillzPane('packerz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showFulfillzPane('labelz')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showFulfillzPane_packerz"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showFulfillzPane_labelz"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div id="barcodzSidebar" class="bom-sidebar" style="display:flex; flex-direction:column; min-width:280px !important; width:320px; overflow-x:hidden;">
@@ -2026,14 +2027,14 @@
                             <span>Total Labels:</span>
                             <span id="spoolTotalCount">0</span>
                         </div>
-                        <button class="btn-green-neon" onclick="executeBatchPrint()" style="width:100%; padding:12px; font-size:14px;">FIRE PRINT BATCH</button>
+                        <button class="btn-green-neon" data-click="click_executeBatchPrint" style="width:100%; padding:12px; font-size:14px;">FIRE PRINT BATCH</button>
                     </div>
                 </div>
                 
-                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+                <div class="h-resizer" data-mousedown="mousedown_initNeoSidebarResizer_event"></div>
                 
                 <div class="bom-main" style="padding:20px; overflow-y:auto;">
-                    <input type="text" id="barcodzSearch" placeholder="🔍 Search Catalog..." style="width:100%; padding:10px 14px; font-size:14px; margin-bottom:20px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-panel); color:var(--text-main);" oninput="renderBarcodzGrid()">
+                    <input type="text" id="barcodzSearch" placeholder="🔍 Search Catalog..." style="width:100%; padding:10px 14px; font-size:14px; margin-bottom:20px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-panel); color:var(--text-main);" data-input="input_renderBarcodzGrid">
                     <div id="barcodzGrid" style="display:block;">
                         <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Initializing...</div>
                     </div>
@@ -2049,13 +2050,13 @@
                 <div class="pane-header-actions" style="display:flex; gap:10px; align-items:center;">
                     <select id="labelzSizeSelect" class="neo-cache-select" style="width:auto; padding:6px 12px; font-size:12px; font-weight:bold; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;">
                     </select>
-                    <button class="btn-green" onclick="openCreateLabelModal()" style="padding:6px 16px; font-size:13px; font-weight:800;">+ NEW LABEL</button>
-                                    <button class="btn-slate" onclick="document.getElementById('paperProfileModal').style.display='flex'" style="padding:6px 12px; font-size:12px; font-weight:bold; height:fit-content;">⚙️ PAPER SETTINGS</button>
+                    <button class="btn-green" data-click="click_openCreateLabelModal" style="padding:6px 16px; font-size:13px; font-weight:800;">+ NEW LABEL</button>
+                                    <button class="btn-slate" data-click="click_document_getElementById_paperP" style="padding:6px 12px; font-size:12px; font-weight:bold; height:fit-content;">⚙️ PAPER SETTINGS</button>
                 </div>
             </div>
 
-            <div class="nav-zone left" onclick="showFulfillzPane('barcodz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showFulfillzPane('packerz')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showFulfillzPane_barcodz"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showFulfillzPane_packerz"><i>›</i></div>
 
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <!-- Sidebar: Spool -->
@@ -2075,15 +2076,15 @@
                             <span>Total Labels:</span>
                             <span id="labelzSpoolTotalCount">0</span>
                         </div>
-                        <button class="btn-green-neon" onclick="executeBatchPrint()" style="width:100%; padding:12px; font-size:14px;">FIRE PRINT BATCH</button>
+                        <button class="btn-green-neon" data-click="click_executeBatchPrint" style="width:100%; padding:12px; font-size:14px;">FIRE PRINT BATCH</button>
                     </div>
                 </div>
 
-                <div class="h-resizer" onmousedown="initNeoSidebarResizer(event)"></div>
+                <div class="h-resizer" data-mousedown="mousedown_initNeoSidebarResizer_event"></div>
 
                 <!-- Main: Label Grid -->
                 <div class="bom-main" style="padding:20px; overflow-y:auto;">
-                    <input type="text" id="labelzSearch" placeholder="🔍 Search Labels..." style="width:100%; padding:10px 14px; font-size:14px; margin-bottom:20px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-panel); color:var(--text-main);" oninput="renderLabelzGrid()">
+                    <input type="text" id="labelzSearch" placeholder="🔍 Search Labels..." style="width:100%; padding:10px 14px; font-size:14px; margin-bottom:20px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-panel); color:var(--text-main);" data-input="input_renderLabelzGrid">
                     <div id="labelzGrid">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading label designs...</div>
                     </div>
@@ -2101,7 +2102,7 @@
                     <div style="width:1px; height:24px; background:var(--border-color); margin:0 10px; flex-shrink:0;"></div>
                     <input type="text" id="labelzDesignerName" placeholder="Label Name" style="background:transparent; border:none; font-size:15px; font-weight:bold; flex:1; min-width:80px; width:auto; max-width:160px; color:white; outline:none; border-bottom:1px dashed var(--text-muted); padding-bottom:2px;">
                     <div style="position:relative; flex-shrink:0;">
-                        <button onclick="toggleLabelzEmojiPicker()" style="background:transparent; border:1px solid var(--border-color); border-radius:6px; font-size:18px; cursor:pointer; padding:2px 8px;" id="labelzDesignerEmojiBtn">🏷️</button>
+                        <button data-click="click_toggleLabelzEmojiPicker" style="background:transparent; border:1px solid var(--border-color); border-radius:6px; font-size:18px; cursor:pointer; padding:2px 8px;" id="labelzDesignerEmojiBtn">🏷️</button>
                         <!-- Emoji Picker -->
                         <div id="labelzDesignerEmojiPicker" style="display:none; position:absolute; top:120%; left:0; background:var(--bg-container); border:1px solid var(--border-color); border-radius:10px; padding:10px; flex-wrap:wrap; gap:6px; width:260px; max-height:180px; overflow-y:auto; z-index:100; box-shadow:0 4px 16px rgba(0,0,0,0.6);">
                             <span class="lblz-emoji-opt" style="cursor:pointer; font-size:16px;">🏷️</span>
@@ -2147,17 +2148,17 @@
                 <div style="display:flex; align-items:center; gap:12px;">
                     <!-- History Controls -->
                     <div style="display:flex; flex-shrink:0; white-space:nowrap; background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; overflow:hidden; margin-right:4px;">
-                        <button onclick="lblzUndo()" style="background:transparent; border:none; border-right:1px solid var(--border-color); color:var(--text-main); font-size:11px; padding:4px 8px; cursor:pointer;" title="Undo (Ctrl+Z)">↶ Undo</button>
-                        <button onclick="lblzRedo()" style="background:transparent; border:none; color:var(--text-main); font-size:11px; padding:4px 8px; cursor:pointer;" title="Redo (Ctrl+Y)">Redo ↷</button>
+                        <button data-click="click_lblzUndo" style="background:transparent; border:none; border-right:1px solid var(--border-color); color:var(--text-main); font-size:11px; padding:4px 8px; cursor:pointer;" title="Undo (Ctrl+Z)">↶ Undo</button>
+                        <button data-click="click_lblzRedo" style="background:transparent; border:none; color:var(--text-main); font-size:11px; padding:4px 8px; cursor:pointer;" title="Redo (Ctrl+Y)">Redo ↷</button>
                     </div>
                     <canvas id="labelzBwipjsRenderer" style="display:none;"></canvas>
 
                     <!-- Label Size -->
-                    <select id="labelzDesignerSize" onchange="updateLabelCanvasSize()" style="padding:6px 8px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); font-size:12px; font-weight:bold;">
+                    <select id="labelzDesignerSize" data-change="change_updateLabelCanvasSize" style="padding:6px 8px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); font-size:12px; font-weight:bold;">
                     </select>
-                    <button id="btnSaveLabelz" class="btn-green" onclick="saveLabelzDesign()" style="padding:6px 16px; font-size:12px;">💾 SAVE</button>
-                    <button id="btnDeleteLabelz" class="btn-red-neon" onclick="deleteLabelzDesign()" style="padding:6px 16px; font-size:12px; margin-right: 15px;">🗑️ DELETE</button>
-                    <button class="btn-red" onclick="closeLabelzDesigner()" style="padding:6px 16px; font-size:12px; display:flex; align-items:center; gap:6px; white-space:nowrap;">✕ CLOSE</button>
+                    <button id="btnSaveLabelz" class="btn-green" data-click="click_saveLabelzDesign" style="padding:6px 16px; font-size:12px;">💾 SAVE</button>
+                    <button id="btnDeleteLabelz" class="btn-red-neon" data-click="click_deleteLabelzDesign" style="padding:6px 16px; font-size:12px; margin-right: 15px;">🗑️ DELETE</button>
+                    <button class="btn-red" data-click="click_closeLabelzDesigner" style="padding:6px 16px; font-size:12px; display:flex; align-items:center; gap:6px; white-space:nowrap;">✕ CLOSE</button>
                 </div>
             </div>
             
@@ -2168,14 +2169,14 @@
                     <div style="padding:15px; border-bottom:1px solid var(--border-color);">
                         <h3 style="margin:0; font-size:12px; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">ADD ELEMENT</h3>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-                            <button onclick="addLabelzText()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📝 Text</button>
-                            <button onclick="addLabelzDynamicText()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🔗 Dyn Text</button>
-                            <button onclick="addLabelzBarcode()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📊 Barcode</button>
-                            <button onclick="addLabelzQR()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📷 QR Code</button>
-                            <button onclick="addLabelzImage()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🖼️ Image</button>
-                            <button onclick="toggleLabelzDrawingMode(this)" id="lblzBrushBtn" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🖌️ Paint</button>
-                            <button onclick="addLabelzRect()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🟥 Rect/Line</button>
-                            <button onclick="addLabelzCircle()" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🔵 Circle</button>
+                            <button data-click="click_addLabelzText" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📝 Text</button>
+                            <button data-click="click_addLabelzDynamicText" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🔗 Dyn Text</button>
+                            <button data-click="click_addLabelzBarcode" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📊 Barcode</button>
+                            <button data-click="click_addLabelzQR" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">📷 QR Code</button>
+                            <button data-click="click_addLabelzImage" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🖼️ Image</button>
+                            <button data-click="click_toggleLabelzDrawingMode_this" id="lblzBrushBtn" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🖌️ Paint</button>
+                            <button data-click="click_addLabelzRect" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🟥 Rect/Line</button>
+                            <button data-click="click_addLabelzCircle" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; color:var(--text-main); font-size:11px; font-weight:800; padding:8px 4px; cursor:pointer;">🔵 Circle</button>
                         </div>
                     </div>
                     
@@ -2188,9 +2189,9 @@
                     <div style="padding:15px; border-top:1px solid var(--border-color); background:var(--bg-bar);">
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <h3 style="margin:0; font-size:10px; color:var(--text-muted); text-transform:uppercase; white-space:nowrap;">CANVAS BACKGROUND</h3>
-                            <button onclick="clearLabelCanvasBg()" style="background:transparent; border:none; font-size:11px; font-weight:900; color:#10b981; cursor:pointer; white-space:nowrap; padding:0;" title="Make Transparent">🔲 Transparent</button>
+                            <button data-click="click_clearLabelCanvasBg" style="background:transparent; border:none; font-size:11px; font-weight:900; color:#10b981; cursor:pointer; white-space:nowrap; padding:0;" title="Make Transparent">🔲 Transparent</button>
                         </div>
-                        <input type="color" id="labelzBgColor" onchange="updateLabelCanvasBg()" value="#ffffff" style="width:100%; height:30px; border:1px solid var(--border-color); border-radius:4px; cursor:pointer; margin-top:8px;" title="Solid BG Color">
+                        <input type="color" id="labelzBgColor" data-change="change_updateLabelCanvasBg" value="#ffffff" style="width:100%; height:30px; border:1px solid var(--border-color); border-radius:4px; cursor:pointer; margin-top:8px;" title="Solid BG Color">
                     </div>
                 </div>
                 
@@ -2202,13 +2203,13 @@
                     </div>
                     <!-- Zoom controls -->
                     <div style="position:absolute; bottom:20px; background:rgba(0,0,0,0.6); border:1px solid #333; border-radius:30px; display:flex; align-items:center; padding:4px 12px; gap:10px; backdrop-filter:blur(4px);">
-                        <button onclick="zoomLabelzCanvas(-0.1)" style="background:none; border:none; color:white; cursor:pointer; font-weight:bold; font-size:16px;">-</button>
+                        <button data-click="click_zoomLabelzCanvas_0_1" style="background:none; border:none; color:white; cursor:pointer; font-weight:bold; font-size:16px;">-</button>
                         <span id="labelzZoomReadout" style="font-size:12px; font-weight:bold; color:white; min-width:36px; text-align:center;">100%</span>
-                        <button onclick="zoomLabelzCanvas(0.1)" style="background:none; border:none; color:white; cursor:pointer; font-weight:bold; font-size:14px;">+</button>
-                        <button onclick="zoomLabelzCanvas('fit')" style="background:none; border:none; color:#0ea5e9; cursor:pointer; font-weight:bold; font-size:11px; margin-left:4px;">Fit</button>
+                        <button data-click="click_zoomLabelzCanvas_0_1_1" style="background:none; border:none; color:white; cursor:pointer; font-weight:bold; font-size:14px;">+</button>
+                        <button data-click="click_zoomLabelzCanvas_fit" style="background:none; border:none; color:#0ea5e9; cursor:pointer; font-weight:bold; font-size:11px; margin-left:4px;">Fit</button>
                     </div>
                     <div style="position:absolute; top:20px; right:20px;">
-                        <button class="print-btn" onclick="exportLabelzPDF()">🖨️ PDF Preview</button>
+                        <button class="print-btn" data-click="click_exportLabelzPDF">🖨️ PDF Preview</button>
                     </div>
                 </div>
                 
@@ -2217,7 +2218,7 @@
                     <div style="padding:15px; border-bottom:1px solid var(--border-color);">
                         <h3 style="margin:0; font-size:12px; color:#0ea5e9; text-transform:uppercase; margin-bottom:6px;">🔗 CATALOG CONNECTOR</h3>
                         <p style="font-size:11px; color:var(--text-muted); margin-top:0; line-height:1.4;">Pick any product or raw material to insert a linked Barcode or Dynamic Text.</p>
-                        <input type="text" id="labelzCatalogSearch" placeholder="🔍 Search Catalog..." oninput="searchLabelzCatalog()" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px; margin-top:4px;">
+                        <input type="text" id="labelzCatalogSearch" placeholder="🔍 Search Catalog..." data-input="input_searchLabelzCatalog" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px; margin-top:4px;">
                     </div>
                     <div id="labelzCatalogResults" style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:6px;">
                         <!-- Results populated via JS -->
@@ -2227,13 +2228,13 @@
             </div>
             
             <!-- Hidden Image Upload Input for Images -->
-            <input type="file" id="labelzImageUpload" accept="image/*" style="display:none;" onchange="handleLabelzImageUpload(event)">
+            <input type="file" id="labelzImageUpload" accept="image/*" style="display:none;" data-change="change_handleLabelzImageUpload_event">
         </div>
 
     <!-- NEXUZ -->
     <div id="synchub-tab" class="tab-content" style="padding:0;">
         <div id="nexuzHubLanding" class="hub-landing hub-container" style="display:none; flex-grow:1; padding:40px;">
-            <div class="hub-card" onclick="showNexuzPane('importz')">
+            <div class="hub-card" data-click="click_showNexuzPane_importz">
                 <i>📥</i>
                 <h2>IMPORTZ</h2>
                 <p>Supply Chain (Inbound): Orderz and Parcelz sync.</p>
@@ -2245,7 +2246,7 @@
                     <div class="kpi-row"><span>Ledger Wt Payload (g)</span><strong id="statImpzWt">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showNexuzPane('salez')">
+            <div class="hub-card" data-click="click_showNexuzPane_salez">
                 <i>🛍️</i>
                 <h2>SALEZ</h2>
                 <p>E-Commerce (Outbound): Order sync and SKU Alias.</p>
@@ -2257,7 +2258,7 @@
                     <div class="kpi-row"><span>Sync Layer Integrity</span><strong id="statSalzHealth">--</strong></div>
                 </div>
             </div>
-            <div class="hub-card" onclick="showNexuzPane('brainz')">
+            <div class="hub-card" data-click="click_showNexuzPane_brainz">
                 <i>🧠</i>
                 <h2>BRAINZ</h2>
                 <p>System Operations: Vault backups and force calc.</p>
@@ -2276,8 +2277,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">IMPORTZ</span>
             </div>
-            <div class="nav-zone left" onclick="showNexuzPane('brainz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showNexuzPane('salez')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showNexuzPane_brainz"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showNexuzPane_salez"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
@@ -2288,15 +2289,15 @@
                                 <h3 style="margin:0 0 10px 0; font-size:15px;">📦 Orderz Sync</h3>
                                 <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML pages from superbuy</p>
                                 <input type="file" id="orderFiles" multiple accept=".html" style="display:none;">
-                                <button class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('orderFiles').click()">📦 IMPORT ORDER HTML</button>
+                                <button class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_orderF">📦 IMPORT ORDER HTML</button>
                                 
                                 <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
                                     <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
                                     <input type="file" id="orderFilesTest" multiple accept=".html" style="display:none;">
-                                    <button class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('orderFilesTest').click()">🧪 IMPORT TEST HTML</button>
+                                    <button class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_orderF_2">🧪 IMPORT TEST HTML</button>
                                 </div>
                                 <div id="statusOrders" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
-                                <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParserConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
+                                <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" data-click="click_openParserConfig">⚙️ CONFIGURE EXTRACTION LOGIC</button>
                             </div>
 
                             <div style="flex-grow: 1; display:flex; flex-direction:column; min-height: 250px;">
@@ -2314,15 +2315,15 @@
                                 <h3 style="margin:0 0 10px 0; font-size:15px;">🚚 Parcelz Sync</h3>
                                 <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML package details page for each parcel from superbuy</p>
                                 <input type="file" id="parcelFiles" multiple accept=".html" style="display:none;">
-                                <button class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('parcelFiles').click()">🚚 IMPORT PARCEL HTML</button>
+                                <button class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_parcel">🚚 IMPORT PARCEL HTML</button>
                                 
                                 <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
                                     <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
                                     <input type="file" id="parcelFilesTest" multiple accept=".html" style="display:none;">
-                                    <button class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('parcelFilesTest').click()">🧪 IMPORT TEST HTML</button>
+                                    <button class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_parcel_3">🧪 IMPORT TEST HTML</button>
                                 </div>
                                 <div id="statusParcels" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
-                                <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParcelConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
+                                <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" data-click="click_openParcelConfig">⚙️ CONFIGURE EXTRACTION LOGIC</button>
                             </div>
 
                             <div style="flex-grow: 1; display:flex; flex-direction:column; min-height: 250px;">
@@ -2342,8 +2343,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">SALEZ</span>
             </div>
-            <div class="nav-zone left" onclick="showNexuzPane('importz')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showNexuzPane('brainz')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showNexuzPane_importz"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showNexuzPane_brainz"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
@@ -2353,17 +2354,17 @@
                             <div>
                                 <h3 style="margin:0 0 10px 0; font-size:15px;">🛍️ Salez Order Sync</h3>
                                 <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Auto-deduct Shopify/Etsy quantities from live inventory.</p>
-                            <input type="file" id="salesCsvFile" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="executeWithButtonAction('btnSalezImport', '⏳ PARSING...', '📋 READY FOR REVIEW', () => processSalesCSV(false))" style="display:none;">
-                            <button id="btnSalezImport" class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('salesCsvFile').click()">📦 IMPORT SALEZ CSV</button>
+                            <input type="file" id="salesCsvFile" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" data-change="change_executeWithButtonAction_btnSal" style="display:none;">
+                            <button id="btnSalezImport" class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_salesC">📦 IMPORT SALEZ CSV</button>
                             
                             <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
                                 <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
-                                <input type="file" id="salesCsvFileTest" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="executeWithButtonAction('btnSalezImportTest', '⏳ PARSING...', '📋 READY FOR TEST', () => processSalesCSV(true))" style="display:none;">
-                                <button id="btnSalezImportTest" class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('salesCsvFileTest').click()">🧪 TEST IMPORT CSV</button>
+                                <input type="file" id="salesCsvFileTest" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" data-change="change_executeWithButtonAction_btnSal_4" style="display:none;">
+                                <button id="btnSalezImportTest" class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_salesC_5">🧪 TEST IMPORT CSV</button>
                             </div>
                             <div style="display:flex; gap:8px; margin-bottom:12px;">
-                                <button class="btn-orange" onclick="backfillFinancials()" style="flex:1; padding:8px; font-size:11px;">↻ BACKFILL FINANCIALS</button>
-                                <button class="btn-blue" onclick="alert('BACKFILL FINANCIALS:\\n\\nThis mathematical tool sequentially loops through all historical orders and dynamically recalculates your exact Net Profit and Transaction Fees based on your currently active Engine specifications (like updated BOM costs and Live eBay/Stripe Fee logic) and pushes those two specific fields up to your master database.\\n\\nIt strictly performs read operations on your original imported CSV physical parameters to execute this, explicitly refusing to overwrite your established Shopify source data strings.')" style="flex:1; padding:8px; font-size:11px; font-weight:bold; background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:#38bdf8; cursor:help;">ℹ️ READ GUIDE</button>
+                                <button class="btn-orange" data-click="click_backfillFinancials" style="flex:1; padding:8px; font-size:11px;">↻ BACKFILL FINANCIALS</button>
+                                <button class="btn-blue" data-click="click_alert_BACKFILL_FINANCIALS_n_nT" style="flex:1; padding:8px; font-size:11px; font-weight:bold; background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:#38bdf8; cursor:help;">ℹ️ READ GUIDE</button>
                             </div>
                         </div>
 
@@ -2382,8 +2383,8 @@
                             <h3 style="margin:0 0 10px 0; font-size:15px;">🔗 SKU Alias Manager</h3>
                             <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Map Shopify/Etsy SKUs to internal internal recipes.</p>
                             <div style="display:flex; gap:8px; margin-bottom:10px;">
-                                <input type="text" id="skuAliasSearch" placeholder="🔍 Search SKUs..." onkeyup="renderAliasManager()" style="flex:1; font-size:11px; padding:6px;">
-                                <button class="btn-green-neon" onclick="openAliasModal('')" style="padding:6px 12px; font-size:11px;">+ Add New</button>
+                                <input type="text" id="skuAliasSearch" placeholder="🔍 Search SKUs..." data-keyup="keyup_renderAliasManager" style="flex:1; font-size:11px; padding:6px;">
+                                <button class="btn-green-neon" data-click="click_openAliasModal" style="padding:6px 12px; font-size:11px;">+ Add New</button>
                             </div>
                             <div id="aliasManagerList" style="max-height:600px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; background:rgba(0,0,0,0.1); padding:10px; display:flex; flex-direction:column; gap:5px;">
                                 <div style="padding:10px; text-align:center; font-size:10px; color:var(--text-muted);">Loading mappings...</div>
@@ -2398,8 +2399,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">BRAINZ</span>
             </div>
-            <div class="nav-zone left" onclick="showNexuzPane('salez')"><i>‹</i></div>
-            <div class="nav-zone right" onclick="showNexuzPane('importz')"><i>›</i></div>
+            <div class="nav-zone left" data-click="click_showNexuzPane_salez"><i>‹</i></div>
+            <div class="nav-zone right" data-click="click_showNexuzPane_importz"><i>›</i></div>
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
@@ -2409,12 +2410,12 @@
                             <h3 style="margin:0 0 10px 0; font-size:15px;">☁️ Backup & Restore</h3>
                             <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Secure authoritative Cloud snapshots and system restoration.</p>
                             <div style="display:flex; flex-direction:column; gap:8px;">
-                                <button id="btnExportBackup" class="btn-blue" style="width:100%; padding:8px; font-size:12px;" onclick="executeExport()">⬇️ EXPORT BACKUP</button>
+                                <button id="btnExportBackup" class="btn-blue" style="width:100%; padding:8px; font-size:12px;" data-click="click_executeExport">⬇️ EXPORT BACKUP</button>
                                 <div style="border-top: 1px solid var(--border-color); padding-top:8px;">
-                                    <input type="file" id="importBackupFile" accept=".xlsx" onchange="handleFileSelect(this)" style="font-size:10px; width:100%;">
+                                    <input type="file" id="importBackupFile" accept=".xlsx" data-change="change_handleFileSelect_this" style="font-size:10px; width:100%;">
                                     <div id="restorePreview" style="margin-top: 8px; display: none;">
                                         <div id="restoreCheckboxes" style="font-size:10px; margin-bottom:8px;"></div>
-                                        <button class="btn-red" onclick="executeRestore()" style="width:100%; padding:8px; font-size:12px;">🔥 RESTORE CLOUD</button>
+                                        <button class="btn-red" data-click="click_executeRestore" style="width:100%; padding:8px; font-size:12px;">🔥 RESTORE CLOUD</button>
                                     </div>
                                 </div>
                             </div>
@@ -2426,8 +2427,8 @@
                             <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Manually trigger a complete mathematical reconciliation of all ledger balances.</p>
                             <div id="statusMaster" class="status-bar status-idle" style="font-size:13px; padding:10px; margin-bottom:10px;">Ready for sync operations...</div>
                             <div id="btnCalcWrapper" style="display:none; gap:8px; width:100%;">
-                                <button class="btn-green" id="btnCalc" onclick="syncAndCalculate()" style="flex:1; padding:12px; font-weight:bold;">↻ FORCE EXACT CALCULATION</button>
-                                <button class="btn-green" onclick="alert('FORCE RECALCULATION:\\n\\nThis mathematical tool sequentially pulls down your entire live database (Operations Ledger, Materials Ledger, etc.), processes every record through the local Master Engine, and verifies alignment.\\n\\nIt serves to instantly correct drift or refresh local caching, and will not execute dangerous overwrites without your explicit permission.')" style="flex:1; padding:12px; font-weight:bold; background:rgba(34, 197, 94, 0.1); border:1px solid rgba(34, 197, 94, 0.3); color:#22c55e; cursor:help;">ℹ️ READ GUIDE</button>
+                                <button class="btn-green" id="btnCalc" data-click="click_syncAndCalculate" style="flex:1; padding:12px; font-weight:bold;">↻ FORCE EXACT CALCULATION</button>
+                                <button class="btn-green" data-click="click_alert_FORCE_RECALCULATION_n_nT" style="flex:1; padding:12px; font-weight:bold; background:rgba(34, 197, 94, 0.1); border:1px solid rgba(34, 197, 94, 0.3); color:#22c55e; cursor:help;">ℹ️ READ GUIDE</button>
                             </div>
                         </div>
                     </div>
@@ -2444,11 +2445,11 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">SOCIALZ AUDIENCE</span>
                 <div class="pane-header-actions">
-                    <button onclick="openAnalyticsDashboard()" class="btn-purple"><i class="fa-solid fa-chart-simple"></i> Analytics</button>
-                    <button onclick="document.getElementById('csv-input').click()" class="btn-blue"><i class="fa-solid fa-file-import"></i> Import</button>
-                    <input type="file" id="csv-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleCSVImport(this)" style="display:none;">
-                    <button onclick="exportCSV()" class="btn-blue"><i class="fa-solid fa-file-export"></i> Export</button>
-                    <button onclick="openModal()" class="btn-green"><i class="fa-solid fa-plus"></i> Add Skater</button>
+                    <button data-click="click_openAnalyticsDashboard" class="btn-purple"><i class="fa-solid fa-chart-simple"></i> Analytics</button>
+                    <button data-click="click_document_getElementById_csv_in" class="btn-blue"><i class="fa-solid fa-file-import"></i> Import</button>
+                    <input type="file" id="csv-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" data-change="change_handleCSVImport_this" style="display:none;">
+                    <button data-click="click_exportCSV" class="btn-blue"><i class="fa-solid fa-file-export"></i> Export</button>
+                    <button data-click="click_openModal" class="btn-green"><i class="fa-solid fa-plus"></i> Add Skater</button>
                 </div>
             </div>
             
@@ -2475,11 +2476,11 @@
                     </style>
 
                     <div class="neon-view-toggle shrink-0" id="view-mode-container">
-                        <button class="active" onclick="toggleViewMode(false)" id="neon-grid">
+                        <button class="active" data-click="click_toggleViewMode_false" id="neon-grid">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="5" height="16" rx="1"></rect><rect x="9.5" y="4" width="5" height="16" rx="1"></rect><rect x="17" y="4" width="5" height="16" rx="1"></rect></svg>
                             Grid
                         </button>
-                        <button onclick="toggleViewMode(true)" id="neon-list">
+                        <button data-click="click_toggleViewMode_true" id="neon-list">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><rect x="3" y="10" width="18" height="4" rx="1"></rect><rect x="3" y="16" width="18" height="4" rx="1"></rect></svg>
                             Row
                         </button>
@@ -2487,13 +2488,13 @@
 
                     <div class="flex items-center gap-0 w-full lg:w-auto border rounded-lg overflow-hidden transition-colors group" style="background: var(--bg-input); border-color: var(--border-input);">
                         <!-- Sort Direction Toggle -->
-                        <button id="sort-dir-btn" onclick="toggleSortDirection()" class="px-2.5 py-1.5 border-r hover:text-[#f97316] transition-all outline-none" style="background: transparent; color: var(--text-muted); border-color: var(--border-input);" title="Toggle Sort Direction">
+                        <button id="sort-dir-btn" data-click="click_toggleSortDirection" class="px-2.5 py-1.5 border-r hover:text-[#f97316] transition-all outline-none" style="background: transparent; color: var(--text-muted); border-color: var(--border-input);" title="Toggle Sort Direction">
                             <i id="sort-dir-icon" class="fa-solid fa-arrow-up-wide-short transition-transform group-hover:scale-110"></i>
                         </button>
 
                         <!-- Sort Select -->
                         <div class="relative w-40 shrink-0">
-                            <select id="sort-select" onchange="handleSortChange(this.value)" class="w-full pl-3 pr-8 py-1.5 focus:outline-none text-[11px] appearance-none cursor-pointer transition-colors" style="background: transparent; color: var(--text-main);">
+                            <select id="sort-select" data-change="change_handleSortChange_this_value" class="w-full pl-3 pr-8 py-1.5 focus:outline-none text-[11px] appearance-none cursor-pointer transition-colors" style="background: transparent; color: var(--text-main);">
                                 <option value="alpha">Alphabetical</option>
                                 <option value="total">Total Followers</option>
                                 <option value="ig">Instagram Followers</option>
@@ -2515,7 +2516,7 @@
                 <!-- Filter: Region -->
                 <div class="relative">
                     <i class="fa-solid fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-muted); font-size: 11px;"></i>
-                    <select id="filter-region" onchange="renderSkaters()" class="w-full pl-8 pr-6 py-1.5 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] text-[11px] appearance-none cursor-pointer transition-colors" style="background: var(--bg-input); border-color: var(--border-input); color: var(--text-main);">
+                    <select id="filter-region" data-change="change_renderSkaters" class="w-full pl-8 pr-6 py-1.5 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] text-[11px] appearance-none cursor-pointer transition-colors" style="background: var(--bg-input); border-color: var(--border-input); color: var(--text-main);">
                         <option value="">All Regions</option>
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -2526,7 +2527,7 @@
                 <!-- Multi-select Filter: Style -->
                 <div class="relative" id="multi-select-style-container" style="position:relative;">
                     <i class="fa-solid fa-tag" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:11px; z-index:10; pointer-events:none;"></i>
-                    <button onclick="toggleMultiSelect('style')" id="style-multi-btn" style="width:100%; padding:5px 24px 5px 28px; background:var(--bg-input); border:1px solid var(--border-input); border-radius:8px; text-align:left; font-size:11px; color:var(--text-main); cursor:pointer; display:flex; justify-content:space-between; align-items:center; overflow:hidden; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-input)'">
+                    <button data-click="click_toggleMultiSelect_style" id="style-multi-btn" style="width:100%; padding:5px 24px 5px 28px; background:var(--bg-input); border:1px solid var(--border-input); border-radius:8px; text-align:left; font-size:11px; color:var(--text-main); cursor:pointer; display:flex; justify-content:space-between; align-items:center; overflow:hidden; transition:border-color 0.2s;" data-mouseover="mouseover_this_style_borderColor_var_pri" data-mouseout="mouseout_this_style_borderColor_var_bor">
                         <span id="style-btn-text" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">All Styles</span>
                         <i class="fa-solid fa-chevron-down" style="font-size:9px; color:var(--text-muted); flex-shrink:0; margin-left:4px;"></i>
                     </button>
@@ -2541,7 +2542,7 @@
                 <!-- Filter: Type -->
                 <div class="relative">
                     <i class="fa-solid fa-skating absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-muted); font-size: 11px;"></i>
-                    <select id="filter-type" onchange="renderSkaters()" class="w-full pl-8 pr-6 py-1.5 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] text-[11px] appearance-none cursor-pointer transition-colors" style="background: var(--bg-input); border-color: var(--border-input); color: var(--text-main);">
+                    <select id="filter-type" data-change="change_renderSkaters" class="w-full pl-8 pr-6 py-1.5 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] text-[11px] appearance-none cursor-pointer transition-colors" style="background: var(--bg-input); border-color: var(--border-input); color: var(--text-main);">
                         <option value="">All Types</option>
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -2582,7 +2583,7 @@
     <!-- LTV Metrics Modal -->
         <div id="ltv-metrics-modal" class="modal-overlay">
         <!-- Backdrop -->
-        <div style="position: absolute; inset: 0;" onclick="closeLtvModal()"></div>
+        <div style="position: absolute; inset: 0;" data-click="click_closeLtvModal"></div>
         
         <!-- Modal Window Container -->
         <div style="width: 95%; max-width: 800px; max-height: 90vh; background: var(--bg-main); display: flex; flex-direction: column; border: 1px solid #8b5cf6; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow: hidden; position: relative; z-index: 10;">
@@ -2597,7 +2598,7 @@
                             <p style="font-size: 14px; color: #c084fc; font-weight: 500; margin: 0;">Zero-PII Cryptographic Matrix</p>
                         </div>
                     </div>
-                    <button onclick="closeLtvModal()" class="btn-icon-sq btn-red-muted"><i class="fa-solid fa-xmark"></i></button>
+                    <button data-click="click_closeLtvModal" class="btn-icon-sq btn-red-muted"><i class="fa-solid fa-xmark"></i></button>
                 </div>
 
                 <div style="padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem;">
@@ -2648,7 +2649,7 @@
     <!-- Analytics Dashboard Modal -->
         <div id="analytics-modal" class="modal-overlay" style="z-index:100; font-family:'Inter', sans-serif;">
         <!-- Backdrop -->
-        <div style="position: absolute; inset: 0;" onclick="closeAnalyticsDashboard()"></div>
+        <div style="position: absolute; inset: 0;" data-click="click_closeAnalyticsDashboard"></div>
         
         <!-- Modal Window Container -->
         <div style="width: 95%; max-width: 1200px; height: 90vh; background: var(--bg-main); display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow: hidden; position: relative; z-index: 10;">
@@ -2663,7 +2664,7 @@
                         <p style="font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; color: var(--text-muted); margin: 4px 0 0 0;">Real-time Performance Metrics</p>
                     </div>
                 </div>
-                <button onclick="closeAnalyticsDashboard()" class="btn-red" style="width: max-content; padding: 10px 24px; font-size: 14px;">
+                <button data-click="click_closeAnalyticsDashboard" class="btn-red" style="width: max-content; padding: 10px 24px; font-size: 14px;">
                     CLOSE
                 </button>
             </div>
@@ -2698,10 +2699,10 @@
 
     <!-- Edit/Add Modal -->
         <div id="skater-modal" class="modal-overlay">
-        <div style="position: absolute; inset: 0;" onclick="closeModal()"></div>
+        <div style="position: absolute; inset: 0;" data-click="click_closeModal"></div>
         <div style="background:var(--bg-container); border:1px solid var(--border-color); border-radius:12px; width:95%; max-width:1000px; max-height:90vh; overflow-y:auto; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position:relative; z-index: 10;">
             
-            <form id="skater-form" onsubmit="handleFormSubmit(event)" style="padding: 24px;">
+            <form id="skater-form" data-submit="submit_handleFormSubmit_event" style="padding: 24px;">
                 <div class="pane-header-actions" style="margin-bottom:20px; border-bottom:1px solid var(--border-color); padding-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="color:var(--text-muted); font-size:12px; text-transform:uppercase; margin:0;">Profile Information</h3>
                     <h2 id="modal-title" style="color:var(--text-heading); font-size:24px; margin:0;">Add New Skater</h2>
@@ -2796,8 +2797,8 @@
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 16px; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: 24px;">
-                        <button type="button" id="btn-delete-modal" onclick="deleteSkaterFromModal()" class="btn-red" style="width: 100%; border-radius: 8px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 12px; padding: 12px;"><i class="fa-solid fa-trash mr-2"></i> Delete Skater</button>
-                        <button type="button" onclick="closeModal()" class="btn-red-muted" style="width: 100%; border-radius: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; padding: 12px;">Cancel</button>
+                        <button type="button" id="btn-delete-modal" data-click="click_deleteSkaterFromModal" class="btn-red" style="width: 100%; border-radius: 8px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 12px; padding: 12px;"><i class="fa-solid fa-trash mr-2"></i> Delete Skater</button>
+                        <button type="button" data-click="click_closeModal" class="btn-red-muted" style="width: 100%; border-radius: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; padding: 12px;">Cancel</button>
                         <button type="submit" class="btn-green-neon" style="width: 100%; border-radius: 8px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 12px; padding: 12px;"><i class="fa-solid fa-save mr-2"></i> Save Profile</button>
                     </div>
                 </form>
@@ -2811,8 +2812,8 @@
         <p id="recipeModalText" style="color:var(--text-main); margin-bottom:15px; font-size:15px;"></p>
         <input type="text" id="recipeModalInput" style="width:100%; padding:10px; margin-bottom:20px; border-radius:4px; border:1px solid var(--border-input); background:var(--bg-input); color:white; display:none; outline:none;" placeholder="Recipe Name">
         <div style="display:flex; justify-content:center; gap:10px;">
-            <button class="btn-red-muted" style="width:100px;" onclick="document.getElementById('recipeActionModal').style.display='none'">Cancel</button>
-            <button id="recipeModalConfirmBtn" class="btn-green" style="width:100px;" onclick="submitRecipeModal()">Confirm</button>
+            <button class="btn-red-muted" style="width:100px;" data-click="click_document_getElementById_recipe">Cancel</button>
+            <button id="recipeModalConfirmBtn" class="btn-green" style="width:100px;" data-click="click_submitRecipeModal">Confirm</button>
         </div>
     </div>
 </div>
@@ -2821,12 +2822,12 @@
     <div class="massive-container">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:20px;">📦 Bulk Add to: <span id="bulkAddTitle" style="color:#0ea5e9;"></span></h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('bulkAddModal').style.display='none'">Close</button>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" data-click="click_document_getElementById_bulkAd">Close</button>
         </div>
-        <input type="text" id="bulkSearch" placeholder="🔍 Search components..." onkeyup="filterBulkList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
+        <input type="text" id="bulkSearch" placeholder="🔍 Search components..." data-keyup="keyup_filterBulkList" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
         <div class="table-wrap" id="bulkAddTableWrap"></div>
         <div style="margin-top:15px; text-align:right; flex-shrink:0;">
-            <button id="btnSaveBulkAdd" class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveBulkAdd()">➕ Save Additions to Product</button>
+            <button id="btnSaveBulkAdd" class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" data-click="click_saveBulkAdd">➕ Save Additions to Product</button>
         </div>
     </div>
 </div>
@@ -2836,9 +2837,9 @@
         <h2 style="margin-top:0;">🏭 Start Production Batch</h2>
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
             <div style="display:flex; gap:10px;">
-                <select id="newWOProductRetail" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('newWOProductSub').value=''; document.getElementById('newWOProductPrint').value='';}; checkWORouting()"><option value="">📦 Select Retail Product</option></select>
-                <select id="newWOProductSub" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('newWOProductRetail').value=''; document.getElementById('newWOProductPrint').value='';}; checkWORouting()"><option value="">⚙️ Select Sub-Assembly</option></select>
-                <select id="newWOProductPrint" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('newWOProductRetail').value=''; document.getElementById('newWOProductSub').value='';}; checkWORouting()"><option value="">🖨️ Select 3D Print</option></select>
+                <select id="newWOProductRetail" style="flex:1; padding:8px; font-size:14px;" data-change="change_if_this_value_document_getElem"><option value="">📦 Select Retail Product</option></select>
+                <select id="newWOProductSub" style="flex:1; padding:8px; font-size:14px;" data-change="change_if_this_value_document_getElem_6"><option value="">⚙️ Select Sub-Assembly</option></select>
+                <select id="newWOProductPrint" style="flex:1; padding:8px; font-size:14px;" data-change="change_if_this_value_document_getElem_7"><option value="">🖨️ Select 3D Print</option></select>
             </div>
             <div style="display:flex; gap:15px; align-items:center;">
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -2850,7 +2851,7 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <label style="font-weight:bold; font-size:14px;">Target Qty:</label>
-                    <input type="number" id="newWOQty" value="1" min="1" step="any" style="padding:10px; width:90px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;" oninput="checkWORouting()">
+                    <input type="number" id="newWOQty" value="1" min="1" step="any" style="padding:10px; width:90px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;" data-input="input_checkWORouting">
                 </div>
             </div>
             <div style="margin-top:4px;">
@@ -2872,8 +2873,8 @@
         </div>
         
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
-            <button class="btn-red" style="width:auto;" onclick="document.getElementById('newWOModal').style.display='none'">Cancel</button>
-            <button id="btnSpawnWO" class="btn-green" style="width:auto;" onclick="window.validateAndCreateWO()">Verify Inventory & Create</button>
+            <button class="btn-red" style="width:auto;" data-click="click_document_getElementById_newWOM">Cancel</button>
+            <button id="btnSpawnWO" class="btn-green" style="width:auto;" data-click="click_window_validateAndCreateWO">Verify Inventory & Create</button>
         </div>
     </div>
 </div>
@@ -2884,16 +2885,16 @@
         
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px; background:var(--bg-panel); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
             <div style="display:flex; gap:10px;">
-                <select id="multiBatchProductRetail" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductSub').value=''; document.getElementById('multiBatchProductPrint').value='';}"><option value="">📦 Select Retail Product</option></select>
-                <select id="multiBatchProductSub" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductRetail').value=''; document.getElementById('multiBatchProductPrint').value='';}"><option value="">⚙️ Select Sub-Assembly</option></select>
-                <select id="multiBatchProductPrint" style="flex:1; padding:8px; font-size:14px;" onchange="if(this.value){document.getElementById('multiBatchProductRetail').value=''; document.getElementById('multiBatchProductSub').value='';}"><option value="">🖨️ Select 3D Print</option></select>
+                <select id="multiBatchProductRetail" style="flex:1; padding:8px; font-size:14px;" data-change="change_if_this_value_document_getElem_8"><option value="">📦 Select Retail Product</option></select>
+                <select id="multiBatchProductSub" style="flex:1; padding:8px; font-size:14px;" data-change="change_if_this_value_document_getElem_9"><option value="">⚙️ Select Sub-Assembly</option></select>
+                <select id="multiBatchProductPrint" style="flex:1; padding:8px; font-size:14px;" data-change="change_if_this_value_document_getElem_10"><option value="">🖨️ Select 3D Print</option></select>
             </div>
             <div style="display:flex; justify-content:flex-start; gap:15px; align-items:center; width:100%;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <label style="font-weight:bold; font-size:14px; margin-left:5px;">Qty:</label>
                     <input type="number" id="multiBatchQty" value="1" min="1" step="any" style="padding:8px; width:65px; text-align:center; font-size:16px; font-weight:bold; color:#0ea5e9;">
                 </div>
-                <button class="btn-green-neon" onclick="stageBatchItem()" style="padding:8px 15px; font-size:14px; white-space:nowrap; width:auto; flex-shrink:0;">+ Add</button>
+                <button class="btn-green-neon" data-click="click_stageBatchItem" style="padding:8px 15px; font-size:14px; white-space:nowrap; width:auto; flex-shrink:0;">+ Add</button>
             </div>
         </div>
         
@@ -2904,8 +2905,8 @@
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto; flex-shrink:0;">
-            <button class="btn-red" style="width:auto;" onclick="document.getElementById('multiBatchOrderModal').style.display='none'">Cancel</button>
-            <button class="btn-green" style="width:auto; font-weight:bold;" onclick="generateMultiBatchOrderReport()">📊 Generate Master Projection</button>
+            <button class="btn-red" style="width:auto;" data-click="click_document_getElementById_multiB">Cancel</button>
+            <button class="btn-green" style="width:auto; font-weight:bold;" data-click="click_generateMultiBatchOrderReport">📊 Generate Master Projection</button>
         </div>
     </div>
 </div>
@@ -2915,8 +2916,8 @@
         <h2 style="margin-top:0; color:var(--text-heading);">📊 Batch Order Projection</h2>
         <div id="batchOrderReportContent" style="flex-grow:1; overflow-y:auto; margin-bottom:20px; background:var(--bg-panel); padding:15px; border-radius:6px; border:1px solid var(--border-color);"></div>
         <div style="display:flex; justify-content:flex-end; gap:10px;">
-            <button class="btn-slate" style="width:auto; padding:8px 15px;" onclick="printBatchOrderReport()">🖨️ Print Report</button>
-            <button class="btn-red" style="width:auto; padding:8px 15px;" onclick="document.getElementById('batchOrderReportModal').style.display='none'">Close</button>
+            <button class="btn-slate" style="width:auto; padding:8px 15px;" data-click="click_printBatchOrderReport">🖨️ Print Report</button>
+            <button class="btn-red" style="width:auto; padding:8px 15px;" data-click="click_document_getElementById_batchO">Close</button>
         </div>
     </div>
 </div>
@@ -2931,13 +2932,13 @@
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
-                <select id="sopMasterProductSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" onchange="renderMasterSOP()">
+                <select id="sopMasterProductSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" data-change="change_renderMasterSOP">
                     <option value="">-- Loading Recipes... --</option>
                 </select>
-                <button id="btnSaveMasterSOP" class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" onclick="saveMasterSOP()">
+                <button id="btnSaveMasterSOP" class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" data-click="click_saveMasterSOP">
                     💾 SAVE MASTER BLUEPRINT
                 </button>
-                <button class="btn-red" style="width:auto; padding:6px 15px; margin-left:15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('sopMasterModal').style.display='none'">Close</button>
+                <button class="btn-red" style="width:auto; padding:6px 15px; margin-left:15px; border-radius:4px; font-size:13px; font-weight:bold;" data-click="click_document_getElementById_sopMas">Close</button>
             </div>
         </div>
         
@@ -2950,9 +2951,9 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                         <div style="display:flex; gap:8px;">
-                            <button onclick="openMediaManager('telemetry')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
-                            <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
-                            <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('productionSopLeftPane', 'masterSopPreviewCol', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                            <button data-click="click_openMediaManager_telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                            <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
+                            <button data-click="click_if_typeof_toggleHorizontalPrev" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                         </div>
                     </div>
                     <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -2963,9 +2964,9 @@
                         <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
                         <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
                         <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
-                        &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="openSOPTokenGuide()">❓ Full Guide</span>
+                        &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">❓ Full Guide</span>
                     </div>
-                    <textarea id="productionAdminQA" oninput="renderProductionTelemetryPreview()" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;"></textarea>
+                    <textarea id="productionAdminQA" data-input="input_renderProductionTelemetryPrevi" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;"></textarea>
                 </div>
 
                 <!-- Column 2: Live Preview Render -->
@@ -2979,7 +2980,7 @@
             </div>
 
             <!-- Resizer Divider — uses global .h-resizer standard -->
-            <div id="productionSopResizer" class="h-resizer" onmousedown="initProductionSopResize(event)"></div>
+            <div id="productionSopResizer" class="h-resizer" data-mousedown="mousedown_initProductionSopResize_event"></div>
 
             <!-- Right Pane: Legacy Rich Text Arrays -->
             <div id="productionSopRightPane" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto;">
@@ -2990,7 +2991,7 @@
                     <div id="sopMasterEditorArea" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the top bar to begin compiling standard operating procedures.</div>
                     </div>
-                    <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" onclick="addSOPRow(this)">+ ADD PROCEDURE STEP</button>
+                    <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" data-click="click_addSOPRow_this">+ ADD PROCEDURE STEP</button>
                 </div>
             </div>
         </div>
@@ -3001,17 +3002,16 @@
     <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; width:90%; max-width:1000px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
         <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; background:var(--bg-bar); border-radius:12px 12px 0 0;">
             <h2 style="margin:0; font-size:22px;">📂 Archive Explorer</h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="window.closeArchiveExplorer()">Close</button>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" data-click="click_window_closeArchiveExplorer">Close</button>
         </div>
         <div style="display:flex; border-bottom:1px solid var(--border-color); background:var(--bg-input);">
-            <button id="tabArchBatchez" class="btn-blue" style="flex:1; border-radius:0; border:none; background:transparent; color:var(--text-main); font-weight:bold; font-size:16px; border-bottom:3px solid transparent; padding:15px;" onclick="window.switchArchiveTab('batchez')">🏭 Batchez</button>
-            <button id="tabArchLayerz" class="btn-blue" style="flex:1; border-radius:0; border:none; background:transparent; color:var(--text-main); font-weight:bold; font-size:16px; border-bottom:3px solid transparent; padding:15px;" onclick="window.switchArchiveTab('layerz')">🖨️ Layerz</button>
+            <button id="tabArchBatchez" class="btn-blue" style="flex:1; border-radius:0; border:none; background:transparent; color:var(--text-main); font-weight:bold; font-size:16px; border-bottom:3px solid transparent; padding:15px;" data-click="click_window_switchArchiveTab_batche">🏭 Batchez</button>
+            <button id="tabArchLayerz" class="btn-blue" style="flex:1; border-radius:0; border:none; background:transparent; color:var(--text-main); font-weight:bold; font-size:16px; border-bottom:3px solid transparent; padding:15px;" data-click="click_window_switchArchiveTab_layerz">🖨️ Layerz</button>
         </div>
         <div style="padding:15px 20px 0 20px; background:var(--bg-input); border-bottom:1px solid var(--border-color); display:flex; gap:10px; align-items:center;">
             <input id="archiveSearchInput" type="text" placeholder="🔍 Search by ID, name, or label..."
-                   style="flex-grow:1; padding:8px 12px; border:1px solid var(--border-input); border-radius:8px; background:var(--bg-panel); color:var(--text-main); font-size:13px; box-sizing:border-box; margin-bottom:12px;"
-                   oninput="filterArchiveList(this.value)">
-            <button class="btn-red" style="width:auto; padding:8px 15px; margin-bottom:12px; font-weight:bold; font-size:12px; white-space:nowrap;" onclick="window.deleteAllArchive()">🗑️ Clear Archive</button>
+                   style="flex-grow:1; padding:8px 12px; border:1px solid var(--border-input); border-radius:8px; background:var(--bg-panel); color:var(--text-main); font-size:13px; box-sizing:border-box; margin-bottom:12px;" data-input="input_filterArchiveList_this_value">
+            <button class="btn-red" style="width:auto; padding:8px 15px; margin-bottom:12px; font-weight:bold; font-size:12px; white-space:nowrap;" data-click="click_window_deleteAllArchive">🗑️ Clear Archive</button>
         </div>
         <div id="archiveListArea" style="flex-grow:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px;"></div>
     </div>
@@ -3024,7 +3024,7 @@
                     <span style="font-size:24px;">⏳</span> VELOCITYZ FORECASTER
                 </div>
                 <div class="pane-header-actions">
-                    <button class="btn-red-muted" onclick="window.closeVelocityzModal()">CLOSE</button>
+                    <button class="btn-red-muted" data-click="click_window_closeVelocityzModal">CLOSE</button>
                 </div>
             </div>
             
@@ -3036,13 +3036,13 @@
                         <div style="display: flex; gap: 15px; align-items: center;">
                             <div style="display: flex; flex-direction: column; align-items: center;">
                                 <span style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">Matrix (Days)</span>
-                                <input type="number" id="velocityzMatrixDays" value="30" onchange="window.recomputeVelocityzBaseline()" style="width: 50px; background: var(--bg-body); border: 1px solid var(--border-color); color: #10b981; font-weight: bold; font-size: 12px; text-align: center; padding: 2px;">
+                                <input type="number" id="velocityzMatrixDays" value="30" data-change="change_window_recomputeVelocityzBasel" style="width: 50px; background: var(--bg-body); border: 1px solid var(--border-color); color: #10b981; font-weight: bold; font-size: 12px; text-align: center; padding: 2px;">
                             </div>
                             <div style="display: flex; flex-direction: column; align-items: center; margin-right: 10px;">
                                 <span style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">Multiplier (x)</span>
-                                <input type="number" id="velocityzMultiplier" value="1.0" step="0.1" onchange="window.recomputeVelocityzBaseline()" style="width: 50px; background: var(--bg-body); border: 1px solid var(--border-color); color: #8b5cf6; font-weight: bold; font-size: 12px; text-align: center; padding: 2px;">
+                                <input type="number" id="velocityzMultiplier" value="1.0" step="0.1" data-change="change_window_recomputeVelocityzBasel" style="width: 50px; background: var(--bg-body); border: 1px solid var(--border-color); color: #8b5cf6; font-weight: bold; font-size: 12px; text-align: center; padding: 2px;">
                             </div>
-                            <button class="btn-slate-muted" style="height: 28px; padding: 0 12px; font-size: 11px;" onclick="window.resetVelocityzForecast()">RESET</button>
+                            <button class="btn-slate-muted" style="height: 28px; padding: 0 12px; font-size: 11px;" data-click="click_window_resetVelocityzForecast">RESET</button>
                         </div>
                     </div>
                     <div class="table-wrap" style="flex: 1; border: none; border-radius: 0; box-shadow: none;">
@@ -3078,7 +3078,7 @@
     </div>
 <div id="mediaModal" style="z-index:10006;">
     <div id="mediaContainer" style="width:98vw; height:98vh; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center;"></div>
-    <div style="position:absolute; top:20px; right:30px; color:white; font-size:45px; font-weight:bold; cursor:pointer;" onclick="closeMediaModal()">×</div>
+    <div style="position:absolute; top:20px; right:30px; color:white; font-size:45px; font-weight:bold; cursor:pointer;" data-click="click_closeMediaModal">×</div>
 </div>
 
 <div id="aliasModal" style="z-index:10002;">
@@ -3088,8 +3088,8 @@
         <div style="margin-bottom:15px; padding:10px; background:var(--bg-bar); border-radius:6px; border:1px solid var(--border-color); font-family:monospace; font-weight:bold; color:var(--text-main);" id="aliasUnknownSku">UNKNOWN_SKU</div>
         <select id="aliasRecipeSelect" style="margin-bottom:20px; padding:10px; font-size:15px;"></select>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto;">
-            <button class="btn-red" style="width:auto;" onclick="document.getElementById('aliasModal').style.display='none'">Cancel Sync</button>
-            <button id="btnSaveAliasMapping" class="btn-green" style="width:auto;" onclick="saveAliasMapping()">Save Link & Resume</button>
+            <button class="btn-red" style="width:auto;" data-click="click_document_getElementById_aliasM">Cancel Sync</button>
+            <button id="btnSaveAliasMapping" class="btn-green" style="width:auto;" data-click="click_saveAliasMapping">Save Link & Resume</button>
         </div>
     </div>
 </div>
@@ -3098,7 +3098,7 @@
     <div class="massive-container" style="max-width:950px; max-height:95vh; display:flex; flex-direction:column;">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:22px;">🚀 CEO Terminal: Unified Analysis Builder</h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoAddModal').style.display='none'">Close</button>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" data-click="click_document_getElementById_ceoAdd">Close</button>
         </div>
         
         <!-- Row 1: Create Custom Test Item -->
@@ -3108,7 +3108,7 @@
                 <div><label style="font-size:10px; color:var(--text-muted); font-weight:bold;">TEST ITEM NAME</label><input type="text" id="ceo-u-custom-name" placeholder="e.g., Soulz Prototype" style="padding:8px; font-size:13px;"></div>
                 <div><label style="font-size:10px; color:var(--text-muted); font-weight:bold;">TRUE COGS ($)</label><input type="number" id="ceo-u-custom-cogs" placeholder="0.00" step="any" style="padding:8px; font-size:13px;"></div>
                 <div><label style="font-size:10px; color:var(--text-muted); font-weight:bold;">LIVE MSRP ($)</label><input type="number" id="ceo-u-custom-msrp" placeholder="0.00" step="any" style="padding:8px; font-size:13px;"></div>
-                <button class="btn-blue" style="padding:8px; font-size:12px;" onclick="addCeoSessionTestItem()">+ Create</button>
+                <button class="btn-blue" style="padding:8px; font-size:12px;" data-click="click_addCeoSessionTestItem">+ Create</button>
             </div>
             <p style="font-size:10px; color:var(--text-muted); margin-top:8px;">Creating an item adds it to the list below. You can then add it individually or bundle it with real products.</p>
         </div>
@@ -3116,7 +3116,7 @@
         <!-- Row 2: Search & Bundle Naming -->
         <div style="display:flex; gap:15px; margin-bottom:15px; align-items:flex-end; flex-shrink:0;">
             <div style="flex:1;"><label style="font-size:10px; color:var(--text-muted); font-weight:bold;">STEP 2: BUNDLE NAME (LEAVE BLANK IF ADDING INDIVIDUALLY)</label><input type="text" id="ceo-u-bundle-name" placeholder="e.g., Extreme Gaming Pack" style="padding:10px; font-size:15px;"></div>
-            <div style="width:250px;"><label style="font-size:10px; color:var(--text-muted); font-weight:bold;">SEARCH COMPONENTS</label><input type="text" id="ceo-u-search" placeholder="🔍 Filter list..." onkeyup="filterUnifiedBuilderList()" style="padding:10px; font-size:15px;"></div>
+            <div style="width:250px;"><label style="font-size:10px; color:var(--text-muted); font-weight:bold;">SEARCH COMPONENTS</label><input type="text" id="ceo-u-search" placeholder="🔍 Filter list..." data-keyup="keyup_filterUnifiedBuilderList" style="padding:10px; font-size:15px;"></div>
         </div>
 
         <!-- Row 3: Product Table -->
@@ -3126,13 +3126,13 @@
 
         <!-- Row 4: Final Action -->
         <div style="margin-top:15px; text-align:right; flex-shrink:0;">
-            <button class="btn-green" style="width:auto; padding:12px 40px; font-size:16px; font-weight:900;" onclick="addCeoUnifiedSelection()">🚀 ADD TO ANALYSIS BOARD</button>
+            <button class="btn-green" style="width:auto; padding:12px 40px; font-size:16px; font-weight:900;" data-click="click_addCeoUnifiedSelection">🚀 ADD TO ANALYSIS BOARD</button>
         </div>
     </div>
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.12.0916"></script>
+    <script src="socialz-module.js?v=v.2026.04.12.0938"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -3147,13 +3147,13 @@
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
-                <select id="packerzAdminRecipeSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" onchange="loadPackerzSopFromDB()">
+                <select id="packerzAdminRecipeSelect" style="width:280px; padding:10px 15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-weight:bold; cursor:pointer;" data-change="change_loadPackerzSopFromDB">
                     <option value="">-- Loading Recipes... --</option>
                 </select>
-                <button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" onclick="savePackerzSOPToDB()" id="btnSavePackerzSOP">
+                <button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" data-click="click_savePackerzSOPToDB" id="btnSavePackerzSOP">
                     💾 SAVE MASTER BLUEPRINT
                 </button>
-                <button class="btn-red" style="width:auto; padding:6px 15px; margin-left:15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('paneFulfillzSopAdmin').style.display='none'">Close</button>
+                <button class="btn-red" style="width:auto; padding:6px 15px; margin-left:15px; border-radius:4px; font-size:13px; font-weight:bold;" data-click="click_document_getElementById_paneFu_11">Close</button>
             </div>
         </div>
         
@@ -3167,9 +3167,9 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
                             <div style="display:flex; gap:8px;">
-                                <button onclick="openMediaManager('telemetry')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
-                                <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
-                                <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('packerzSopLeftPane', 'packerzSopPreviewCol', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                                <button data-click="click_openMediaManager_telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                                <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
+                                <button data-click="click_if_typeof_toggleHorizontalPrev_12" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -3180,9 +3180,9 @@
                             <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
                             <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
                             <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
-                            &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="openSOPTokenGuide()">❓ Full Guide</span>
+                            &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">❓ Full Guide</span>
                         </div>
-                        <textarea id="packerzAdminQA" oninput="renderPackerzTelemetryPreview()" placeholder="# Gather SOULZ Parts&#10;- 2 x SK8Lytz Units&#10;[BARCODE:SK8LYTZ-4x6-STICKER]&#10;[IMG:https://your-bucket.supabase.co/...]&#10;[QR:https://zengge.app]&#10;[INPUT] Enter Serial Number" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px;"></textarea>
+                        <textarea id="packerzAdminQA" data-input="input_renderPackerzTelemetryPreview" placeholder="# Gather SOULZ Parts&#10;- 2 x SK8Lytz Units&#10;[BARCODE:SK8LYTZ-4x6-STICKER]&#10;[IMG:https://your-bucket.supabase.co/...]&#10;[QR:https://zengge.app]&#10;[INPUT] Enter Serial Number" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px;"></textarea>
                     </div>
                     
                     <!-- Column 2: Live Preview Render -->
@@ -3195,7 +3195,7 @@
                 </div>
 
                 <!-- Resizer Divider — uses global .h-resizer standard -->
-                <div id="packerzSopResizer" class="h-resizer" onmousedown="initPackerzSopResize(event)"></div>
+                <div id="packerzSopResizer" class="h-resizer" data-mousedown="mousedown_initPackerzSopResize_event"></div>
 
                 <!-- Right Pane: Rich Text -->
                 <div id="packerzSopRightPane" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto;">
@@ -3206,7 +3206,7 @@
                         <div id="packerzSopEditorArea" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
                             <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the top bar to begin compiling standard operating procedures.</div>
                         </div>
-                        <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" onclick="addPackerzSOPRow(this)">+ ADD PROCEDURE STEP</button>
+                        <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" data-click="click_addPackerzSOPRow_this">+ ADD PROCEDURE STEP</button>
                     </div>
                 </div>
             </div>
@@ -3216,7 +3216,7 @@
     <!-- ============================================================
          SOP MEDIA PICKER MODAL
     ============================================================ -->
-    <div id="sopMediaPickerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPMediaPicker()">
+    <div id="sopMediaPickerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" data-click="click_if_event_target_this_closeSOPM">
         <div style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(14,165,233,0.3); width:860px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--bg-bar); border-bottom:1px solid var(--border-color); flex-shrink:0;">
@@ -3225,11 +3225,11 @@
                     <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Browse folders, upload files, and insert image tokens into your checklist.</div>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <button onclick="createSOPMediaFolder()" class="btn-green" style="width:auto; padding:6px 14px; font-size:13px; display:flex; align-items:center; gap:6px;">📁 NEW FOLDER</button>
+                    <button data-click="click_createSOPMediaFolder" class="btn-green" style="width:auto; padding:6px 14px; font-size:13px; display:flex; align-items:center; gap:6px;">📁 NEW FOLDER</button>
                     <label class="btn-blue" style="width:auto; padding:6px 14px; font-size:13px; margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">⬆ UPLOAD
-                        <input type="file" id="sopMediaUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,video/mp4,video/webm,application/pdf" style="display:none;" onchange="uploadSOPMedia(this.files[0])">
+                        <input type="file" id="sopMediaUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,video/mp4,video/webm,application/pdf" style="display:none;" data-change="change_uploadSOPMedia_this_files_0">
                     </label>
-                    <button onclick="closeSOPMediaPicker()" class="btn-red" style="width:auto; padding:6px 14px; font-size:13px; display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-times"></i> Close</button>
+                    <button data-click="click_closeSOPMediaPicker" class="btn-red" style="width:auto; padding:6px 14px; font-size:13px; display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-times"></i> Close</button>
                 </div>
             </div>
             <!-- Breadcrumb Nav -->
@@ -3248,7 +3248,7 @@
     <!-- ============================================================
          SOP AUDIT LOG MODAL
     ============================================================ -->
-    <div id="sopAuditLogModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPAuditLog()">
+    <div id="sopAuditLogModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" data-click="click_if_event_target_this_closeSOPA">
         <div style="background:var(--bg-container); border-radius:12px; border:1px solid rgba(16,185,129,0.3); width:1100px; max-width:96vw; height:88vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--bg-bar); border-bottom:1px solid var(--border-color); flex-shrink:0;">
@@ -3257,8 +3257,8 @@
                     <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Immutable record of every SOP version and Telemetry Map used at the time of QA sign-off.</div>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <input type="text" id="sopAuditSearch" placeholder="Search by order or recipe..." oninput="filterSOPAuditLog()" style="padding:7px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px; width:220px;">
-                    <button onclick="closeSOPAuditLog()" class="btn-red" style="width:auto; padding:6px 14px; font-size:13px;"><i class="fa-solid fa-times"></i> Close</button>
+                    <input type="text" id="sopAuditSearch" placeholder="Search by order or recipe..." data-input="input_filterSOPAuditLog" style="padding:7px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px; width:220px;">
+                    <button data-click="click_closeSOPAuditLog" class="btn-red" style="width:auto; padding:6px 14px; font-size:13px;"><i class="fa-solid fa-times"></i> Close</button>
                 </div>
             </div>
             <!-- Log Table -->
@@ -4233,7 +4233,7 @@
     <div class="massive-container" style="max-width: 500px; height: auto; min-height: 300px; justify-content: flex-start;">
         <div class="header-area" style="flex-shrink:0;">
             <h2 style="margin:0; font-size:20px;">➕ New Manual Print Job</h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="closeManualPrintModal()">Close</button>
+            <button class="btn-red" style="width:auto; padding:6px 15px;" data-click="click_closeManualPrintModal">Close</button>
         </div>
         <div style="margin-bottom:15px; display:flex; flex-direction:column; gap:15px;">
             <div>
@@ -4251,20 +4251,20 @@
             </div>
         </div>
         <div style="margin-top:20px; text-align:right; flex-shrink:0;">
-            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="submitManualPrint()">🚀 Send to LAYERZ Queue</button>
+            <button class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" data-click="click_submitManualPrint">🚀 Send to LAYERZ Queue</button>
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.12.0916"></script>
-<script src="system-tools-module.js?v=v.2026.04.12.0916"></script>
-<script src="bom-module.js?v=v.2026.04.12.0916"></script>
-<script src="inventory-module.js?v=v.2026.04.12.0916"></script>
-<script src="packerz-module.js?v=v.2026.04.12.0916"></script>
-<script src="production-module.js?v=v.2026.04.12.0916"></script>
-<script src="sales-module.js?v=v.2026.04.12.0916"></script>
-<script src="analytics-module.js?v=v.2026.04.12.0916"></script>
-<script src="ceo-module.js?v=v.2026.04.12.0916"></script>
-<script src="print-module.js?v=v.2026.04.12.0916"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.12.0938"></script>
+<script src="system-tools-module.js?v=v.2026.04.12.0938"></script>
+<script src="bom-module.js?v=v.2026.04.12.0938"></script>
+<script src="inventory-module.js?v=v.2026.04.12.0938"></script>
+<script src="packerz-module.js?v=v.2026.04.12.0938"></script>
+<script src="production-module.js?v=v.2026.04.12.0938"></script>
+<script src="sales-module.js?v=v.2026.04.12.0938"></script>
+<script src="analytics-module.js?v=v.2026.04.12.0938"></script>
+<script src="ceo-module.js?v=v.2026.04.12.0938"></script>
+<script src="print-module.js?v=v.2026.04.12.0938"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4296,20 +4296,20 @@
         <div class="header-area" style="flex-shrink:0; margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; width:100%;">
             <h2 style="margin:0; font-size:20px;">💡 Tipz Board & Suggestions</h2>
             <div style="display:flex; gap:10px; align-items:center;">
-                <button class="btn-green" style="width:auto; padding:6px 15px;" onclick="submitTipzSuggestion()">🚀 Submit Tip</button>
-                <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="closeTipzModal()">Close</button>
+                <button class="btn-green" style="width:auto; padding:6px 15px;" data-click="click_submitTipzSuggestion">🚀 Submit Tip</button>
+                <button class="btn-red" style="width:auto; padding:6px 15px;" data-click="click_closeTipzModal">Close</button>
             </div>
         </div>
         
         <!-- Submit Form -->
         <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 20px; flex-shrink: 0;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <div id="tipzMainToolbar" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"></div>
+                <div id="tipzMainToolbar" style="opacity:0.8; transition:0.2s;" data-mouseover="mouseover_this_style_opacity_1" data-mouseout="mouseout_this_style_opacity_0_8"></div>
                 <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
                     <span style="font-size:11px; color:var(--text-muted); margin-right:4px;">Priority:</span>
-                    <button type="button" id="newTipPrioHigh" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:transparent; color:var(--text-muted); border:1px solid var(--border-color);" onclick="setNewTipPriority('High')">High</button>
-                    <button type="button" id="newTipPrioMed" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:#f59e0b20; color:#f59e0b; border:1px solid #f59e0b40;" onclick="setNewTipPriority('Medium')">Med</button>
-                    <button type="button" id="newTipPrioLow" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:transparent; color:var(--text-muted); border:1px solid var(--border-color);" onclick="setNewTipPriority('Low')">Low</button>
+                    <button type="button" id="newTipPrioHigh" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:transparent; color:var(--text-muted); border:1px solid var(--border-color);" data-click="click_setNewTipPriority_High">High</button>
+                    <button type="button" id="newTipPrioMed" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:#f59e0b20; color:#f59e0b; border:1px solid #f59e0b40;" data-click="click_setNewTipPriority_Medium">Med</button>
+                    <button type="button" id="newTipPrioLow" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; cursor:pointer; transition:0.2s; background:transparent; color:var(--text-muted); border:1px solid var(--border-color);" data-click="click_setNewTipPriority_Low">Low</button>
                 </div>
             </div>
             <div style="border:1px solid var(--border-input); border-radius:4px; min-height:80px; background:var(--bg-input); margin-bottom:0; padding:10px;">
@@ -4321,7 +4321,7 @@
         <div style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0; background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color); background: var(--bg-bar);">
                 <h3 style="margin:0; font-size:14px; font-weight: bold; color: var(--text-heading);">Current Tipz</h3>
-                <button class="btn-blue" style="width:auto; padding: 4px 10px; font-size: 11px;" onclick="fetchAndRenderTipz()">↻ Refresh</button>
+                <button class="btn-blue" style="width:auto; padding: 4px 10px; font-size: 11px;" data-click="click_fetchAndRenderTipz">↻ Refresh</button>
             </div>
             <div class="table-wrap" id="tipzListContainer" style="flex-grow: 1; overflow-y: auto; padding: 15px; background:var(--bg-body);">
                 <!-- RENDER TIPZ HERE -->
@@ -4333,7 +4333,7 @@
 
 <!-- ============================================== -->
 <!-- PACKERZ COMPLETED ARCHIVE MODAL                -->
-<div id="packerzArchiveModal" class="modal-overlay" style="display:none; align-items:center; z-index:1000;" onclick="if(event.target===this) this.style.display='none'">
+<div id="packerzArchiveModal" class="modal-overlay" style="display:none; align-items:center; z-index:1000;" data-click="click_if_event_target_this_this_styl">
     <div class="modal-content" style="max-width:2000px; width:98vw; height:98vh; display:flex; flex-direction:column; padding:0; background:var(--bg-container); border-radius:8px; border:1px solid rgba(16,185,129,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow:hidden;">
         <div style="padding:20px 25px; border-bottom:1px solid var(--border-color); background:var(--bg-glass); display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:15px;">
@@ -4343,7 +4343,7 @@
                     <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Historical read-only ledger of successfully shipped units under Fulfillz.</div>
                 </div>
             </div>
-            <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" onclick="document.getElementById('packerzArchiveModal').style.display='none'">Close</button>
+            <button class="btn-red" style="width:auto; padding:6px 15px; border-radius:4px; font-size:13px; font-weight:bold;" data-click="click_document_getElementById_packer">Close</button>
         </div>
         <div style="padding:25px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden;">
             <div id="packerzCompletedQueue" style="flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; gap:15px; padding-right:10px;">
@@ -4368,9 +4368,9 @@
                 <div id="packerzSopViewerSubtitle" style="font-size:12px; color:var(--text-muted); font-family:monospace; margin-top:5px;">Awaiting Recipe Target...</div>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
-                <button class="btn-ghost-base btn-ghost-blue" onclick="printPackerzSOP()" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>
-                <button class="btn-blue" id="btnPackerzLiveToggleEdit" onclick="if(typeof togglePackerzLiveInlineSOP==='function') togglePackerzLiveInlineSOP();" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>
-                <button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" onclick="closePackerzSopViewer()">X</button>
+                <button class="btn-ghost-base btn-ghost-blue" data-click="click_printPackerzSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>
+                <button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_if_typeof_togglePackerzLiveInl" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>
+                <button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" data-click="click_closePackerzSopViewer">X</button>
             </div>
         </div>
 
@@ -4387,14 +4387,14 @@
                 </div>
                 
                 <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
-                    <button id="btnPackerzSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
+                    <button id="btnPackerzSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" data-click="click_signoffPackerzQA">
                         COMPLETE QA CHECKS
                     </button>
                 </div>
             </div>
 
             <!-- Resizer Divider — uses global .h-resizer standard -->
-            <div id="packerzLiveSopResizer" class="h-resizer" onmousedown="initPackerzLiveSopResize(event)"></div>
+            <div id="packerzLiveSopResizer" class="h-resizer" data-mousedown="mousedown_initPackerzLiveSopResize_event"></div>
 
             <!-- Right Pane (SWAPPED to Procedure Steps) -->
             <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
@@ -4422,21 +4422,21 @@
     </div>
     <div id="sopCameraStatus" style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); min-height:20px; text-align:center;">Point at the QR code on the bin label...</div>
     <div style="display:flex; gap:12px;">
-        <button onclick="closeCameraScanner()" class="btn-red" style="padding:10px 28px; width:max-content; border-radius:8px; font-weight:800; font-size:14px;">✕ Cancel</button>
+        <button data-click="click_closeCameraScanner" class="btn-red" style="padding:10px 28px; width:max-content; border-radius:8px; font-weight:800; font-size:14px;">✕ Cancel</button>
     </div>
 </div>
 
 <!-- ============================================================
      SOP TOKEN GUIDE MODAL
 ============================================================ -->
-<div id="sopTokenGuideModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.88); z-index:11001; justify-content:center; align-items:center; backdrop-filter:blur(8px);" onclick="if(event.target===this)closeSOPTokenGuide()">
+<div id="sopTokenGuideModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.88); z-index:11001; justify-content:center; align-items:center; backdrop-filter:blur(8px);" data-click="click_if_event_target_this_closeSOPT">
     <div style="background:var(--bg-container); border-radius:14px; border:1px solid rgba(14,165,233,0.35); width:820px; max-width:96vw; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.9); overflow:hidden;">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 26px; background:linear-gradient(135deg,rgba(14,165,233,0.12) 0%,var(--bg-bar) 100%); border-bottom:1px solid rgba(14,165,233,0.25); flex-shrink:0;">
             <div>
                 <div style="font-size:17px; font-weight:900; color:#0ea5e9;">❓ SOP Token Reference Guide</div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">All syntax tokens available in the CHECKLIST editor</div>
             </div>
-            <button onclick="closeSOPTokenGuide()" class="btn-red" style="width:auto; padding:7px 16px; font-size:13px;"><i class="fa-solid fa-times"></i> Close</button>
+            <button data-click="click_closeSOPTokenGuide" class="btn-red" style="width:auto; padding:7px 16px; font-size:13px;"><i class="fa-solid fa-times"></i> Close</button>
         </div>
         <div style="flex-grow:1; overflow-y:auto; padding:28px; display:flex; flex-direction:column; gap:20px;">
             <div style="font-size:10px; font-weight:900; color:#0ea5e9; letter-spacing:2.5px; border-bottom:1px solid rgba(14,165,233,0.2); padding-bottom:6px;">QA CHECKLIST TOKENS</div>
@@ -4722,18 +4722,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.0916"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.0938"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.0916"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.0938"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.0916"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.0938"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.0916"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.0916"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.0916"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.0938"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.0938"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.0938"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.12.0916"></script>
-    <script src="labelz-module.js?v=v.2026.04.12.0916"></script>
+    <script src="barcodz-module.js?v=v.2026.04.12.0938"></script>
+    <script src="labelz-module.js?v=v.2026.04.12.0938"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100vw; height:100vh; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -4748,11 +4748,11 @@
             </div>
             <div id="sandboxActionFooter" style="padding:15px 25px; border-top:1px solid rgba(255,255,255,0.1); background:var(--bg-panel); justify-content:flex-end; gap:15px; display:flex;">
                 <!-- LIVE STAGING UI -->
-                <button id="btnSandboxDiscard" class="btn-red-muted" style="padding:10px 20px; font-weight:bold; font-size:12px; display:none;" onclick="if(window.cancelSandboxImport) window.cancelSandboxImport(); else { document.getElementById('sandboxDataModal').style.display='none'; }">🗑️ Cancel & Discard</button>
-                <button id="btnSandboxSync" class="btn-green-neon" style="padding:10px 25px; font-weight:bold; font-size:13px; display:none;" onclick="if(window.commitSandboxImport) window.commitSandboxImport();">✅ UPLOAD & SYNC</button>
+                <button id="btnSandboxDiscard" class="btn-red-muted" style="padding:10px 20px; font-weight:bold; font-size:12px; display:none;" data-click="click_if_window_cancelSandboxImport">🗑️ Cancel & Discard</button>
+                <button id="btnSandboxSync" class="btn-green-neon" style="padding:10px 25px; font-weight:bold; font-size:13px; display:none;" data-click="click_if_window_commitSandboxImport">✅ UPLOAD & SYNC</button>
                 
                 <!-- TEST MODE UI -->
-                <button id="btnSandboxClose" class="btn-red-muted" style="padding:10px 25px; font-weight:bold; font-size:12px; display:block;" onclick="if(window.cancelSandboxImport) window.cancelSandboxImport(); else document.getElementById('sandboxDataModal').style.display='none';">Close Data Viewer</button>
+                <button id="btnSandboxClose" class="btn-red-muted" style="padding:10px 25px; font-weight:bold; font-size:12px; display:block;" data-click="click_if_window_cancelSandboxImport_13">Close Data Viewer</button>
             </div>
         </div>
     </div>
@@ -4770,8 +4770,8 @@
                 </div>
             </div>
             <div style="padding:15px 25px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); justify-content:flex-end; gap:15px; border-radius:0 0 12px 12px; display:flex;">
-                <button class="btn-ghost-base btn-ghost-brand" style="padding:8px 15px;" onclick="document.getElementById('finalizeWoModal').style.display='none';">Cancel</button>
-                <button id="finalizeWoActionBtn" class="btn-green" style="padding:8px 20px; font-weight:bold;" onclick="window.submitFinalizeWo()">Finalize & Deduct</button>
+                <button class="btn-ghost-base btn-ghost-brand" style="padding:8px 15px;" data-click="click_document_getElementById_finali">Cancel</button>
+                <button id="finalizeWoActionBtn" class="btn-green" style="padding:8px 20px; font-weight:bold;" data-click="click_window_submitFinalizeWo">Finalize & Deduct</button>
             </div>
         </div>
     </div>
@@ -4801,8 +4801,8 @@
                 </div>
             </div>
             <div style="padding:15px 25px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); justify-content:flex-end; gap:15px; border-radius:0 0 12px 12px; display:flex;">
-                <button class="btn-ghost-base btn-ghost-brand" style="padding:8px 15px;" onclick="document.getElementById('finalizePrintModal').style.display='none'">Cancel</button>
-                <button class="btn-green" style="padding:8px 20px; font-weight:bold;" onclick="submitFinalizePrint()">Complete & Log</button>
+                <button class="btn-ghost-base btn-ghost-brand" style="padding:8px 15px;" data-click="click_document_getElementById_finali_14">Cancel</button>
+                <button class="btn-green" style="padding:8px 20px; font-weight:bold;" data-click="click_submitFinalizePrint">Complete & Log</button>
             </div>
         </div>
     </div>
@@ -4814,7 +4814,7 @@
         <div style="background:var(--bg-panel); border:1px solid #8b5cf6; border-radius:12px; width:90%; max-width:600px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
             <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(139, 92, 246, 0.1); border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="margin:0; font-size:18px; color:#8b5cf6; display:flex; align-items:center; gap:10px;">📄 Paper Stock Manager</h2>
-                <button class="btn-ghost-base btn-ghost-slate" onclick="document.getElementById('paperProfileModal').style.display='none'"><i class="fa-solid fa-times"></i> Close</button>
+                <button class="btn-ghost-base btn-ghost-slate" data-click="click_document_getElementById_paperP_15"><i class="fa-solid fa-times"></i> Close</button>
             </div>
             <div style="padding:20px; display:flex; flex-direction:column; gap:15px;">
                 <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px; padding:15px; display:flex; align-items:flex-end; gap:10px;">
@@ -4830,7 +4830,7 @@
                         <label style="font-size:10px; font-weight:bold; color:var(--text-muted); margin-bottom:2px;">Height (in)</label>
                         <input type="number" id="newPaperH" step="any" placeholder="6.0" style="width:100%; padding:8px; border-radius:4px; background:var(--bg-panel); color:white; border:1px solid var(--border-color);">
                     </div>
-                    <button id="paperManagerAddBtn" class="btn-green" onclick="addPaperProfile()" style="width:auto; padding:8px 15px; border-radius:4px; font-weight:bold;">Add</button>
+                    <button id="paperManagerAddBtn" class="btn-green" data-click="click_addPaperProfile" style="width:auto; padding:8px 15px; border-radius:4px; font-weight:bold;">Add</button>
                 </div>
                 <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
                     <table style="width:100%; border-collapse:collapse; font-size:12px; color:white;">
@@ -4860,10 +4860,10 @@
             <div style="background:var(--bg-panel); border:1px solid #10b981; border-radius:12px; width:90%; max-width:500px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
             <div style="padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(16, 185, 129, 0.1); border-radius:12px 12px 0 0; position:relative; display:flex; align-items:center;">
                 <h2 style="margin:0; font-size:20px; color:#10b981; display:flex; align-items:center; gap:10px;">🔄 Cycle Count Manager</h2>
-                <button class="modal-close-btn" onclick="window.closeCycleCountManager()">✕ CLOSE</button>
+                <button class="modal-close-btn" data-click="click_window_closeCycleCountManager">✕ CLOSE</button>
             </div>
             <div style="padding:30px; display:flex; flex-direction:column; gap:25px;">
-                <button class="btn-green-neon" style="width:100%; height:60px; font-size:18px; font-weight:900; box-shadow:0 0 20px rgba(16,185,129,0.3);" onclick="window.startCycleCount()">
+                <button class="btn-green-neon" style="width:100%; height:60px; font-size:18px; font-weight:900; box-shadow:0 0 20px rgba(16,185,129,0.3);" data-click="click_window_startCycleCount">
                     📷 LAUNCH CAMERA SCANNER
                 </button>
                 <div style="display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:12px; font-weight:bold;">
@@ -4875,10 +4875,10 @@
                     <div style="display:flex; flex-direction:column;">
                         <label style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-bottom:5px;">Search & Select Item</label>
                         <div style="position:relative; margin-bottom:10px;">
-                            <input type="text" id="ccMngrSearch" placeholder="🔍 Type item name or spec..." onkeyup="window.filterCcMngrItems()" onclick="window.filterCcMngrItems()" autocomplete="off" style="width:100%; padding:10px; border-radius:6px; background:var(--bg-panel); color:var(--text-main); border:1px solid var(--border-input);">
+                            <input type="text" id="ccMngrSearch" placeholder="🔍 Type item name or spec..." data-keyup="keyup_window_filterCcMngrItems" data-click="click_window_filterCcMngrItems" autocomplete="off" style="width:100%; padding:10px; border-radius:6px; background:var(--bg-panel); color:var(--text-main); border:1px solid var(--border-input);">
                             <div id="ccMngrDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; max-height:250px; overflow-y:auto; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; z-index:9999; box-shadow:var(--glass-shadow); margin-top:4px;"></div>
                         </div>
-                        <select id="ccMngrItemSelect" onchange="window.updateCcMngrStock()" style="width:100%; padding:10px; border-radius:6px; background:var(--bg-panel); color:var(--text-main); border:1px solid var(--border-input); font-size:14px; font-weight:bold; cursor:pointer;">
+                        <select id="ccMngrItemSelect" data-change="change_window_updateCcMngrStock" style="width:100%; padding:10px; border-radius:6px; background:var(--bg-panel); color:var(--text-main); border:1px solid var(--border-input); font-size:14px; font-weight:bold; cursor:pointer;">
                             <option value="">-- Choose Item Natively --</option>
                         </select>
                     </div>
@@ -4892,23 +4892,23 @@
                         <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:6px;">
                             <div style="background:rgba(0,0,0,0.15); padding:10px 4px; border-radius:6px; text-align:center; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:4px;">
                                 <div id="ccMngrL1" style="font-size:8px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">PROD</div>
-                                <div id="ccMngrV1" class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="window.handleCcMngrTelemetryEdit(this, 1)" style="font-size:14px; font-weight:900; color:var(--text-heading);">—</div>
+                                <div id="ccMngrV1" class="editable" contenteditable="true" data-focus="focus_storeOldVal_this" data-blur="blur_window_handleCcMngrTelemetryEd" style="font-size:14px; font-weight:900; color:var(--text-heading);">—</div>
                             </div>
                             <div style="background:rgba(0,0,0,0.15); padding:10px 4px; border-radius:6px; text-align:center; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:4px;">
                                 <div id="ccMngrL2" style="font-size:8px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">PROTO</div>
-                                <div id="ccMngrV2" class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="window.handleCcMngrTelemetryEdit(this, 2)" style="font-size:14px; font-weight:900; color:var(--text-heading);">—</div>
+                                <div id="ccMngrV2" class="editable" contenteditable="true" data-focus="focus_storeOldVal_this" data-blur="blur_window_handleCcMngrTelemetryEd_16" style="font-size:14px; font-weight:900; color:var(--text-heading);">—</div>
                             </div>
                             <div style="background:rgba(0,0,0,0.15); padding:10px 4px; border-radius:6px; text-align:center; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:4px;">
                                 <div id="ccMngrL3" style="font-size:8px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">CONS</div>
-                                <div id="ccMngrV3" class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="window.handleCcMngrTelemetryEdit(this, 3)" style="font-size:14px; font-weight:900; color:#ef4444; cursor:text;">—</div>
+                                <div id="ccMngrV3" class="editable" contenteditable="true" data-focus="focus_storeOldVal_this" data-blur="blur_window_handleCcMngrTelemetryEd_17" style="font-size:14px; font-weight:900; color:#ef4444; cursor:text;">—</div>
                             </div>
                             <div style="background:rgba(0,0,0,0.15); padding:10px 4px; border-radius:6px; text-align:center; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:4px;">
                                 <div id="ccMngrL4" style="font-size:8px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">SCRAP</div>
-                                <div id="ccMngrV4" class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="window.handleCcMngrTelemetryEdit(this, 4)" style="font-size:14px; font-weight:900; color:#ef4444;">—</div>
+                                <div id="ccMngrV4" class="editable" contenteditable="true" data-focus="focus_storeOldVal_this" data-blur="blur_window_handleCcMngrTelemetryEd_18" style="font-size:14px; font-weight:900; color:#ef4444;">—</div>
                             </div>
                             <div style="background:rgba(0,0,0,0.15); padding:10px 4px; border-radius:6px; text-align:center; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:4px;">
                                 <div id="ccMngrL5" style="font-size:8px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">ADJ</div>
-                                <div id="ccMngrV5" class="editable" contenteditable="true" onfocus="storeOldVal(this)" onblur="window.handleCcMngrTelemetryEdit(this, 5)" style="font-size:14px; font-weight:900; color:#3b82f6;">—</div>
+                                <div id="ccMngrV5" class="editable" contenteditable="true" data-focus="focus_storeOldVal_this" data-blur="blur_window_handleCcMngrTelemetryEd_19" style="font-size:14px; font-weight:900; color:#3b82f6;">—</div>
                             </div>
                         </div>
                     </div>
@@ -4916,7 +4916,7 @@
                         <label style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-bottom:5px;">New Physical Qty</label>
                         <input type="number" id="ccMngrQtyInput" step="any" placeholder="Enter Physical Qty" style="width:100%; padding:10px; border-radius:6px; background:var(--bg-panel); color:var(--text-main); border:1px solid var(--border-input); font-size:16px; font-weight:bold;">
                     </div>
-                    <button class="btn-green" style="width:100%; padding:12px; font-weight:bold; margin-top:5px;" onclick="window.saveManualCycleCount()">💾 Save Manual Count</button>
+                    <button class="btn-green" style="width:100%; padding:12px; font-weight:bold; margin-top:5px;" data-click="click_window_saveManualCycleCount">💾 Save Manual Count</button>
                 </div>
             </div>
             </div>
@@ -4928,7 +4928,7 @@
                         <span style="display:inline-block; width:10px; height:10px; background:#0ea5e9; border-radius:50%; box-shadow:0 0 10px #0ea5e9; animation:pulse 1.5s infinite;"></span>
                         📷 ITEM SCANNER
                     </h2>
-                    <button class="modal-close-btn" onclick="stopCycleCount()">✕ CLOSE</button>
+                    <button class="modal-close-btn" data-click="click_stopCycleCount">✕ CLOSE</button>
                 </div>
                 <div style="padding:30px; display:flex; flex-direction:column; align-items:center; text-align:center; height:100%; justify-content:center; flex-grow:1;">
                     <div id="inlineScannerItemName" style="font-size:18px; font-weight:900; color:white; margin-bottom:4px;">Scan Any Item</div>
