@@ -85,21 +85,20 @@
             return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
         }
 
-        function generateSocial(link, followers, icon, colorClass, handle) {
+                function generateSocial(link, followers, icon, colorClass, handle) {
             if (!handle || handle === '-' || handle === '') return "";
-            let tc = ''; 
-            let hb = '';
-            if(colorClass === 'pink') { tc = 'text-pink-500'; hb = 'hover:bg-pink-500/10'; }
-            else if(colorClass === 'cyan') { tc = 'text-cyan-500'; hb = 'hover:bg-cyan-500/10'; }
-            else if(colorClass === 'red') { tc = 'text-red-500'; hb = 'hover:bg-red-500/10'; }
-            else if(colorClass === 'blue') { tc = 'text-blue-500'; hb = 'hover:bg-blue-500/10'; }
+            let tc = ''; let hb = '';
+            if (colorClass === 'pink') { tc = '#ec4899'; hb = 'rgba(236,72,153, 0.1)'; }
+            else if(colorClass === 'cyan') { tc = '#06b6d4'; hb = 'rgba(6,182,212, 0.1)'; }
+            else if(colorClass === 'red') { tc = '#ef4444'; hb = 'rgba(239,68,68, 0.1)'; }
+            else if(colorClass === 'blue') { tc = '#3b82f6'; hb = 'rgba(59,130,246, 0.1)'; }
             
             return `
-                <a href="${link}" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg transition-all ${hb} group flex-1 min-w-0 border shadow-sm hover:shadow-md" style="background: var(--bg-panel); border-color: var(--border-color);">
-                    <span class="text-sm ${tc} mb-1 truncate w-full font-medium tracking-tight text-center px-1">${handle}</span>
-                    <div class="flex items-center gap-2 min-w-0 w-full">
-                        <i class="fa-brands ${icon} ${tc} text-4xl group-hover:scale-110 transition-transform"></i>
-                        <span class="text-base font-bold dark:text-slate-300">${followers}</span>
+                <a href="${link}" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; transition: all 0.2s; flex: 1; min-width: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none; background: var(--bg-panel); border: 1px solid var(--border-color);" onmouseover="this.style.background='${hb}'" onmouseout="this.style.background='var(--bg-panel)'">
+                    <span style="font-size: 14px; color: ${tc}; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; font-weight: 500; text-align: center;">${handle}</span>
+                    <div style="display: flex; align-items: center; gap: 8px; min-width: 0; justify-content: center; width: 100%;">
+                        <i class="fa-brands ${icon}" style="color: ${tc}; font-size: 24px;"></i>
+                        <span style="font-size: 16px; font-weight: bold; color: var(--text-heading);">${followers}</span>
                     </div>
                 </a>
             `;
@@ -334,35 +333,49 @@
                         const ytHtml = generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);
                         const fbHtml = generateSocial(s.links.fb, s.followers.fb, 'fa-facebook', 'blue', s.handles.fb);
 
-                        return `<div class="rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border overflow-hidden flex flex-col group relative hover:border-[#f97316]" style="background: var(--bg-panel); border-color: var(--border-color); box-shadow: 0 4px 6px var(--shadow-color);">
-                        <!-- Favorite Heart -->
-                        <button onclick="toggleFavorite(${originalIndex}, event)" class="absolute top-4 right-4 w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-all ${s.isFavorite ? 'opacity-100' : 'opacity-100 hover:text-red-400'}" style="z-index: 20; background: var(--bg-main); border: 1px solid var(--border-color); color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};">
-                            ${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}
-                        </button>
-                        <!-- Viral Star -->
-                        ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="absolute top-4 w-8 h-8 rounded-full shadow-sm flex items-center justify-center transition-transform hover:scale-110" style="z-index: 20; right: 54px; background: var(--bg-main); color: #FBBF24; border: 1px solid var(--border-color); filter: drop-shadow(0 0 2px rgba(251,191,36,0.3));" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : ''}
+                        return `<div class="socialz-influencer-card" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color);">
+               <!-- Favorite Heart -->
+               <button onclick="toggleFavorite(${originalIndex}, event)" class="btn-icon-sq" style="position: absolute; top: 16px; right: 16px; z-index: 20; border-radius: 50%; background: var(--bg-main); border: 1px solid var(--border-color); color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};">
+                   ${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}
+               </button>
+               <!-- Viral Star -->
+               ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" style="position: absolute; top: 16px; right: 54px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-main); border: 1px solid var(--border-color); color: #FBBF24; filter: drop-shadow(0 0 2px rgba(251,191,36,0.3)); z-index: 20;" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : ''}
 
-                         <div class="p-4 pt-3 pb-4 relative flex-grow flex flex-col">
-                        <div class="flex items-center gap-4 mb-4"><div class="w-16 h-16 relative rounded-full overflow-hidden shadow-lg shrink-0 border" style="border-color: var(--border-color);"><div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-2xl font-bold z-0">${s.name.charAt(0)}</div>${src ? `<img loading="lazy" src="${src}" class="absolute inset-0 w-full h-full object-cover z-10" style="background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}</div><div class="overflow-hidden flex-grow"><h2 class="font-bold text-xl leading-tight truncate pr-2" style="color: var(--text-heading);">${s.name}</h2><div class="flex flex-wrap items-center gap-1.5 mt-1 text-sm truncate" style="color: var(--text-muted);"><i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} ${s.region ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase" style="${regStyles}">${s.region}</span>` : ''} <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${typeClass}">${s.type || ''}</span></div></div></div><p class="text-sm mt-3 line-clamp-3 leading-relaxed mb-4 min-h-[4.5em]" style="color: var(--text-main);">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p><div class="text-sm pt-3 mt-auto min-h-[44px]" style="border-top: 1px solid var(--border-color); display: block; width: 100%; position: relative;">
-                            <!-- Right: Edit Action (Floated FIRST) -->
-                            <div style="float: right; display: flex; align-items: center; position: relative; z-index: 10; margin-top: 5px;">
-                                <button onclick="editSkater(${originalIndex})" class="text-xs font-bold text-slate-400 hover:text-orange-400 flex items-center gap-1 shrink-0"><i class="fa-solid fa-pen"></i> EDIT</button>
-                            </div>
-                            <!-- Left: Status and Styles -->
-                            <div class="flex flex-wrap items-center gap-1.5" style="float: left; max-width: 45%; position: relative; z-index: 10;">
-                                ${s.collabStatus ? `<span class="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded uppercase">${s.collabStatus}</span>` : ''}
-                                ${styleList.map(st => `<div class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide" style="background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-color);">${st}</div>`).join('')}
-                            </div>
-                            
-                            <!-- Center Group: Reach -->
-                            <div class="flex items-center gap-2" style="position: absolute; left: 50%; transform: translateX(-50%); top: 12px; z-index: 5;">
-                                <div class="px-3 py-1 rounded-lg border shadow-sm" style="background: var(--bg-input); border-color: var(--border-color);">
-                                    <span class="text-xs font-black text-brand uppercase tracking-tight">${formatCountShort(s.rawFollowers)} REACH</span>
-                                </div>
-                            </div>
+                <div style="padding: 12px 16px 16px 16px; position: relative; flex-grow: 1; display: flex; flex-direction: column;">
+               <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                   <div style="width: 64px; height: 64px; border-radius: 50%; position: relative; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
+                       <div style="position: absolute; inset:0; background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
+                       ${src ? `<img loading="lazy" src="${src}" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}
+                   </div>
+                   <div style="overflow: hidden; flex-grow: 1;">
+                       <h2 style="font-weight: bold; font-size: 20px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: var(--text-heading); margin: 0;">${s.name}</h2>
+                       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; font-size: 14px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                           <i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} 
+                           ${s.region ? `<span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; ${regStyles}">${s.region}</span>` : ''} 
+                           <span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase;" style="${typeClass}">${s.type || ''}</span>
+                       </div>
+                   </div>
+               </div>
+               <p style="font-size: 14px; margin-top: 12px; margin-bottom: 16px; min-height: 60px; line-height: 1.5; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p>
+               <div style="border-top: 1px solid var(--border-color); display: block; width: 100%; position: relative; padding-top: 12px; margin-top: auto; min-height: 44px; display:flex; justify-content:space-between; align-items:center;">
+                   <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                       ${s.collabStatus ? `<span style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; text-transform:uppercase; background:rgba(99,102,241,0.1); color:#818cf8;">${s.collabStatus}</span>` : ''}
+                       ${styleList.map(st => `<div style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; text-transform:uppercase; background:var(--bg-input); color:var(--text-muted); border:1px solid var(--border-color);">${st}</div>`).join('')}
+                   </div>
+                   
+                   <div style="position: absolute; left: 50%; transform: translateX(-50%); top: 12px; z-index: 5;">
+                       <div style="padding: 4px 12px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color);">
+                           <span style="font-size: 12px; font-weight: 900; color: #f97316; text-transform: uppercase;">${formatCountShort(s.rawFollowers)} REACH</span>
+                       </div>
+                   </div>
 
-                            <div style="clear: both;"></div>
-                        </div></div><div class="mt-auto p-4 flex flex-nowrap justify-center gap-2 overflow-x-auto" style="background: var(--bg-input); border-top: 1px solid var(--border-color);">${igHtml}${ttHtml}${ytHtml}${fbHtml}</div></div>`;
+                   <button onclick="editSkater(${originalIndex})" style="font-size: 12px; font-weight: bold; color: var(--text-muted); border:none; background:none; cursor:pointer;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='var(--text-muted)'"><i class="fa-solid fa-pen"></i> EDIT</button>
+               </div>
+               </div>
+               <div style="margin-top: auto; padding: 16px; display: flex; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
+                   ${igHtml}${ttHtml}${ytHtml}${fbHtml}
+               </div>
+           </div>`;
                     }).join('');
                 } else {
                     // COMPACT LIST VIEW - TABLE MODE
@@ -400,31 +413,31 @@
                             ((s.type || '').toLowerCase() === 'indoor' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300');
 
                         const regStyles = getRegionStyleConfig(s.region);
-                        const parsedStyles = s.style ? s.style.split(';').map(st => `<span class="bg-[var(--bg-input)] px-1.5 py-0.5 rounded mx-0.5 text-[9px] uppercase font-bold border" style="border-color:var(--border-color)">${st.trim()}</span>`).join('') : '-';
+                        const parsedStyles = s.style ? s.style.split(';').map(st => `<span style="background: var(--bg-input); padding: 2px 6px; border-radius: 4px; margin: 0 2px; font-size: 9px; text-transform: uppercase; font-weight: bold; border: 1px solid var(--border-color);" style="border-color:var(--border-color)">${st.trim()}</span>`).join('') : '-';
                         
                         return `<tr style="border-bottom:1px solid var(--border-color); background:var(--bg-panel);" onmouseover="this.style.background='rgba(59, 130, 246, 0.05)'" onmouseout="this.style.background='var(--bg-panel)'">
                             <td class="overflow-hidden" style="padding:4px; text-align:center;">
-                                <button onclick="toggleFavorite(${originalIndex}, event)" class="hover:scale-110 transition-transform flex items-center justify-center shrink-0 w-full ${s.isFavorite ? 'text-red-500' : 'text-slate-400'}">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
+                                <button onclick="toggleFavorite(${originalIndex}, event)" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; transition: transform 0.2s; color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
                             </td>
                             <td class="trunc-col" style="padding:4px 12px; font-weight:bold; color:var(--text-heading); text-align:left;">
-                                <div class="flex items-center gap-2 min-w-0 w-full">
-                                    <div class="w-8 h-8 rounded-full overflow-hidden border shadow-sm flex items-center justify-center text-[10px] relative" style="background:var(--bg-input); border-color:var(--border-color); color:var(--text-muted); flex-shrink:0;">
-                                        <div class="absolute inset-0 flex items-center justify-center z-0">${s.name.charAt(0)}</div>
-                                        ${src ? `<img loading="lazy" src="${src}" class="w-full h-full object-cover relative z-10" onerror="this.style.display='none'">` : ''}
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0; width: 100%;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; position: relative; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-muted); flex-shrink: 0;">
+                                        <div style="position: absolute; inset:0; display: flex; align-items: center; justify-content: center; z-index: 0; font-size: 10px;">${s.name.charAt(0)}</div>
+                                        ${src ? `<img loading="lazy" src="${src}" style="position: relative; width: 100%; height: 100%; object-fit: cover; z-index: 10;" onerror="this.style.display='none'">` : ''}
                                     </div>
-                                    <span class="truncate w-full block">${s.name}</span>
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${s.name}</span>
                                 </div>
                             </td>
                             <td class="trunc-col" style="padding:4px 12px; color:var(--text-muted); text-align:left;">${s.location || '-'}</td>
-                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="${regStyles}">${s.region || '-'}</span></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><span style="padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; ${regStyles}">${s.region || '-'}</span></td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;">${parsedStyles}</td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.ig||'#'}" target="_blank" style="font-weight:800; color:#ec4899; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.ig||'0'}</a></td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.tt||'#'}" target="_blank" style="font-weight:800; color:#06b6d4; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.tt||'0'}</a></td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.yt||'#'}" target="_blank" style="font-weight:800; color:#ef4444; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.yt||'0'}</a></td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.fb||'#'}" target="_blank" style="font-weight:800; color:#3b82f6; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.fb||'0'}</a></td>
-                            <td class="overflow-hidden" style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="hover:scale-125 transition-transform flex items-center justify-center shrink-0 w-full h-full" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; height: 100%; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
                             <td class="overflow-hidden" style="padding:4px; text-align:right; font-weight:900; color:var(--text-heading); font-size:13px;">${formatCountShort(s.rawFollowers)}</td>
-                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><button onclick="editSkater(${originalIndex})" class="px-2 py-1 rounded transition-colors hover:text-[#f97316] font-bold text-[9px] flex items-center gap-1 mx-auto" style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color);"><i class="fa-solid fa-pen"></i> EDIT</button></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><button onclick="editSkater(${originalIndex})" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9px; display: flex; align-items: center; justify-content: center; gap: 4px; margin: 0 auto; transition: color 0.2s; color: var(--text-muted); background: var(--bg-input); border: 1px solid var(--border-color);" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='var(--text-muted)'"><i class="fa-solid fa-pen"></i> EDIT</button></td>
                         </tr>`;
                     }).join('');
                     
