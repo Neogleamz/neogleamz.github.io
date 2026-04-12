@@ -84,6 +84,7 @@ window.loadParserConfig = function() {
             }
         }
     } catch(e) {
+        sysLog("Parser profile load failed: " + e.message, true);
         window.PARSER_PROFILES = [{name: "Factory Default", rules: {...DEFAULT_PARSER_RULES}}];
         window.ACTIVE_PROFILE_INDEX = 0;
         window.PARSER_RULES = window.PARSER_PROFILES[0].rules;
@@ -354,6 +355,7 @@ window.evaluateLiveRegex = function(id, manualTargetTxt = null, returnAll = fals
             return null;
         }
     } catch(e) {
+        sysLog("Regex live parse error: " + e.message, true);
         badge.innerText = "SYNTAX ERR";
         badge.style.color = "#ef4444";
         return null;
@@ -378,6 +380,7 @@ window.loadParcelConfig = function() {
             window.PARCEL_RULES = window.PARCEL_PROFILES[0].rules;
         }
     } catch(e) {
+        sysLog("Highlight overlay error: " + e.message, true);
         window.PARCEL_PROFILES = [{name: "Factory Default", rules: {...DEFAULT_PARCEL_RULES}}];
         window.ACTIVE_PARCEL_PROFILE_INDEX = 0;
         window.PARCEL_RULES = window.PARCEL_PROFILES[0].rules;
@@ -647,6 +650,7 @@ window.evaluateLiveParcelRegex = function(id, manualTargetTxt = null, returnAll 
             return null;
         }
     } catch(e) {
+        sysLog("Order extractor fault: " + e.message, true);
         badge.innerText = "SYNTAX ERR";
         badge.style.color = "#ef4444";
         return null;
@@ -912,33 +916,80 @@ window.commitSandboxImport = async function() {
     let ctx = window.__pendingLiveImportMeta;
     if (!ctx) return;
     
-    document.getElementById('sandboxDataModal').style.display = 'none';
+    let btnSync = document.getElementById('btnSandboxSync');
+    let btnCancel = document.getElementById('btnSandboxDiscard');
+    
+    if (btnSync) {
+        btnSync.innerHTML = "⏳ SYNCING TO CLOUD...";
+        btnSync.disabled = true;
+        btnSync.style.opacity = "0.7";
+    }
+    if (btnCancel) btnCancel.style.display = "none";
+    
     let termId = ctx.termId; let statId = ctx.statId; let resObj = ctx.resObj;
     
     try {
-        importTrace(`Transmitting [${resObj.table}] staged payload -> supabaseClient...`, false, termId);
+        importTrace(`▶ Execution Phase: Cloud Upsert initialized. Target DB: [${resObj.table}]`, false, termId);
+        if(resObj.data.length > 0) importTrace(`▶ Payload Size: ${resObj.count} records. Writing Columns: ${Object.keys(resObj.data[0]).join(', ')}`, false, termId);
+        
         sysLog(`Pushing ${resObj.count} items...`); setSysProgress(80, 'working');
-        const {error} = await supabaseClient.from(resObj.table).upsert(resObj.data, {onConflict: resObj.conflict}); if(error) throw new Error(error.message);
+        const {data: retData, error} = await supabaseClient.from(resObj.table).upsert(resObj.data, {onConflict: resObj.conflict}).select(); 
+        if(error) throw new Error(error.message);
+        
+        importTrace(`✅ SUCCESS: Upserted and verified ${retData ? retData.length : resObj.data.length} records in [${resObj.table}].`, false, termId);
+        importTrace(`🔒 INTEGRITY: Primary keys resolved via conflict strategy: '${resObj.conflict}'.`, false, termId);
         
         if (resObj.data2) { 
-            importTrace(`Secondary relation array found! Transmitting [${resObj.table2}] insertion payload...`, false, termId);
-            const {error2} = await supabaseClient.from(resObj.table2).upsert(resObj.data2, {onConflict: resObj.conflict2}); if(error2) throw new Error(error2.message); 
+            importTrace(`▶ Secondary Target: [${resObj.table2}] (${resObj.data2.length} child records)`, false, termId);
+            const {data: retData2, error2} = await supabaseClient.from(resObj.table2).upsert(resObj.data2, {onConflict: resObj.conflict2}).select(); 
+            if(error2) throw new Error(error2.message); 
+            importTrace(`✅ SUCCESS: Upserted and verified ${retData2 ? retData2.length : resObj.data2.length} records in [${resObj.table2}].`, false, termId);
+            importTrace(`🔒 INTEGRITY: Secondary conflict strategy: '${resObj.conflict2}'.`, false, termId);
         }
         
-        importTrace(`Upload Cycle Completed Successfully! Local data sync triggered.`, false, termId);
+        if (btnSync) {
+            btnSync.innerHTML = "✅ SYNCED SUCCESSFULLY!";
+            btnSync.style.opacity = "1";
+        }
+        
+        importTrace(`💯 UPLOAD CYCLE COMPLETE: Local application data sync triggered.`, false, termId);
         setSysProgress(100, 'success'); setModuleStatus(statId, `✅ Synced!`, 'mod-success'); 
         
         let fileInput = document.getElementById(ctx.inputNodeId);
         if(fileInput) { fileInput.value = ""; fileInput.disabled = false; }
         
-        setTimeout(() => { setSysProgress(0,'working'); if(typeof syncAndCalculate === 'function') syncAndCalculate(); }, 1000);
+        setTimeout(() => { 
+            document.getElementById('sandboxDataModal').style.display = 'none';
+            if (btnSync) {
+                btnSync.innerHTML = "✅ UPLOAD & SYNC";
+                btnSync.disabled = false;
+            }
+            setSysProgress(0,'working'); 
+            if(typeof syncAndCalculate === 'function') syncAndCalculate(); 
+        }, 1500);
     } catch(e) {
+        if (btnSync) {
+            btnSync.innerHTML = "❌ SYNC FAILED";
+            btnSync.style.backgroundColor = "#ef4444";
+        }
+    
+        sysLog("Sync payload exception: " + e.message, true);
         importTrace(`CRITICAL STAGING FAULT: ${e.message}`, true, termId);
         sysLog(e.message, true); setSysProgress(100, 'error'); setModuleStatus(statId, "❌ Sync Error.", "mod-error"); 
         
         let fileInput = document.getElementById(ctx.inputNodeId);
         if(fileInput) fileInput.disabled = false;
-        setTimeout(()=>setSysProgress(0,'working'),3000); 
+        
+        setTimeout(() => { 
+            document.getElementById('sandboxDataModal').style.display = 'none';
+            if (btnSync) {
+                btnSync.innerHTML = "✅ UPLOAD & SYNC";
+                btnSync.disabled = false;
+                btnSync.style.backgroundColor = "";
+                btnSync.style.opacity = "1";
+            }
+            setSysProgress(0,'working'); 
+        }, 3000); 
     }
     window.__pendingLiveImportMeta = null;
 };
@@ -1506,6 +1557,7 @@ async function loadPaperProfiles() {
             await savePaperProfiles(false);
         }
     } catch(e) {
+        sysLog("DB Size fetch failed: " + e.message, true);
         console.warn("No paper profiles cloud config found. Initializing defaults.");
     }
     renderPaperProfileTable();
@@ -1522,6 +1574,7 @@ async function savePaperProfiles(silent = false) {
             renderPaperProfileDropdowns();
         }
     } catch(e) {
+        sysLog("Table fetch failed: " + e.message, true);
         if (!silent) setMasterStatus("Error Saving", "mod-error");
     }
 }

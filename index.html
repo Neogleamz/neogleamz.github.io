@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.11.1910"></script>
+    <script src="system-version.js?v=v.2026.04.11.2000"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js?v=v.2026.04.11.1910"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.11.1910"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.11.2000"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.11.1910"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.11.2000"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <script>
@@ -2487,52 +2487,56 @@
             
             <div class="bom-layout" style="flex-grow:1; min-height:0;">
                 <div class="bom-main">
-                    <div class="control-panel" style="grid-template-columns: repeat(2, 1fr); gap:15px; margin-bottom:20px;">
-                        <!-- 1. Orders Sync -->
-                        <div class="panel-card" style="border-left: 4px solid var(--primary-color);">
-                            <h3 style="margin:0 0 10px 0; font-size:15px;">📦 Orderz Sync</h3>
-                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML pages from superbuy</p>
-                            <input type="file" id="orderFiles" multiple accept=".html" style="width:100%; font-size:11px;">
-                            
-                            <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
-                                <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
-                                <input type="file" id="orderFilesTest" multiple accept=".html" style="width:100%; font-size:11px;">
+                    <div class="control-panel" style="grid-template-columns: repeat(2, 1fr); gap:15px; margin-bottom:20px; align-items: stretch;">
+                        <!-- 1. Orders Full Pane -->
+                        <div class="panel-card" style="border: 1px solid #38bdf8; border-left: 4px solid #38bdf8; display:flex; flex-direction:column; gap:20px;">
+                            <div>
+                                <h3 style="margin:0 0 10px 0; font-size:15px;">📦 Orderz Sync</h3>
+                                <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML pages from superbuy</p>
+                                <input type="file" id="orderFiles" multiple accept=".html" style="display:none;">
+                                <button class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('orderFiles').click()">📦 IMPORT ORDER HTML</button>
+                                
+                                <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
+                                    <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
+                                    <input type="file" id="orderFilesTest" multiple accept=".html" style="display:none;">
+                                    <button class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('orderFilesTest').click()">🧪 IMPORT TEST HTML</button>
+                                </div>
+                                <div id="statusOrders" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
+                                <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParserConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
                             </div>
-                            <div id="statusOrders" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
-                            <button class="btn-blue-muted" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParserConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
-                        </div>
 
-                        <!-- 2. Parcels Sync -->
-                        <div class="panel-card" style="border-left: 4px solid #f59e0b;">
-                            <h3 style="margin:0 0 10px 0; font-size:15px;">🚚 Parcelz Sync</h3>
-                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML package details page for each parcel from superbuy</p>
-                            <input type="file" id="parcelFiles" multiple accept=".html" style="width:100%; font-size:11px;">
-                            
-                            <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
-                                <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
-                                <input type="file" id="parcelFilesTest" multiple accept=".html" style="width:100%; font-size:11px;">
-                            </div>
-                            <div id="statusParcels" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
-                            <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParcelConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
-                        </div>
-                    </div>
-
-                    <div class="control-panel" style="grid-template-columns: repeat(2, 1fr); gap:15px;">
-                        <!-- IMPORTZ Orderz Progress Terminal Window -->
-                        <div class="panel-card" style="border-left: 4px solid #38bdf8; display:flex; flex-direction:column; min-height: 250px;">
-                            <h3 style="margin:0 0 10px 0; font-size:15px;">🔌 Orderz Engine Trace</h3>
-                            <div style="flex-grow: 1; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; font-family: monospace; font-size: 10px; color: #38bdf8;">
-                                <div style="color:#64748b; margin-bottom: 5px; font-weight:bold;">> SYSTEM_STATUS: AWAITING ORDER PAYLOADS</div>
-                                <div id="importzProgressTerminal" style="display:flex; flex-direction:column; gap:6px;"></div>
+                            <div style="flex-grow: 1; display:flex; flex-direction:column; min-height: 250px;">
+                                <h3 style="margin:0 0 10px 0; font-size:15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top:20px;">🔌 Orderz Engine Trace</h3>
+                                <div style="flex-grow: 1; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; font-family: monospace; font-size: 10px; color: #38bdf8;">
+                                    <div style="color:#64748b; margin-bottom: 5px; font-weight:bold;">> SYSTEM_STATUS: AWAITING ORDER PAYLOADS</div>
+                                    <div id="importzProgressTerminal" style="display:flex; flex-direction:column; gap:6px;"></div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- IMPORTZ Parcelz Progress Terminal Window -->
-                        <div class="panel-card" style="border-left: 4px solid #f59e0b; display:flex; flex-direction:column; min-height: 250px;">
-                            <h3 style="margin:0 0 10px 0; font-size:15px;">🔌 Parcelz Engine Trace</h3>
-                            <div style="flex-grow: 1; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; font-family: monospace; font-size: 10px; color: #f59e0b;">
-                                <div style="color:#64748b; margin-bottom: 5px; font-weight:bold;">> SYSTEM_STATUS: AWAITING PARCEL PAYLOADS</div>
-                                <div id="parcelzProgressTerminal" style="display:flex; flex-direction:column; gap:6px;"></div>
+                        <!-- 2. Parcels Full Pane -->
+                        <div class="panel-card" style="border: 1px solid #f59e0b; border-left: 4px solid #f59e0b; display:flex; flex-direction:column; gap:20px;">
+                            <div>
+                                <h3 style="margin:0 0 10px 0; font-size:15px;">🚚 Parcelz Sync</h3>
+                                <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Import the complete .HTML package details page for each parcel from superbuy</p>
+                                <input type="file" id="parcelFiles" multiple accept=".html" style="display:none;">
+                                <button class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('parcelFiles').click()">🚚 IMPORT PARCEL HTML</button>
+                                
+                                <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
+                                    <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
+                                    <input type="file" id="parcelFilesTest" multiple accept=".html" style="display:none;">
+                                    <button class="btn-orange-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="document.getElementById('parcelFilesTest').click()">🧪 IMPORT TEST HTML</button>
+                                </div>
+                                <div id="statusParcels" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
+                                <button class="btn-orange" style="width:100%; margin-top:12px; padding:8px; font-weight:bold; letter-spacing:0.5px; font-size:11px;" onclick="openParcelConfig()">⚙️ CONFIGURE EXTRACTION LOGIC</button>
+                            </div>
+
+                            <div style="flex-grow: 1; display:flex; flex-direction:column; min-height: 250px;">
+                                <h3 style="margin:0 0 10px 0; font-size:15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top:20px;">🔌 Parcelz Engine Trace</h3>
+                                <div style="flex-grow: 1; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; font-family: monospace; font-size: 10px; color: #f59e0b;">
+                                    <div style="color:#64748b; margin-bottom: 5px; font-weight:bold;">> SYSTEM_STATUS: AWAITING PARCEL PAYLOADS</div>
+                                    <div id="parcelzProgressTerminal" style="display:flex; flex-direction:column; gap:6px;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3333,7 +3337,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.11.1910"></script>
+    <script src="socialz-module.js?v=v.2026.04.11.2000"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4492,16 +4496,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.11.1910"></script>
-<script src="system-tools-module.js?v=v.2026.04.11.1910"></script>
-<script src="bom-module.js?v=v.2026.04.11.1910"></script>
-<script src="inventory-module.js?v=v.2026.04.11.1910"></script>
-<script src="packerz-module.js?v=v.2026.04.11.1910"></script>
-<script src="production-module.js?v=v.2026.04.11.1910"></script>
-<script src="sales-module.js?v=v.2026.04.11.1910"></script>
-<script src="analytics-module.js?v=v.2026.04.11.1910"></script>
-<script src="ceo-module.js?v=v.2026.04.11.1910"></script>
-<script src="print-module.js?v=v.2026.04.11.1910"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.11.2000"></script>
+<script src="system-tools-module.js?v=v.2026.04.11.2000"></script>
+<script src="bom-module.js?v=v.2026.04.11.2000"></script>
+<script src="inventory-module.js?v=v.2026.04.11.2000"></script>
+<script src="packerz-module.js?v=v.2026.04.11.2000"></script>
+<script src="production-module.js?v=v.2026.04.11.2000"></script>
+<script src="sales-module.js?v=v.2026.04.11.2000"></script>
+<script src="analytics-module.js?v=v.2026.04.11.2000"></script>
+<script src="ceo-module.js?v=v.2026.04.11.2000"></script>
+<script src="print-module.js?v=v.2026.04.11.2000"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4959,18 +4963,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.11.1910"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.11.2000"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.11.1910"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.11.2000"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.11.1910"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.11.2000"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.11.1910"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.11.1910"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.11.1910"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.11.2000"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.11.2000"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.11.2000"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.11.1910"></script>
-    <script src="labelz-module.js?v=v.2026.04.11.1910"></script>
+    <script src="barcodz-module.js?v=v.2026.04.11.2000"></script>
+    <script src="labelz-module.js?v=v.2026.04.11.2000"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100vw; height:100vh; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">

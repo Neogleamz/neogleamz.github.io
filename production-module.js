@@ -82,10 +82,10 @@ function renderMasterSOP() {
     } catch(e) { sysLog(e.message, true); } 
 }
 
-function addSOPRow(btn) { try { let newRow = document.createElement('div'); newRow.innerHTML = generateEditableSOPRow({}, 999); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) {} }
-function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) {} }
-function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) {} }
-function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) {} }
+function addSOPRow(btn) { try { let newRow = document.createElement('div'); newRow.innerHTML = generateEditableSOPRow({}, 999); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
+function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) { sysLog("UI Error removing SOP step: " + e.message, true); } }
+function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) { sysLog("UI Error moving SOP up: " + e.message, true); } }
+function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) { sysLog("UI Error moving SOP down: " + e.message, true); } }
 
 function extractSOPDataFromUI(containerId) {
     let steps = []; document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { let t = row.querySelector('.sop-text-rich'); let m1t = row.querySelector('.m1-type').value; let m1u = row.querySelector('.m1-url').value; let m2t = row.querySelector('.m2-type').value; let m2u = row.querySelector('.m2-url').value; let m3t = row.querySelector('.m3-type').value; let m3u = row.querySelector('.m3-url').value; if(t && t.innerHTML.trim()) { steps.push({ text: t.innerHTML.trim(), m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u} }); } }); return steps;

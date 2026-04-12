@@ -129,6 +129,7 @@
                     if(skaterId) await supabaseClient.from('socialz_audience').update({ is_favorite: socialzSkaters[index].isFavorite }).eq('id', skaterId);
                 } catch(err) {
                     console.error('Failed to sync favorite status to DB', err);
+                    sysLog('Failed to sync favorite status to DB: ' + err.message, true);
                 }
             }
         }
@@ -524,7 +525,7 @@
                     
                     initSocialzData(remoteData);
                     sysLog(`Imported ${newS.length} records successfully!`);
-                } catch(err) { console.error("IMPORT ERROR:", err); sysLog("Import failed: " + err.message); }
+                } catch(err) { console.error("IMPORT ERROR:", err); sysLog("Import failed: " + err.message, true); }
                 input.value = '';
             };
             reader.readAsArrayBuffer(f);
@@ -553,7 +554,7 @@
                         if(error) throw new Error(error.message);
                     }
                     socialzSkaters.splice(i, 1); updateFilterDropdownOptions(); renderSkaters(); closeModal(); sysLog("Deleted"); 
-                } catch(e) { sysLog("Failed to delete from DB: " + e.message); }
+                } catch(e) { sysLog("Failed to delete from DB: " + e.message, true); }
             } 
         }
         
@@ -590,7 +591,7 @@
                 closeModal(); sysLog("Saved to DB!");
             } catch(err) {
                 console.error("DB SAVE ERROR", err);
-                sysLog("Failed to save to DB: " + err.message);
+                sysLog("Failed to save to DB: " + err.message, true);
             }
         }
 
@@ -615,7 +616,7 @@
         if (originalHideExecutive) originalHideExecutive();
         try {
             if(document.getElementById('paneSocialzRoster')) document.getElementById('paneSocialzRoster').style.setProperty('display', 'none', 'important');
-        } catch(e) {}
+        } catch(e) { sysLog("UI Error hiding social pane: " + e.message, true); }
     }
     
     // --- LIVE ANALYTICS DATA BINDING ---

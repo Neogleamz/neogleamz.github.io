@@ -756,7 +756,7 @@ window.stopCycleCount = function() {
     if(html5QrCode && html5QrCode.getState() !== 1) { // 1 = NOT_STARTED
         html5QrCode.stop().then(() => {
             html5QrCode.clear();
-        }).catch(err => console.log(err));
+        }).catch(err => sysLog("Camera stop error: " + err, true));
     }
     document.getElementById('cycleCountModal').style.display = 'none';
 };
@@ -769,7 +769,7 @@ window.onScanSuccess = function(decodedText) {
     let beep = document.getElementById('scanner-beep');
     if (beep) {
         beep.currentTime = 0;
-        beep.play().catch(()=>{});
+        beep.play().catch((err)=>{ sysLog("Scanner beep audio playback blocked/failed: " + err); });
     }
     
     let flash = document.getElementById('scanner-success-flash');
