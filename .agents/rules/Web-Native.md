@@ -1,6 +1,7 @@
 ---
-trigger: always_on
+name: web_native
 description: "Strict enforcement of Web Browser Sandbox constraints against native/mobile API hallucinations."
+trigger: "/web_native, /sandbox, web native, browser rules"
 ---
 
 # Web Native Exclusivity Rule
