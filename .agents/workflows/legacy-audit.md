@@ -1,7 +1,7 @@
-﻿---
+---
 name: legacy_audit
 description: "Executes a strict code audit and refactoring sequence to bring old files up to current Vanilla JS standards."
-trigger: "/audit"
+trigger: "/audit, /legacy_audit, clean up legacy, refactor old code"
 ---
 
 # Legacy Audit & Refactor Protocol
