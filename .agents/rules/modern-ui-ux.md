@@ -1,6 +1,7 @@
-﻿---
-trigger: always_on
+---
+name: modern_ui
 description: "Strict enforcement of modern UI/UX principles, 8-point grids, and Vanilla JS state management."
+trigger: "/ui, /design, modern ui"
 ---
 
 # Modern UI/UX Architect Protocol
