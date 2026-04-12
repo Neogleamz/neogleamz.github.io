@@ -14,18 +14,18 @@ function generateEditableSOPRow(s, idx) {
 
 let currentSopMode = 'production'; // 'production' or '3d'
 
-function openSOPMasterModal(mode = 'production') { 
+function openSOPMasterModal(mode = 'production') {
     currentSopMode = mode;
     document.getElementById('sopMasterTitle').innerText = (mode === '3d') ? '📝 LAYERZ SOP EDITOR' : '📝 BATCHEZ SOP EDITOR';
     populateSOPDropdown();
-    document.getElementById('sopMasterModal').style.display = 'flex'; 
+    document.getElementById('sopMasterModal').style.display = 'flex';
     renderMasterSOP();
 }
 
 function populateSOPDropdown() {
     const sopSelect = document.getElementById('sopMasterProductSelect');
     if (!sopSelect) return;
-    
+
     let options = '<option value="">-- Select Item to Edit SOP --</option>';
     if (currentSopMode === '3d') {
         // Show only 3D Printed Products/Recipes (is_3d_print flag lives on productsDB entries)
@@ -50,21 +50,21 @@ function populateSOPDropdown() {
     sopSelect.innerHTML = options;
 }
 
-function renderMasterSOP() { 
-    try { 
-        const p = document.getElementById('sopMasterProductSelect').value; 
-        const area = document.getElementById('sopMasterEditorArea'); 
+function renderMasterSOP() {
+    try {
+        const p = document.getElementById('sopMasterProductSelect').value;
+        const area = document.getElementById('sopMasterEditorArea');
         const qaArea = document.getElementById('productionAdminQA');
-        if(!p) { 
-            area.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select an item above to start writing instructions.</div>"; 
+        if(!p) {
+            area.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select an item above to start writing instructions.</div>";
             if(qaArea) { qaArea.value = ''; if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview(); }
-            return; 
-        } 
+            return;
+        }
         let dbPayload = sopsDB[p];
         let steps = [];
         let qaChecks = [];
         if (dbPayload) {
-            if (Array.isArray(dbPayload)) { steps = dbPayload; } 
+            if (Array.isArray(dbPayload)) { steps = dbPayload; }
             else if (typeof dbPayload === 'object') {
                 steps = dbPayload.steps || [];
                 qaChecks = dbPayload.qaChecks || [];
@@ -74,12 +74,12 @@ function renderMasterSOP() {
             qaArea.value = qaChecks.join('\n');
             if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
         }
-        let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s); 
-        if(mappedSteps.length === 0) mappedSteps = [{}]; 
-        let h = ""; 
-        mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); }); 
-        area.innerHTML = h; 
-    } catch(e) { sysLog(e.message, true); } 
+        let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s);
+        if(mappedSteps.length === 0) mappedSteps = [{}];
+        let h = "";
+        mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); });
+        area.innerHTML = h;
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function addSOPRow(btn) { try { let newRow = document.createElement('div'); newRow.innerHTML = generateEditableSOPRow({}, 999); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
@@ -91,93 +91,63 @@ function extractSOPDataFromUI(containerId) {
     let steps = []; document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { let t = row.querySelector('.sop-text-rich'); let m1t = row.querySelector('.m1-type').value; let m1u = row.querySelector('.m1-url').value; let m2t = row.querySelector('.m2-type').value; let m2u = row.querySelector('.m2-url').value; let m3t = row.querySelector('.m3-type').value; let m3u = row.querySelector('.m3-url').value; if(t && t.innerHTML.trim()) { steps.push({ text: t.innerHTML.trim(), m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u} }); } }); return steps;
 }
 
-async function saveMasterSOP() { 
-    const btn = document.getElementById('btnSaveMasterSOP');
-    if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity = "0.5"; }
+async function saveMasterSOP() {
+    const p = document.getElementById('sopMasterProductSelect').value;
+    if(!p) return;
 
-    try { 
-        const p = document.getElementById('sopMasterProductSelect').value; 
-        if(!p) {
-            if(btn) { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.opacity = "1"; }
-            return;
-        } 
-        let steps = extractSOPDataFromUI('sopMasterEditorArea'); 
+    await executeWithButtonAction('btnSaveMasterSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
+        let steps = extractSOPDataFromUI('sopMasterEditorArea');
         let rawQa = document.getElementById('productionAdminQA')?.value || '';
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
         const payload = { qaChecks: qaLines, steps: steps };
-        sopsDB[p] = payload; 
-        sysLog(`Saving Master SOP for ${p}`); 
-        setMasterStatus("Saving...", "mod-working"); 
-        
-        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'}); 
-        if(error) throw new Error(error.message); 
-        
-        if(btn) {
-            btn.innerText = "💾 SAVED SUCCESSFULLY!";
-            btn.style.background = "#059669";
-            setTimeout(() => { 
-                if(btn) { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.background = ""; btn.style.opacity = "1"; }
-            }, 3000);
-        }
+        sopsDB[p] = payload;
+        sysLog(`Saving Master SOP for ${p}`);
+        setMasterStatus("Saving...", "mod-working");
 
-        setMasterStatus("Saved!", "mod-success"); 
-        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); 
-        if(currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id); 
-    } catch(e) { 
-        sysLog(e.message, true); 
-        setMasterStatus("Error", "mod-error"); 
-        if(btn) { btn.innerText = "❌ ERROR - RETRY"; btn.style.opacity = "1"; btn.style.background = "#ef4444"; setTimeout(() => { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.background = ""; }, 3000); }
-    } 
+        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'});
+        if(error) throw new Error(error.message);
+
+        setMasterStatus("Saved!", "mod-success");
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        if(typeof currentWO !== 'undefined' && currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id);
+    }).catch(e => {
+        sysLog(e.message, true); setMasterStatus("Error", "mod-error");
+    });
 }
-async function saveInlineSOP() { 
-    const btn = document.getElementById('btnSaveInlineSOP');
-    if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity = "0.5"; }
+async function saveInlineSOP() {
+    if(typeof currentWO === 'undefined' || !currentWO) return;
 
-    try { 
-        if(!currentWO) {
-            if(btn) { btn.innerText = "💾 Save Changes to Cloud"; btn.style.opacity = "1"; }
-            return;
-        } 
-        const p = currentWO.product_name; 
-        let steps = extractSOPDataFromUI('inlineSOPContainer'); 
+    await executeWithButtonAction('btnSaveInlineSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
+        const p = currentWO.product_name;
+        let steps = extractSOPDataFromUI('inlineSOPContainer');
         let existingQa = [];
         if (sopsDB[p] && typeof sopsDB[p] === 'object' && !Array.isArray(sopsDB[p])) existingQa = sopsDB[p].qaChecks || [];
         const payload = { qaChecks: existingQa, steps: steps };
-        sopsDB[p] = payload; 
-        sysLog(`Saving Inline SOP for ${p}`); 
-        setMasterStatus("Saving...", "mod-working"); 
-        
-        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'}); 
-        if(error) throw new Error(error.message); 
-        
-        if(btn) {
-            btn.innerText = "💾 SAVED SUCCESSFULLY!";
-            btn.style.background = "#059669";
-            setTimeout(() => { 
-                if(btn) { btn.innerText = "💾 Save Changes to Cloud"; btn.style.background = ""; btn.style.opacity = "1"; }
-            }, 3000);
-        }
+        sopsDB[p] = payload;
+        sysLog(`Saving Inline SOP for ${p}`);
+        setMasterStatus("Saving...", "mod-working");
 
-        setMasterStatus("Saved!", "mod-success"); 
-        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); 
-        toggleSOPLock(); 
-    } catch(e) { 
-        sysLog(e.message, true); 
-        setMasterStatus("Error", "mod-error"); 
-        if(btn) { btn.innerText = "❌ ERROR - RETRY"; btn.style.opacity = "1"; btn.style.background = "#ef4444"; setTimeout(() => { btn.innerText = "💾 Save Changes to Cloud"; btn.style.background = ""; }, 3000); }
-    } 
+        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'});
+        if(error) throw new Error(error.message);
+
+        setMasterStatus("Saved!", "mod-success");
+        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        toggleSOPLock();
+    }).catch(e => {
+        sysLog(e.message, true); setMasterStatus("Error", "mod-error");
+    });
 }
 
-function openNewWOModal() { 
-    document.getElementById('woErrorBox').style.display = 'none'; 
-    document.getElementById('woRoutingArea').style.display = 'none'; 
-    document.getElementById('newWOQty').value = 1; 
+function openNewWOModal() {
+    document.getElementById('woErrorBox').style.display = 'none';
+    document.getElementById('woRoutingArea').style.display = 'none';
+    document.getElementById('newWOQty').value = 1;
     let r = document.getElementById('newWOProductRetail'); if(r) r.value = '';
     let s = document.getElementById('newWOProductSub'); if(s) s.value = '';
     let p = document.getElementById('newWOProductPrint'); if(p) p.value = '';
     let lbl = document.getElementById('newWOLabel'); if(lbl) lbl.value = '';
-    document.getElementById('newWOModal').style.display = 'flex'; 
-    checkWORouting(); 
+    document.getElementById('newWOModal').style.display = 'flex';
+    checkWORouting();
 }
 
 let multiBatchItems = [];
@@ -188,7 +158,7 @@ function openMultiBatchModal(mode = 'all') {
     let r = document.getElementById('multiBatchProductRetail'); if(r) r.value = '';
     let s = document.getElementById('multiBatchProductSub'); if(s) s.value = '';
     let p = document.getElementById('multiBatchProductPrint'); if(p) p.value = '';
-    
+
     if(r) r.style.display = 'block';
     if(s) s.style.display = 'block';
     if(p) p.style.display = 'block';
@@ -215,14 +185,14 @@ function stageBatchItem() {
     const p = getMultiBatchProduct();
     const q = parseFloat(document.getElementById('multiBatchQty').value);
     if(!p || isNaN(q) || q <= 0) return alert("Select product and valid quantity.");
-    
+
     let existing = multiBatchItems.find(i => i.p === p);
     if(existing) {
         existing.q += q;
     } else {
         multiBatchItems.push({p: p, q: q});
     }
-    
+
     // Clear selections
     let mr = document.getElementById('multiBatchProductRetail'); if(mr) mr.value = '';
     let ms = document.getElementById('multiBatchProductSub'); if(ms) ms.value = '';
@@ -242,7 +212,7 @@ function renderStagedBatchItems() {
         list.innerHTML = '<li class="empty-state" style="list-style:none;">Cart is empty. Add products above.</li>';
         return;
     }
-    
+
     let h = '';
     multiBatchItems.forEach((item, index) => {
         let f = fmtKey(item.p); let name = f.nn ? f.nn : f.in;
@@ -270,11 +240,11 @@ function checkWORouting() {
                 let subName = k.replace('RECIPE:::', '');
                 let isSub = typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[subName];
                 let is3DP = typeof productsDB !== 'undefined' && productsDB[subName] && productsDB[subName].is_3d_print;
-                if(isSub || is3DP) { 
+                if(isSub || is3DP) {
                     if (!subsNeeded[subName]) {
                         subsNeeded[subName] = { req: 0, depth: depth };
                     }
-                    subsNeeded[subName].req += pq; 
+                    subsNeeded[subName].req += pq;
                     hunt(subName, pq, depth + 1);
                 }
             }
@@ -283,15 +253,15 @@ function checkWORouting() {
     hunt(p, q, 0);
 
     let keys = Object.keys(subsNeeded);
-    if(keys.length === 0) { 
+    if(keys.length === 0) {
         rList.innerHTML = '';
-        rArea.style.display = 'none'; 
-        return; 
+        rArea.style.display = 'none';
+        return;
     }
-    rArea.style.display = 'block'; 
+    rArea.style.display = 'block';
     let h = "";
     let openKeys = [];
-    
+
     keys.forEach((k, i) => {
         let node = subsNeeded[k];
         let req = node.req; let curDepth = node.depth;
@@ -299,7 +269,7 @@ function checkWORouting() {
         let c_prod = parseFloat(inv.production_consumed_qty)||0; let c_proto = parseFloat(inv.prototype_consumed_qty)||0; let pb = parseFloat(inv.prototype_produced_qty)||0;
         let onHand = (inv.produced_qty||0) - (inv.sold_qty||0) - c_prod - (inv.scrap_qty||0) + (inv.manual_adjustment||0) - Math.max(0, c_proto - pb);
         let autoPull = Math.min(req, Math.max(0, onHand)); let autoBuild = req - autoPull;
-        
+
         let is3DPUI = typeof productsDB !== 'undefined' && productsDB[k] && productsDB[k].is_3d_print;
         let icon = is3DPUI ? '🖨️' : '⚙️';
         let safeK = k.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g, '');
@@ -333,7 +303,7 @@ function checkWORouting() {
                     </div>
                 </div>
               </div>`;
-        
+
         if (hasChildren) {
             h += rowHtml;
             h += `<div id="route_children_${safeK}" style="display:none; flex-direction:column; margin-left:11px; padding-left:11px; border-left:1px dashed var(--border-color); gap:0px;">`;
@@ -354,12 +324,12 @@ function checkWORouting() {
 function balanceRoute(safeKey, total, changed, maxPull) {
     let pullEl = document.getElementById(`route_pull_${safeKey}`); let buildEl = document.getElementById(`route_build_${safeKey}`);
     if(changed === 'pull') {
-        let val = parseFloat(pullEl.value) || 0; 
+        let val = parseFloat(pullEl.value) || 0;
         if(val > maxPull) { val = maxPull; pullEl.value = val; }
         if(val > total) { val = total; pullEl.value = val; }
         buildEl.value = (Math.max(0, total - val)).toFixed(2);
     } else {
-        let val = parseFloat(buildEl.value) || 0; 
+        let val = parseFloat(buildEl.value) || 0;
         if(val > total) { val = total; buildEl.value = val; }
         let theoreticalPull = total - val;
         if(theoreticalPull > maxPull) {
@@ -375,12 +345,12 @@ function getDirectMaterials(name, amount) {
     let res = {};
     (productsDB[name] || []).forEach(part => {
         let k = String(part.item_key || part.di_item_id || part.name); let q = (parseFloat(part.quantity || part.qty) || 1) * amount;
-        
+
         let subName = k.replace('RECIPE:::', '');
         let is3DPrint = productsDB[subName] && productsDB[subName].is_3d_print;
 
-        if(!k.startsWith('RECIPE:::') || is3DPrint) { 
-            res[k] = (res[k] || 0) + q; 
+        if(!k.startsWith('RECIPE:::') || is3DPrint) {
+            res[k] = (res[k] || 0) + q;
         }
     });
     return res;
@@ -391,33 +361,33 @@ function calculateExactWODeductions(wo) {
     let built_subs = {};
     function traverseBOM(recipeName, qty, isTopLevel) {
         (productsDB[recipeName] || []).forEach(part => {
-            let k = String(part.item_key || part.di_item_id || part.name); 
+            let k = String(part.item_key || part.di_item_id || part.name);
             let q = (parseFloat(part.quantity || part.qty) || 1) * qty;
-            
+
             let subName = k.replace('RECIPE:::', '');
             let is3DPrint = productsDB[subName] && productsDB[subName].is_3d_print;
 
-            if(!k.startsWith('RECIPE:::') || is3DPrint) { 
+            if(!k.startsWith('RECIPE:::') || is3DPrint) {
                 if (isTopLevel) {
                     raws_production[k] = (raws_production[k] || 0) + q;
                 } else {
                     raws_assembly[k] = (raws_assembly[k] || 0) + q;
                 }
-                raws_total[k] = (raws_total[k] || 0) + q; 
+                raws_total[k] = (raws_total[k] || 0) + q;
             } else {
                 let pullQty = 0;
                 let buildQty = q;
-                
+
                 // Allow dynamic override from the routing map for manually stated shelf pulls, regardless of structural depth
                 if (wo.routing && wo.routing[subName]) {
                     pullQty = parseFloat(wo.routing[subName].pull || 0);
                     buildQty = parseFloat(wo.routing[subName].build || 0);
-                } 
-                
+                }
+
                 if (pullQty > 0) {
                     pulls[k] = (pulls[k] || 0) + pullQty;
                 }
-                
+
                 if (buildQty > 0) {
                     built_subs[k] = (built_subs[k] || 0) + buildQty;
                     traverseBOM(subName, buildQty, false);
@@ -427,14 +397,14 @@ function calculateExactWODeductions(wo) {
     }
 
     traverseBOM(wo.product_name, wo.qty, true);
-    
+
     return { raws: raws_total, raws_production, raws_assembly, pulls, built_subs };
 }
 
 function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
     let prints = {};
     const recipe = productsDB[rootProduct] || [];
-    
+
     recipe.forEach(part => {
         let k = String(part.item_key || part.di_item_id || part.name || "");
         let q = (parseFloat(part.quantity || part.qty) || 1) * rootQty;
@@ -442,7 +412,7 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
         // 3D PRINTED SUB-ASSEMBLY (RECIPE)
         if (k.startsWith('RECIPE:::')) {
             const subName = cleanK;
-            
+
             // Check if we are building or pulling this sub-assembly
             let buildQty = q;
             if (routingMap && routingMap[subName]) {
@@ -481,7 +451,7 @@ function sortReportTable(th, n, isNumeric) {
     let tbody = table.querySelector('tbody');
     let rows = Array.from(tbody.querySelectorAll('tr'));
     if(rows.length === 0 || (rows.length === 1 && rows[0].innerText.includes('No '))) return; // empty table
-    
+
     let isAsc = th.getAttribute('data-asc') !== 'true';
     th.setAttribute('data-asc', isAsc ? 'true' : 'false');
 
@@ -512,12 +482,12 @@ function generateMultiBatchOrderReport() {
     if(multiBatchItems.length === 0) return alert("Cart is empty.");
 
     let exactDeductions = { raws: {}, pulls: {}, built_subs: {} };
-    
+
     // Aggregate deductions for every staged item assuming 100% build strategy for sub-assemblies
     multiBatchItems.forEach(item => {
-        let tempWO = { product_name: item.p, qty: item.q, routing: {} }; 
+        let tempWO = { product_name: item.p, qty: item.q, routing: {} };
         let itemDeductions = calculateExactWODeductions(tempWO);
-        
+
         Object.keys(itemDeductions.raws).forEach(k => {
             exactDeductions.raws[k] = (exactDeductions.raws[k] || 0) + itemDeductions.raws[k];
         });
@@ -534,13 +504,13 @@ function generateMultiBatchOrderReport() {
     // Calculate critical procurement first
     let orderList = [];
     Object.keys(exactDeductions.raws).forEach(k => {
-        let req = exactDeductions.raws[k]; 
-        let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; 
-        let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
-        let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment; 
+        let req = exactDeductions.raws[k];
+        let c = catalogCache[k] || {totalQty: 0, is_3d_print: false};
+        let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0};
+        let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
         let diff = onHand - req;
         if(diff < 0) {
-            let f = fmtKey(k); let name = f.nn ? f.nn : f.in; 
+            let f = fmtKey(k); let name = f.nn ? f.nn : f.in;
             orderList.push({ name: name, qty: Math.abs(diff) });
         }
     });
@@ -580,22 +550,22 @@ function generateMultiBatchOrderReport() {
             </thead>
             <tbody>
     `;
-    
+
     let hasRaws = false;
     Object.keys(exactDeductions.raws).forEach(k => {
         hasRaws = true;
-        let req = exactDeductions.raws[k]; 
-        let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; 
-        let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
-        let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment; 
+        let req = exactDeductions.raws[k];
+        let c = catalogCache[k] || {totalQty: 0, is_3d_print: false};
+        let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0};
+        let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
         let diff = onHand - req;
-        
-        let f = fmtKey(k); 
-        let name = f.nn ? f.nn : f.in; 
-        
+
+        let f = fmtKey(k);
+        let name = f.nn ? f.nn : f.in;
+
         let diffColor = diff < 0 ? '#ef4444' : '#10b981';
         let stockColor = onHand <= 0 ? '#ef4444' : 'var(--text-main)';
-        
+
         h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
             <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${name}</td>
             <td style="padding:8px; text-align:right; color:#f59e0b; font-weight:bold;">${req.toFixed(2)}</td>
@@ -603,7 +573,7 @@ function generateMultiBatchOrderReport() {
             <td style="padding:8px; text-align:right; font-weight:bold; color:${diffColor};">${diff > 0 ? '+'+diff.toFixed(2) : diff.toFixed(2)}</td>
         </tr>`;
     });
-    
+
     if(!hasRaws) h += `<tr><td colspan="4" class="empty-state" style="border:none;">No raw materials required.</td></tr>`;
     h += `</tbody></table>`;
 
@@ -624,17 +594,17 @@ function generateMultiBatchOrderReport() {
     let hasPulls = false;
     Object.keys(exactDeductions.pulls).forEach(k => {
         hasPulls = true;
-        let req = exactDeductions.pulls[k]; 
+        let req = exactDeductions.pulls[k];
         let i = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, prototype_produced_qty:0, prototype_consumed_qty:0, scrap_qty:0, manual_adjustment:0};
         let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
-        let onHand = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+        let onHand = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);
         let diff = onHand - req;
-        
+
         let name = k.replace('RECIPE:::', '');
-        
+
         let diffColor = diff < 0 ? '#ef4444' : '#10b981';
         let stockColor = onHand <= 0 ? '#ef4444' : 'var(--text-main)';
-        
+
         h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
             <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${name}</td>
             <td style="padding:8px; text-align:right; color:#8b5cf6; font-weight:bold;">${req.toFixed(2)}</td>
@@ -663,14 +633,14 @@ function generateMultiBatchOrderReport() {
     let hasBuilds = false;
     Object.keys(exactDeductions.built_subs).forEach(k => {
         hasBuilds = true;
-        let req = exactDeductions.built_subs[k]; 
+        let req = exactDeductions.built_subs[k];
         let i = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, prototype_produced_qty:0, prototype_consumed_qty:0, scrap_qty:0, manual_adjustment:0};
         let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
-        let onHand = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
+        let onHand = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);
         let estTotal = onHand + req;
-        
+
         let name = k.replace('RECIPE:::', '');
-        
+
         h += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
             <td style="padding:8px; font-weight:bold; color:var(--text-heading);">${name}</td>
             <td style="padding:8px; text-align:right; color:#3b82f6; font-weight:bold;">${req.toFixed(2)}</td>
@@ -701,7 +671,7 @@ async function validateAndCreateWO() {
     await executeWithButtonAction('btnSpawnWO', 'SPAWNING...', '✅ CREATED!', async () => {
         const p = getNewWOProduct(); const q = parseFloat(document.getElementById('newWOQty').value); if(!p || isNaN(q) || q <= 0) return alert("Select product and quantity.");
         const label = document.getElementById('newWOLabel')?.value.trim() || null;
-        
+
         let routingMap = {};
         document.querySelectorAll('.route-row').forEach(row => {
             let subName = row.getAttribute('data-subname');
@@ -718,21 +688,21 @@ async function validateAndCreateWO() {
             let cleanK = k.replace('RECIPE:::', '');
             let is3DPrint = productsDB[cleanK] && productsDB[cleanK].is_3d_print;
 
-            let req = exactDeductions.raws[k]; 
-            let c = catalogCache[k] || {totalQty: 0, is_3d_print: false}; 
-            let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0}; 
-            
-            let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment; 
-            
+            let req = exactDeductions.raws[k];
+            let c = catalogCache[k] || {totalQty: 0, is_3d_print: false};
+            let i = inventoryDB[k] || {consumed_qty: 0, manual_adjustment: 0, scrap_qty: 0};
+
+            let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
+
             if (is3DPrint) {
                 let FGI = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
                 let c_prod = parseFloat(FGI.production_consumed_qty)||0; let c_proto = parseFloat(FGI.prototype_consumed_qty)||0; let pb = parseFloat(FGI.prototype_produced_qty)||0;
                 onHand = (FGI.produced_qty||0) - (FGI.sold_qty||0) - c_prod - (FGI.scrap_qty||0) + (FGI.manual_adjustment||0) - Math.max(0, c_proto - pb);
             }
 
-            if(req > onHand) { 
+            if(req > onHand) {
                 if (!is3DPrint) {
-                    let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`); 
+                    let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`);
                 }
             }
         });
@@ -745,32 +715,32 @@ async function validateAndCreateWO() {
         });
 
         if(shortfalls.length > 0) { document.getElementById('woShortfallList').innerHTML = shortfalls.join(''); document.getElementById('woErrorBox').style.display = 'block'; return; }
-        
+
         let batchType = document.getElementById('batchTypeSelect') ? document.getElementById('batchTypeSelect').value : 'Production';
-        let woId = "WO-" + Date.now().toString().slice(-6); 
-        let wo = { wo_id: woId, product_name: p, qty: q, label: label, status: 'Queued', wip_state: { batch_type: batchType }, routing: routingMap }; 
+        let woId = "WO-" + Date.now().toString().slice(-6);
+        let wo = { wo_id: woId, product_name: p, qty: q, label: label, status: 'Queued', wip_state: { batch_type: batchType }, routing: routingMap };
         sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
-        
+
         const {error} = await supabaseClient.from('work_orders').insert({
-            wo_id: wo.wo_id, product_name: wo.product_name, qty: wo.qty, label: wo.label, status: wo.status, 
+            wo_id: wo.wo_id, product_name: wo.product_name, qty: wo.qty, label: wo.label, status: wo.status,
             wip_state: JSON.stringify(wo.wip_state), routing: JSON.stringify(wo.routing)
-        }); 
-        if(error) throw new Error(error.message); 
+        });
+        if(error) throw new Error(error.message);
 
         // 🖨️ AUTO-SPAWN 3D PRINT JOBS
         const printsToSpawn = find3DPrintedComponents(p, q, routingMap);
         const printPromises = [];
-        
+
         Object.keys(printsToSpawn).forEach(part => {
             let totalNeeded = printsToSpawn[part];
             let isLegacyRaw = (typeof catalogCache !== 'undefined' && catalogCache[part]);
             let invKey = isLegacyRaw ? part : `RECIPE:::${part}`;
             let prefix = isLegacyRaw ? "" : "RECIPE:::";
-            
+
             let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
-            
+
             let amountToPrint = totalNeeded;
-            
+
             // Strictly deploy print jobs based exclusively on the routing map calculations (Pulls vs Builds), eliminating rogue autonomous logic out of sync with Batchez.
             if (amountToPrint > 0) {
                 if (typeof addPrintJob === 'function') {
@@ -778,12 +748,12 @@ async function validateAndCreateWO() {
                 }
             }
         });
-        
+
         if (printPromises.length > 0) {
             sysLog(`Spawning ${printPromises.length} 3D print jobs for ${woId}...`);
             await Promise.all(printPromises);
         }
-        
+
         workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
     });
 }
@@ -793,7 +763,7 @@ let woDraggedIndex = null;
 function renderWOList() {
     try {
         const ui = document.getElementById('woListUI'); ui.innerHTML = "";
-        
+
         let activeBatches = 0;
         let totalUnits = 0;
         workOrdersDB.forEach(wo => {
@@ -810,28 +780,28 @@ function renderWOList() {
 
         let activeCount = workOrdersDB.filter(w => w.status !== 'Archived').length;
         if(activeCount === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
-        
-        workOrdersDB.forEach((wo, index) => { 
+
+        workOrdersDB.forEach((wo, index) => {
             if (wo.status === 'Archived') return;
             if(typeof wo.wip_state === 'string') wo.wip_state = JSON.parse(wo.wip_state || '{}');
             if(typeof wo.routing === 'string') wo.routing = JSON.parse(wo.routing || '{}');
-            let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : ''; 
-            let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠')); 
-            
-            ui.innerHTML += `<li class="${sel}" 
+            let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : '';
+            let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠'));
+
+            ui.innerHTML += `<li class="${sel}"
                 draggable="true"
-                ondragstart="woDragStart(event, ${index})" 
-                ondragover="woDragOver(event)" 
-                ondrop="woDrop(event, ${index})" 
+                ondragstart="woDragStart(event, ${index})"
+                ondragover="woDragOver(event)"
+                ondrop="woDrop(event, ${index})"
                 ondragend="woDragEnd(event)"
-                onclick="selectWO('${wo.wo_id}')" 
+                onclick="selectWO('${wo.wo_id}')"
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
                     <span style="font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">☰ ${dot} ${wo.wo_id}: ${wo.product_name}</span>
                     ${wo.label ? `<span style="font-size:11px; color:#f59e0b; font-style:italic; padding-left:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${wo.label}</span>` : ''}
                 </div>
                 <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${wo.qty}</span>
-            </li>`; 
+            </li>`;
         });
         if(!currentWO) {
             let activeWO = workOrdersDB.find(w => w.status !== 'Archived');
@@ -847,9 +817,9 @@ function renderWOList() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function woDragStart(e, index) { 
-    woDraggedIndex = index; 
-    e.target.style.opacity = '0.5'; 
+function woDragStart(e, index) {
+    woDraggedIndex = index;
+    e.target.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
 }
 function woDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
@@ -873,7 +843,7 @@ async function editWOQty(id) {
     let wo = workOrdersDB.find(w => w.wo_id === id);
     if (!wo) return;
     if (wo.materials_pulled || wo.status === 'Completed') return alert("Cannot edit quantity after materials have been physically pulled from shelf stock!");
-    
+
     let ans = prompt(`Current Target Quantity: ${wo.qty}\n\nEnter the new corrected quantity for this Work Order:`, wo.qty);
     if (ans === null) return;
     let newQty = parseFloat(ans);
@@ -885,7 +855,7 @@ async function editWOQty(id) {
     setMasterStatus("Updating Quantity...", "mod-working");
     let oldQty = parseFloat(wo.qty);
     let ratio = newQty / oldQty;
-    
+
     let clonedRouting = JSON.parse(JSON.stringify(wo.routing || {}));
     Object.keys(clonedRouting).forEach(sub => {
         clonedRouting[sub].pull = parseFloat((parseFloat(clonedRouting[sub].pull || 0) * ratio).toFixed(4));
@@ -897,9 +867,9 @@ async function editWOQty(id) {
             qty: newQty,
             routing: clonedRouting
         }).eq('wo_id', id);
-        
+
         if (error) throw error;
-        
+
         wo.qty = newQty;
         wo.routing = clonedRouting;
         sysLog(`Adjusted WO ${wo.wo_id} quantity ${oldQty} -> ${newQty}`);
@@ -923,11 +893,11 @@ function renderActiveWO(id) {
         document.getElementById('woQtyTarget').innerText = wo.qty;
         let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
         if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
-        
+
         const stEl = document.getElementById('woStartTime');
         const enEl = document.getElementById('woEndTime');
         const fmtDT = (iso) => { if(!iso) return ""; let d = new Date(iso); return d.toLocaleDateString([], {month:'numeric', day:'numeric'}) + " " + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); };
-        
+
         if(stEl) {
             if(wo.started_at) { stEl.innerText = `START: ${fmtDT(wo.started_at)}`; stEl.style.display = 'inline-block'; }
             else stEl.style.display = 'none';
@@ -936,12 +906,12 @@ function renderActiveWO(id) {
             if(wo.completed_at) { enEl.innerText = `FINISH: ${fmtDT(wo.completed_at)}`; enEl.style.display = 'inline-block'; }
             else enEl.style.display = 'none';
         }
-        ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => { 
+        ['Queued', 'Picking', 'Production', 'Completed'].forEach(s => {
             let el = document.getElementById('pipe-'+s);
-            el.classList.remove('active'); 
+            el.classList.remove('active');
             el.style.pointerEvents = 'auto';
             el.style.opacity = '1';
-            document.getElementById('sect-'+s).classList.remove('active'); 
+            document.getElementById('sect-'+s).classList.remove('active');
         });
 
         document.getElementById('pipe-Queued').innerHTML = '1. Queued';
@@ -951,7 +921,7 @@ function renderActiveWO(id) {
 
         let wip = wo.wip_state || {};
         const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
-        
+
         if (wo.status === 'Picking' || wo.status === 'In Production' || wo.status === 'Completed') {
             document.getElementById('pipe-Queued').style.pointerEvents = 'none';
             document.getElementById('pipe-Queued').style.opacity = '0.6';
@@ -972,31 +942,31 @@ function renderActiveWO(id) {
         }
 
         if(wo.status === 'Queued') { document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); }
-        else if(wo.status === 'Picking') { 
-            document.getElementById('pipe-Picking').classList.add('active'); document.getElementById('sect-Picking').classList.add('active'); 
+        else if(wo.status === 'Picking') {
+            document.getElementById('pipe-Picking').classList.add('active'); document.getElementById('sect-Picking').classList.add('active');
             let pList = document.getElementById('woPickList'); let html = `<div class="kitting-board">`; let chkIdx = 0; let grpCounter = 0;
             let directRaws = getDirectMaterials(wo.product_name, wo.qty);
             if(Object.keys(directRaws).length > 0) {
                 let currentGrpId = `pickgrp_${grpCounter++}`;
-                
+
                 let isTopSub = typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[wo.product_name];
                 let isTop3D = typeof productsDB !== 'undefined' && productsDB[wo.product_name] && productsDB[wo.product_name].is_3d_print;
                 let topLevelTitle = isTop3D ? `🟠 Build: 🖨️ ${wo.product_name} (x${wo.qty})` : (isTopSub ? `🟠 Build: ⚙️ ${wo.product_name} (x${wo.qty})` : `📦 Direct Raw Materials`);
-                
+
                 html += `<div class="kitting-card"><h4>${topLevelTitle} <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
                 Object.keys(directRaws).forEach(k => {
-                    let req = directRaws[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); 
+                    let req = directRaws[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                     let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
                     let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
                     let name = `${emojiPrefix} ${cleanName}`.trim();
                     let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
-                    
+
                     let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
                     html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                 });
                 html += `</div>`;
             }
-            
+
             let exactDeds = calculateExactWODeductions(wo);
             let shelfPulls = [];
             Object.keys(exactDeds.pulls).forEach(k => {
@@ -1014,7 +984,7 @@ function renderActiveWO(id) {
                 });
                 html += `</div>`;
             }
-            
+
             if(exactDeds.built_subs) {
                 Object.keys(exactDeds.built_subs).forEach(subK => {
                     let qty = exactDeds.built_subs[subK];
@@ -1022,18 +992,18 @@ function renderActiveWO(id) {
                         let cleanSubName = subK.replace('RECIPE:::', '');
                         let isTop3D = productsDB[cleanSubName] && productsDB[cleanSubName].is_3d_print;
                         let titleEmoji = isTop3D ? '🖨️' : '⚙️';
-                        
+
                         let subDirect = getDirectMaterials(cleanSubName, qty);
                         if(Object.keys(subDirect).length > 0) {
                             let currentGrpId = `pickgrp_${grpCounter++}`;
                             html += `<div class="kitting-card route-card-build"><h4>🟠 Build: ${titleEmoji} ${cleanSubName} (x${qty}) <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
                             Object.keys(subDirect).forEach(k => {
-                                let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); 
+                                let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                                 let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
                                 let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
                                 let name = `${emojiPrefix} ${cleanName}`.trim();
                                 let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
-                                
+
                                 let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
                                 html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                             });
@@ -1044,13 +1014,13 @@ function renderActiveWO(id) {
             }
             pList.innerHTML = html + `</div>`;
         }
-        else if(wo.status === 'In Production') { 
-            document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active'); 
-            
+        else if(wo.status === 'In Production') {
+            document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active');
+
             let sList = document.getElementById('woSOPList'); sList.innerHTML = ""; let saveContainer = document.getElementById('inlineSaveContainer');
-            
-                            let sopGroups = [];  
-                
+
+                            let sopGroups = [];
+
                 // Fetch Sub-Assembly SOPs
                 if(wo.routing) {
                     Object.keys(wo.routing).forEach(sub => {
@@ -1064,7 +1034,7 @@ function renderActiveWO(id) {
                             let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
                             let emoji = is3D ? '🖨️' : '⚙️';
                             let desc = is3D ? '3D Print' : 'Build Sub-Assembly';
-                            
+
                             sopGroups.push({
                                 id: encodeURIComponent(sub.replace(/\s+/g,'_')),
                                 rawName: sub,
@@ -1075,7 +1045,7 @@ function renderActiveWO(id) {
                         }
                     });
                 }
-                
+
                 // Fetch Main Assembly SOPs
                 let mainPayload = sopsDB[wo.product_name];
                 let mainSteps = []; let mainQa = [];
@@ -1090,11 +1060,11 @@ function renderActiveWO(id) {
                     qa: mainQa,
                     steps: mainSteps
                 });
-                
+
                 // Sort Groups based on saved localStorage order
                 let savedSort = [];
                 try { savedSort = JSON.parse(localStorage.getItem('batchezSopSort_' + wo.product_name)) || []; } catch(e){}
-                
+
                 if (savedSort.length > 0) {
                     sopGroups.sort((a,b) => {
                         let idxA = savedSort.indexOf(a.id);
@@ -1104,7 +1074,7 @@ function renderActiveWO(id) {
                         return idxA - idxB;
                     });
                 }
-                
+
                 let htmlOut = '';
                 sopGroups.forEach((grp, grpIdx) => {
                     let isExpanded = localStorage.getItem('batchezSopExpanded_' + grp.id) === 'true';
@@ -1112,7 +1082,7 @@ function renderActiveWO(id) {
                     let chev = isExpanded ? '▼' : '▶';
                     let isEditing = window.activeInlineSopEditors && window.activeInlineSopEditors[grp.id] === true;
                     if(isEditing) { disp = 'block'; chev = '▼'; }
-                    
+
                     htmlOut += `
                     <div class="sop-grp-card" id="sopgrp_${grp.id}" draggable="true" ondragstart="batchezSopDragStart(event, '${grp.id}')" ondragover="batchezSopDragOver(event)" ondrop="batchezSopDrop(event, '${grp.id}', '${wo.product_name.replace(/'/g, "\\'")}')" ondragend="batchezSopDragEnd(event)" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
                         <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);" onclick="if(!${isEditing}){ toggleBatchezSopGroup('${grp.id}'); }">
@@ -1127,7 +1097,7 @@ function renderActiveWO(id) {
                         </div>
                         <div id="sopgrp_body_${grp.id}" style="display:${disp}; padding:10px 15px; border-top:1px solid var(--border-color);">
                     `;
-                    
+
                     if(isEditing) {
                         let qaText = grp.qa.join('\\n');
                         let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
@@ -1138,14 +1108,14 @@ function renderActiveWO(id) {
                             let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
                             stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
                         });
-                        
+
                         htmlOut += `
                             <!-- Layout Container (Side-by-side with resizer) -->
                             <div id="inlineContainer_${grp.id}" style="display:flex; flex-direction:row; width:100%; border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
-                                
+
                                 <!-- Pane 1: Telemetry & Live Preview (Side-by-side like Master SOP) -->
                                 <div id="inlineLeftPane_${grp.id}" style="flex: 0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:15px; background:var(--bg-body); border-right:1px solid var(--border-color);  overflow:hidden;">
-                                    
+
                                     <!-- Column 1: Config & Input -->
                                     <div id="inlineInputCol_${grp.id}" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -1168,7 +1138,7 @@ function renderActiveWO(id) {
                                         </div>
                                         <textarea id="inlineSopQA_${grp.id}" oninput="if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}')" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaText}</textarea>
                                     </div>
-                                    
+
                                     <!-- Column 2: Live Preview Render -->
                                     <div id="inlinePreviewContainer_${grp.id}" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
                                         <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
@@ -1176,10 +1146,10 @@ function renderActiveWO(id) {
                                     </div>
 
                                 </div>
-                                
+
                                 <!-- Dedicated Vertical Resizer Handle -->
                                 <div id="inlineResizer_{grp.id}" class="h-resizer" onmousedown="if(typeof initInlineResize===\'function\'){initInlineResize(event, \'${grp.id}\');}"></div>
-                                
+
                                 <!-- Pane 2: Rich Text Steps -->
                                 <div id="inlineRightPane_${grp.id}" style="flex: 1; min-width:30px; display:flex; flex-direction:column; padding:15px; background:var(--bg-body); border-left:1px solid var(--border-color);  overflow:hidden;">
                                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
@@ -1191,7 +1161,7 @@ function renderActiveWO(id) {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Save Actions -->
                             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
                                 <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" onclick="toggleInlineEditor('${grp.id}')">✕ Cancel Changes</button>
@@ -1199,9 +1169,9 @@ function renderActiveWO(id) {
                             </div>
                         </div>
                         <script>
-                        setTimeout(() => { 
-                            if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}'); 
-                            
+                        setTimeout(() => {
+                            if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}');
+
                             let savedOrder = localStorage.getItem('inlineSopSwapOrder_${grp.id}');
                             if(savedOrder === 'right-left') {
                                 let c = document.getElementById('inlineContainer_${grp.id}');
@@ -1210,12 +1180,12 @@ function renderActiveWO(id) {
                                 let z = document.getElementById('inlineResizer_${grp.id}');
                                 if(c && l && r && z) { c.insertBefore(r, z); c.insertBefore(z, l); }
                             }
-                            
+
                             let rz = document.getElementById('inlineResizer_${grp.id}');
                             let lp = document.getElementById('inlineLeftPane_${grp.id}');
                             let rp = document.getElementById('inlineRightPane_${grp.id}');
                             let isDragging = false;
-                            
+
                             if(rz && lp && rp) {
                                 rz.addEventListener('mousedown', (e) => {
                                     isDragging = true;
@@ -1228,10 +1198,10 @@ function renderActiveWO(id) {
                                     let totalW = container.getBoundingClientRect().width;
                                     let rect = container.getBoundingClientRect();
                                     let newLeftW = e.clientX - rect.left;
-                                    
+
                                     if(newLeftW < 100) newLeftW = 100;
                                     if(totalW - newLeftW < 100) newLeftW = totalW - 100;
-                                    
+
                                     lp.style.flex = \`0 0 \${newLeftW}px\`;
                                     rp.style.flex = \`1 1 0\`;
                                 });
@@ -1264,25 +1234,25 @@ function renderActiveWO(id) {
                                 });
                                 htmlOut += `<div style="height:6px;"></div>`;
                             }
-                            
+
                             if (grp.steps.length > 0) {
                                 let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
                                 let stepCounter = 1;
                                 mappedSteps.forEach((s, sIdx) => {
-                                    let chkKey = `sop_step_${grp.id}_${sIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : ''; 
+                                    let chkKey = `sop_step_${grp.id}_${sIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
                                     let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">`;
                                     [s.m1, s.m2, s.m3].forEach(m => {
                                         if(m && m.url) {
                                             let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\\\'").replace(/"/g, '"');
-                                            if (m.type === 'img') { 
-                                                let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl; 
-                                                attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`; 
-                                            } else { 
+                                            if (m.type === 'img') {
+                                                let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl;
+                                                attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`;
+                                            } else {
                                                 let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
                                                 if (isNativeVid) {
                                                     attachmentHtml += `<div class="media-thumb" style="max-height:100px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:24px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:10px; font-weight:bold;">VIDEO</span></div></div>`;
                                                 } else {
-                                                    let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
+                                                    let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
                                                     if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
                                                     attachmentHtml += `<div class="media-thumb" style="max-height:100px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`;
                                                 }
@@ -1300,18 +1270,18 @@ function renderActiveWO(id) {
                 sList.innerHTML = htmlOut;
                 if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
         }
-        else if(wo.status === 'Completed') { 
-            document.getElementById('pipe-Completed').classList.add('active'); 
-            document.getElementById('sect-Completed').classList.add('active'); 
+        else if(wo.status === 'Completed') {
+            document.getElementById('pipe-Completed').classList.add('active');
+            document.getElementById('sect-Completed').classList.add('active');
         }
     } catch(e) { sysLog(e.message, true); }
 }
 
 async function advanceWO(newStatus, bypassModal = false) {
     try {
-        if(!currentWO) return; 
+        if(!currentWO) return;
         if(currentWO.status === 'Completed') return showToast('This Work Order is already archived.', 'error');
-        
+
         if (currentWO.materials_pulled && (newStatus === 'Queued' || newStatus === 'Picking')) {
             return alert("Materials have already been pulled for this Work Order. You cannot revert to previous planning stages.");
         }
@@ -1320,17 +1290,17 @@ async function advanceWO(newStatus, bypassModal = false) {
             let w = currentWO.wip_state || {};
             let drafts = w.scrap_draft || {};
             let tableHtml = buildDraftModalHtml(currentWO, drafts);
-            
+
             document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(16, 185, 129, 0.1)';
             document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
             document.getElementById('finalizeWoTitle').innerHTML = '✅ Verify Batch Finalization';
             document.getElementById('finalizeWoTitle').style.color = '#10b981';
-            
+
             let btn = document.getElementById('finalizeWoActionBtn');
             btn.className = 'btn-green';
             btn.innerHTML = 'Finalize & Deduct';
             btn.onclick = window.submitFinalizeWo;
-            
+
             let m = document.getElementById('finalizeWoItemsList');
             if (m) {
                 m.innerHTML = tableHtml;
@@ -1347,12 +1317,12 @@ async function advanceWO(newStatus, bypassModal = false) {
                 let upsKeys = new Set();
                 let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
                 let isScrapTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
-                
+
                 Object.keys(exactDeductions.raws_production).forEach(k => {
                     let req = exactDeductions.raws_production[k];
-                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
+                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
                     if (isScrapTicket) { inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty||0) + req; } else {
-                        inventoryDB[k].consumed_qty += req; 
+                        inventoryDB[k].consumed_qty += req;
                         if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
                         else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
                     }
@@ -1360,9 +1330,9 @@ async function advanceWO(newStatus, bypassModal = false) {
                 });
                 Object.keys(exactDeductions.raws_assembly).forEach(k => {
                     let req = exactDeductions.raws_assembly[k];
-                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
+                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
                     if (isScrapTicket) { inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty||0) + req; } else {
-                        inventoryDB[k].consumed_qty += req; 
+                        inventoryDB[k].consumed_qty += req;
                         if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
                         else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
                     }
@@ -1370,18 +1340,18 @@ async function advanceWO(newStatus, bypassModal = false) {
                 });
                 Object.keys(exactDeductions.pulls).forEach(k => {
                     let req = exactDeductions.pulls[k];
-                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
+                    if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
                     if (isScrapTicket) { inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty||0) + req; } else {
-                        inventoryDB[k].consumed_qty += req; 
+                        inventoryDB[k].consumed_qty += req;
                         if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
                         else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
                     }
                     upsKeys.add(k);
                 });
-                
+
                 let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
-                if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
-                
+                if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
+
                 currentWO.materials_pulled = true;
                 await supabaseClient.from('work_orders').update({ materials_pulled: true }).eq('wo_id', currentWO.wo_id);
             }
@@ -1390,15 +1360,15 @@ async function advanceWO(newStatus, bypassModal = false) {
         if (newStatus === 'Completed') {
             if(!confirm(`Add ${currentWO.qty} Finished Goods to Inventory Yield?`)) { setMasterStatus("Ready.", "status-idle"); return; }
             let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
-            
+
             let exactDeductions = calculateExactWODeductions(currentWO);
             let upsKeys = new Set();
-            
+
             let isScrapTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
             Object.keys(exactDeductions.built_subs).forEach(k => {
                 let req = exactDeductions.built_subs[k];
-                if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0}; 
-                
+                if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
+
                 if (isScrapTicket) {
                     inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + req;
                 } else {
@@ -1406,10 +1376,10 @@ async function advanceWO(newStatus, bypassModal = false) {
                     if(bType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + req;
                     else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + req;
                 }
-                
+
                 let cleanName = k.replace('RECIPE:::', '');
                 let is3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
-                
+
                 if (!is3D) {
                     if(bType === 'Prototype') inventoryDB[k].prototype_produced_qty = (inventoryDB[k].prototype_produced_qty||0) + req;
                     else inventoryDB[k].produced_qty += req;
@@ -1419,15 +1389,15 @@ async function advanceWO(newStatus, bypassModal = false) {
 
             let fgiKey = `RECIPE:::${currentWO.product_name}`;
             if(!inventoryDB[fgiKey]) inventoryDB[fgiKey]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
-            
+
             if(bType === 'Prototype') inventoryDB[fgiKey].prototype_produced_qty = (inventoryDB[fgiKey].prototype_produced_qty||0) + currentWO.qty;
             else inventoryDB[fgiKey].produced_qty += currentWO.qty;
             upsKeys.add(fgiKey);
-            
+
             let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
             if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
         }
-        
+
         const updateData = {status: newStatus};
         if(newStatus !== 'Queued' && !currentWO.started_at) {
             currentWO.started_at = new Date().toISOString();
@@ -1439,8 +1409,8 @@ async function advanceWO(newStatus, bypassModal = false) {
             updateData.status = 'Archived';
         }
 
-        const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message); 
-        
+        const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message);
+
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
             const { data: existingPrints } = await supabaseClient.from('print_queue').select('id').eq('wo_id', currentWO.wo_id);
@@ -1456,7 +1426,7 @@ async function advanceWO(newStatus, bypassModal = false) {
                     let rawOnHand = isLegacyRaw ? ((catalogCache[job] ? catalogCache[job].totalQty : 0) - (i.consumed_qty||0) - (i.scrap_qty||0) + (i.manual_adjustment||0)) : 0;
                     let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
                     let onHand = isLegacyRaw ? rawOnHand : ((i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb));
-                    
+
                     let amountToPrint = totalNeeded;
                     if (onHand > 0) amountToPrint = Math.max(0, totalNeeded - onHand);
 
@@ -1467,11 +1437,11 @@ async function advanceWO(newStatus, bypassModal = false) {
             }
         } catch(pe) { sysLog("Print Spawn Error: " + pe.message, true); }
 
-        currentWO.status = updateData.status || newStatus; 
+        currentWO.status = updateData.status || newStatus;
         if(currentWO.status === 'Archived') {
             currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
         }
-        setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList(); 
+        setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList();
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
@@ -1530,7 +1500,7 @@ async function switchArchiveTab(tab) {
     currentArchiveTab = tab;
     document.getElementById('tabArchBatchez').style.borderBottom = tab === 'batchez' ? '3px solid #0ea5e9' : '3px solid transparent';
     document.getElementById('tabArchLayerz').style.borderBottom = tab === 'layerz' ? '3px solid #0ea5e9' : '3px solid transparent';
-    
+
     if (tab === 'layerz' && !window._layerzArchiveLoaded) {
         if (typeof refreshPrintQueue === 'function') {
             document.getElementById('archiveListArea').innerHTML = '<p style="color:var(--text-muted); text-align:center;">Fetching records...</p>';
@@ -1674,10 +1644,10 @@ async function deleteAllArchive() {
     if(!confirm(`⚠️ DANGER: Are you sure you want to permanently delete ALL archived records in the ${currentArchiveTab === 'batchez' ? 'Batchez' : 'Layerz'} tab?\n\nThis action cannot be undone.`)) return;
     sysLog(`Hard deleting ALL archives from ${currentArchiveTab}`);
     setMasterStatus("Deleting Archive...", "mod-working");
-    
+
     const btn = document.querySelector('.btn-red[onclick="deleteAllArchive()"]');
     if (btn) { btn.innerText = "Deleting..."; btn.disabled = true; }
-    
+
     try {
         if(currentArchiveTab === 'batchez') {
             const {error} = await supabaseClient.from('work_orders').delete().eq('status', 'Archived');
@@ -1691,9 +1661,9 @@ async function deleteAllArchive() {
         setMasterStatus("Archive Cleared!", "mod-success");
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
         renderArchiveList();
-    } catch(e) { 
-        sysLog(e.message, true); 
-        setMasterStatus("Error", "mod-error"); 
+    } catch(e) {
+        sysLog(e.message, true);
+        setMasterStatus("Error", "mod-error");
     } finally {
         if (btn) { btn.innerText = "🗑️ Clear Archive"; btn.disabled = false; }
     }
@@ -1702,8 +1672,8 @@ async function deleteAllArchive() {
 function printPickList() {
     try {
         if(!currentWO) return;
-        let html = `<html><head><title>Pick List - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} table{width:100%; border-collapse:collapse; margin-top:10px; font-size:11px;} th,td{border:1px solid #ccc; padding:4px; text-align:left;} th{background:#f1f5f9;} .group-header{background:#e0f2fe; font-weight:bold; font-size:12px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`; 
-        html += `<h2>Pick List: ${currentWO.wo_id}</h2><h3>Product: ${currentWO.product_name} (Qty: ${currentWO.qty})</h3>`; 
+        let html = `<html><head><title>Pick List - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} table{width:100%; border-collapse:collapse; margin-top:10px; font-size:11px;} th,td{border:1px solid #ccc; padding:4px; text-align:left;} th{background:#f1f5f9;} .group-header{background:#e0f2fe; font-weight:bold; font-size:12px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`;
+        html += `<h2>Pick List: ${currentWO.wo_id}</h2><h3>Product: ${currentWO.product_name} (Qty: ${currentWO.qty})</h3>`;
         html += `<table><thead><tr><th style="width:40px;">Pick</th><th>Item Name</th><th>Spec</th><th style="width:80px;">Qty Needed</th></tr></thead><tbody>`;
         let directRaws = getDirectMaterials(currentWO.product_name, currentWO.qty);
         if(Object.keys(directRaws).length > 0) {
@@ -1736,18 +1706,18 @@ function printPickList() {
 
 function printSOP() {
     try {
-        if(!currentWO) return; 
+        if(!currentWO) return;
         let stepsToRender = [];
         if(currentWO.routing) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
                     let subSteps = sopsDB[sub] || [];
-                    if(subSteps.length > 0) { 
+                    if(subSteps.length > 0) {
                         let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
                         let emo = is3D ? '🖨️' : '⚙️';
                         let tp = is3D ? '3D Print' : 'Build Sub-Assembly';
-                        stepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` }); 
-                        stepsToRender = stepsToRender.concat(subSteps); 
+                        stepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` });
+                        stepsToRender = stepsToRender.concat(subSteps);
                     }
                 }
             });
@@ -1756,16 +1726,16 @@ function printSOP() {
         if(mainSteps.length > 0 || stepsToRender.length > 0) {
             if(mainSteps.length > 0) { stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${currentWO.product_name}` }); stepsToRender = stepsToRender.concat(mainSteps); }
         }
-        let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, m1:{url: "", type: "img"}, m2:{url: "", type: "img"}, m3:{url: "", type: "img"}}); 
-        let html = `<html><head><title>SOP - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #0ea5e9;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#0ea5e9; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`; 
+        let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, m1:{url: "", type: "img"}, m2:{url: "", type: "img"}, m3:{url: "", type: "img"}});
+        let html = `<html><head><title>SOP - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #0ea5e9;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#0ea5e9; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`;
         html += `<h2>Compiled SOP</h2><h3>Work Order: ${currentWO.wo_id}</h3><hr>`;
         if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
-        else { 
+        else {
             let stepCounter = 1;
-            mappedSteps.forEach((s) => { 
+            mappedSteps.forEach((s) => {
                 if(s.isHeader) { html += `<div class="header">${s.text}</div>`; }
                 else { html += `<div class="step"><strong style="color:#0ea5e9; font-size:14px;">Step ${stepCounter++}:</strong><br> ${s.text}</div>`; }
-            }); 
+            });
         }
         html += `</body></html>`; let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500);
     } catch(e) { sysLog(e.message, true); }
@@ -1773,7 +1743,7 @@ function printSOP() {
 
 function parseProductionTelemetryLine(q, contextIdx) {
     let html = '';
-    
+
     function parseInputs(text) { return text.replace(/\[INPUT\]/gi, `<input type="text" placeholder="..." style="padding:4px 8px; border-radius:4px; background:rgba(255,255,255,0.1); border:1px solid #10b981; color:#fff; font-family:monospace; font-size:12px; width:120px; font-weight:bold; margin:0 6px;">`); }
 
     function parseImgs(text) {
@@ -1828,13 +1798,13 @@ function parseProductionTelemetryLine(q, contextIdx) {
 function processTelemetryCanvasRendering(container) {
     if (typeof JsBarcode !== 'undefined') {
         container.querySelectorAll('.sop-barcode-svg').forEach(el => {
-            try { JsBarcode(el, el.dataset.value || 'NEOGLEAMZ', { format: 'CODE128', width: 1.8, height: 50, displayValue: true, fontSize: 11, margin: 6, lineColor: '#000', background: '#ffffff' }); } 
+            try { JsBarcode(el, el.dataset.value || 'NEOGLEAMZ', { format: 'CODE128', width: 1.8, height: 50, displayValue: true, fontSize: 11, margin: 6, lineColor: '#000', background: '#ffffff' }); }
             catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ Barcode error: ${e.message}</span>`; }
         });
     }
     if (typeof QRCode !== 'undefined') {
         container.querySelectorAll('.sop-qr-canvas').forEach(el => {
-            try { QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', { width: 80, margin: 1 }); } 
+            try { QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', { width: 80, margin: 1 }); }
             catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ QR error: ${e.message}</span>`; }
         });
     }
@@ -1856,7 +1826,7 @@ function renderProductionTelemetryPreview() {
     qaChecks.forEach((line, idx) => {
         let q = line.trim();
         if(!q) return;
-        
+
         let contentHtml = parseProductionTelemetryLine(q, idx);
 
         if (q.startsWith('> ')) {
@@ -1886,16 +1856,16 @@ function doProductionSopResize(e) {
     const leftPane = document.getElementById('productionSopLeftPane');
     const previewCol = document.getElementById('productionAdminQAPreviewCol');
     if(!wrapper || !leftPane) return;
-    
+
     const rect = wrapper.getBoundingClientRect();
     let newWidth = e.clientX - rect.left - 20;
-    
+
     let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
     let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
-    
+
     if(newWidth < 300) newWidth = 300;
     if(newWidth > maxBound) newWidth = maxBound;
-    
+
     leftPane.style.flex = '0 0 ' + newWidth + 'px';
     leftPane.style.width = newWidth + 'px';
 }
@@ -1932,18 +1902,18 @@ function batchezSopDrop(e, targetGrpId, prodName) {
     e.preventDefault();
     e.target.style.opacity = '1';
     if (!batchezDraggedGrpId || batchezDraggedGrpId === targetGrpId) return;
-    
+
     const container = document.getElementById('woSOPList');
     if (!container) return;
     const cards = Array.from(container.querySelectorAll('.sop-grp-card'));
     let srcIdx = cards.findIndex(c => c.id === 'sopgrp_' + batchezDraggedGrpId);
     let tgtIdx = cards.findIndex(c => c.id === 'sopgrp_' + targetGrpId);
     if (srcIdx < 0 || tgtIdx < 0) return;
-    
+
     let currentSort = cards.map(c => c.id.replace('sopgrp_', ''));
     let movedItem = currentSort.splice(srcIdx, 1)[0];
     currentSort.splice(tgtIdx, 0, movedItem);
-    
+
     localStorage.setItem('batchezSopSort_' + prodName, JSON.stringify(currentSort));
     if (currentWO) renderActiveWO(currentWO.wo_id);
 }
@@ -1986,29 +1956,29 @@ window.saveInlineSopBlock = async function(grpId, productName) {
         if (typeof extractSOPDataFromUI !== 'function') {
             console.error('extractSOPDataFromUI is not defined!');
         }
-        
+
         let rawQa = document.getElementById('inlineSopQA_' + grpId)?.value || '';
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
-        
+
         const payload = { qaChecks: qaLines, steps: steps };
         if(typeof sopsDB !== 'undefined') sopsDB[productName] = payload;
         if(typeof sysLog === 'function') sysLog('Saving Inline SOP for ' + productName);
-        
+
         if(typeof supabaseClient !== 'undefined') {
             const {error} = await supabaseClient.from('production_sops').upsert({product_name: productName, steps: payload}, {onConflict: 'product_name'});
             if(error) throw new Error(error.message);
         }
-        
+
         // Turn off inline edit mode for this item
         window.activeInlineSopEditors[grpId] = false;
-        
+
         // Rerender view
         if(typeof currentPrintJob !== "undefined" && currentPrintJob && currentPrintJob.id && document.getElementById("paneProdPrint") && document.getElementById("paneProdPrint").style.display !== "none") {
             if(typeof renderActivePrintJob === "function") renderActivePrintJob(currentPrintJob.id);
         } else {
             if(typeof renderActiveWO === "function" && typeof currentWO !== "undefined" && currentWO) renderActiveWO(currentWO.wo_id);
         }
-        
+
     } catch(e) {
         if(typeof sysLog === 'function') sysLog(e.message, true);
         alert("Failed to save SOP: " + e.message);
@@ -2029,28 +1999,28 @@ window.toggleHorizontalPreview = function(paneId, colId, btnEl) {
     let pane = document.getElementById(paneId);
     let col = document.getElementById(colId);
     if (!pane || !col) return;
-    
+
     let inputCol = col.previousElementSibling;
     let currentInputWidth = inputCol.getBoundingClientRect().width;
     let wrapper = pane.parentElement;
     let wrapperWidth = wrapper.getBoundingClientRect().width;
-    
+
     if (col.style.display === 'none') {
         col.style.display = 'flex';
         btnEl.style.background = 'rgba(59,130,246,0.1)';
-        
-        let newPaneWidth = currentInputWidth * 2 + 15; 
+
+        let newPaneWidth = currentInputWidth * 2 + 15;
         if(newPaneWidth > wrapperWidth * 0.70) newPaneWidth = wrapperWidth * 0.70;
-        
+
         pane.style.flex = '0 0 ' + newPaneWidth + 'px';
         pane.style.width = newPaneWidth + 'px';
     } else {
         col.style.display = 'none';
         btnEl.style.background = 'transparent';
-        
+
         let targetWidth = currentInputWidth;
         if(targetWidth > wrapperWidth * 0.35) targetWidth = wrapperWidth * 0.35;
-        
+
         pane.style.flex = '0 0 ' + targetWidth + 'px';
         pane.style.width = targetWidth + 'px';
     }
@@ -2078,13 +2048,13 @@ window.doInlineResize = function(e) {
     let newWidth = e.clientX - rect.left - 15;
     const previewCol = document.getElementById('inlinePreviewContainer_' + grpId);
     let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
-    
+
     let minBound = isPreviewOpen ? 640 : 320;
     let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
-    
+
     if(newWidth < minBound) newWidth = minBound;
     if(newWidth > maxBound) newWidth = maxBound;
-    
+
     leftPane.style.flex = '0 0 ' + newWidth + 'px';
     leftPane.style.width = newWidth + 'px';
 };
@@ -2115,7 +2085,7 @@ window.inlineRenderTelemetryPreview = function(grpId) {
     qaChecks.forEach((line, idx) => {
         let q = line.trim();
         if(!q) return;
-        
+
         let contentHtml = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, idx) : q;
 
         if (q.startsWith('> ')) {
@@ -2128,7 +2098,7 @@ window.inlineRenderTelemetryPreview = function(grpId) {
     });
 
     previewContainer.innerHTML = html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`;
-    
+
     if (typeof processTelemetryCanvasRendering === 'function') {
         processTelemetryCanvasRendering(previewContainer);
     }
@@ -2136,7 +2106,7 @@ window.inlineRenderTelemetryPreview = function(grpId) {
 
 function buildDraftModalHtml(wo, drafts) {
     let ht = '';
-    
+
     // Direct Raws
     let directRaws = getDirectMaterials(wo.product_name, wo.qty);
     if(Object.keys(directRaws).length > 0) {
@@ -2160,13 +2130,13 @@ function buildDraftModalHtml(wo, drafts) {
         });
         ht += `</div>`;
     }
-    
+
     let exactDeds = calculateExactWODeductions(wo);
     let shelfPulls = [];
     Object.keys(exactDeds.pulls).forEach(k => {
         shelfPulls.push({name: k.replace('RECIPE:::', ''), q: exactDeds.pulls[k]});
     });
-    
+
     if(shelfPulls.length > 0) {
         ht += `<div class="kitting-card route-card-pull" style="box-sizing:border-box; flex: 1 1 400px;"><h4>🟢 Pull Pre-Built from Shelf</h4>`;
         shelfPulls.forEach(sub => {
@@ -2190,7 +2160,7 @@ function buildDraftModalHtml(wo, drafts) {
         });
         ht += `</div>`;
     }
-    
+
     // Build from Scratch Sub-assemblies
     if(exactDeds.built_subs) {
         let sortedSubs = Object.keys(exactDeds.built_subs).sort((a, b) => {
@@ -2208,13 +2178,13 @@ function buildDraftModalHtml(wo, drafts) {
                 let cleanSubName = subK.replace('RECIPE:::', '');
                 let isTop3D = typeof productsDB !== 'undefined' && productsDB[cleanSubName] && productsDB[cleanSubName].is_3d_print;
                 let titleEmoji = isTop3D ? '🖨️' : '⚙️';
-                
+
                 let subDirect = getDirectMaterials(cleanSubName, qty);
                 if(Object.keys(subDirect).length > 0) {
                     let topScrapKey = subK;
                     let topCurVal = drafts[topScrapKey + '__BUILD'] ? drafts[topScrapKey + '__BUILD'] : '';
                     ht += `<div class="kitting-card route-card-build" style="box-sizing:border-box; flex: 1 1 400px;"><h4>🟠 Build: ${titleEmoji} ${cleanSubName}</h4>`;
-                    
+
                     // Add top-level loss row for the entire sub-assembly
                     ht += `<div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #ef4444; background-color: rgba(239, 68, 68, 0.05); margin-bottom: 5px;">
                         <div class="chk-text" style="font-size:14px; flex-grow:1; font-weight:bold; color:#ef4444;">🚨 SCRAP ENTIRE: ${cleanSubName} <div style="font-size:10px; color:var(--text-muted); font-weight:normal; margin-top:2px;">Scrapping this will forcefully deduct its required raw materials from stock.</div></div>
@@ -2252,11 +2222,11 @@ function buildDraftModalHtml(wo, drafts) {
             }
         });
     }
-    
+
     if (ht === '') {
         ht = `<div style="text-align:center; padding:15px; width:100%; color:var(--text-muted);">No materials pulled for this batch.</div>`;
     }
-    
+
     return ht;
 }
 
@@ -2266,7 +2236,7 @@ window.submitFinalizeWo = async function() {
         let upsKeys = new Set();
         let totalScrapEntries = 0;
         let directUpserts = {};
-        
+
         scrapInputs.forEach(input => {
             let v = parseFloat(input.value) || 0;
             if (v > 0) {
@@ -2274,34 +2244,34 @@ window.submitFinalizeWo = async function() {
                 directUpserts[k] = (directUpserts[k] || 0) + v;
             }
         });
-        
+
         let spawnedScrapWOs = [];
         let spawnedScrapPrints = [];
-        
+
         let pNameClean = currentWO.product_name.replace('RECIPE:::', '');
         let isTopLevelSub = typeof isSubassemblyDB !== 'undefined' && !!isSubassemblyDB[pNameClean];
         let isTopLevel3D = typeof productsDB !== 'undefined' && !!(productsDB[pNameClean] && productsDB[pNameClean].is_3d_print);
         let isScrapRebuildTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
         let isYieldEnforced = isScrapRebuildTicket ? true : (!isTopLevelSub && !isTopLevel3D);
-        
+
         Object.keys(directUpserts).forEach(k => {
             let v = directUpserts[k];
             let actualK = k.endsWith('__BUILD') ? k.replace('__BUILD', '') : k;
-            
+
             if(!inventoryDB[actualK]) inventoryDB[actualK]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
-            
+
             inventoryDB[actualK].scrap_qty = (inventoryDB[actualK].scrap_qty || 0) + v;
             upsKeys.add(actualK);
             totalScrapEntries++;
-            
+
             if (isYieldEnforced) {
                 let cleanK = actualK.replace('RECIPE:::', '');
                 let is3D = productsDB[cleanK] && productsDB[cleanK].is_3d_print;
-                
+
                 if (k.endsWith('__BUILD')) {
                     // Instantly spawn a Scrap Rebuild recovery ticket instead of magically mapping inventory loss below.
                     let recoveryWoId = "WO-" + Date.now().toString().slice(-4) + "-" + Math.random().toString(36).substring(2, 7).toUpperCase();
-                    
+
                     spawnedScrapWOs.push({
                         wo_id: recoveryWoId,
                         product_name: cleanK,
@@ -2322,20 +2292,20 @@ window.submitFinalizeWo = async function() {
                 }
             }
         });
-        
+
         if(upsKeys.size > 0) {
             setMasterStatus("Logging Scrap...", "mod-working");
             let ups = Array.from(upsKeys).map(k => ({
-                item_key: k, 
-                consumed_qty: inventoryDB[k].consumed_qty, 
-                manual_adjustment: inventoryDB[k].manual_adjustment, 
-                produced_qty: inventoryDB[k].produced_qty, 
-                sold_qty: inventoryDB[k].sold_qty, 
-                min_stock: inventoryDB[k].min_stock, 
-                scrap_qty: inventoryDB[k].scrap_qty, 
-                prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, 
-                assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, 
-                production_consumed_qty: inventoryDB[k].production_consumed_qty||0, 
+                item_key: k,
+                consumed_qty: inventoryDB[k].consumed_qty,
+                manual_adjustment: inventoryDB[k].manual_adjustment,
+                produced_qty: inventoryDB[k].produced_qty,
+                sold_qty: inventoryDB[k].sold_qty,
+                min_stock: inventoryDB[k].min_stock,
+                scrap_qty: inventoryDB[k].scrap_qty,
+                prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0,
+                assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0,
+                production_consumed_qty: inventoryDB[k].production_consumed_qty||0,
                 prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0
             }));
             await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
@@ -2351,9 +2321,9 @@ window.submitFinalizeWo = async function() {
                     }))
                 );
                 if (scrapErr) throw new Error("Scrap WO Deploy Error: " + scrapErr.message);
-                
+
                 spawnedScrapWOs.forEach(s => workOrdersDB.unshift(s));
-                
+
                 // Queue any nested 3D prints required by these auto-recovery tickets
                 for (let s of spawnedScrapWOs) {
                     if (productsDB[s.product_name] && productsDB[s.product_name].is_3d_print) {
@@ -2370,7 +2340,7 @@ window.submitFinalizeWo = async function() {
                     }
                 }
             }
-            
+
             // Queue component-level 3D prints that were explicitly scrapped explicitly
             for (let p of spawnedScrapPrints) {
                 if (typeof addPrintJob === 'function') {
@@ -2378,13 +2348,13 @@ window.submitFinalizeWo = async function() {
                 }
             }
         }
-        
+
         document.getElementById('finalizeWoModal').style.display = 'none';
         sysLog(`Batch verified. ${totalScrapEntries} scrap line(s) logged.`);
-        
+
         // Push payload forward into actual completion
         advanceWO('Completed', true);
-        
+
     } catch (e) {
         sysLog(e.message, true);
         alert("Failed to submit Work Order finals.");
@@ -2396,17 +2366,17 @@ window.openDraftScrapModal = function() {
     let w = currentWO.wip_state || {};
     let drafts = w.scrap_draft || {};
     let tableHtml = buildDraftModalHtml(currentWO, drafts);
-    
+
     document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(239, 68, 68, 0.1)';
     document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
     document.getElementById('finalizeWoTitle').innerHTML = '🗑️ Update Scrap Tally';
     document.getElementById('finalizeWoTitle').style.color = '#ef4444';
-    
+
     let btn = document.getElementById('finalizeWoActionBtn');
     btn.className = 'btn-red';
     btn.innerHTML = 'Save Tally Draft';
     btn.onclick = window.saveDraftScrap;
-    
+
     let m = document.getElementById('finalizeWoItemsList');
     if (m) {
         m.innerHTML = tableHtml;
@@ -2422,13 +2392,13 @@ window.saveDraftScrap = async function() {
         let v = parseFloat(input.value) || 0;
         if (v > 0) drafts[input.getAttribute('data-key')] = v;
     });
-    
+
     if(!currentWO.wip_state) currentWO.wip_state = {};
     currentWO.wip_state.scrap_draft = drafts;
-    
+
     setMasterStatus("Saving Scrap Draft...", "mod-working");
     await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id);
-    
+
     document.getElementById('finalizeWoModal').style.display = 'none';
     setMasterStatus("Draft Saved", "mod-success");
     setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
