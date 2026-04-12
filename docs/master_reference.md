@@ -270,6 +270,7 @@ The system natively deploys 16 tables. RLS explicitly dictates that **Authentica
 -- id: string
 -- internal_fulfillment_status: string | null
 -- internal_recipe_name: string | null
+-- isFirstRow: boolean | null
 -- lineitem_compare_at_price: number | null
 -- lineitem_fulfillment_status: string | null
 -- linked_order_id: string | null
