@@ -141,17 +141,16 @@ The system natively deploys 16 tables. RLS explicitly dictates that **Authentica
 
 #### `label_designs`
 ```sql
-CREATE TABLE IF NOT EXISTS label_designs (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  product_name text NOT NULL UNIQUE,
-  emoji text DEFAULT 'dY?,?',
-  file_url text,
-  file_name text,
-  layout_json jsonb,
-  label_size text DEFAULT '2.25x1.25',
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
+-- TABLE: label_designs
+-- created_at: string
+-- emoji: string | null
+-- file_name: string | null
+-- file_url: string | null
+-- id: string
+-- label_size: string | null
+-- layout_json: Json | null
+-- product_name: string
+-- updated_at: string
 ```
 
 #### `pack_ship_sops` & `production_sops`
