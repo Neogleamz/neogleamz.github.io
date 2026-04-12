@@ -108,8 +108,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `debt/security` : **[HIGH] RESOLVED ✅** `xlsx` (SheetJS) CVEs Prototype Pollution + ReDoS. Audited the repo to verify it wasn't required for compilation, and effectively eradicated the NPM ghost package via `npm uninstall xlsx`. `npm audit` returned 0 vulnerabilities.
 
 ### 🟡 Outdated Dependencies (npm outdated)
-- [ ] `debt/deps` : **`@supabase/supabase-js`** is on `2.101.1` → latest is `2.103.0`. Minor version bump — review changelog for breaking changes before updating.
-- [ ] `debt/deps` : **`supabase` CLI** is on `2.84.10` → latest is `2.89.1`. Minor version bump — update to pull in latest edge function and migration tooling improvements.
+- [x] `debt/deps` : **RESOLVED ✅** `@supabase/supabase-js` bumped to `2.103.0`.
+- [x] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped to `2.89.1`.
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
 - [x] `debt/hmac-verification` : **RESOLVED ✅** `supabase/functions/shopify-webhook/index.ts:22` - Implemented native Deno `crypto.subtle` HMAC validation with dynamic 401 blocking. Also structurally patched the synchronous PII variables bug.
