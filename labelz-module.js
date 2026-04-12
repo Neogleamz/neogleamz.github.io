@@ -83,68 +83,70 @@ async function loadLabelzData() {
 }
 
 function renderLabelzGrid() {
-    const grid = document.getElementById('labelzGrid');
-    if (!grid) return;
-    const search = document.getElementById('labelzSearch')?.value.toLowerCase() || '';
+    try {
+        const grid = document.getElementById('labelzGrid');
+        if (!grid) return;
+        const search = document.getElementById('labelzSearch')?.value.toLowerCase() || '';
 
-    const filtered = labelzDB.filter(l => l.product_name.toLowerCase().includes(search));
+        const filtered = labelzDB.filter(l => l.product_name.toLowerCase().includes(search));
 
-    if (filtered.length === 0) {
-        grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
-            <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
-            ${search ? 'No labels match your search.' : 'No custom labels yet. Click <strong>+ NEW LABEL</strong> to create your first one.'}
-        </div>`;
-        return;
-    }
-
-    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">';
-
-    filtered.forEach(label => {
-        // Correct FGI Stock Calculation from inventoryDB
-        const invKey = 'RECIPE:::' + label.product_name;
-        const invData = typeof inventoryDB !== 'undefined' ? inventoryDB[invKey] : null;
-        let stockQty = 0;
-        if(invData) {
-            stockQty = (invData.produced_qty || 0) - (invData.sold_qty || 0);
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
+                <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
+                ${search ? 'No labels match your search.' : 'No custom labels yet. Click <strong>+ NEW LABEL</strong> to create your first one.'}
+            </div>`;
+            return;
         }
-        
-        const lowThreshold = 10;
-        const stockColor = stockQty === 0 ? '#ef4444' : stockQty < lowThreshold ? '#f59e0b' : '#10b981';
-        const stockBg = stockQty === 0 ? 'rgba(239,68,68,0.1)' : stockQty < lowThreshold ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)';
 
-        const cleanName = label.product_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-        const safeEmoji = label.emoji || '🏷️';
-        const safeSize  = label.label_size || '2.25x1.25';
+        let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">';
 
-        html += `
-            <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                
-                <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
-                    <!-- Emoji Top Left -->
-                    <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">${safeEmoji}</div>
+        filtered.forEach(label => {
+            // Correct FGI Stock Calculation from inventoryDB
+            const invKey = 'RECIPE:::' + label.product_name;
+            const invData = typeof inventoryDB !== 'undefined' ? inventoryDB[invKey] : null;
+            let stockQty = 0;
+            if(invData) {
+                stockQty = (invData.produced_qty || 0) - (invData.sold_qty || 0);
+            }
+            
+            const lowThreshold = 10;
+            const stockColor = stockQty === 0 ? '#ef4444' : stockQty < lowThreshold ? '#f59e0b' : '#10b981';
+            const stockBg = stockQty === 0 ? 'rgba(239,68,68,0.1)' : stockQty < lowThreshold ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)';
+
+            const cleanName = label.product_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            const safeEmoji = label.emoji || '🏷️';
+            const safeSize  = label.label_size || '2.25x1.25';
+
+            html += `
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
                     
-                    <!-- Type Pills Centered -->
-                    <div style="display:flex; justify-content:center; align-items:center; height:100%; gap:4px;">
-                        <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${safeSize}"</span>
-                        <span style="display:inline-block; font-size:8px; font-weight:800; background:${stockBg}; color:${stockColor}; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">STOCK: ${stockQty}</span>
+                    <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
+                        <!-- Emoji Top Left -->
+                        <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">${safeEmoji}</div>
+                        
+                        <!-- Type Pills Centered -->
+                        <div style="display:flex; justify-content:center; align-items:center; height:100%; gap:4px;">
+                            <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${safeSize}"</span>
+                            <span style="display:inline-block; font-size:8px; font-weight:800; background:${stockBg}; color:${stockColor}; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">STOCK: ${stockQty}</span>
+                        </div>
+                        
+                        <!-- Spool Button Top Right (Matched to Barcodz Blue) -->
+                        <button class="btn-blue" onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                     </div>
                     
-                    <!-- Spool Button Top Right (Matched to Barcodz Blue) -->
-                    <button class="btn-blue" onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
+                    <!-- Content & Edit Base -->
+                    <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
+                        <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
+                        
+                        <button class="btn-slate-muted" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
+                    </div>
                 </div>
-                
-                <!-- Content & Edit Base -->
-                <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
-                    <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
-                    
-                    <button class="btn-slate-muted" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
-                </div>
-            </div>
-        `;
-    });
+            `;
+        });
 
-    html += '</div>';
-    grid.innerHTML = html;
+        html += '</div>';
+        grid.innerHTML = html;
+    } catch(e) { sysLog('Labelz grid render error: ' + e.message, true); }
 }
 
 // ============================================================
@@ -441,7 +443,7 @@ function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
             fCanvas.setActiveObject(img);
         });
     } catch(e) {
-        console.error(e);
+        sysLog('Fabric Barcode Gen Error: ' + e.message, true);
         tmpCanvas.width = 150; tmpCanvas.height = 30;
         const ctx = tmpCanvas.getContext('2d');
         ctx.fillStyle = '#ff0000'; ctx.fillRect(0,0,150,30);
@@ -482,7 +484,7 @@ function addLabelzQR(codeStr = 'NEOGLEAMZ') {
             fCanvas.setActiveObject(img);
         });
     } catch(e) {
-        console.error(e);
+        sysLog('Fabric QR Gen Error: ' + e.message, true);
         alert('Could not render QR: ' + e.message);
     }
 }
@@ -507,7 +509,7 @@ function regenerateBarcodeImage(obj, text, format) {
             fCanvas.renderAll();
         });
     } catch(e) {
-        console.warn('Barcode gen error:', e);
+        sysLog('Fabric Barcode Regen Error: ' + e.message, true);
         // Draw visual error indicator
         tmpCanvas.width = 150; tmpCanvas.height = 30;
         const ctx = tmpCanvas.getContext('2d');
@@ -678,52 +680,54 @@ function clearLabelCanvasBg() {
 // ============================================================
 
 function searchLabelzCatalog() {
-    const q = document.getElementById('labelzCatalogSearch').value.toLowerCase();
-    const resDiv = document.getElementById('labelzCatalogResults');
-    if(!q || q.length < 2) { resDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>'; return; }
+    try {
+        const q = document.getElementById('labelzCatalogSearch').value.toLowerCase();
+        const resDiv = document.getElementById('labelzCatalogResults');
+        if(!q || q.length < 2) { resDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>'; return; }
 
-    let results = [];
-    
-    // Search productsDB
-    if(typeof productsDB !== 'undefined') {
-        Object.keys(productsDB).forEach(pName => {
-            if(pName.toLowerCase().includes(q)) {
-                let pd = productsDB[pName];
-                let is3d = pd.is_3d_print;
-                let loc = (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]) ? 'Sub-Assembly' : (is3d ? '3D Print' : 'Retail Product');
-                let bcVal = typeof getItemBarcodeValue === 'function' ? getItemBarcodeValue(pName, true) : 'RECIPE:::'+pName;
-                results.push({ name: pName, spec: loc, source: 'Recipe', val: bcVal, cogs: typeof getEngineTrueCogs ==='function' ? getEngineTrueCogs(pName) : 0 });
-            }
-        });
-    }
+        let results = [];
+        
+        // Search productsDB
+        if(typeof productsDB !== 'undefined') {
+            Object.keys(productsDB).forEach(pName => {
+                if(pName.toLowerCase().includes(q)) {
+                    let pd = productsDB[pName];
+                    let is3d = pd.is_3d_print;
+                    let loc = (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]) ? 'Sub-Assembly' : (is3d ? '3D Print' : 'Retail Product');
+                    let bcVal = typeof getItemBarcodeValue === 'function' ? getItemBarcodeValue(pName, true) : 'RECIPE:::'+pName;
+                    results.push({ name: pName, spec: loc, source: 'Recipe', val: bcVal, cogs: typeof getEngineTrueCogs ==='function' ? getEngineTrueCogs(pName) : 0 });
+                }
+            });
+        }
 
-    // Search catalogCache
-    if(typeof catalogCache !== 'undefined') {
-        Object.keys(catalogCache).forEach(k => {
-            let c = catalogCache[k];
-            if ((c.neoName||"").toLowerCase().includes(q) || (c.itemName||"").toLowerCase().includes(q)) {
-                results.push({ name: c.neoName||c.itemName, spec: c.spec||'Raw Mat', source: 'Catalog', val: k, cogs: c.avgUnitCost||0 });
-            }
-        });
-    }
+        // Search catalogCache
+        if(typeof catalogCache !== 'undefined') {
+            Object.keys(catalogCache).forEach(k => {
+                let c = catalogCache[k];
+                if ((c.neoName||"").toLowerCase().includes(q) || (c.itemName||"").toLowerCase().includes(q)) {
+                    results.push({ name: c.neoName||c.itemName, spec: c.spec||'Raw Mat', source: 'Catalog', val: k, cogs: c.avgUnitCost||0 });
+                }
+            });
+        }
 
-    if(results.length === 0) { resDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px;">No results found.</div>'; return; }
+        if(results.length === 0) { resDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px;">No results found.</div>'; return; }
 
-    let html = '';
-    results.slice(0, 15).forEach(r => {
-        let safeName = r.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        let safeVal = String(r.val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        html += `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.borderColor='#0ea5e9'" onmouseout="this.style.borderColor='var(--border-color)'" onclick="applyCatalogData('${safeName}', '${safeVal}', ${r.cogs})">
-                <div style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:2px;">${r.name}</div>
-                <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted);">
-                    <span>[${r.source}] ${r.spec}</span>
-                    <span>Cost: $${r.cogs.toFixed(2)}</span>
+        let html = '';
+        results.slice(0, 15).forEach(r => {
+            let safeName = r.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            let safeVal = String(r.val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            html += `
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.borderColor='#0ea5e9'" onmouseout="this.style.borderColor='var(--border-color)'" onclick="applyCatalogData('${safeName}', '${safeVal}', ${r.cogs})">
+                    <div style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:2px;">${r.name}</div>
+                    <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted);">
+                        <span>[${r.source}] ${r.spec}</span>
+                        <span>Cost: $${r.cogs.toFixed(2)}</span>
+                    </div>
                 </div>
-            </div>
-        `;
-    });
-    resDiv.innerHTML = html;
+            `;
+        });
+        resDiv.innerHTML = html;
+    } catch(e) { sysLog('Labelz Catalog Search error: ' + e.message, true); }
 }
 
 window.applyCatalogData = function(name, bcValue, cost) {
