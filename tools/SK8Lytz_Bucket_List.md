@@ -53,10 +53,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ### Target: `main`
-*(Epic: Automated Shippo Printing)*
-- [ ] `feat/shippo-auto-print` : Automated Label Printing: Direct Shippo/EasyPost API integration so clicking "Fulfilled" automatically prints a PDF layout to an attached Zebra thermal printer.
-
-### Target: `main`
 *(Epic: Socialz Outreach Kanban)*
 - [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
 
