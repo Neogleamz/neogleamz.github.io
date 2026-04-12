@@ -23,7 +23,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Full-System Layout Documentation)*
-- [ ] `docs/system-audit-part2` : Systematically document the layout, architecture, and core modules of the A.I. Hub, including STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ, and NEXUZ (which houses Brainz and Importz).
+- [x] `docs/system-audit-part2` : Systematically document the layout, architecture, and core modules of the A.I. Hub, including STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ, and NEXUZ (which houses Brainz and Importz).
 
 ### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
