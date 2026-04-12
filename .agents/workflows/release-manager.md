@@ -1,7 +1,7 @@
-﻿---
+---
 name: cut_release
 description: "Executes the version bump, changelog generation, and tagging sequence to cut a new release."
-trigger: "/release"
+trigger: "/release, cut a release, prepare release, draft release"
 ---
 
 # Release Manager Workflow
