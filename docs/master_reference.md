@@ -371,4 +371,17 @@ CREATE TABLE IF NOT EXISTS label_designs (
 
 
 ## Sales Ledger Mechanics
-**Ghost Revenue Immunity Protocol**: In multi-item Shopify orders, if an item goes unfulfilled (pending), the engine natively declares it Cancelled (Void). To prevent double-penalizing the order's total Net Profit when parsing Shopify's global Refunded Amount column, the engine uses oidedRevenueByOrder to aggressively subtract the ghosted item's price out of the global refund penalty before it touches the primary fulfilled item.
+**1. Ghost Revenue Immunity (Cancelled/Void Protocol)**: 
+In multi-item Shopify orders, if an item goes unfulfilled (pending), the engine natively declares it Cancelled (Void). To prevent double-penalizing the order's total Net Profit when parsing Shopify's global Refunded Amount column, the engine uses `voidedRevenueByOrder` to aggressively subtract the ghosted item's price out of the global refund penalty before it touches the primary fulfilled item.
+
+**2. Pre-Ship Exchange (Unshipped / Ghost Transfer)**:
+When a customer swaps an item before the box is ever packed, the engine shifts the original item's monetary payload (Net Revenue, Stripe Fees, Shipping, Discounts) directly to the **Exchange Replacement** item. The original item is completely zeroed out (COGS=0, Net=0), preventing double-revenue tracking and phantom COGS loss, since the old item never actually left the warehouse.
+
+**3. Post-Ship Exchange (Physical Reality Decoupling)**:
+When a customer returns an item after delivery to swap it, the engine shifts the original Customer Payment Revenue to the new **Exchange Replacement** item so gross sales aren't inflated. However, the original item is left isolated in the ledger as a **pure loss string**—it correctly eats the original outbound Shipping Cost and the Stripe Fee as sunk costs. COGS is zeroed out under the assumption the returned item is restocked.
+
+**4. Warranty Replacements**:
+Flags the line item as a zero-revenue event that strictly incurs COGS and Shipping costs. It explicitly increments the `burdenUnits` tracking metric to evaluate hardware failure rates against total units shipped.
+
+**5. IGNORE Token**:
+Prevents the line item from incrementing the `totals.units` sold metric. Used for digital tips, shipping protection, or non-physical tokens that Shopify forces into the line-item CSV logic.
