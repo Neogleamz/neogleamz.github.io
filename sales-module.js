@@ -135,7 +135,8 @@ async function processParsedSales(rows, isTestMode = false) {
         let rawDate = r['Created at'] || r['Date'] || r['Sale Date'] || new Date().toISOString();
         
         if(!orderId || !skuName || qty <= 0) continue;
-        if(!isTestMode && salesDB.some(s => s.order_id === String(orderId) && s.storefront_sku === String(skuName))) continue;
+        
+        // Removed pre-parsing deduplication here so the unified Sandbox Modal can natively display the full matrix for physical layout/formatting review prior to final sync.
 
         let dateStr = "";
         if (typeof rawDate === 'number') {
@@ -258,15 +259,15 @@ async function processParsedSales(rows, isTestMode = false) {
     }
 
     if(pendingSalesRows.length === 0) {
-        syncTrace("HALT WARNING: Zero valid rows detected or Ledger matched existing instances 100%. Aborting.", true);
-        setTimeout(() => showToast("No new sales found in this file! All orders already exist in the ledger or file contained invalid rows."), 10);
+        syncTrace("HALT WARNING: Zero valid rows inherently parsed from target file. Aborting.", true);
+        setTimeout(() => showToast("No valid row structures found in this file!"), 10);
         let elUnmapped = document.getElementById('unmappedSkusList');
         if (elUnmapped) elUnmapped.innerHTML = "";
-        syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
+        
         setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); 
         let elFile = document.getElementById('salesCsvFile');
         if (elFile) elFile.value = ""; 
-        throw new Error("Zero new rows (Deduplicated)");
+        throw new Error("Zero valid structured rows.");
     }
 
 
@@ -449,18 +450,28 @@ async function executeSalesSync(isTestMode = false) {
         if (typeof window.openSandboxModal === 'function') {
             window.openSandboxModal(salesPayload, "PRODUCTION_SALEZ_SYNC", null, "sales_ledger (Primary)", null, {
                 termId: 'syncProgressTerminal',
-                statId: 'statusOrders', // not strictly used in salez UI but required by interface
+                statId: 'statusOrders', 
                 inputNodeId: 'salesCsvFile',
                 resObj: { table: 'sales_ledger', count: salesPayload.length, data: salesPayload },
                 customCommitFn: async () => {
-                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
+                    importTrace(`▶ Execution Phase: Sanitizing injection payload for duplicates natively...`, false);
+                    let cleanPayload = salesPayload.filter(sp => !salesDB.some(s => s.order_id === String(sp.order_id) && s.storefront_sku === String(sp.storefront_sku)));
+                    
+                    if (cleanPayload.length === 0) {
+                        importTrace(`✅ SUCCESS: Execution resolved! Data inherently identically synced to database.`, false);
+                        setTimeout(() => showToast(`✅ Synced! All items were already securely logged in the database.`), 10);
+                        return;
+                    }
+                    
+                    importTrace(`▶ Verified ${cleanPayload.length} valid target entities. Pushing to Cloud Matrix...`, false);
+                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(cleanPayload); 
                     if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
                     syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
                     syncTrace(`Transaction successful! Updating dynamic DOM clusters!`);
                     
-                    salesPayload.forEach(s => salesDB.unshift(s));  
-                    let count = salesPayload.length;
+                    cleanPayload.forEach(s => salesDB.unshift(s));  
+                    let count = cleanPayload.length;
                     pendingSalesRows = [];
                     let elUnmapped = document.getElementById('unmappedSkusList');
                     if (elUnmapped) elUnmapped.innerHTML = "";
@@ -471,7 +482,7 @@ async function executeSalesSync(isTestMode = false) {
                     if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
                     
                     syncTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
-                    setTimeout(() => showToast(`✅ Success! ${count} sales synced. Inventory deduction deferred until Packerz Assembly Completion.`), 10);
+                    setTimeout(() => showToast(`✅ Success! ${count} new sales structurally appended.`), 10);
                 }
             });
         }
