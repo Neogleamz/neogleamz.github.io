@@ -78,137 +78,144 @@ function renderAnalyticsDashboard() {
 }
 
 function renderWaterfallChart(t) {
-    const ctx = document.getElementById('waterfallChart');
-    if (!ctx) return;
-    if (waterfallChart) waterfallChart.destroy();
+    try {
+        const ctx = document.getElementById('waterfallChart');
+        if (!ctx) return;
+        if (waterfallChart) waterfallChart.destroy();
 
-    const netSales = t.gross - t.discounts;
-    
-    const data = [
-        [0, t.gross],                       // Gross Sales
-        [t.gross, netSales],                // Discounts
-        [netSales, netSales - t.cogs],      // COGS
-        [netSales - t.cogs, netSales - t.cogs - t.shipping], // Shipping
-        [netSales - t.cogs - t.shipping, netSales - t.cogs - t.shipping - t.stripe], // Stripe Fees
-        [0, t.net]                          // Net Profit (Final)
-    ];
+        const netSales = t.gross - t.discounts;
 
-    waterfallChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Gross Sales', 'Discounts', 'True COGS', 'Shipping', 'Fees', 'NET PROFIT'],
-            datasets: [{
-                label: 'Financial Flow',
-                data: data,
-                backgroundColor: [
-                    '#6366f1', // Indigo
-                    '#fb7185', // Rose (Loss)
-                    '#f43f5e', // Red (Loss)
-                    '#fbbf24', // Amber (Loss)
-                    '#94a3b8', // Blue Gray (Loss)
-                    '#10b981'  // Emerald (Profit)
-                ],
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (context) => {
-                            const val = context.raw;
-                            const diff = Math.abs(val[1] - val[0]);
-                            return `$${diff.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+        const data = [
+            [0, t.gross],                       // Gross Sales
+            [t.gross, netSales],                // Discounts
+            [netSales, netSales - t.cogs],      // COGS
+            [netSales - t.cogs, netSales - t.cogs - t.shipping], // Shipping
+            [netSales - t.cogs - t.shipping, netSales - t.cogs - t.shipping - t.stripe], // Stripe Fees
+            [0, t.net]                          // Net Profit (Final)
+        ];
+
+        waterfallChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Gross Sales', 'Discounts', 'True COGS', 'Shipping', 'Fees', 'NET PROFIT'],
+                datasets: [{
+                    label: 'Financial Flow',
+                    data: data,
+                    backgroundColor: [
+                        '#6366f1', // Indigo
+                        '#fb7185', // Rose (Loss)
+                        '#f43f5e', // Red (Loss)
+                        '#fbbf24', // Amber (Loss)
+                        '#94a3b8', // Blue Gray (Loss)
+                        '#10b981'  // Emerald (Profit)
+                    ],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const val = context.raw;
+                                const diff = Math.abs(val[1] - val[0]);
+                                return `$${diff.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+                            }
                         }
                     }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { font: { size: 9 }, callback: v => '$' + v.toLocaleString() } },
+                    x: { ticks: { font: { size: 9 } } }
                 }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { font: { size: 9 }, callback: v => '$' + v.toLocaleString() } },
-                x: { ticks: { font: { size: 9 } } }
             }
-        }
-    });
+        });
+    } catch(e) { sysLog('Waterfall chart render error: ' + e.message, true); }
 }
 
 function renderExpenseDoughnut(t) {
-    const ctx = document.getElementById('expenseDoughnut');
-    if (!ctx) return;
-    if (expenseDoughnut) expenseDoughnut.destroy();
+    try {
+        const ctx = document.getElementById('expenseDoughnut');
+        if (!ctx) return;
+        if (expenseDoughnut) expenseDoughnut.destroy();
 
-    expenseDoughnut = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['COGS', 'Shipping', 'Fees', 'Net Profit'],
-            datasets: [{
-                data: [t.cogs, t.shipping, t.stripe, Math.max(0, t.net)],
-                backgroundColor: ['#f43f5e', '#fbbf24', '#94a3b8', '#10b981'],
-                borderWidth: 0,
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '70%',
-            plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, color: '#94a3b8', padding: 10 } }
+        expenseDoughnut = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['COGS', 'Shipping', 'Fees', 'Net Profit'],
+                datasets: [{
+                    data: [t.cogs, t.shipping, t.stripe, Math.max(0, t.net)],
+                    backgroundColor: ['#f43f5e', '#fbbf24', '#94a3b8', '#10b981'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, color: '#94a3b8', padding: 10 } }
+                }
             }
-        }
-    });
+        });
+    } catch(e) { sysLog('Expense doughnut render error: ' + e.message, true); }
 }
 
 function renderTrendsChart(trendData) {
-    const ctx = document.getElementById('trendsChart');
-    if (!ctx) return;
-    if (trendsChart) trendsChart.destroy();
+    try {
+        const ctx = document.getElementById('trendsChart');
+        if (!ctx) return;
+        if (trendsChart) trendsChart.destroy();
 
-    const sortedDates = Object.keys(trendData).sort();
-    const capturedVals = sortedDates.map(d => trendData[d].captured);
-    const netVals = sortedDates.map(d => trendData[d].net);
+        const sortedDates = Object.keys(trendData).sort();
+        const capturedVals = sortedDates.map(d => trendData[d].captured);
+        const netVals = sortedDates.map(d => trendData[d].net);
 
-    trendsChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: sortedDates,
-            datasets: [
-                {
-                    label: 'Captured Revenue',
-                    data: capturedVals,
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Net Profit',
-                    data: netVals,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: { position: 'top', align: 'end', labels: { boxWidth: 12, font: { size: 10 }, padding: 8 } }
+        trendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: sortedDates,
+                datasets: [
+                    {
+                        label: 'Captured Revenue',
+                        data: capturedVals,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Net Profit',
+                        data: netVals,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
             },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-                y: { beginAtZero: true, ticks: { font: { size: 9 }, callback: v => '$' + v.toLocaleString() } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top', align: 'end', labels: { boxWidth: 12, font: { size: 10 }, padding: 8 } }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                    y: { beginAtZero: true, ticks: { font: { size: 9 }, callback: v => '$' + v.toLocaleString() } }
+                }
             }
-        }
-    });
+        });
+    } catch(e) { sysLog('Trends chart render error: ' + e.message, true); }
 }
 
 function renderProfitabilityMatrix(SHIP_COST) {
+    try {
     let wrap = document.getElementById('analyticsTableWrap'); if(!wrap) return;
     let ths = ` <th class="${currentAnalyticsSort.column==='n'?'sorted-'+currentAnalyticsSort.direction:''}" onclick="sortAnalytics('n')">Retail Product</th> <th class="${currentAnalyticsSort.column==='tc'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tc')">True COGS</th> <th class="${currentAnalyticsSort.column==='ms'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ms')">Live MSRP</th> <th class="${currentAnalyticsSort.column==='mg'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('mg')">Gross Margin %</th> <th class="${currentAnalyticsSort.column==='ts'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ts')">Total Units Sold</th> <th class="${currentAnalyticsSort.column==='tp'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tp')">Actual Net Profit</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
@@ -239,7 +246,8 @@ function renderProfitabilityMatrix(SHIP_COST) {
             h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">📦 ${x.n}</td><td class="text-right" style="color:#ef4444;">$${x.tc.toFixed(2)}</td><td class="text-right" style="color:#0ea5e9;">$${x.ms.toFixed(2)}</td><td class="text-right"><span class="margin-badge ${badgeClass}">${x.mg.toFixed(1)}%</span></td><td class="text-right" style="font-weight:bold;">${x.ts.toFixed(0)}</td><td class="text-right" style="font-weight:bold; color:${profitColor};">$${x.tp.toFixed(2)}</td></tr>`; 
         });
     }
-    wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('analyticsTableWrap');
+        wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('analyticsTableWrap');
+    } catch(e) { sysLog('Profitability matrix render error: ' + e.message, true); }
 }
 
 async function backfillFinancials() {
@@ -279,7 +287,8 @@ async function backfillFinancials() {
                 .eq('internal_recipe_name', s.internal_recipe_name);
             
             if(error) {
-                console.error(`Error updating row ${s.order_id}:`, error);
+                // 🧹 Boy Scout: promoted console.error to sysLog for consistent error telemetry
+                sysLog(`Backfill row error [${s.order_id}]: ${error.message}`, true);
             } else {
                 count++;
             }
