@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.0.4] - 2026-04-12
+
+### Features & Refactors
+- **Sitewide Button State Feedback**: Standardized the overarching A.I. Application's core button functionality to visually reflect progress and loading states globally across the webapp. Integrated the new Async state handler `executeWithButtonAction` to guarantee precise visual feedback (Saving..., Synced!) for everything from `EXPORT BACKUP` commands in the Nexuz system to complex SOP modification states.
+
 ## [1.0.3] - 2026-04-12
 
 ### Features & Refactors

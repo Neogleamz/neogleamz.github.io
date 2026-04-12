@@ -23,10 +23,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
-### Target: `main`
-*(Epic: Sitewide Button State Feedback)*
-- [ ] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
-  - [ ] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
+
 
 
 
@@ -112,6 +109,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🗄️ Completed & Archived Epics
 
+### Target: `main`
+*(Epic: Sitewide Button State Feedback)*
+- [x] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
+  - [x] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
 ### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
 - [x] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
