@@ -1,4 +1,4 @@
-﻿---
+---
 name: isolated_test_and_verify
 description: "Executes a strict QA workflow to verify recent changes, utilizing manual browser steps for UI/Bluetooth and isolated tests for DB logic."
 trigger: "/test, test this, check the browser, verify the change"
@@ -27,5 +27,6 @@ When the user invokes `/test` (or asks to "test this", "check the browser", or "
    - Ask the user: *"Please run the test above and report back. Did it pass, or did you see an error/visual bug?"*
    - **Do not commit the code** and do not move on to the next Bucket List item.
 
-5. **Targeted Self-Healing**:
+5. **Targeted Self-Healing (Micro-Commit Enforcement)**:
    - If the user reports an error, you must fix it by *only* modifying the specific lines identified in Step 1. Do not rewrite the entire file or introduce new architectural changes just to fix a typo.
+   - **Crucial:** You must immediately commit the experimental fix locally (e.g., `git commit -m "fix(scope): targeted self-healing attempt X"`) before running the next test. This locks the isolated change into the local history as a permanent diagnostic record.
