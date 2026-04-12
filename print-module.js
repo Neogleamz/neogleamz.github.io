@@ -326,25 +326,30 @@ function renderActivePrintJob(id) {
                                         document.body.style.cursor = 'col-resize';
                                         e.preventDefault();
                                     });
-                                    document.addEventListener('mousemove', (e) => {
+
+                                    // Named functions so removeEventListener can correctly clean them up
+                                    function doPrintSopResize(e) {
                                         if(!isDragging) return;
                                         let container = rz.parentElement;
                                         let totalW = container.getBoundingClientRect().width;
                                         let rect = container.getBoundingClientRect();
                                         let newLeftW = e.clientX - rect.left;
-                                        
                                         if(newLeftW < 100) newLeftW = 100;
                                         if(totalW - newLeftW < 100) newLeftW = totalW - 100;
-                                        
                                         lp.style.flex = \`0 0 \${newLeftW}px\`;
                                         rp.style.flex = \`1 1 0\`;
-                                    });
-                                    document.addEventListener('mouseup', () => {
+                                    }
+                                    function stopPrintSopResize() {
                                         if(isDragging) {
                                             isDragging = false;
                                             document.body.style.cursor = '';
+                                            // Clean up both listeners to prevent accumulation
+                                            document.removeEventListener('mousemove', doPrintSopResize);
+                                            document.removeEventListener('mouseup', stopPrintSopResize);
                                         }
-                                    });
+                                    }
+                                    document.addEventListener('mousemove', doPrintSopResize);
+                                    document.addEventListener('mouseup', stopPrintSopResize);
                                 }
                             }, 20);
                             <\/script>
