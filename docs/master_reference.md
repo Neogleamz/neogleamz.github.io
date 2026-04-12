@@ -370,6 +370,21 @@ CREATE TABLE IF NOT EXISTS label_designs (
 - **PowerShell Precautions:** Do not attempt complex string-based lookup in terminals if HTML contains nested quotes. Use the built-in search tools to isolate lines securely.
 
 
+## 6. Page-by-Page Element Mechanics
+
+### SALEZ
+**1. The CSV Importer Mechanics:**
+- Parses raw Shopify Order CSV exports directly in the browser via `XLSX.js`. 
+- **First-Row Optimization:** Since Shopify CSVs duplicate shipping, tax, and order-level totals across every single line-item row, the engine creates an `orderFirstRowFlags` dictionary to extract the financial footprint ONLY on the first appearance of the order. This ensures accurate relational totals without inflations.
+- **PII Securization Barrier:** Before finalizing the payload, the importer passes the `Email`, `Phone`, `Name`, and `Shipping Address` columns through a local SHA-256 `hashPII` function. The original plaintext data is permanently uncoupled; only the hashes hit the database.
+- **Pre-Flight Sandbox Matrix:** The importer does NOT insert blindly. It generates the `pendingSalesRows` mapping and automatically fires the `Sandbox Modal`. This gives the user a visual terminal matrix to inspect the exact structure, test for formatting failures, and view duplicates before explicitly authorizing the Cloud Database push.
+
+**2. SKU Alias Manager:**
+- During ingestion, the engine cross-references the raw CSV `Lineitem name` against the master internal `productsDB`.
+- If the name doesn't match an exact recipe, it checks the `storefront_aliases` database matrix.
+- If it's an entirely new/unmapped product name from an external platform (like Etsy or a renamed Shopify variant), the system intercepts the sync and surfaces the **Alias Manager Modal**. It forces the user to manually map the foreign `storefront_sku` to an internal `internal_recipe_name`.
+- Once saved, this mapping is permanently written to the database, ensuring the system intelligently "learns" the translation for all future imports.
+
 ## Sales Ledger Mechanics
 **1. Ghost Revenue Immunity (Cancelled/Void Protocol)**: 
 In multi-item Shopify orders, if an item goes unfulfilled (pending), the engine natively declares it Cancelled (Void). To prevent double-penalizing the order's total Net Profit when parsing Shopify's global Refunded Amount column, the engine uses `voidedRevenueByOrder` to aggressively subtract the ghosted item's price out of the global refund penalty before it touches the primary fulfilled item.
