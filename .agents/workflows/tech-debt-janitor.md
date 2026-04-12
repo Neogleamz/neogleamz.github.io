@@ -1,7 +1,7 @@
-﻿---
+---
 name: health_check
 description: "Scans the codebase for vulnerabilities and technical debt, then triages findings into the bucket list."
-trigger: "/health-check"
+trigger: "/health_check, /health-check, run health check, clean the house"
 ---
 
 # Tech Debt Janitor Workflow
