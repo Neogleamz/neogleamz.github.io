@@ -28,9 +28,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
-### Target: `main`
-*(Epic: Competitive Feature Benchmarking)*
-- [ ] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
+
 
 ### Target: `main`
 *(Epic: Sitewide Security Audit)*
@@ -145,4 +143,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `epic/redundant-tools-cleanup`
 - [x] `chore/audit-agents-tools` : Inspect `.agents/tools/` for outdated duplicates.
 - [x] `feat/consolidate-tools` : Compare files with root `tools/` directory to resolve data divergence, delete the redundant folder, and update pointers.
+
+### Target: `main`
+*(Epic: Competitive Feature Benchmarking)*
+- [x] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
 
