@@ -1,7 +1,7 @@
-﻿---
+---
 name: version_control_escape_hatches
 description: "Executes safety checkpoints or destructive rollbacks to protect the codebase from rabbit holes and broken states."
-trigger: "/checkpoint, /abort"
+trigger: "/checkpoint, /abort, save point, revert, restart"
 ---
 
 # The Save Point & Abort Workflow
