@@ -12,12 +12,19 @@
 
 ### Global Standardized Button Utility Classes
 When adding action buttons across the software, you MUST adhere to the global 6-color functional mapping palette (`.btn-[color]-muted/standard/neon`). 
+
+**Color Semantics:**
 1. **🟢 Emerald/Green**: *Positive Commits & Creation*. (e.g. `SAVE MASTER BLUEPRINT`).
 2. **🔵 Blue**: *Neutral Tools & Navigation*. (e.g. `BATCHEZ SOP EDITOR`).
 3. **🟠 Orange/Brand**: *High-Level Engine Execution*. (e.g. `🚀 INITIATE SYNC`).
 4. **🔴 Red**: *Destructive Actions & Overrides*. (e.g. `⚠️ RESET STOCK LEVELS`).
 5. **🟣 Purple**: *A.I. Intelligence & Smart Mapping*. (e.g. `✨ AUTO-FILL LEDGER`).
 6. **⚪ Slate/Grey**: *Physical Reporting*. (e.g. `🖨️ PRINT SOP`).
+
+**The 3-Intensity Bordered System:**
+* **Neon (`.btn-[color]-neon`)**: Highest priority. Solid vibrant background. Use for primary call-to-actions (e.g. `btn-green-neon` for "Save Profile").
+* **Standard Ghost (`.btn-[color]`)**: Neutral priority. Translucent background with a corresponding solid outline border (e.g. `.btn-red` for "Delete"). NOTE: `.btn-ghost-[color]` classes (e.g. `.btn-ghost-red`) strictly govern color schemes but omit border mapping. To render properly, they MUST be paired with `.btn-ghost-base` in the HTML class array to draw the physical boundary box.
+* **Muted Ghost (`.btn-[color]-muted`)**: Lowest priority. Translucent background with a lighter translucent outline border. Perfect for secondary cancel flows (e.g. `.btn-red-muted` for "Cancel").
 
 ### Executive Pane Layout Standards
 - Dashboard module panes **MUST** utilize `<div class="pane-header-bar">` and anchor titles inside `<span class="pane-header-title">`.
