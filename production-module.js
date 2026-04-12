@@ -791,6 +791,7 @@ function renderWOList() {
         let activeCount = workOrdersDB.filter(w => w.status !== 'Archived').length;
         if(activeCount === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
 
+        let woListHtml = [];
         workOrdersDB.forEach((wo, index) => {
             if (wo.status === 'Archived') return;
             if(typeof wo.wip_state === 'string') wo.wip_state = JSON.parse(wo.wip_state || '{}');
@@ -798,7 +799,7 @@ function renderWOList() {
             let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : '';
             let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠'));
 
-            ui.innerHTML += `<li class="${sel}"
+            woListHtml.push(`<li class="${sel}"
                 draggable="true"
                 ondragstart="woDragStart(event, ${index})"
                 ondragover="woDragOver(event)"
@@ -811,8 +812,9 @@ function renderWOList() {
                     ${wo.label ? `<span style="font-size:11px; color:#f59e0b; font-style:italic; padding-left:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${wo.label}</span>` : ''}
                 </div>
                 <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${wo.qty}</span>
-            </li>`;
+            </li>`);
         });
+        ui.innerHTML = woListHtml.join('');
         if(!currentWO) {
             let activeWO = workOrdersDB.find(w => w.status !== 'Archived');
             if(activeWO) {
