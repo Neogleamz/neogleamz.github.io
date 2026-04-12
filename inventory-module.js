@@ -732,36 +732,50 @@ let html5QrCode = null;
 let currentScanKey = null;
 let currentScanIsFgi = false;
 
-window.startCycleCount = function() {
+window.startCycleCount = async function() {
     document.getElementById('cycleCountModal').style.display = 'flex';
-    if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("barcode-reader");
+    
+    // Completely destroy previous instance to prevent iOS Safari Promise locks
+    if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch(e) {}
+        html5QrCode = null;
     }
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText, decodedResult) => {
-            window.onScanSuccess(decodedText);
-        },
-        (errorMessage) => {
-            // ignore background parse errors
-        }
-    ).catch(err => {
-        sysLog(`WebRTC Camera Error: ${err}`, true);
-        alert("Camera error: " + err);
+    const readerEl = document.getElementById("barcode-reader");
+    if (readerEl) readerEl.innerHTML = '';
+
+    try {
+        html5QrCode = new Html5Qrcode("barcode-reader");
+        await html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 12, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+            (decodedText, decodedResult) => {
+                window.onScanSuccess(decodedText);
+            },
+            (errorMessage) => {
+                // ignore per-frame scan errors
+            }
+        );
+    } catch(err) {
+        sysLog(`WebRTC Camera Error: ${err.message || err}`, true);
+        alert("Camera error: " + (err.message || err));
         window.stopCycleCount();
-    });
+    }
 };
 
-window.stopCycleCount = function() {
+window.stopCycleCount = async function() {
     if(html5QrCode && html5QrCode.getState() !== 1) { // 1 = NOT_STARTED
-        html5QrCode.stop().then(() => {
+        try {
+            await html5QrCode.stop();
             html5QrCode.clear();
-        }).catch(err => {
+        } catch(err) {
             sysLog(`Scanner clear error: ${err.message || err}`, true);
             console.warn(err);
-        });
+        }
+        html5QrCode = null;
     }
+    const readerEl = document.getElementById("barcode-reader");
+    if (readerEl) readerEl.innerHTML = '';
+    
     document.getElementById('cycleCountModal').style.display = 'none';
 };
 
