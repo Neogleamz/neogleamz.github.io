@@ -747,6 +747,7 @@ window.startCycleCount = function() {
             // ignore background parse errors
         }
     ).catch(err => {
+        sysLog(`WebRTC Camera Error: ${err}`, true);
         alert("Camera error: " + err);
         window.stopCycleCount();
     });
@@ -756,7 +757,10 @@ window.stopCycleCount = function() {
     if(html5QrCode && html5QrCode.getState() !== 1) { // 1 = NOT_STARTED
         html5QrCode.stop().then(() => {
             html5QrCode.clear();
-        }).catch(err => sysLog("Camera stop error: " + err, true));
+        }).catch(err => {
+            sysLog(`Scanner clear error: ${err.message || err}`, true);
+            console.warn(err);
+        });
     }
     document.getElementById('cycleCountModal').style.display = 'none';
 };
