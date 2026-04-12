@@ -1,5 +1,6 @@
-﻿---
-trigger: always_on
+---
+name: bug_hunter
+trigger: "/bug_hunter, fix this error, fix this crash, fix this bug"
 description: "Auto-migrated Core A.I. Rule"
 ---
 
