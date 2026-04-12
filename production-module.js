@@ -23,6 +23,7 @@ function openSOPMasterModal(mode = 'production') {
 }
 
 function populateSOPDropdown() {
+    try {
     const sopSelect = document.getElementById('sopMasterProductSelect');
     if (!sopSelect) return;
 
@@ -48,6 +49,7 @@ function populateSOPDropdown() {
         options += grp('🖨️ 3D PRINTS',       '🖨️',  prints);
     }
     sopSelect.innerHTML = options;
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function renderMasterSOP() {
@@ -182,6 +184,7 @@ function getNewWOProduct() {
 }
 
 function stageBatchItem() {
+    try {
     const p = getMultiBatchProduct();
     const q = parseFloat(document.getElementById('multiBatchQty').value);
     if(!p || isNaN(q) || q <= 0) return alert("Select product and valid quantity.");
@@ -199,6 +202,7 @@ function stageBatchItem() {
     let mp = document.getElementById('multiBatchProductPrint'); if(mp) mp.value = '';
 
     renderStagedBatchItems();
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function removeBatchItem(index) {
@@ -207,6 +211,7 @@ function removeBatchItem(index) {
 }
 
 function renderStagedBatchItems() {
+    try {
     let list = document.getElementById('stagedBatchItemsList');
     if(multiBatchItems.length === 0) {
         list.innerHTML = '<li class="empty-state" style="list-style:none;">Cart is empty. Add products above.</li>';
@@ -222,9 +227,11 @@ function renderStagedBatchItems() {
         </li>`;
     });
     list.innerHTML = h;
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function checkWORouting() {
+    try {
     const p = getNewWOProduct();
     const q = parseFloat(document.getElementById('newWOQty').value) || 0;
     const rArea = document.getElementById('woRoutingArea');
@@ -319,6 +326,7 @@ function checkWORouting() {
     }
 
     rList.innerHTML = h;
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function balanceRoute(safeKey, total, changed, maxPull) {
@@ -479,6 +487,7 @@ function sortReportTable(th, n, isNumeric) {
 }
 
 function generateMultiBatchOrderReport() {
+    try {
     if(multiBatchItems.length === 0) return alert("Cart is empty.");
 
     let exactDeductions = { raws: {}, pulls: {}, built_subs: {} };
@@ -655,6 +664,7 @@ function generateMultiBatchOrderReport() {
     document.getElementById('batchOrderReportContent').innerHTML = h;
     document.getElementById('multiBatchOrderModal').style.display = 'none';
     document.getElementById('batchOrderReportModal').style.display = 'flex';
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function printBatchOrderReport() {
@@ -755,7 +765,7 @@ async function validateAndCreateWO() {
         }
 
         workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
-    });
+    }).catch(e => { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); });
 }
 
 let woDraggedIndex = null;
@@ -1513,48 +1523,55 @@ async function switchArchiveTab(tab) {
 let _archiveFullData = [];
 
 function renderArchiveList() {
-    const searchEl = document.getElementById('archiveSearchInput');
-    if (searchEl) searchEl.value = '';
+    try {
+        const searchEl = document.getElementById('archiveSearchInput');
+        if (searchEl) searchEl.value = '';
 
-    if (currentArchiveTab === 'batchez') {
-        _archiveFullData = workOrdersDB.filter(w => w.status === 'Archived');
-    } else {
-        _archiveFullData = printQueueDB.filter(p => p.status === 'Archived');
-    }
-    _renderArchiveCards(_archiveFullData);
+        if (currentArchiveTab === 'batchez') {
+            _archiveFullData = workOrdersDB.filter(w => w.status === 'Archived');
+        } else {
+            _archiveFullData = printQueueDB.filter(p => p.status === 'Archived');
+        }
+        _renderArchiveCards(_archiveFullData);
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function filterArchiveList(q) {
-    if (!q || !q.trim()) { _renderArchiveCards(_archiveFullData); return; }
-    const lq = q.toLowerCase().trim();
-    let filtered;
-    if (currentArchiveTab === 'batchez') {
-        filtered = _archiveFullData.filter(w =>
-            (w.wo_id || '').toLowerCase().includes(lq) ||
-            (w.product_name || '').toLowerCase().includes(lq) ||
-            (w.label || '').toLowerCase().includes(lq)
-        );
-    } else {
-        filtered = _archiveFullData.filter(j =>
-            (j.wo_id || '').toLowerCase().includes(lq) ||
-            (j.part_name || '').toLowerCase().includes(lq) ||
-            (j.label || '').toLowerCase().includes(lq)
-        );
-    }
-    _renderArchiveCards(filtered);
+    try {
+        if (!q || !q.trim()) { _renderArchiveCards(_archiveFullData); return; }
+        const lq = q.toLowerCase().trim();
+        let filtered;
+        if (currentArchiveTab === 'batchez') {
+            filtered = _archiveFullData.filter(w =>
+                (w.wo_id || '').toLowerCase().includes(lq) ||
+                (w.product_name || '').toLowerCase().includes(lq) ||
+                (w.label || '').toLowerCase().includes(lq)
+            );
+        } else {
+            filtered = _archiveFullData.filter(j =>
+                (j.wo_id || '').toLowerCase().includes(lq) ||
+                (j.part_name || '').toLowerCase().includes(lq) ||
+                (j.label || '').toLowerCase().includes(lq)
+            );
+        }
+        _renderArchiveCards(filtered);
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function toggleArchiveDetail(id) {
-    const detail = document.getElementById(id);
-    const chevron = document.getElementById(id + '-chev');
-    if (!detail) return;
-    const isOpen = detail.style.display !== 'none';
-    detail.style.display = isOpen ? 'none' : 'flex';
-    if (chevron) chevron.classList.toggle('open', !isOpen);
+    try {
+        const detail = document.getElementById(id);
+        const chevron = document.getElementById(id + '-chev');
+        if (!detail) return;
+        const isOpen = detail.style.display !== 'none';
+        detail.style.display = isOpen ? 'none' : 'flex';
+        if (chevron) chevron.classList.toggle('open', !isOpen);
+    } catch(e) { sysLog(e.message, true); }
 }
 
 function _renderArchiveCards(items) {
-    const listArea = document.getElementById('archiveListArea');
+    try {
+        const listArea = document.getElementById('archiveListArea');
     if (!listArea) return;
     if (items.length === 0) {
         listArea.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No archived records found.</div>`;
@@ -1619,6 +1636,7 @@ function _renderArchiveCards(items) {
             </div>`;
         }).join('');
     }
+    } catch(e) { sysLog(e.message, true); }
 }
 
 
@@ -1811,6 +1829,7 @@ function processTelemetryCanvasRendering(container) {
 }
 
 function renderProductionTelemetryPreview() {
+    try {
     const rawText = document.getElementById('productionAdminQA')?.value || '';
     const previewContainer = document.getElementById('productionAdminQAPreview');
     if(!previewContainer) return;
@@ -1840,6 +1859,7 @@ function renderProductionTelemetryPreview() {
 
     previewContainer.innerHTML = html;
     processTelemetryCanvasRendering(previewContainer);
+    } catch(e) { sysLog(e.message, true); }
 }
 
 let isProductionResizing = false;
@@ -1935,6 +1955,7 @@ function toggleBatchezSopGroup(grpId) {
 
 window.activeInlineSopEditors = window.activeInlineSopEditors || {};
 window.toggleInlineEditor = function(id) {
+    try {
     window.activeInlineSopEditors[id] = !window.activeInlineSopEditors[id];
     if(typeof currentPrintJob !== "undefined" && currentPrintJob && currentPrintJob.id && document.getElementById("paneProdPrint") && document.getElementById("paneProdPrint").style.display !== "none") {
         if(typeof renderActivePrintJob === "function") renderActivePrintJob(currentPrintJob.id);
@@ -1946,6 +1967,7 @@ window.toggleInlineEditor = function(id) {
             inlineRenderTelemetryPreview(id);
         }
     }, 150);
+    } catch(e) { sysLog(e.message, true); }
 };
 
 window.saveInlineSopBlock = async function(grpId, productName) {
@@ -1954,7 +1976,7 @@ window.saveInlineSopBlock = async function(grpId, productName) {
         // Check if extractSOPDataFromUI is available globally, which it is in production-module.js
         let steps = typeof extractSOPDataFromUI === 'function' ? extractSOPDataFromUI(stepsContainer) : [];
         if (typeof extractSOPDataFromUI !== 'function') {
-            console.error('extractSOPDataFromUI is not defined!');
+            sysLog('extractSOPDataFromUI is not defined!', true);
         }
 
         let rawQa = document.getElementById('inlineSopQA_' + grpId)?.value || '';
@@ -2070,6 +2092,7 @@ window.stopInlineResize = function() {
 };
 
 window.inlineRenderTelemetryPreview = function(grpId) {
+    try {
     const rawText = document.getElementById('inlineSopQA_' + grpId)?.value || '';
     const previewContainer = document.getElementById('inlineSopQAPreview_' + grpId);
     if(!previewContainer) return;
@@ -2102,9 +2125,11 @@ window.inlineRenderTelemetryPreview = function(grpId) {
     if (typeof processTelemetryCanvasRendering === 'function') {
         processTelemetryCanvasRendering(previewContainer);
     }
+    } catch(e) { sysLog(e.message, true); }
 };
 
 function buildDraftModalHtml(wo, drafts) {
+    try {
     let ht = '';
 
     // Direct Raws
@@ -2228,6 +2253,7 @@ function buildDraftModalHtml(wo, drafts) {
     }
 
     return ht;
+    } catch(e) { sysLog(e.message, true); return ''; }
 }
 
 window.submitFinalizeWo = async function() {
@@ -2366,6 +2392,7 @@ window.submitFinalizeWo = async function() {
 };
 
 window.openDraftScrapModal = function() {
+    try {
     if (!currentWO) return;
     let w = currentWO.wip_state || {};
     let drafts = w.scrap_draft || {};
@@ -2386,9 +2413,11 @@ window.openDraftScrapModal = function() {
         m.innerHTML = tableHtml;
         document.getElementById('finalizeWoModal').style.display = 'flex';
     }
+    } catch(e) { sysLog(e.message, true); }
 };
 
 window.saveDraftScrap = async function() {
+    try {
     if (!currentWO) return;
     
     await window.executeWithButtonAction('finalizeWoActionBtn', '💾 SAVING DRAFT...', '✅ DRAFT SAVED', async () => {
@@ -2413,6 +2442,7 @@ window.saveDraftScrap = async function() {
         setMasterStatus("Draft Saved", "mod-success");
         setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
     });
+    } catch(e) { sysLog(e.message, true); }
 };
 
 // ====== GLOBAL BINDINGS ======
