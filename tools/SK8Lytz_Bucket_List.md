@@ -21,9 +21,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-### Target: `main`
-*(Epic: Inventory UI State Management)*
-- [ ] `fix/inventory-sort-state-separation` : Decouple the sorting states between the DATAZ and EDITZ inventory tabs. Ensure that sorting columns on one table does not unintentionally mutate the sorting order on the other.
+
 
 
 

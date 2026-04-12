@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.0.5] - 2026-04-12
+
+### Features & Refactors
+- **Inventory UI State Management**: Decoupled the inventory column sorting configurations. Separated the `DATAZ` and `EDITZ` ledgers into independent isolated tracking objects so dynamically mutating UI sorting on one grid does not unintentionally bleed over to the other.
+
 ## [1.0.4] - 2026-04-12
 
 ### Features & Refactors
