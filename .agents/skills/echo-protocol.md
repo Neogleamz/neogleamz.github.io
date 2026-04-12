@@ -1,7 +1,7 @@
-﻿---
+---
 name: echo_protocol
 description: "A strict active-listening checkpoint triggered to verify alignment, assumptions, and scope before executing complex tasks."
-trigger: "Are you following, Do you understand, Make sense?, Playback"
+trigger: "/echo, /playback, Are you following, Do you understand, Make sense?, Playback"
 ---
 
 # Echo Protocol (Context Verification)
