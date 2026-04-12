@@ -1,6 +1,6 @@
 ---
 name: isolated_test_and_verify
-description: "Executes a strict QA workflow to verify recent changes, utilizing manual browser steps for UI/Bluetooth and isolated tests for DB logic."
+description: "Executes a strict QA workflow to verify recent changes natively on 127.0.0.1:5500."
 trigger: always_on
 ---
 
@@ -12,19 +12,14 @@ When the user invokes `/test` (or asks to "test this", "check the browser", or "
    - Use the `run_command` tool to execute `git diff HEAD`.
    - Read the output to understand *exactly* which lines of code were just modified or added. You are strictly forbidden from evaluating or refactoring code outside of this specific diff during this test.
 
-2. **Environment Boot**:
-   - If the local development server (e.g., Vite) is not already running, use your tools to start it (e.g., `npm run dev`). 
-   - Note the local port (usually `http://localhost:5173`).
-
-3. **Execution & Verification (Context Branching)**:
-   - **If the change was strictly Database/Supabase API logic:** - Autonomously write a temporary, isolated `curl` command (using Supabase REST endpoints) or a Vanilla JS browser console snippet to verify the data mutation. 
-     - Analyze the output to prove the logic works.
-   - **If the change was UI, DOM logic, or Hardware/Web Bluetooth:** - *Crucial Context:* Web Bluetooth requires physical human gestures. You cannot automate hardware tests.
-     - Output the exact `localhost` URL the user needs to open.
-     - Write a strict, step-by-step "Manual Test Script" for the user to execute (e.g., *"1. Go to /lights. 2. Tap the 'Connect' button to trigger the browser BLE prompt. 3. Verify the skates turn blue."*).
+2. **Execution & Verification**:
+   - **If the change was strictly Database/Supabase API logic:** 
+     - Autonomously generate a temporary Javascript snippet for the user to run directly in their browser console to verify the data mutation.
+   - **If the change was UI or DOM logic:** 
+     - Write a strict, step-by-step "Manual Test Script" using explicit Neogleamz terminology (e.g., *"1. Open `127.0.0.1:5500`. 2. Navigate to STOCKPILEZ > DATAZ. 3. Type inside the new search bar and verify filtering works."*).
 
 4. **Halt & Await Feedback**:
-   - Ask the user: *"Please run the test above and report back. Did it pass, or did you see an error/visual bug?"*
+   - Ask the user: *"Please run the test script dynamically on your local server and report back. Did it pass, or did you see an error/visual bug?"*
    - **Do not commit the code** and do not move on to the next Bucket List item.
 
 5. **Targeted Self-Healing (Micro-Commit Enforcement)**:
