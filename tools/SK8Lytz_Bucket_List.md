@@ -28,7 +28,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Tailwind Modal Migration)*
-- [ ] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
+- [x] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
 
 ### Target: `main`
 *(Epic: Sitewide Code Quality Audit)*
