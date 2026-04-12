@@ -26,7 +26,7 @@ async function addManualSale() {
         let source = document.getElementById('manualSaleSource').value.trim();
         let balance = parseFloat(document.getElementById('manualSaleBalance').value) || 0;
         
-        if(!id || !dt || !rec || isNaN(qty) || qty <= 0) return alert("Please fill all required fields correctly.");
+        if(!id || !dt || !rec || isNaN(qty) || qty <= 0) { sysLog("Validation Error: Missing required fields for manual sale.", true); return alert("Please fill all required fields correctly."); }
         
         let subtot = subtotRaw ? parseFloat(subtotRaw) : (qty * pr);
         let total = totalRaw ? parseFloat(totalRaw) : (subtot + ship + tax - discAmt);
@@ -262,7 +262,7 @@ function openAliasModal(sku) { document.getElementById('aliasUnknownSku').innerT
 
 async function saveAliasMapping() {
     let sku = document.getElementById('aliasUnknownSku').innerText; let recipe = document.getElementById('aliasRecipeSelect').value;
-    if(!recipe) return alert("Select an internal recipe.");
+    if(!recipe) { sysLog("Validation Error: No recipe selected for mapping.", true); return alert("Select an internal recipe."); }
     sysLog(`Mapping ${sku} -> ${recipe}`); setMasterStatus("Saving Alias...", "mod-working");
     
     aliasDB[sku] = recipe;
@@ -739,7 +739,7 @@ window.updateSaleType = async function(sel, orderId, sku) {
         let oldVal = row.transaction_type || 'Standard';
         row.transaction_type = newVal;
         const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
-        if(error) { alert("Error saving type: " + error.message); return; }
+        if(error) { sysLog("DB Error saving type: " + error.message, true); alert("Error saving type: " + error.message); return; }
         
         setMasterStatus("Saved!", "mod-success"); 
         renderSalesTable(); 
@@ -755,10 +755,10 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
         let dbVal = newVal;
         if(isNum) {
             dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,""));
-            if(isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); }
+            if(isNaN(dbVal)) { cell.innerText = oldValTemp; sysLog("Validation Error: Valid number required for cell edit.", true); return alert("Valid number required."); }
         }
         if(col === 'order_id' && salesDB.some(s => s.order_id === dbVal && s.storefront_sku === sku && s.order_id !== orderId)) { 
-            cell.innerText = oldValTemp; return alert("This Order ID + SKU combination already exists."); 
+            cell.innerText = oldValTemp; sysLog("Validation Error: Duplicate Order ID + SKU combo.", true); return alert("This Order ID + SKU combination already exists."); 
         }
         
         sysLog(`Editing Sale ${orderId}: ${col}`); setMasterStatus("Saving...", "mod-working");
