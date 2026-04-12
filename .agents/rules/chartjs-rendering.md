@@ -1,6 +1,7 @@
-﻿---
-trigger: always_on
+---
+name: chartjs_rendering
 description: "Strict Vanilla JS rendering constraints, memory-management, and update methodologies for Chart.js."
+trigger: "/chartjs, /charts, render chart, build chart"
 ---
 
 # Chart.js Rendering Rule
