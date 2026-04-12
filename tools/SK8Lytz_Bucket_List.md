@@ -21,9 +21,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-
-
-
+### Target: `main`
+*(Epic: Master Reference Compliance Audit)*
+- [ ] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
 
 
 
@@ -42,9 +42,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: Socialz Outreach Kanban)*
 - [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
 
-### Target: `main`
-*(Epic: Master Reference Compliance Audit)*
-- [ ] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
 
 ### Target: `main`
 *(Epic: Sitewide Performance Optimization)*
