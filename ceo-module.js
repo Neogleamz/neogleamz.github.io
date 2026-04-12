@@ -33,7 +33,7 @@ function saveCeoBoard() { if (typeof saveCloudPrefs === 'function') saveCloudPre
 
 function get30DayVolume(productName) {
     try {
-        if(typeof salesDB === 'undefined' || !salesDB || !Array.isArray(salesDB)) return 0; 
+        if(typeof salesDB === 'undefined' || !salesDB || !Array.isArray(salesDB)) return 0;
         let thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         let vol = 0;
         let searchName = productName.toUpperCase().trim();
@@ -44,7 +44,7 @@ function get30DayVolume(productName) {
                 }
             }
         });
-        return vol; 
+        return vol;
     } catch (e) { return 0; }
 }
 
@@ -53,7 +53,7 @@ function get30DayVolume(productName) {
  * Skips 3D prints, labels, and subassemblies to ensure only valid customer-facing volume is simulated.
  */
 function autoPopulateCeoBoard() {
-    if (ceoActiveProducts.length > 0) return; 
+    if (ceoActiveProducts.length > 0) return;
     let prods = Object.keys(productsDB).filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
     prods.forEach(pName => {
         let vol = get30DayVolume(pName);
@@ -78,10 +78,10 @@ function initCeoCharts() {
         try {
             ceoWaterfallChart = new Chart(elWaterfall.getContext('2d'), {
                 type: 'bar', plugins: [ChartDataLabels],
-                data: { 
-                    labels: ['Gross Sales', 'COGS', 'Stripe', 'Shipping', 'Warranty', 'Affiliate', 'Ads (CAC)', 'Net Profit'], 
-                    datasets: [{ 
-                        label: 'Financial Flow', 
+                data: {
+                    labels: ['Gross Sales', 'COGS', 'Stripe', 'Shipping', 'Warranty', 'Affiliate', 'Ads (CAC)', 'Net Profit'],
+                    datasets: [{
+                        label: 'Financial Flow',
                         data: [
                             {x: 'Gross Sales', y: 0, base: 0},
                             {x: 'COGS', y: 0, base: 0},
@@ -91,15 +91,15 @@ function initCeoCharts() {
                             {x: 'Affiliate', y: 0, base: 0},
                             {x: 'Ads (CAC)', y: 0, base: 0},
                             {x: 'Net Profit', y: 0, base: 0}
-                        ], 
-                        backgroundColor: ['#10b981', '#8b5cf6', '#06b6d4', '#3b82f6', '#f59e0b', '#facc15', '#ef4444', '#00ff66'], 
-                        borderRadius: 4, barPercentage: 0.8 
-                    }] 
+                        ],
+                        backgroundColor: ['#10b981', '#8b5cf6', '#06b6d4', '#3b82f6', '#f59e0b', '#facc15', '#ef4444', '#00ff66'],
+                        borderRadius: 4, barPercentage: 0.8
+                    }]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 30 } }, 
-                    plugins: { 
-                        legend: { display: false }, 
+                options: {
+                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 30 } },
+                    plugins: {
+                        legend: { display: false },
                         datalabels: {
                             color: '#fff',
                             align: 'center',
@@ -120,11 +120,11 @@ function initCeoCharts() {
                                 }
                             }
                         }
-                    }, 
-                    scales: { 
-                        y: { grid: {color:'#222'} }, 
-                        x: { grid: { display: false } } 
-                    } 
+                    },
+                    scales: {
+                        y: { grid: {color:'#222'} },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
         } catch (e) {
@@ -136,12 +136,12 @@ function initCeoCharts() {
     if (elExpense) {
         ceoExpenseChart = new Chart(elExpense.getContext('2d'), {
             type: 'bar', plugins: [ChartDataLabels],
-            data: { 
-                labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Net Profit'], 
+            data: {
+                labels: ['True COGS', 'Ads (CAC)', 'Affil', 'Warr', 'Shipping', 'Stripe', 'Net Profit'],
                 datasets: [
                     { label: 'Current MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['rgba(139,92,246,0.3)', 'rgba(239,68,68,0.3)', 'rgba(250,204,21,0.3)', 'rgba(245,158,11,0.3)', 'rgba(59,130,246,0.3)', 'rgba(6,182,212,0.3)', 'rgba(0,255,102,0.3)'], borderRadius: 4 },
                     { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'], borderRadius: 4 }
-                ] 
+                ]
             },
             options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
         });
@@ -153,9 +153,9 @@ function initCeoCharts() {
     }
     const efficiencyOptions = (isCurrent) => ({
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        scales: { 
-            x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} }, 
-            y: { stacked: true, grid: {display: false} } 
+        scales: {
+            x: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: {color: '#222'} },
+            y: { stacked: true, grid: {display: false} }
         },
         plugins: {
             legend: { position: 'bottom' },
@@ -186,8 +186,8 @@ function initCeoCharts() {
                     let dol = (value / 100) * bs;
                     return `${ceoFmt.format(dol)}\n(${value.toFixed(1)}%)`;
                 },
-                align: 'center', 
-                anchor: 'center', 
+                align: 'center',
+                anchor: 'center',
                 textAlign: 'center'
             }
         }
@@ -195,7 +195,7 @@ function initCeoCharts() {
 
     let elEff = document.getElementById('efficiencyChart');
     if (elEff) ceoEfficiencyChart = new Chart(elEff.getContext('2d'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(false) });
-    
+
     let elCurEff = document.getElementById('curEfficiencyChart');
     if (elCurEff) ceoCurEfficiencyChart = new Chart(elCurEff.getContext('2d'), { type: 'bar', plugins: [ChartDataLabels], data: { labels: [], datasets: [] }, options: efficiencyOptions(true) });
 }
@@ -203,9 +203,9 @@ function initCeoCharts() {
 function renderCeoTerminal() {
     sysLog("Booting CEO Terminal...");
     autoPopulateCeoBoard();
-    
+
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
-    
+
     let controlHtml = `
         <div style="background: var(--bg-surface-light); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border-color);">
             <button class="btn-blue" onclick="openCeoAddModal()" style="width:100%; padding: 12px; font-size:14px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
@@ -217,7 +217,7 @@ function renderCeoTerminal() {
     let slidersHtml = controlHtml;
     ceoActiveProducts.forEach((p, index) => {
         const toggleStyle = (active, color) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? color : '#444'}; background: ${active ? color+'22' : '#222'}; color: ${active ? color : '#666'}; margin-right: 4px;`;
-        
+
         slidersHtml += `
         <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px; cursor:grab;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
             <div class="ceo-slider-label">
@@ -234,7 +234,7 @@ function renderCeoTerminal() {
             </div>
         </div>`;
     });
-    
+
     let elSliders = document.getElementById('ceo-dynamic-sliders');
     if (elSliders) elSliders.innerHTML = slidersHtml;
     if(!ceoExpenseChart) initCeoCharts();
@@ -248,11 +248,11 @@ function toggleCeoBtn(idx, key) {
 
 function updateCeoEngine() {
     try {
-        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00; 
+        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
         let gCac = parseFloat(document.getElementById('globalCacNum').value) || 0;
         let gAff = parseFloat(document.getElementById('globalAffNum').value) || 0;
         let gWarr = parseFloat(document.getElementById('globalWarrNum').value) || 0;
-        
+
         let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, curStripe:0, aff:0, curAff:0, warr:0, curWarr:0, ship:0, cac:0 };
         let charts = { labels:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
 
@@ -260,8 +260,8 @@ function updateCeoEngine() {
         ceoActiveProducts.forEach((p, index) => {
             p.vol = parseInt(document.getElementById(`ceo-vol-${index}-num`)?.value) || 0;
             p.testMsrp = parseFloat(document.getElementById(`ceo-testmsrp-${index}`)?.value) || p.testMsrp;
-            
-            let effCac = p.applyCac ? gCac : 0; 
+
+            let effCac = p.applyCac ? gCac : 0;
             let effAff = p.applyAff ? gAff : 0;
             let effWarr = p.applyWarr ? gWarr : 0;
 
@@ -274,23 +274,23 @@ function updateCeoEngine() {
             // Math: Test (Free Shipping Threshold)
             let testMetrics = getEnginePredictiveMetrics(p.testMsrp, liveCogs, fsThreshold, effCac, effAff, effWarr);
 
-            totals.gross += (p.testMsrp * p.vol); 
-            totals.curNet += (curMetrics.net * p.vol); 
+            totals.gross += (p.testMsrp * p.vol);
+            totals.curNet += (curMetrics.net * p.vol);
             totals.testNet += (testMetrics.net * p.vol);
-            totals.cogs += (liveCogs * p.vol); 
-            totals.stripe += (testMetrics.stripe * p.vol); 
+            totals.cogs += (liveCogs * p.vol);
+            totals.stripe += (testMetrics.stripe * p.vol);
             totals.curStripe += (curMetrics.stripe * p.vol);
-            totals.aff += (testMetrics.aff * p.vol); 
+            totals.aff += (testMetrics.aff * p.vol);
             totals.curAff += (curMetrics.aff * p.vol);
-            totals.warr += (testMetrics.warr * p.vol); 
+            totals.warr += (testMetrics.warr * p.vol);
             totals.curWarr += (curMetrics.warr * p.vol);
-            totals.ship += (testMetrics.ship * p.vol); 
+            totals.ship += (testMetrics.ship * p.vol);
             totals.cac += (effCac * p.vol);
 
             charts.labels.push(p.name);
-            charts.curNetData.push(curMetrics.net); 
+            charts.curNetData.push(curMetrics.net);
             charts.testNetData.push(testMetrics.net);
-            
+
             let b = p.testMsrp || 1;
             charts.eff.push([(liveCogs/b)*100, (effCac/b)*100, (testMetrics.aff/b)*100, (testMetrics.warr/b)*100, (testMetrics.merchantShipMargin/b)*100, (testMetrics.stripe/b)*100, (Math.max(0,testMetrics.net)/b)*100]);
 
@@ -355,23 +355,23 @@ function updateCeoEngine() {
             });
         }
         tableHtml += '</tbody></table>';
-        
+
         const wrap = document.getElementById('ceoTableWrap');
         if (wrap) {
             wrap.innerHTML = tableHtml;
             applyTableInteractivity('ceoTableWrap');
         }
-        
+
         // Update KPIs
         let elKpiGross = document.getElementById('kpiGross');
         if (elKpiGross) elKpiGross.innerText = ceoFmt.format(totals.gross).split('.')[0];
-        
+
         let elKpiOldNet = document.getElementById('kpiOldNet');
         if (elKpiOldNet) elKpiOldNet.innerText = ceoFmt.format(totals.curNet).split('.')[0];
-        
+
         let elKpiNewNet = document.getElementById('kpiNewNet');
         if (elKpiNewNet) elKpiNewNet.innerText = ceoFmt.format(totals.testNet).split('.')[0];
-        
+
         let elKpiSaved = document.getElementById('kpiSaved');
         if (elKpiSaved) elKpiSaved.innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
 
@@ -383,7 +383,7 @@ function updateCeoEngine() {
         if (typeof salesDB !== 'undefined' && Array.isArray(salesDB) && salesDB.length !== window._ltvCacheLength) {
             let ltvNetSum = 0;
             window._ltvCustomerMap = {};
-            
+
             salesDB.forEach(s => {
                 let qty = parseFloat(s.qty_sold) || 1;
                 let cogs = (typeof getEngineTrueCogs === 'function') ? getEngineTrueCogs(s.internal_recipe_name || s.item_name) * qty : 0;
@@ -402,10 +402,10 @@ function updateCeoEngine() {
                     window._ltvCustomerMap[h].totalNet += net;
                 }
             });
-            
+
             let totalUniqueHashes = Object.keys(window._ltvCustomerMap).length;
             let repeatBuyers = Object.values(window._ltvCustomerMap).filter(c => c.orders > 1).length;
-            
+
             window._ltvCachedRepeatRate = totalUniqueHashes > 0 ? (repeatBuyers / totalUniqueHashes) * 100 : 0;
             window._ltvCachedAvg = totalUniqueHashes > 0 ? (ltvNetSum / totalUniqueHashes) : 0;
             window._ltvCacheLength = salesDB.length;
@@ -422,7 +422,7 @@ function updateCeoEngine() {
         let rem1 = totals.gross - totals.cogs;
         let rem2 = rem1 - totals.stripe;
         let rem3 = rem2 - totals.ship;
-        let remWarr = rem3 - totals.warr; 
+        let remWarr = rem3 - totals.warr;
         let remAff = remWarr - totals.aff;
         let rem4 = remAff - totals.cac;
 
@@ -445,9 +445,9 @@ function updateCeoEngine() {
         ceoExpenseChart.data.datasets[1].data = [totals.cogs, totals.cac, totals.aff, totals.warr, totals.ship, totals.stripe, Math.max(0, totals.testNet)];
         ceoExpenseChart.update();
 
-        ceoUnitChart.data.labels = charts.labels; 
-        ceoUnitChart.data.datasets[0].data = charts.curNetData; 
-        ceoUnitChart.data.datasets[1].data = charts.testNetData; 
+        ceoUnitChart.data.labels = charts.labels;
+        ceoUnitChart.data.datasets[0].data = charts.curNetData;
+        ceoUnitChart.data.datasets[1].data = charts.testNetData;
         ceoUnitChart.update();
 
         const colors = ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'];
@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = document.getElementById(id + 'Slider');
         const n = document.getElementById(id + 'Num');
         if(s && n) {
-            s.value = 0; n.value = 0; 
+            s.value = 0; n.value = 0;
             s.addEventListener('input', () => { n.value = s.value; updateCeoEngine(); });
             n.addEventListener('input', () => { s.value = n.value; updateCeoEngine(); });
         }
@@ -534,13 +534,13 @@ function addCeoSessionTestItem() {
     if(!raw) return alert("Enter item name.");
     let iName = "🧪 " + raw;
     if(window.ceoSessionTestItems.some(p => p.name === iName)) return alert("Test item name taken.");
-    
+
     let c = parseFloat(document.getElementById('ceo-u-custom-cogs').value) || 0;
     let m = parseFloat(document.getElementById('ceo-u-custom-msrp').value) || 0;
-    
+
     window.ceoSessionTestItems.unshift({ name: iName, cogs: c, msrp: m });
     renderUnifiedBuilderTable();
-    
+
     // Clear custom inputs
     document.getElementById('ceo-u-custom-name').value = '';
     document.getElementById('ceo-u-custom-cogs').value = '';
@@ -567,13 +567,13 @@ function addCeoUnifiedSelection() {
     if(selections.length === 0) return alert("Please select quantities for at least one item.");
 
     let bNameRaw = document.getElementById('ceo-u-bundle-name').value.trim();
-    
+
     if(bNameRaw) {
         // Create as BUNDLE
         let finalName = "📦 " + bNameRaw;
         let tCogs = 0; let tMsrp = 0;
         selections.forEach(s => { tCogs += s.qty * s.cogs; tMsrp += s.qty * s.msrp; });
-        
+
         ceoActiveProducts.push({ name: finalName, isBundle:true, applyCac:false, applyAff:false, applyWarr:false, currentMsrp: tMsrp, testMsrp: tMsrp, cogs: tCogs, vol: 0 });
     } else {
         // Add INDIVIDUALLY
@@ -596,7 +596,7 @@ function addCeoUnifiedSelection() {
 function openLtvModal() {
     let map = window._ltvCustomerMap || {};
     let hashes = Object.keys(map);
-    
+
     // Distribution
     let distribution = { 1: 0, 2: 0, 3: 0 };
     let whales = [];
