@@ -377,6 +377,49 @@ CREATE TABLE IF NOT EXISTS label_designs (
 - The main entry point to the NEXUZ executive console displaying three high-level navigation cards (`IMPORTZ`, `SALEZ`, `BRAINZ`).
 - Displays live, real-time KPI grids (`statImpzSyncs`, `statSalzMap`, `statBrnzSync`, etc.) aggregated from across the system for top-level health monitoring.
 
+### IMPORTZ
+**1. Orderz & Parcelz Sync (The HTML Parsers):**
+- Unlike standard systems that rely on APIs, this engine acts as an aggressive web-scraper running entirely within the local browser. It is designed to ingest raw, downloaded `.html` pages natively from overseas freight-forwarders (e.g., Superbuy).
+- **The Execution:** The user feeds multiple raw `.html` files into the importer. The engine uses the native browser `DOMParser()` to invisibly construct a virtual DOM tree in RAM. 
+- **The RegEx Dictionary:** Because vendor HTML interfaces constantly change, the engine does not rely on strict CSS classes to target data. Instead, it processes the raw `innerText` blocks sequentially using the highly customizable `PARSER_RULES` and `PARCEL_RULES` Regular Expression dictionaries to extract mathematical realities (Unit Cost, Make Up Fees, Actual Paid, Chargeable Weight).
+- **Orderz Distributed Math:** For outbound supply chain orders, the engine explicitly hunts for "Make Up" fees and "Hidden Surcharges" embedded dynamically in the HTML and mathematically distributes those fees proportionally across the specific line items `[ (hiddenFee / totalQty) ]` to ensure flawless COGS parity.
+
+**2. Test Mode (Sandbox):**
+- As with SALEZ, the user has the explicit option to upload HTML packets directly into **Test Mode**. The engine will execute the full DOM extraction and math spread, but bypass the Supabase cloud connection entirely, rendering the final data structures as a visual table matrix in the sandbox modal for integrity verification.
+
+**3. Engine Trace (The Diagnostics Box):**
+- Because RegEx extraction is highly volatile against external code changes, the module includes a live **Engine Trace** readout below the importer. 
+- During extraction, the engine actively strips away all `tr/td/div` HTML nodes, leaving a purified line-by-line plaintext summary of what the `DOMParser` actually saw. This provides the user with an exact diagnostic window to adjust their custom RegEx patterns without leaving the application.
+
+### SALEZ
+**1. The CSV Importer Mechanics:**
+- Parses raw Shopify Order CSV exports directly in the browser via `XLSX.js`. 
+- **First-Row Optimization:** Since Shopify CSVs duplicate shipping, tax, and order-level totals across every single line-item row, the engine creates an `orderFirstRowFlags` dictionary to extract the financial footprint ONLY on the first appearance of the order. This ensures accurate relational totals without inflations.
+- **PII Securization Barrier:** Before finalizing the payload, the importer passes the `Email`, `Phone`, `Name`, and `Shipping Address` columns through a local SHA-256 `hashPII` function. The original plaintext data is permanently uncoupled; only the hashes hit the database.
+- **Pre-Flight Sandbox Matrix:** The importer does NOT insert blindly. It generates the `pendingSalesRows` mapping and automatically fires the `Sandbox Modal`. This gives the user a visual terminal matrix to inspect the exact structure, test for formatting failures, and view duplicates before explicitly authorizing the Cloud Database push.
+
+**2. SKU Alias Manager:**
+- During ingestion, the engine cross-references the raw CSV `Lineitem name` against the master internal `productsDB`.
+- If the name doesn't match an exact recipe, it checks the `storefront_aliases` database matrix.
+- If it's an entirely new/unmapped product name from an external platform (like Etsy or a renamed Shopify variant), the system intercepts the sync and surfaces the **Alias Manager Modal**. It forces the user to manually map the foreign `storefront_sku` to an internal `internal_recipe_name`.
+- Once saved, this mapping is permanently written to the database, ensuring the system intelligently "learns" the translation for all future imports.
+
+**3. Sales Ledger Mechanics (Data Parsers):**
+- **Ghost Revenue Immunity (Cancelled/Void Protocol):** 
+In multi-item Shopify orders, if an item goes unfulfilled (pending), the engine natively declares it Cancelled (Void). To prevent double-penalizing the order's total Net Profit when parsing Shopify's global Refunded Amount column, the engine uses `voidedRevenueByOrder` to aggressively subtract the ghosted item's price out of the global refund penalty before it touches the primary fulfilled item.
+
+- **Pre-Ship Exchange (Unshipped / Ghost Transfer):**
+When a customer swaps an item before the box is ever packed, the engine shifts the original item's monetary payload (Net Revenue, Stripe Fees, Shipping, Discounts) directly to the **Exchange Replacement** item. The original item is completely zeroed out (COGS=0, Net=0), preventing double-revenue tracking and phantom COGS loss, since the old item never actually left the warehouse.
+
+- **Post-Ship Exchange (Physical Reality Decoupling):**
+When a customer returns an item after delivery to swap it, the engine shifts the original Customer Payment Revenue to the new **Exchange Replacement** item so gross sales aren't inflated. However, the original item is left isolated in the ledger as a **pure loss string**—it correctly eats the original outbound Shipping Cost and the Stripe Fee as sunk costs. COGS is zeroed out under the assumption the returned item is restocked.
+
+- **Warranty Replacements:**
+Flags the line item as a zero-revenue event that strictly incurs COGS and Shipping costs. It explicitly increments the `burdenUnits` tracking metric to evaluate hardware failure rates against total units shipped.
+
+**5. IGNORE Token**:
+Prevents the line item from incrementing the `totals.units` sold metric. Used for digital tips, shipping protection, or non-physical tokens that Shopify forces into the line-item CSV logic.
+
 ### BRAINZ
 **1. Backup & Restore (Data Vault):**
 - **Export Backup:** Triggers a native system operation to compile authoritative snapshots of the cloud database ledgers into a secure, downloadable `.xlsx` physical archive.
@@ -454,33 +497,6 @@ CREATE TABLE IF NOT EXISTS label_designs (
 - Includes a dedicated serialization GUI to mix text, barcodes, and emojis (`labelzDesignerEmojiPicker`).
 - Generated label definitions are saved securely and can be pooled into the global Print Spooler just like `BARCODZ` for unified thermal execution.
 
-### SALEZ
-**1. The CSV Importer Mechanics:**
-- Parses raw Shopify Order CSV exports directly in the browser via `XLSX.js`. 
-- **First-Row Optimization:** Since Shopify CSVs duplicate shipping, tax, and order-level totals across every single line-item row, the engine creates an `orderFirstRowFlags` dictionary to extract the financial footprint ONLY on the first appearance of the order. This ensures accurate relational totals without inflations.
-- **PII Securization Barrier:** Before finalizing the payload, the importer passes the `Email`, `Phone`, `Name`, and `Shipping Address` columns through a local SHA-256 `hashPII` function. The original plaintext data is permanently uncoupled; only the hashes hit the database.
-- **Pre-Flight Sandbox Matrix:** The importer does NOT insert blindly. It generates the `pendingSalesRows` mapping and automatically fires the `Sandbox Modal`. This gives the user a visual terminal matrix to inspect the exact structure, test for formatting failures, and view duplicates before explicitly authorizing the Cloud Database push.
-
-**2. SKU Alias Manager:**
-- During ingestion, the engine cross-references the raw CSV `Lineitem name` against the master internal `productsDB`.
-- If the name doesn't match an exact recipe, it checks the `storefront_aliases` database matrix.
-- If it's an entirely new/unmapped product name from an external platform (like Etsy or a renamed Shopify variant), the system intercepts the sync and surfaces the **Alias Manager Modal**. It forces the user to manually map the foreign `storefront_sku` to an internal `internal_recipe_name`.
-- Once saved, this mapping is permanently written to the database, ensuring the system intelligently "learns" the translation for all future imports.
-
-### IMPORTZ
-**1. Orderz & Parcelz Sync (The HTML Parsers):**
-- Unlike standard systems that rely on APIs, this engine acts as an aggressive web-scraper running entirely within the local browser. It is designed to ingest raw, downloaded `.html` pages natively from overseas freight-forwarders (e.g., Superbuy).
-- **The Execution:** The user feeds multiple raw `.html` files into the importer. The engine uses the native browser `DOMParser()` to invisibly construct a virtual DOM tree in RAM. 
-- **The RegEx Dictionary:** Because vendor HTML interfaces constantly change, the engine does not rely on strict CSS classes to target data. Instead, it processes the raw `innerText` blocks sequentially using the highly customizable `PARSER_RULES` and `PARCEL_RULES` Regular Expression dictionaries to extract mathematical realities (Unit Cost, Make Up Fees, Actual Paid, Chargeable Weight).
-- **Orderz Distributed Math:** For outbound supply chain orders, the engine explicitly hunts for "Make Up" fees and "Hidden Surcharges" embedded dynamically in the HTML and mathematically distributes those fees proportionally across the specific line items `[ (hiddenFee / totalQty) ]` to ensure flawless COGS parity.
-
-**2. Test Mode (Sandbox):**
-- As with SALEZ, the user has the explicit option to upload HTML packets directly into **Test Mode**. The engine will execute the full DOM extraction and math spread, but bypass the Supabase cloud connection entirely, rendering the final data structures as a visual table matrix in the sandbox modal for integrity verification.
-
-**3. Engine Trace (The Diagnostics Box):**
-- Because RegEx extraction is highly volatile against external code changes, the module includes a live **Engine Trace** readout below the importer. 
-- During extraction, the engine actively strips away all `tr/td/div` HTML nodes, leaving a purified line-by-line plaintext summary of what the `DOMParser` actually saw. This provides the user with an exact diagnostic window to adjust their custom RegEx patterns without leaving the application.
-
 ### REVENUEZ (Hub Landing)
 **1. The Trinity Cards:**
 - The final financial nexus displaying `ORDERZ`, `STATZ`, and `SIMULATORZ`.
@@ -506,18 +522,3 @@ CREATE TABLE IF NOT EXISTS label_designs (
 - Includes dynamic grid generation (`skater-grid`) supporting dual-view layouts (Card vs List), complex multi-select filtering logic (Style tag mapping), and live-sorting functionality.
 - Direct CSV ingestion allows rapid bulk roster scaling.
 
-## Sales Ledger Mechanics
-**1. Ghost Revenue Immunity (Cancelled/Void Protocol)**: 
-In multi-item Shopify orders, if an item goes unfulfilled (pending), the engine natively declares it Cancelled (Void). To prevent double-penalizing the order's total Net Profit when parsing Shopify's global Refunded Amount column, the engine uses `voidedRevenueByOrder` to aggressively subtract the ghosted item's price out of the global refund penalty before it touches the primary fulfilled item.
-
-**2. Pre-Ship Exchange (Unshipped / Ghost Transfer)**:
-When a customer swaps an item before the box is ever packed, the engine shifts the original item's monetary payload (Net Revenue, Stripe Fees, Shipping, Discounts) directly to the **Exchange Replacement** item. The original item is completely zeroed out (COGS=0, Net=0), preventing double-revenue tracking and phantom COGS loss, since the old item never actually left the warehouse.
-
-**3. Post-Ship Exchange (Physical Reality Decoupling)**:
-When a customer returns an item after delivery to swap it, the engine shifts the original Customer Payment Revenue to the new **Exchange Replacement** item so gross sales aren't inflated. However, the original item is left isolated in the ledger as a **pure loss string**—it correctly eats the original outbound Shipping Cost and the Stripe Fee as sunk costs. COGS is zeroed out under the assumption the returned item is restocked.
-
-**4. Warranty Replacements**:
-Flags the line item as a zero-revenue event that strictly incurs COGS and Shipping costs. It explicitly increments the `burdenUnits` tracking metric to evaluate hardware failure rates against total units shipped.
-
-**5. IGNORE Token**:
-Prevents the line item from incrementing the `totals.units` sold metric. Used for digital tips, shipping protection, or non-physical tokens that Shopify forces into the line-item CSV logic.
