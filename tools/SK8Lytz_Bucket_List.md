@@ -43,7 +43,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `chore/audit-system-tools` : Execute `@[/legacy_audit]` against `system-tools-module.js` to ensure telemetry rules are met.
 - [x] `chore/audit-system-version` : Execute `@[/legacy_audit]` against `system-version.js` to verify DOM structures and variable scopes.
 - [x] `chore/audit-inventory` : Execute `@[/legacy_audit]` against `inventory-module.js` to verify DOM structures and variable scopes.
-- [ ] `chore/audit-bom` : Execute `@[/legacy_audit]` against `bom-module.js` to eradicate technical debt.
+- [x] `chore/audit-bom` : Execute `@[/legacy_audit]` against `bom-module.js` to eradicate technical debt.
 - [ ] `chore/audit-packerz` : Execute `@[/legacy_audit]` against `packerz-module.js` to bring standards up to modern Vanilla DOM rules.
 
 
