@@ -1,7 +1,7 @@
-﻿---
+---
 name: panic_button
 description: "Triggers a strict read-only diagnostic mode for when the project is broken but the user doesn't know why."
-trigger: "/panic"
+trigger: "/panic, PANIC, everything is broken, emergency"
 ---
 
 # Panic Button (Emergency Triage Workflow)
