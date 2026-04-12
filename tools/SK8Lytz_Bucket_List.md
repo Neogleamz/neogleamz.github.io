@@ -22,6 +22,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟠 P1 High Priority (Core Features)
 
 ### Target: `main`
+*(Epic: Inventory Data Grid & ROP Management)*
+- [ ] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
+- [ ] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
+
 *(Epic: Sitewide Button State Feedback)*
 - [ ] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
   - [ ] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
@@ -55,11 +59,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Socialz Outreach Kanban)*
 - [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
-
-### Target: `main`
-*(Epic: Inventory Data Grid & ROP Management)*
-- [ ] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
-- [ ] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
 
 ### Target: `main`
 *(Epic: Master Reference Compliance Audit)*
