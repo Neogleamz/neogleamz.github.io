@@ -24,7 +24,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
-- [ ] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
+- [x] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
 - [ ] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
 
 *(Epic: Sitewide Button State Feedback)*
