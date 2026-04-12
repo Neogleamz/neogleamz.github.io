@@ -1,6 +1,7 @@
-﻿---
-trigger: always_on
+---
+name: critical_safety
 description: "Strict system-level security constraints regarding Git hooks, branch protection, and credential handling."
+trigger: "/safety, /critical_safety, read safety protocols"
 ---
 
 # Critical Safety Protocol
