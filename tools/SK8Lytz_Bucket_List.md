@@ -67,6 +67,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `chore/audit-socialz` : Execute `@[/legacy_audit]` against `socialz-module.js` to eradicate technical debt.
 - [ ] `chore/audit-ceo` : Execute `@[/legacy_audit]` against `ceo-module.js` to verify DOM structures and variable scopes.
 
+### Target: `main`
+*(Epic: Full-System Layout Documentation)*
+- [ ] `docs/system-audit-part2` : Systematically document the layout, architecture, and core modules of the A.I. Hub, including STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ, and NEXUZ (which houses Brainz and Importz).
 
 
 ---
