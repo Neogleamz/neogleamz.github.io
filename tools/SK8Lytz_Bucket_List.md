@@ -112,7 +112,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `debt/deps` : **`supabase` CLI** is on `2.84.10` → latest is `2.89.1`. Minor version bump — update to pull in latest edge function and migration tooling improvements.
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
-- [ ] `debt/hmac-verification` : `supabase/functions/shopify-webhook/index.ts:22` - `TODO: Add proper HMAC verification using Deno Crypto API Web Crypto`. (Crucial for endpoint security on live Shopify webhooks).
+- [x] `debt/hmac-verification` : **RESOLVED ✅** `supabase/functions/shopify-webhook/index.ts:22` - Implemented native Deno `crypto.subtle` HMAC validation with dynamic 401 blocking. Also structurally patched the synchronous PII variables bug.
 
 ---
 

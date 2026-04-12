@@ -13,17 +13,37 @@ async function hashPII(rawStr) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
+async function verifyShopifyWebhook(rawBody: string, hmacHeader: string, secret: string) {
+    if (!secret || !hmacHeader) return false;
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(secret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign', 'verify']
+    );
+    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+    const base64Signature = btoa(String.fromCharCode(...new Uint8Array(signature)));
+    return base64Signature === hmacHeader;
+}
 
 serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
   }
 
-  // TODO: Add proper HMAC verification using Deno Crypto API Web Crypto
-  // const hmac = req.headers.get('x-shopify-hmac-sha256')
+  const hmacHeader = req.headers.get('x-shopify-hmac-sha256');
+  const shopifySecret = Deno.env.get('SHOPIFY_WEBHOOK_SECRET');
   
   try {
     const rawBody = await req.text()
+
+    if (!hmacHeader || !await verifyShopifyWebhook(rawBody, hmacHeader, shopifySecret || '')) {
+        console.error("HMAC Verification Failed! Unauthorized access attempt.");
+        return new Response('Unauthorized', { status: 401 });
+    }
+
     const order = JSON.parse(rawBody)
 
     // Initialize Supabase Admin Client
@@ -50,6 +70,11 @@ serve(async (req) => {
       let invUpdates: any[] = []; // Initialize invUpdates here
 
       let orderIdStr = order.name || String(order.id); // Define orderIdStr here
+
+      let piiEmail = await hashPII(order.email);
+      let piiPhone = await hashPII(order.phone || order.customer?.phone);
+      let piiShipName = await hashPII(order.shipping_address?.name);
+      let piiShipAddr = await hashPII(order.shipping_address?.address1);
 
       if(order.line_items) {
         order.line_items.forEach((item, index) => {
