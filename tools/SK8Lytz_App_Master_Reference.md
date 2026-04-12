@@ -9,6 +9,10 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 * **Component Location:** There is no `src/` directory. All core JavaScript modules live directly in the Root Directory.
   * e.g., `inventory-module.js`, `ceo-module.js`, `production-module.js`, `sales-module.js`, etc.
 
+### Local State Caching Matrix
+* **Synchronous Speed Priority**: `localStorage` is used exclusively for global toggles, persistent states, and zero-latency configs.
+* **Storage Keys**:
+  * `neogleamz_default_lead_time`: Sets the global fallback ROP lead time (in days) if a raw good does not have a unique one set.
 ---
 
 ## 🎨 2. UI & Front-End Architecture Standards
