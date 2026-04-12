@@ -41,7 +41,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Full-Repo Legacy Audit)*
-- [ ] `chore/audit-index-html` : Execute `@[/legacy_audit]` against `index.html` to bring standards up to modern Vanilla DOM rules.
+- [x] `chore/audit-index-html` : Execute `@[/legacy_audit]` against `index.html` to bring standards up to modern Vanilla DOM rules.
 - [ ] `chore/audit-neogleamz-engine` : Execute `@[/legacy_audit]` against `neogleamz-engine.js` to eradicate technical debt.
 - [ ] `chore/audit-system-tools` : Execute `@[/legacy_audit]` against `system-tools-module.js` to ensure telemetry rules are met.
 - [ ] `chore/audit-system-version` : Execute `@[/legacy_audit]` against `system-version.js` to verify DOM structures and variable scopes.
