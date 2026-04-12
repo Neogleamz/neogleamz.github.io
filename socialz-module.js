@@ -37,7 +37,8 @@
         let socialzSortDirection = window.getSavedSort ? window.getSavedSort('socialzSortDirection', 'asc') : 'asc'; 
         let dashboardCharts = {};
         let selectedStyles = [];
-        let viewMode = 'grid'; 
+        let viewMode = 'grid';
+        let _socialzStylePanelListenerRegistered = false; // Guard: prevents duplicate window click listeners
 
         function initSocialzData(data) {
             if(!data) return;
@@ -197,11 +198,16 @@
             panel.style.display = isHidden ? 'block' : 'none';
         }
 
-        window.addEventListener('click', function(e) {
+        // Named handler: allows future removeEventListener and prevents anonymous accumulation
+        function closeSocialzStylePanel(e) {
             const container = document.getElementById('multi-select-style-container');
             const panel = document.getElementById('style-options-panel');
             if (container && !container.contains(e.target)) { panel.style.display = 'none'; }
-        });
+        }
+        if (!_socialzStylePanelListenerRegistered) {
+            window.addEventListener('click', closeSocialzStylePanel);
+            _socialzStylePanelListenerRegistered = true;
+        }
 
         function handleStyleToggle(style) {
             if (selectedStyles.includes(style)) { selectedStyles = selectedStyles.filter(s => s !== style); } 
