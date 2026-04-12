@@ -136,10 +136,10 @@
         // --- Analytics Dashboard ---
         function openAnalyticsDashboard() {
             if (socialzSkaters.length === 0) { sysLog("No data to analyze."); return; }
-            document.getElementById('analytics-modal').classList.remove('hidden');
+            document.getElementById('analytics-modal').style.display = 'flex';
             renderDashboardCharts();
         }
-        function closeAnalyticsDashboard() { document.getElementById('analytics-modal').classList.add('hidden'); }
+        function closeAnalyticsDashboard() { document.getElementById('analytics-modal').style.display = 'none'; }
         function updateChart(id, config) { if (dashboardCharts[id]) dashboardCharts[id].destroy(); const socialzCtx = document.getElementById(id).getContext('2d'); dashboardCharts[id] = new Chart(ctx, config); }
 
         function renderDashboardCharts() {
@@ -545,10 +545,10 @@
         }
 
         // --- CRUD Modals ---
-        function openModal() { document.getElementById('skater-modal').classList.remove('hidden'); document.getElementById('skater-form').reset(); document.getElementById('edit-index').value = "-1"; document.getElementById('modal-title').innerText = "Add New Skater"; }
-        function closeModal() { document.getElementById('skater-modal').classList.add('hidden'); }
+        function openModal() { document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('skater-form').reset(); document.getElementById('edit-index').value = "-1"; document.getElementById('modal-title').innerText = "Add New Skater"; }
+        function closeModal() { document.getElementById('skater-modal').style.display = 'none'; }
         function editSkater(index) {
-            const s = socialzSkaters[index]; document.getElementById('skater-modal').classList.remove('hidden'); document.getElementById('edit-index').value = index; document.getElementById('modal-title').innerText = "Edit Skater";
+            const s = socialzSkaters[index]; document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('edit-index').value = index; document.getElementById('modal-title').innerText = "Edit Skater";
             document.getElementById('input-name').value = s.name; document.getElementById('input-location').value = s.location; document.getElementById('input-region').value = s.region; document.getElementById('input-contact').value = s.contactInfo; document.getElementById('input-style').value = s.style; document.getElementById('input-type').value = s.type; document.getElementById('input-collab-tier').value = s.collabTier; document.getElementById('input-collab-status').value = s.collabStatus; document.getElementById('input-summary').value = s.summary; document.getElementById('input-viral').value = s.viralUrl;
             document.getElementById('input-favorite').checked = s.isFavorite || false;
             document.getElementById('input-ig').value = s.handles.ig; document.getElementById('input-ig-link').value = s.links.ig; document.getElementById('input-ig-followers').value = s.followers.ig;
@@ -636,12 +636,12 @@
     let socialzChartInstances = {};
     window.openAnalyticsDashboard = function() {
         const modal = document.getElementById('analytics-modal');
-        if(modal) modal.classList.remove('hidden');
+        if(modal) modal.style.display = 'flex';
         renderSocialzCharts();
     };
     window.closeAnalyticsDashboard = function() {
         const modal = document.getElementById('analytics-modal');
-        if(modal) modal.classList.add('hidden');
+        if(modal) modal.style.display = 'none';
     };
     function renderSocialzCharts() {
         if(typeof Chart === 'undefined') return;
