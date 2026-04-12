@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.0.3] - 2026-04-12
+
+### Features & Refactors
+- **Inventory Data Grid & ROP Management**: Added a robust live search/filtering feature to the DATAZ/EDITZ ledgers. Architected a dynamic Reorder Point (ROP) tracking system, allowing global supplier lead thresholds to be overridden on a per-item basis for highly granular component procurement alerts.
+
 ## [1.0.2] - 2026-04-11
 
 ### Features & Refactors

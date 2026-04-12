@@ -22,10 +22,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟠 P1 High Priority (Core Features)
 
 
-### Target: `main`
-*(Epic: Inventory Data Grid & ROP Management)*
-- [x] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
-- [x] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
 
 *(Epic: Sitewide Button State Feedback)*
 - [ ] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
@@ -107,6 +103,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🗄️ Completed & Archived Epics
 
+### Target: `main`
+*(Epic: Inventory Data Grid & ROP Management)*
+- [x] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
+- [x] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
 ### Target: `epic/webrtc-cycle-scanner`
 - [x] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
 - [x] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure the WebRTC constraint logic fully supports cross-platform execution specifically for iPhone iOS Safari, native Android, and PC webcams. Ensure consistent behavior across all scanning entry points.
