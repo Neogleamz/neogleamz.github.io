@@ -102,3 +102,69 @@ Known verified tables currently in active use across the JavaScript modules:
 
 ## ?? 5. Module & Hub Architecture Reference
 For a complete, canonical page-by-page and element-by-element breakdown of the A.I. Hub (NEXUZ, STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ) and their underlying algorithms, please consult the dedicated architecture documentation at: docs/master_reference.md.
+
+---
+
+## 🏗️ 6. Comprehensive UI DOM Binding Dictionary (Element Authority)
+To strictly enforce standard Vanilla JS interaction mapping within `index.html`, this directory outlines the precise intent of every functional DOM Pane, Modal Overlay, and Action button currently active. DO NOT duplicate these elements.
+
+### A. Global Modals (Overlays) & Logic Matrix
+*All modal overlays must use `class="modal-overlay"`, strict `z-index` layering, and absolute/fixed centering to ensure responsive execution.*
+- `sandboxDataModal`: The primary safety gate for IMPORTZ. Must execute `customCommitFn` instead of blindly overwriting databases to guarantee explicit user staging.
+- `cycleCountManagerModal`: The WebBluetooth/WebRTC scanner UI for STOCKZ. Requires physical `#barcode-reader` strictly typed with `{aspectRatio: 1.0}` to prevent iOS zoom malfunctions.
+- `archiveExplorerModal`: Handles Soft-Delete recovery via nested `.archive-card` elements. Uses `.btn-red-muted` to prevent accidental hard wipes.
+- `sopMasterModal`: The core editor for standard operating procedures (MAKERZ). Controls structural `#sopRowsContainer`.
+- `velocityzModal`: The financial forecast UI embedded within STOCKZ grids.
+- `aliasModal`: The data dictionary mapping modal translating 3rd-party Shopify SKUs to native internal representations.
+- **A.I. CFO Simulation Modals**: `ceoAddModal`, `ceoBundleModal`, `ceoCustomModal`. Used exclusively inside REVENUEZ to append temporary theoretical nodes to the `true-profit-waterfall` canvas.
+- **Print & Label Modals**: `manualPrintModal`, `finalizePrintModal`, `labelzDesignerModal`, `paperProfileModal`. Bridges the browser strictly to the external PrintNode API ecosystem.
+- **Workflow & Fulfill Modals**: `newWOModal` (instantiates batches), `finalizeWoModal` (commits physical inventory deductions), `multiBatchOrderModal`, `batchOrderReportModal`.
+- **CRM Modals**: `skater-modal` (Socialz CRM card), `ltv-metrics-modal` (lifetime value visualizer).
+- **Documentation & Helper Modals**: `tipzModal`, `packerzArchiveModal`, `packerzSopViewerModal`, `sopCameraModal`, `sopTokenGuideModal`, `sopMediaPickerModal`, `sopAuditLogModal`, `globalRegexPlaygroundModalContainer`.
+
+### B. Hub-by-Hub Structural Pane Directory
+*The foundational Executive Panes `id="pane..."` that control visibility routing within the main workspace.*
+
+#### 1. NEXUZ (The Command Center)
+- **`paneNexuzBrainz` (A.I. Terminal)**:
+  - Houses the `#agentTerminal` text UI. Controls strict system commands via `.btn-green` `EXECUTE` and `.btn-blue` `EXPORT BACKUP`.
+- **`paneNexuzImportz` (Data Sync)**:
+  - Contains distinct `.import-card` blocks. Forces uploaded payload data strings sequentially into the `sandboxDataModal` for deduplication.
+- **`paneNexuzSalez` (Ledger)**:
+  - Strictly Read-Only interface. Renders inbound logic via collapsible classes: `.salez-record` (Standard), `.replacement-row` (Warranty), and `.refund-row` (Ghost Revenue). 
+
+#### 2. STOCKPILEZ (Inventory Logistics)
+- **`panePipeline` (DATAZ)**:
+  - The Raw Goods system of truth database. Uses `.btn-blue` forms to declare native SKU limits (`ROP`).
+- **`paneSimple` (EDITZ)**:
+  - Value adjuster matrix utilizing inline `.btn-orange` logic.
+- **`paneInventory` (STOCKZ)**:
+  - The real-time interactive lifecycle module. Triggers `cycleCountManagerModal` via standard scanner hardware, and integrates explicit `velocityzModal` charting.
+
+#### 3. MAKERZ (Production Ecosystem)
+- **`paneProdBuilder` (RECIPEZ)**:
+  - Contains `recipeActionModal` triggers to actively map Raw Goods arrays against Final SKUs.
+- **`paneProdControl` (BATCHEZ)**:
+  - Controls work order states (Pending, Core Processing).
+- **`paneProdPrint` (LAYERZ)**:
+  - Top-tier logical progression managing SOP executions (`sopMasterModal`).
+
+#### 4. FULFILLZ (Logistics Assembly)
+- **`paneFulfillzPackerz` (PACKERZ)**:
+  - Renders Read-Only arrays of `[IMG]` and `[BARCODE]` tokens driven by `#sopRowsContainer`.
+- **`paneFulfillzBarcodz` (BARCODZ)**:
+  - Centralizes native layout for QR and Code128 generation logic.
+- **`paneFulfillzLabelz` (LABELZ)**:
+  - Form routes the `labelzDesignerModal` visualizer.
+
+#### 5. REVENUEZ (Financial Ops)
+- **`paneSalezBridge` (ORDERZ)**:
+  - High-level synchronization bridge mapping sales to physical tasks.
+- **`paneSalezAnalyticz` (STATZ)**:
+  - Strictly relies on `.chart-container` DOM wrappers enforcing Chart.js `destroy()` protocols to prevent graph ghosting leaks.
+- **`paneSalezCommandz` (SIMULATORZ / A.I. CFO)**:
+  - Global metric testbed utilizing independent calculation hooks (`ceoAddModal`) to simulate P&L without touching core localstorage or database values. Namespace enforced via `<canvas id="chart_cfo_waterfall">`.
+
+#### 6. SOCIALZ (Outreach CRM)
+- **`paneSocialzRoster` (ROSTER)**:
+  - The unified client grid rendering individual `.skater-card` components. Integrates specific event delegations for `#skater-modal`.
