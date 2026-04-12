@@ -1216,6 +1216,13 @@ function openBackupModal() {
 function closeBackupModal() { document.getElementById('backupModal').style.display = 'none'; }
 
 async function executeExport() {
+    let btn = document.getElementById('btnExportBackup');
+    let oldTxt = "⬇️ EXPORT BACKUP";
+    if (btn) {
+        btn.innerHTML = "⏳ EXPORTING...";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+    }
     try {
         setMasterStatus("Exporting...", "mod-working"); sysLog("Exporting full system backup...");
         const wb = XLSX.utils.book_new();
@@ -1253,8 +1260,19 @@ async function executeExport() {
         await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
-        setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-    } catch (e) { sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); }
+        if(btn) { btn.innerHTML = "✅ EXPORTED!"; btn.style.background = "#10b981"; btn.style.color = "#fff"; btn.style.opacity = "1"; }
+        setMasterStatus("Export Complete!", "mod-success"); 
+        setTimeout(()=>{ 
+            setMasterStatus("Ready.", "status-idle"); 
+            if(btn) { btn.innerHTML = oldTxt; btn.disabled = false; btn.style.background = ""; btn.style.color = ""; } 
+        }, 3000);
+    } catch (e) { 
+        if(btn) { 
+            btn.innerHTML = "❌ FAILED"; btn.style.background = "#ef4444"; btn.style.color = "#fff"; btn.style.opacity = "1"; 
+            setTimeout(()=>{ btn.innerHTML = oldTxt; btn.disabled = false; btn.style.background = ""; btn.style.color = ""; }, 3000); 
+        }
+        sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); 
+    }
 }
 
 let pendingRestoreData = {};
