@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.12.0301"></script>
+    <script src="system-version.js?v=v.2026.04.12.0303"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.0301"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.0303"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.0301"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.0303"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <script>
@@ -3347,7 +3347,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.12.0301"></script>
+    <script src="socialz-module.js?v=v.2026.04.12.0303"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4443,51 +4443,7 @@
     </div>
 </div>
 
-<div id="ceoBundleModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
-    <div class="massive-container">
-        <div class="header-area" style="flex-shrink:0;">
-            <h2 style="margin:0; font-size:20px;">📦 Build Custom CEO Bundle</h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoBundleModal').style.display='none'">Close</button>
-        </div>
-        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
-            <label style="font-weight:bold;">Bundle Name:</label>
-            <input type="text" id="ceoBundleName" placeholder="e.g. Starter Kit" style="flex:1; padding:8px; font-size:15px;">
-        </div>
-        <input type="text" id="ceoBundleSearch" placeholder="🔍 Search retail products..." onkeyup="filterCeoBundleList()" style="width:100%; padding:10px; font-size:15px; margin-bottom:10px;">
-        <div class="table-wrap" id="ceoBundleTableWrap" style="overflow-y:auto; max-height:400px; padding-right:10px;"></div>
-        <div style="margin-top:15px; text-align:right; flex-shrink:0;">
-            <button id="btnSaveCeoBundle" class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoBundle()">➕ Create Bundle & Add to Board</button>
-        </div>
-    </div>
-</div>
 
-<div id="ceoCustomModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
-    <div class="massive-container" style="max-width: 500px;">
-        <div class="header-area" style="flex-shrink:0;">
-            <h2 style="margin:0; font-size:20px;">🧪 Add Custom Test Item</h2>
-            <button class="btn-red" style="width:auto; padding:6px 15px;" onclick="document.getElementById('ceoCustomModal').style.display='none'">Close</button>
-        </div>
-        <div style="margin-bottom:15px; display:flex; flex-direction:column; gap:15px;">
-            <div>
-                <label style="font-weight:bold; display:block; margin-bottom:5px;">Item Name:</label>
-                <input type="text" id="ceoCustomName" placeholder="e.g. Mystery Box" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
-            </div>
-            <div style="display:flex; gap:15px;">
-                <div style="flex:1;">
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">True COGS ($):</label>
-                    <input type="number" id="ceoCustomCogs" placeholder="0.00" min="0" step="0.01" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
-                </div>
-                <div style="flex:1;">
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Live MSRP ($):</label>
-                    <input type="number" id="ceoCustomMsrp" placeholder="0.00" min="0" step="0.01" style="width:100%; padding:10px; font-size:15px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; border-radius:4px;">
-                </div>
-            </div>
-        </div>
-        <div style="margin-top:20px; text-align:right; flex-shrink:0;">
-            <button id="btnSaveCeoCustomItem" class="btn-green" style="width:auto; padding:12px 30px; font-size:16px;" onclick="saveCeoCustomItem()">➕ Add to Board</button>
-        </div>
-    </div>
-</div>
 <div id="manualPrintModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div class="massive-container" style="max-width: 500px; height: auto; min-height: 300px; justify-content: flex-start;">
         <div class="header-area" style="flex-shrink:0;">
@@ -4514,16 +4470,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.12.0301"></script>
-<script src="system-tools-module.js?v=v.2026.04.12.0301"></script>
-<script src="bom-module.js?v=v.2026.04.12.0301"></script>
-<script src="inventory-module.js?v=v.2026.04.12.0301"></script>
-<script src="packerz-module.js?v=v.2026.04.12.0301"></script>
-<script src="production-module.js?v=v.2026.04.12.0301"></script>
-<script src="sales-module.js?v=v.2026.04.12.0301"></script>
-<script src="analytics-module.js?v=v.2026.04.12.0301"></script>
-<script src="ceo-module.js?v=v.2026.04.12.0301"></script>
-<script src="print-module.js?v=v.2026.04.12.0301"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.12.0303"></script>
+<script src="system-tools-module.js?v=v.2026.04.12.0303"></script>
+<script src="bom-module.js?v=v.2026.04.12.0303"></script>
+<script src="inventory-module.js?v=v.2026.04.12.0303"></script>
+<script src="packerz-module.js?v=v.2026.04.12.0303"></script>
+<script src="production-module.js?v=v.2026.04.12.0303"></script>
+<script src="sales-module.js?v=v.2026.04.12.0303"></script>
+<script src="analytics-module.js?v=v.2026.04.12.0303"></script>
+<script src="ceo-module.js?v=v.2026.04.12.0303"></script>
+<script src="print-module.js?v=v.2026.04.12.0303"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4981,18 +4937,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.0301"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.0303"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.0301"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.0303"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.0301"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.0303"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.0301"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.0301"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.0301"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.0303"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.0303"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.0303"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.12.0301"></script>
-    <script src="labelz-module.js?v=v.2026.04.12.0301"></script>
+    <script src="barcodz-module.js?v=v.2026.04.12.0303"></script>
+    <script src="labelz-module.js?v=v.2026.04.12.0303"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100vw; height:100vh; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
