@@ -1,7 +1,7 @@
 ---
 name: emergency_debug_drill
 description: "A strict diagnostic workflow that forces the AI to instrument code with logs and form theories before attempting to guess-fix a bug."
-trigger: "debug this:, critical bug:, let's debug"
+trigger: "/emergency_debug_drill, debug this:, critical bug:, let's debug"
 ---
 
 # Emergency Debug Drill Workflow
