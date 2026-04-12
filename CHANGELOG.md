@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.0.6] - 2026-04-12
+
+### Features & Refactors
+- **Tailwind Modal Migration**: Migrated the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / `var(--*)` tokens to enforce consistency with the rest of the terminal UI.
+
 ## [1.0.5] - 2026-04-12
 
 ### Features & Refactors
