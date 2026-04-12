@@ -1,7 +1,7 @@
-﻿---
+---
 name: idea_intake
 description: "Captures natural language ideas and formats them into the project bucket list with structured git slugs."
-trigger: "add to:, new task:, idea:"
+trigger: "/idea_intake, add to:, new task:, idea:"
 ---
 
 # Idea Intake Workflow
