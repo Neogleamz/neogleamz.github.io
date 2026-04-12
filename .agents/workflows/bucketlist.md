@@ -44,6 +44,7 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - Stage your specific file changes (avoid blind `git add .` if there are untracked files).
    - Execute: `git commit -m "feat(<scope>): complete <extracted-branch-slug>"`
 
-8. **Update Tracking & Halt**: 
+8. **Update Tracking, Archive & Halt**: 
    - Modify `@/tools/SK8Lytz_Bucket_List.md` and change the checkbox for this item to `- [x]`.
+   - **Enforce Archiving Protocol**: Scan the surrounding epic `### Target:` block. If every single item in this specific Epic is now marked as `[x]`, you MUST autonomously cut the entire block (the `### Target:` header, the `*(Epic...)*` subheader, and all the `[x]` tasks) and paste it at the absolute bottom of the file under the `🗄️ Completed & Archived Epics` section to keep the active list clean.
    - Output a clean confirmation message to the chat that the task is complete and the branch is ready for testing. Do not automatically start the next task.

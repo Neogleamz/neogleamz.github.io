@@ -21,13 +21,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-### Target: `main`
-*(Epic: Full-System Layout Documentation)*
-- [x] `docs/system-audit-part2` : Systematically document the layout, architecture, and core modules of the A.I. Hub, including STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ, and NEXUZ (which houses Brainz and Importz).
-
-### Target: `main`
-*(Epic: Comprehensive UI Element Documentation)*
-- [x] `docs/comprehensive-ui-audit` : Conduct a granular button-by-button, modal-by-modal documentation audit for every hub and page across the app, ensuring `tools/SK8Lytz_App_Master_Reference.md` is fully updated with explicit DOM structural definitions.
 
 ### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
@@ -165,3 +158,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `epic/redundant-tools-cleanup`
 - [x] `chore/audit-agents-tools` : Inspect `.agents/tools/` for outdated duplicates.
 - [x] `feat/consolidate-tools` : Compare files with root `tools/` directory to resolve data divergence, delete the redundant folder, and update pointers.
+
+### Target: `main`
+*(Epic: Full-System Layout Documentation)*
+- [x] `docs/system-audit-part2` : Systematically document the layout, architecture, and core modules of the A.I. Hub, including STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ, and NEXUZ (which houses Brainz and Importz).
+
+### Target: `main`
+*(Epic: Comprehensive UI Element Documentation)*
+- [x] `docs/comprehensive-ui-audit` : Conduct a granular button-by-button, modal-by-modal documentation audit for every hub and page across the app, ensuring `tools/SK8Lytz_App_Master_Reference.md` is fully updated with explicit DOM structural definitions.
