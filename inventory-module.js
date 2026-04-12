@@ -1017,16 +1017,24 @@ window.updateCcMngrStock = function() {
     let display = document.getElementById('ccMngrStockDisplay');
     let valEl = document.getElementById('ccMngrStockVal');
     
-    if (!key) { display.style.display = 'none'; return; }
-    
-    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'");
-    let inv = inventoryDB[rKey] || {};
-    let stock = 0;
-    
     let elL1 = document.getElementById('ccMngrL1'); let elV1 = document.getElementById('ccMngrV1');
     let elL2 = document.getElementById('ccMngrL2'); let elV2 = document.getElementById('ccMngrV2');
     let elL3 = document.getElementById('ccMngrL3'); let elV3 = document.getElementById('ccMngrV3');
     let elV4 = document.getElementById('ccMngrV4'); let elV5 = document.getElementById('ccMngrV5');
+    
+    if (!key) { 
+        elL1.innerText = "PROD"; elV1.innerText = "—"; elV1.contentEditable = "false"; elV1.className = "";
+        elL2.innerText = "PROTO"; elV2.innerText = "—"; elV2.parentElement.style.visibility = "visible";
+        elL3.innerText = "CONS"; elV3.innerText = "—"; elV3.contentEditable = "false"; elV3.className = "";
+        elV4.innerText = "—"; elV5.innerText = "—";
+        valEl.innerText = "—"; valEl.style.color = '#f97316';
+        display.style.display = 'flex';
+        return; 
+    }
+    
+    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'");
+    let inv = inventoryDB[rKey] || {};
+    let stock = 0;
     
     if (rKey.startsWith('RECIPE:::')) {
         let p    = parseFloat(inv.produced_qty) || 0;
