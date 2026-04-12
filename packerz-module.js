@@ -79,9 +79,12 @@ async function fetchUnfulfilledOrders() {
                 </div>
             `;
 
-            card.onclick = () => openPackerzSopTerminal(order);
+            card.dataset.appClick = 'openSopTerminal';
+            card.dataset.orderId = order.order_id;
+            
             fragment.appendChild(card);
         });
+        window.currentPackerzGroupedOrders = groupedOrders;
         queueContainer.appendChild(fragment);
 
         loadSOPAuditLog();
@@ -126,7 +129,8 @@ function openPackerzSopTerminal(orderGroup) {
         let t = i.transaction_type || 'Standard';
         let safeRecipe = i.recipe.replace(/'/g,"\\'");
         let selectHtml = `
-            <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; width:160px; max-width:100%;" onchange="updatePackerzItemType('${orderGroup.order_id}', '${i.sku}', this.value, '${safeRecipe}')">
+            <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; width:160px; max-width:100%;" 
+                data-app-change="updateItemType" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
                 <option value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
                 <option value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
                 <option value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
@@ -153,7 +157,7 @@ function openPackerzSopTerminal(orderGroup) {
                 <button id="qa-btn-${orderGroup.order_id}-${i.sku}"
                     class="btn-slate-muted"
                     style="flex-shrink:0; white-space:nowrap;"
-                    onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${safeRecipe}')">
+                    data-app-click="loadActiveSOP" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
                     &#128065; VIEW SOP
                 </button>
             </div>
@@ -207,18 +211,15 @@ function validatePackerzAssemblyButton(orderId) {
             btn.className = 'btn-green-neon';
 
             btn.innerText = 'ASSEMBLY COMPLETE';
-            btn.onmouseover = () => btn.style.transform='scale(1.02)';
-            btn.onmouseout = () => btn.style.transform='scale(1)';
-            btn.onclick = () => executePackerzCompletion(orderId);
+            btn.dataset.appClick = 'executeCompletion';
+            btn.dataset.orderId = orderId;
         } else {
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
             btn.className = 'btn-orange-neon';
 
             btn.innerText = 'AWAITING QA CLEARANCE';
-            btn.onmouseover = null;
-            btn.onmouseout = null;
-            btn.onclick = null;
+            delete btn.dataset.appClick;
         }
     }
 }
@@ -341,12 +342,12 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
                 </div>
                 <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
-                    <button id="btnPackerzSopSignoff" class="btn-green-neon" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" onclick="signoffPackerzQA()">
+                    <button id="btnPackerzSopSignoff" class="btn-green-neon" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" data-app-click="signoffQA">
                         COMPLETE QA CHECKS
                     </button>
                 </div>
             </div>
-            <div id="packerzLiveSopResizer" class="h-resizer" onmousedown="initPackerzLiveSopResize(event)"></div>
+            <div id="packerzLiveSopResizer" class="h-resizer" data-app-mousedown="initPackerzResize"></div>
             <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
                 <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
             </div>
@@ -389,9 +390,9 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
                             <div style="display:flex; gap:8px;">
-                                <button onclick="window.activeSOPTextAreaId='packerzLiveInlineQA'; if(typeof openSOPMediaPicker==='function') openSOPMediaPicker('packerzLiveInlineQA')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖼️ MEDIA</button>
-                                <button onclick="if(typeof openSOPTokenGuide==='function') openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">⚡ GUIDE</button>
-                                <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('packerzInlineSopLeftPane', 'packerzLiveInlinePreviewCol', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                                <button data-app-click="openSOPMediaInline" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖼️ MEDIA</button>
+                                <button data-app-click="openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">⚡ GUIDE</button>
+                                <button data-app-click="togglePackerzSOPPreview" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -402,9 +403,9 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                             <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
                             <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
                             <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
-                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="if(typeof openSOPTokenGuide==='function') openSOPTokenGuide()">&#10067; Full Guide</span>
+                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-app-click="openSOPTokenGuide">&#10067; Full Guide</span>
                         </div>
-                        <textarea id="packerzLiveInlineQA" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;" oninput="if(typeof renderPackerzLiveInlineTelemetryPreview==='function') renderPackerzLiveInlineTelemetryPreview()">${qaText}</textarea>
+                        <textarea id="packerzLiveInlineQA" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;" data-app-input="renderSOPPreview">${qaText}</textarea>
                     </div>
 
                     <!-- Column 2: Live Preview Render -->
@@ -415,7 +416,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 </div>
 
                 <!-- Resizer Divider -->
-                <div id="packerzLiveInlineResizerHandle" class="h-resizer packerz-h-resizer" onmousedown="initPackerzLiveSopResize(event)"></div>
+                <div id="packerzLiveInlineResizerHandle" class="h-resizer packerz-h-resizer" data-app-mousedown="initPackerzResize"></div>
 
                 <!-- Column 3: Rich Text Row Builders -->
                 <div id="packerzInlineSopRightPane" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:25px; border:1px solid var(--border-color); display:flex; flex-direction:column; overflow-y:auto;">
@@ -425,7 +426,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     </div>
 
                     <div style="display:flex; gap:10px; margin-top:20px; padding-top:20px; border-top:1px dashed rgba(255,255,255,0.1);">
-                        <button class="btn-green" id="btnSavePackerzInlineSOP" style="padding:10px 25px; font-size:14px; font-weight:900; width:100%;" onclick="if(typeof savePackerzLiveInlineSOP==='function') savePackerzLiveInlineSOP()">💾 SAVE SOP MASTER BLUEPRINT</button>
+                        <button class="btn-green" id="btnSavePackerzInlineSOP" style="padding:10px 25px; font-size:14px; font-weight:900; width:100%;" data-app-click="saveInlineSOP">💾 SAVE SOP MASTER BLUEPRINT</button>
                     </div>
                 </div>
             </div>
@@ -447,15 +448,15 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                       let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
                       let dId = getDId(m.url);
                       if (m.type === 'img') {
-                          mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'img')">`;
+                          mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="img">`;
                       } else {
                           let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
                           if (isNativeVid) {
-                              mediaHtml += `<div class="media-thumb" style="position:relative; background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
+                              mediaHtml += `<div class="media-thumb" style="position:relative; background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="vid"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
                           } else {
                               let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
                               if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
-                              mediaHtml += `<div class="media-thumb" style="position:relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`;
+                              mediaHtml += `<div class="media-thumb" style="position:relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" data-app-click="openMediaContext" data-url="${mediaUrl}" data-type="iframe"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`;
                           }
                       }
                   }
@@ -487,27 +488,27 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
             let html = '';
 
             function parseInputs(text) {
-                return text.replace(/\[INPUT\]/gi, `<input type="text" onclick="event.stopPropagation()" class="packerz-qa-input" placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;" onkeyup="checkPackerzSopSignoffState()">`);
+                return text.replace(/\[INPUT\]/gi, `<input type="text" data-app-click="stopProp" class="packerz-qa-input" placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;" data-app-keyup="sopSignoffCheck">`);
             }
 
             function parseInlineMedia(text) {
                 text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
                     const safe = url.replace(/'/g, "\\'");
-                    return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">📄 View PDF</button>`;
+                    return `<button type="button" data-app-click="openWindowBlank" data-url="${safe}" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" class="packerz-btn-hover">📄 View PDF</button>`;
                 });
                 text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
                     const safe = url.replace(/'/g, "\\'");
-                    return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">🎥 Play Video</button>`;
+                    return `<button type="button" data-app-click="openMediaContext" data-type="vid" data-url="${safe}" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" class="packerz-btn-hover">🎥 Play Video</button>`;
                 });
                 text = text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
                     const safe = url.replace(/'/g, "\\'");
                     if(url.toLowerCase().endsWith('.pdf')) {
-                       return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">📄 View PDF</button>`;
+                       return `<button type="button" data-app-click="openWindowBlank" data-url="${safe}" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" class="packerz-btn-hover">📄 View PDF</button>`;
                     }
                     if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) {
-                       return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">🎥 Play Video</button>`;
+                       return `<button type="button" data-app-click="openMediaContext" data-type="vid" data-url="${safe}" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;" class="packerz-btn-hover">🎥 Play Video</button>`;
                     }
-                    return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
+                    return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" data-app-click="openMediaContext" data-type="img" data-url="${safe}">`;
                 });
                 text = text.replace(/\[SCAN:([^\]]+)\]/gi, (_, val) => {
                     return `<span style="background:rgba(14,165,233,0.15); border:1px solid #0ea5e9; color:#0ea5e9; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:800; white-space:nowrap; margin:0 4px; vertical-align:middle;">📷 SCAN: ${val.trim()}</span>`;
@@ -547,7 +548,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                                     <span id="scan-status-${rowId}" style="font-size:11px; color:#ef4444; font-weight:700;">⏳ Unscan</span>
-                                    <button id="scan-btn-${rowId}" onclick="openCameraScanner('${expected}', '${rowId}', '${safeItem}')" style="padding:6px 10px; background:#0ea5e9; color:white; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; white-space:nowrap;">📷 SCAN</button>
+                                    <button id="scan-btn-${rowId}" data-app-click="openScanner" data-expected="${expected}" data-rowid="${rowId}" data-item="${safeItem}" style="padding:6px 10px; background:#0ea5e9; color:white; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; white-space:nowrap;">📷 SCAN</button>
                                 </div>
                             </div>
                         </div>`;
@@ -560,7 +561,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     html += `
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:2px; margin-bottom:2px; padding:4px 8px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:4px;">
                             <label style="font-size:10px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${label}</label>
-                            <input type="text" class="packerz-qa-input" data-label="${safeLabel}" placeholder="..." style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:11px;" onkeyup="checkPackerzSopSignoffState()">
+                            <input type="text" class="packerz-qa-input" data-label="${safeLabel}" placeholder="..." style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:11px;" data-app-keyup="sopSignoffCheck">
                         </div>
                     `;
                 }
@@ -573,8 +574,8 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     let safeSubQ = subQ.replace(/"/g, '&quot;');
                     let content = parseInlineMedia(parseInputs(subQ));
                     html += `
-                        <label style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:2px 8px 2px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background='transparent'">
-                            <input type="checkbox" class="packerz-qa-check" data-label="${safeSubQ}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer;" onchange="checkPackerzSopSignoffState()">
+                        <label style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:2px 8px 2px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s;" class="packerz-qa-hover-sub">
+                            <input type="checkbox" class="packerz-qa-check" data-label="${safeSubQ}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer;" data-app-change="sopSignoffCheck">
                             <span style="display:flex; align-items:center; flex-wrap:wrap;">${content}</span>
                         </label>
                     `;
@@ -584,8 +585,8 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     let safeQ = q.replace(/"/g, '&quot;');
                     let content = parseInlineMedia(parseInputs(q));
                     html += `
-                        <label style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); cursor:pointer; padding:4px 8px; margin-bottom:0; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='var(--border-color)'">
-                            <input type="checkbox" class="packerz-qa-check" data-label="${safeQ}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer;" onchange="checkPackerzSopSignoffState()">
+                        <label style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); cursor:pointer; padding:4px 8px; margin-bottom:0; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); transition:all 0.2s;" class="packerz-qa-hover-main">
+                            <input type="checkbox" class="packerz-qa-check" data-label="${safeQ}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer;" data-app-change="sopSignoffCheck">
                             <span style="display:flex; align-items:center; flex-wrap:wrap;">${content}</span>
                         </label>
                     `;
@@ -1962,4 +1963,67 @@ async function handleScanResult(decodedText, expectedValue, rowId) {
     }
 }
 
+// --- PACKERZ EVENT DELEGATION ---
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-app-click]');
+    if (!btn) return;
+    const action = btn.dataset.appClick;
+    
+    if (action === 'openSopTerminal') {
+        if(typeof openPackerzSopTerminal === 'function') openPackerzSopTerminal(window.currentPackerzGroupedOrders[btn.dataset.orderId]);
+    } else if (action === 'loadActiveSOP') {
+        if(typeof loadPackerzActiveSOP === 'function') loadPackerzActiveSOP(btn.dataset.orderId, btn.dataset.sku, btn.dataset.recipe);
+    } else if (action === 'signoffQA') {
+        if(typeof signoffPackerzQA === 'function') signoffPackerzQA();
+    } else if (action === 'openSOPMediaInline') {
+        window.activeSOPTextAreaId = 'packerzLiveInlineQA';
+        if(typeof openSOPMediaPicker === 'function') openSOPMediaPicker('packerzLiveInlineQA');
+    } else if (action === 'openSOPTokenGuide') {
+        if(typeof openSOPTokenGuide === 'function') openSOPTokenGuide();
+    } else if (action === 'togglePackerzSOPPreview') {
+        if(typeof toggleHorizontalPreview === 'function') toggleHorizontalPreview('packerzInlineSopLeftPane', 'packerzLiveInlinePreviewCol', btn);
+    } else if (action === 'saveInlineSOP') {
+        if(typeof savePackerzLiveInlineSOP === 'function') savePackerzLiveInlineSOP();
+    } else if (action === 'openMediaContext') {
+        if(typeof openMediaModal === 'function') openMediaModal(btn.dataset.url, btn.dataset.type);
+    } else if (action === 'stopProp') {
+        e.stopPropagation();
+    } else if (action === 'openWindowBlank') {
+        e.preventDefault(); e.stopPropagation();
+        window.open(btn.dataset.url, '_blank');
+    } else if (action === 'openScanner') {
+        if(typeof openCameraScanner === 'function') openCameraScanner(btn.dataset.expected, btn.dataset.rowid, btn.dataset.item);
+    } else if (action === 'executeCompletion') {
+        if(typeof executePackerzCompletion === 'function') executePackerzCompletion(btn.dataset.orderId);
+    }
+});
 
+document.addEventListener('change', (e) => {
+    const el = e.target;
+    if (el.dataset.appChange === 'updateItemType') {
+        if(typeof updatePackerzItemType === 'function') updatePackerzItemType(el.dataset.orderId, el.dataset.sku, el.value, el.dataset.recipe);
+    } else if (el.dataset.appChange === 'sopSignoffCheck') {
+        if(typeof checkPackerzSopSignoffState === 'function') checkPackerzSopSignoffState();
+    }
+});
+
+document.addEventListener('input', (e) => {
+    const el = e.target;
+    if (el.dataset.appInput === 'renderSOPPreview') {
+        if(typeof renderPackerzLiveInlineTelemetryPreview === 'function') renderPackerzLiveInlineTelemetryPreview();
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    const el = e.target;
+    if (el.dataset.appKeyup === 'sopSignoffCheck') {
+        if(typeof checkPackerzSopSignoffState === 'function') checkPackerzSopSignoffState();
+    }
+});
+
+document.addEventListener('mousedown', (e) => {
+    const el = e.target;
+    if (el.dataset.appMousedown === 'initPackerzResize') {
+        if(typeof initPackerzLiveSopResize === 'function') initPackerzLiveSopResize(e);
+    }
+});
