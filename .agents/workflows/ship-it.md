@@ -1,7 +1,7 @@
-﻿---
+---
 name: ship_it
 description: "Executes the code audit, documentation check, and git merge sequence to finalize a feature branch."
-trigger: "/ship-it"
+trigger: "/ship_it, /ship-it, ship it, merge task, finalize branch"
 ---
 
 # Ship It Workflow
