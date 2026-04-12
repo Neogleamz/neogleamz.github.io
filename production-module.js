@@ -2232,7 +2232,8 @@ function buildDraftModalHtml(wo, drafts) {
 
 window.submitFinalizeWo = async function() {
     try {
-        let scrapInputs = document.querySelectorAll('.wo-scrap-input');
+        await window.executeWithButtonAction('finalizeWoActionBtn', '💾 FINALIZING...', '✅ FINALIZED', async () => {
+            let scrapInputs = document.querySelectorAll('.wo-scrap-input');
         let upsKeys = new Set();
         let totalScrapEntries = 0;
         let directUpserts = {};
@@ -2349,11 +2350,14 @@ window.submitFinalizeWo = async function() {
             }
         }
 
-        document.getElementById('finalizeWoModal').style.display = 'none';
+        setTimeout(() => {
+            document.getElementById('finalizeWoModal').style.display = 'none';
+        }, 800);
         sysLog(`Batch verified. ${totalScrapEntries} scrap line(s) logged.`);
 
         // Push payload forward into actual completion
         advanceWO('Completed', true);
+        });
 
     } catch (e) {
         sysLog(e.message, true);
@@ -2386,22 +2390,29 @@ window.openDraftScrapModal = function() {
 
 window.saveDraftScrap = async function() {
     if (!currentWO) return;
-    let scrapInputs = document.querySelectorAll('.wo-scrap-input');
-    let drafts = {};
-    scrapInputs.forEach(input => {
-        let v = parseFloat(input.value) || 0;
-        if (v > 0) drafts[input.getAttribute('data-key')] = v;
+    
+    await window.executeWithButtonAction('finalizeWoActionBtn', '💾 SAVING DRAFT...', '✅ DRAFT SAVED', async () => {
+        let scrapInputs = document.querySelectorAll('.wo-scrap-input');
+        let drafts = {};
+        scrapInputs.forEach(input => {
+            let v = parseFloat(input.value) || 0;
+            if (v > 0) drafts[input.getAttribute('data-key')] = v;
+        });
+
+        if(!currentWO.wip_state) currentWO.wip_state = {};
+        currentWO.wip_state.scrap_draft = drafts;
+
+        setMasterStatus("Saving Scrap Draft...", "mod-working");
+        
+        let { error } = await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id);
+        if (error) throw error;
+
+        setTimeout(() => {
+            document.getElementById('finalizeWoModal').style.display = 'none';
+        }, 800);
+        setMasterStatus("Draft Saved", "mod-success");
+        setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
     });
-
-    if(!currentWO.wip_state) currentWO.wip_state = {};
-    currentWO.wip_state.scrap_draft = drafts;
-
-    setMasterStatus("Saving Scrap Draft...", "mod-working");
-    await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id);
-
-    document.getElementById('finalizeWoModal').style.display = 'none';
-    setMasterStatus("Draft Saved", "mod-success");
-    setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
 };
 
 // ====== GLOBAL BINDINGS ======

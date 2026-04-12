@@ -777,55 +777,53 @@ async function executePackerzCompletion(orderId) {
     if(!confirm(`Are you absolutely sure you want to officially mark Order ${orderId} as completely assembled?`)) return;
 
     try {
-        const btn = document.getElementById(`btnCompleteAssembly_${orderId}`);
-        if(btn) { btn.innerText = 'SYNCING SUPABASE CLOUD...'; btn.style.opacity = '0.7'; }
+        await window.executeWithButtonAction(`btnCompleteAssembly_${orderId}`, '📦 SYNCING...', '✅ QA PASSED ✓', async () => {
+            // 1. Mutate the status flag to Completed globally across all grouped rows & timestamp it
+            const { error } = await supabaseClient
+                .from('sales_ledger')
+                .update({
+                    internal_fulfillment_status: 'Completed',
+                    assembly_completed_at: new Date().toISOString()
+                })
+                .eq('order_id', orderId);
 
-        // 1. Mutate the status flag to Completed globally across all grouped rows & timestamp it
-        const { error } = await supabaseClient
-            .from('sales_ledger')
-            .update({
-                internal_fulfillment_status: 'Completed',
-                assembly_completed_at: new Date().toISOString()
-            })
-            .eq('order_id', orderId);
+            if(error) throw error;
 
-        if(error) throw error;
+            // 2. Fetch specific line items for this order and structurally deduct (upsert) the Inventory ledger
+            const { data: lineItems, error: itemsError } = await supabaseClient
+                .from('sales_ledger')
+                .select('internal_recipe_name, qty_sold, transaction_type')
+                .eq('order_id', orderId);
 
-        // 2. Fetch specific line items for this order and structurally deduct (upsert) the Inventory ledger
-        const { data: lineItems, error: itemsError } = await supabaseClient
-            .from('sales_ledger')
-            .select('internal_recipe_name, qty_sold, transaction_type')
-            .eq('order_id', orderId);
+            if (itemsError) throw itemsError;
 
-        if (itemsError) throw itemsError;
+            let invMap = {};
+            lineItems.forEach(r => {
+                if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
+                let k = `RECIPE:::${r.internal_recipe_name}`;
+                if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
+                invMap[k] += r.qty_sold;
+            });
+            let invPayload = Object.keys(invMap).map(k => {
+                if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+                inventoryDB[k].sold_qty = invMap[k];
+                return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
+            });
 
-        let invMap = {};
-        lineItems.forEach(r => {
-            if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
-            let k = `RECIPE:::${r.internal_recipe_name}`;
-            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
-            invMap[k] += r.qty_sold;
+            if (invPayload.length > 0) {
+                const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
+                if (invError) throw new Error("Inventory Deduction Error: " + invError.message);
+            }
+
+            if (typeof renderInventoryTable === 'function') renderInventoryTable();
+
+            // 2. Clear Active UI Node
+            document.getElementById('packerzActiveQueue').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>';
+
+            // 3. Re-Sync Live Queue
+            fetchUnfulfilledOrders();
         });
-        let invPayload = Object.keys(invMap).map(k => {
-            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-            inventoryDB[k].sold_qty = invMap[k];
-            return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
-        });
-
-        if (invPayload.length > 0) {
-            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
-            if (invError) throw new Error("Inventory Deduction Error: " + invError.message);
-        }
-
-        if (typeof renderInventoryTable === 'function') renderInventoryTable();
-
-        // 2. Clear Active UI Node
-        document.getElementById('packerzActiveQueue').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>';
-
-        // 3. Re-Sync Live Queue
-        fetchUnfulfilledOrders();
-
-} catch(err) {
+    } catch(err) {
         console.error("Completion Error", err);
         alert("CRITICAL ERROR: Failed to close out structural order constraints. \n" + err.message);
     }
