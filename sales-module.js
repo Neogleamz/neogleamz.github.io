@@ -266,8 +266,9 @@ async function processParsedSales(rows, isTestMode = false) {
         setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); 
         let elFile = document.getElementById('salesCsvFile');
         if (elFile) elFile.value = ""; 
-        return;
+        throw new Error("Zero new rows (Deduplicated)");
     }
+
 
     await executeSalesSync(isTestMode);
 }
