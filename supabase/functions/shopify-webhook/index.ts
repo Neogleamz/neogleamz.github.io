@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -28,7 +29,7 @@ async function verifyShopifyWebhook(rawBody: string, hmacHeader: string, secret:
     return base64Signature === hmacHeader;
 }
 
-serve(async (req: any) => {
+serve(async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
   }
@@ -51,7 +52,7 @@ serve(async (req: any) => {
 
     // 1. Fetch alias mapping to convert Shopify SKUs to Internal Recipes
     const { data: aliases } = await supabase.from('storefront_aliases').select('*')
-    const aliasMap = {}
+    const aliasMap: Record<string, string> = {}
     if (aliases) {
         aliases.forEach((a: any) => { aliasMap[a.storefront_sku] = a.internal_recipe_name })
     }
