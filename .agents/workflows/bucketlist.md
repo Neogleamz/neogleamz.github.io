@@ -1,4 +1,4 @@
-﻿---
+---
 name: next_task_auto_branch
 description: "The primary project engine. Automates branching, planning, execution, and documentation for the next item on the Bucket List."
 trigger: "start working on the bucket list, start bucket list, what's next, what's next on the list?"
@@ -15,9 +15,9 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
 
 2. **Branch Creation**:
    - Extract the specific branch slug for the task.
-   - Use the `run_command` tool to execute `git checkout <target-base-branch>` to ensure you are on the correct source of truth.
-   - Execute `git pull` to fetch the latest changes.
-   - Execute `git checkout -b <extracted-branch-slug>` to create the isolated workspace.
+   - Run `git branch --list <extracted-branch-slug>`. If the branch already exists locally, execute `git checkout <extracted-branch-slug>` to resume it.
+   - If the branch does NOT exist, execute `git checkout <target-base-branch>`, perform `git pull`, and then carefully execute `git checkout -b <extracted-branch-slug>`.
+   - **CRITICAL SAFETY RULE**: YOU ARE STRICTLY FORBIDDEN from ever using the `-B` flag inside `git checkout`. Forcing a branch recreation via `-B` wipes out unmerged user commits and destroys local history. Never guess; check if the branch exists before creating.
 
 3. **Discovery & Clarification Phase**:
    - Analyze the bucket list requirement.
