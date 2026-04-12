@@ -1,7 +1,7 @@
-﻿---
+---
 name: status_update
 description: "Generates a Situation Report (SITREP) based on current Git context and the Bucket List."
-trigger: "/status"
+trigger: "/status, whats up, status update, where are we, what's happening"
 ---
 
 # Status Update Workflow
