@@ -21,8 +21,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-
-
+### Target: `main`
+*(Epic: Inventory UI State Management)*
+- [ ] `fix/inventory-sort-state-separation` : Decouple the sorting states between the DATAZ and EDITZ inventory tabs. Ensure that sorting columns on one table does not unintentionally mutate the sorting order on the other.
 
 
 
@@ -83,9 +84,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: Sitewide Button UI & Mobile Responsiveness)*
 - [ ] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
 
-### Target: `main`
-*(Epic: Inventory UI State Management)*
-- [ ] `fix/inventory-sort-state-separation` : Decouple the sorting states between the DATAZ and EDITZ inventory tabs. Ensure that sorting columns on one table does not unintentionally mutate the sorting order on the other.
+
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
