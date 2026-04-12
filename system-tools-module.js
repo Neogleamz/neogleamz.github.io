@@ -1275,7 +1275,7 @@ function handleFileSelect(input) {
 
 async function executeRestore() {
     const checkboxes = document.querySelectorAll('.restore-chk:checked');
-    if(checkboxes.length === 0) return alert("Select at least one sheet.");
+    if(checkboxes.length === 0) { sysLog("Validation Error: Backup Restoral aborted, no sheets selected.", true); return alert("Select at least one sheet."); }
     if(!confirm("⚠️ OVERWRITE cloud data?")) return;
     try {
         setMasterStatus("Restoring...", "mod-working"); setSysProgress(20, 'working');
@@ -1563,8 +1563,8 @@ async function loadPaperProfiles() {
             await savePaperProfiles(false);
         }
     } catch(e) {
-        sysLog("DB Size fetch failed: " + e.message, true);
-        console.warn("No paper profiles cloud config found. Initializing defaults.");
+        sysLog("Paper Profile Init Error: " + e.message, true);
+        console.warn("No paper profiles cloud config found: " + e.message);
     }
     renderPaperProfileTable();
     renderPaperProfileDropdowns();
@@ -1629,7 +1629,7 @@ function saveInlineEditPaper(idx) {
     const n = document.getElementById(`inlineEditN_${idx}`).value.trim();
     const w = parseFloat(document.getElementById(`inlineEditW_${idx}`).value);
     const h = parseFloat(document.getElementById(`inlineEditH_${idx}`).value);
-    if (!n || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return alert('Invalid paper dimensions.');
+    if (!n || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) { sysLog("Validation Error: Invalid paper dimensions.", true); return alert('Invalid paper dimensions.'); }
     
     window.activePaperProfiles[idx] = { n, w, h };
     editingPaperIdx = -1;
@@ -1641,7 +1641,7 @@ function addPaperProfile() {
     const n = document.getElementById('newPaperName').value.trim();
     const w = parseFloat(document.getElementById('newPaperW').value);
     const h = parseFloat(document.getElementById('newPaperH').value);
-    if (!n || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return alert('Invalid paper dimensions.');
+    if (!n || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) { sysLog("Validation Error: Invalid paper dimensions.", true); return alert('Invalid paper dimensions.'); }
     
     window.activePaperProfiles.push({ n, w, h });
     
