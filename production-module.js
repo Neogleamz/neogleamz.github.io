@@ -1202,7 +1202,7 @@ function renderActiveWO(id) {
                                     document.body.style.cursor = 'col-resize';
                                     e.preventDefault();
                                 });
-                                document.addEventListener('mousemove', (e) => {
+                                function doInlineSOPResize_${grp.id}(e) {
                                     if(!isDragging) return;
                                     let container = rz.parentElement;
                                     let totalW = container.getBoundingClientRect().width;
@@ -1214,13 +1214,17 @@ function renderActiveWO(id) {
 
                                     lp.style.flex = \`0 0 \${newLeftW}px\`;
                                     rp.style.flex = \`1 1 0\`;
-                                });
-                                document.addEventListener('mouseup', () => {
+                                }
+                                function stopInlineSOPResize_${grp.id}() {
                                     if(isDragging) {
                                         isDragging = false;
                                         document.body.style.cursor = '';
+                                        document.removeEventListener('mousemove', doInlineSOPResize_${grp.id});
+                                        document.removeEventListener('mouseup', stopInlineSOPResize_${grp.id});
                                     }
-                                });
+                                }
+                                document.addEventListener('mousemove', doInlineSOPResize_${grp.id});
+                                document.addEventListener('mouseup', stopInlineSOPResize_${grp.id});
                             }
                         }, 20);
                         <\/script>
