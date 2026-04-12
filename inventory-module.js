@@ -1,5 +1,15 @@
 // --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
-const savedFgiState = JSON.parse(localStorage.getItem('fgiCategoryState') || "null");
+const invStyles = document.createElement('style');
+invStyles.innerHTML = `
+.inv-cat-header { background: rgba(255,255,255,0.03); transition: background 0.2s; cursor: pointer; padding:10px 15px; border-bottom:1px solid rgba(255,255,255,0.1); border-radius: 6px 6px 0 0; }
+.inv-cat-header:hover { background: rgba(255,255,255,0.06); }
+.cc-dropdown-item { padding:8px 10px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border-color); background: transparent; }
+.cc-dropdown-item:hover { background: var(--brand-dark); }
+`;
+document.head.appendChild(invStyles);
+
+let savedFgiState = null;
+try { savedFgiState = JSON.parse(localStorage.getItem('fgiCategoryState')); } catch(e) { console.warn('Invalid FGI State cache cleared.'); localStorage.removeItem('fgiCategoryState'); }
 window.fgiCategoryState = savedFgiState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true, 'cat-label': true };
 window.toggleFgiCategory = function(cat) { 
     window.fgiCategoryState[cat] = !window.fgiCategoryState[cat]; 
@@ -20,8 +30,8 @@ function renderFgiTable() {
         };
     }
 
-    const getTh = (cat, col, label, color) => `<th class="${currentFgiSort[cat].column===col?'sorted-'+currentFgiSort[cat].direction:''} text-right" onclick="sortFGI('${cat}', '${col}')" style="${color ? 'border-bottom:2px solid '+color+';' : ''}">${label}</th>`;
-    const getNameTh = (cat) => `<th class="${currentFgiSort[cat].column==='n'?'sorted-'+currentFgiSort[cat].direction:''}" onclick="sortFGI('${cat}', 'n')">Product Name</th>`;
+    const getTh = (cat, col, label, color) => `<th class="${currentFgiSort[cat].column===col?'sorted-'+currentFgiSort[cat].direction:''} text-right" data-app-click="sortFgi" data-cat="${cat}" data-col="${col}" style="${color ? 'border-bottom:2px solid '+color+';' : ''}">${label}</th>`;
+    const getNameTh = (cat) => `<th class="${currentFgiSort[cat].column==='n'?'sorted-'+currentFgiSort[cat].direction:''}" data-app-click="sortFgi" data-cat="${cat}" data-col="n">Product Name</th>`;
 
     const schemas = {
         'cat-retail': `<tr>${getNameTh('cat-retail')} ${getTh('cat-retail','b','PROD','#3b82f6')} ${getTh('cat-retail','pb','PROTO','#8b5cf6')} ${getTh('cat-retail','sold','SOLD','#ef4444')} ${getTh('cat-retail','warranty','WRTY','#fbbf24')} ${getTh('cat-retail','s','STOCK','#10b981')} ${getTh('cat-retail','ms','MIN','#f97316')} ${getTh('cat-retail','tv','ASSETS')} ${getTh('cat-retail','net','NET')} ${getTh('cat-retail','msrpv','MSRP')}</tr>`,
@@ -65,7 +75,7 @@ function renderFgiTable() {
             let chevron = isExp ? '▼' : '▶';
             
             let mt = isFirstGroup ? '0px' : '20px';
-            h += `<div class="category-header" onclick="window.toggleFgiCategory('${g.id}')" style="cursor:pointer; background:rgba(255,255,255,0.03); transition: background 0.2s; padding:10px 15px; border-bottom:1px solid rgba(255,255,255,0.1); margin-top:${mt}; border-radius: 6px 6px 0 0;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'"><span style="font-weight:900; color:var(--primary-color); font-size:13px; text-transform:uppercase; letter-spacing:1px;"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></span></div>`;
+            h += `<div class="category-header" class="category-header inv-cat-header" data-app-click="toggleFgiCat" data-cat="${g.id}" style="margin-top:${mt};"><span style="font-weight:900; color:var(--primary-color); font-size:13px; text-transform:uppercase; letter-spacing:1px;"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></span></div>`;
             isFirstGroup = false;
             
             if(isExp) {
@@ -83,41 +93,41 @@ function renderFgiTable() {
                     trHtml += `<td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td>`;
                     
                     if (g.id === 'cat-retail') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'sold_qty')">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="prototype_produced_qty">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="sold_qty">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#fbbf24; font-weight:bold;">${x.warranty.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:${netColor};">$${x.net.toFixed(2)}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:var(--text-main);">$${(x.msrpv||0).toFixed(2)}</td>`;
                     }
                     else if (g.id === 'cat-sub') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'production_consumed_qty')">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="prototype_produced_qty">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="production_consumed_qty">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'scrap_qty')">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="scrap_qty">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#fbbf24; font-weight:bold;">${x.warranty.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                     }
                     else if (g.id === 'cat-print') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'prototype_produced_qty')">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="prototype_produced_qty">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'scrap_qty')">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="scrap_qty">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                     }
                     else if (g.id === 'cat-label') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'produced_qty')">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'production_consumed_qty')">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'fgi_stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',0,0,0,0,'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="production_consumed_qty">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                     }
                     
@@ -186,7 +196,7 @@ window.calculateTrailingVelocity = function(item_key, days=30) {
 function renderInventoryTable() {
     const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
     renderFgiTable();
-    let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('nn')">Neogleamz Name</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" onclick="sortInventory('n')">Item Name</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('p')">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('c')" style="border-bottom:2px solid #ef4444;">CONS</th> <th class="${currentInvSort.column==='pc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('pc')" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentInvSort.column==='prc'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('prc')" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentInvSort.column==='sq'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('sq')" style="border-bottom:2px solid #b91c1c;">SCRAP</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('a')" style="border-bottom:2px solid #0ea5e9;">ADJMT</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('ms')" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentInvSort.column==='ld'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('ld')" style="border-bottom:2px solid #14b8a6;">LEAD</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('s')" style="border-bottom:2px solid #f59e0b;">STOCK</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" onclick="sortInventory('tp')">ASSETS</th> `;
+    let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" data-app-click="sortInv" data-col="nn">Neogleamz Name</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" data-app-click="sortInv" data-col="n">Item Name</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="p">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="c" style="border-bottom:2px solid #ef4444;">CONS</th> <th class="${currentInvSort.column==='pc'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="pc" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentInvSort.column==='prc'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="prc" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentInvSort.column==='sq'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="sq" style="border-bottom:2px solid #b91c1c;">SCRAP</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="a" style="border-bottom:2px solid #0ea5e9;">ADJMT</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="ms" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentInvSort.column==='ld'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="ld" style="border-bottom:2px solid #14b8a6;">LEAD</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="s" style="border-bottom:2px solid #f59e0b;">STOCK</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="tp">ASSETS</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
     let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5}; let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, n:c.itemName, p:c.totalQty, c:i.consumed_qty, sq:i.scrap_qty, a:i.manual_adjustment, ms:i.min_stock, ld:parseFloat(i.rop_lead_time_days)||SUPPLIER_LEAD_TIME_DAYS, s:s, up:up, tp:tp, pc: (i.prototype_consumed_qty||0), prc: (i.production_consumed_qty||0) }; });
     if(a.length===0){ h += "<tr><td colspan='13' style='text-align:center;'>No raw inventory.</td></tr>"; }
@@ -204,7 +214,7 @@ function renderInventoryTable() {
             
             let ropPill = (dynamicROP > 0 && isLow) ? `<span style="background:#ef4444; color:#fff; border-radius:12px; font-size:10px; padding:1px 6px; font-weight:bold; margin-left:8px; animation: ropPulse 1.5s infinite;">🚨 ROP: ${dynamicROP.toFixed(1).replace(/\.?0+$/,'')} (Lead: ${x.ld}d)</span>` : '';
             
-            h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn} ${ropPill}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td><td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'consumed_qty')">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'prototype_consumed_qty')">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'production_consumed_qty')">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#b91c1c;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'scrap_qty')">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'manual_adjustment')">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable" style="color:#f97316;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'min_stock')">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#14b8a6;" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'rop_lead_time_days')">${x.ld}</td><td class="text-right editable ${sc}" contenteditable="true" onfocus="storeOldVal(this)" onblur="handleInvEdit(this,'${sk}',${x.p},${x.c},${x.a},${x.sq},'stock')">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; 
+            h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn} ${ropPill}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td><td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="consumed_qty">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="prototype_consumed_qty">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="production_consumed_qty">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#b91c1c;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="scrap_qty">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="manual_adjustment">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable" style="color:#f97316;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#14b8a6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="rop_lead_time_days">${x.ld}</td><td class="text-right editable ${sc}" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; 
 
         });
     }
@@ -966,7 +976,7 @@ window.openCycleCountManager = function() {
     let mkItem = (val, txt) => {
         let safeVal = String(val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         let safeTxt = String(txt).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        return `<div class="cc-dropdown-item" style="padding:8px 10px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border-color);" onclick="window.selectCcMngrItem('${safeVal}', '${safeTxt}')" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='transparent'">${txt}</div>`;
+        return `<div class="cc-dropdown-item" style="padding:8px 10px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border-color);" class="cc-dropdown-item" data-app-click="selectCcItem" data-val="${safeVal}" data-txt="${safeTxt}">${txt}</div>`;
     };
 
     let mkOpt = (val, txt) => {
@@ -1267,3 +1277,31 @@ if (typeof window !== 'undefined') {
     window.sortFGI = typeof sortFGI !== 'undefined' ? sortFGI : undefined;
     window.runProductionBatch = typeof runProductionBatch !== 'undefined' ? runProductionBatch : undefined;
 }
+
+
+// --- INVENTORY EVENT DELEGATION ---
+document.addEventListener('focusin', (e) => {
+    if (e.target.dataset.appFocus === 'storeOldValInv') {
+        if(typeof storeOldVal === 'function') storeOldVal(e.target);
+    }
+});
+document.addEventListener('focusout', (e) => {
+    if (e.target.dataset.appBlur === 'handleInvEdit') {
+        let d = e.target.dataset;
+        if(typeof handleInvEdit === 'function') handleInvEdit(e.target, d.key, parseFloat(d.p)||0, parseFloat(d.c)||0, parseFloat(d.a)||0, parseFloat(d.sq)||0, d.mode);
+    }
+});
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-app-click]');
+    if (!btn) return;
+    const action = btn.dataset.appClick;
+    if (action === 'sortFgi') { if(typeof sortFGI === 'function') sortFGI(btn.dataset.cat, btn.dataset.col); }
+    if (action === 'sortInv') { if(typeof sortInventory === 'function') sortInventory(btn.dataset.col); }
+    if (action === 'toggleFgiCat') { if(typeof toggleFgiCategory === 'function') toggleFgiCategory(btn.dataset.cat); }
+    if (action === 'selectCcItem') { if(typeof selectCcMngrItem === 'function') selectCcMngrItem(btn.dataset.val, btn.dataset.txt); }
+});
+document.addEventListener('input', (e) => {
+    if (e.target.dataset.appInput === 'forecast') {
+        if(typeof window.updateVelocityzForecast === 'function') window.updateVelocityzForecast(e.target.dataset.item, e.target.value);
+    }
+});
