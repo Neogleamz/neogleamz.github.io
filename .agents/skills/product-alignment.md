@@ -1,6 +1,7 @@
-﻿---
+---
 name: product_alignment_check
 description: "Triggers whenever the user brainstorms a new feature or uses an intake command to validate the idea against core product philosophies."
+trigger: "/product_alignment, /vet_idea, vet this idea, check product alignment"
 ---
 
 # Product Alignment Protocol
