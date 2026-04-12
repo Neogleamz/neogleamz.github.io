@@ -29,7 +29,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Sitewide Code Quality Audit)*
-- [ ] `chore/code-quality-audit` : Perform a full sitewide audit of current coding practices across all JS modules and index.html — cross-reference against industry standard best practices (e.g. event delegation, memory leaks, function scoping, global var hygiene, DOM query caching) and produce a prioritized list of refactor targets.
+- [x] `chore/code-quality-audit` : Perform a full sitewide audit of current coding practices across all JS modules and index.html — cross-reference against industry standard best practices (e.g. event delegation, memory leaks, function scoping, global var hygiene, DOM query caching) and produce a prioritized list of refactor targets.
 
 ### Target: `main`
 *(Epic: Competitive Feature Benchmarking)*
