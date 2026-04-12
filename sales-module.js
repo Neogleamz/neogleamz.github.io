@@ -454,16 +454,19 @@ async function executeSalesSync(isTestMode = false) {
                 inputNodeId: 'salesCsvFile',
                 resObj: { table: 'sales_ledger', count: salesPayload.length, data: salesPayload },
                 customCommitFn: async () => {
-                    importTrace(`▶ Execution Phase: Sanitizing injection payload for duplicates natively...`, false);
+                    syncTrace(`▶ Execution Phase: Sanitizing injection payload for duplicates natively...`, false);
                     let cleanPayload = salesPayload.filter(sp => !salesDB.some(s => s.order_id === String(sp.order_id) && s.storefront_sku === String(sp.storefront_sku)));
+                    let duplicatesIgnored = salesPayload.length - cleanPayload.length;
                     
                     if (cleanPayload.length === 0) {
-                        importTrace(`✅ SUCCESS: Execution resolved! Data inherently identically synced to database.`, false);
+                        syncTrace(`✅ SUCCESS: Safety checks verified ${duplicatesIgnored} duplicates and 0 non-duplicates. Database write bypassed.`, false);
                         setTimeout(() => showToast(`✅ Synced! All items were already securely logged in the database.`), 10);
                         return;
                     }
                     
-                    importTrace(`▶ Verified ${cleanPayload.length} valid target entities. Pushing to Cloud Matrix...`, false);
+                    if (duplicatesIgnored > 0) syncTrace(`▶ Filtered ${duplicatesIgnored} duplicates safely. Verified ${cleanPayload.length} pure items. Pushing to Cloud Matrix...`, false);
+                    else syncTrace(`▶ Verified ${cleanPayload.length} valid target entities. Pushing to Cloud Matrix...`, false);
+                    
                     const { error: e1 } = await supabaseClient.from('sales_ledger').insert(cleanPayload); 
                     if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
