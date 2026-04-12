@@ -36,15 +36,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: Sitewide Security Audit)*
 - [ ] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
 
-### Target: `main`
-*(Epic: Full-Repo Legacy Audit)*
-- [x] `chore/audit-index-html` : Execute `@[/legacy_audit]` against `index.html` to bring standards up to modern Vanilla DOM rules.
-- [x] `chore/audit-neogleamz-engine` : Execute `@[/legacy_audit]` against `neogleamz-engine.js` to eradicate technical debt.
-- [x] `chore/audit-system-tools` : Execute `@[/legacy_audit]` against `system-tools-module.js` to ensure telemetry rules are met.
-- [x] `chore/audit-system-version` : Execute `@[/legacy_audit]` against `system-version.js` to verify DOM structures and variable scopes.
-- [x] `chore/audit-inventory` : Execute `@[/legacy_audit]` against `inventory-module.js` to verify DOM structures and variable scopes.
-- [x] `chore/audit-bom` : Execute `@[/legacy_audit]` against `bom-module.js` to eradicate technical debt.
-- [ ] `chore/audit-packerz` : Execute `@[/legacy_audit]` against `packerz-module.js` to bring standards up to modern Vanilla DOM rules.
 
 
 ---
@@ -162,3 +153,13 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Comprehensive UI Element Documentation)*
 - [x] `docs/comprehensive-ui-audit` : Conduct a granular button-by-button, modal-by-modal documentation audit for every hub and page across the app, ensuring `tools/SK8Lytz_App_Master_Reference.md` is fully updated with explicit DOM structural definitions.
+
+### Target: `main`
+*(Epic: Full-Repo Legacy Audit)*
+- [x] `chore/audit-index-html` : Execute `@[/legacy_audit]` against `index.html` to bring standards up to modern Vanilla DOM rules.
+- [x] `chore/audit-neogleamz-engine` : Execute `@[/legacy_audit]` against `neogleamz-engine.js` to eradicate technical debt.
+- [x] `chore/audit-system-tools` : Execute `@[/legacy_audit]` against `system-tools-module.js` to ensure telemetry rules are met.
+- [x] `chore/audit-system-version` : Execute `@[/legacy_audit]` against `system-version.js` to verify DOM structures and variable scopes.
+- [x] `chore/audit-inventory` : Execute `@[/legacy_audit]` against `inventory-module.js` to verify DOM structures and variable scopes.
+- [x] `chore/audit-bom` : Execute `@[/legacy_audit]` against `bom-module.js` to eradicate technical debt.
+- [x] `chore/audit-packerz` : Execute `@[/legacy_audit]` against `packerz-module.js` to bring standards up to modern Vanilla DOM rules.
