@@ -529,9 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_document_getElementById_finali':
                     document.getElementById('finalizeWoModal').style.display='none';;
                     break;
-                case 'click_window_submitFinalizeWo':
-                    window.submitFinalizeWo();
-                    break;
+
                 case 'click_document_getElementById_finali_14':
                     document.getElementById('finalizePrintModal').style.display='none';
                     break;

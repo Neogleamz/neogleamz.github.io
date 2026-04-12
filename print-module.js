@@ -60,6 +60,7 @@ function renderPrintQueue() {
         ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>";
         document.getElementById('printMainArea').style.display = 'none';
     } else {
+        let printListHtml = [];
         printQueueDB.forEach((job, index) => {
             if (job.status === 'Archived') return;
             let cleanPartName = job.part_name.startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : job.part_name.split(':::')[0];
@@ -81,7 +82,7 @@ function renderPrintQueue() {
             const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + job.id.substring(0, 8).toUpperCase());
             const timeStr = totalTime > 0 ? ` - ${formatPrintTime(totalTime)}` : "";
 
-            ui.innerHTML += `<li class="${sel}" 
+            printListHtml.push(`<li class="${sel}" 
                 draggable="true"
                 ondragstart="printDragStart(event, ${index})" 
                 ondragover="printDragOver(event)" 
@@ -94,8 +95,9 @@ function renderPrintQueue() {
                     ${job.label ? `<span style="font-size:11px; color:#f59e0b; font-style:italic; padding-left:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${job.label}</span>` : ''}
                 </div>
                 <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${job.qty}</span>
-            </li>`;
+            </li>`);
         });
+        ui.innerHTML = printListHtml.join('');
     }
 
     const tasksEl = document.getElementById('totalPrintTasks');
@@ -618,14 +620,15 @@ async function addPrintJob(partName, qty, woId = null, label = null) {
 function openManualPrintModal() {
     const sel = document.getElementById('manualPrintSelect');
     if(sel) {
-        sel.innerHTML = '<option value="">-- Select 3D Part --</option>';
+        let manualPrintHtml = ['<option value="">-- Select 3D Part --</option>'];
         Object.keys(productsDB).sort((a,b) => {
             return a.localeCompare(b);
         }).forEach(k => {
             if (productsDB[k] && productsDB[k].is_3d_print) {
-                sel.innerHTML += `<option value="RECIPE:::${String(k).replace(/"/g, '&quot;')}">🖨️ ${k}</option>`;
+                manualPrintHtml.push(`<option value="RECIPE:::${String(k).replace(/"/g, '&quot;')}">🖨️ ${k}</option>`);
             }
         });
+        sel.innerHTML = manualPrintHtml.join('');
     }
     const q = document.getElementById('manualPrintQty');
     if(q) q.value = 1;

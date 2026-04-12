@@ -791,6 +791,7 @@ function renderWOList() {
         let activeCount = workOrdersDB.filter(w => w.status !== 'Archived').length;
         if(activeCount === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
 
+        let woListHtml = [];
         workOrdersDB.forEach((wo, index) => {
             if (wo.status === 'Archived') return;
             if(typeof wo.wip_state === 'string') wo.wip_state = JSON.parse(wo.wip_state || '{}');
@@ -798,7 +799,7 @@ function renderWOList() {
             let sel = (currentWO && currentWO.wo_id === wo.wo_id) ? 'selected' : '';
             let dot = wo.status === 'Queued' ? '🟡' : (wo.status === 'Completed' ? '🟢' : (wo.status === 'Picking' ? '🔵' : '🟠'));
 
-            ui.innerHTML += `<li class="${sel}"
+            woListHtml.push(`<li class="${sel}"
                 draggable="true"
                 ondragstart="woDragStart(event, ${index})"
                 ondragover="woDragOver(event)"
@@ -811,8 +812,9 @@ function renderWOList() {
                     ${wo.label ? `<span style="font-size:11px; color:#f59e0b; font-style:italic; padding-left:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${wo.label}</span>` : ''}
                 </div>
                 <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${wo.qty}</span>
-            </li>`;
+            </li>`);
         });
+        ui.innerHTML = woListHtml.join('');
         if(!currentWO) {
             let activeWO = workOrdersDB.find(w => w.status !== 'Archived');
             if(activeWO) {
@@ -1294,16 +1296,17 @@ function renderActiveWO(id) {
 async function advanceWO(newStatus, bypassModal = false) {
     try {
         if(!currentWO) return;
-        if(currentWO.status === 'Completed') return showToast('This Work Order is already archived.', 'error');
+        const targetWO = currentWO;
+        if(targetWO.status === 'Completed') return showToast('This Work Order is already archived.', 'error');
 
-        if (currentWO.materials_pulled && (newStatus === 'Queued' || newStatus === 'Picking')) {
+        if (targetWO.materials_pulled && (newStatus === 'Queued' || newStatus === 'Picking')) {
             return alert("Materials have already been pulled for this Work Order. You cannot revert to previous planning stages.");
         }
 
         if (newStatus === 'Completed' && !bypassModal) {
-            let w = currentWO.wip_state || {};
+            let w = targetWO.wip_state || {};
             let drafts = w.scrap_draft || {};
-            let tableHtml = buildDraftModalHtml(currentWO, drafts);
+            let tableHtml = buildDraftModalHtml(targetWO, drafts);
 
             document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(16, 185, 129, 0.1)';
             document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
@@ -1323,14 +1326,14 @@ async function advanceWO(newStatus, bypassModal = false) {
             return;
         }
 
-        sysLog(`WO ${currentWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
+        sysLog(`WO ${targetWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
         if (newStatus === 'In Production' || newStatus === 'Completed') {
-            if (!currentWO.materials_pulled) {
-                if(!confirm(`Deduct raw materials for ${currentWO.wo_id}?`)) { setMasterStatus("Ready.", "status-idle"); return; }
-                let exactDeductions = calculateExactWODeductions(currentWO);
+            if (!targetWO.materials_pulled) {
+                if(!confirm(`Deduct raw materials for ${targetWO.wo_id}?`)) { setMasterStatus("Ready.", "status-idle"); return; }
+                let exactDeductions = calculateExactWODeductions(targetWO);
                 let upsKeys = new Set();
-                let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
-                let isScrapTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
+                let bType = targetWO.wip_state && targetWO.wip_state.batch_type ? targetWO.wip_state.batch_type : 'Production';
+                let isScrapTicket = targetWO.label && targetWO.label.includes('[SCRAP REBUILD]');
 
                 Object.keys(exactDeductions.raws_production).forEach(k => {
                     let req = exactDeductions.raws_production[k];
@@ -1366,19 +1369,19 @@ async function advanceWO(newStatus, bypassModal = false) {
                 let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
                 if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
 
-                currentWO.materials_pulled = true;
-                await supabaseClient.from('work_orders').update({ materials_pulled: true }).eq('wo_id', currentWO.wo_id);
+                targetWO.materials_pulled = true;
+                await supabaseClient.from('work_orders').update({ materials_pulled: true }).eq('wo_id', targetWO.wo_id);
             }
         }
 
         if (newStatus === 'Completed') {
-            if(!confirm(`Add ${currentWO.qty} Finished Goods to Inventory Yield?`)) { setMasterStatus("Ready.", "status-idle"); return; }
-            let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
+            if(!confirm(`Add ${targetWO.qty} Finished Goods to Inventory Yield?`)) { setMasterStatus("Ready.", "status-idle"); return; }
+            let bType = targetWO.wip_state && targetWO.wip_state.batch_type ? targetWO.wip_state.batch_type : 'Production';
 
-            let exactDeductions = calculateExactWODeductions(currentWO);
+            let exactDeductions = calculateExactWODeductions(targetWO);
             let upsKeys = new Set();
 
-            let isScrapTicket = currentWO.label && currentWO.label.includes('[SCRAP REBUILD]');
+            let isScrapTicket = targetWO.label && targetWO.label.includes('[SCRAP REBUILD]');
             Object.keys(exactDeductions.built_subs).forEach(k => {
                 let req = exactDeductions.built_subs[k];
                 if(!inventoryDB[k]) inventoryDB[k]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
@@ -1401,11 +1404,11 @@ async function advanceWO(newStatus, bypassModal = false) {
                 upsKeys.add(k);
             });
 
-            let fgiKey = `RECIPE:::${currentWO.product_name}`;
+            let fgiKey = `RECIPE:::${targetWO.product_name}`;
             if(!inventoryDB[fgiKey]) inventoryDB[fgiKey]={consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
 
-            if(bType === 'Prototype') inventoryDB[fgiKey].prototype_produced_qty = (inventoryDB[fgiKey].prototype_produced_qty||0) + currentWO.qty;
-            else inventoryDB[fgiKey].produced_qty += currentWO.qty;
+            if(bType === 'Prototype') inventoryDB[fgiKey].prototype_produced_qty = (inventoryDB[fgiKey].prototype_produced_qty||0) + targetWO.qty;
+            else inventoryDB[fgiKey].produced_qty += targetWO.qty;
             upsKeys.add(fgiKey);
 
             let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
@@ -1413,23 +1416,23 @@ async function advanceWO(newStatus, bypassModal = false) {
         }
 
         const updateData = {status: newStatus};
-        if(newStatus !== 'Queued' && !currentWO.started_at) {
-            currentWO.started_at = new Date().toISOString();
-            updateData.started_at = currentWO.started_at;
+        if(newStatus !== 'Queued' && !targetWO.started_at) {
+            targetWO.started_at = new Date().toISOString();
+            updateData.started_at = targetWO.started_at;
         }
         if(newStatus === 'Completed') {
-            currentWO.completed_at = new Date().toISOString();
-            updateData.completed_at = currentWO.completed_at;
+            targetWO.completed_at = new Date().toISOString();
+            updateData.completed_at = targetWO.completed_at;
             updateData.status = 'Archived';
         }
 
-        const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', currentWO.wo_id); if(error) throw new Error(error.message);
+        const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', targetWO.wo_id); if(error) throw new Error(error.message);
 
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
-            const { data: existingPrints } = await supabaseClient.from('print_queue').select('id').eq('wo_id', currentWO.wo_id);
+            const { data: existingPrints } = await supabaseClient.from('print_queue').select('id').eq('wo_id', targetWO.wo_id);
             if (!existingPrints || existingPrints.length === 0) {
-                const printJobs = find3DPrintedComponents(currentWO.product_name, currentWO.qty, currentWO.routing);
+                const printJobs = find3DPrintedComponents(targetWO.product_name, targetWO.qty, targetWO.routing);
                 for(let job of Object.keys(printJobs)) {
                     let totalNeeded = printJobs[job];
                     let isLegacyRaw = (typeof catalogCache !== 'undefined' && catalogCache[job]);
@@ -1445,15 +1448,17 @@ async function advanceWO(newStatus, bypassModal = false) {
                     if (onHand > 0) amountToPrint = Math.max(0, totalNeeded - onHand);
 
                     if (amountToPrint > 0 && typeof addPrintJob === 'function') {
-                        await addPrintJob(prefix + job, amountToPrint, currentWO.wo_id);
+                        await addPrintJob(prefix + job, amountToPrint, targetWO.wo_id);
                     }
                 }
             }
         } catch(pe) { sysLog("Print Spawn Error: " + pe.message, true); }
 
-        currentWO.status = updateData.status || newStatus;
-        if(currentWO.status === 'Archived') {
-            currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
+        if(currentWO && currentWO.wo_id === targetWO.wo_id) {
+            currentWO.status = updateData.status || newStatus;
+            if(currentWO.status === 'Archived') {
+                currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null;
+            }
         }
         setMasterStatus("Updated!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); renderWOList();
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
