@@ -44,6 +44,17 @@ Buttons follow a 3-intensity system (Muted, Standard/Ghost, Neon). Use the follo
 
 ### C. Executive Panes & Layout Geometry
 * **Split-Panes:** All split interfaces MUST use `<div class="bom-layout">` separated by an `.h-resizer` that explicitly binds to `onmousedown="initNeoSidebarResizer(event)"`.
+* **⚠️ Inline Resize Listener Pattern (Memory Safety):** When resize logic is injected via dynamic `<script>` blocks (e.g. inside `renderActivePrintJob`, `renderWOList`), `document.addEventListener('mousemove'/'mouseup')` MUST use **named function declarations**, never anonymous arrow functions. Anonymous functions cannot be passed to `removeEventListener`, causing compounding listener accumulation on every re-render. Canonical pattern:
+  ```js
+  function doXyzResize(e) { /* resize logic */ }
+  function stopXyzResize() {
+      isDragging = false;
+      document.removeEventListener('mousemove', doXyzResize);
+      document.removeEventListener('mouseup', stopXyzResize);
+  }
+  document.addEventListener('mousemove', doXyzResize);
+  document.addEventListener('mouseup', stopXyzResize);
+  ```
 * **Zero-Padding Headers:** Executive headers (`.pane-header-bar`) must be bound tightly to `height: 26px`, `padding: 0 10px` so that `.pane-header-title` remains absolutely centered (`left: 50%; transform: translate(-50%, -50%)`) without visual jumping.
 * **No Spacers:** Do NOT use empty HTML `<div>` elements as visual spacers or layout controls. Unused blocks must be explicitly set to `display: none;`.
 
