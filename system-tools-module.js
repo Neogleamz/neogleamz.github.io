@@ -170,34 +170,37 @@ window.loadSelectedRegexPreset = function() {
 
 window.saveRegexPresetAsNew = function() {
     let name = prompt("Enter a name for this new Extraction Profile:");
-    if(!name || name.trim() === "") return;
+    if(!name || name.trim() === "") { sysLog("Validation Error: Profile name cannot be empty.", true); return; }
     window.PARSER_PROFILES.push({name: name.trim(), rules: window.getCurrentUIRules()});
     window.ACTIVE_PROFILE_INDEX = window.PARSER_PROFILES.length - 1;
     window.PARSER_RULES = window.PARSER_PROFILES[window.ACTIVE_PROFILE_INDEX].rules;
     window.saveStorageProfiles();
     window.renderPresetDropdown();
+    sysLog(`Success: Saved new profile: ${name}`);
     alert(`Successfully saved new profile: ${name}`);
 };
 
 window.overwriteCurrentRegexPreset = function() {
-    if(window.ACTIVE_PROFILE_INDEX === 0) { alert("Cannot overwrite the Factory Default profile."); return; }
+    if(window.ACTIVE_PROFILE_INDEX === 0) { sysLog("Validation Error: Cannot overwrite the Factory Default profile.", true); alert("Cannot overwrite the Factory Default profile."); return; }
     let cur = window.PARSER_PROFILES[window.ACTIVE_PROFILE_INDEX];
     if(confirm(`Overwrite profile [ ${cur.name} ] with the current visual rules?`)) {
         cur.rules = window.getCurrentUIRules();
         window.PARSER_RULES = cur.rules;
         window.saveStorageProfiles();
+        sysLog(`Success: Profile [ ${cur.name} ] automatically updated!`);
         alert(`Profile [ ${cur.name} ] automatically updated!`);
     }
 };
 
 window.deleteRegexPreset = function() {
-    if(window.ACTIVE_PROFILE_INDEX === 0) { alert("Factory Default cannot be deleted."); return; }
+    if(window.ACTIVE_PROFILE_INDEX === 0) { sysLog("Validation Error: Factory Default cannot be deleted.", true); alert("Factory Default cannot be deleted."); return; }
     let cur = window.PARSER_PROFILES[window.ACTIVE_PROFILE_INDEX];
     if(confirm(`DANGER: Are you sure you want to completely erase the [ ${cur.name} ] profile?`)) {
         window.PARSER_PROFILES.splice(window.ACTIVE_PROFILE_INDEX, 1);
         window.ACTIVE_PROFILE_INDEX = 0; // fallback to default
         window.PARSER_RULES = window.PARSER_PROFILES[0].rules;
         window.saveStorageProfiles();
+        sysLog(`Success: Profile [ ${cur.name} ] deleted!`);
         window.openParserConfig();
     }
 };
@@ -465,33 +468,36 @@ window.loadSelectedParcelRegexPreset = function() {
 
 window.saveParcelRegexPresetAsNew = function() {
     let name = prompt("Enter a name for this new Parcel Extraction Profile:");
-    if(!name || name.trim() === "") return;
+    if(!name || name.trim() === "") { sysLog("Validation Error: Parcel profile name cannot be empty.", true); return; }
     window.PARCEL_PROFILES.push({name: name.trim(), rules: window.getCurrentParcelUIRules()});
     window.ACTIVE_PARCEL_PROFILE_INDEX = window.PARCEL_PROFILES.length - 1;
     window.PARCEL_RULES = window.PARCEL_PROFILES[window.ACTIVE_PARCEL_PROFILE_INDEX].rules;
     window.saveParcelProfiles();
     window.renderParcelPresetDropdown();
+    sysLog(`Success: Saved new parcel profile: ${name}`);
     alert(`Successfully saved new profile: ${name}`);
 };
 
 window.overwriteCurrentParcelRegexPreset = function() {
-    if(window.ACTIVE_PARCEL_PROFILE_INDEX === 0) { alert("Cannot overwrite the Factory Default profile."); return; }
+    if(window.ACTIVE_PARCEL_PROFILE_INDEX === 0) { sysLog("Validation Error: Cannot overwrite the Factory Default profile.", true); alert("Cannot overwrite the Factory Default profile."); return; }
     let cur = window.PARCEL_PROFILES[window.ACTIVE_PARCEL_PROFILE_INDEX];
     if(confirm(`Overwrite profile [ ${cur.name} ] with the current visual rules?`)) {
         cur.rules = window.getCurrentParcelUIRules();
         window.PARCEL_RULES = cur.rules;
         window.saveParcelProfiles();
+        sysLog(`Success: Parcel profile [ ${cur.name} ] automatically updated!`);
         alert(`Profile [ ${cur.name} ] automatically updated!`);
     }
 };
 
 window.deleteParcelRegexPreset = function() {
-    if(window.ACTIVE_PARCEL_PROFILE_INDEX === 0) { alert("Factory Default cannot be deleted."); return; }
+    if(window.ACTIVE_PARCEL_PROFILE_INDEX === 0) { sysLog("Validation Error: Factory Default cannot be deleted.", true); alert("Factory Default cannot be deleted."); return; }
     let cur = window.PARCEL_PROFILES[window.ACTIVE_PARCEL_PROFILE_INDEX];
     if(confirm(`DANGER: Are you sure you want to completely erase the [ ${cur.name} ] profile?`)) {
         window.PARCEL_PROFILES.splice(window.ACTIVE_PARCEL_PROFILE_INDEX, 1);
         window.ACTIVE_PARCEL_PROFILE_INDEX = 0; // fallback to default
         window.PARCEL_RULES = window.PARCEL_PROFILES[0].rules;
+        sysLog(`Success: Parcel profile [ ${cur.name} ] deleted!`);
         window.saveParcelProfiles();
         window.openParcelConfig();
     }
