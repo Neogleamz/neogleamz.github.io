@@ -1,6 +1,7 @@
-﻿---
-trigger: always_on
-description: "Auto-migrated Core A.I. Rule"
+---
+name: local_tool_enforcement
+description: "Strictly ban terminal utilities for file manipulation, prioritizing native AI tooling like 'view_file' and 'grep_search'."
+trigger: "/tools, /local_tools, use proper tools"
 ---
 
 # Local Tool Enforcement Rule
