@@ -76,7 +76,7 @@ Known verified tables currently in active use across the JavaScript modules:
 
 ### Core Ledgers
 - `sales_ledger`: Tracks order hashes, COGS, and sales mapping.
-- `inventory_consumption`: Tracks recipe components deducted per sale (`item_key`, `consumed_qty`, `manual_adjustment`).
+- `inventory_consumption`: Tracks recipe components deducted per sale (`item_key`, `consumed_qty`, `manual_adjustment`, `rop_lead_time_days`).
 
 ### Products & Costs
 - `full_landed_costs`: Calculates absolute profitability (`parcel_no`, `di_item_id`, `neogleamz_product`, `quantity`, `lot_multiplier`).

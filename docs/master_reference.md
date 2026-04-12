@@ -127,6 +127,7 @@ The system natively deploys 16 tables. RLS explicitly dictates that **Authentica
 -- production_consumed_qty: number | null
 -- prototype_consumed_qty: number | null
 -- prototype_produced_qty: number | null
+-- rop_lead_time_days: number | null
 -- scrap_qty: number | null
 -- sold_qty: number | null
 ```
