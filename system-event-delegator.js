@@ -4,8 +4,6 @@
 // Replaces inline HTML handlers per Native Vanilla DOM Rules
 // ==========================================
 
-import { sysLog } from './system-tools-module.js';
-
 document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('click', function(event) {
