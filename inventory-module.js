@@ -733,7 +733,24 @@ let currentScanKey = null;
 let currentScanIsFgi = false;
 
 window.startCycleCount = async function() {
-    document.getElementById('cycleCountModal').style.display = 'flex';
+    let card = document.getElementById('inlineCycleScannerCard');
+    if(card) card.style.display = 'flex';
+    
+    // Pull context from the Cycle Count Manager dropdown
+    let selectEl = document.getElementById('ccMngrItemSelect');
+    let titleEl = document.getElementById('inlineScannerItemName');
+    let subtitleEl = document.getElementById('inlineScannerExpected');
+    
+    if (selectEl && selectEl.value) {
+        let selectedOption = selectEl.options[selectEl.selectedIndex];
+        titleEl.innerText = "VERIFYING TARGET:";
+        titleEl.style.color = "#10b981";
+        subtitleEl.innerText = selectedOption.text;
+    } else {
+        titleEl.innerText = "Scan Any Item";
+        titleEl.style.color = "white";
+        subtitleEl.innerText = "No target filter applied";
+    }
     
     // Completely destroy previous instance to prevent iOS Safari Promise locks
     if (html5QrCode) {
@@ -747,7 +764,7 @@ window.startCycleCount = async function() {
         html5QrCode = new Html5Qrcode("barcode-reader");
         await html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 12, qrbox: { width: 250, height: 250 } },
+            { fps: 12, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
             (decodedText, decodedResult) => {
                 window.onScanSuccess(decodedText);
             },
@@ -776,7 +793,8 @@ window.stopCycleCount = async function() {
     const readerEl = document.getElementById("barcode-reader");
     if (readerEl) readerEl.innerHTML = '';
     
-    document.getElementById('cycleCountModal').style.display = 'none';
+    let card = document.getElementById('inlineCycleScannerCard');
+    if(card) card.style.display = 'none';
 };
 
 window.onScanSuccess = function(decodedText) {
@@ -796,30 +814,14 @@ window.onScanSuccess = function(decodedText) {
         setTimeout(() => flash.style.display = 'none', 300);
     }
 
-    let isFgi = false;
-    let name = "";
-    let expectedStock = 0;
     let actualKey = "";
-    
     let pName = decodedText.replace('RECIPE:::', '');
+    
+    // Validate barcode exists in system
     if(productsDB[pName]) {
-        isFgi = true;
-        name = pName;
         actualKey = `RECIPE:::${pName}`;
-        
-        let i = inventoryDB[actualKey] || {};
-        let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; 
-        let sold = parseFloat(i.sold_qty) || 0; let c_prod = parseFloat(i.production_consumed_qty) || 0; 
-        let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; 
-        let adj = parseFloat(i.manual_adjustment) || 0;
-        expectedStock = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb); 
     } else if(catalogCache[decodedText] || (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName])) {
-        isFgi = false;
-        name = catalogCache[decodedText] ? (catalogCache[decodedText].neoName || catalogCache[decodedText].itemName) : pName;
         actualKey = decodedText;
-        
-        let i = inventoryDB[actualKey] || {};
-        expectedStock = (catalogCache[actualKey] ? catalogCache[actualKey].totalQty : 0) - (parseFloat(i.consumed_qty) || 0) - (parseFloat(i.scrap_qty) || 0) + (parseFloat(i.manual_adjustment) || 0);
     } else {
         sysLog(`Barcode Error: Not recognized - ${decodedText}`, true);
         alert("Barcode not recognized in system: " + decodedText);
@@ -827,23 +829,44 @@ window.onScanSuccess = function(decodedText) {
         return;
     }
     
-    currentScanKey = actualKey;
-    currentScanIsFgi = isFgi;
+    // Auto-select the item in the Cycle Count Manager dropdown
+    let selectEl = document.getElementById('ccMngrItemSelect');
+    if (selectEl) {
+        selectEl.value = actualKey;
+        
+        // If the value wasn't in the options (unlikely if the DBs match, but possible if unfiltered), try to inject it
+        if(selectEl.value !== actualKey) {
+            let n = pName;
+            if(catalogCache[actualKey]) n = catalogCache[actualKey].neoName || catalogCache[actualKey].itemName;
+            sysLog(`Scanner parsed valid key ${actualKey} but it was not in select list natively. Forcing injection.`);
+            let opt = document.createElement("option");
+            opt.value = actualKey;
+            opt.text = n;
+            selectEl.appendChild(opt);
+            selectEl.value = actualKey;
+        }
+    }
     
-    document.getElementById('scanner-prompt-title').innerText = name;
-    document.getElementById('scanner-expected-stock').innerText = expectedStock.toFixed(2).replace(/\.?0+$/,'');
-    document.getElementById('scanner-physical-count').value = ""; 
+    // Trigger the stock update logic natively as if the user clicked the dropdown
+    window.updateCcMngrStock();
     
-    document.getElementById('scanner-overlay-prompt').style.display = 'flex';
+    // Shutdown the camera to save battery now that we have loaded the form
+    window.stopCycleCount();
+    
+    // Focus the actual manager quantity input field
     setTimeout(() => {
-        document.getElementById('scanner-physical-count').focus();
+        let input = document.getElementById('ccMngrQtyInput');
+        if(input) {
+            input.focus();
+            // scroll manager to view just in case
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }, 100);
 };
 
 window.resumeCycleCount = function() {
-    document.getElementById('scanner-overlay-prompt').style.display = 'none';
-    currentScanKey = null;
-    if(html5QrCode && html5QrCode.getState() === 3) { // 3 = PAUSED
+    // Deprecated for Dual-Card layout, left for compatibility stub
+    if(html5QrCode && html5QrCode.getState() === 3) {
         html5QrCode.resume();
     }
 };
