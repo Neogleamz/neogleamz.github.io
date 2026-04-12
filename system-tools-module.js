@@ -1176,8 +1176,14 @@ async function executeExport(btnObj) {
             const { data, error } = await supabaseClient.from(tableName).select('*');
             if (error) throw error;
             let exportData = data;
-            if (tableName === 'app_settings') {
-                exportData = data.map(r => ({ ...r, config_json: typeof r.config_json === 'object' ? JSON.stringify(r.config_json) : r.config_json }));
+            if (tableName === 'product_recipes') {
+                exportData = data.map(r => ({ product_name: r.product_name, components: JSON.stringify(r.components), labor_time_mins: r.labor_time_mins, labor_rate_hr: r.labor_rate_hr, msrp: r.msrp, wholesale_price: r.wholesale_price, is_subassembly: r.is_subassembly }));
+            } else if (tableName === 'production_sops') {
+                exportData = data.map(r => ({ product_name: r.product_name, steps: JSON.stringify(r.steps) }));
+            } else if (tableName === 'work_orders') {
+                exportData = data.map(r => ({ ...r, wip_state: JSON.stringify(r.wip_state), routing: JSON.stringify(r.routing || {}) }));
+            } else if (tableName === 'pack_ship_sops') {
+                exportData = data.map(r => ({ ...r, instruction_json: typeof r.instruction_json === 'object' ? JSON.stringify(r.instruction_json) : r.instruction_json }));
             } else if (tableName === 'sop_archives') {
                 exportData = data.map(r => ({ ...r, telemetry_json: typeof r.telemetry_json === 'object' ? JSON.stringify(r.telemetry_json) : r.telemetry_json }));
             }
