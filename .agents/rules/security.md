@@ -1,7 +1,7 @@
 ---
 name: security_auditor
 description: "Strict enforcement of environment variable management and anti-hardcoding guardrails."
-trigger: "/security, /audit, security rule"
+trigger: always_on
 ---
 
 # Security & Secrets Standard

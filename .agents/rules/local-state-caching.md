@@ -1,7 +1,7 @@
 ---
 name: local_caching
 description: "Strict coding standards for browser-native caching and data serialization."
-trigger: "/caching, /localstorage, local state caching, fix caching"
+trigger: always_on
 ---
 
 # Local State Caching Rule

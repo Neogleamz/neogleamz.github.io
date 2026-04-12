@@ -1,7 +1,7 @@
 ---
 name: test_driven_development
 description: "Triggers when the user asks to create a new utility function, data calculation, or pure logic service to enforce TDD principles."
-trigger: "/tdd, /test_driven, write a test first, use tdd"
+trigger: always_on
 ---
 
 # Test-First Standard

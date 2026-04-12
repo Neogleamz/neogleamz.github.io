@@ -1,7 +1,7 @@
 ---
 name: wind_down
 description: "Executes the end-of-session synchronization, workspace sanitization, and state saving sequence."
-trigger: "/wind_down, /wind-down, end session, wind down, see you tomorrow"
+trigger: always_on
 ---
 
 # The Midnight Oil Protocol (Wind Down Workflow)

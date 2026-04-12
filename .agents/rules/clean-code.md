@@ -1,7 +1,7 @@
 ---
 name: clean_code
 description: "Strict enforcement of Vanilla JS modularity, ES6+ syntax, and code cleanliness."
-trigger: "/clean_code, /refactor, clean code, refactor code"
+trigger: always_on
 ---
 
 # Coding Standards & Clean Code Rule

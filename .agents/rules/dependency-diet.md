@@ -1,7 +1,7 @@
 ---
 name: dependency_diet
 description: "Triggers whenever the AI attempts to add an external library, forcing a justification check and prioritizing native Browser APIs."
-trigger: "/dependency_diet, /dependencies, verify dependencies, check dependencies"
+trigger: always_on
 ---
 
 # Dependency Diet & Anti-Bloat Protocol

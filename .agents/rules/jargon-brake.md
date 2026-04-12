@@ -1,7 +1,7 @@
 ---
 name: jargon_brake
 description: "A reactive persona shift triggered when the user is confused, forcing the AI to stop coding and explain concepts via simple analogies."
-trigger: "/jargon_brake, /slow_down, slow down, explain simply, jargon brake, ELI5"
+trigger: always_on
 ---
 
 # Jargon Brake (Mentorship Protocol)

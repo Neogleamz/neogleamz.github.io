@@ -1,7 +1,7 @@
 ---
 name: whiteboard_mode
 description: "A read-only, consultative persona shift for brainstorming and theory-crafting without triggering code changes or PM workflows."
-trigger: "/whiteboard, /brainstorm, let's brainstorm, lets chat, just thinking out loud"
+trigger: always_on
 ---
 
 # Whiteboard & Brainstorming Protocol

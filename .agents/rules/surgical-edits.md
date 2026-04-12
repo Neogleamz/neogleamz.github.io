@@ -1,7 +1,7 @@
 ---
 name: surgical_edits
 description: "Strictly enforced code-editing guardrails to prevent accidental overwrites and silent deletions."
-trigger: "/surgical, /edits, surgical strike"
+trigger: always_on
 ---
 
 # Surgical Strike Protocol (Anti-Collision Protocol)

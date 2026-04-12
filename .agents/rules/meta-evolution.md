@@ -1,7 +1,7 @@
 ---
 name: meta_evolution
 description: "Triggers when the agent detects repeated user corrections, or when the user invokes '/evolve', to permanently update the agent's core instructions."
-trigger: "/evolve, /meta_evolution, update your rules, learn this"
+trigger: always_on
 ---
 
 # Meta-Evolution & Self-Correction Protocol

@@ -1,7 +1,7 @@
 ---
 name: dual_brain_sync
 description: "Forces a strict mirror-sync of all agent files across /rules and their original /workflows or /skills directories."
-trigger: "/sync, /mirror, dual brain sync"
+trigger: always_on
 ---
 
 # The Dual-Brain Synchronization Protocol

@@ -1,7 +1,7 @@
 ---
 name: local_tool_enforcement
 description: "Strictly ban terminal utilities for file manipulation, prioritizing native AI tooling like 'view_file' and 'grep_search'."
-trigger: "/tools, /local_tools, use proper tools"
+trigger: always_on
 ---
 
 # Local Tool Enforcement Rule

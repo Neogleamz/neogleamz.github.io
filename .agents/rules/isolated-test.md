@@ -1,7 +1,7 @@
 ---
 name: isolated_test_and_verify
 description: "Executes a strict QA workflow to verify recent changes, utilizing manual browser steps for UI/Bluetooth and isolated tests for DB logic."
-trigger: "/test, test this, check the browser, verify the change"
+trigger: always_on
 ---
 
 # Isolated Test & Verify Protocol

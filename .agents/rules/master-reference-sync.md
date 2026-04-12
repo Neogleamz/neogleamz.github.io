@@ -1,7 +1,7 @@
 ---
 name: master_reference_sync
 description: "Strict constraints for updating and maintaining corporate memory documents without duplication or data loss."
-trigger: "/sync_docs, /master_sync, update documentation"
+trigger: always_on
 ---
 
 # Corporate Memory Synchronization Rule

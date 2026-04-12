@@ -1,7 +1,7 @@
 ---
 name: vanilla_dom
 description: "Strictly enforced coding standard for all UI logic and rendering."
-trigger: "/vanilla, /dom, vanilla js only"
+trigger: always_on
 ---
 
 # Vanilla DOM Mastery

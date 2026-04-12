@@ -1,7 +1,7 @@
 ---
 name: rubber_duck_eli5
 description: "Triggers whenever tasked with implementing highly complex logic, hardware payloads, or architecture to ensure human readability before coding."
-trigger: "/rubber_duck, /eli5, rubber duck this, explain like im 5"
+trigger: always_on
 ---
 
 # The Rubber Duck (ELI5) Protocol

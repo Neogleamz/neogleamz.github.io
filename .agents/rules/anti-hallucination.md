@@ -1,7 +1,6 @@
 ---
-name: anti_hallucination
+trigger: always_on
 description: "Strict epistemic constraints to eliminate hallucinations by anchoring to the Master Reference and first principles."
-trigger: "/truth, /anti_hallucination, stop guessing, check the reference"
 ---
 
 # The Absolute Truth / Anti-Hallucination Rule

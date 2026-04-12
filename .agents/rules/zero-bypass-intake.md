@@ -1,7 +1,7 @@
 ---
 name: zero_bypass_intake
 description: "Triggers when the user requests an actionable modification to logic, UI, or architecture to formally triage the task."
-trigger: "/zero_bypass, /intake, log this task, formal intake"
+trigger: always_on
 ---
 
 # The Zero-Bypass Protocol (Strict Intake Enforcement)
