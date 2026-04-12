@@ -372,7 +372,7 @@
                    <button onclick="editSkater(${originalIndex})" style="font-size: 12px; font-weight: bold; color: var(--text-muted); border:none; background:none; cursor:pointer; margin-left: auto;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='var(--text-muted)'"><i class="fa-solid fa-pen"></i> EDIT</button>
                </div>
                </div>
-               <div style="margin-top: auto; padding: 16px; display: flex; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
+               <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
                 </div>
             </div>`;
