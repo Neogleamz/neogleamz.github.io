@@ -31,6 +31,23 @@ This document acts as the permanent, living task tracker integrated directly wit
   - [ ] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
 
 
+
+### Target: `main`
+*(Epic: Tailwind Modal Migration)*
+- [ ] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
+
+### Target: `main`
+*(Epic: Sitewide Code Quality Audit)*
+- [ ] `chore/code-quality-audit` : Perform a full sitewide audit of current coding practices across all JS modules and index.html — cross-reference against industry standard best practices (e.g. event delegation, memory leaks, function scoping, global var hygiene, DOM query caching) and produce a prioritized list of refactor targets.
+
+### Target: `main`
+*(Epic: Competitive Feature Benchmarking)*
+- [ ] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
+
+### Target: `main`
+*(Epic: Sitewide Security Audit)*
+- [ ] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
+
 ### Target: `main`
 *(Epic: Full-Repo Legacy Audit)*
 - [ ] `chore/audit-index-html` : Execute `@[/legacy_audit]` against `index.html` to bring standards up to modern Vanilla DOM rules.
@@ -49,22 +66,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `chore/audit-print` : Execute `@[/legacy_audit]` against `print-module.js` to align with strict error handling.
 - [ ] `chore/audit-socialz` : Execute `@[/legacy_audit]` against `socialz-module.js` to eradicate technical debt.
 - [ ] `chore/audit-ceo` : Execute `@[/legacy_audit]` against `ceo-module.js` to verify DOM structures and variable scopes.
-
-### Target: `main`
-*(Epic: Tailwind Modal Migration)*
-- [ ] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
-
-### Target: `main`
-*(Epic: Sitewide Code Quality Audit)*
-- [ ] `chore/code-quality-audit` : Perform a full sitewide audit of current coding practices across all JS modules and index.html — cross-reference against industry standard best practices (e.g. event delegation, memory leaks, function scoping, global var hygiene, DOM query caching) and produce a prioritized list of refactor targets.
-
-### Target: `main`
-*(Epic: Competitive Feature Benchmarking)*
-- [ ] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
-
-### Target: `main`
-*(Epic: Sitewide Security Audit)*
-- [ ] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
 
 
 
