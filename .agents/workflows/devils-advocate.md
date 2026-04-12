@@ -1,7 +1,7 @@
 ---
 name: devils_advocate
 trigger: "/devils_advocate, roast this idea, pre-mortem, find the flaws in"
-description: "Auto-migrated Core A.I. Rule"
+description: "Forces a critical persona shift to stress-test ideas and identify production flaws before planning begins."
 ---
 
 # Devil's Advocate Workflow

@@ -1,7 +1,7 @@
 ---
 name: bug_hunter
 trigger: "/bug_hunter, fix this error, fix this crash, fix this bug"
-description: "Auto-migrated Core A.I. Rule"
+description: "A strict diagnostic workflow for analyzing stack traces, formulating theories, and awaiting authorization before writing code."
 ---
 
 # Bug Hunter Workflow

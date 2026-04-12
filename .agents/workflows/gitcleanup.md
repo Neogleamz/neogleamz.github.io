@@ -1,7 +1,7 @@
-﻿---
+---
 name: repo_cleanup
 description: "Safely parses and prunes local Git branches that have already been merged."
-trigger: "/cleanup, clean up the repository, clean up repo"
+trigger: "/repo_cleanup, /cleanup, clean up the repository, clean up repo"
 ---
 
 # Repository Cleanup Workflow
