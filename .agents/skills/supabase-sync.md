@@ -1,6 +1,7 @@
-﻿---
+---
 name: supabase_schema_sync
 description: "Triggers whenever the user requests a modification to a Supabase database table, RLS logic, or schema migration to ensure documentation stays synced."
+trigger: "/sync_db, /supabase_sync, sync the database, update schema docs"
 ---
 
 # Supabase Schema Sync Protocol
