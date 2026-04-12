@@ -55,6 +55,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
 
 
+### Target: `main`
+*(Epic: Supabase CLI Repair)*
+- [ ] `chore/supabase-cli-repair` : Repair the local Supabase migration history tracking to re-sync `npx supabase db push` functionality with the remote database without destroying data, resolving the "Remote migration versions not found" tracked mismatches.
+
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
