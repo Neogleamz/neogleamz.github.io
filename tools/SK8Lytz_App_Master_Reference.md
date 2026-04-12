@@ -27,11 +27,19 @@ The CSS system is hardcoded into the massive `index.html` style block using nati
 * **10000+**: `.modal-overlay` wrappers (Ensures Modals ALWAYS win over dropsdowns)
 
 ### B. Global Action Button Matrix
-Buttons follow a 3-intensity system (Muted, Ghost/Standard, Neon). Use the following semantic colors:
-* **🟢 Green (`.btn-green`)**: Positive commits, saves, submits, creations.
-* **🔴 Red (`.btn-red`)**: Destructive actions, resets, closes, deletes.
-* **🟠 Orange (`.btn-orange`)**: Inline properties, editing modes, and configuration tools.
-* **🔵 Blue (`.btn-blue`)**: Neutral tools, nav, safe auxiliary tasks.
+Buttons follow a 3-intensity system (Muted, Standard/Ghost, Neon). Use the following semantic colors and intensity suffixes to maintain UI coherence:
+
+**Color Semantics:**
+* **🟢 Green**: Positive commits, saves, submits, creations.
+* **🔴 Red**: Destructive actions, resets, closes, deletes.
+* **🟠 Orange / Brand**: Inline properties, editing modes, and configuration tools.
+* **🔵 Blue / Slate**: Neutral tools, nav, safe auxiliary tasks.
+
+**The 3-Intensity Bordered System:**
+* **Neon (`.btn-[color]-neon`)**: Highest priority. Solid vibrant background. Use for primary call-to-actions (e.g. `btn-green-neon` for "Save Profile").
+* **Standard Ghost (`.btn-[color]`)**: Neutral priority. Translucent background with a corresponding solid outline border (e.g. `.btn-red` for "Delete"). NOTE: `.btn-ghost-[color]` classes (e.g. `.btn-ghost-red`) strictly govern color schemes but omit border mapping. To render properly, they MUST be paired with `.btn-ghost-base` in the HTML class array to draw the physical boundary box.
+* **Muted Ghost (`.btn-[color]-muted`)**: Lowest priority. Translucent background with a lighter translucent outline border. Perfect for secondary cancel flows (e.g. `.btn-red-muted` for "Cancel").
+
 * **Special Rules:** All async Database/API buttons MUST inject tactile loading via the global wrapper `executeWithButtonAction('btnId', 'SYNCING...', '✅ SAVED!', async () => { ... })`. Silent payloads are strictly forbidden.
 
 ### C. Executive Panes & Layout Geometry
