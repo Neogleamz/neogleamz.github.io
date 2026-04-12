@@ -787,7 +787,7 @@ window._renderSandboxModal = function() {
                     displayC = "🔐 " + c;
                     colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);"; // amber logic for secure keys
                 }
-                h += `<th onclick="window.sortSandboxModal('${c}', ${tableNum})" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
+                h += `<th data-app-click="sort-sandbox-modal" data-sort-col="${c}" data-table-num="${tableNum}" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
             });
             h += `</tr></thead><tbody>`;
             data.forEach(row => {
@@ -1428,15 +1428,15 @@ window.openGlobalRegexPlayground = function(type) {
     let conf = window.EXTRACTOR_CONFIGS[type];
     if (!conf) return;
 
-    let h = `<div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; width:98vw; height:94vh; margin-top:30px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
+    let h = `<div id="globalRegexModalWrapper" data-regex-type="${type}" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; width:98vw; height:94vh; margin-top:30px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
         <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; background:rgba(56, 189, 248, 0.1); border-radius:12px 12px 0 0; position:relative;">
             <div style="flex:1;">
                 <h2 style="margin:0; font-size:18px; color:#38bdf8; display:flex; align-items:center; gap:10px;">⚙️ <span>${conf.title}</span></h2>
                 <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted); padding-right:30px;">Visually verify logic mappings. As you type, the engine evaluates your strings instantly against the cached target.</p>
             </div>
             <div style="display:flex; align-items:center; gap:15px; margin-top:-6px;">
-                <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://regex101.com/', '_blank'); return false;" style="cursor:pointer; font-size:13px; color:#10b981; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; border:1px solid #10b981; padding:0 15px; border-radius:6px; background:rgba(16, 185, 129, 0.1); max-width:max-content; height:32px;">📚 REGEX HELPER ENGINE ↗</button>
-                <button onclick="window.${conf.closeModalFn}()" class="btn-red-muted" style="font-size:13px; font-weight:bold; height:32px; width: max-content; padding: 0 15px;" title="Close Window">Close</button>
+                <button type="button" data-app-click="open-regex-helper" style="cursor:pointer; font-size:13px; color:#10b981; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; border:1px solid #10b981; padding:0 15px; border-radius:6px; background:rgba(16, 185, 129, 0.1); max-width:max-content; height:32px;">📚 REGEX HELPER ENGINE ↗</button>
+                <button data-app-click="close-regex-modal" class="btn-red-muted" style="font-size:13px; font-weight:bold; height:32px; width: max-content; padding: 0 15px;" title="Close Window">Close</button>
             </div>
         </div>
         
@@ -1453,12 +1453,12 @@ window.openGlobalRegexPlayground = function(type) {
                             <button id="btnDeletePreset" onclick="window.${conf.deleteFn}()" class="btn-red-muted btn-sm" style="font-size:9px; display:none;">🗑️ Delete</button>
                         </div>
                     </div>
-                    <select id="${conf.presetDropdownId}" class="input-dark" style="font-size:11px; padding:4px; width:100%; border:1px solid ${type==='orders'?'#38bdf8':'#f59e0b'};" onchange="window.${conf.onDropdownChangeFn}()"></select>
+                    <select id="${conf.presetDropdownId}" class="input-dark" style="font-size:11px; padding:4px; width:100%; border:1px solid ${type==='orders'?'#38bdf8':'#f59e0b'};" data-app-change="regex-preset-dropdown"></select>
                 </div>`;
 
     conf.groups.forEach((g, gIdx) => {
         let suffixHTML = g.label_suffix ? `<span style="opacity:0.7; font-size:10px;">(${g.label_suffix})</span>` : ``;
-        h += `<div style="margin: 10px 0 0 0; padding-bottom:5px; border-bottom:2px solid ${g.color}; cursor:pointer;" onclick="let el=document.getElementById('dynGrp_${type}_${gIdx}'); el.style.display=el.style.display==='none'?'flex':'none';">
+        h += `<div style="margin: 10px 0 0 0; padding-bottom:5px; border-bottom:2px solid ${g.color}; cursor:pointer;" data-app-click="toggle-regex-group" data-group-type="${type}" data-group-idx="${gIdx}">
             <h3 style="margin:0; font-size:12px; color:${g.color}; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center;">
                 <span>${g.icon} ${g.table} ${suffixHTML}</span> <span style="font-size:10px; opacity:0.5;">▼</span>
             </h3>
@@ -1471,11 +1471,11 @@ window.openGlobalRegexPlayground = function(type) {
             
             
             if (f.type === "textarea") {
-                 h += `<textarea id="${f.id}" onkeyup="window.${conf.evaluatorFn}('${f.id}')" style="width:100%; height:${f.height}; font-family:monospace; background:black; color:#10b981; resize:vertical; padding:6px; border:1px solid var(--border-color); border-radius:6px; font-size:10px;" placeholder="${f.placeholder}"></textarea>`;
+                 h += `<textarea id="${f.id}" data-app-keyup="evaluate-regex-field" data-field-id="${f.id}" style="width:100%; height:${f.height}; font-family:monospace; background:black; color:#10b981; resize:vertical; padding:6px; border:1px solid var(--border-color); border-radius:6px; font-size:10px;" placeholder="${f.placeholder}"></textarea>`;
             } else if (f.type === "readonly") {
                  h += `<div style="width:100%; font-family:monospace; background:rgba(0,0,0,0.5); color:${f.color}; font-size:11px; padding:6px; border:1px solid ${f.color}40; border-radius:4px; display:flex; align-items:center; gap:6px;">${f.placeholder}</div>`;
             } else {
-                 h += `<input type="text" id="${f.id}" onkeyup="window.${conf.evaluatorFn}('${f.id}')" style="width:100%; font-family:monospace; background:black; color:#10b981; font-size:11px;" placeholder="${f.placeholder}">`;
+                 h += `<input type="text" id="${f.id}" data-app-keyup="evaluate-regex-field" data-field-id="${f.id}" style="width:100%; font-family:monospace; background:black; color:#10b981; font-size:11px;" placeholder="${f.placeholder}">`;
             }
             if (f.type !== "readonly") h += `<div id="eval_${f.id}" style="font-size:10px; margin-top:4px; min-height:12px; color:#cbd5e1;"></div>`;
             h += `</div>`;
@@ -1489,14 +1489,14 @@ window.openGlobalRegexPlayground = function(type) {
                 <h3 style="margin:0 0 10px 0; color:#f59e0b; display:flex; justify-content:space-between; align-items:center;">
                     🎯 Live Target Text Payload
                     <div style="display:flex; gap:6px;">
-                        <button id="btnToggleView" onclick="window.${conf.toggleViewFn}()" class="btn-slate-muted btn-sm" style="font-size:10px;">👁️ VIEW SOURCE HTML</button>
-                        <button onclick="window.${conf.resetFn}()" class="btn-red-muted btn-sm" style="font-size:10px;">RESET TO DEFAULTS</button>
+                        <button id="btnToggleView" data-app-click="toggle-regex-view" class="btn-slate-muted btn-sm" style="font-size:10px;">👁️ VIEW SOURCE HTML</button>
+                        <button data-app-click="reset-regex-defaults" class="btn-red-muted btn-sm" style="font-size:10px;">RESET TO DEFAULTS</button>
                     </div>
                 </h3>
-                <input type="text" id="${conf.searchBoxId}" class="input-dark" style="margin-bottom:10px; font-size:12px; font-family:monospace; width:100%;" placeholder="🔍 Search:   Type to instantly find and highlight string matches..." onkeyup="window.${conf.evaluatorAllFn}()">
+                <input type="text" id="${conf.searchBoxId}" class="input-dark" style="margin-bottom:10px; font-size:12px; font-family:monospace; width:100%;" placeholder="🔍 Search:   Type to instantly find and highlight string matches..." data-app-keyup="evaluate-regex-all">
                 
                 <div style="position:relative; flex:1; border:1px solid rgba(255,255,255,0.1); border-radius:6px; overflow:hidden;">
-                    <textarea id="${conf.livePlaygroundPayloadId}" style="position:absolute; top:0; left:0; width:100%; height:100%; background:transparent; color:transparent; caret-color:#10b981; font-family:monospace; font-size:11px; padding:10px; resize:none; border:none; z-index:1;" oninput="window.${conf.evaluatorAllFn}()" spellcheck="false"></textarea>
+                    <textarea id="${conf.livePlaygroundPayloadId}" style="position:absolute; top:0; left:0; width:100%; height:100%; background:transparent; color:transparent; caret-color:#10b981; font-family:monospace; font-size:11px; padding:10px; resize:none; border:none; z-index:1;" data-app-input="evaluate-regex-all" spellcheck="false"></textarea>
                     
                     <!-- Visualization Layer below the transparent text -->
                     <div id="${type}liveRegexHighlightLayer" style="position:absolute; top:0; left:0; width:100%; height:100%; font-family:monospace; font-size:11px; padding:10px; pointer-events:none; z-index:0; overflow:hidden; white-space:pre-wrap; word-wrap:break-word; color:#cbd5e1; background:black;"></div>
@@ -1506,8 +1506,8 @@ window.openGlobalRegexPlayground = function(type) {
         
         <!-- Modal Footer -->
         <div style="padding:15px 25px; background:var(--bg-panel); border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:flex-end; gap:10px; border-radius:0 0 12px 12px;">
-            <button class="btn-red-muted" onclick="window.${conf.closeModalFn}()">Cancel</button>
-            <button class="btn-green-neon" style="padding:10px 25px; font-weight:bold;" onclick="${conf.applyBtnFn}">✅ APPLY ACTIVE RULES (TEMPORARY)</button>
+            <button class="btn-red-muted" data-app-click="close-regex-modal">Cancel</button>
+            <button class="btn-green-neon" style="padding:10px 25px; font-weight:bold;" data-app-click="apply-regex-rules">✅ APPLY ACTIVE RULES (TEMPORARY)</button>
         </div>
     </div>`;
 
@@ -1518,10 +1518,12 @@ window.openGlobalRegexPlayground = function(type) {
     let payloadBox = document.getElementById(conf.livePlaygroundPayloadId);
     let hlLayer = document.getElementById(type + "liveRegexHighlightLayer");
     if (payloadBox && hlLayer) {
-        payloadBox.addEventListener("scroll", function() {
+        if (payloadBox._scrollSyncHandler) { payloadBox.removeEventListener("scroll", payloadBox._scrollSyncHandler); }
+        payloadBox._scrollSyncHandler = function() {
             hlLayer.scrollTop = payloadBox.scrollTop;
             hlLayer.scrollLeft = payloadBox.scrollLeft;
-        });
+        };
+        payloadBox.addEventListener("scroll", payloadBox._scrollSyncHandler);
     }
 
     // Explicit backward compatibility for older hardcoded spans
@@ -1689,3 +1691,98 @@ function renderPaperProfileDropdowns() {
     });
 }
 // ============================================================
+// SYSTEM TOOLS EVENT DELEGATION
+// Combats memory leaks and enforces Vanilla DOM Mastery
+// ============================================================
+document.addEventListener('click', function(e) {
+    let appClick = e.target.closest('[data-app-click]');
+    if (!appClick) return;
+    
+    let action = appClick.getAttribute('data-app-click');
+    let modalWrapper = appClick.closest('[data-regex-type]');
+    let type = modalWrapper ? modalWrapper.getAttribute('data-regex-type') : null;
+    let conf = type ? window.EXTRACTOR_CONFIGS[type] : null;
+
+    if (action === 'open-regex-helper') {
+        e.stopPropagation(); e.preventDefault();
+        window.open('https://regex101.com/', '_blank');
+        return false;
+    }
+    if (action === 'close-regex-modal' && conf && typeof window[conf.closeModalFn] === 'function') {
+        window[conf.closeModalFn]();
+    }
+    if (action === 'save-new-regex-preset' && conf && typeof window[conf.saveNewFn] === 'function') {
+        window[conf.saveNewFn]();
+    }
+    if (action === 'overwrite-regex-preset' && conf && typeof window[conf.overwriteFn] === 'function') {
+        window[conf.overwriteFn]();
+    }
+    if (action === 'delete-regex-preset' && conf && typeof window[conf.deleteFn] === 'function') {
+        window[conf.deleteFn]();
+    }
+    if (action === 'toggle-regex-group') {
+        let gIdx = appClick.getAttribute('data-group-idx');
+        let el = document.getElementById(`dynGrp_${type}_${gIdx}`);
+        if(el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+    }
+    if (action === 'toggle-regex-view' && conf && typeof window[conf.toggleViewFn] === 'function') {
+        window[conf.toggleViewFn]();
+    }
+    if (action === 'reset-regex-defaults' && conf && typeof window[conf.resetFn] === 'function') {
+        window[conf.resetFn]();
+    }
+    if (action === 'apply-regex-rules' && conf) {
+        if(type === 'orders') { window.PARSER_RULES=window.getCurrentUIRules(); window.closeParserConfig(); }
+        else { window.PARCEL_RULES=window.getCurrentParcelUIRules(); window.closeParcelConfig(); }
+    }
+    
+    // Sandbox specific
+    if (action === 'sort-sandbox-modal') {
+        if(typeof window.sortSandboxModal === 'function') window.sortSandboxModal(appClick.getAttribute('data-sort-col'), parseInt(appClick.getAttribute('data-table-num')));
+    }
+
+    // Paper Profile specific
+    if (action === 'save-paper-inline') {
+        saveInlineEditPaper(parseInt(appClick.getAttribute('data-idx')));
+    }
+    if (action === 'edit-paper-profile') {
+        editPaperProfile(parseInt(appClick.getAttribute('data-idx')));
+    }
+    if (action === 'delete-paper-profile') {
+        deletePaperProfile(parseInt(appClick.getAttribute('data-idx')));
+    }
+});
+
+document.addEventListener('keyup', function(e) {
+    if (e.target.matches('[data-app-keyup="evaluate-regex-field"]')) {
+        let fId = e.target.getAttribute('data-field-id');
+        let modalWrapper = e.target.closest('[data-regex-type]');
+        let type = modalWrapper ? modalWrapper.getAttribute('data-regex-type') : null;
+        let conf = type ? window.EXTRACTOR_CONFIGS[type] : null;
+        if (conf && typeof window[conf.evaluatorFn] === 'function') window[conf.evaluatorFn](fId);
+    }
+    if (e.target.matches('[data-app-keyup="evaluate-regex-all"]')) {
+        let modalWrapper = e.target.closest('[data-regex-type]');
+        let type = modalWrapper ? modalWrapper.getAttribute('data-regex-type') : null;
+        let conf = type ? window.EXTRACTOR_CONFIGS[type] : null;
+        if (conf && typeof window[conf.evaluatorAllFn] === 'function') window[conf.evaluatorAllFn]();
+    }
+});
+
+document.addEventListener('input', function(e) {
+    if (e.target.matches('[data-app-input="evaluate-regex-all"]')) {
+        let modalWrapper = e.target.closest('[data-regex-type]');
+        let type = modalWrapper ? modalWrapper.getAttribute('data-regex-type') : null;
+        let conf = type ? window.EXTRACTOR_CONFIGS[type] : null;
+        if (conf && typeof window[conf.evaluatorAllFn] === 'function') window[conf.evaluatorAllFn]();
+    }
+});
+
+document.addEventListener('change', function(e) {
+    if (e.target.matches('[data-app-change="regex-preset-dropdown"]')) {
+        let modalWrapper = e.target.closest('[data-regex-type]');
+        let type = modalWrapper ? modalWrapper.getAttribute('data-regex-type') : null;
+        let conf = type ? window.EXTRACTOR_CONFIGS[type] : null;
+        if (conf && typeof window[conf.onDropdownChangeFn] === 'function') window[conf.onDropdownChangeFn]();
+    }
+});
