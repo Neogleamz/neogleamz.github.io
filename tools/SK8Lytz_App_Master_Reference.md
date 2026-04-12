@@ -55,7 +55,7 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 ### F. Explorer Memory & Immutability
 * **Source-Aware Accounting:** Financial webhook data (Shopify, Parcels) is fundamentally Read-Only. Users cannot manually "type over" original ingested strings. Corrections must be derived algorithmically via engine transaction tags.
 * **Archive Explorer:** All archived/deleted records must use the `.archive-card` expandable accordion. Hard-delete UI nodes must utilize `stopPropagation()` to shield them from misclicks.
-* **Data Table Memory:** Header sorting events must hook into `window.saveSort()` and initialize with `window.getSavedSort()` to persist grid layouts across caching refreshes.
+* **Data Table Memory:** Header sorting events must explicitly hook into isolated, pane-specific configuration objects (e.g., `currentDatazSort` vs `currentEditzSort`) rather than shared global ones, preventing layout bleeding. They must hook into `window.saveSort('keyName', obj)` and initialize with `window.getSavedSort('keyName')` to persist unique, decoupled grid layouts horizontally across caching refreshes.
 * **Version Bumping:** When altering core logic, `system-version.js` MUST be bumped manually to purge live `.com` clients.
 
 ### G. Modal Close Button Standard
