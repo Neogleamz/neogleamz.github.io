@@ -1185,12 +1185,11 @@ async function extractParcels(files, isTestMode=false) {
 }
 
 async function syncAndCalculate() {
-    const btnCalc = document.getElementById('btnCalc'); if(btnCalc) btnCalc.disabled = true;
-    setMasterStatus("⚙️ Downloading data...", "mod-working"); sysLog("Sync/Calc..."); setSysProgress(20, 'working');
-    try {
+    await executeWithButtonAction('btnCalc', '🧮 CALCULATING...', '✅ CALCULATED!', async () => {
+        setMasterStatus("⚙️ Downloading data...", "mod-working"); sysLog("Sync/Calc..."); setSysProgress(20, 'working');
         const [oR, sR, iR, eR] = await Promise.all([ supabaseClient.from('raw_orders').select('*'), supabaseClient.from('raw_parcel_summary').select('*'), supabaseClient.from('raw_parcel_items').select('*'), supabaseClient.from('full_landed_costs').select('parcel_no, di_item_id, neogleamz_name, neogleamz_product, quantity, lot_multiplier') ]);
         if(oR.error) throw new Error(oR.error.message); if(sR.error) throw new Error(sR.error.message); if(iR.error) throw new Error(iR.error.message);
-        if(!iR.data||iR.data.length===0) { sysLog("No raw items.", true); setSysProgress(0, 'working'); if(btnCalc) btnCalc.disabled=false; return; }
+        if(!iR.data||iR.data.length===0) { sysLog("No raw items.", true); setSysProgress(0, 'working'); return; }
         sysLog("Calculating Math..."); setSysProgress(60, 'working'); setMasterStatus("🧮 Calculating...", "mod-working");
         let eM={}; if(eR.data) eR.data.forEach(r => eM[`${r.parcel_no}_${r.di_item_id}`]=r);
         let oM={}; (oR.data||[]).forEach(o => oM[o.di_item_id]=o); let sM={}; (sR.data||[]).forEach(s => sM[s.parcel_no]=s);
@@ -1210,8 +1209,9 @@ async function syncAndCalculate() {
         sysLog(`Pushing ${dI.length} rows...`); setSysProgress(80, 'working');
         const {error} = await supabaseClient.from('full_landed_costs').upsert(dI, {onConflict:'parcel_no, di_item_id'}); if(error) throw new Error(error.message);
         if(typeof loadData === 'function') await loadData(true); setSysProgress(100, 'success'); setMasterStatus(`✅ Calculated!`, "mod-success"); setTimeout(()=>{setSysProgress(0,'working');}, 3000);
-    } catch (error) { setSysProgress(100, 'error'); sysLog(error.message, true); setMasterStatus("❌ Calc Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'), 3000); }
-    if(btnCalc) btnCalc.disabled = false;
+    }).catch(error => {
+        setSysProgress(100, 'error'); sysLog(error.message, true); setMasterStatus("❌ Calc Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'), 3000);
+    });
 }
 
 // --- 13. NEW BACKUP & RESTORE SYSTEM ---
@@ -1224,14 +1224,7 @@ function openBackupModal() {
 function closeBackupModal() { document.getElementById('backupModal').style.display = 'none'; }
 
 async function executeExport() {
-    let btn = document.getElementById('btnExportBackup');
-    let oldTxt = "⬇️ EXPORT BACKUP";
-    if (btn) {
-        btn.innerHTML = "⏳ EXPORTING...";
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
-    }
-    try {
+    await executeWithButtonAction('btnExportBackup', '⏳ EXPORTING...', '✅ EXPORTED!', async () => {
         setMasterStatus("Exporting...", "mod-working"); sysLog("Exporting full system backup...");
         const wb = XLSX.utils.book_new();
         async function addSheet(tableName, sheetName) {
@@ -1268,19 +1261,11 @@ async function executeExport() {
         await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
-        if(btn) { btn.innerHTML = "✅ EXPORTED!"; btn.style.background = "#10b981"; btn.style.color = "#fff"; btn.style.opacity = "1"; }
         setMasterStatus("Export Complete!", "mod-success"); 
-        setTimeout(()=>{ 
-            setMasterStatus("Ready.", "status-idle"); 
-            if(btn) { btn.innerHTML = oldTxt; btn.disabled = false; btn.style.background = ""; btn.style.color = ""; } 
-        }, 3000);
-    } catch (e) { 
-        if(btn) { 
-            btn.innerHTML = "❌ FAILED"; btn.style.background = "#ef4444"; btn.style.color = "#fff"; btn.style.opacity = "1"; 
-            setTimeout(()=>{ btn.innerHTML = oldTxt; btn.disabled = false; btn.style.background = ""; btn.style.color = ""; }, 3000); 
-        }
+        setTimeout(()=>{ setMasterStatus("Ready.", "status-idle"); }, 3000);
+    }).catch(e => {
         sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); 
-    }
+    });
 }
 
 let pendingRestoreData = {};

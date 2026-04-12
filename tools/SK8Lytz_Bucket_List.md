@@ -23,6 +23,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
+### Target: `main`
 *(Epic: Sitewide Button State Feedback)*
 - [ ] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
   - [ ] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
@@ -80,6 +81,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Sitewide Performance Optimization)*
 - [ ] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
+
+### Target: `main`
+*(Epic: Sitewide Button UI & Mobile Responsiveness)*
+- [ ] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
+
+### Target: `main`
+*(Epic: Inventory UI State Management)*
+- [ ] `fix/inventory-sort-state-separation` : Decouple the sorting states between the DATAZ and EDITZ inventory tabs. Ensure that sorting columns on one table does not unintentionally mutate the sorting order on the other.
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)

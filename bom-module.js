@@ -16,7 +16,7 @@ window.renderBulkAddBody = function() {
     filtered.forEach(x => { let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" oninput="updateBulkQty('${sk}', this.value)" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
     wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('bulkAddTableWrap');
 }
-window.saveBulkAdd = async function() { let addedCount = 0; bulkAddData.forEach(i => { let v = parseFloat(i.q); if(v > 0) { let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } addedCount++; } }); if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); await window.syncRecipe(currentProduct); window.renderProductBOM(); window.renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); } else { alert("No quantities greater than 0 were entered."); } }
+window.saveBulkAdd = async function() { await executeWithButtonAction('btnSaveBulkAdd', '💾 SAVING...', '✅ SAVED!', async () => { let addedCount = 0; bulkAddData.forEach(i => { let v = parseFloat(i.q); if(v > 0) { let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } addedCount++; } }); if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); await window.syncRecipe(currentProduct); window.renderProductBOM(); window.renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); } else { throw new Error("No quantities greater than 0 were entered."); } }).catch(e => { alert(e.message); }); }
 
 // --- 7. PRODUCT BUILDER & LABOR LOGIC ---
 window.updateLaborCosts = async function() {
@@ -34,15 +34,15 @@ window.updateLaborCosts = async function() {
         pricingDB[currentProduct] = { msrp: m, wholesale: w };
         isSubassemblyDB[currentProduct] = isSub;
         const isLabel = document.getElementById('isLabelInput')?.checked || false;
-        
+
         if (!productsDB[currentProduct]) productsDB[currentProduct] = [];
         productsDB[currentProduct].is_3d_print = is3d;
         productsDB[currentProduct].print_time_mins = pt;
         productsDB[currentProduct].is_label = isLabel;
 
         sysLog(`Updating profile for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
-        const { error } = await supabaseClient.from('product_recipes').update({ 
-            labor_time_mins: t, 
+        const { error } = await supabaseClient.from('product_recipes').update({
+            labor_time_mins: t,
             labor_rate_hr: r,
             msrp: m,
             wholesale_price: w,
@@ -51,53 +51,53 @@ window.updateLaborCosts = async function() {
             print_time_mins: pt,
             is_label: isLabel
         }).eq('product_name', currentProduct);
-        
+
         if (error) throw new Error(error.message);
         setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-        if(typeof populateDropdowns === 'function') populateDropdowns(); 
-        window.renderProductList(); window.renderProductBOM(); 
-        if(typeof renderFgiTable === 'function') renderFgiTable(); 
+        if(typeof populateDropdowns === 'function') populateDropdowns();
+        window.renderProductList(); window.renderProductBOM();
+        if(typeof renderFgiTable === 'function') renderFgiTable();
         let aTab = document.getElementById('analytics-tab');
-        if(typeof renderAnalyticsDashboard === 'function' && aTab && aTab.classList.contains('active')) renderAnalyticsDashboard(); 
+        if(typeof renderAnalyticsDashboard === 'function' && aTab && aTab.classList.contains('active')) renderAnalyticsDashboard();
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
-window.renameCurrentProduct = async function() { 
-    if (!currentProduct) return; 
-    let newName = prompt("Enter new name:", currentProduct); 
-    if (!newName || !newName.trim() || newName.trim() === currentProduct) return; 
-    
-    newName = newName.trim(); 
+window.renameCurrentProduct = async function() {
+    if (!currentProduct) return;
+    let newName = prompt("Enter new name:", currentProduct);
+    if (!newName || !newName.trim() || newName.trim() === currentProduct) return;
+
+    newName = newName.trim();
     if (productsDB[newName]) {
         return alert("A product with this name already exists.");
     }
 
-    sysLog(`Renaming ${currentProduct} to ${newName}...`); 
-    setMasterStatus("Renaming...", "mod-working"); 
+    sysLog(`Renaming ${currentProduct} to ${newName}...`);
+    setMasterStatus("Renaming...", "mod-working");
 
-    let oldName = currentProduct; 
-    let c = productsDB[oldName] || []; 
-    let l = laborDB[oldName] || {time:0, rate:0}; 
-    let pR = pricingDB[oldName] || {msrp:0, wholesale:0}; 
-    let isSub = isSubassemblyDB[oldName] || false; 
-    let is3D = c.is_3d_print || false; 
-    let pt = c.print_time_mins || 0; 
-    
-    productsDB[newName] = c; 
-    laborDB[newName] = l; 
-    pricingDB[newName] = pR; 
-    isSubassemblyDB[newName] = isSub; 
+    let oldName = currentProduct;
+    let c = productsDB[oldName] || [];
+    let l = laborDB[oldName] || {time:0, rate:0};
+    let pR = pricingDB[oldName] || {msrp:0, wholesale:0};
+    let isSub = isSubassemblyDB[oldName] || false;
+    let is3D = c.is_3d_print || false;
+    let pt = c.print_time_mins || 0;
+
+    productsDB[newName] = c;
+    laborDB[newName] = l;
+    pricingDB[newName] = pR;
+    isSubassemblyDB[newName] = isSub;
 
     // API Call 1: Upsert the new duplicate product
     const { error: upsertErr } = await supabaseClient.from('product_recipes').upsert({
-        product_name: newName, 
-        components: c, 
-        labor_time_mins: l.time, 
-        labor_rate_hr: l.rate, 
-        msrp: pR.msrp, 
-        wholesale_price: pR.wholesale, 
-        is_subassembly: isSub, 
-        is_3d_print: is3D, 
+        product_name: newName,
+        components: c,
+        labor_time_mins: l.time,
+        labor_rate_hr: l.rate,
+        msrp: pR.msrp,
+        wholesale_price: pR.wholesale,
+        is_subassembly: isSub,
+        is_3d_print: is3D,
         print_time_mins: pt
     });
     if (upsertErr) sysLog(`Upsert Rename Failed: ${upsertErr.message}`, true);
@@ -108,25 +108,25 @@ window.renameCurrentProduct = async function() {
         .eq('product_name', oldName);
     if (delErr) sysLog(`Delete Old Artifact Failed: ${delErr.message}`, true);
 
-    delete productsDB[oldName]; 
-    delete laborDB[oldName]; 
-    delete pricingDB[oldName]; 
-    delete isSubassemblyDB[oldName]; 
+    delete productsDB[oldName];
+    delete laborDB[oldName];
+    delete pricingDB[oldName];
+    delete isSubassemblyDB[oldName];
 
     // Search and Replace internal components across the universe
-    let upserts = []; 
-    Object.keys(productsDB).forEach(k => { 
-        let changed = false; 
-        productsDB[k].forEach(p => { 
-            if (String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + oldName) { 
-                p.item_key = 'RECIPE:::' + newName; 
-                changed = true; 
-            } 
-        }); 
+    let upserts = [];
+    Object.keys(productsDB).forEach(k => {
+        let changed = false;
+        productsDB[k].forEach(p => {
+            if (String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + oldName) {
+                p.item_key = 'RECIPE:::' + newName;
+                changed = true;
+            }
+        });
         if (changed) {
-            upserts.push(supabaseClient.from('product_recipes').update({components: productsDB[k]}).eq('product_name', k)); 
+            upserts.push(supabaseClient.from('product_recipes').update({components: productsDB[k]}).eq('product_name', k));
         }
-    }); 
+    });
 
     if (upserts.length > 0) {
         const results = await Promise.all(upserts);
@@ -135,28 +135,28 @@ window.renameCurrentProduct = async function() {
         });
     }
 
-    currentProduct = newName; 
-    if (typeof populateDropdowns === 'function') populateDropdowns(); 
-    window.renderProductList(); 
-    
-    setMasterStatus("Renamed!", "mod-success"); 
-    setTimeout(() => setMasterStatus("Ready.", "status-idle"), 3000); 
+    currentProduct = newName;
+    if (typeof populateDropdowns === 'function') populateDropdowns();
+    window.renderProductList();
+
+    setMasterStatus("Renamed!", "mod-success");
+    setTimeout(() => setMasterStatus("Ready.", "status-idle"), 3000);
 }
 
-window.syncRecipe = async function(name) { 
-    try { 
-        sysLog(`Syncing recipe: ${name}`); 
-        const {error} = await supabaseClient.from('product_recipes').update({components: productsDB[name]}).eq('product_name', name); 
-        if (error) throw new Error(error.message); 
-        if (typeof populateDropdowns === 'function') populateDropdowns(); 
-    } catch(e) { 
-        sysLog(`Recipe Sync Fault: ${e.message}`, true); 
-    } 
+window.syncRecipe = async function(name) {
+    try {
+        sysLog(`Syncing recipe: ${name}`);
+        const {error} = await supabaseClient.from('product_recipes').update({components: productsDB[name]}).eq('product_name', name);
+        if (error) throw new Error(error.message);
+        if (typeof populateDropdowns === 'function') populateDropdowns();
+    } catch(e) {
+        sysLog(`Recipe Sync Fault: ${e.message}`, true);
+    }
 }
 
 let productDraggedName = null;
 
-window.renderProductList = function() { 
+window.renderProductList = function() {
     try {
         const labelsToClean = window.activePaperProfiles ? window.activePaperProfiles.map(p => p.n) : [];
         labelsToClean.forEach(lbl => {
@@ -167,10 +167,10 @@ window.renderProductList = function() {
             }
         });
     } catch(e) { sysLog(`Error in product list cleanup: ${e.message}`, true); }
-    
-    const ui = document.getElementById('productListUI'); ui.innerHTML = ""; 
+
+    const ui = document.getElementById('productListUI'); ui.innerHTML = "";
     let allProds = Object.keys(productsDB);
-    
+
     // Sort based on saved preference if available
     if (window.cloudTablePrefs && window.cloudTablePrefs.productOrder) {
         allProds.sort((a,b) => {
@@ -183,11 +183,11 @@ window.renderProductList = function() {
         allProds.sort();
     }
 
-    if(allProds.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; } 
+    if(allProds.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; }
     let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
     let labelProds = allProds.filter(p => productsDB[p] && productsDB[p].is_label);
 
-    if(!currentProduct && allProds.length > 0) currentProduct = allProds[0]; 
+    if(!currentProduct && allProds.length > 0) currentProduct = allProds[0];
 
     let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
     let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
@@ -195,13 +195,13 @@ window.renderProductList = function() {
 
     function buildItem(n) {
         let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'");
-        return `<li class="${sel}" 
-            draggable="true" 
-            ondragstart="productDragStart(event, '${safeName}')" 
-            ondragover="productDragOver(event)" 
-            ondrop="productDrop(event, '${safeName}')" 
+        return `<li class="${sel}"
+            draggable="true"
+            ondragstart="productDragStart(event, '${safeName}')"
+            ondragover="productDragOver(event)"
+            ondrop="productDrop(event, '${safeName}')"
             ondragend="productDragEnd(event)"
-            onclick="selectProduct('${safeName}')" 
+            onclick="selectProduct('${safeName}')"
             style="font-weight:bold; font-size:14px; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px; display:flex; justify-content:space-between; align-items:center;">
             <span>☰ ${n}</span><span class="prod-cost">$${calculateProductTotal(n).toFixed(2)}</span>
         </li>`;
@@ -272,12 +272,12 @@ window.renderProductList = function() {
     }
 
     ui.innerHTML = html;
-    if(currentProduct) window.renderProductBOM(); 
+    if(currentProduct) window.renderProductBOM();
 }
 
-function productDragStart(e, name) { 
-    productDraggedName = name; 
-    e.target.style.opacity = '0.5'; 
+function productDragStart(e, name) {
+    productDraggedName = name;
+    e.target.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
 }
 function productDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
@@ -289,7 +289,7 @@ function productDrop(e, targetName) {
         let currentOrder = window.cloudTablePrefs.productOrder || Object.keys(productsDB).sort();
         let srcIdx = currentOrder.indexOf(productDraggedName);
         let tgtIdx = currentOrder.indexOf(targetName);
-        
+
         if (srcIdx !== -1 && tgtIdx !== -1) {
             currentOrder.splice(srcIdx, 1);
             currentOrder.splice(tgtIdx, 0, productDraggedName);
@@ -304,7 +304,7 @@ window.sortBOM = function(c) { currentBOMSort = { column: c, direction: currentB
 
 window.renderProductBOM = function() {
     if(!currentProduct) return; document.getElementById('bomMainArea').style.display='block'; document.getElementById('bomTitle').innerText=currentProduct;
-    
+
     let lData = laborDB[currentProduct] || {time:0, rate:0};
     let pData = pricingDB[currentProduct] || {msrp:0, wholesale:0};
     document.getElementById('laborTimeInput').value = lData.time;
@@ -313,13 +313,13 @@ window.renderProductBOM = function() {
     document.getElementById('wholesaleInput').value = pData.wholesale;
     document.getElementById('isSubassemblyInput').checked = !!isSubassemblyDB[currentProduct];
 
-    let p = productsDB[currentProduct]||[]; 
+    let p = productsDB[currentProduct]||[];
     document.getElementById('is3dPrintInput').checked = !!p.is_3d_print;
     document.getElementById('recipePrintTimeInput').value = p.print_time_mins || 0;
     if (document.getElementById('isLabelInput')) document.getElementById('isLabelInput').checked = !!p.is_label;
-    
+
     let gt = 0; let wrap = document.getElementById('bomTableWrap');
-    
+
     let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('nn')">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('np')">Neogleamz Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('n')">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" onclick="sortBOM('sp')">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('q')">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('uc')">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" onclick="sortBOM('ec')">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
     if(p.length===0){ h += "<tr><td colspan='8' style='text-align:center;'>No components.</td></tr>"; }
@@ -342,7 +342,7 @@ window.showRecipeModal = function(mode) {
     const p = document.getElementById('recipeModalText');
     const i = document.getElementById('recipeModalInput');
     const b = document.getElementById('recipeModalConfirmBtn');
-    
+
     if(mode === 'create') {
         t.innerText = "Create New Recipe";
         p.innerText = "Enter a unique name for the new product or sub-assembly:";
