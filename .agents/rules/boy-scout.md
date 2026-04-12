@@ -1,6 +1,7 @@
-﻿---
-trigger: always_on
+---
+name: boy_scout
 description: "Mandates minor, zero-risk technical debt cleanup during routine file modifications, enforcing Vanilla JS standards."
+trigger: "/boy_scout, /cleanup, boy scout rule, clean code"
 ---
 
 # The Boy Scout Protocol
