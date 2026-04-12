@@ -191,3 +191,15 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 #### 6. SOCIALZ (Outreach CRM)
 - **`paneSocialzRoster` (ROSTER)**:
   - The unified client grid rendering individual `.skater-card` components. Integrates specific event delegations for `#skater-modal`.
+
+---
+
+## Security Patterns
+
+### A. PII Hashing (`hashPII`)
+- **Location**: `sales-module.js` L1 — called inside `processParsedSales()` during CSV import.
+- **Algorithm**: SHA-256 via `window.crypto.subtle.digest()` (Web Cryptography API).
+- **Constraint**: `crypto.subtle` is **only available in secure contexts (HTTPS or localhost)**. On plain HTTP it will throw `TypeError: Cannot read properties of undefined`.
+- **Degradation behavior**: `hashPII()` is wrapped in `try/catch`. On failure it logs to `sysLog` and returns `null`. The upstream `processParsedSales` continues — customer hash fields will be `null` in the DB row rather than crashing the entire import.
+- **Fields hashed**: `customer_email_hash`, `customer_phone_hash`, `shipping_name_hash`, `shipping_address_hash` (all stored in `sales_ledger`).
+- **Zero PII guarantee**: Raw email/phone/name/address values are NEVER stored. Only the SHA-256 hex digest is persisted.
