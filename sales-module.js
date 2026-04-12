@@ -1,11 +1,17 @@
 async function hashPII(rawStr) {
-    if (rawStr === null || rawStr === undefined) return null;
-    let str = String(rawStr);
-    if (str.trim() === '') return null;
-    const msgUint8 = new TextEncoder().encode(str.trim().toLowerCase());
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    try {
+        if (rawStr === null || rawStr === undefined) return null;
+        let str = String(rawStr);
+        if (str.trim() === '') return null;
+        const msgUint8 = new TextEncoder().encode(str.trim().toLowerCase());
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch(e) {
+        // SubtleCrypto unavailable (non-HTTPS context) or encoding failure — degrade gracefully
+        sysLog('hashPII error: ' + e.message, true);
+        return null;
+    }
 }
 
 // --- 9. SALES SYNC ENGINE ---
@@ -495,8 +501,6 @@ async function executeSalesSync(isTestMode = false) {
             });
         }
         return;
-
-        // execution now fully deferred to customCommitFn above
     } catch(e) {
         syncTrace(`CRITICAL FAULT: ${e.stack || e.message}`, true);
         sysLog(e.stack || e.message, true);
@@ -509,6 +513,7 @@ async function executeSalesSync(isTestMode = false) {
 function sortSales(c) { if(isResizing) return; currentSalesSort = { column: c, direction: currentSalesSort.column===c && currentSalesSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentSalesSort', currentSalesSort); renderSalesTable(); }
 
 function renderSalesTable() {
+    try {
     let wrap = document.getElementById('salesTableWrap');
     if(!wrap) return;
 
@@ -769,27 +774,29 @@ function renderSalesTable() {
         });
     }
 
-    wrap.innerHTML = h + `</tbody></table>`;
-    if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
+        wrap.innerHTML = h + `</tbody></table>`;
+        if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
+    } catch(e) { sysLog('Sales table render error: ' + e.message, true); }
 }
 
 window.updateSaleType = async function(sel, orderId, sku) {
-    let newVal = sel.value;
-    sysLog(`Editing Sale Type ${orderId}: ${newVal}`);
-    setMasterStatus("Saving...", "mod-working");
-    let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
-    if(row) {
-        let oldVal = row.transaction_type || 'Standard';
-        row.transaction_type = newVal;
-        const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
-        if(error) { sysLog("DB Error saving type: " + error.message, true); alert("Error saving type: " + error.message); return; }
+    try {
+        let newVal = sel.value;
+        sysLog(`Editing Sale Type ${orderId}: ${newVal}`);
+        setMasterStatus("Saving...", "mod-working");
+        let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
+        if(row) {
+            row.transaction_type = newVal;
+            const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
+            if(error) throw new Error("DB Error saving type: " + error.message);
 
-        setMasterStatus("Saved!", "mod-success");
-        renderSalesTable();
-        if(typeof renderInventoryTable === 'function') renderInventoryTable();
-        if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
-        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-    }
+            setMasterStatus("Saved!", "mod-success");
+            renderSalesTable();
+            if(typeof renderInventoryTable === 'function') renderInventoryTable();
+            if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
+            setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        }
+    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); alert("Error saving type: \n" + e.message); }
 }
 
 async function updateSaleCell(cell, orderId, sku, col, isNum) {
