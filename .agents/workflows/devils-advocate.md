@@ -1,5 +1,6 @@
-﻿---
-trigger: always_on
+---
+name: devils_advocate
+trigger: "/devils_advocate, roast this idea, pre-mortem, find the flaws in"
 description: "Auto-migrated Core A.I. Rule"
 ---
 
