@@ -935,22 +935,30 @@ window.commitSandboxImport = async function() {
     let termId = ctx.termId; let statId = ctx.statId; let resObj = ctx.resObj;
     
     try {
-        importTrace(`▶ Execution Phase: Cloud Upsert initialized. Target DB: [${resObj.table}]`, false, termId);
-        if(resObj.data.length > 0) importTrace(`▶ Payload Size: ${resObj.count} records. Writing Columns: ${Object.keys(resObj.data[0]).join(', ')}`, false, termId);
+        if (ctx.customCommitFn && typeof ctx.customCommitFn === 'function') {
+            importTrace(`▶ Execution Phase: Delegating cloud execution to Custom Commit Handler...`, false, termId);
+            await ctx.customCommitFn();
+            importTrace(`✅ SUCCESS: Custom Commit Handler resolved successfully.`, false, termId);
+        } else {
+            importTrace(`▶ Execution Phase: Cloud Upsert initialized. Target DB: [${resObj.table}]`, false, termId);
+            if(resObj.data.length > 0) importTrace(`▶ Payload Size: ${resObj.count} records. Writing Columns: ${Object.keys(resObj.data[0]).join(', ')}`, false, termId);
+            
+            sysLog(`Pushing ${resObj.count} items...`); setSysProgress(80, 'working');
+            const {data: retData, error} = await supabaseClient.from(resObj.table).upsert(resObj.data, {onConflict: resObj.conflict}).select(); 
+            if(error) throw new Error(error.message);
+            
+            importTrace(`✅ SUCCESS: Upserted and verified ${retData ? retData.length : resObj.data.length} records in [${resObj.table}].`, false, termId);
+            
+            // Boy Scout Rule: Improved missing conflict string formatting
+            importTrace(`🔒 INTEGRITY: Primary keys resolved via conflict strategy: '${resObj.conflict || "Inferred/Insert"}'.`, false, termId);
+        }
         
-        sysLog(`Pushing ${resObj.count} items...`); setSysProgress(80, 'working');
-        const {data: retData, error} = await supabaseClient.from(resObj.table).upsert(resObj.data, {onConflict: resObj.conflict}).select(); 
-        if(error) throw new Error(error.message);
-        
-        importTrace(`✅ SUCCESS: Upserted and verified ${retData ? retData.length : resObj.data.length} records in [${resObj.table}].`, false, termId);
-        importTrace(`🔒 INTEGRITY: Primary keys resolved via conflict strategy: '${resObj.conflict}'.`, false, termId);
-        
-        if (resObj.data2) { 
+        if (!ctx.customCommitFn && resObj.data2) { 
             importTrace(`▶ Secondary Target: [${resObj.table2}] (${resObj.data2.length} child records)`, false, termId);
             const {data: retData2, error2} = await supabaseClient.from(resObj.table2).upsert(resObj.data2, {onConflict: resObj.conflict2}).select(); 
             if(error2) throw new Error(error2.message); 
             importTrace(`✅ SUCCESS: Upserted and verified ${retData2 ? retData2.length : resObj.data2.length} records in [${resObj.table2}].`, false, termId);
-            importTrace(`🔒 INTEGRITY: Secondary conflict strategy: '${resObj.conflict2}'.`, false, termId);
+            importTrace(`🔒 INTEGRITY: Secondary conflict strategy: '${resObj.conflict2 || "Inferred/Insert"}'.`, false, termId);
         }
         
         if (btnSync) {

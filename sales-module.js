@@ -432,7 +432,6 @@ async function executeSalesSync(isTestMode = false) {
             setSysProgress(100, 'success'); setMasterStatus("🧪 Test Parsed!", "mod-success");
             
             if (typeof window.openSandboxModal === 'function') {
-                // Pass raw salesPayload so native Sandbox visualizer picks up raw schema names
                 window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS");
             }
             
@@ -442,32 +441,42 @@ async function executeSalesSync(isTestMode = false) {
             setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 4000);
             return;
         }
-        // --------------------------------
         
-        const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
-        if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
+        // --- PRODUCTION MODAL REDIRECT ---
+        syncTrace(`▶ Routing Production payload to Modal for final review...`, false);
+        setSysProgress(50, 'working'); setMasterStatus("Ready For Review", "mod-success");
+        if (typeof window.openSandboxModal === 'function') {
+            window.openSandboxModal(salesPayload, "PRODUCTION_SALEZ_SYNC", null, "sales_ledger (Primary)", null, {
+                termId: 'syncProgressTerminal',
+                statId: 'statusOrders', // not strictly used in salez UI but required by interface
+                inputNodeId: 'salesCsvFile',
+                resObj: { table: 'sales_ledger', count: salesPayload.length, data: salesPayload },
+                customCommitFn: async () => {
+                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(salesPayload); 
+                    if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
-        syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
-
-        syncTrace(`Transaction successful! Updating dynamic DOM clusters!`);
-        salesPayload.forEach(s => salesDB.unshift(s));  
-        let count = pendingSalesRows.length;
-        pendingSalesRows = [];
-        let elUnmapped = document.getElementById('unmappedSkusList');
-        if (elUnmapped) elUnmapped.innerHTML = "";
-        syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
+                    syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
+                    syncTrace(`Transaction successful! Updating dynamic DOM clusters!`);
+                    
+                    salesPayload.forEach(s => salesDB.unshift(s));  
+                    let count = salesPayload.length;
+                    pendingSalesRows = [];
+                    let elUnmapped = document.getElementById('unmappedSkusList');
+                    if (elUnmapped) elUnmapped.innerHTML = "";
+                    syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
+                    
+                    renderSalesTable(); 
+                    renderInventoryTable(); 
+                    if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
+                    
+                    syncTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
+                    setTimeout(() => showToast(`✅ Success! ${count} sales synced. Inventory deduction deferred until Packerz Assembly Completion.`), 10);
+                }
+            });
+        }
+        return;
         
-        let elFile = document.getElementById('salesCsvFile');
-        if (elFile) elFile.value = "";
-
-        setSysProgress(100, 'success'); setMasterStatus("Sales Synced!", "mod-success");
-        renderSalesTable(); 
-        renderInventoryTable(); 
-        if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
-        
-        syncTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
-        setTimeout(() => showToast(`✅ Success! ${count} sales synced. Inventory deduction deferred until Packerz Assembly Completion.`), 10);
-        setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000);
+        // execution now fully deferred to customCommitFn above
     } catch(e) { 
         syncTrace(`CRITICAL FAULT: ${e.stack || e.message}`, true);
         sysLog(e.stack || e.message, true); 
