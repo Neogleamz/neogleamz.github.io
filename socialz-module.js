@@ -374,7 +374,8 @@
                </div>
                <div style="margin-top: auto; padding: 16px; display: flex; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
-               </div>
+                </div>
+            </div>`;
                     }).join('');
                 } else {
                     // COMPACT LIST VIEW - TABLE MODE
