@@ -26,6 +26,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `docs/system-audit-part2` : Systematically document the layout, architecture, and core modules of the A.I. Hub, including STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ, and NEXUZ (which houses Brainz and Importz).
 
 ### Target: `main`
+*(Epic: Comprehensive UI Element Documentation)*
+- [ ] `docs/comprehensive-ui-audit` : Conduct a granular button-by-button, modal-by-modal documentation audit for every hub and page across the app, ensuring `tools/SK8Lytz_App_Master_Reference.md` is fully updated with explicit DOM structural definitions.
+
+### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
 - [ ] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
 - [ ] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
