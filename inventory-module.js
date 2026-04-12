@@ -131,7 +131,24 @@ function renderFgiTable() {
     wrap.innerHTML = h; applyTableInteractivity('fgiTableWrap');
 }
 
-const SUPPLIER_LEAD_TIME_DAYS = 5;
+let SUPPLIER_LEAD_TIME_DAYS = parseFloat(localStorage.getItem('neogleamz_default_lead_time')) || 5;
+
+window.editGlobalLeadTime = function() {
+    let current = SUPPLIER_LEAD_TIME_DAYS;
+    let fallback = prompt("Enter the Global Fallback Lead Time (in days) to use when an item has no specific lead time set:", current);
+    if(fallback !== null) {
+        let val = parseFloat(fallback);
+        if(!isNaN(val) && val >= 0) {
+            SUPPLIER_LEAD_TIME_DAYS = val;
+            localStorage.setItem('neogleamz_default_lead_time', val);
+            if(typeof renderInventoryTable === 'function') renderInventoryTable();
+            alert(`Global fallback lead time seamlessly updated to ${val} days.`);
+        } else {
+            alert("Invalid number. Must be a positive numerical value.");
+        }
+    }
+};
+
 const SAFETY_STOCK_MULTIPLIER = 1.10;
 
 window.calculateTrailingVelocity = function(item_key, days=30) {
