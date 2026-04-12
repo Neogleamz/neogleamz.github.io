@@ -248,222 +248,240 @@ function toggleCeoBtn(idx, key) {
 
 function updateCeoEngine() {
     try {
-        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-        let gCac = parseFloat(document.getElementById('globalCacNum').value) || 0;
-        let gAff = parseFloat(document.getElementById('globalAffNum').value) || 0;
-        let gWarr = parseFloat(document.getElementById('globalWarrNum').value) || 0;
+        let metricsData = _calculateCeoMetrics();
+        _buildCeoTable(metricsData);
+        _syncCeoKPIs(metricsData);
+        _updateCeoCharts(metricsData);
+        saveCeoBoard();
+    } catch (e) { sysLog("Engine Fault: " + (e.message || e), true); }
+}
 
-        let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, curStripe:0, aff:0, curAff:0, warr:0, curWarr:0, ship:0, cac:0 };
-        let charts = { labels:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
+function _calculateCeoMetrics() {
+    const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+    let cacEl = document.getElementById('globalCacNum');
+    let gCac = cacEl ? parseFloat(cacEl.value) || 0 : 0;
+    let affEl = document.getElementById('globalAffNum');
+    let gAff = affEl ? parseFloat(affEl.value) || 0 : 0;
+    let warrEl = document.getElementById('globalWarrNum');
+    let gWarr = warrEl ? parseFloat(warrEl.value) || 0 : 0;
 
-        let tableRows = [];
-        ceoActiveProducts.forEach((p, index) => {
-            p.vol = parseInt(document.getElementById(`ceo-vol-${index}-num`)?.value) || 0;
-            p.testMsrp = parseFloat(document.getElementById(`ceo-testmsrp-${index}`)?.value) || p.testMsrp;
+    let totals = { gross:0, curNet:0, testNet:0, cogs:0, stripe:0, curStripe:0, aff:0, curAff:0, warr:0, curWarr:0, ship:0, cac:0 };
+    let charts = { labels:[], curNetData:[], testNetData:[], eff:[], curEff:[] };
 
-            let effCac = p.applyCac ? gCac : 0;
-            let effAff = p.applyAff ? gAff : 0;
-            let effWarr = p.applyWarr ? gWarr : 0;
+    let tableRows = [];
+    ceoActiveProducts.forEach((p, index) => {
+        let volMatch = document.getElementById(`ceo-vol-${index}-num`);
+        p.vol = volMatch ? parseInt(volMatch.value) || 0 : p.vol || 0;
+        let testMsrpMatch = document.getElementById(`ceo-testmsrp-${index}`);
+        p.testMsrp = testMsrpMatch ? parseFloat(testMsrpMatch.value) || p.testMsrp : p.testMsrp;
 
-            let liveCogs = (p.isBundle || p.name.startsWith('🧪')) ? (p.cogs || 0) : getEngineTrueCogs(p.name);
-            let fsThreshold = parseFloat(document.getElementById('ceo-fs-threshold')?.value) || 50;
+        let effCac = p.applyCac ? gCac : 0;
+        let effAff = p.applyAff ? gAff : 0;
+        let effWarr = p.applyWarr ? gWarr : 0;
 
-            // Math: Current (Customer ALWAYS pays shipping - infinite threshold)
-            let curMetrics = getEnginePredictiveMetrics(p.currentMsrp, liveCogs, 999999, effCac, effAff, effWarr);
+        let liveCogs = (p.isBundle || p.name.startsWith('🧪')) ? (p.cogs || 0) : getEngineTrueCogs(p.name);
+        let fsThreshEl = document.getElementById('ceo-fs-threshold');
+        let fsThreshold = fsThreshEl ? parseFloat(fsThreshEl.value) || 50 : 50;
 
-            // Math: Test (Free Shipping Threshold)
-            let testMetrics = getEnginePredictiveMetrics(p.testMsrp, liveCogs, fsThreshold, effCac, effAff, effWarr);
+        let curMetrics = getEnginePredictiveMetrics(p.currentMsrp, liveCogs, 999999, effCac, effAff, effWarr);
+        let testMetrics = getEnginePredictiveMetrics(p.testMsrp, liveCogs, fsThreshold, effCac, effAff, effWarr);
 
-            totals.gross += (p.testMsrp * p.vol);
-            totals.curNet += (curMetrics.net * p.vol);
-            totals.testNet += (testMetrics.net * p.vol);
-            totals.cogs += (liveCogs * p.vol);
-            totals.stripe += (testMetrics.stripe * p.vol);
-            totals.curStripe += (curMetrics.stripe * p.vol);
-            totals.aff += (testMetrics.aff * p.vol);
-            totals.curAff += (curMetrics.aff * p.vol);
-            totals.warr += (testMetrics.warr * p.vol);
-            totals.curWarr += (curMetrics.warr * p.vol);
-            totals.ship += (testMetrics.ship * p.vol);
-            totals.cac += (effCac * p.vol);
+        totals.gross += (p.testMsrp * p.vol);
+        totals.curNet += (curMetrics.net * p.vol);
+        totals.testNet += (testMetrics.net * p.vol);
+        totals.cogs += (liveCogs * p.vol);
+        totals.stripe += (testMetrics.stripe * p.vol);
+        totals.curStripe += (curMetrics.stripe * p.vol);
+        totals.aff += (testMetrics.aff * p.vol);
+        totals.curAff += (curMetrics.aff * p.vol);
+        totals.warr += (testMetrics.warr * p.vol);
+        totals.curWarr += (curMetrics.warr * p.vol);
+        totals.ship += (testMetrics.ship * p.vol);
+        totals.cac += (effCac * p.vol);
 
-            charts.labels.push(p.name);
-            charts.curNetData.push(curMetrics.net);
-            charts.testNetData.push(testMetrics.net);
+        charts.labels.push(p.name);
+        charts.curNetData.push(curMetrics.net);
+        charts.testNetData.push(testMetrics.net);
 
-            let b = p.testMsrp || 1;
-            charts.eff.push([(liveCogs/b)*100, (effCac/b)*100, (testMetrics.aff/b)*100, (testMetrics.warr/b)*100, (testMetrics.merchantShipMargin/b)*100, (testMetrics.stripe/b)*100, (Math.max(0,testMetrics.net)/b)*100]);
+        let b = p.testMsrp || 1;
+        charts.eff.push([(liveCogs/b)*100, (effCac/b)*100, (testMetrics.aff/b)*100, (testMetrics.warr/b)*100, (testMetrics.merchantShipMargin/b)*100, (testMetrics.stripe/b)*100, (Math.max(0,testMetrics.net)/b)*100]);
 
-            let curB = p.currentMsrp || 1;
-            charts.curEff.push([(liveCogs/curB)*100, (effCac/curB)*100, (curMetrics.aff/curB)*100, (curMetrics.warr/curB)*100, (curMetrics.merchantShipMargin/curB)*100, (curMetrics.stripe/curB)*100, (Math.max(0,curMetrics.net)/curB)*100]);
+        let curB = p.currentMsrp || 1;
+        charts.curEff.push([(liveCogs/curB)*100, (effCac/curB)*100, (curMetrics.aff/curB)*100, (curMetrics.warr/curB)*100, (curMetrics.merchantShipMargin/curB)*100, (curMetrics.stripe/curB)*100, (Math.max(0,curMetrics.net)/curB)*100]);
 
-            tableRows.push({
-                index: index, name: p.name, cogs: liveCogs, currentMsrp: p.currentMsrp, curShip: curMetrics.ship, curStripe: curMetrics.stripe, curOOP: curMetrics.oop, curNet: curMetrics.net, testMsrp: p.testMsrp, testShip: testMetrics.ship, testStripe: testMetrics.stripe, testOOP: testMetrics.oop, testNet: testMetrics.net
-            });
+        tableRows.push({
+            index: index, name: p.name, cogs: liveCogs, currentMsrp: p.currentMsrp, curShip: curMetrics.ship, curStripe: curMetrics.stripe, curOOP: curMetrics.oop, curNet: curMetrics.net, testMsrp: p.testMsrp, testShip: testMetrics.ship, testStripe: testMetrics.stripe, testOOP: testMetrics.oop, testNet: testMetrics.net
+        });
+    });
+
+    if(ceoSortKey) {
+        tableRows.sort((a,b) => {
+            let valA = a[ceoSortKey]; let valB = b[ceoSortKey];
+            if(typeof valA === 'string') return ceoSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            return ceoSortAsc ? valA - valB : valB - valA;
+        });
+    }
+    return { totals, charts, tableRows };
+}
+
+function _buildCeoTable({ tableRows }) {
+    const getThClass = (key) => (ceoSortKey === key ? `sorted-${ceoSortAsc ? 'asc' : 'desc'}` : '');
+
+    let tableHtml = `
+        <div class="ceo-kpi-title" style="margin-bottom:5px;">Current vs. Test Scenario Ledger</div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="${getThClass('name')}" data-ceosort="name" tabindex="0" style="text-align:left; cursor:pointer;">Product Name</th>
+                    <th class="${getThClass('cogs')}" data-ceosort="cogs" tabindex="0" style="font-weight:900; cursor:pointer;">True COGS</th>
+                    <th class="${getThClass('currentMsrp')}" data-ceosort="currentMsrp" tabindex="0" style="color:#888; cursor:pointer;">Current MSRP</th>
+                    <th class="${getThClass('curShip')}" data-ceosort="curShip" tabindex="0" style="color:#888; cursor:pointer;">Cur. Ship</th>
+                    <th class="${getThClass('curStripe')}" data-ceosort="curStripe" tabindex="0" style="color:#888; cursor:pointer;">Cur. Stripe</th>
+                    <th class="${getThClass('curOOP')}" data-ceosort="curOOP" tabindex="0" style="color:#888; cursor:pointer;">Cust OOP</th>
+                    <th class="${getThClass('curNet')}" data-ceosort="curNet" tabindex="0" style="color:#ccc; cursor:pointer;">Current Net</th>
+                    <th class="${getThClass('testMsrp')}" data-ceosort="testMsrp" tabindex="0" style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px; cursor:pointer;">Test MSRP ✏️</th>
+                    <th class="${getThClass('testShip')}" data-ceosort="testShip" tabindex="0" style="color:var(--neon-cyan); cursor:pointer;">Test Ship</th>
+                    <th class="${getThClass('testStripe')}" data-ceosort="testStripe" tabindex="0" style="color:var(--neon-cyan); cursor:pointer;">Test Stripe</th>
+                    <th class="${getThClass('testOOP')}" data-ceosort="testOOP" tabindex="0" style="color:var(--neon-cyan); cursor:pointer;">Cust OOP</th>
+                    <th class="${getThClass('testNet')} val-green" data-ceosort="testNet" tabindex="0" style="font-weight:900; cursor:pointer;">Test Net</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    if (tableRows.length === 0) {
+        tableHtml += '<tr><td colspan="12" style="text-align:center;">No products active.</td></tr>';
+    } else {
+        tableRows.forEach(r => {
+            tableHtml += `
+            <tr>
+                <td style="text-align:left; font-weight:700;">${r.name}</td>
+                <td style="font-weight:700;">${ceoFmt.format(r.cogs)}</td>
+                <td style="color:#888;">${ceoFmt.format(r.currentMsrp)}</td>
+                <td style="color:#888;">${ceoFmt.format(r.curShip)}</td>
+                <td style="color:#888;">${ceoFmt.format(r.curStripe)}</td>
+                <td style="color:#888;">${ceoFmt.format(r.curOOP)}</td>
+                <td style="color:#ccc;">${ceoFmt.format(r.curNet)}</td>
+                <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${r.index}" data-msrp-idx="${r.index}" class="ceo-table-input ceo-test-msrp-listen" value="${r.testMsrp.toFixed(2)}"></td>
+                <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testShip)}</td>
+                <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testStripe)}</td>
+                <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(r.testOOP)}</td>
+                <td class="${r.testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(r.testNet)}</td>
+            </tr>`;
+        });
+    }
+    tableHtml += '</tbody></table>';
+
+    const wrap = document.getElementById('ceoTableWrap');
+    if (wrap) {
+        wrap.innerHTML = tableHtml;
+        if (typeof applyTableInteractivity === 'function') applyTableInteractivity('ceoTableWrap');
+    }
+}
+
+function _syncCeoKPIs({ totals }) {
+    let elKpiGross = document.getElementById('kpiGross');
+    if (elKpiGross) elKpiGross.innerText = ceoFmt.format(totals.gross).split('.')[0];
+
+    let elKpiOldNet = document.getElementById('kpiOldNet');
+    if (elKpiOldNet) elKpiOldNet.innerText = ceoFmt.format(totals.curNet).split('.')[0];
+
+    let elKpiNewNet = document.getElementById('kpiNewNet');
+    if (elKpiNewNet) elKpiNewNet.innerText = ceoFmt.format(totals.testNet).split('.')[0];
+
+    let elKpiSaved = document.getElementById('kpiSaved');
+    if (elKpiSaved) elKpiSaved.innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
+
+    if (typeof window._ltvCacheLength === 'undefined') window._ltvCacheLength = -1;
+    if (typeof window._ltvCachedRepeatRate === 'undefined') window._ltvCachedRepeatRate = 0;
+    if (typeof window._ltvCachedAvg === 'undefined') window._ltvCachedAvg = 0;
+
+    if (typeof salesDB !== 'undefined' && Array.isArray(salesDB) && salesDB.length !== window._ltvCacheLength) {
+        let ltvNetSum = 0;
+        window._ltvCustomerMap = {};
+
+        salesDB.forEach(s => {
+            let qty = parseFloat(s.qty_sold) || 1;
+            let cogs = (typeof getEngineTrueCogs === 'function') ? getEngineTrueCogs(s.internal_recipe_name || s.item_name) * qty : 0;
+            let rev = parseFloat(s.total_received) || 0;
+            let shp = parseFloat(s.shipping_paid) || 0;
+            let stf = (rev * 0.029) + 0.30;
+            let net = rev - (cogs + shp + stf);
+            ltvNetSum += net;
+
+            let h = s.customer_email_hash || s.customer_phone_hash;
+            if (h && h.trim() !== '') {
+                if (!window._ltvCustomerMap[h]) {
+                    window._ltvCustomerMap[h] = { orders: 0, totalNet: 0 };
+                }
+                window._ltvCustomerMap[h].orders += 1;
+                window._ltvCustomerMap[h].totalNet += net;
+            }
         });
 
-        if(ceoSortKey) {
-            tableRows.sort((a,b) => {
-                let valA = a[ceoSortKey]; let valB = b[ceoSortKey];
-                if(typeof valA === 'string') return ceoSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                return ceoSortAsc ? valA - valB : valB - valA;
-            });
-        }
+        let totalUniqueHashes = Object.keys(window._ltvCustomerMap).length;
+        let repeatBuyers = Object.values(window._ltvCustomerMap).filter(c => c.orders > 1).length;
 
-        const getThClass = (key) => (ceoSortKey === key ? `sorted-${ceoSortAsc ? 'asc' : 'desc'}` : '');
+        window._ltvCachedRepeatRate = totalUniqueHashes > 0 ? (repeatBuyers / totalUniqueHashes) * 100 : 0;
+        window._ltvCachedAvg = totalUniqueHashes > 0 ? (ltvNetSum / totalUniqueHashes) : 0;
+        window._ltvCacheLength = salesDB.length;
+    }
 
-        let tableHtml = `
-            <div class="ceo-kpi-title" style="margin-bottom:5px;">Current vs. Test Scenario Ledger</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="${getThClass('name')}" onclick="sortCeoTable('name')" style="text-align:left;">Product Name</th>
-                        <th class="${getThClass('cogs')}" onclick="sortCeoTable('cogs')" style="font-weight:900;">True COGS</th>
-                        <th class="${getThClass('currentMsrp')}" onclick="sortCeoTable('currentMsrp')" style="color:#888;">Current MSRP</th>
-                        <th class="${getThClass('curShip')}" onclick="sortCeoTable('curShip')" style="color:#888;">Cur. Ship</th>
-                        <th class="${getThClass('curStripe')}" onclick="sortCeoTable('curStripe')" style="color:#888;">Cur. Stripe</th>
-                        <th class="${getThClass('curOOP')}" onclick="sortCeoTable('curOOP')" style="color:#888;">Cust OOP</th>
-                        <th class="${getThClass('curNet')}" onclick="sortCeoTable('curNet')" style="color:#ccc;">Current Net</th>
-                        <th class="${getThClass('testMsrp')}" onclick="sortCeoTable('testMsrp')" style="color:var(--neon-cyan); border-left:2px solid #444; padding-left:15px;">Test MSRP ✏️</th>
-                        <th class="${getThClass('testShip')}" onclick="sortCeoTable('testShip')" style="color:var(--neon-cyan);">Test Ship</th>
-                        <th class="${getThClass('testStripe')}" onclick="sortCeoTable('testStripe')" style="color:var(--neon-cyan);">Test Stripe</th>
-                        <th class="${getThClass('testOOP')}" onclick="sortCeoTable('testOOP')" style="color:var(--neon-cyan);">Cust OOP</th>
-                        <th class="${getThClass('testNet')} val-green" onclick="sortCeoTable('testNet')" style="font-weight:900;">Test Net</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+    let elKpiRepeat = document.getElementById('kpiRepeatRate');
+    if(elKpiRepeat) elKpiRepeat.innerText = window._ltvCachedRepeatRate.toFixed(1) + "%";
 
-        if (tableRows.length === 0) {
-            tableHtml += '<tr><td colspan="12" style="text-align:center;">No products active.</td></tr>';
-        } else {
-            tableRows.forEach(r => {
-                tableHtml += `
-                <tr>
-                    <td style="text-align:left; font-weight:700;">${r.name}</td>
-                    <td style="font-weight:700;">${ceoFmt.format(r.cogs)}</td>
-                    <td style="color:#888;">${ceoFmt.format(r.currentMsrp)}</td>
-                    <td style="color:#888;">${ceoFmt.format(r.curShip)}</td>
-                    <td style="color:#888;">${ceoFmt.format(r.curStripe)}</td>
-                    <td style="color:#888;">${ceoFmt.format(r.curOOP)}</td>
-                    <td style="color:#ccc;">${ceoFmt.format(r.curNet)}</td>
-                    <td style="border-left:2px solid #444; padding-left:15px;"><input type="number" id="ceo-testmsrp-${r.index}" class="ceo-table-input" value="${r.testMsrp.toFixed(2)}" onchange="updateCeoEngine()"></td>
-                    <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testShip)}</td>
-                    <td style="color:var(--neon-cyan);">${ceoFmt.format(r.testStripe)}</td>
-                    <td style="color:var(--neon-cyan); font-weight:bold;">${ceoFmt.format(r.testOOP)}</td>
-                    <td class="${r.testNet < 0 ? 'val-red' : 'val-green'}" style="font-weight:900;">${ceoFmt.format(r.testNet)}</td>
-                </tr>`;
-            });
-        }
-        tableHtml += '</tbody></table>';
+    let elKpiLTV = document.getElementById('kpiAvgLTV');
+    if(elKpiLTV) elKpiLTV.innerText = ceoFmt.format(window._ltvCachedAvg).split('.')[0];
+}
 
-        const wrap = document.getElementById('ceoTableWrap');
-        if (wrap) {
-            wrap.innerHTML = tableHtml;
-            applyTableInteractivity('ceoTableWrap');
-        }
+function _updateCeoCharts({ totals, charts }) {
+    let rem1 = totals.gross - totals.cogs;
+    let rem2 = rem1 - totals.stripe;
+    let rem3 = rem2 - totals.ship;
+    let remWarr = rem3 - totals.warr;
+    let remAff = remWarr - totals.aff;
+    let rem4 = remAff - totals.cac;
 
-        // Update KPIs
-        let elKpiGross = document.getElementById('kpiGross');
-        if (elKpiGross) elKpiGross.innerText = ceoFmt.format(totals.gross).split('.')[0];
+    if(ceoWaterfallChart) {
+        ceoWaterfallChart.data.datasets[0].data = [
+            { x: 'Gross Sales', y: totals.gross, base: 0 },
+            { x: 'COGS', y: totals.gross, base: rem1 },
+            { x: 'Stripe', y: rem1, base: rem2 },
+            { x: 'Shipping', y: rem2, base: rem3 },
+            { x: 'Warranty', y: rem3, base: remWarr },
+            { x: 'Affiliate', y: remWarr, base: remAff },
+            { x: 'Ads (CAC)', y: remAff, base: rem4 },
+            { x: 'Net Profit', y: Math.max(0, totals.testNet), base: 0 }
+        ];
+        ceoWaterfallChart.update();
+    }
 
-        let elKpiOldNet = document.getElementById('kpiOldNet');
-        if (elKpiOldNet) elKpiOldNet.innerText = ceoFmt.format(totals.curNet).split('.')[0];
-
-        let elKpiNewNet = document.getElementById('kpiNewNet');
-        if (elKpiNewNet) elKpiNewNet.innerText = ceoFmt.format(totals.testNet).split('.')[0];
-
-        let elKpiSaved = document.getElementById('kpiSaved');
-        if (elKpiSaved) elKpiSaved.innerText = (totals.testNet - totals.curNet >= 0 ? "+" : "") + ceoFmt.format(totals.testNet - totals.curNet).split('.')[0];
-
-        // --- LTV & Acquisition Analysis ---
-        if (typeof window._ltvCacheLength === 'undefined') window._ltvCacheLength = -1;
-        if (typeof window._ltvCachedRepeatRate === 'undefined') window._ltvCachedRepeatRate = 0;
-        if (typeof window._ltvCachedAvg === 'undefined') window._ltvCachedAvg = 0;
-
-        if (typeof salesDB !== 'undefined' && Array.isArray(salesDB) && salesDB.length !== window._ltvCacheLength) {
-            let ltvNetSum = 0;
-            window._ltvCustomerMap = {};
-
-            salesDB.forEach(s => {
-                let qty = parseFloat(s.qty_sold) || 1;
-                let cogs = (typeof getEngineTrueCogs === 'function') ? getEngineTrueCogs(s.internal_recipe_name || s.item_name) * qty : 0;
-                let rev = parseFloat(s.total_received) || 0;
-                let shp = parseFloat(s.shipping_paid) || 0;
-                let stf = (rev * 0.029) + 0.30;
-                let net = rev - (cogs + shp + stf);
-                ltvNetSum += net;
-
-                let h = s.customer_email_hash || s.customer_phone_hash;
-                if (h && h.trim() !== '') {
-                    if (!window._ltvCustomerMap[h]) {
-                        window._ltvCustomerMap[h] = { orders: 0, totalNet: 0 };
-                    }
-                    window._ltvCustomerMap[h].orders += 1;
-                    window._ltvCustomerMap[h].totalNet += net;
-                }
-            });
-
-            let totalUniqueHashes = Object.keys(window._ltvCustomerMap).length;
-            let repeatBuyers = Object.values(window._ltvCustomerMap).filter(c => c.orders > 1).length;
-
-            window._ltvCachedRepeatRate = totalUniqueHashes > 0 ? (repeatBuyers / totalUniqueHashes) * 100 : 0;
-            window._ltvCachedAvg = totalUniqueHashes > 0 ? (ltvNetSum / totalUniqueHashes) : 0;
-            window._ltvCacheLength = salesDB.length;
-        }
-
-        let elKpiRepeat = document.getElementById('kpiRepeatRate');
-        if(elKpiRepeat) elKpiRepeat.innerText = window._ltvCachedRepeatRate.toFixed(1) + "%";
-
-        let elKpiLTV = document.getElementById('kpiAvgLTV');
-        if(elKpiLTV) elKpiLTV.innerText = ceoFmt.format(window._ltvCachedAvg).split('.')[0];
-        // ----------------------------------
-
-        // True Profit Waterfall Engine Arithmetic
-        let rem1 = totals.gross - totals.cogs;
-        let rem2 = rem1 - totals.stripe;
-        let rem3 = rem2 - totals.ship;
-        let remWarr = rem3 - totals.warr;
-        let remAff = remWarr - totals.aff;
-        let rem4 = remAff - totals.cac;
-
-        if(ceoWaterfallChart) {
-            ceoWaterfallChart.data.datasets[0].data = [
-                { x: 'Gross Sales', y: totals.gross, base: 0 },
-                { x: 'COGS', y: totals.gross, base: rem1 },
-                { x: 'Stripe', y: rem1, base: rem2 },
-                { x: 'Shipping', y: rem2, base: rem3 },
-                { x: 'Warranty', y: rem3, base: remWarr },
-                { x: 'Affiliate', y: remWarr, base: remAff },
-                { x: 'Ads (CAC)', y: remAff, base: rem4 },
-                { x: 'Net Profit', y: Math.max(0, totals.testNet), base: 0 }
-            ];
-            ceoWaterfallChart.update();
-        }
-
-        // Update Charts
+    if(ceoExpenseChart) {
         ceoExpenseChart.data.datasets[0].data = [totals.cogs, totals.cac, totals.curAff, totals.curWarr, totals.ship, totals.curStripe, Math.max(0, totals.curNet)];
         ceoExpenseChart.data.datasets[1].data = [totals.cogs, totals.cac, totals.aff, totals.warr, totals.ship, totals.stripe, Math.max(0, totals.testNet)];
         ceoExpenseChart.update();
+    }
 
+    if(ceoUnitChart) {
         ceoUnitChart.data.labels = charts.labels;
         ceoUnitChart.data.datasets[0].data = charts.curNetData;
         ceoUnitChart.data.datasets[1].data = charts.testNetData;
         ceoUnitChart.update();
+    }
 
-        const colors = ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'];
-        const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
+    const colors = ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'];
+    const labels = ['COGS', 'CAC', 'Affil', 'Warr', 'Ship', 'Stripe', 'Net'];
+    if(ceoEfficiencyChart) {
         ceoEfficiencyChart.data.labels = charts.labels;
         ceoEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.eff.map(row => row[i]), backgroundColor: colors[i] }));
         ceoEfficiencyChart.update();
+    }
 
+    if(ceoCurEfficiencyChart) {
         ceoCurEfficiencyChart.data.labels = charts.labels;
         ceoCurEfficiencyChart.data.datasets = labels.map((l, i) => ({ label: l, data: charts.curEff.map(row => row[i]), backgroundColor: colors[i] }));
         ceoCurEfficiencyChart.update();
-
-        saveCeoBoard();
-    } catch (e) { console.error(e); }
+    }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     ['globalCac', 'globalAff', 'globalWarr'].forEach(id => {
         const s = document.getElementById(id + 'Slider');
@@ -650,3 +668,71 @@ function closeLtvModal() {
     let modal = document.getElementById('ltv-metrics-modal');
     if (modal) modal.style.display = 'none';
 }
+
+// --- CEO Terminal Global Event Delegation ---
+document.addEventListener('click', (e) => {
+    try {
+        if (e.target.closest('#btn-open-ceo-add-modal')) openCeoAddModal();
+        
+        const toggleBtn = e.target.closest('.ceo-toggle-btn');
+        if (toggleBtn) {
+            let idx = toggleBtn.getAttribute('data-toggle-idx');
+            let prop = toggleBtn.getAttribute('data-toggle-prop');
+            if (idx !== null && prop) toggleCeoBtn(parseInt(idx), prop);
+        }
+        
+        const removeBtn = e.target.closest('.ceo-remove-btn');
+        if (removeBtn) {
+            let idx = removeBtn.getAttribute('data-remove-idx');
+            if (idx !== null) removeCeoProduct(parseInt(idx));
+        }
+        
+        const sortTh = e.target.closest('th[data-ceosort]');
+        if (sortTh) {
+            let key = sortTh.getAttribute('data-ceosort');
+            if (key) sortCeoTable(key);
+        }
+    } catch (err) { }
+});
+
+document.addEventListener('change', (e) => {
+    try {
+        const testMsrpInput = e.target.closest('.ceo-test-msrp-listen');
+        if (testMsrpInput) updateCeoEngine();
+    } catch (err) { }
+});
+
+document.addEventListener('input', (e) => {
+    try {
+        const volInput = e.target.closest('.ceo-vol-listen');
+        if (volInput) {
+            let idx = volInput.getAttribute('data-vol-idx');
+            let dup = document.getElementById(`ceo-vol-${idx}`);
+            if(dup) dup.value = volInput.value;
+            updateCeoEngine();
+        }
+    } catch (err) { }
+});
+
+document.addEventListener('dragstart', (e) => {
+    const sliderGroup = e.target.closest('.ceo-slider-group');
+    if (sliderGroup) {
+        let idx = sliderGroup.getAttribute('data-slider-idx');
+        if (idx !== null) ceoDragStart(e, parseInt(idx));
+    }
+});
+document.addEventListener('dragover', (e) => {
+    const sliderGroup = e.target.closest('.ceo-slider-group');
+    if (sliderGroup) ceoDragOver(e);
+});
+document.addEventListener('drop', (e) => {
+    const sliderGroup = e.target.closest('.ceo-slider-group');
+    if (sliderGroup) {
+        let idx = sliderGroup.getAttribute('data-slider-idx');
+        if (idx !== null) ceoDrop(e, parseInt(idx));
+    }
+});
+document.addEventListener('dragend', (e) => {
+    const sliderGroup = e.target.closest('.ceo-slider-group');
+    if (sliderGroup) ceoDragEnd(e);
+});
