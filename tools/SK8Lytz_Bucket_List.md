@@ -57,7 +57,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `feat/webrtc-cycle-counts`
 *(Epic: Cycle Count Scanner Standardization)*
-- [ ] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure consistent behavior across all scanning entry points.
+- [ ] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure the WebRTC constraint logic fully supports cross-platform execution specifically for iPhone iOS Safari, native Android, and PC webcams. Ensure consistent behavior across all scanning entry points.
 
 ### Target: `main`
 *(Epic: Sitewide Performance Optimization)*
