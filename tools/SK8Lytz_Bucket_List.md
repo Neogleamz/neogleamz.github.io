@@ -21,6 +21,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
+### Target: `main`
+*(Epic: Sitewide Button State Feedback)*
+- [ ] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
+  - [ ] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
 
 
 ### Target: `main`
@@ -47,11 +51,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟡 P2 Medium Priority (Enhancements)
-
-### Target: `main`
-*(Epic: Sitewide Button State Feedback)*
-- [ ] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
-  - [ ] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
 
 ### Target: `main`
 *(Epic: Automated Shippo Printing)*
