@@ -25,6 +25,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: WebRTC Scanner Integration)*
 - [ ] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
 
+### Target: `main`
+*(Epic: Full-Repo Legacy Audit)*
+- [ ] `chore/audit-packerz` : Execute `@[/legacy_audit]` against `packerz-module.js` to bring standards up to modern Vanilla DOM rules.
+- [ ] `chore/audit-production` : Execute `@[/legacy_audit]` against `production-module.js` to align with strict error handling.
+- [ ] `chore/audit-system-tools` : Execute `@[/legacy_audit]` against `system-tools-module.js` to ensure telemetry rules are met.
+- [ ] `chore/audit-inventory` : Execute `@[/legacy_audit]` against `inventory-module.js` to verify DOM structures and variable scopes.
+- [ ] `chore/audit-socialz` : Execute `@[/legacy_audit]` against `socialz-module.js` to eradicate technical debt.
+
 
 
 ---
