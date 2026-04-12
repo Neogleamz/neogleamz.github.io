@@ -1,6 +1,7 @@
-﻿---
-trigger: always_on
+---
+name: responsive_ui
 description: "Strict UI layout constraints, separating internal desktop tools from mobile customer apps."
+trigger: "/layout, /responsive, /flexbox, responsive layout"
 ---
 
 # UI Architecture & Browser Standards Rule
