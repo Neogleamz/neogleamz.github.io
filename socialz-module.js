@@ -461,9 +461,10 @@
             reader.onload = async function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+                    const workbook = typeof XLSX !== 'undefined' ? XLSX.read(data, {type: 'array'}) : null;
+                    if(!workbook) throw new Error("SheetJS not loaded correctly");
+                    const firstSheet = workbook.SheetNames[0];
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {raw: false, defval: ""});
                     
                     const newS = rows.map(r => {
                         const m = (k) => {

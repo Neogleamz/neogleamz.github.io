@@ -8,56 +8,6 @@ async function hashPII(rawStr) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/**
- * RFC 4180-compliant CSV parser. Handles Shopify exports with quoted fields,
- * embedded commas, and quoted newlines. Returns an array of row objects keyed
- * by the header row, matching the output format of excelSheetToJson().
- * @param {string} text - Raw CSV file content as a UTF-8 string
- * @returns {Object[]}
- */
-function parseCsvText(text) {
-    // Normalize line endings
-    const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const cells = [];
-    let currentCell = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < normalized.length; i++) {
-        const ch = normalized[i];
-        const next = normalized[i + 1];
-        if (inQuotes) {
-            if (ch === '"' && next === '"') { currentCell += '"'; i++; } // escaped quote
-            else if (ch === '"') { inQuotes = false; }
-            else { currentCell += ch; }
-        } else {
-            if (ch === '"') { inQuotes = true; }
-            else if (ch === ',') { cells.push(currentCell); currentCell = ''; }
-            else if (ch === '\n') { cells.push(currentCell); currentCell = ''; cells.push('\n'); }
-            else { currentCell += ch; }
-        }
-    }
-    cells.push(currentCell); // final cell
-
-    // Reconstruct rows from the flat cell + newline-marker array
-    const allRows = [];
-    let currentRow = [];
-    for (const cell of cells) {
-        if (cell === '\n') { allRows.push(currentRow); currentRow = []; }
-        else { currentRow.push(cell); }
-    }
-    if (currentRow.length > 0 && currentRow.some(c => c !== '')) allRows.push(currentRow);
-
-    if (allRows.length < 2) return [];
-    const headers = allRows[0];
-    return allRows.slice(1)
-        .filter(row => row.some(c => c.trim() !== ''))
-        .map(row => {
-            const obj = {};
-            headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
-            return obj;
-        });
-}
-
 // --- 9. SALES SYNC ENGINE ---
 async function addManualSale() {
     try {
@@ -147,39 +97,14 @@ async function processSalesCSV(isTestMode = false) {
     if(!file) { syncTrace("ERROR: No CSV payload selected.", true); return alert("Please select a CSV file first."); }
     syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
     sysLog("Reading Sales CSV..."); setMasterStatus("Parsing...", "mod-working"); setSysProgress(20, 'working');
-    const isCsv = file.name.toLowerCase().endsWith('.csv');
     const reader = new FileReader();
-
-    if (isCsv) {
-        // CSV path: read as text and parse manually (ExcelJS xlsx.load rejects non-ZIP files)
-        reader.onload = function(e) {
-            try {
-                const rows = parseCsvText(e.target.result);
-                processParsedSales(rows, isTestMode);
-            } catch (err) {
-                syncTrace('CSV parse error: ' + err.message, true);
-                setMasterStatus('Parse Error', 'mod-error');
-            }
-        };
-        reader.readAsText(file);
-    } else {
-        // XLSX path: use SheetJS
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheetName = workbook.SheetNames[0];
-                const roa = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { raw: false });
-                
-                if (roa.length === 0) return alert("The selected sheet is empty or improperly formatted.");
-                processParsedSales(roa, isTestMode);
-            } catch (err) {
-                syncTrace('XLSX parse error: ' + err.message, true);
-                setMasterStatus('Parse Error', 'mod-error');
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    }
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(firstSheet, {defval: ""});
+        processParsedSales(rows, isTestMode);
+    };
+    reader.readAsArrayBuffer(file);
 }
 
 async function processParsedSales(rows, isTestMode = false) {
@@ -199,11 +124,7 @@ async function processParsedSales(rows, isTestMode = false) {
         if(!isTestMode && salesDB.some(s => s.order_id === String(orderId) && s.storefront_sku === String(skuName))) continue;
 
         let dateStr = "";
-        if (rawDate instanceof Date) {
-            // ExcelJS natively parses dates as Date objects
-            dateStr = rawDate.toISOString().split('T')[0];
-        } else if (typeof rawDate === 'number') {
-            // Legacy serial date fallback (safety net for any edge cases)
+        if (typeof rawDate === 'number') {
             let excelEpoch = new Date(1899, 11, 30);
             let jsDate = new Date(excelEpoch.getTime() + rawDate * 86400000);
             dateStr = jsDate.toISOString().split('T')[0];
