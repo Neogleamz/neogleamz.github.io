@@ -29,6 +29,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Epic: Sitewide Performance Optimization)*
 - [ ] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
 
+### Target: `main`
+*(Epic: Sitewide Button UI & Mobile Responsiveness)*
+- [ ] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
+
 
 
 
@@ -49,9 +53,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
-### Target: `main`
-*(Epic: Sitewide Button UI & Mobile Responsiveness)*
-- [ ] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
+
 
 
 ---
