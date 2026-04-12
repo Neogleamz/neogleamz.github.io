@@ -5,152 +5,155 @@
 let barcodzCache = [];
 
 function buildBarcodzCache() {
-    barcodzCache = [];
-    
-    // 1. Gather all Finished Goods & Recipes (Makerz)
-    if (typeof productsDB !== 'undefined') {
-        Object.keys(productsDB).forEach(pName => {
-            const is3D = !!(productsDB[pName].is_3d_print);
-            const isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]);
-            const isLabel = !!(productsDB[pName].is_label);
-            const typeLabel = isLabel ? 'Custom Labelz' : (is3D ? '3D Print' : (isSub ? 'Sub-Assembly' : 'Retail Product'));
-            const customIcon = productsDB[pName].label_emoji || '🏷️';
-            
-            barcodzCache.push({
-                name: pName,
-                slug: getItemBarcodeValue(pName),
-                type: typeLabel,
-                icon: isLabel ? customIcon : (is3D ? "🖨️" : (isSub ? "⚙️" : "📦")),
-                isCatalog: false
-            });
-        });
-    }
+    try {
+        barcodzCache = [];
 
-    // 2. Gather all global raw materials (Inventory)
-    if (typeof catalogCache !== 'undefined') {
-        Object.keys(catalogCache).forEach(k => {
-            const c = catalogCache[k];
-            // Prefer NeoName if available, otherwise fallback to item name
-            const labelName = c.neoName && c.neoName !== '-' ? c.neoName : c.itemName;
-            
-            // Deduplicate if already exists (some sub-assemblies might crossover)
-            if (!barcodzCache.find(x => x.name === labelName)) {
+        // 1. Gather all Finished Goods & Recipes (Makerz)
+        if (typeof productsDB !== 'undefined') {
+            Object.keys(productsDB).forEach(pName => {
+                const is3D = !!(productsDB[pName].is_3d_print);
+                const isSub = !!(typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName]);
+                const isLabel = !!(productsDB[pName].is_label);
+                const typeLabel = isLabel ? 'Custom Labelz' : (is3D ? '3D Print' : (isSub ? 'Sub-Assembly' : 'Retail Product'));
+                const customIcon = productsDB[pName].label_emoji || '🏷️';
+
                 barcodzCache.push({
-                    name: labelName,
-                    slug: getItemBarcodeValue(labelName),
-                    type: 'Raw Material',
-                    icon: "🔩",
-                    desc: c.spec !== '(Mixed Specs)' ? c.spec : '',
-                    isCatalog: true
+                    name: pName,
+                    slug: getItemBarcodeValue(pName),
+                    type: typeLabel,
+                    icon: isLabel ? customIcon : (is3D ? "🖨️" : (isSub ? "⚙️" : "📦")),
+                    isCatalog: false
                 });
-            }
-        });
-    }
-    
-    // 3. Gather Custom Labels from label_designs (LABELZ module)
-    if (typeof getLabelzForBarcodz === 'function') {
-        getLabelzForBarcodz().forEach(lbl => {
-            if (!barcodzCache.find(x => x.name === lbl.name)) {
-                barcodzCache.push(lbl);
-            }
-        });
-    }
-    
-    // Alphabetical sort by product name
-    barcodzCache.sort((a,b) => a.name.localeCompare(b.name));
-    
-    // Update KPI counter
-    const kpi = document.getElementById('kpiBarcodzCount');
-    if (kpi) kpi.innerText = barcodzCache.length;
-    
-    // Update LABELZ KPI counter
-    const kpiL = document.getElementById('kpiLabelzCount');
-    if (kpiL) kpiL.innerText = typeof labelzDB !== 'undefined' ? labelzDB.length : 0;
+            });
+        }
+
+        // 2. Gather all global raw materials (Inventory)
+        if (typeof catalogCache !== 'undefined') {
+            Object.keys(catalogCache).forEach(k => {
+                const c = catalogCache[k];
+                // Prefer NeoName if available, otherwise fallback to item name
+                const labelName = c.neoName && c.neoName !== '-' ? c.neoName : c.itemName;
+
+                // Deduplicate if already exists (some sub-assemblies might crossover)
+                if (!barcodzCache.find(x => x.name === labelName)) {
+                    barcodzCache.push({
+                        name: labelName,
+                        slug: getItemBarcodeValue(labelName),
+                        type: 'Raw Material',
+                        icon: "🔩",
+                        desc: c.spec !== '(Mixed Specs)' ? c.spec : '',
+                        isCatalog: true
+                    });
+                }
+            });
+        }
+
+        // 3. Gather Custom Labels from label_designs (LABELZ module)
+        if (typeof getLabelzForBarcodz === 'function') {
+            getLabelzForBarcodz().forEach(lbl => {
+                if (!barcodzCache.find(x => x.name === lbl.name)) {
+                    barcodzCache.push(lbl);
+                }
+            });
+        }
+
+        // Alphabetical sort by product name
+        barcodzCache.sort((a,b) => a.name.localeCompare(b.name));
+
+        // Update KPI counter
+        const kpi = document.getElementById('kpiBarcodzCount');
+        if (kpi) kpi.innerText = barcodzCache.length;
+
+        // Update LABELZ KPI counter
+        const kpiL = document.getElementById('kpiLabelzCount');
+        if (kpiL) kpiL.innerText = typeof labelzDB !== 'undefined' ? labelzDB.length : 0;
+    } catch(e) { sysLog('Barcodz cache build error: ' + e.message, true); }
 }
 
 function renderBarcodzGrid(forceRebuild = false) {
-    let hasProducts = barcodzCache.some(x => x.type !== 'Custom Labelz');
-    if (barcodzCache.length === 0 || (!hasProducts && typeof productsDB !== 'undefined' && Object.keys(productsDB).length > 0) || forceRebuild) {
-        buildBarcodzCache();
-    }
-    
-    const grid = document.getElementById('barcodzGrid');
-    const searchInput = document.getElementById('barcodzSearch')?.value.toLowerCase() || '';
-    if (!grid) return;
-    
-    const filtered = barcodzCache.filter(item => 
-        item.name.toLowerCase().includes(searchInput) || 
-        item.slug.toLowerCase().includes(searchInput) ||
-        item.type.toLowerCase().includes(searchInput)
-    );
-    
-    if (filtered.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No labels found matching search.</div>`;
-        return;
-    }
-    
-    // Group items by Type
-    const grouped = {};
-    filtered.forEach(item => {
-        if(!grouped[item.type]) grouped[item.type] = [];
-        grouped[item.type].push(item);
-    });
-    
-    const typeOrder = ['Retail Product', 'Sub-Assembly', 'Custom Labelz', '3D Print', 'Raw Material'];
-    const groupsToRender = Object.keys(grouped).sort((a,b) => typeOrder.indexOf(a) - typeOrder.indexOf(b));
+    try {
+        let hasProducts = barcodzCache.some(x => x.type !== 'Custom Labelz');
+        if (barcodzCache.length === 0 || (!hasProducts && typeof productsDB !== 'undefined' && Object.keys(productsDB).length > 0) || forceRebuild) {
+            buildBarcodzCache();
+        }
 
-    let savedState = null;
-    try { savedState = JSON.parse(localStorage.getItem('barcodzGroupState')); } catch(e){}
-    window.barcodzGroupState = window.barcodzGroupState || savedState || {};
-    let html = '';
-    groupsToRender.forEach(type => {
-        let isOpen = window.barcodzGroupState[type] !== false;
-        html += `
-        <details ${isOpen ? 'open' : ''} ontoggle="window.barcodzGroupState['${type}'] = this.open; localStorage.setItem('barcodzGroupState', JSON.stringify(window.barcodzGroupState));" style="margin-bottom:20px; background:rgba(0,0,0,0.1); border-radius:12px; border:1px solid var(--border-color); grid-column: 1 / -1;">
-            <summary style="padding:14px 20px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; color:var(--text-heading); list-style:none; display:flex; align-items:center; border-bottom:1px solid var(--border-color); background:var(--bg-panel); border-radius:12px 12px 0 0;">
-                <span style="font-size:18px; margin-right:10px;">${grouped[type][0].icon}</span> 
-                ${type.endsWith('z') ? type : type + 's'} <span style="margin-left:10px; background:var(--bg-input); padding:2px 8px; border-radius:12px; font-size:10px; color:var(--text-muted);">${grouped[type].length}</span>
-            </summary>
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; padding:16px;">
-        `;
-        
-        grouped[type].forEach(item => {
+        const grid = document.getElementById('barcodzGrid');
+        const searchInput = document.getElementById('barcodzSearch')?.value.toLowerCase() || '';
+        if (!grid) return;
+
+        const filtered = barcodzCache.filter(item =>
+            item.name.toLowerCase().includes(searchInput) ||
+            item.slug.toLowerCase().includes(searchInput) ||
+            item.type.toLowerCase().includes(searchInput)
+        );
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No labels found matching search.</div>`;
+            return;
+        }
+
+        // Group items by Type
+        const grouped = {};
+        filtered.forEach(item => {
+            if(!grouped[item.type]) grouped[item.type] = [];
+            grouped[item.type].push(item);
+        });
+
+        const typeOrder = ['Retail Product', 'Sub-Assembly', 'Custom Labelz', '3D Print', 'Raw Material'];
+        const groupsToRender = Object.keys(grouped).sort((a,b) => typeOrder.indexOf(a) - typeOrder.indexOf(b));
+
+        let savedState = null;
+        try { savedState = JSON.parse(localStorage.getItem('barcodzGroupState')); } catch(e){}
+        window.barcodzGroupState = window.barcodzGroupState || savedState || {};
+        let html = '';
+        groupsToRender.forEach(type => {
+            let isOpen = window.barcodzGroupState[type] !== false;
             html += `
-                <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                    
-                    <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
-                        <!-- Emoji Top Left -->
-                        <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">${item.icon}</div>
-                        
-                        <!-- Type Centered -->
-                        <div style="display:flex; justify-content:center; align-items:center; height:100%;">
-                            <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${item.type}</span>
+            <details ${isOpen ? 'open' : ''} ontoggle="window.barcodzGroupState['${type}'] = this.open; localStorage.setItem('barcodzGroupState', JSON.stringify(window.barcodzGroupState));" style="margin-bottom:20px; background:rgba(0,0,0,0.1); border-radius:12px; border:1px solid var(--border-color); grid-column: 1 / -1;">
+                <summary style="padding:14px 20px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; color:var(--text-heading); list-style:none; display:flex; align-items:center; border-bottom:1px solid var(--border-color); background:var(--bg-panel); border-radius:12px 12px 0 0;">
+                    <span style="font-size:18px; margin-right:10px;">${grouped[type][0].icon}</span> 
+                    ${type.endsWith('z') ? type : type + 's'} <span style="margin-left:10px; background:var(--bg-input); padding:2px 8px; border-radius:12px; font-size:10px; color:var(--text-muted);">${grouped[type].length}</span>
+                </summary>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; padding:16px;">
+            `;
+
+            grouped[type].forEach(item => {
+                html += `
+                    <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+
+                        <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
+                            <!-- Emoji Top Left -->
+                            <div style="font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--bg-input); border-radius:6px;">${item.icon}</div>
+
+                            <!-- Type Centered -->
+                            <div style="display:flex; justify-content:center; align-items:center; height:100%;">
+                                <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${item.type}</span>
+                            </div>
+
+                            <!-- Button Top Right -->
+                            <button class="btn-blue" onclick="addBarcodzToSpool('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}', '${item.icon}', '${item.type}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                         </div>
-                        
-                        <!-- Button Top Right -->
-                        <button class="btn-blue" onclick="addBarcodzToSpool('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}', '${item.icon}', '${item.type}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
+
+                        <!-- Content -->
+                        <div style="padding-top:4px; border-top:1px solid var(--border-color); text-align:center;">
+                            <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word;">${item.name}</div>
+                            <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0; word-break:break-all;">${item.slug}</div>
+                            ${item.desc ? `<div style="font-size:10px; color:var(--text-muted); margin-top:2px; font-style:italic; line-height:1.2;">${item.desc}</div>` : ''}
+                        </div>
                     </div>
-                    
-                    <!-- Content -->
-                    <div style="padding-top:4px; border-top:1px solid var(--border-color); text-align:center;">
-                        <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word;">${item.name}</div>
-                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0; word-break:break-all;">${item.slug}</div>
-                        ${item.desc ? `<div style="font-size:10px; color:var(--text-muted); margin-top:2px; font-style:italic; line-height:1.2;">${item.desc}</div>` : ''}
-                    </div>
+                `;
+            });
+
+            html += `
                 </div>
+            </details>
             `;
         });
-        
-        html += `
-            </div>
-        </details>
-        `;
-    });
-    
-    // We remove the static CSS grid on `barcodzGrid` since we pushed it down into the details elements
-    grid.style.display = 'block';
-    
-    grid.innerHTML = html;
+
+        // Push grid layout down into details elements
+        grid.style.display = 'block';
+        grid.innerHTML = html;
+    } catch(e) { sysLog('Barcodz grid render error: ' + e.message, true); }
 }
 
 // ------------------------------------------------------------
@@ -291,7 +294,7 @@ function executeBatchPrint() {
     
     // Parse JSON injected value
     let pObj = {w: 4, h: 6, n: "Default Paper"};
-    try { pObj = JSON.parse(sizeSelect); } catch(e) { console.warn("Failed parsing size", sizeSelect); }
+    try { pObj = JSON.parse(sizeSelect); } catch(e) { sysLog('Barcodz size parse error: ' + e.message, true); }
     let pW = parseFloat(pObj.w);
     let pH = parseFloat(pObj.h);
 
@@ -488,5 +491,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-
-// SIDEBAR RESIZER LOGIC MIGRATED TO neogleamz-engine.js
