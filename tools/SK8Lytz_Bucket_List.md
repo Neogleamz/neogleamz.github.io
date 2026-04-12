@@ -27,7 +27,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Comprehensive Diagnostic Tracing)*
-- [ ] `feat/diagnostic-telemetry-upgrade` : Eliminate all silent failures across the app. Ensure everything (especially file I/O like Backup & Restore) reports state changes, warnings, and errors directly to the A.I. Diagnostics panel so we never have to guess why a process failed.
+- [x] `feat/diagnostic-telemetry-upgrade` : Eliminate all silent failures across the app. Ensure everything (especially file I/O like Backup & Restore) reports state changes, warnings, and errors directly to the A.I. Diagnostics panel so we never have to guess why a process failed.
 
 ---
 
