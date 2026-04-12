@@ -1202,41 +1202,14 @@ async function executeExport(btnObj) {
         
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         
-        // Generate the physical binary stream into memory using robust SheetJS
-        const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-        preparedBackupBlob = new Blob([wbOut], { type: 'application/octet-stream' });
-        preparedBackupFileName = `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`;
+        // Native, robust SheetJS explicit export
+        XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
         
-        // --- 2-STEP SYNCHRONOUS UI BYPASS ---
-        // Halting execution here prevents Chromium's "Asynchronous Drive-By-Download" timeout block.
-        // We present a secondary trigger. The user clicks. The anchor injection is now 100% synchronous,
-        // so Chromium unconditionally trusts the MIME payload and filename.
-        btnObj.innerHTML = "💾 READY - CLICK TO SAVE";
-        btnObj.style.background = "#10b981"; // success green
+        btnObj.innerHTML = originalText;
+        btnObj.style.background = ""; // revert to CSS default
         btnObj.disabled = false;
-        
-        btnObj.onclick = function() {
-            // Native, battle-tested anchor injection
-            const url = window.URL.createObjectURL(preparedBackupBlob);
-            const anchor = document.createElement('a');
-            anchor.style.display = 'none';
-            anchor.href = url;
-            anchor.download = preparedBackupFileName;
-            document.body.appendChild(anchor);
-            anchor.click();
-            
-            setTimeout(() => {
-                document.body.removeChild(anchor);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-            
-            // Reset button to initial state
-            btnObj.innerHTML = originalText;
-            btnObj.style.background = ""; 
-            btnObj.onclick = function() { executeExport(this); };
-        };
 
-        setMasterStatus("Backup Ready for Download", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
+        setMasterStatus("Export Complete!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch (e) { 
         sysLog(e.message, true); setMasterStatus("Export Error", "mod-error"); 
         if(btnObj) { btnObj.innerHTML = "⬇️ EXPORT BACKUP"; btnObj.disabled = false; btnObj.style.background = ""; }
