@@ -125,6 +125,10 @@ Known verified tables currently in active use across the JavaScript modules:
 ## 🛡️ 4. Supabase Disaster Recovery & Backups
 * **Automated Point-in-Time Recovery (PITR):** Supabase inherently takes daily physical database backups. A full catastrophic state can be restored via the Supabase Hub.
 * **Hard Data Exports (Monthly CSV):** Core master ledgers (`sales_ledger`, `inventory_consumption`, `product_recipes`) should be exported manually to CSV once a month and stored in `OneDrive - Neogleamz`. This acts as an un-locked local safety net away from enterprise SAAS constraints.
+* **CLI Migration Sync & Ghost Recovery:** If the remote Database tracks synthetic schemas generated directly from the Supabase Dashboard, `npx supabase db push` will fail with a "Remote migration versions not found" error. To synchronize local tracking without destroying data:
+  1. Execute `npx supabase migration repair --status reverted <ghost_ids>` to detach UI-generated IDs from CLI tracking.
+  2. Execute `npx supabase migration repair --status applied <local_ids>` to log manually created `.sql` files that were natively pasted into the Dashboard to prevent dual-execution.
+  3. Subsequent `npx supabase db push` calls will now reliably sync the local `/supabase/migrations` stack correctly to the remote without dual-executing local databases. (To physically download missing Dashboard schema strings to your local disk, execute `npx supabase db pull dashboard_sync` if Docker Desktop is available).
 
 ---
 

@@ -59,7 +59,7 @@ When adding action buttons across the software, you MUST adhere to the global 6-
 ## 4. Current DB Schemas & Backup Protocol
 
 ### DB Row Level Security Matrix
-The system natively deploys 16 tables. RLS explicitly dictates that **Authenticated Users** possess full universal bypass `USING (true) WITH CHECK (true)`, and **Anon Users** are strictly denied across the board with the sole exception of the `sop-media` cloud-bucket fetch protocols.
+The system natively deploys 16 tables. RLS explicitly dictates that **Authenticated Users** possess full universal bypass `USING (true) WITH CHECK (true)`, and **Anon Users** are strictly denied across the board WITHOUT exception. The `sop-media` Supabase Storage bucket specifically operates on a strict Zero-Trust policy: all INSERT, DELETE, and SELECT operations require an `authenticated` user token.
 
 ### Active Logical Tables (Schema Definitions)
 
