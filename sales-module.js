@@ -16,7 +16,7 @@ async function addManualSale() {
         let rec = document.getElementById('manualSaleRecipe').value;
         let qty = parseFloat(document.getElementById('manualSaleQty').value);
         let pr = parseFloat(document.getElementById('manualSalePrice').value) || 0;
-        
+
         let subtotRaw = document.getElementById('manualSaleSubtot').value;
         let ship = parseFloat(document.getElementById('manualSaleShip').value) || 0;
         let tax = parseFloat(document.getElementById('manualSaleTax').value) || 0;
@@ -25,48 +25,48 @@ async function addManualSale() {
         let totalRaw = document.getElementById('manualSaleTotal').value;
         let source = document.getElementById('manualSaleSource').value.trim();
         let balance = parseFloat(document.getElementById('manualSaleBalance').value) || 0;
-        
+
         if(!id || !dt || !rec || isNaN(qty) || qty <= 0) { sysLog("Validation Error: Missing required fields for manual sale.", true); return alert("Please fill all required fields correctly."); }
-        
+
         let subtot = subtotRaw ? parseFloat(subtotRaw) : (qty * pr);
         let total = totalRaw ? parseFloat(totalRaw) : (subtot + ship + tax - discAmt);
-        
+
         sysLog(`Adding Manual Sale: ${id}`); setMasterStatus("Saving...", "mod-working");
-        
+
         // --- POWERED BY MASTER ENGINE ---
         let cogs = getEngineTrueCogs(rec);
         let stripeFee = getEngineStripeFee(total, source);
         let actualShipCost = (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty;
         let lineNet = getHistoricalNetProfit(pr * qty, ship, tax, discAmt, actualShipCost, rec, qty, source);
         // --------------------------------
-        
+
         let uniqueManualSku = "MANUAL_ENTRY_" + rec;
-        
-        let sRow = { 
-            order_id: id, sale_date: dt, storefront_sku: uniqueManualSku, internal_recipe_name: rec, 
-            qty_sold: qty, actual_sale_price: pr, cogs_at_sale: cogs, 
+
+        let sRow = {
+            order_id: id, sale_date: dt, storefront_sku: uniqueManualSku, internal_recipe_name: rec,
+            qty_sold: qty, actual_sale_price: pr, cogs_at_sale: cogs,
             subtotal: subtot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: total,
             "Source": source, "Outstanding Balance": balance,
             transaction_fees: stripeFee, net_profit: lineNet
         };
-        
+
         let invK = `RECIPE:::${rec}`;
         if(!inventoryDB[invK]) inventoryDB[invK] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
         inventoryDB[invK].sold_qty += qty;
         let invPayload = { item_key: invK, ...inventoryDB[invK] };
-        
+
         const {error: e1} = await supabaseClient.from('sales_ledger').insert([sRow]); if(e1) throw new Error("Insert Error: " + e1.message);
         const {error: e2} = await supabaseClient.from('inventory_consumption').upsert([invPayload], {onConflict:'item_key'}); if(e2) throw new Error("Inventory Error: " + e2.message);
-        
+
         salesDB.unshift(sRow);
         ['manualSaleId', 'manualSalePrice', 'manualSaleSubtot', 'manualSaleShip', 'manualSaleTax', 'manualSaleDiscCode', 'manualSaleDisc', 'manualSaleTotal', 'manualSaleSource', 'manualSaleBalance'].forEach(el => {
             let field = document.getElementById(el);
             if(field) field.value = "";
         });
-        setMasterStatus("Sale Added!", "mod-success"); 
-        
-        renderSalesTable(); 
-        renderInventoryTable(); 
+        setMasterStatus("Sale Added!", "mod-success");
+
+        renderSalesTable();
+        renderInventoryTable();
         if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         setTimeout(()=> {
             let sm = document.getElementById('statusMaster');
@@ -93,12 +93,12 @@ async function processSalesCSV(isTestMode = false) {
         let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
         syncTrace("INITIALIZING SYNC PROTOCOL...", false);
         const fileId = isTestMode ? 'salesCsvFileTest' : 'salesCsvFile';
-        
+
         if(isTestMode) syncTrace("🧪 DRY RUN SANDBOX ENGAGED: Bypassing Supabase Connection.", false);
         const fileInput = document.getElementById(fileId); const file = fileInput.files[0];
-        if(!file) { 
-            syncTrace("ERROR: No CSV payload selected.", true); 
-            alert("Please select a CSV file first."); 
+        if(!file) {
+            syncTrace("ERROR: No CSV payload selected.", true);
+            alert("Please select a CSV file first.");
             return reject(new Error("No File Selected"));
         }
         syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
@@ -133,9 +133,9 @@ async function processParsedSales(rows, isTestMode = false) {
         let qty = parseFloat(r['Lineitem quantity'] || r['Quantity'] || r['Qty'] || 0);
         let price = parseFloat(r['Lineitem price'] || r['Price'] || r['Item Price'] || 0);
         let rawDate = r['Created at'] || r['Date'] || r['Sale Date'] || new Date().toISOString();
-        
+
         if(!orderId || !skuName || qty <= 0) continue;
-        
+
         // Removed pre-parsing deduplication here so the unified Sandbox Modal can natively display the full matrix for physical layout/formatting review prior to final sync.
 
         let dateStr = "";
@@ -159,7 +159,7 @@ async function processParsedSales(rows, isTestMode = false) {
             tot = parseFloat(String(r['Total'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
             let src = String(r['Source'] || "").trim();
             let bal = parseFloat(String(r['Outstanding Balance'] || r['Balance'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
-            
+
             // Extract Extra ORDERZ Columns strictly on the first row
             let fStatus = String(r['Financial Status'] || "").trim();
             let pfStatus = String(r['Fulfillment Status'] || "").trim();
@@ -173,33 +173,33 @@ async function processParsedSales(rows, isTestMode = false) {
             let paymentMethod = String(r['Payment Method'] || "").trim();
             let riskLevel = String(r['Risk Level'] || "").trim();
             let refundedAmt = parseFloat(String(r['Refunded Amount'] || "0").replace(/[^0-9.-]+/g,"")) || 0;
-            
+
             let hEmail = await hashPII(r['Email'] || "");
             let hPhone = await hashPII(r['Shipping Phone'] || r['Phone'] || r['Billing Phone'] || "");
             let hName = await hashPII(r['Shipping Name'] || r['Billing Name'] || "");
             let hAddr = await hashPII(String(r['Shipping Street'] || r['Shipping Address1'] || "") + String(r['Shipping Zip'] || ""));
-            
-            orderFirstRowFlags[orderId] = { 
+
+            orderFirstRowFlags[orderId] = {
                 hEmail, hPhone, hName, hAddr,
                 firstRowTotal: tot,
                 refundedAmount: refundedAmt,
-                source: src, balance: bal, 
-                fStatus, pfStatus, tags, currency, shippingMethod, 
-                shippingCity, shippingProvince, shippingZip, shippingCountry, paymentMethod, riskLevel 
-            }; 
+                source: src, balance: bal,
+                fStatus, pfStatus, tags, currency, shippingMethod,
+                shippingCity, shippingProvince, shippingZip, shippingCountry, paymentMethod, riskLevel
+            };
         }
 
         let internalName = aliasDB[skuName] || (productsDB[skuName] ? skuName : null);
         if (isTestMode && !internalName) {
             internalName = "[UNMAPPED_SANDBOX_SKU]";
         }
-        
-        pendingSalesRows.push({ 
-            order_id: String(orderId), sale_date: dateStr, storefront_sku: String(skuName), 
-            qty_sold: qty, actual_sale_price: price, internal_recipe_name: internalName, 
+
+        pendingSalesRows.push({
+            order_id: String(orderId), sale_date: dateStr, storefront_sku: String(skuName),
+            qty_sold: qty, actual_sale_price: price, internal_recipe_name: internalName,
             subtotal: subTot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: tot,
             "Source": orderFirstRowFlags[orderId].source, "Outstanding Balance": isFirstRow ? orderFirstRowFlags[orderId].balance : 0,
-            
+
             // Map Extra ORDERZ Elements
             financial_status: orderFirstRowFlags[orderId].fStatus,
             fulfillment_status: orderFirstRowFlags[orderId].pfStatus,
@@ -225,11 +225,11 @@ async function processParsedSales(rows, isTestMode = false) {
                 let oTot = orderFirstRowFlags[orderId].firstRowTotal || 0;
                 let oBal = orderFirstRowFlags[orderId].balance || 0;
                 let lPrice = parseFloat(r['Lineitem price'] || r['Price'] || r['Item Price'] || 0) || parseFloat(r.actual_sale_price) || 0;
-                
+
                 if (oTot === 0 && fStat.toLowerCase() !== 'refunded') return 'NEEDS ATTENTION';
 
 
-                
+
                 // If they technically paid for it but we never shipped it, it was almost certainly a Pre-Ship Exchange or cancellation!
                 if (lFulfill === 'pending' || lFulfill === 'unfulfilled') {
                     if (fStat.toLowerCase() === 'paid') return 'Pre-Ship Exchange';
@@ -247,7 +247,7 @@ async function processParsedSales(rows, isTestMode = false) {
             })(),
             refunded_amount: orderFirstRowFlags[orderId].refundedAmount || 0
         });
-        
+
         if(!internalName) unmapped.add(String(skuName));
     } // End of for loop
 
@@ -255,7 +255,7 @@ async function processParsedSales(rows, isTestMode = false) {
         let uList = Array.from(unmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
         uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
         document.getElementById('unmappedSkusList').innerHTML = h;
-        setMasterStatus("Action Required", "mod-error"); setSysProgress(0, 'working'); return; 
+        setMasterStatus("Action Required", "mod-error"); setSysProgress(0, 'working'); return;
     }
 
     if(pendingSalesRows.length === 0) {
@@ -263,10 +263,10 @@ async function processParsedSales(rows, isTestMode = false) {
         setTimeout(() => showToast("No valid row structures found in this file!"), 10);
         let elUnmapped = document.getElementById('unmappedSkusList');
         if (elUnmapped) elUnmapped.innerHTML = "";
-        
-        setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); 
+
+        setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working');
         let elFile = document.getElementById('salesCsvFile');
-        if (elFile) elFile.value = ""; 
+        if (elFile) elFile.value = "";
         throw new Error("Zero valid structured rows.");
     }
 
@@ -277,26 +277,31 @@ async function processParsedSales(rows, isTestMode = false) {
 function openAliasModal(sku) { document.getElementById('aliasUnknownSku').innerText = sku; document.getElementById('aliasRecipeSelect').value = ""; document.getElementById('aliasModal').style.display = 'flex'; }
 
 async function saveAliasMapping() {
-    let sku = document.getElementById('aliasUnknownSku').innerText; let recipe = document.getElementById('aliasRecipeSelect').value;
-    if(!recipe) { sysLog("Validation Error: No recipe selected for mapping.", true); return alert("Select an internal recipe."); }
-    sysLog(`Mapping ${sku} -> ${recipe}`); setMasterStatus("Saving Alias...", "mod-working");
-    
-    aliasDB[sku] = recipe;
-    const { error } = await supabaseClient.from('storefront_aliases').upsert({ storefront_sku: sku, internal_recipe_name: recipe, platform: 'CSV Import' });
-    if(error) { sysLog(error.message, true); setMasterStatus("Error", "mod-error"); return; }
-    
-    document.getElementById('aliasModal').style.display = 'none'; setMasterStatus("Mapped!", "mod-success");
-    pendingSalesRows.forEach(r => { if(r.storefront_sku === sku) r.internal_recipe_name = recipe; });
-    let stillUnmapped = new Set(); pendingSalesRows.forEach(r => { if(!r.internal_recipe_name) stillUnmapped.add(r.storefront_sku); });
-    
-    if(stillUnmapped.size === 0) executeSalesSync();
-    else {
-        let uList = Array.from(stillUnmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
-        uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
-        let elUnmapped = document.getElementById('unmappedSkusList');
-        if (elUnmapped) elUnmapped.innerHTML = h;
-    }
-    if (typeof renderAliasManager === 'function') renderAliasManager();
+    await executeWithButtonAction('btnSaveAliasMapping', '💾 SAVING...', '✅ MAPPED!', async () => {
+        let sku = document.getElementById('aliasUnknownSku').innerText; let recipe = document.getElementById('aliasRecipeSelect').value;
+        if(!recipe) { sysLog("Validation Error: No recipe selected for mapping.", true); throw new Error("Select an internal recipe."); }
+        sysLog(`Mapping ${sku} -> ${recipe}`); setMasterStatus("Saving Alias...", "mod-working");
+
+        aliasDB[sku] = recipe;
+        const { error } = await supabaseClient.from('storefront_aliases').upsert({ storefront_sku: sku, internal_recipe_name: recipe, platform: 'CSV Import' });
+        if(error) { throw new Error(error.message); }
+
+        document.getElementById('aliasModal').style.display = 'none'; setMasterStatus("Mapped!", "mod-success");
+        pendingSalesRows.forEach(r => { if(r.storefront_sku === sku) r.internal_recipe_name = recipe; });
+        let stillUnmapped = new Set(); pendingSalesRows.forEach(r => { if(!r.internal_recipe_name) stillUnmapped.add(r.storefront_sku); });
+
+        if(stillUnmapped.size === 0) executeSalesSync();
+        else {
+            let uList = Array.from(stillUnmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
+            uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
+            let elUnmapped = document.getElementById('unmappedSkusList');
+            if (elUnmapped) elUnmapped.innerHTML = h;
+        }
+        if (typeof renderAliasManager === 'function') renderAliasManager();
+    }).catch(e => {
+        sysLog(e.message, true); setMasterStatus("Error", "mod-error");
+        if(e.message === "Select an internal recipe.") alert(e.message);
+    });
 }
 
 async function executeSalesSync(isTestMode = false) {
@@ -312,7 +317,7 @@ async function executeSalesSync(isTestMode = false) {
                 let bal = parseFloat(group[0]['Outstanding Balance'] || 0) || parseFloat(group.find(x=>x["Outstanding Balance"])?.["Outstanding Balance"] || 0);
                 if (bal > 0) {
                     let orig = group[0];
-                    let repl = group[group.length - 1]; 
+                    let repl = group[group.length - 1];
                     if (orig && repl) {
                         let oFulfill = String(orig.lineitem_fulfillment_status || "").trim().toLowerCase();
                         let rFulfill = String(repl.lineitem_fulfillment_status || "").trim().toLowerCase();
@@ -339,41 +344,41 @@ async function executeSalesSync(isTestMode = false) {
 
         // Clear execution deduplicator hash per import batch
         window._refundDeductedDB = {};
-        let salesPayload = pendingSalesRows.map(r => { 
+        let salesPayload = pendingSalesRows.map(r => {
             let type = r.transaction_type || 'Standard';
             let cogs = getEngineTrueCogs(r.internal_recipe_name);
             let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
-            
+
             if (type === 'Cancelled') { cogs = 0; }
             if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') { cogs = 0; }
-            
+
             let trueLineCaptured = isCostOnlyItem ? 0 : (r.actual_sale_price * r.qty_sold) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0) - parseFloat(r.discount_amount || 0);
             let outBal = parseFloat(r['Outstanding Balance']) || 0;
             let stripeCaptureTarget = trueLineCaptured - outBal;
-            
+
             let fee = (isCostOnlyItem || type === 'Cancelled') ? 0 : getEngineStripeFee(stripeCaptureTarget, r["Source"]);
-            
+
             const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
             let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (parseFloat(r.shipping || 0) > 0 ? parseFloat(r.shipping) : (SHIP_COST * r.qty_sold));
-            
+
             // Calculate true net strictly honoring the rules.
             let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
             let shipRev = isCostOnlyItem ? 0 : parseFloat(r.shipping || 0);
             let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
             let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
-            
+
             let rawNet = getHistoricalNetProfit(gross, shipRev, taxRev, disc, actualShipCost, r.internal_recipe_name, r.qty_sold, r["Source"]);
             let refAmt = parseFloat(r.refunded_amount) || 0;
             // Erase the cancelled line-item values from the global refund penalty to prevent double-dipping ghost loops
             let voidedRev = voidedRevenueByOrder[r.order_id] || 0;
             let actualDeductibleRefund = Math.max(0, refAmt - voidedRev);
-            
-            let net = rawNet; 
-            
+
+            let net = rawNet;
+
             if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') net = 0;
             if (type === 'Pre-Ship Exchange') net += getEngineTrueCogs(r.internal_recipe_name); // Re-add the true COGS (engine deducted it, but we didn't physically ship this)
             if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') net = 0 - actualShipCost - cogs; // Complete loss
-            
+
             // DEDUPLICATE DATABASE REFUNDS
             if (!window._refundDeductedDB) window._refundDeductedDB = {};
             if (actualDeductibleRefund > 0 && type !== 'Cancelled' && type !== 'IGNORE' && !window._refundDeductedDB[r.order_id]) {
@@ -384,40 +389,40 @@ async function executeSalesSync(isTestMode = false) {
             let cS = Math.round(cogs * 100) / 100;
             let fS = Math.round(fee * 100) / 100;
             let nS = Math.round(net * 100) / 100;
-            
-            return { ...r, cogs_at_sale: cS, transaction_fees: fS, net_profit: nS, transaction_type: type }; 
+
+            return { ...r, cogs_at_sale: cS, transaction_fees: fS, net_profit: nS, transaction_type: type };
         });
 
         // REVENUE TRANSFER BATCH
         let pg = {};
         // DEFENSIVE SHIP COST RESOLVER
         const LOCAL_SHIP = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-        
+
         salesPayload.forEach(x => { if(!pg[x.order_id]) pg[x.order_id] = []; pg[x.order_id].push(x); });
         Object.values(pg).forEach(group => {
             let primes = group.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
             let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
             if (primes.length > 0 && replacements.length > 0) {
                 let u = primes[0]; let r = replacements[0];
-                
+
                 // DECOUPLED PHYSICAL REALITY ACCOUNTING
                 if (u.transaction_type === 'Post-Ship Exchange') {
                     // 1. Shift the purely positive raw revenue component onto the replacement.
                     let uRawRev = (parseFloat(u.actual_sale_price || 0) * parseFloat(u.qty_sold || 0)) + parseFloat(u.shipping || 0) - parseFloat(u.discount_amount || 0);
                     r.net_profit += uRawRev; // Replacement absorbs the pure revenue
-                    
+
                     // 2. Original row loses the revenue (shipped to r), and loses its COGS (restocked), leaving ONLY the pure logistical losses:
                     let activeShipValue = parseFloat(u.shipping || 0) > 0 ? parseFloat(u.shipping || 0) : LOCAL_SHIP;
                     let uStripeValue = parseFloat(u.transaction_fees || 0);
-                    
+
                     let secureNet = 0 - activeShipValue - uStripeValue;
-                    u.net_profit = isNaN(secureNet) ? 0 : secureNet; 
+                    u.net_profit = isNaN(secureNet) ? 0 : secureNet;
                 } else {
                     // Ghost Transfer for Unshipped
-                    r.net_profit += (parseFloat(u.net_profit) || 0); 
-                    u.net_profit = 0; 
+                    r.net_profit += (parseFloat(u.net_profit) || 0);
+                    u.net_profit = 0;
                 }
-                
+
                 r.net_profit = Math.round((parseFloat(r.net_profit) || 0) * 100) / 100;
                 u.net_profit = Math.round((parseFloat(u.net_profit) || 0) * 100) / 100;
             }
@@ -426,77 +431,77 @@ async function executeSalesSync(isTestMode = false) {
         // --------------------------------
 
         syncTrace(`Injecting aggregated Sales Ledger objects to network array...`);
-        
+
         // --- DRY RUN SANDBOX OVERRIDE ---
         if (isTestMode) {
             syncTrace(`🧪 SANDBOX INTERCEPT: Supabase connection physically bypassed.`, true);
             syncTrace(`Payload matrix cleanly routed directly to Global Data Modal.`, false);
             setSysProgress(100, 'success'); setMasterStatus("🧪 Test Parsed!", "mod-success");
-            
+
             if (typeof window.openSandboxModal === 'function') {
                 window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS");
             }
-            
+
             let elFile = document.getElementById('salesCsvFileTest');
             if (elFile) elFile.value = "";
             pendingSalesRows = [];
             setTimeout(()=> { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 4000);
             return;
         }
-        
+
         // --- PRODUCTION MODAL REDIRECT ---
         syncTrace(`▶ Routing Production payload to Modal for final review...`, false);
         setSysProgress(50, 'working'); setMasterStatus("Ready For Review", "mod-success");
         if (typeof window.openSandboxModal === 'function') {
             window.openSandboxModal(salesPayload, "PRODUCTION_SALEZ_SYNC", null, "sales_ledger (Primary)", null, {
                 termId: 'syncProgressTerminal',
-                statId: 'statusOrders', 
+                statId: 'statusOrders',
                 inputNodeId: 'salesCsvFile',
                 resObj: { table: 'sales_ledger', count: salesPayload.length, data: salesPayload },
                 customCommitFn: async () => {
                     syncTrace(`▶ Execution Phase: Sanitizing injection payload for duplicates natively...`, false);
                     let cleanPayload = salesPayload.filter(sp => !salesDB.some(s => s.order_id === String(sp.order_id) && s.storefront_sku === String(sp.storefront_sku)));
                     let duplicatesIgnored = salesPayload.length - cleanPayload.length;
-                    
+
                     if (cleanPayload.length === 0) {
                         syncTrace(`✅ SUCCESS: Safety checks verified ${duplicatesIgnored} duplicates and 0 non-duplicates. Database write bypassed.`, false);
                         setTimeout(() => showToast(`✅ Synced! All items were already securely logged in the database.`), 10);
                         return;
                     }
-                    
+
                     if (duplicatesIgnored > 0) syncTrace(`▶ Filtered ${duplicatesIgnored} duplicates safely. Verified ${cleanPayload.length} pure items. Pushing to Cloud Matrix...`, false);
                     else syncTrace(`▶ Verified ${cleanPayload.length} valid target entities. Pushing to Cloud Matrix...`, false);
-                    
-                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(cleanPayload); 
+
+                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(cleanPayload);
                     if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
                     syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
                     syncTrace(`Transaction successful! Updating dynamic DOM clusters!`);
-                    
-                    cleanPayload.forEach(s => salesDB.unshift(s));  
+
+                    cleanPayload.forEach(s => salesDB.unshift(s));
                     let count = cleanPayload.length;
                     pendingSalesRows = [];
                     let elUnmapped = document.getElementById('unmappedSkusList');
                     if (elUnmapped) elUnmapped.innerHTML = "";
                     syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
-                    
-                    renderSalesTable(); 
-                    renderInventoryTable(); 
+
+                    renderSalesTable();
+                    renderInventoryTable();
                     if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
-                    
+
                     syncTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
                     setTimeout(() => showToast(`✅ Success! ${count} new sales structurally appended.`), 10);
                 }
             });
         }
         return;
-        
+
         // execution now fully deferred to customCommitFn above
-    } catch(e) { 
+    } catch(e) {
         syncTrace(`CRITICAL FAULT: ${e.stack || e.message}`, true);
-        sysLog(e.stack || e.message, true); 
-        setMasterStatus("Sync Error", "mod-error"); 
-        setSysProgress(100, 'error'); 
+        sysLog(e.stack || e.message, true);
+        setMasterStatus("Sync Error", "mod-error");
+        setSysProgress(100, 'error');
         setTimeout(() => showToast("Database Error during Sync:\n\n" + (e.stack || e.message) + "\n\nPlease check your Supabase columns.", 'error'), 10);
     }
 }
@@ -504,13 +509,13 @@ async function executeSalesSync(isTestMode = false) {
 function sortSales(c) { if(isResizing) return; currentSalesSort = { column: c, direction: currentSalesSort.column===c && currentSalesSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentSalesSort', currentSalesSort); renderSalesTable(); }
 
 function renderSalesTable() {
-    let wrap = document.getElementById('salesTableWrap'); 
+    let wrap = document.getElementById('salesTableWrap');
     if(!wrap) return;
-    
+
     // Updated Headers based on System Standard
     let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('d')">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('o')">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('src')">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('sku')">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('int')">Recipe</th> <th class="${currentSalesSort.column==='type'?'sorted-'+currentSalesSort.direction:''}" onclick="sortSales('type')">Type</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('q')">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('p')">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('disc')">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('ship')">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tax')">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('tot')">Total Captured</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('c')">True COGS</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('stripe')">Stripe/eBay</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" onclick="sortSales('net')">Actual Net</th>`;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
-    
+
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
 
     // Pre-calculate Engine stats for sorting and rendering
@@ -521,10 +526,10 @@ function renderSalesTable() {
         let s = parseFloat(x.shipping) || 0;
         let t = parseFloat(x.taxes) || 0;
         let d = parseFloat(x.discount_amount) || 0;
-        
+
         let liveCogs = getEngineTrueCogs(x.internal_recipe_name) * qty;
         let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
-        
+
         // --- CUSTOM EXCEPTION OVERRIDES ---
         if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
             liveCogs = 0;
@@ -532,18 +537,18 @@ function renderSalesTable() {
         if (isCostOnlyItem) {
             p = 0; s = 0; t = 0; d = 0;
         }
-        
+
         // BUGFIX: Base Stripe Fee on True Line Capture, avoiding Shopify's merged Total inflation
         let trueLineCaptured = (p * qty) + s + t - d;
         let stripeFee = isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured, x['Source']);
-        
+
         // --- POWERED BY MASTER ENGINE ---
-        let actualShipCost = type === 'Pre-Ship Exchange' ? 0 : 
+        let actualShipCost = type === 'Pre-Ship Exchange' ? 0 :
                              type === 'IGNORE' ? 0 :
                              type === 'NEEDS ATTENTION' ? 0 :
                              (s > 0 ? s : SHIP_COST); // All valid items cleanly map actual ship cost to what the customer paid, OR default to flat-rate if Free Shipping
         let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
-        
+
         if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
             net = 0;
         } else if (type === 'Pre-Ship Exchange') {
@@ -552,14 +557,14 @@ function renderSalesTable() {
             net = 0 - actualShipCost - liveCogs;
         }
         // --------------------------------
-        
+
         return { ...x, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false, isCostOnlyItem, actualShipCost };
     });
 
     // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
-    
+
     // CALCULATE GHOST REVENUE
     let voidedRevenueByOrder = {};
     Object.values(orderGroups).forEach(group => {
@@ -581,7 +586,7 @@ function renderSalesTable() {
             let refAmt = parseFloat(r.refunded_amount) || 0;
             let voidedRev = voidedRevenueByOrder[r.order_id] || 0;
             let actualDeductibleRefund = Math.max(0, refAmt - voidedRev);
-            
+
             if (actualDeductibleRefund > 0 && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && !refundDeducted) {
                 r.net -= actualDeductibleRefund;
                 r.exchAdj = (r.exchAdj || 0) - actualDeductibleRefund;
@@ -605,33 +610,33 @@ function renderSalesTable() {
         let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
         if (primes.length > 0 && replacements.length > 0) {
             let u = primes[0]; let r = replacements[0];
-            
+
 
             if (u.transaction_type === 'Post-Ship Exchange') {
                 // Physical Reality Decoupling
                 let uRawRev = (parseFloat(u.actual_sale_price || 0) * (parseFloat(u.qty_sold) || 0)) + parseFloat(u.shipping || 0) - parseFloat(u.discount_amount || 0);
-                
+
                 // 1. Shift Customer Payment Revenue to Replacement
                 r.net += (parseFloat(uRawRev) || 0);
-                r.actual_sale_price = u.actual_sale_price; 
+                r.actual_sale_price = u.actual_sale_price;
                 r.discount_amount = u.discount_amount;
                 r.shipping = u.shipping;
                 r.taxes = u.taxes;
-                
+
                 // 2. Original Item is left isolated as a pure loss string (burns ship cost + stripe fee)
-                u.actual_sale_price = 0; 
+                u.actual_sale_price = 0;
                 u.shipping = 0;
                 u.discount_amount = 0;
                 u.taxes = 0;
                 u.liveCogs = 0; // Restocked
-                
+
                 let secureNetLoss = 0 - (parseFloat(u.actualShipCost) || 0) - (parseFloat(u.stripeFee) || 0);
                 u.net = isNaN(secureNetLoss) ? 0 : secureNetLoss;
             } else {
                 // Ghost Transfer for Unshipped (Pre-Ship)
                 r.net += (parseFloat(u.net) || 0);
-                r.stripeFee += (parseFloat(u.stripeFee) || 0); 
-                r.actual_sale_price = u.actual_sale_price; 
+                r.stripeFee += (parseFloat(u.stripeFee) || 0);
+                r.actual_sale_price = u.actual_sale_price;
                 r.discount_amount = u.discount_amount;
                 r.shipping = u.shipping;
 
@@ -644,7 +649,7 @@ function renderSalesTable() {
                 u.actualShipCost = 0;
                 u.liveCogs = 0;
             }
-            
+
             u.isExchanged = true;
         }
 
@@ -659,7 +664,7 @@ function renderSalesTable() {
         if(group.length > 1) {
             let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
             let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
-            
+
             // Fix: We only want to trigger Automated Exchange Logic if an item with $0 line-item price exists, OR it's been manually flagged
             let hasTrueExchangeIndication = group.some(r => r.transaction_type !== 'Standard') || group.some(r => parseFloat(r.actual_sale_price || 0) === 0);
 
@@ -670,11 +675,11 @@ function renderSalesTable() {
                     nonZeroTotal.exchAdj = -orderBalance;
                     zeroTotal.isExchanged = true;
                     nonZeroTotal.isExchanged = true;
-                    
+
                     if (zeroTotal.transaction_type === 'Standard' && nonZeroTotal.transaction_type === 'Standard') {
                         nonZeroTotal.net += nonZeroTotal.liveCogs;
                         nonZeroTotal.net += (SHIP_COST * parseFloat(nonZeroTotal.qty_sold || 0));
-                        nonZeroTotal.liveCogs = 0; 
+                        nonZeroTotal.liveCogs = 0;
                     }
                 }
             }
@@ -691,7 +696,7 @@ function renderSalesTable() {
         let d = parseFloat(x.discount_amount || 0);
         let trueLineCaptured = (p * q) + s + t - d;
         x.localDerivedTotal = trueLineCaptured; // Store for the UI rendering below
-        
+
         totals.gross += isCostOnly ? 0 : (p * q);
         totals.discounts += isCostOnly ? 0 : d;
         totals.captured += isCostOnly ? 0 : (trueLineCaptured + (x.exchAdj || 0));
@@ -700,7 +705,7 @@ function renderSalesTable() {
         totals.stripe += x.stripeFee;
         totals.net += x.net;
         totals.units += (x.transaction_type === 'IGNORE') ? 0 : (parseFloat(x.qty_sold) || 0);
-        
+
         // Track strictly isolated Warranty overhead
         if(x.transaction_type === 'Warranty') {
             totals.burdenUnits += (parseFloat(x.qty_sold) || 0);
@@ -713,21 +718,21 @@ function renderSalesTable() {
     window.salesEngineTotals = totals;
     window.processedSalesDB = a;
     // ----------------------------------
-    
-    if(a.length===0){ 
-        h += "<tr><td colspan='16' style='text-align:center;'>No sales synced yet.</td></tr>"; 
+
+    if(a.length===0){
+        h += "<tr><td colspan='16' style='text-align:center;'>No sales synced yet.</td></tr>";
     } else {
-        a.sort((x,y) => { 
-            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', type:'transaction_type', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', adj:'exchAdj', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'}; 
-            let col = map[currentSalesSort.column]; 
-            let u = x[col]; let v = y[col]; 
-            if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u; 
-            u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); 
-            if(u<v) return currentSalesSort.direction==='asc'?-1:1; 
-            if(u>v) return currentSalesSort.direction==='asc'?1:-1; return 0; 
+        a.sort((x,y) => {
+            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', type:'transaction_type', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', adj:'exchAdj', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'};
+            let col = map[currentSalesSort.column];
+            let u = x[col]; let v = y[col];
+            if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u;
+            u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase();
+            if(u<v) return currentSalesSort.direction==='asc'?-1:1;
+            if(u>v) return currentSalesSort.direction==='asc'?1:-1; return 0;
         });
-        
-        a.forEach(x => { 
+
+        a.forEach(x => {
             let safeSku = String(x.storefront_sku).replace(/'/g, "\\'");
             let netColor = x.net < 0 ? '#ef4444' : '#10b981';
 
@@ -760,11 +765,11 @@ function renderSalesTable() {
             <td class="text-right" style="color:#ef4444; font-weight:bold;">$${x.liveCogs.toFixed(2)}</td>
             <td class="text-right" style="color:#888;">-$${x.stripeFee.toFixed(2)}</td>
             <td class="text-right" style="color:${netColor}; font-weight:900;">$${x.net.toFixed(2)}</td>
-            </tr>`; 
+            </tr>`;
         });
     }
-    
-    wrap.innerHTML = h + `</tbody></table>`; 
+
+    wrap.innerHTML = h + `</tbody></table>`;
     if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
 }
 
@@ -778,9 +783,9 @@ window.updateSaleType = async function(sel, orderId, sku) {
         row.transaction_type = newVal;
         const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
         if(error) { sysLog("DB Error saving type: " + error.message, true); alert("Error saving type: " + error.message); return; }
-        
-        setMasterStatus("Saved!", "mod-success"); 
-        renderSalesTable(); 
+
+        setMasterStatus("Saved!", "mod-success");
+        renderSalesTable();
         if(typeof renderInventoryTable === 'function') renderInventoryTable();
         if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
@@ -795,21 +800,21 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
             dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,""));
             if(isNaN(dbVal)) { cell.innerText = oldValTemp; sysLog("Validation Error: Valid number required for cell edit.", true); return alert("Valid number required."); }
         }
-        if(col === 'order_id' && salesDB.some(s => s.order_id === dbVal && s.storefront_sku === sku && s.order_id !== orderId)) { 
-            cell.innerText = oldValTemp; sysLog("Validation Error: Duplicate Order ID + SKU combo.", true); return alert("This Order ID + SKU combination already exists."); 
+        if(col === 'order_id' && salesDB.some(s => s.order_id === dbVal && s.storefront_sku === sku && s.order_id !== orderId)) {
+            cell.innerText = oldValTemp; sysLog("Validation Error: Duplicate Order ID + SKU combo.", true); return alert("This Order ID + SKU combination already exists.");
         }
-        
+
         sysLog(`Editing Sale ${orderId}: ${col}`); setMasterStatus("Saving...", "mod-working");
         let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku); if(!row) return;
         let oldQty = row.qty_sold; let oldRec = row.internal_recipe_name;
-        
+
         let payload = { [col]: dbVal };
-        
-        const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku); 
+
+        const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku);
         if(error) throw new Error(error.message);
-        
+
         row[col] = dbVal;
-        
+
         if(col === 'qty_sold' || col === 'internal_recipe_name') {
             let invUps = [];
             if(col === 'internal_recipe_name') {
@@ -825,10 +830,10 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
             }
             if(invUps.length > 0) await supabaseClient.from('inventory_consumption').upsert(invUps, {onConflict:'item_key'});
         }
-        
+
         setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000);
-        renderSalesTable(); 
-        renderInventoryTable(); 
+        renderSalesTable();
+        renderInventoryTable();
         if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; alert("Error updating cell: \n" + e.message); }

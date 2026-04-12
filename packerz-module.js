@@ -8,7 +8,7 @@ async function fetchUnfulfilledOrders() {
         if (!supabaseClient) return console.error("Supabase client not initialized.");
         const queueContainer = document.getElementById('packerzAwaitingQueue');
         if (!queueContainer) return;
-        
+
         queueContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-style:italic;">Querying Supabase edge nodes...</div>';
 
         // 1. Fetch exactly the physical rows mathematically marked globally as incomplete
@@ -27,7 +27,7 @@ async function fetchUnfulfilledOrders() {
                 groupedOrders[row.order_id] = {
                     order_id: row.order_id,
                     sale_date: row.sale_date,
-                    customer: 'Shopify Checkout', 
+                    customer: 'Shopify Checkout',
                     items: []
                 };
             }
@@ -54,18 +54,18 @@ async function fetchUnfulfilledOrders() {
             return;
         }
 
-        queueContainer.innerHTML = ''; 
+        queueContainer.innerHTML = '';
 
         // 4. Architect Physical Order Cards in the DOM Container
         const fragment = document.createDocumentFragment();
         distinctOrderIds.forEach(id => {
             const order = groupedOrders[id];
-            
+
             const card = document.createElement('div');
             card.className = 'packerz-order-card';
             card.id = 'packerz-card-' + order.order_id;
             card.style.cssText = 'background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 15px var(--shadow-color); border-left: 1px solid var(--border-color);';
-            
+
             const shortDate = new Date(order.sale_date).toLocaleDateString();
             const itemsPreview = order.items.map(i => `<span style="display:block; margin-top:4px;"><b>${i.qty}x</b> ${i.recipe}</span>`).join('');
 
@@ -78,7 +78,7 @@ async function fetchUnfulfilledOrders() {
                     ${itemsPreview}
                 </div>
             `;
-            
+
             card.onclick = () => openPackerzSopTerminal(order);
             fragment.appendChild(card);
         });
@@ -150,8 +150,8 @@ function openPackerzSopTerminal(orderGroup) {
                     <span style="font-size:10px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">TYPE:</span>
                     ${selectHtml}
                 </div>
-                <button id="qa-btn-${orderGroup.order_id}-${i.sku}" 
-                    class="btn-slate-muted" 
+                <button id="qa-btn-${orderGroup.order_id}-${i.sku}"
+                    class="btn-slate-muted"
                     style="flex-shrink:0; white-space:nowrap;"
                     onclick="loadPackerzActiveSOP('${orderGroup.order_id}', '${i.sku}', '${safeRecipe}')">
                     &#128065; VIEW SOP
@@ -167,18 +167,18 @@ function openPackerzSopTerminal(orderGroup) {
             <h3 style="margin:0; color:#F59E0B; font-size:18px; font-weight:900; letter-spacing:1px;">ACTIVE TARGET: ${orderGroup.order_id}</h3>
             <span style="font-size:11px; font-weight:900; color:var(--text-muted);">${new Date(orderGroup.sale_date).toLocaleDateString()}</span>
         </div>
-        
+
         <p style="font-size:12px; color:var(--text-muted); font-weight:700; margin-bottom:20px;">Review the mandatory Pick-List and clear all SOP QA checks before closing out this active order block.</p>
-        
+
         <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:25px;">
             ${itemsHtml}
         </div>
-        
+
         <button id="btnCompleteAssembly_${orderGroup.order_id}" class="btn-orange-neon" style="width:100%; padding:16px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; font-size:14px; transition:transform 0.2s;">
             AWAITING QA CLEARANCE
         </button>
     </div>`;
-    
+
     validatePackerzAssemblyButton(orderGroup.order_id);
 }
 
@@ -186,7 +186,7 @@ window.updatePackerzItemType = async function(orderId, sku, newVal, safeRecipe) 
     sysLog(`Packerz overriding Sale Type ${orderId}: ${newVal}`);
     const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
     if(error) { alert("Error saving type mapping from Packerz: " + error.message); return; }
-    
+
     // Auto-update local DB if present
     if (typeof salesDB !== 'undefined') {
         let r = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
@@ -198,14 +198,14 @@ function validatePackerzAssemblyButton(orderId) {
     const rows = document.querySelectorAll(`[id^="qa-row-${orderId}-"]`);
     let allPassed = true;
     rows.forEach(r => { if(r.getAttribute('data-qa-passed') !== 'true') allPassed = false; });
-    
+
     const btn = document.getElementById(`btnCompleteAssembly_${orderId}`);
     if(btn) {
         if(allPassed) {
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
             btn.className = 'btn-green-neon';
-            
+
             btn.innerText = 'ASSEMBLY COMPLETE';
             btn.onmouseover = () => btn.style.transform='scale(1.02)';
             btn.onmouseout = () => btn.style.transform='scale(1)';
@@ -214,7 +214,7 @@ function validatePackerzAssemblyButton(orderId) {
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
             btn.className = 'btn-orange-neon';
-            
+
             btn.innerText = 'AWAITING QA CLEARANCE';
             btn.onmouseover = null;
             btn.onmouseout = null;
@@ -239,7 +239,7 @@ window.savePackerzLiveInlineSOP = async function() {
     if(!currentPackerzQaRecipe) return alert("SOP Target Unknown!");
     const btn = document.getElementById('btnSavePackerzInlineSOP');
     if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity="0.5"; }
-    
+
     try {
         let rows = document.querySelectorAll('#packerzLiveInlineRowsWrapper .sop-step-row');
         let stepsArray = [];
@@ -248,7 +248,7 @@ window.savePackerzLiveInlineSOP = async function() {
             let m1t = r.querySelector('.m1-type').value; let m1u = r.querySelector('.m1-url').value;
             let m2t = r.querySelector('.m2-type').value; let m2u = r.querySelector('.m2-url').value;
             let m3t = r.querySelector('.m3-type').value; let m3u = r.querySelector('.m3-url').value;
-            
+
             stepsArray.push({
                 text: richText,
                 m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u}
@@ -266,9 +266,9 @@ window.savePackerzLiveInlineSOP = async function() {
 
         const { error } = await supabaseClient.from('pack_ship_sops').upsert(payload, { onConflict: 'internal_recipe_name' });
         if(error) throw error;
-        
+
         if(btn) { btn.innerText = "💾 SAVED SUCCESSFULLY!"; btn.style.background = "#059669"; }
-        setTimeout(() => { 
+        setTimeout(() => {
             window.isPackerzLiveEditing = false;
             loadPackerzActiveSOP(currentPackerzQaOrderId, currentPackerzQaSku, currentPackerzQaRecipe);
         }, 1200);
@@ -310,7 +310,7 @@ window.renderPackerzLiveInlineTelemetryPreview = function() {
     });
 
     previewContainer.innerHTML = html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`;
-    
+
     if (typeof processTelemetryCanvasRendering === 'function') {
         processTelemetryCanvasRendering(previewContainer);
     }
@@ -321,17 +321,17 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     currentPackerzQaSku = sku;
     currentPackerzQaRecipe = recipe;
     scanConfirmations.clear();
-    
+
     document.getElementById('packerzSopViewerModal').style.display = 'flex';
     document.getElementById('packerzSopViewerTitle').innerHTML = window.isPackerzLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`;
     document.getElementById('packerzSopViewerSubtitle').innerText = `Target Alias: ${sku}`;
-    
+
     // We target the outer wrapper directly when editing so we can overwrite its layout
     const wrapper = document.getElementById('packerzLiveSopSplitWrapper');
     let body = document.getElementById('packerzSopViewerBody');
     let qaList = document.getElementById('packerzSopViewerQAList');
     let btnSignoff = document.getElementById('btnPackerzSopSignoff');
-    
+
     if(!window.isPackerzLiveEditing) {
         // Normal split-pane setup restored strictly
         wrapper.innerHTML = `
@@ -355,7 +355,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         body = document.getElementById('packerzSopViewerBody');
         qaList = document.getElementById('packerzSopViewerQAList');
         btnSignoff = document.getElementById('btnPackerzSopSignoff');
-        
+
         body.innerHTML = `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`;
         qaList.innerHTML = '';
         btnSignoff.style.opacity = '0.5';
@@ -365,7 +365,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         wrapper.innerHTML = `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`;
         btnSignoff.style.display = 'none';
     }
-    
+
     try {
         const { data, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe).single();
         // Allow fallback data if error (so we can create a new one inline)
@@ -373,17 +373,17 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         currentPackerzSopData = instructionJson;
         const steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
         const qaChecks = instructionJson.qaChecks || [];
-        
+
         if(window.isPackerzLiveEditing) {
             let qaText = (qaChecks || []).join('\n');
             let rowsHtml = '';
             steps.forEach((s, idx) => { rowsHtml += generatePackerzEditableSOPRow(s, idx); });
-            
+
             let editHtml = `
             <div style="display:flex; flex-direction:row; gap:15px; width:100%; height:100%; padding:20px; background:var(--bg-body); overflow:hidden;">
                 <!-- Left Pane: Telemetry Editor & Live Preview -->
                 <div id="packerzInlineSopLeftPane" style="flex:0 0 65%; min-width:600px; padding-right:20px; display:flex; flex-direction:row; gap:15px; border-right:1px solid transparent;">
-                    
+
                     <!-- Column 1: Config & Input -->
                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -423,7 +423,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     <div id="packerzLiveInlineRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px; flex-grow:1;">
                         ${rowsHtml}
                     </div>
-                    
+
                     <div style="display:flex; gap:10px; margin-top:20px; padding-top:20px; border-top:1px dashed rgba(255,255,255,0.1);">
                         <button class="btn-green" id="btnSavePackerzInlineSOP" style="padding:10px 25px; font-size:14px; font-weight:900; width:100%;" onclick="if(typeof savePackerzLiveInlineSOP==='function') savePackerzLiveInlineSOP()">💾 SAVE SOP MASTER BLUEPRINT</button>
                     </div>
@@ -434,43 +434,43 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
             setTimeout(() => { if(typeof renderPackerzLiveInlineTelemetryPreview==='function') renderPackerzLiveInlineTelemetryPreview(); }, 150);
             return; // EXIT here so we don't render read-only checkboxes!
         }
-    
+
                  // 1. Render Read-Only Steps
           let h = '';
-          
+
           let getDId = (u) => { let match = (u||'').match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return match ? match[1] : null; };
-          
+
           steps.forEach((s, idx) => {
               let mediaHtml = '';
               [s.m1, s.m2, s.m3].forEach(m => {
                   if(m && m.url) {
                       let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
                       let dId = getDId(m.url);
-                      if (m.type === 'img') { 
-                          mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'img')">`; 
-                      } else { 
+                      if (m.type === 'img') {
+                          mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'img')">`;
+                      } else {
                           let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
                           if (isNativeVid) {
                               mediaHtml += `<div class="media-thumb" style="position:relative; background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
                           } else {
-                              let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl; 
+                              let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
                               if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
-                              mediaHtml += `<div class="media-thumb" style="position:relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`; 
+                              mediaHtml += `<div class="media-thumb" style="position:relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" onclick="if(typeof openMediaModal==='function') openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`;
                           }
                       }
                   }
               });
-              
+
               h += `
               <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; padding:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
                   <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:10px; letter-spacing:1px;">PROCEDURE STEP ${idx+1}</div>
                   <div class="sop-text-rich" style="font-size:15px; line-height:1.5;">${s.text || ''}</div>
                   ${mediaHtml ? `<div style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--border-color); display:flex; gap:15px; flex-wrap:wrap;">${mediaHtml}</div>` : ''}
               </div>`;
-          });         
-        
+          });
+
         if(steps.length === 0) h = `<div style="padding:20px; color:var(--text-muted); font-style:italic;">No visual steps configured. Proceed strictly to QA Checks.</div>`;
-        
+
         if(data.required_box_sku) {
             h = `<div style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; border-radius:12px; padding:20px; margin-bottom:10px;">
                 <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:5px; letter-spacing:1px;">REQUIRED SHIPPING HARNESS</div>
@@ -478,18 +478,18 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
             </div>` + h;
         }
         body.innerHTML = h;
-        
+
         // 2. Render Checkboxes
         if(qaChecks.length === 0) {
             qaList.innerHTML = `<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No custom QA parameters required for this module. Free clear.</div>`;
             checkPackerzSopSignoffState(); // Automatically unlocks button
         } else {
             let html = '';
-            
+
             function parseInputs(text) {
                 return text.replace(/\[INPUT\]/gi, `<input type="text" onclick="event.stopPropagation()" class="packerz-qa-input" placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;" onkeyup="checkPackerzSopSignoffState()">`);
             }
-            
+
             function parseInlineMedia(text) {
                 text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
                     const safe = url.replace(/'/g, "\\'");
@@ -522,11 +522,11 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 });
                 return text;
             }
-            
+
             qaChecks.forEach((line) => {
                 let q = line.trim();
                 if(!q) return;
-                
+
                 // ── [SCAN:itemName] ──────────────────────────────────
                 if (/^\[SCAN:(.+)\]$/i.test(q)) {
                     const itemName = q.match(/^\[SCAN:(.+)\]$/i)[1].trim();
@@ -563,7 +563,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                             <input type="text" class="packerz-qa-input" data-label="${safeLabel}" placeholder="..." style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:11px;" onkeyup="checkPackerzSopSignoffState()">
                         </div>
                     `;
-                } 
+                }
                 else if (q.startsWith('# ')) {
                     let content = parseInlineMedia(parseInputs(q.substring(2).trim()));
                     html += `<div style="font-size:13px; font-weight:900; color:#10b981; margin-top:8px; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:2px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap;">${content}</div>`;
@@ -592,7 +592,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 }
             });
             qaList.innerHTML = html;
-            
+
             // Hydrate scan row QR codes after innerHTML
             if (typeof QRCode !== 'undefined') {
                 document.querySelectorAll('#packerzSopViewerQAList canvas[id^="scan-qr-"]').forEach(el => {
@@ -601,7 +601,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     const value = row ? row.dataset.expected : 'NGZ';
                     QRCode.toCanvas(el, value, { width: 56, margin: 0, color: { dark: '#000', light: '#fff' } }).catch(() => {});
                 });
-                
+
                 // Hydrate inline QR
                 document.querySelectorAll('#packerzSopViewerQAList .sop-qr-canvas').forEach(el => {
                     try {
@@ -611,7 +611,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     } catch(e) {}
                 });
             }
-            
+
             // Hydrate inline Barcodes
             if (typeof JsBarcode !== 'undefined') {
                 document.querySelectorAll('#packerzSopViewerQAList .sop-barcode-svg').forEach(el => {
@@ -626,7 +626,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     }
                 });
             }
-            
+
             checkPackerzSopSignoffState(); // Initial check
         }
 
@@ -643,18 +643,18 @@ function printPackerzSOP() {
             sysLog("No active Packerz SOP data available to print.", true);
             return;
         }
-        
+
         let pName = currentPackerzQaRecipe;
         let steps = currentPackerzSopData.steps || [];
         let qaChecks = currentPackerzSopData.qaChecks || [];
-        
+
         // Safety check
         if(!Array.isArray(steps)) steps = Object.keys(steps).map(k => steps[k]);
         if(!Array.isArray(qaChecks)) qaChecks = Object.keys(qaChecks).map(k => qaChecks[k]);
-        
+
         let html = `<html><head><title>Packing SOP - ${pName}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #F59E0B;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#F59E0B; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px; color:#10b981;} .qa-item{font-weight:bold; font-size:13px; color:#10b981; margin-bottom:5px;} </style></head><body>`;
         html += `<h2>Fulfillment & Packing SOP</h2><h3>Master Recipe: ${pName}</h3><hr>`;
-        
+
         if(qaChecks.length > 0) {
             html += `<h3 style="color:#F59E0B;">MANDATORY QA CHECKS:</h3>`;
             qaChecks.forEach((qa) => {
@@ -662,7 +662,7 @@ function printPackerzSOP() {
             });
             html += `<br><hr>`;
         }
-        
+
         if(steps.length === 0) {
             html += `<p>No visual steps configured. Proceed strictly to QA Checks.</p>`;
         } else {
@@ -671,14 +671,14 @@ function printPackerzSOP() {
                 html += `<div class="step"><strong style="color:#F59E0B; font-size:14px;">Pack Step ${stepCounter++}:</strong><br> ${s.text || ''}</div>`;
             });
         }
-        
+
         html += `</body></html>`;
         let win = window.open('', '', 'width=800,height=600');
         win.document.write(html);
         win.document.close();
         setTimeout(() => win.print(), 500);
-    } catch(e) { 
-        sysLog(`Print Packerz SOP Error: ${e.message}`, true); 
+    } catch(e) {
+        sysLog(`Print Packerz SOP Error: ${e.message}`, true);
     }
 }
 
@@ -686,15 +686,15 @@ function checkPackerzSopSignoffState() {
     const checks = document.querySelectorAll('.packerz-qa-check');
     let allValid = true;
     checks.forEach(c => { if(!c.checked) allValid = false; });
-    
+
     const inputs = document.querySelectorAll('.packerz-qa-input');
     inputs.forEach(i => { if(i.value.trim() === '') allValid = false; });
-    
+
     // Gate on unconfirmed scan rows
     document.querySelectorAll('.packerz-scan-row').forEach(row => {
         if (row.dataset.confirmed !== 'true') allValid = false;
     });
-    
+
     const btnSignoff = document.getElementById('btnPackerzSopSignoff');
     if(allValid) {
         btnSignoff.style.opacity = '1';
@@ -709,7 +709,7 @@ function checkPackerzSopSignoffState() {
 
 async function signoffPackerzQA() {
     if(!currentPackerzQaOrderId || !currentPackerzQaSku) return;
-    
+
     // Snag telemetry object map
     let telemetryData = [];
     document.querySelectorAll('.packerz-qa-check').forEach(c => {
@@ -723,7 +723,7 @@ async function signoffPackerzQA() {
     try {
         if(supabaseClient) {
             const { error: updErr } = await supabaseClient.from('sales_ledger')
-                .update({ 
+                .update({
                     qa_cleared_at: new Date().toISOString()
                 })
                 .eq('order_id', currentPackerzQaOrderId)
@@ -740,27 +740,27 @@ async function signoffPackerzQA() {
     } catch(err) {
         console.warn("Audit tracking mathematically failed on the Edge.", err);
     }
-    
+
     const rowId = `qa-row-${currentPackerzQaOrderId}-${currentPackerzQaSku}`;
     const btnId = `qa-btn-${currentPackerzQaOrderId}-${currentPackerzQaSku}`;
-    
+
     const row = document.getElementById(rowId);
     if(row) {
         row.setAttribute('data-qa-passed', 'true');
         row.style.borderColor = '#10b981';
         row.style.background = 'rgba(16,185,129,0.05)';
-        
+
         let qtyNode = row.querySelector('div:nth-child(2)');
         if(qtyNode) qtyNode.style.boxShadow = '0 0 10px rgba(16,185,129,0.5)';
     }
-    
+
     const btn = document.getElementById(btnId);
     if(btn) {
         btn.innerText = 'QA PASSED ✓';
         btn.className = 'btn-green-neon';
         btn.style.color = 'white';
     }
-    
+
     const capturedOrderId = currentPackerzQaOrderId;
     closePackerzSopViewer();
     validatePackerzAssemblyButton(capturedOrderId);
@@ -775,7 +775,7 @@ function closePackerzSopViewer() {
 
 async function executePackerzCompletion(orderId) {
     if(!confirm(`Are you absolutely sure you want to officially mark Order ${orderId} as completely assembled?`)) return;
-    
+
     try {
         const btn = document.getElementById(`btnCompleteAssembly_${orderId}`);
         if(btn) { btn.innerText = 'SYNCING SUPABASE CLOUD...'; btn.style.opacity = '0.7'; }
@@ -783,7 +783,7 @@ async function executePackerzCompletion(orderId) {
         // 1. Mutate the status flag to Completed globally across all grouped rows & timestamp it
         const { error } = await supabaseClient
             .from('sales_ledger')
-            .update({ 
+            .update({
                 internal_fulfillment_status: 'Completed',
                 assembly_completed_at: new Date().toISOString()
             })
@@ -800,11 +800,11 @@ async function executePackerzCompletion(orderId) {
         if (itemsError) throw itemsError;
 
         let invMap = {};
-        lineItems.forEach(r => { 
+        lineItems.forEach(r => {
             if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
-            let k = `RECIPE:::${r.internal_recipe_name}`; 
-            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); 
-            invMap[k] += r.qty_sold; 
+            let k = `RECIPE:::${r.internal_recipe_name}`;
+            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
+            invMap[k] += r.qty_sold;
         });
         let invPayload = Object.keys(invMap).map(k => {
             if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
@@ -818,13 +818,13 @@ async function executePackerzCompletion(orderId) {
         }
 
         if (typeof renderInventoryTable === 'function') renderInventoryTable();
-        
+
         // 2. Clear Active UI Node
         document.getElementById('packerzActiveQueue').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>';
-        
+
         // 3. Re-Sync Live Queue
         fetchUnfulfilledOrders();
-        
+
 } catch(err) {
         console.error("Completion Error", err);
         alert("CRITICAL ERROR: Failed to close out structural order constraints. \n" + err.message);
@@ -833,7 +833,7 @@ async function executePackerzCompletion(orderId) {
 
 async function unarchivePackerzOrder(orderId) {
     if(!confirm(`Are you absolutely sure you want to UNARCHIVE Order ${orderId} and return it to the active queue?`)) return;
-    
+
     try {
         // 1. Fetch specific line items for this order and structurally refund (upsert) the Inventory ledger
         const { data: lineItems, error: itemsError } = await supabaseClient
@@ -844,11 +844,11 @@ async function unarchivePackerzOrder(orderId) {
         if (itemsError) throw itemsError;
 
         let invMap = {};
-        lineItems.forEach(r => { 
+        lineItems.forEach(r => {
             if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
-            let k = `RECIPE:::${r.internal_recipe_name}`; 
-            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0); 
-            invMap[k] -= r.qty_sold; 
+            let k = `RECIPE:::${r.internal_recipe_name}`;
+            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
+            invMap[k] -= r.qty_sold;
         });
         let invPayload = Object.keys(invMap).map(k => {
             if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
@@ -865,7 +865,7 @@ async function unarchivePackerzOrder(orderId) {
 
         const { error } = await supabaseClient
             .from('sales_ledger')
-            .update({ 
+            .update({
                 internal_fulfillment_status: 'Awaiting Assembly',
                 assembly_completed_at: null
             })
@@ -879,7 +879,7 @@ async function unarchivePackerzOrder(orderId) {
         // Re-Sync Live Queues
         if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
         loadSOPAuditLog();
-        
+
     } catch(err) {
         console.error("Unarchive Error", err);
         alert("CRITICAL ERROR: Failed to unarchive order. \n" + err.message);
@@ -893,13 +893,13 @@ async function unarchivePackerzOrder(orderId) {
 
 // This physically generates the visual BATCHEZ-legacy Rich-Text row arrays
 function generatePackerzEditableSOPRow(s, idx) {
-    let safeText = s.text || ''; 
-    let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; 
-    let m2 = s.m2 || {type: 'img', url: ''}; 
+    let safeText = s.text || '';
+    let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''};
+    let m2 = s.m2 || {type: 'img', url: ''};
     let m3 = s.m3 || {type: 'img', url: ''};
-    
-    let rowGen = (m, n) => { 
-        let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); 
+
+    let rowGen = (m, n) => {
+        let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'");
         return `<div class="media-row">
             <select class="m${n}-type">
                 <option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option>
@@ -907,9 +907,9 @@ function generatePackerzEditableSOPRow(s, idx) {
                 <option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option>
             </select>
             <input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}">
-        </div>`; 
+        </div>`;
     };
-    
+
     return `<div class="sop-step-row" style="display:flex; gap:15px; padding:20px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:12px;">
         <div class="sop-step-movers">
             <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="movePackerzSOPUp(this)">▲</button>
@@ -997,7 +997,7 @@ async function filterPackerzAdminDropdown() {
 function openPackerzAuditLog(sku, telemetryJsonString) {
     let data;
     try { data = JSON.parse(telemetryJsonString); } catch(e) { return alert("Corrupted Audit Log"); }
-    
+
     let h = `
         <div id="packerzAuditOverlay" class="modal-overlay active">
             <div style="background:var(--bg-container); border:1px solid #10b981; border-radius:12px; width:clamp(320px, 90vw, 500px); max-height:90vh; padding:25px; box-shadow:0 10px 40px rgba(16,185,129,0.2); display:flex; flex-direction:column;">
@@ -1008,7 +1008,7 @@ function openPackerzAuditLog(sku, telemetryJsonString) {
                 <div style="font-size:11px; margin-bottom:15px; color:var(--text-muted); font-family:monospace;">Item ID: ${sku}</div>
                 <div style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:5px;">
     `;
-    
+
     data.forEach(d => {
         if(d.type === 'check') {
             h += `<div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-heading); background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);"><span style="color:#10b981; font-size:14px; margin-top:-1px;">✅</span><span>${d.text}</span></div>`;
@@ -1019,7 +1019,7 @@ function openPackerzAuditLog(sku, telemetryJsonString) {
                   </div>`;
         }
     });
-    
+
     h += `</div></div></div>`;
     document.body.insertAdjacentHTML('beforeend', h);
 }
@@ -1192,12 +1192,12 @@ async function loadPackerzSopFromDB() {
         area.innerHTML = "<div style='text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;'>Select a target recipe on the left to begin compiling standard operating procedures.</div>";
         return;
     }
-    
+
     area.innerHTML = "<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching structural SOP payload from Supabase Edge...</div>";
-    
+
     try {
         const { data, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku).single();
-        
+
         let steps = [{}];
         if(data) {
 
@@ -1214,7 +1214,7 @@ async function loadPackerzSopFromDB() {
         let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">`;
         steps.forEach((s, idx) => { h += generatePackerzEditableSOPRow(s, idx); });
         h += `</div>`;
-        
+
         area.innerHTML = h;
 
     } catch(e) {
@@ -1235,11 +1235,8 @@ async function loadPackerzSopFromDB() {
 async function savePackerzSOPToDB() {
     const sku = document.getElementById('packerzAdminRecipeSelect').value;
     if(!sku) return alert("Must select a Recipe first!");
-    
-    const btn = document.getElementById('btnSavePackerzSOP');
-    btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity="0.5";
 
-    try {
+    await executeWithButtonAction('btnSavePackerzSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
         let rows = document.querySelectorAll('#packerzSopEditorRowsWrapper .sop-step-row');
         let stepsArray = [];
         rows.forEach(r => {
@@ -1247,7 +1244,7 @@ async function savePackerzSOPToDB() {
             let m1t = r.querySelector('.m1-type').value; let m1u = r.querySelector('.m1-url').value;
             let m2t = r.querySelector('.m2-type').value; let m2u = r.querySelector('.m2-url').value;
             let m3t = r.querySelector('.m3-type').value; let m3u = r.querySelector('.m3-url').value;
-            
+
             stepsArray.push({
                 text: richText,
                 m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u}
@@ -1265,17 +1262,11 @@ async function savePackerzSOPToDB() {
 
         const { error } = await supabaseClient.from('pack_ship_sops').upsert(payload, { onConflict: 'internal_recipe_name' });
         if(error) throw error;
-        
-        btn.innerText = "💾 SAVED SUCCESSFULLY!";
-        btn.style.background = "#059669";
-        setTimeout(() => { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.background = ""; btn.style.opacity="1"; }, 3000);
-
-    } catch(e) {
+    }).catch(e => {
         console.error(e);
         if(typeof sysLog === 'function') sysLog(`Packerz Save Error: ${e.message}`, true);
         alert("CRITICAL SAVE ERROR: " + e.message);
-        btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.opacity="1";
-    }
+    });
 }
 
 // --- PACKERZ ADMIN: UI Split Pane Resizer ---
@@ -1294,17 +1285,17 @@ function doPackerzSopResize(e) {
     const leftPane = document.getElementById('packerzSopLeftPane');
     const previewCol = document.getElementById('packerzSopPreviewCol');
     if(!wrapper || !leftPane) return;
-    
+
     const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 20; 
-    
+    let newWidth = e.clientX - rect.left - 20;
+
     let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
     let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
-    
+
     let minWidth = 300;
     if(newWidth < minWidth) newWidth = minWidth;
     if(newWidth > maxBound) newWidth = maxBound;
-    
+
     leftPane.style.flex = `0 0 ${newWidth}px`;
     leftPane.style.width = newWidth + 'px';
 }
@@ -1331,17 +1322,17 @@ function doPackerzLiveSopResize(e) {
     const wrapper = document.getElementById('packerzLiveSopSplitWrapper');
     const leftPane = document.getElementById('packerzLiveSopLeftPane') || document.getElementById('packerzInlineSopLeftPane');
     if(!wrapper || !leftPane) return;
-    
+
     const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 20; 
+    let newWidth = e.clientX - rect.left - 20;
     let minWidth = 300;
-    
+
     let isInline = !!document.getElementById('packerzInlineSopLeftPane');
     let maxBound = isInline ? (rect.width * 0.70) : (rect.width - 300);
-    
+
     if(newWidth < minWidth) newWidth = minWidth;
     if(newWidth > maxBound) newWidth = maxBound;
-    
+
     leftPane.style.flex = `0 0 ${newWidth}px`;
     leftPane.style.width = newWidth + 'px';
 }
@@ -1419,7 +1410,7 @@ async function refreshSOPMediaGrid() {
             card.ondrop = (e) => sopHandleDrop(e, fullPath);
             card.onmouseover = () => { card.style.borderColor = '#10b981'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
-            
+
             card.innerHTML = `
                 <div style="font-size:36px;" onclick="navigateSOPMediaFolder('${fullPath.replace(/'/g, "\\'")}')">📁</div>
                 <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" onclick="navigateSOPMediaFolder('${fullPath.replace(/'/g, "\\'")}')">${folder.name}</div>
@@ -1441,7 +1432,7 @@ async function refreshSOPMediaGrid() {
             card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; cursor:grab; transition:all 0.2s; display:flex; flex-direction:column; position:relative;';
             card.onmouseover = () => { card.style.borderColor = '#0ea5e9'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
-            
+
             const contentHtml = isImg
                 ? `<img src="${url}" loading="lazy" style="width:100%; height:110px; object-fit:cover; pointer-events:none;"><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;" title="${file.name}">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`
                 : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; pointer-events:none;">📄</div><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`;
@@ -1507,13 +1498,13 @@ function insertSOPToken(token) {
     const needsNewlineAfter = after.length > 0 && !after.startsWith('\n');
     ta.value = before + (needsNewlineBefore ? '\n' : '') + token + (needsNewlineAfter ? '\n' : '') + after;
     ta.focus();
-    
+
     if (activeSOPTextAreaId === 'packerzAdminQA' && typeof renderPackerzTelemetryPreview === 'function') {
         renderPackerzTelemetryPreview();
     } else if (activeSOPTextAreaId === 'productionAdminQA' && typeof renderProductionTelemetryPreview === 'function') {
         renderProductionTelemetryPreview();
     }
-    
+
     closeSOPMediaPicker();
 }
 
@@ -1558,12 +1549,12 @@ async function sopHandleDrop(e, destFolder) {
     e.preventDefault();
     e.currentTarget.style.borderColor = 'var(--border-color)';
     e.currentTarget.style.backgroundColor = 'var(--bg-panel)';
-    
+
     // Extract custom payload to bypass browser <img> URI-hijacks natively
     let sourcePath = e.dataTransfer.getData('fulfillz-path');
     if(!sourcePath) sourcePath = e.dataTransfer.getData('text/plain');
     if (!sourcePath || destFolder === undefined) return;
-    
+
     // Prevent moving folder into itself etc..
     const fileName = sourcePath.split('/').pop();
     const destPath = destFolder ? `${destFolder}/${fileName}` : fileName;
@@ -1591,7 +1582,7 @@ async function sopHandleDrop(e, destFolder) {
     }
 
     if (finalError) { statusEl.style.color = '#ef4444'; statusEl.innerText = `❌ Move failed: ${finalError}`; return; }
-    
+
     statusEl.style.color = '#10b981';
     statusEl.innerText = `✅ Moved successfully.`;
     setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
@@ -1621,9 +1612,9 @@ async function deleteSOPMedia(path, isFolder) {
     }
 
     const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).remove(pathsToDelete);
-    
+
     if (error) { statusEl.innerText = `❌ Delete failed: ${error.message}`; return; }
-    
+
     statusEl.style.color = '#10b981';
     statusEl.innerText = `✅ Deleted successfully.`;
     setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
@@ -1723,15 +1714,15 @@ async function loadSOPAuditLog() {
                 .from('sales_ledger')
                 .select('order_id, sale_date, assembly_completed_at, internal_fulfillment_status')
                 .in('order_id', orderIds);
-                
+
             let ledgerMap = {};
             if(ledgerData) ledgerData.forEach(row => ledgerMap[row.order_id] = row);
-            
+
             // Filter out ghost archives where the order was unarchived back to Awaiting Assembly
             const validData = rawData.filter(a => {
                 const lp = ledgerMap[a.order_id];
                 if (!lp || lp.internal_fulfillment_status !== 'Completed') return false;
-                
+
                 a._sale_date = lp.sale_date;
                 a._completed_at = lp.assembly_completed_at;
                 return true;
@@ -1749,7 +1740,7 @@ async function loadSOPAuditLog() {
                         items: {}
                     };
                 }
-                
+
                 // Deduplicate item-level snapshots
                 let recipeKey = a.internal_recipe_name;
                 if (!orderGroups[k].items[recipeKey] || new Date(a.qa_passed_at) > new Date(orderGroups[k].items[recipeKey].qa_passed_at)) {
@@ -1814,7 +1805,7 @@ function renderSOPAuditLogRows(rows) {
             const inputs    = telemetry.filter(t => t.type === 'input');
             const passed    = checks.filter(c => c.valid).length;
             const total     = checks.length;
-            
+
             totalChecks += total;
             totalPassed += passed;
             recipeNames.push(item.internal_recipe_name);
@@ -1843,7 +1834,7 @@ function renderSOPAuditLogRows(rows) {
 
         let sumRecipes = recipeNames.join(', ');
         if (sumRecipes.length > 30) sumRecipes = sumRecipes.substring(0, 27) + '...';
-        if (!sumRecipes) sumRecipes = "LEGACY ARCHIVE ITEM"; 
+        if (!sumRecipes) sumRecipes = "LEGACY ARCHIVE ITEM";
         // Note: For orders with 0 QA passed items in sop_archives (e.g. MISC_APPAREL), they wouldn't even appear here anymore because this array is driven by sop_archives explicitly!
 
         return `
