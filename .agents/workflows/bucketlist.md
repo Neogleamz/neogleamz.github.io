@@ -1,7 +1,7 @@
 ---
 name: next_task_auto_branch
 description: "The primary project engine. Automates branching, planning, execution, and documentation for the next item on the Bucket List."
-trigger: "start working on the bucket list, start bucket list, what's next, what's next on the list?"
+trigger: "/next_task_auto_branch"
 ---
 
 # Auto-Branching Execution Workflow
