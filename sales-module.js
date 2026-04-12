@@ -89,22 +89,36 @@ function syncTrace(msg, isErr=false) {
 }
 
 async function processSalesCSV(isTestMode = false) {
-    let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
-    syncTrace("INITIALIZING SYNC PROTOCOL...", false);
-    const fileId = isTestMode ? 'salesCsvFileTest' : 'salesCsvFile';
-    if(isTestMode) syncTrace("🧪 DRY RUN SANDBOX ENGAGED: Bypassing Supabase Connection.", false);
-    const fileInput = document.getElementById(fileId); const file = fileInput.files[0];
-    if(!file) { syncTrace("ERROR: No CSV payload selected.", true); return alert("Please select a CSV file first."); }
-    syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
-    sysLog("Reading Sales CSV..."); setMasterStatus("Parsing...", "mod-working"); setSysProgress(20, 'working');
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(firstSheet, {defval: ""});
-        processParsedSales(rows, isTestMode);
-    };
-    reader.readAsArrayBuffer(file);
+    return new Promise((resolve, reject) => {
+        let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
+        syncTrace("INITIALIZING SYNC PROTOCOL...", false);
+        const fileId = isTestMode ? 'salesCsvFileTest' : 'salesCsvFile';
+        
+        if(isTestMode) syncTrace("🧪 DRY RUN SANDBOX ENGAGED: Bypassing Supabase Connection.", false);
+        const fileInput = document.getElementById(fileId); const file = fileInput.files[0];
+        if(!file) { 
+            syncTrace("ERROR: No CSV payload selected.", true); 
+            alert("Please select a CSV file first."); 
+            return reject(new Error("No File Selected"));
+        }
+        syncTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
+        sysLog("Reading Sales CSV..."); setMasterStatus("Parsing...", "mod-working"); setSysProgress(20, 'working');
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, {defval: ""});
+                fileInput.value = ""; // Reset input so same file can be triggered again
+                await processParsedSales(rows, isTestMode);
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
 }
 
 async function processParsedSales(rows, isTestMode = false) {
@@ -255,7 +269,7 @@ async function processParsedSales(rows, isTestMode = false) {
         return;
     }
 
-    executeSalesSync(isTestMode);
+    await executeSalesSync(isTestMode);
 }
 
 function openAliasModal(sku) { document.getElementById('aliasUnknownSku').innerText = sku; document.getElementById('aliasRecipeSelect').value = ""; document.getElementById('aliasModal').style.display = 'flex'; }
