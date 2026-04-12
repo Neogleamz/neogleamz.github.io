@@ -30,9 +30,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
-### Target: `main`
-*(Epic: Sitewide Security Audit)*
-- [ ] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
+
 
 
 
@@ -147,4 +145,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Competitive Feature Benchmarking)*
 - [x] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
+
+### Target: `main`
+*(Epic: Sitewide Security Audit)*
+- [x] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
 
