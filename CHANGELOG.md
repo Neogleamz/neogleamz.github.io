@@ -1,0 +1,11 @@
+# SK8Lytz Application Changelog
+
+## [1.0.1] - 2026-04-11
+
+### Features & Refactors
+- **Diagnostic Telemetry Upgrade**: Eliminated silent failures across the app. Implemented robust UI traces for database syncing, parser evaluation, and error catching directly to the local application UI nodes rather than hidden debug consoles.
+- **Salez Order Sync Enhancements**: Modified the CSV Parser to bypass raw local deduplication until Post-Sanitation review allows users to securely examine all raw file rows inside the Sandbox Modal visually without overwriting existing data.
+- **UI Architecture Unification**: Formatted the Salez Order Sync UI flex layout and terminal structures to strictly match the visual architecture of the Orderz and Parcelz Engine traces.
+
+### Cleanups & Bug Fixes
+- Restored missing specific progress feedback to all generic operation buttons using `executeWithButtonAction` API routing.
