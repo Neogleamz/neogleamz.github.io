@@ -55,10 +55,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
 
 
-### Target: `main`
-*(Epic: Supabase CLI Repair)*
-- [ ] `chore/supabase-cli-repair` : Repair the local Supabase migration history tracking to re-sync `npx supabase db push` functionality with the remote database without destroying data, resolving the "Remote migration versions not found" tracked mismatches.
-
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
@@ -153,4 +149,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Sitewide Security Audit)*
 - [x] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
+
+### Target: `main`
+*(Epic: Supabase CLI Repair)*
+- [x] `chore/supabase-cli-repair` : Repair the local Supabase migration history tracking to re-sync `npx supabase db push` functionality with the remote database without destroying data, resolving the "Remote migration versions not found" tracked mismatches.
+
 
