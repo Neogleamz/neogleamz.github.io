@@ -747,7 +747,7 @@ window.startCycleCount = async function() {
         html5QrCode = new Html5Qrcode("barcode-reader");
         await html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 12, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+            { fps: 12, qrbox: { width: 250, height: 250 } },
             (decodedText, decodedResult) => {
                 window.onScanSuccess(decodedText);
             },
