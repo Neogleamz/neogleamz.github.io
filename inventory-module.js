@@ -807,6 +807,7 @@ window.onScanSuccess = function(decodedText) {
         let i = inventoryDB[actualKey] || {};
         expectedStock = (catalogCache[actualKey] ? catalogCache[actualKey].totalQty : 0) - (parseFloat(i.consumed_qty) || 0) - (parseFloat(i.scrap_qty) || 0) + (parseFloat(i.manual_adjustment) || 0);
     } else {
+        sysLog(`Barcode Error: Not recognized - ${decodedText}`, true);
         alert("Barcode not recognized in system: " + decodedText);
         if(html5QrCode) html5QrCode.resume();
         return;
@@ -1081,6 +1082,7 @@ window.handleCcMngrTelemetryEdit = async function(el, colIndex) {
     el.style.background = "rgba(16, 185, 129, 0.2)";
     const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'});
     if(error) { 
+        sysLog("DB Error: " + error.message, true);
         alert("DB Error: " + error.message); 
         inventoryDB[rKey][field] = oldDbVal; 
         el.innerText = oldDbVal;
@@ -1095,12 +1097,12 @@ window.handleCcMngrTelemetryEdit = async function(el, colIndex) {
 
 window.saveManualCycleCount = async function(event) {
     let key = document.getElementById('ccMngrItemSelect').value;
-    if(!key) return alert("Please select an item first.");
+    if(!key) { sysLog("Validation Error: No item selected for count.", true); return alert("Please select an item first."); }
     
     let valInput = document.getElementById('ccMngrQtyInput').value;
-    if(valInput === "") return alert("Please enter the physical quantity.");
+    if(valInput === "") { sysLog("Validation Error: Empty quantity entered.", true); return alert("Please enter the physical quantity."); }
     let val = parseFloat(valInput);
-    if(isNaN(val)) return alert("Please enter a valid number.");
+    if(isNaN(val)) { sysLog("Validation Error: Invalid number entered.", true); return alert("Please enter a valid number."); }
     
     let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); 
     let isFgi = rKey.startsWith('RECIPE:::');
@@ -1139,7 +1141,7 @@ window.saveManualCycleCount = async function(event) {
         btn.disabled = false;
     }
     
-    if(error){ alert("DB Error: " + error.message); return; }
+    if(error) { sysLog("DB Error: " + error.message, true); alert("DB Error: " + error.message); return; }
     
     inventoryDB[rKey] = payload;
     window.renderInventoryTable();
@@ -1157,7 +1159,7 @@ window.saveCycleCount = async function() {
     let valInput = document.getElementById('scanner-physical-count').value;
     if(valInput === "") { window.resumeCycleCount(); return; } // just hit cancel effectively or enter empty
     let val = parseFloat(valInput);
-    if(isNaN(val)) return alert("Please enter a valid number");
+    if(isNaN(val)) { sysLog("Validation Error: Invalid scanner number entered.", true); return alert("Please enter a valid number"); }
     
     let key = currentScanKey;
     let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); 
@@ -1184,7 +1186,7 @@ window.saveCycleCount = async function() {
     document.getElementById('scanner-prompt-title').innerText = "Saving...";
     
     const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
-    if(error){ alert("DB Error: " + error.message); document.getElementById('scanner-prompt-title').innerText = currentScanKey; return; }
+    if(error) { sysLog("DB Error: " + error.message, true); alert("DB Error: " + error.message); document.getElementById('scanner-prompt-title').innerText = currentScanKey; return; }
     
     inventoryDB[rKey] = payload;
     window.renderInventoryTable(); window.updateCcMngrStock();
