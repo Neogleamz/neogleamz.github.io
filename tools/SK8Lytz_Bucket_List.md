@@ -27,9 +27,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
-### Target: `main`
-*(Epic: Sitewide Code Quality Audit)*
-- [x] `chore/code-quality-audit` : Perform a full sitewide audit of current coding practices across all JS modules and index.html — cross-reference against industry standard best practices (e.g. event delegation, memory leaks, function scoping, global var hygiene, DOM query caching) and produce a prioritized list of refactor targets.
 
 ### Target: `main`
 *(Epic: Competitive Feature Benchmarking)*
@@ -45,18 +42,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `chore/audit-neogleamz-engine` : Execute `@[/legacy_audit]` against `neogleamz-engine.js` to eradicate technical debt.
 - [ ] `chore/audit-system-tools` : Execute `@[/legacy_audit]` against `system-tools-module.js` to ensure telemetry rules are met.
 - [ ] `chore/audit-system-version` : Execute `@[/legacy_audit]` against `system-version.js` to verify DOM structures and variable scopes.
-- [x] `chore/audit-analytics` : Execute `@[/legacy_audit]` against `analytics-module.js` to ensure telemetry rules are met.
 - [ ] `chore/audit-inventory` : Execute `@[/legacy_audit]` against `inventory-module.js` to verify DOM structures and variable scopes.
 - [ ] `chore/audit-bom` : Execute `@[/legacy_audit]` against `bom-module.js` to eradicate technical debt.
-- [x] `chore/audit-production` : Execute `@[/legacy_audit]` against `production-module.js` to align with strict error handling.
 - [ ] `chore/audit-packerz` : Execute `@[/legacy_audit]` against `packerz-module.js` to bring standards up to modern Vanilla DOM rules.
-- [x] `chore/audit-sales` : Execute `@[/legacy_audit]` against `sales-module.js` to eradicate technical debt.
-- [x] `chore/audit-orders` : Execute `@[/legacy_audit]` against `orders-module.js` to verify DOM structures and variable scopes.
-- [x] `chore/audit-barcodz` : Execute `@[/legacy_audit]` against `barcodz-module.js` to align with strict error handling.
-- [x] `chore/audit-labelz` : Execute `@[/legacy_audit]` against `labelz-module.js` to align with strict error handling.
-- [x] `chore/audit-print` : Execute `@[/legacy_audit]` against `print-module.js` to align with strict error handling.
-- [x] `chore/audit-socialz` : Execute `@[/legacy_audit]` against `socialz-module.js` to eradicate technical debt.
-- [x] `chore/audit-ceo` : Execute `@[/legacy_audit]` against `ceo-module.js` to verify DOM structures and variable scopes.
 
 
 ---
