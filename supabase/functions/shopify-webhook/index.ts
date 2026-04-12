@@ -4,9 +4,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-async function hashPII(rawStr) {
+async function hashPII(rawStr: any) {
     if (rawStr === null || rawStr === undefined) return null;
-    let str = String(rawStr);
+    const str = String(rawStr);
     if (str.trim() === '') return null;
     const msgUint8 = new TextEncoder().encode(str.trim().toLowerCase());
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -28,7 +28,7 @@ async function verifyShopifyWebhook(rawBody: string, hmacHeader: string, secret:
     return base64Signature === hmacHeader;
 }
 
-serve(async (req) => {
+serve(async (req: any) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
   }
@@ -57,49 +57,49 @@ serve(async (req) => {
     }
 
     // 2. Map Shopify Data to Neogleamz `sales_ledger` format
-      let dateStr = order.created_at ? order.created_at.split('T')[0] : new Date().toISOString().split('T')[0];
+      const dateStr = order.created_at ? order.created_at.split('T')[0] : new Date().toISOString().split('T')[0];
       
       // Order level aggregations
-      let ship = parseFloat(order.total_shipping_price_set?.shop_money?.amount || 0);
-      let tax = parseFloat(order.total_tax) || 0;
-      let tot = parseFloat(order.total_price) || 0;
-      let balance = parseFloat(order.total_outstanding) || 0;
-      let fee = (tot * 0.029) + 0.30; // Stripe/Shopify Payments Processing Rate
+      const ship = parseFloat(order.total_shipping_price_set?.shop_money?.amount || 0);
+      const tax = parseFloat(order.total_tax) || 0;
+      const tot = parseFloat(order.total_price) || 0;
+      const balance = parseFloat(order.total_outstanding) || 0;
+      const fee = (tot * 0.029) + 0.30; // Stripe/Shopify Payments Processing Rate
 
-      let ledgerRows: any[] = [];
-      let invUpdates: any[] = []; // Initialize invUpdates here
+      const ledgerRows: any[] = [];
+      const invUpdates: any[] = []; // Initialize invUpdates here
 
-      let orderIdStr = order.name || String(order.id); // Define orderIdStr here
+      const orderIdStr = order.name || String(order.id); // Define orderIdStr here
 
-      let piiEmail = await hashPII(order.email);
-      let piiPhone = await hashPII(order.phone || order.customer?.phone);
-      let piiShipName = await hashPII(order.shipping_address?.name);
-      let piiShipAddr = await hashPII(order.shipping_address?.address1);
+      const piiEmail = await hashPII(order.email);
+      const piiPhone = await hashPII(order.phone || order.customer?.phone);
+      const piiShipName = await hashPII(order.shipping_address?.name);
+      const piiShipAddr = await hashPII(order.shipping_address?.address1);
 
       if(order.line_items) {
-        order.line_items.forEach((item, index) => {
-          let skuName = item.name || item.title;
-          let qty = parseInt(item.quantity) || 1;
-          let price = parseFloat(item.price) || 0;
-          let internalName = aliasMap[skuName] || skuName;
+        order.line_items.forEach((item: any, index: any) => {
+          const skuName = item.name || item.title;
+          const qty = parseInt(item.quantity) || 1;
+          const price = parseFloat(item.price) || 0;
+          const internalName = aliasMap[skuName] || skuName;
           console.log(` -> Mapping SKU: [${skuName}] to Internal Recipe: [${internalName}]`);
 
           // Sum accurate discount allocations for this specific line item to avoid cart-level double-counting
           let lineDiscount = 0;
           if (item.discount_allocations && item.discount_allocations.length > 0) {
-            lineDiscount = item.discount_allocations.reduce((sum, d) => sum + parseFloat(d.amount || 0), 0);
+            lineDiscount = item.discount_allocations.reduce((sum: any, d: any) => sum + parseFloat(d.amount || 0), 0);
           }
 
           // Segregate specific order-level aggregate fees/shipping only onto the FIRST row to perfectly replicate CSV behavior
-          let rowShip = index === 0 ? ship : 0;
-          let rowTax = index === 0 ? tax : 0;
-          let rowFee = index === 0 ? fee : 0;
-          let rowBalance = index === 0 ? balance : 0;
-          let rowCartTotal = index === 0 ? tot : 0;
+          const rowShip = index === 0 ? ship : 0;
+          const rowTax = index === 0 ? tax : 0;
+          const rowFee = index === 0 ? fee : 0;
+          const rowBalance = index === 0 ? balance : 0;
+          const rowCartTotal = index === 0 ? tot : 0;
 
           // Accurately calculate True Net Profit for this specific loop matrix
-          let subtotal = price * qty;
-          let net = subtotal + rowShip + rowTax - lineDiscount - rowFee;
+          const subtotal = price * qty;
+          const net = subtotal + rowShip + rowTax - lineDiscount - rowFee;
 
           ledgerRows.push({
             order_id: orderIdStr,
