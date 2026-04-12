@@ -1,6 +1,7 @@
 ---
-trigger: always_on
+name: semantic_commits
 description: "Strict enforcement of Conventional Commits formatting for all version control operations."
+trigger: "/commits, /git, semantic commits"
 ---
 
 # Semantic Commits Enforcer Rule
