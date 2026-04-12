@@ -869,9 +869,14 @@ window.selectCcMngrItem = function(val, text) {
     window.updateCcMngrStock();
 };
 
+/**
+ * Opens the Cycle Count Manager modal and heavily initializes both 
+ * the custom search dropdown overlay and the native fallback select.
+ */
 window.openCycleCountManager = function() {
     let select = document.getElementById('ccMngrItemSelect');
-    select.innerHTML = '';
+    // Seed the empty default option
+    let baseSelectHtml = '<option value="">-- Choose Item Natively --</option>';
     
     let allProds = Object.keys(productsDB).sort();
     let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
@@ -888,17 +893,30 @@ window.openCycleCountManager = function() {
         label: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🏷️ CUSTOM LABELZ</div>',
         raw: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🔩 RAW MATERIALS</div>'
     };
+
+    let nativeGroups = {
+        retail: '<optgroup label="📦 RETAIL PRODUCTS">',
+        sub: '<optgroup label="⚙️ SUB-ASSEMBLIES">',
+        print: '<optgroup label="🖨️ 3D PRINTS">',
+        label: '<optgroup label="🏷️ CUSTOM LABELZ">',
+        raw: '<optgroup label="🔩 RAW MATERIALS">'
+    };
     
     let mkItem = (val, txt) => {
         let safeVal = String(val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         let safeTxt = String(txt).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         return `<div class="cc-dropdown-item" style="padding:8px 10px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border-color);" onclick="window.selectCcMngrItem('${safeVal}', '${safeTxt}')" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='transparent'">${txt}</div>`;
     };
+
+    let mkOpt = (val, txt) => {
+        let safeVal = String(val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        return `<option value="${safeVal}">${txt}</option>`;
+    };
     
-    retailProds.forEach(k => optGroups.retail += mkItem(`RECIPE:::${k}`, `📦 ${k}`));
-    subProds.forEach(k => optGroups.sub += mkItem(`RECIPE:::${k}`, `⚙️ ${k}`));
-    realPrintProds.forEach(k => optGroups.print += mkItem(`RECIPE:::${k}`, `🖨️ ${k}`));
-    labelProds.forEach(k => optGroups.label += mkItem(`RECIPE:::${k}`, `🏷️ ${k}`));
+    retailProds.forEach(k => { optGroups.retail += mkItem(`RECIPE:::${k}`, `📦 ${k}`); nativeGroups.retail += mkOpt(`RECIPE:::${k}`, `📦 ${k}`); });
+    subProds.forEach(k => { optGroups.sub += mkItem(`RECIPE:::${k}`, `⚙️ ${k}`); nativeGroups.sub += mkOpt(`RECIPE:::${k}`, `⚙️ ${k}`); });
+    realPrintProds.forEach(k => { optGroups.print += mkItem(`RECIPE:::${k}`, `🖨️ ${k}`); nativeGroups.print += mkOpt(`RECIPE:::${k}`, `🖨️ ${k}`); });
+    labelProds.forEach(k => { optGroups.label += mkItem(`RECIPE:::${k}`, `🏷️ ${k}`); nativeGroups.label += mkOpt(`RECIPE:::${k}`, `🏷️ ${k}`); });
     
     // sort raw
     let rawArr = Object.entries(catalogCache).sort((a,b) => {
@@ -909,16 +927,26 @@ window.openCycleCountManager = function() {
     rawArr.forEach(([itemKey, r]) => {
         let n = r.neoName || r.itemName;
         optGroups.raw += mkItem(itemKey, `🔩 ${n}`);
+        nativeGroups.raw += mkOpt(itemKey, `🔩 ${n}`);
     });
+
+    if (retailProds.length > 0) nativeGroups.retail += '</optgroup>';
+    if (subProds.length > 0) nativeGroups.sub += '</optgroup>';
+    if (realPrintProds.length > 0) nativeGroups.print += '</optgroup>';
+    if (labelProds.length > 0) nativeGroups.label += '</optgroup>';
+    if (rawArr.length > 0) nativeGroups.raw += '</optgroup>';
     
     let finalHtml = '';
-    if (retailProds.length > 0) finalHtml += optGroups.retail;
-    if (subProds.length > 0) finalHtml += optGroups.sub;
-    if (realPrintProds.length > 0) finalHtml += optGroups.print;
-    if (labelProds.length > 0) finalHtml += optGroups.label;
-    if (rawArr.length > 0) finalHtml += optGroups.raw;
+    let finalNativeHtml = baseSelectHtml;
+
+    if (retailProds.length > 0) { finalHtml += optGroups.retail; finalNativeHtml += nativeGroups.retail; }
+    if (subProds.length > 0) { finalHtml += optGroups.sub; finalNativeHtml += nativeGroups.sub; }
+    if (realPrintProds.length > 0) { finalHtml += optGroups.print; finalNativeHtml += nativeGroups.print; }
+    if (labelProds.length > 0) { finalHtml += optGroups.label; finalNativeHtml += nativeGroups.label; }
+    if (rawArr.length > 0) { finalHtml += optGroups.raw; finalNativeHtml += nativeGroups.raw; }
     
     document.getElementById('ccMngrDropdown').innerHTML = finalHtml;
+    select.innerHTML = finalNativeHtml;
     window.cachedCcMngrOptions = finalHtml;
     
     let searchEl = document.getElementById('ccMngrSearch');
@@ -934,6 +962,16 @@ window.closeCycleCountManager = function() {
 
 window.updateCcMngrStock = function() {
     let key = document.getElementById('ccMngrItemSelect').value;
+    
+    // Sync the search input if changing from native select natively
+    let searchEl = document.getElementById('ccMngrSearch');
+    if (searchEl && key) {
+        let opt = document.querySelector(`#ccMngrItemSelect option[value="${key.replace(/"/g, '\\"')}"]`);
+        if (opt) searchEl.value = opt.text;
+    } else if (!key && searchEl) {
+        searchEl.value = '';
+    }
+    
     let display = document.getElementById('ccMngrStockDisplay');
     let valEl = document.getElementById('ccMngrStockVal');
     

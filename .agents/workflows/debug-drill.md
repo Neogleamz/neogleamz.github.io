@@ -1,4 +1,4 @@
-﻿---
+---
 name: emergency_debug_drill
 description: "A strict diagnostic workflow that forces the AI to instrument code with logs and form theories before attempting to guess-fix a bug."
 trigger: "debug this:, critical bug:, let's debug"
@@ -18,3 +18,6 @@ When the user invokes "debug this:", "critical bug:", or "let's debug", you must
    - Based ONLY on the pasted logs and the codebase context, output exactly **three** distinct, highly technical theories explaining the root cause.
 5. **Approval Gate (HALT)**: 
    - Wait for the user to select a theory or authorize a fix. Do NOT alter the actual source code logic (beyond removing your injected logs) until explicitly approved.
+6. **Micro-Commit Diagnostic Trace**:
+   - Once the user authorizes a fix attempt, you must implement the change and **instantly commit it locally** using the `fix():` Semantic Commit format (e.g., `git commit -m "fix(module): attempt X to resolve Y"`).
+   - If the fix fails and we try a new approach, **do not amend**. Make the new change and commit it as a new micro-commit. This ensures every attempted fix is permanently recorded in the local version control history to aid in further diagnostic tracing.
