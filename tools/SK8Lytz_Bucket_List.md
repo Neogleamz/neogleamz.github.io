@@ -52,7 +52,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `chore/audit-packerz` : Execute `@[/legacy_audit]` against `packerz-module.js` to bring standards up to modern Vanilla DOM rules.
 - [x] `chore/audit-sales` : Execute `@[/legacy_audit]` against `sales-module.js` to eradicate technical debt.
 - [x] `chore/audit-orders` : Execute `@[/legacy_audit]` against `orders-module.js` to verify DOM structures and variable scopes.
-- [ ] `chore/audit-barcodz` : Execute `@[/legacy_audit]` against `barcodz-module.js` to align with strict error handling.
+- [x] `chore/audit-barcodz` : Execute `@[/legacy_audit]` against `barcodz-module.js` to align with strict error handling.
 - [ ] `chore/audit-labelz` : Execute `@[/legacy_audit]` against `labelz-module.js` to align with strict error handling.
 - [x] `chore/audit-print` : Execute `@[/legacy_audit]` against `print-module.js` to align with strict error handling.
 - [x] `chore/audit-socialz` : Execute `@[/legacy_audit]` against `socialz-module.js` to eradicate technical debt.
