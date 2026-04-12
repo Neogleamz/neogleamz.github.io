@@ -372,6 +372,88 @@ CREATE TABLE IF NOT EXISTS label_designs (
 
 ## 6. Page-by-Page Element Mechanics
 
+### NEXUZ (Hub Landing)
+**1. The Trinity Cards**:
+- The main entry point to the NEXUZ executive console displaying three high-level navigation cards (`IMPORTZ`, `SALEZ`, `BRAINZ`).
+- Displays live, real-time KPI grids (`statImpzSyncs`, `statSalzMap`, `statBrnzSync`, etc.) aggregated from across the system for top-level health monitoring.
+
+### BRAINZ
+**1. Backup & Restore (Data Vault):**
+- **Export Backup:** Triggers a native system operation to compile authoritative snapshots of the cloud database ledgers into a secure, downloadable `.xlsx` physical archive.
+- **Restore Cloud:** Accepts `.xlsx` vault snapshots, providing a visual checklist of which tables to overwrite, and restores the live cloud database to a previous state in the event of corruption.
+
+**2. Force Recalculation:**
+- Manually triggers a complete mathematical reconciliation of all ledger balances. 
+- It sequentially pulls down the entire live database (Operations Ledger, Materials Ledger, etc.), processes every record through the local Master Engine, and verifies alignment. Used to instantly correct mathematical drift or refresh local caching without dangerous overwrites.
+
+### STOCKPILEZ (Hub Landing)
+**1. The Trinity Cards**:
+- The main entry point to the STOCKPILEZ inventory console, featuring `DATAZ`, `EDITZ`, and `STOCKZ`.
+- Displays live, real-time KPI grids tracking logged parcel weights (`statDatazWt`), active components (`statEditzComps`), and raw/FGI valuations (`statStockzFgiVal`).
+
+### DATAZ
+**1. Operations Ledger Terminal:**
+- Contains the central `results` logic wrapper mapping the absolute truth of all inbound stock events, material shipments, and manual additions.
+
+### EDITZ
+**1. Manual Entry Matrix:**
+- Provides a high-speed CRUD interface for injecting specific "Neo Productz" and raw inventory events without requiring an overarching HTML parcel payload.
+- **Auto-Fill Ledger:** Automatically extrapolates existing product profiles based on nomenclature input, dynamically fetching prior multiplier metrics and per-unit costs.
+- Integrates dynamic column toggles (`colToggleContainer`) to customize view density.
+
+### STOCKZ
+**1. The Core Engines:**
+- Features a highly functional split-pane architecture (`stockz-split-container`) simultaneously projecting **Finished Goods Inventory (FGI)** alongside **Raw Component Inventory**. 
+- Uses an immediate DOM-based resizer (`stockz-h-resizer`) so users can scale partitioned views.
+- **Cycle Counts:** Hooks directly into `openCycleCountManager()` for rigorous physical auditing and syncs adjustments.
+- **Velocityz:** Loads the forecasting module (`openVelocityzModal()`) to predict run-out timelines based on historical ingestion and depletion velocity.
+
+### MAKERZ (Hub Landing)
+**1. The Trinity Cards**:
+- The entryway to the Production console, defining `RECIPEZ`, `BATCHEZ`, and `LAYERZ`.
+- Surfaces KPIs on global average margin, active assembly batches, and 3D print scrap rates.
+
+### RECIPEZ
+**1. Bill of Materials (BOM) & Labor Engine:**
+- Permits the explicit definition of internal manufacturing recipes by linking raw `DATAZ` stockpile items to a final FGI target.
+- **Categorization Toggles:** Flags items as `Sub-Assembly`, `3D Print`, or `Label` to dictate how routing logic behaves downstream.
+- **Micro-Economics:** Dynamically calculates total BOM cost using live exact averages from the inventory ledger, then applies `Labor Time` and `Shop Rate` to output true production costs and auto-calculate margin against MSRP/Wholesale values.
+
+### BATCHEZ
+**1. Active Manufacturing Pipeline:**
+- **Work Orders:** Sequences physical assembly into 4 discrete pipeline stages: `Queued`, `Picking Parts`, `In Production`, and `Completed`.
+- **The Pick List:** In the "Picking" stage, operators can print a consolidated Pick List guiding them precisely on what components to pull from physical bins based on target yield.
+- **Scrap & Completion:** Tracks manufacturing defects (`Scrap Tally`) during the Production phase. "Completion" explicitly triggers the database logic to universally deduct the consumed raw materials and inject the final quantity into the FGI ledger.
+
+### LAYERZ
+**1. 3D Print Farm Director:**
+- Dedicated pipeline to isolate the physical machine runtime layer from physical human assembly `BATCHEZ`.
+- Follows a 4-stage pipeline: `Queued`, `Start Print Job`, `Mark as Cleaned`, and `Completed`.
+- Completing a print job correctly deducts raw filament/resin (`DATAZ`) and yields finished printed sub-assemblies for the parent BOM structure.
+
+### FULFILLZ (Hub Landing)
+**1. The Trinity Cards**:
+- The logistical nerve center, surfacing `PACKERZ`, `BARCODZ`, and `LABELZ`.
+- Tracks KPIs related to unfulfilled queue depth, scanner tether connections, and thermal API health.
+
+### PACKERZ
+**1. Quality Assurance Kanban:**
+- **Pipeline Architecture:** Utilizes a rigid left-to-right flow (`AWAITING ASSEMBLY` → `IN PROGRESS`) to prevent fulfillment collision when multiple users are picking.
+- **SOP Administrator:** Features a robust Blueprint Editor (`paneFulfillzSopAdmin`) to construct strict packing guidelines. When an order lands in `IN PROGRESS`, operators are subjected to the mapped SOP, forcing them to physically verify included components before moving to completion.
+- **Completed Orders Archive:** A read-only historical ledger bridging closed Fulfillz events back to the parent Sales metrics.
+
+### BARCODZ
+**1. Global Catalog Spooler:**
+- Maps the total inventory product directory and generates live barcode equivalents natively in the browser via `bwip-js`.
+- **Symbology Matrix:** Supports switching output formats dynamically between `CODE128` (Universal 1D), `QR` (2D Square Camera-ready), and `CODE39` (Alphanumeric 1D) without round-tripping to a server.
+- **Batch Print Spooler:** Users can click multiple items to load them into the `barcodzSpoolList` sidebar, configure the target thermal paper size, and trigger one massive concatenated payload (`executeBatchPrint()`).
+
+### LABELZ
+**1. Thermal Design Engine:**
+- Replaces external subscription software (e.g., Rollo/Dymo designers) with a built-in vector layout tool (`labelzDesignerModal`).
+- Includes a dedicated serialization GUI to mix text, barcodes, and emojis (`labelzDesignerEmojiPicker`).
+- Generated label definitions are saved securely and can be pooled into the global Print Spooler just like `BARCODZ` for unified thermal execution.
+
 ### SALEZ
 **1. The CSV Importer Mechanics:**
 - Parses raw Shopify Order CSV exports directly in the browser via `XLSX.js`. 
@@ -398,6 +480,31 @@ CREATE TABLE IF NOT EXISTS label_designs (
 **3. Engine Trace (The Diagnostics Box):**
 - Because RegEx extraction is highly volatile against external code changes, the module includes a live **Engine Trace** readout below the importer. 
 - During extraction, the engine actively strips away all `tr/td/div` HTML nodes, leaving a purified line-by-line plaintext summary of what the `DOMParser` actually saw. This provides the user with an exact diagnostic window to adjust their custom RegEx patterns without leaving the application.
+
+### REVENUEZ (Hub Landing)
+**1. The Trinity Cards:**
+- The final financial nexus displaying `ORDERZ`, `STATZ`, and `SIMULATORZ`.
+
+### ORDERZ
+**1. Sales Ledger Terminal:**
+- Displays the chronological passive review of all finalized outbound e-commerce sales successfully parsed by the `SALEZ` importer.
+
+### STATZ
+**1. Visual Analytics Engine:**
+- Aggregates top-level financial metrics (`Gross Revenue`, `Pure Net Margin`) derived by deducting the Exact Raw Component values against the incoming CSV order cash flow.
+- Maps interactive `Chart.js` components charting Revenue vs. Profit Trends, Profit Waterfall logic, and Expense Distribution.
+
+### SIMULATORZ (A.I. CFO Executive Terminal)
+**1. Global Master Levers:**
+- Features dynamic range logic sliders (e.g., `Blended CAC`, `Global Affiliate`, `Warranty Return Rate`) to stress-test the margin structure globally.
+- Instantly re-runs the entire `productsDB` against the simulated parameters vs real-world current numbers to output "Test Scenario Net Profit" and "Margin Squeeze" analytics.
+- **Cohort Intelligence:** Tracks `Repeat Customer Rate` and calculates `Average Lifetime Value (LTV)` by mining the previously secured SHA-256 PII hashes, enabling highly accurate customer acquisition cost thresholds.
+
+### SOCIALZ
+**1. Audience Profile Ledger:**
+- The CRM database for mapping Skater personas across multiple regions, skate-styles, and platforms (TikTok, IG, YouTube).
+- Includes dynamic grid generation (`skater-grid`) supporting dual-view layouts (Card vs List), complex multi-select filtering logic (Style tag mapping), and live-sorting functionality.
+- Direct CSV ingestion allows rapid bulk roster scaling.
 
 ## Sales Ledger Mechanics
 **1. Ghost Revenue Immunity (Cancelled/Void Protocol)**: 
