@@ -352,26 +352,25 @@
                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; font-size: 14px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                            <i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} 
                            ${s.region ? `<span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; ${regStyles}">${s.region}</span>` : ''} 
-                           <span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase;" style="${typeClass}">${s.type || ''}</span>
+                           <span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase;" class="${typeClass}">${s.type || ''}</span>
                        </div>
                    </div>
                </div>
                <p style="font-size: 14px; margin-top: 12px; margin-bottom: 16px; min-height: 60px; line-height: 1.5; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p>
-               <div style="border-top: 1px solid var(--border-color); display: block; width: 100%; position: relative; padding-top: 12px; margin-top: auto; min-height: 44px; display:flex; justify-content:space-between; align-items:center;">
-                   <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                       ${s.collabStatus ? `<span style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; text-transform:uppercase; background:rgba(99,102,241,0.1); color:#818cf8;">${s.collabStatus}</span>` : ''}
-                       ${styleList.map(st => `<div style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; text-transform:uppercase; background:var(--bg-input); color:var(--text-muted); border:1px solid var(--border-color);">${st}</div>`).join('')}
-                   </div>
-                   
-                   <div style="position: absolute; left: 50%; transform: translateX(-50%); top: 12px; z-index: 5;">
-                       <div style="padding: 4px 12px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color);">
-                           <span style="font-size: 12px; font-weight: 900; color: #f97316; text-transform: uppercase;">${formatCountShort(s.rawFollowers)} REACH</span>
-                       </div>
-                   </div>
+                <div style="border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; width: 100%; padding-top: 12px; margin-top: auto; gap: 8px;">
+                    <div style="display: flex; flex-wrap: nowrap; gap: 4px; overflow: hidden; flex: 1; max-width: 45%;">
+                        ${s.collabStatus ? `<span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; background:rgba(99,102,241,0.1); color:#818cf8; white-space:nowrap; flex-shrink:0;">${s.collabStatus}</span>` : ''}
+                        ${styleList.map(st => `<div style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; background:var(--bg-input); color:var(--text-muted); border:1px solid var(--border-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${st}</div>`).join('')}
+                    </div>
+                    
+                    <div style="padding: 3px 8px; border-radius: 6px; background: var(--bg-input); border: 1px solid var(--border-color); flex-shrink: 0; display:flex; align-items:center;">
+                        <span style="font-size: 11px; font-weight: 900; color: #f59e0b; text-transform: uppercase;">${formatCountShort(s.rawFollowers)} REACH</span>
+                    </div>
 
-                   <button onclick="editSkater(${originalIndex})" style="font-size: 12px; font-weight: bold; color: var(--text-muted); border:none; background:none; cursor:pointer; margin-left: auto;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='var(--text-muted)'"><i class="fa-solid fa-pen"></i> EDIT</button>
-               </div>
-               </div>
+                    <div style="flex: 1; display: flex; justify-content: flex-end; max-width: 45%;">
+                        <button onclick="editSkater(${originalIndex})" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='#f97316'"><i class="fa-solid fa-pen"></i> EDIT</button>
+                    </div>
+                </div></div>
                <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
                 </div>
