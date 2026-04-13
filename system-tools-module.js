@@ -1448,10 +1448,20 @@ function handleFileSelect(input, isTestMode = false) {
                     setTimeout(()=> { setModuleStatus("statusBackup", "Ready.", "status-idle"); setSysProgress(0,'working'); }, 3000);
                 }
             } else {
-                document.getElementById('restoreCheckboxes').innerHTML = html; 
-                document.getElementById('restorePreview').style.display = 'block';
-                importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Array diverted to visual inspector for approval.`, true, termId);
-                setSysProgress(100, 'success'); setModuleStatus("statusBackup", "⚠️ Waiting for confirmation...", "mod-working"); 
+                if (typeof window.openSandboxModal === 'function') {
+                    importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Array diverted to visual inspector for approval.`, true, termId);
+                    setSysProgress(100, 'success'); setModuleStatus("statusBackup", "⚠️ Waiting for Sync...", "mod-working"); 
+                    
+                    let liveImportContext = {
+                        termId: termId,
+                        statId: "statusBackup",
+                        inputNodeId: input.id,
+                        customCommitFn: async () => {
+                            await executeRestore();
+                        }
+                    };
+                    window.openSandboxModal(pendingRestoreData, `PRODUCTION_BACKUP_TARGETS`, null, `Sandbox Multi-sheet Renderer`, null, liveImportContext);
+                }
             }
         } catch(err) {
             importTrace(`CRITICAL FAULT: ${err.message}`, true, termId);
@@ -1466,26 +1476,20 @@ function handleFileSelect(input, isTestMode = false) {
 
 async function executeRestore() {
     let termId = 'backupProgressTerminal';
-    const checkboxes = document.querySelectorAll('.restore-chk:checked');
-    if(checkboxes.length === 0) { 
-        importTrace(`CRITICAL FAULT: No sheets selected.`, true, termId);
-        sysLog("Validation Error: Backup Restoral aborted, no sheets selected.", true); 
-        return alert("Select at least one sheet."); 
-    }
-    
-    // Boy Scout fix: Using window.confirm correctly but we also need to guard via the UI natively
-    if(!confirm("⚠️ SECURITY VERIFICATION: Overwrite cloud database via Live Restore?")) {
-        importTrace(`🗑️ STAGING ABORTED: User cancelled at firewall.`, true, termId);
-        return;
+    const sheetNames = Object.keys(pendingRestoreData);
+    if(sheetNames.length === 0) { 
+        importTrace(`CRITICAL FAULT: No valid payload memory found.`, true, termId);
+        sysLog("Validation Error: Backup Restoral aborted.", true); 
+        return; 
     }
     
     try {
         setMasterStatus("Restoring...", "mod-working"); setSysProgress(20, 'working');
         importTrace(`▶ Execution Phase: Cloud Upsert initialized. Target: Supabase DB.`, false, termId);
 
-        let iterIdx = 1; let ttlChecks = checkboxes.length;
-        for (let chk of checkboxes) {
-            const sheetName = chk.value; const rawData = pendingRestoreData[sheetName]; 
+        let iterIdx = 1; let ttlChecks = sheetNames.length;
+        for (let sheetName of sheetNames) {
+            const rawData = pendingRestoreData[sheetName]; 
             sysLog(`Restoring sheet: ${sheetName}`);
             
             let tableName = ''; let conflictKey = ''; let parsedData = rawData;
