@@ -1448,20 +1448,10 @@ function handleFileSelect(input, isTestMode = false) {
                     setTimeout(()=> { setModuleStatus("statusBackup", "Ready.", "status-idle"); setSysProgress(0,'working'); }, 3000);
                 }
             } else {
-                if (typeof window.openSandboxModal === 'function') {
-                    importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Array diverted to visual inspector for approval.`, true, termId);
-                    setSysProgress(100, 'success'); setModuleStatus("statusBackup", "⚠️ Waiting for Sync...", "mod-working"); 
-                    
-                    let liveImportContext = {
-                        termId: termId,
-                        statId: "statusBackup",
-                        inputNodeId: input.id,
-                        customCommitFn: async () => {
-                            await executeRestore();
-                        }
-                    };
-                    window.openSandboxModal(pendingRestoreData, `PRODUCTION_BACKUP_TARGETS`, null, `Sandbox Multi-sheet Renderer`, null, liveImportContext);
-                }
+                document.getElementById('restoreCheckboxes').innerHTML = html; 
+                document.getElementById('restorePreview').style.display = 'block';
+                importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Select target sheets to inspect.`, true, termId);
+                setSysProgress(100, 'success'); setModuleStatus("statusBackup", "⚠️ Select targets...", "mod-working"); 
             }
         } catch(err) {
             importTrace(`CRITICAL FAULT: ${err.message}`, true, termId);
@@ -1476,12 +1466,35 @@ function handleFileSelect(input, isTestMode = false) {
 
 async function executeRestore() {
     let termId = 'backupProgressTerminal';
-    const sheetNames = Object.keys(pendingRestoreData);
-    if(sheetNames.length === 0) { 
-        importTrace(`CRITICAL FAULT: No valid payload memory found.`, true, termId);
-        sysLog("Validation Error: Backup Restoral aborted.", true); 
-        return; 
+    const checkboxes = document.querySelectorAll('.restore-chk:checked');
+    if(checkboxes.length === 0) { 
+        importTrace(`CRITICAL FAULT: No sheets selected.`, true, termId);
+        sysLog("Validation Error: Backup Restoral aborted, no sheets selected.", true); 
+        return alert("Select at least one sheet."); 
     }
+    
+    let filteredData = {};
+    for (let chk of checkboxes) {
+        filteredData[chk.value] = pendingRestoreData[chk.value];
+    }
+    
+    if (typeof window.openSandboxModal === 'function') {
+        importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Filtered array diverted to visual inspector.`, true, termId);
+        let liveImportContext = {
+            termId: termId,
+            statId: "statusBackup",
+            inputNodeId: "importBackupFile",
+            customCommitFn: async () => {
+                await commitLiveRestore(filteredData);
+            }
+        };
+        window.openSandboxModal(filteredData, `PRODUCTION_BACKUP_TARGETS`, null, `Sandbox Multi-sheet Renderer`, null, liveImportContext);
+    }
+}
+
+async function commitLiveRestore(dataDict) {
+    let termId = 'backupProgressTerminal';
+    const sheetNames = Object.keys(dataDict);
     
     try {
         setMasterStatus("Restoring...", "mod-working"); setSysProgress(20, 'working');
@@ -1489,7 +1502,7 @@ async function executeRestore() {
 
         let iterIdx = 1; let ttlChecks = sheetNames.length;
         for (let sheetName of sheetNames) {
-            const rawData = pendingRestoreData[sheetName]; 
+            const rawData = dataDict[sheetName]; 
             sysLog(`Restoring sheet: ${sheetName}`);
             
             let tableName = ''; let conflictKey = ''; let parsedData = rawData;
@@ -1530,6 +1543,7 @@ async function executeRestore() {
         sysLog(e.message, true); 
         importTrace(`CRITICAL FAULT DURING UPSERT: ${e.message}`, true, termId);
         setMasterStatus("Restore Error", "mod-error"); 
+        throw e;
     }
 }
 
