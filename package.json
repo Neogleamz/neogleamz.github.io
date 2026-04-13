@@ -5,7 +5,10 @@
   "main": "analytics-module.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "version:bump": "node scripts/bump-system-version.js"
+    "version:bump": "node scripts/bump-system-version.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -20,6 +23,8 @@
   },
   "homepage": "https://github.com/Neogleamz/neogleamz.github.io#readme",
   "devDependencies": {
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.2",
     "supabase": "^2.89.1"
   },
   "dependencies": {

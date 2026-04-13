@@ -21,17 +21,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-
-
-
-
-
-
-
-
-
-
-
+### Target: `epic/agentic-workflow-tooling`
+*(Epic: Agentic Workflow Tooling & QA Automation)*
+- [x] `chore/prettier-eslint-initialization` : Setup a strict `.prettierrc` and `.eslintrc.json` in the root optimized for Vanilla ES6+ Javascript. Add NPM scrips `lint` and `format` so the AI can algorithmically sanitize the codebase and catch syntax errors pre-execution.
+- [ ] `feat/strict-jsdoc-typing` : Do a systematic pass over the core database sync modules (`sales-module.js`, `inventory-module.js`) and inject strict JSDoc typing (`/** @type {...} */`) for core data structures to mathematically prevent AI hallucination of payload shapes.
+- [ ] `feat/automated-test-suite` : Initialize a lightweight, native JavaScript automated testing suite (e.g. Jest or Playwright) that runs against the local `.js` algorithms. Provide the AI with an `npm test` script to autonomously verify complex math (like CFO waterfall algorithms) without bothering the user for manual QA.
 
 ---
 
