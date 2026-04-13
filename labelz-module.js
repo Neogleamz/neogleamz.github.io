@@ -137,15 +137,15 @@ function renderLabelzGrid() {
                             <span style="display:inline-block; font-size:8px; font-weight:800; background:${stockBg}; color:${stockColor}; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">STOCK: ${stockQty}</span>
                         </div>
                         
-                        <!-- Spool Button Top Right (Matched to Barcodz Blue) -->
-                        <button class="btn-blue" onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
+                        <!-- Spool Button Top Right -->
+                        <button class="btn-white" onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                     </div>
                     
                     <!-- Content & Edit Base -->
                     <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
                         <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
                         
-                        <button class="btn-slate-muted" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
+                        <button class="btn-orange" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
                     </div>
                 </div>
             `;
