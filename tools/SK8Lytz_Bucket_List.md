@@ -21,6 +21,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
+### Target: `main`
+*(Epic: Nexuz Importer Cards UI Standardization)*
+- [ ] `style/nexuz-compact-importer-ui` : Refactor the NEXUZ importer cards (Backup & Restore, etc.) to a compact standard layout. Move Title and Description to the same row, shrink action buttons to ~20% size aligned left, and move Engine Traces to the newly freed space on the right to reduce vertical footprint while maintaining 80% trace visibility.
 
 ### Target: `main`
 *(Epic: Sitewide Button UI & Mobile Responsiveness)*
@@ -39,9 +42,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
-### Target: `main`
-*(Epic: Nexuz Importer Cards UI Standardization)*
-- [ ] `style/nexuz-compact-importer-ui` : Refactor the NEXUZ importer cards (Backup & Restore, etc.) to a compact standard layout. Move Title and Description to the same row, shrink action buttons to ~20% size aligned left, and move Engine Traces to the newly freed space on the right to reduce vertical footprint while maintaining 80% trace visibility.
 
 ### Target: `main`
 *(Epic: Backup & Restore Sandbox Style Standardization)*
