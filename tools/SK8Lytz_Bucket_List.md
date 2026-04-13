@@ -38,9 +38,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ### Target: `main`
-*(Epic: Widescreen Header Consolidation)*
-- [x] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
-
+*(Epic: Widescreen Header Consolidation Archive)*
 
 
 
@@ -66,6 +64,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+*(Epic: Widescreen Header Consolidation)*
+- [x] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
+- [x] `feat/pure-flexbox-gui-migration` : Completely rebuilt the global layout engine to utilize 100% fluid flexbox arrays safely mitigating element overlap bugs without absolute CSS overrides.
 
 ### Target: `main`
 *(Epic: Tailwind Modal Migration)*

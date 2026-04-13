@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.0.10] - 2026-04-13
+
+### Features & Refactors
+- **Widescreen Navbar Scroll Integration**: Restructured the top header into a single horizontal row on widescreen displays (>1200px) with dedicated hub tabs (`.tabs`) mapped to freely scroll horizontally via intuitive swiper arrows. System collapses automatically back to a stacked 3-row GUI configuration on smaller viewports.
+- **Pure Flexbox Layout Architecture**: Completely rebuilt the structural GUI engine for global `.pane-header-bar` and `.modal-close-btn` components. Eradicated all structural absolute positioning overrides in favor of a 100% fluid flexbox system. This perfectly mitigates overlapping text layouts and UI element collisions dynamically across the entire web application and internal sandbox modals.
+
 ## [1.0.9] - 2026-04-12
 
 ### Features & Refactors
