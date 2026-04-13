@@ -21,9 +21,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-### Target: `main`
-*(Epic: Nexuz Importer Cards UI Standardization)*
-- [x] `style/nexuz-compact-importer-ui` : Refactor the NEXUZ importer cards (Backup & Restore, etc.) to a compact standard layout. Move Title and Description to the same row, shrink action buttons to ~20% size aligned left, and move Engine Traces to the newly freed space on the right to reduce vertical footprint while maintaining 80% trace visibility.
 
 ### Target: `main`
 *(Epic: Sitewide Button UI & Mobile Responsiveness)*
@@ -43,9 +40,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 
 
-### Target: `main`
-*(Epic: Backup & Restore Sandbox Style Standardization)*
-- [x] `feat/backup-restore-sandbox` : Create a "Cancel" button for when you start a restore in the Brainz. Refactor the Backup & Restore module buttons to match the style/color of the Orders and Parcels Sync importers. Replicate "Test Mode" (Sandbox) functionality and "Normal Mode" so the Restore module has fully working modals and behaviors completely matching the standardized importer templates.
 
 ### Target: `main`
 *(Epic: Socialz Outreach Kanban)*
@@ -163,3 +157,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Sitewide Performance Optimization)*
 - [x] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
+
+### Target: `main`
+*(Epic: Nexuz Importer Cards UI Standardization)*
+- [x] `style/nexuz-compact-importer-ui` : Refactor the NEXUZ importer cards (Backup & Restore, etc.) to a compact standard layout. Move Title and Description to the same row, shrink action buttons to ~20% size aligned left, and move Engine Traces to the newly freed space on the right to reduce vertical footprint while maintaining 80% trace visibility.
+
+### Target: `main`
+*(Epic: Backup & Restore Sandbox Style Standardization)*
+- [x] `feat/backup-restore-sandbox` : Create a "Cancel" button for when you start a restore in the Brainz. Refactor the Backup & Restore module buttons to match the style/color of the Orders and Parcels Sync importers. Replicate "Test Mode" (Sandbox) functionality and "Normal Mode" so the Restore module has fully working modals and behaviors completely matching the standardized importer templates.
