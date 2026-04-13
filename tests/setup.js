@@ -18,6 +18,12 @@ window.catalogCache = {
     "RAW-BOX-S": { totalQty: 1000, avgUnitCost: 1.00, scrapRate: 0.01 }
 };
 
+window.catalogByName = {
+    "PRO-SKATE-WHEEL": { print_time_mins: 120, unit_weight_g: 50, is_3d_print: true },
+    "WHEEL-CORE-ASY": { print_time_mins: 60, unit_weight_g: 20, is_3d_print: true },
+    "RAW-FILAMENT-BLK": { print_time_mins: 0, unit_weight_g: 0, is_3d_print: false }
+};
+
 window.isSubassemblyDB = {
     "WHEEL-CORE-ASY": true
 };
