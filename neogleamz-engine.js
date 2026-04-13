@@ -1,3 +1,19 @@
+/**
+ * @typedef {Object} FullLandedCostRow
+ * @property {number} raw
+ * @property {number} labor
+ * @property {number} total
+ */
+
+/**
+ * @typedef {Object} BomTreeNode
+ * @property {string} [item_key]
+ * @property {string} [di_item_id]
+ * @property {string} [name]
+ * @property {number|string} [quantity]
+ * @property {number|string} [qty]
+ */
+
 // ==========================================
 // SYSTEM CONFIGURATIONS
 // ==========================================
@@ -78,6 +94,35 @@ window.calculateProductBreakdown = function(pName) {
  */
 window.getEngineTrueCogs = function(pName) { return window.calculateProductBreakdown(pName).total; };
 window.calculateProductTotal = window.getEngineTrueCogs;
+
+/**
+ * Recursively computes a flat map of all raw materials needed to produce a recipe.
+ * @param {string} pName - Internal recipe name.
+ * @param {number} [qty=1] - Multiplier.
+ * @returns {Object.<string, number>} key-value pairs of raw material IDs and total quantity required.
+ */
+window.getRawMaterials = function(pName, qty = 1) {
+    let res = {};
+    if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return res;
+
+    const components = productsDB[pName] || [];
+    components.forEach(item => {
+        let key = item?.item_key || item?.di_item_id || item?.name;
+        if (!key) return;
+
+        let compQty = (parseFloat(item?.quantity || item?.qty) || 1) * qty;
+        if (key.startsWith('RECIPE:::')) {
+            let sub = window.getRawMaterials(key.replace('RECIPE:::', ''), compQty);
+            Object.keys(sub).forEach(k => {
+                res[k] = (res[k] || 0) + sub[k];
+            });
+        } else {
+            res[key] = (res[key] || 0) + compQty;
+        }
+    });
+
+    return res;
+};
 
 /**
  * Calculates platform transaction fees based dynamically on the parsed metric configurations.

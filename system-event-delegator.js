@@ -1,3 +1,9 @@
+/**
+ * @typedef {Object} EventMap
+ * @property {string} event_type
+ * @property {string} action_token
+ * @property {Element} target_element
+ */
 
 // ==========================================
 // SYSTEM EVENT DELEGATOR

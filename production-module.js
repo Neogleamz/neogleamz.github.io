@@ -1,3 +1,19 @@
+/**
+ * @typedef {Object} WorkOrderRow
+ * @property {string} wo_id
+ * @property {string} product_name
+ * @property {number} qty
+ * @property {string|null} label
+ * @property {string} status
+ * @property {Object|string} wip_state
+ * @property {Object|string} routing
+ */
+
+/**
+ * @typedef {Object} ProductionSopRow
+ * @property {string} product_name
+ * @property {Object|string} steps
+ */
 // --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
 function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
 function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = `<video src="${url}" style="max-width:100%; max-height:100%; outline:none; box-shadow:0 0 40px rgba(0,0,0,0.5);" controls autoplay controlsList="nodownload"></video>`; } else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }

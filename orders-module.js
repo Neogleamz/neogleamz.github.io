@@ -3,6 +3,19 @@
 // ==============================================
 // Responsible for tracking exact Shopify Orders with expanded metadata
 
+/**
+ * @typedef {Object} OrderzRow
+ * @property {string|number} [order_id]
+ * @property {string} [sale_date]
+ * @property {string} [internal_recipe_name]
+ * @property {string} [storefront_sku]
+ * @property {number} [qty_sold]
+ * @property {string} [shipping_city]
+ * @property {string} [shipping_province]
+ * @property {string} [financial_status]
+ * @property {string} [fulfillment_status]
+ */
+
 let ordersDB = [];
 
 window.initOrderzCore = function() {
