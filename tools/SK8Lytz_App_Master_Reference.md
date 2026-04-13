@@ -127,6 +127,10 @@ Known verified tables currently in active use across the JavaScript modules:
 ---
 
 ## 🛡️ 4. Supabase Disaster Recovery & Backups
+* **Native Client-Side Backups & Sandbox Restoration:** The NEXUZ `Brainz` panel houses a dedicated `Backup & Restore` UI. It allows generating `.xlsx` snapshot exports of all critical ledgers. Furthermore, it enforces a strict 3-stage restoration protocol:
+  1. **Sandbox Staging (` importBackupFileTest `):** Backups must first be uploaded via the Test File input to render in the UI, allowing operators to visually inspect the payload data on screen without writing to the live DB.
+  2. **Table Targeting:** The operator manually selects exactly which tables (e.g. `sales_ledger`, `inventory_consumption`) should be overwritten from the snapshot checkboxes.
+  3. **Live Restore Execution (` click_executeRestore `):** The authoritative execution gate. Warning: This is an unrecoverable overwrite of the live Supabase tables based on the selected `.xlsx` sheets.
 * **Automated Point-in-Time Recovery (PITR):** Supabase inherently takes daily physical database backups. A full catastrophic state can be restored via the Supabase Hub.
 * **Hard Data Exports (Monthly CSV):** Core master ledgers (`sales_ledger`, `inventory_consumption`, `product_recipes`) should be exported manually to CSV once a month and stored in `OneDrive - Neogleamz`. This acts as an un-locked local safety net away from enterprise SAAS constraints.
 * **CLI Migration Sync & Ghost Recovery:** If the remote Database tracks synthetic schemas generated directly from the Supabase Dashboard, `npx supabase db push` will fail with a "Remote migration versions not found" error. To synchronize local tracking without destroying data:
