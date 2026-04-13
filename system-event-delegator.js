@@ -572,6 +572,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_document_getElementById_importBackupFileTest':
                     document.getElementById('importBackupFileTest').click();
                     break;
+                case 'click_sandboxToggleSheet':
+                    if (typeof window.sandboxToggleSheet === 'function') {
+                        window.sandboxToggleSheet(el.getAttribute('data-sheet-name'));
+                    }
+                    break;
+                case 'click_sortSandboxDict':
+                    if (typeof window.sortSandboxDict === 'function') {
+                        window.sortSandboxDict(el.getAttribute('data-sort-col'), el.getAttribute('data-sheet-name'));
+                    }
+                    break;
+                case 'click_sortSandboxModal':
+                    if (typeof window.sortSandboxModal === 'function') {
+                        window.sortSandboxModal(el.getAttribute('data-sort-col'), parseInt(el.getAttribute('data-table-num'), 10));
+                    }
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
@@ -599,6 +614,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'keyup_window_filterCcMngrItems':
                     window.filterCcMngrItems();
+                    break;
+                case 'keyup_sandboxSearch':
+                    if (typeof window.sandboxSearchDict === 'function') {
+                        window.sandboxSearchDict(el.getAttribute('data-sheet-name'), el.value);
+                    }
                     break;
             }
         } catch (error) {

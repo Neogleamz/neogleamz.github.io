@@ -742,6 +742,38 @@ window.openSandboxModal = function(payload, title, payload2=null, table1Title="T
     document.getElementById('sandboxDataModal').style.display = 'flex';
 };
 
+window.sandboxToggleSheet = function(sName) {
+    if (window.__sandboxCollapseStateDict) {
+        window.__sandboxCollapseStateDict[sName] = !window.__sandboxCollapseStateDict[sName];
+        window._renderSandboxModal();
+    }
+};
+
+window.sortSandboxDict = function(col, sName) {
+    if (!window.__sandboxSortStateDict) return;
+    const st = window.__sandboxSortStateDict[sName];
+    if (st.col === col) st.asc = !st.asc;
+    else { st.col = col; st.asc = true; }
+    
+    let arr = window.__sandboxDataDict[sName];
+    arr.sort((a,b) => {
+        let v1 = a[col]; let v2 = b[col];
+        if(typeof v1 === 'string') v1 = v1.toLowerCase();
+        if(typeof v2 === 'string') v2 = v2.toLowerCase();
+        if (v1 < v2) return st.asc ? -1 : 1;
+        if (v1 > v2) return st.asc ? 1 : -1;
+        return 0;
+    });
+    window._renderSandboxModal();
+};
+
+window.sandboxSearchDict = function(sName, term) {
+    if(window.__sandboxSearchStateDict) {
+        window.__sandboxSearchStateDict[sName] = term.toLowerCase();
+        window._renderSandboxModal();
+    }
+};
+
 window.sortSandboxModal = function(col, tableNum=1) {
     let targetData = tableNum === 2 ? window.__sandboxData2 : window.__sandboxData;
     if(!targetData || !targetData.length) return;
@@ -777,9 +809,9 @@ window._renderSandboxModal = function() {
     if ((!payload || payload.length === 0) && !dictPayload) {
         body.innerHTML = "<div style='color:#ef4444; font-weight:bold;'>Error: Evaluated payload array is physically empty.</div>";
     } else {
-        let renderTable = (data, title, tableNum, noSort=false) => {
-            let sortCol = tableNum === 2 ? window.__sandboxSortCol2 : window.__sandboxSortCol;
-            let sortAsc = tableNum === 2 ? window.__sandboxSortAsc2 : window.__sandboxSortAsc;
+        let renderTable = (data, title, tableNum, isDict=false, dictName=null) => {
+            let sortCol = isDict ? window.__sandboxSortStateDict[dictName].col : (tableNum === 2 ? window.__sandboxSortCol2 : window.__sandboxSortCol);
+            let sortAsc = isDict ? window.__sandboxSortStateDict[dictName].asc : (tableNum === 2 ? window.__sandboxSortAsc2 : window.__sandboxSortAsc);
             let cols = Object.keys(data[0] || {}).filter(k => !k.startsWith('_'));
             
             let h = ``;
@@ -799,10 +831,10 @@ window._renderSandboxModal = function() {
                     colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);";
                 }
                 
-                if (noSort) {
-                    h += `<th style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; z-index:10; ${colorRule}" title="${c}">${displayC}</th>`;
+                if (isDict) {
+                    h += `<th data-click="click_sortSandboxDict" data-sort-col="${c}" data-sheet-name="${dictName}" style="padding:10px 15px; position:sticky; top:0; background:rgba(0,0,0,0.8); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
                 } else {
-                    h += `<th data-app-click="sort-sandbox-modal" data-sort-col="${c}" data-table-num="${tableNum}" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
+                    h += `<th data-click="click_sortSandboxModal" data-sort-col="${c}" data-table-num="${tableNum}" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
                 }
             });
             h += `</tr></thead><tbody>`;
@@ -841,10 +873,41 @@ window._renderSandboxModal = function() {
         let finalHtml = ``;
         if (dictPayload) {
             let sheets = Object.keys(dictPayload);
-            sheets.forEach(sName => {
+            sheets.forEach((sName, idx) => {
                 let sData = dictPayload[sName];
                 if (sData && sData.length > 0) {
-                    finalHtml += renderTable(sData, "📄 " + sName.replace(/_/g, ' '), null, true);
+                    let isCollapsed = window.__sandboxCollapseStateDict[sName];
+                    let searchTerm = window.__sandboxSearchStateDict[sName] || "";
+                    
+                    finalHtml += `<div style="margin-bottom:10px; border:1px solid rgba(255,255,255,0.1); border-radius:6px; overflow:hidden;">`;
+                    finalHtml += `<div data-click="click_sandboxToggleSheet" data-sheet-name="${sName}" style="padding:12px 15px; background:var(--bg-panel); cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#10b981; font-weight:bold; font-size:14px;">📄 Page ${idx+1} <span style="color:#64748b; margin:0 8px;">—</span> Database Table: <span style="color:#f59e0b; font-family:monospace; letter-spacing:0.5px;">${sName}</span></span>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:11px; color:#64748b; font-weight:bold;">${sData.length} records</span>
+                            <span style="color:#94a3b8; font-size:14px; font-weight:bold;">${isCollapsed ? '▼' : '▲'}</span>
+                        </div>
+                    </div>`;
+                    
+                    if (!isCollapsed) {
+                        let displayData = sData;
+                        if (searchTerm) {
+                            displayData = sData.filter(r => JSON.stringify(Object.values(r)).toLowerCase().includes(searchTerm));
+                        }
+                        
+                        finalHtml += `<div style="padding:15px; background:rgba(0,0,0,0.3); border-top:1px solid rgba(255,255,255,0.05); overflow-x:auto;">`;
+                        finalHtml += `<div style="margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                            <span style="color:#94a3b8; font-size:11px; font-weight:bold;">🔍 ROW SEARCH:</span>
+                            <input type="text" data-keyup="keyup_sandboxSearch" data-sheet-name="${sName}" value="${searchTerm.replace(/"/g, '&quot;')}" placeholder="Enter keyword to instantly filter array..." style="flex:1; padding:8px 12px; font-size:12px; background:var(--bg-panel); border:1px solid rgba(255,255,255,0.1); border-radius:4px; color:#fff;">
+                        </div>`;
+                        
+                        if (displayData.length > 0) {
+                            finalHtml += renderTable(displayData, null, null, true, sName);
+                        } else {
+                            finalHtml += `<div style="color:#ef4444; font-size:12px; font-weight:bold; padding:20px; text-align:center;">❌ No records within the [${sName}] array matched the real-time search query.</div>`;
+                        }
+                        finalHtml += `</div>`;
+                    }
+                    finalHtml += `</div>`;
                 }
             });
         } else {
