@@ -21,8 +21,8 @@ When the user invokes `/wind-down` (or strongly implies they are ending the sess
 
 3. **Workspace Sanitization (The Big Sync)**:
    - Run `git status` and `git diff` to analyze uncommitted changes.
-   - Present a brief list of the modified files to the user and ask: *"Ready to commit and push these as a WIP end-of-session sync?"*
-   - Upon approval, execute `git add .`, `git commit -m "chore: end of session WIP sync"`, and `git push` (if a remote exists).
+   - Automatically execute `git add .`, `git commit -m "chore: end of session WIP sync"`, and `git push` (if a remote exists) without waiting for explicit user approval to guarantee all final context gets vaulted.
+   - Present a brief list of the modified files to the user that were automatically saved.
 
 4. **The State of the Union (Final SITREP)**:
    - Generate a concise summary of today's achievements.
