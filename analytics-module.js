@@ -1,3 +1,13 @@
+/**
+ * @typedef {Object} TrueNetWaterfallToken
+ * @property {number} gross
+ * @property {number} discounts
+ * @property {number} captured
+ * @property {number} cogs
+ * @property {number} shipping
+ * @property {number} stripe
+ * @property {number} net
+ */
 // --- PROFITABILITY DASHBOARD MODULE ---
 let waterfallChart = null;
 let expenseDoughnut = null;

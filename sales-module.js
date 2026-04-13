@@ -1,3 +1,31 @@
+/**
+ * @typedef {Object} SalesLedgerRow
+ * @property {string|number} order_id
+ * @property {string} sale_date
+ * @property {string} storefront_sku
+ * @property {string} internal_recipe_name
+ * @property {number} qty_sold
+ * @property {number} actual_sale_price
+ * @property {number} subtotal
+ * @property {number} shipping
+ * @property {number} taxes
+ * @property {string} [discount_code]
+ * @property {number} discount_amount
+ * @property {number} total
+ * @property {string} Source
+ * @property {number} [Outstanding Balance]
+ * @property {string} [financial_status]
+ * @property {string} [fulfillment_status]
+ * @property {string} [transaction_type]
+ * @property {number} [cogs_at_sale]
+ * @property {number} [transaction_fees]
+ * @property {number} [net_profit]
+ * @property {string|null} [customer_email_hash]
+ * @property {string|null} [customer_phone_hash]
+ * @property {string|null} [shipping_name_hash]
+ * @property {string|null} [shipping_address_hash]
+ */
+
 async function hashPII(rawStr) {
     try {
         if (rawStr === null || rawStr === undefined) return null;

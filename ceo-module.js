@@ -1,3 +1,13 @@
+/**
+ * @typedef {Object} TrueNetWaterfallToken
+ * @property {number} gross
+ * @property {number} discounts
+ * @property {number} captured
+ * @property {number} cogs
+ * @property {number} shipping
+ * @property {number} stripe
+ * @property {number} net
+ */
 // --- CEO TERMINAL: OPERATION APEX 2.1 ---
 
 let ceoWaterfallChart, ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;

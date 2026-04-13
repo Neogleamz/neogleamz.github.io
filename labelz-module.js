@@ -1,3 +1,10 @@
+/**
+ * @typedef {Object} LabelPayload
+ * @property {string} product_name
+ * @property {string|null} emoji
+ * @property {string|null} label_size
+ * @property {string} canvas_json
+ */
 // ============================================================
 // LABELZ MODULE — Neogleamz Custom Label Manager (Canvas)
 // ============================================================

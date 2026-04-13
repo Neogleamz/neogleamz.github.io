@@ -1,3 +1,12 @@
+/**
+ * @typedef {Object} BomTreeNode
+ * @property {string} [item_key]
+ * @property {string} [di_item_id]
+ * @property {string} [name]
+ * @property {number|string} [quantity]
+ * @property {number|string} [qty]
+ */
+
 window.openBulkAddModal = function() {
     if(!currentProduct) return alert("Please select a product from the sidebar first."); document.getElementById('bulkAddTitle').innerText = currentProduct; bulkAddData = [];
 // --- 6. BULK MODAL ---

@@ -1,3 +1,19 @@
+/**
+ * @typedef {Object} FullLandedCostRow
+ * @property {number} raw
+ * @property {number} labor
+ * @property {number} total
+ */
+
+/**
+ * @typedef {Object} BomTreeNode
+ * @property {string} [item_key]
+ * @property {string} [di_item_id]
+ * @property {string} [name]
+ * @property {number|string} [quantity]
+ * @property {number|string} [qty]
+ */
+
 // ==========================================
 // SYSTEM CONFIGURATIONS
 // ==========================================
