@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.0.9] - 2026-04-12
+
+### Features & Refactors
+- **Nexuz Importer UI Compact Refactor**: Standardized all NEXUZ importer cards (Orderz, Parcelz, Salez, Backup & Restore, Force Recalculation, SKU Alias Manager) into a high-density 2-column flexbox architecture. This structure drastically reduces vertical scroll clearance while retaining 80% Engine Trace visibility horizontally. Formatted text headers for strict visual alignment and updated nomenclature titles for explicit workflow designations (e.g. SUPERBUY ORDERZ, SHOPIFY ORDERZ).
+- **Backup & Restore Sandbox Protocol**: Upgraded the authoritative Database Vault with a 3-stage sandbox protection pipeline. Implemented "Test Mode" UI constraints forcing users to preview raw `.xlsx` inbound payload strings structurally before manually targeting specific operational tables and initiating live destruct/restore sequences. Included functional "Cancel" fallback routing.
+
 ## [1.0.8] - 2026-04-12
 
 ### Features & Refactors
