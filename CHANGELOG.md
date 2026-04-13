@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.0.11] - 2026-04-13
+
+### Features & Refactors
+- **Cohort Simulator Formatting**: Condensed the top 6 KPIs to a single row to save vertical space. Relocated the "View Cohort Intelligence" button to the top right header. Refactored order-count logic to accurately use unique Order IDs instead of raw line items. Expanded the LTV modal to include a 'Total Buyers' stat, enlarged its viewing area, and applied drag-to-sort logic to the data table.
+- **Header Responsive Architecture Patch**: Enforced mathematically perfect flex symmetry while strictly protecting fixed UI elements from leftward-spillage. Replaced manual `min-width` parameters with `min-content` on side containers to guarantee controls are never squeezed beyond physical boundaries. Applied `flex: 1 1 0` symmetrically on the JS wrapper to ensure correct allocation of center horizontal squeeze factor, completely eliminating the tab-overlapping bug on browser resize.
+
 ## [1.0.10] - 2026-04-13
 
 ### Features & Refactors

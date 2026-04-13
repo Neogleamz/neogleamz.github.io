@@ -20,14 +20,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟠 P1 High Priority (Core Features)
-- [ ] `fix/header-responsive-wrap` : Fix header `.top-controls` overlapping with `.tabs` on resize, and prevent them from being cut in half horizontally below 768px due to container height/overflow constraints.
-
+*(No active P1 tasks)*
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
-### Target: `main`
-*(Epic: Cohort Simulator Formatting)*
-- [ ] `feat/cohort-sim-formatting` : Condense top 6 KPIs to a single row to save vertical space. Relocate "View Cohort Intelligence" button to top right header. Fix order-count logic to use unique Order IDs instead of line items. Expand LTV modal to include 'Total Buyers' stat, enlarge it, and apply drag-to-sort logic to the table. Document the new modal standards in the Master Reference.
+*(No active P2 tasks)*
 
 ---
 
@@ -51,6 +48,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+*(Epic: Cohort Simulator Formatting)*
+- [x] `feat/cohort-sim-formatting` : Condensed top 6 KPIs to a single row to save vertical space. Relocated "View Cohort Intelligence" button to top right header. Fixed order-count logic to use unique Order IDs instead of line items. Expanded LTV modal to include 'Total Buyers' stat, enlarged it, and applied drag-to-sort logic to the table. Documented the new modal standards in the Master Reference.
+- [x] `fix/header-responsive-wrap` : Fixed header `.top-controls` overlapping with `.tabs` on resize, enforcing mathematically perfect flex symmetry and min-content boundaries.
 
 ### Target: `main`
 *(Epic: Automated Testing Suite)*
