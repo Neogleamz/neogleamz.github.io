@@ -231,16 +231,16 @@ function renderCeoTerminal() {
         slidersHtml += `
         <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom:8px; cursor:grab; display:flex; flex-direction:column; gap:6px;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                <div style="display:flex; flex-direction:column; gap:6px; font-size: 0.8rem; font-weight:bold;">
-                    <span title="Drag to reorder" style="line-height:1.2;">☰ ${p.name}</span>
-                    <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();" style="width: 80px;">
-                </div>
-                <button class="ceo-remove-btn btn-red-muted" data-remove-idx="${index}" style="padding:4px 6px; font-size:9px; font-weight:bold; cursor:pointer;" title="Remove Product">REMOVE</button>
+                <span title="Drag to reorder" style="line-height:1.2; font-size: 0.8rem; font-weight:bold;">☰ ${p.name}</span>
+                <button class="ceo-remove-btn btn-red-muted" data-remove-idx="${index}" style="flex: 0 0 auto; width: max-content !important; padding: 2px 8px; font-size:10px; font-weight:800; border-radius:4px; border:1px solid #fca5a5; cursor:pointer;" title="Remove Product">REMOVE</button>
             </div>
-            <div style="display:flex; gap:4px;">
-                <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
-                <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
-                <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:4px;">
+                    <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
+                    <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
+                    <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
+                </div>
+                <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();" style="width: 50px; text-align:center; padding: 2px; font-size: 11px;">
             </div>
         </div>`;
     });
