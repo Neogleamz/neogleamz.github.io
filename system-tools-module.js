@@ -738,6 +738,20 @@ window.openSandboxModal = function(payload, title, payload2=null, table1Title="T
     window.__sandboxSortCol2 = null;
     window.__sandboxSortAsc = true;
     window.__sandboxSortAsc2 = true;
+
+    window.__sandboxCollapseStateDict = {};
+    window.__sandboxSortStateDict = {};
+    window.__sandboxSearchStateDict = {};
+
+    let dictPayload = window.__sandboxDataDict;
+    if (dictPayload) {
+        Object.keys(dictPayload).forEach(k => {
+            window.__sandboxCollapseStateDict[k] = true;
+            window.__sandboxSortStateDict[k] = {col: null, asc: true};
+            window.__sandboxSearchStateDict[k] = "";
+        });
+    }
+
     window._renderSandboxModal();
     document.getElementById('sandboxDataModal').style.display = 'flex';
 };
