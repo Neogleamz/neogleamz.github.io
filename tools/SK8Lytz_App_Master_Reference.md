@@ -226,3 +226,7 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 * **Testing Framework**: The webapp relies on **Jest** combined natively with **jest-environment-jsdom** to simulate a browser execution environment from the terminal. 
 * **Zero-Build Compatibility**: This ensures mathematical algorithms (e.g., `calculateProductBreakdown`, True COGS mapping) from the Vanilla `.js` stack can be run instantaneously via `npm test` without needing Webpack, browser drivers, or Node exports.
 * **Mocks Setup**: `tests/setup.js` executes globally before tests, simulating native browser variables (`window.catalogCache`, `window.productsDB`, `window.inventoryDB`, `window.NEOGLEAMZ_CONFIG`) so mathematics execute deterministically during unit tests offline.
+* **Core Suites Established**:
+  1. `math-engine.test.js`: Validates True COGS, 3D Print Times, Stripe/eBay Fees, and Predictive LTV/CAC Metrics.
+  2. `inventory-engine.test.js`: Validates Reorder Point (ROP) math, Trailing Velocity trailing averages, and Safety Stock calculations.
+  3. `sales-engine.test.js`: Validates the complex revenue-shifting logic required to properly calculate the absolute True Net Profit when standard orders are chained to Pre-Ship Exchanges, Post-Ship Refunds, or Warranty claims.
