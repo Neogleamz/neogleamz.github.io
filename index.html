@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.12.1844"></script>
+    <script src="system-version.js?v=v.2026.04.12.2011"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
@@ -9,11 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.1844"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.2011"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.1844"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.2011"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="system-event-delegator.js?v=v.2026.04.12.1844"></script>
+    <script src="system-event-delegator.js?v=v.2026.04.12.2011"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -2407,28 +2407,57 @@
                     <div class="control-panel" style="grid-template-columns: repeat(2, 1fr); gap:15px; margin-bottom:20px;">
                         <!-- 4. Data Vault -->
                         <div class="panel-card" style="border-left: 4px solid #0ea5e9;">
-                            <h3 style="margin:0 0 10px 0; font-size:15px;">☁️ Backup & Restore</h3>
-                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Secure authoritative Cloud snapshots and system restoration.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <button id="btnExportBackup" class="btn-blue" style="width:100%; padding:8px; font-size:12px;" data-click="click_executeExport">⬇️ EXPORT BACKUP</button>
-                                <div style="border-top: 1px solid var(--border-color); padding-top:8px;">
-                                    <input type="file" id="importBackupFile" accept=".xlsx" data-change="change_handleFileSelect_this" style="font-size:10px; width:100%;">
-                                    <div id="restorePreview" style="margin-top: 8px; display: none;">
-                                        <div id="restoreCheckboxes" style="font-size:10px; margin-bottom:8px;"></div>
-                                        <button class="btn-red" data-click="click_executeRestore" style="width:100%; padding:8px; font-size:12px;">🔥 RESTORE CLOUD</button>
+                            <div>
+                                <h3 style="margin:0 0 10px 0; font-size:15px;">☁️ Backup & Restore</h3>
+                                <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Secure authoritative Cloud snapshots and system restoration.</p>
+                                
+                                <button id="btnExportBackup" class="btn-blue" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_executeExport">⬇️ EXPORT BACKUP (.xlsx)</button>
+                                
+                                <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1);">
+                                    <input type="file" id="importBackupFile" accept=".xlsx" style="display:none;" data-change="change_handleFileSelect_this">
+                                    <button class="btn-green" style="width:100%; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_importBackupFile">📦 IMPORT BACKUP FILE</button>
+                                    
+                                    <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed #f59e0b;">
+                                        <h4 style="margin:0 0 8px 0; font-size:12px; color:#f59e0b; letter-spacing:0.5px;">🧪 TEST MODE (SANDBOX)</h4>
+                                        <input type="file" id="importBackupFileTest" accept=".xlsx" style="display:none;" data-change="change_handleFileSelectTest_this">
+                                        <button class="btn-amber-muted" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:8px;" data-click="click_document_getElementById_importBackupFileTest">🧪 INSPECT TEST BACKUP</button>
+                                    </div>
+                                    <div id="statusBackup" class="mod-status" style="display:none; margin-top:10px;">Waiting...</div>
+                                </div>
+                                
+                                <div id="restorePreview" style="margin-top: 12px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; display: none;">
+                                    <div id="restoreCheckboxes" style="font-size:10px; margin-bottom:8px;"></div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button class="btn-red" data-click="click_executeRestore" style="flex:1; padding:10px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border-radius:6px;">🔥 LIVE RESTORE</button>
+                                        <button class="btn-gray" data-click="click_cancelRestore" style="padding:10px; font-size:12px; font-weight:bold; border-radius:6px;">❌ CANCEL</button>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <!-- Engine Trace for Backup/Restore -->
+                            <div style="margin-top:20px; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; min-height:100px; display:flex; flex-direction:column;">
+                                <div style="color:#64748b; font-size:10px; font-family:monospace; margin-bottom:5px;">🔌 Restore Engine Trace</div>
+                                <div id="backupProgressTerminal" style="font-family:monospace; font-size:10px; color:#0ea5e9; display:flex; flex-direction:column; gap:4px; max-height:200px; overflow-y:auto;"></div>
                             </div>
                         </div>
 
                         <!-- 5. Force Recalculation -->
-                        <div class="panel-card master-card" style="border-left: 4px solid #ef4444;">
-                            <h3 style="margin:0 0 10px 0; font-size:15px;">⚙️ Force Recalculation</h3>
-                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Manually trigger a complete mathematical reconciliation of all ledger balances.</p>
-                            <div id="statusMaster" class="status-bar status-idle" style="font-size:13px; padding:10px; margin-bottom:10px;">Ready for sync operations...</div>
-                            <div id="btnCalcWrapper" style="display:none; gap:8px; width:100%;">
-                                <button class="btn-green" id="btnCalc" data-click="click_syncAndCalculate" style="flex:1; padding:12px; font-weight:bold;">↻ FORCE EXACT CALCULATION</button>
-                                <button class="btn-green" data-click="click_alert_FORCE_RECALCULATION_n_nT" style="flex:1; padding:12px; font-weight:bold; background:rgba(34, 197, 94, 0.1); border:1px solid rgba(34, 197, 94, 0.3); color:#22c55e; cursor:help;">ℹ️ READ GUIDE</button>
+                        <div class="panel-card master-card" style="border-left: 4px solid #ef4444; display:flex; flex-direction:column;">
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="margin:0 0 10px 0; font-size:15px;">⚙️ Force Recalculation</h3>
+                                <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Manually trigger a complete mathematical reconciliation of all ledger balances.</p>
+                                <div id="statusMaster" class="status-bar status-idle" style="font-size:13px; padding:10px; margin-bottom:10px;">Ready for sync operations...</div>
+                                <div id="btnCalcWrapper" style="display:none; gap:8px; width:100%;">
+                                    <button class="btn-green" id="btnCalc" data-click="click_syncAndCalculate" style="flex:1; padding:12px; font-weight:bold;">↻ FORCE EXACT CALCULATION</button>
+                                    <button class="btn-green" data-click="click_alert_FORCE_RECALCULATION_n_nT" style="flex:1; padding:12px; font-weight:bold; background:rgba(34, 197, 94, 0.1); border:1px solid rgba(34, 197, 94, 0.3); color:#22c55e; cursor:help;">ℹ️ READ GUIDE</button>
+                                </div>
+                            </div>
+                            <div style="flex-grow: 1; display:flex; flex-direction:column; min-height: 250px;">
+                                <h3 style="margin:0 0 10px 0; font-size:15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top:20px;">🔌 Master Math Engine Trace</h3>
+                                <div style="flex-grow: 1; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; font-family: monospace; font-size: 10px; color: #ef4444;">
+                                    <div style="color:#64748b; margin-bottom: 5px; font-weight:bold;">> SYSTEM_STATUS: AWAITING RECALCULATION TRIGGER</div>
+                                    <div id="recalcProgressTerminal" style="display:flex; flex-direction:column; gap:6px;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3132,7 +3161,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.12.1844"></script>
+    <script src="socialz-module.js?v=v.2026.04.12.2011"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4265,16 +4294,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.12.1844"></script>
-<script src="system-tools-module.js?v=v.2026.04.12.1844"></script>
-<script src="bom-module.js?v=v.2026.04.12.1844"></script>
-<script src="inventory-module.js?v=v.2026.04.12.1844"></script>
-<script src="packerz-module.js?v=v.2026.04.12.1844"></script>
-<script src="production-module.js?v=v.2026.04.12.1844"></script>
-<script src="sales-module.js?v=v.2026.04.12.1844"></script>
-<script src="analytics-module.js?v=v.2026.04.12.1844"></script>
-<script src="ceo-module.js?v=v.2026.04.12.1844"></script>
-<script src="print-module.js?v=v.2026.04.12.1844"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.12.2011"></script>
+<script src="system-tools-module.js?v=v.2026.04.12.2011"></script>
+<script src="bom-module.js?v=v.2026.04.12.2011"></script>
+<script src="inventory-module.js?v=v.2026.04.12.2011"></script>
+<script src="packerz-module.js?v=v.2026.04.12.2011"></script>
+<script src="production-module.js?v=v.2026.04.12.2011"></script>
+<script src="sales-module.js?v=v.2026.04.12.2011"></script>
+<script src="analytics-module.js?v=v.2026.04.12.2011"></script>
+<script src="ceo-module.js?v=v.2026.04.12.2011"></script>
+<script src="print-module.js?v=v.2026.04.12.2011"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4732,18 +4761,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.1844"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.2011"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.1844"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.2011"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.1844"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.2011"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.1844"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.1844"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.1844"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.2011"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.2011"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.2011"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.12.1844"></script>
-    <script src="labelz-module.js?v=v.2026.04.12.1844"></script>
+    <script src="barcodz-module.js?v=v.2026.04.12.2011"></script>
+    <script src="labelz-module.js?v=v.2026.04.12.2011"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100vw; height:100vh; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">

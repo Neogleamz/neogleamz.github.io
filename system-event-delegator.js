@@ -557,6 +557,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_stopCycleCount':
                     stopCycleCount();
                     break;
+                case 'click_executeRestore':
+                    if (typeof executeRestore === 'function') executeRestore();
+                    break;
+                case 'click_cancelRestore':
+                    if (typeof cancelRestore === 'function') cancelRestore();
+                    break;
+                case 'click_executeExport':
+                    if (typeof executeExport === 'function') executeExport();
+                    break;
+                case 'click_document_getElementById_importBackupFile':
+                    document.getElementById('importBackupFile').click();
+                    break;
+                case 'click_document_getElementById_importBackupFileTest':
+                    document.getElementById('importBackupFileTest').click();
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
@@ -829,5 +844,24 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
         }
     }, true);
+
+    document.body.addEventListener('change', function(event) {
+        const el = event.target.closest('[data-change]');
+        if (!el) return;
+        const action = el.getAttribute('data-change');
+        
+        try {
+            switch(action) {
+                case 'change_handleFileSelect_this':
+                    if (typeof handleFileSelect === 'function') handleFileSelect(el, false);
+                    break;
+                case 'change_handleFileSelectTest_this':
+                    if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
+                    break;
+            }
+        } catch (error) {
+            console.error(`[Event Delegator] Error executing ${action} on change:`, error);
+        }
+    }, false);
 
 });
