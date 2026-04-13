@@ -39,7 +39,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Widescreen Header Consolidation)*
-- [ ] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
+- [x] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
 
 
 

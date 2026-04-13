@@ -17,4 +17,5 @@ To prevent the Master Reference from filling up with duplicates, or breaking due
 - **Search Before Write**: NEVER blindly append to the end of the document. You must use `grep_search` or `view_file` to see if the topic (e.g., `0x51 Payload` or `Users Table`) already exists.
 - **Update, Don't Duplicate**: If the topic exists, strictly use native tools like `replace_file_content` to edit that exact section rather than creating a secondary entry.
 - **Strict Headers**: Place your findings under the appropriate structured Markdown heading (e.g., `## BLE Protocols`, `## Database Schemas`, `## Core API Services`). Do NOT use React-specific headers like Context Providers or Hooks.
+- **Pure Flex Compliance**: When documenting UI patterns or architecture, verify that NO rigid structural hacks (like `position: absolute`, fixed dimensions, or negative margins) are included. The architecture documented must align with a 100% fluid Flexbox model.
 - **Prune Old Assumptions**: If your new discovery proves an old note wrong, delete the old incorrect assumption from the reference file entirely.

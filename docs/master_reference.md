@@ -28,7 +28,7 @@ When adding action buttons across the software, you MUST adhere to the global 6-
 
 ### Executive Pane Layout Standards
 - Dashboard module panes **MUST** utilize `<div class="pane-header-bar">` and anchor titles inside `<span class="pane-header-title">`.
-- **Absolute Title Centering:** Elements must strictly use full geometric centering (`left: 50%; top: 50%; transform: translate(-50%, -50%);`).
+- **Pure Flex Fluid Headers:** UI titles must natively flow as standard flex items and are strictly forbidden from utilizing `position: absolute` or static translation hacks. The header must dynamically wrap contents to prevent UI collisions during scaling.
 - Structural wrappers handling internal core content **MUST NOT** deploy full horizontal boundaries beneath the pane index. The intended look is a borderless, floating content area.
 - Do NOT use empty HTML `<div>` elements as visual spacers or layout controls. Responsive padding should be configured centrally via CSS `clamp()` bounds.
 

@@ -24,3 +24,8 @@ When instructed to build UI logic, manipulate rendering, or attach interactions 
 4. **DOM Mutation Techniques**:
    - For simple text changes: Use `element.textContent`.
    - For injecting complex dynamic fragments: Use `element.insertAdjacentHTML()` over heavy `.innerHTML` wipes to maintain speed and preserve state in adjacent elements.
+
+5. **Pure Flex Architecture (No Rigid Hacks)**:
+   - You MUST design every page, modal, popup, text element, and button as purely fluid and dynamically scalable using Native Flexbox (`display: flex`).
+   - You are explicitly FORBIDDEN from using `position: absolute`, fixed height integers (`height: 26px`), or negative margins to forcefully center structural UI elements.
+   - Trust natural document flow: use `justify-content` and `align-items` uniformly, and allow containers to gracefully wrap into new rows or columns when squeezed on mobile viewports.
