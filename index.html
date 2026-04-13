@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.12.2054"></script>
+    <script src="system-version.js?v=v.2026.04.12.2057"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
@@ -9,11 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.2054"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.2057"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.2054"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.2057"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="system-event-delegator.js?v=v.2026.04.12.2054"></script>
+    <script src="system-event-delegator.js?v=v.2026.04.12.2057"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -2285,9 +2285,10 @@
                     <div class="control-panel" style="grid-template-columns: repeat(2, 1fr); gap:15px; margin-bottom:20px; align-items: stretch;">
                         <!-- 1. Orders Full Pane -->
                         <div class="panel-card" style="border: 1px solid #38bdf8; border-left: 4px solid #38bdf8; display:flex; flex-direction:column;">
-                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <h3 style="margin:0; font-size:14px; text-transform:uppercase;">📦 Orderz Sync</h3>
-                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:right;">Import the complete .HTML pages from superbuy</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">📦 Orderz Sync</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">Import the complete .HTML pages from superbuy</p>
+                                <div style="flex:1;"></div>
                             </div>
                             <div style="display:flex; gap:15px; flex-grow:1;">
                                 <div style="flex:0 0 220px; display:flex; flex-direction:column; gap:8px;">
@@ -2314,9 +2315,10 @@
                         <!-- 2. Parcels Full Pane -->
                         <div class="panel-card" style="border: 1px solid #f59e0b; border-left: 4px solid #f59e0b; display:flex; flex-direction:column;">
                             <!-- Header Row -->
-                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <h3 style="margin:0; font-size:14px; text-transform:uppercase;">🚚 Parcelz Sync</h3>
-                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:right;">Import the complete .HTML package details page for each parcel from superbuy</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">🚚 Parcelz Sync</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">Import the complete .HTML package details page for each parcel from superbuy</p>
+                                <div style="flex:1;"></div>
                             </div>
                             
                             <!-- Body Row -->
@@ -2362,9 +2364,10 @@
                     <div class="control-panel" id="salezControlPanel" style="grid-template-columns: repeat(2, 1fr); gap:15px; margin-bottom:20px; align-items: stretch;">
                         <!-- 3. Sales Sync -->
                         <div class="panel-card" style="border: 1px solid #10b981; border-left: 4px solid #10b981; display:flex; flex-direction:column;">
-                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <h3 style="margin:0; font-size:14px; text-transform:uppercase;">🛍️ Salez Order Sync</h3>
-                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:right;">Auto-deduct Shopify/Etsy quantities from live inventory.</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">🛍️ Salez Order Sync</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">Auto-deduct Shopify/Etsy quantities from live inventory.</p>
+                                <div style="flex:1;"></div>
                             </div>
                             
                             <div style="display:flex; gap:15px; flex-grow:1;">
@@ -2395,12 +2398,12 @@
 
                         <!-- 3b. SKU Alias Manager -->
                         <div class="panel-card" style="border-left: 4px solid #8b5cf6; display:flex; flex-direction:column;">
-                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <div style="display:flex; align-items:baseline; gap:10px;">
-                                    <h3 style="margin:0; font-size:14px; text-transform:uppercase;">🔗 SKU Alias Manager</h3>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">🔗 SKU Alias Manager</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">Map Shopify/Etsy SKUs to internal recipes.</p>
+                                <div style="flex:1; display:flex; justify-content:flex-end;">
                                     <button class="btn-green-neon" data-click="click_openAliasModal" style="padding:4px 8px; font-size:9px; font-weight:bold; letter-spacing:0.5px; border-radius:4px;">+ ADD NEW</button>
                                 </div>
-                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:right;">Map Shopify/Etsy SKUs to internal recipes.</p>
                             </div>
                             
                             <div style="display:flex; flex-direction:column; gap:8px; flex-grow:1;">
@@ -2427,9 +2430,10 @@
                     <div class="control-panel" style="grid-template-columns: repeat(2, 1fr); gap:15px; margin-bottom:20px;">
                         <!-- 4. Data Vault -->
                         <div class="panel-card" style="border-left: 4px solid #0ea5e9; display:flex; flex-direction:column;">
-                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <h3 style="margin:0; font-size:14px; text-transform:uppercase;">☁️ Backup & Restore</h3>
-                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:right;">Secure authoritative Cloud snapshots and system restoration.</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">☁️ Backup & Restore</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">Secure authoritative Cloud snapshots and system restoration.</p>
+                                <div style="flex:1;"></div>
                             </div>
                             
                             <div style="display:flex; gap:15px; flex-grow:1;">
@@ -2467,9 +2471,10 @@
 
                         <!-- 5. Force Recalculation -->
                         <div class="panel-card master-card" style="border-left: 4px solid #ef4444; display:flex; flex-direction:column;">
-                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <h3 style="margin:0; font-size:14px; text-transform:uppercase;">⚙️ Force Recalculation</h3>
-                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:right;">Manually trigger a complete mathematical reconciliation of all ledger balances.</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">⚙️ Force Recalculation</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">Manually trigger a complete mathematical reconciliation of all ledger balances.</p>
+                                <div style="flex:1;"></div>
                             </div>
                             
                             <div style="display:flex; gap:15px; flex-grow:1;">
@@ -3190,7 +3195,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.12.2054"></script>
+    <script src="socialz-module.js?v=v.2026.04.12.2057"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4323,16 +4328,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.12.2054"></script>
-<script src="system-tools-module.js?v=v.2026.04.12.2054"></script>
-<script src="bom-module.js?v=v.2026.04.12.2054"></script>
-<script src="inventory-module.js?v=v.2026.04.12.2054"></script>
-<script src="packerz-module.js?v=v.2026.04.12.2054"></script>
-<script src="production-module.js?v=v.2026.04.12.2054"></script>
-<script src="sales-module.js?v=v.2026.04.12.2054"></script>
-<script src="analytics-module.js?v=v.2026.04.12.2054"></script>
-<script src="ceo-module.js?v=v.2026.04.12.2054"></script>
-<script src="print-module.js?v=v.2026.04.12.2054"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.12.2057"></script>
+<script src="system-tools-module.js?v=v.2026.04.12.2057"></script>
+<script src="bom-module.js?v=v.2026.04.12.2057"></script>
+<script src="inventory-module.js?v=v.2026.04.12.2057"></script>
+<script src="packerz-module.js?v=v.2026.04.12.2057"></script>
+<script src="production-module.js?v=v.2026.04.12.2057"></script>
+<script src="sales-module.js?v=v.2026.04.12.2057"></script>
+<script src="analytics-module.js?v=v.2026.04.12.2057"></script>
+<script src="ceo-module.js?v=v.2026.04.12.2057"></script>
+<script src="print-module.js?v=v.2026.04.12.2057"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4790,18 +4795,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.2054"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.2057"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.2054"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.2057"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.2054"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.2057"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.2054"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.2054"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.2054"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.2057"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.2057"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.2057"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.12.2054"></script>
-    <script src="labelz-module.js?v=v.2026.04.12.2054"></script>
+    <script src="barcodz-module.js?v=v.2026.04.12.2057"></script>
+    <script src="labelz-module.js?v=v.2026.04.12.2057"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
