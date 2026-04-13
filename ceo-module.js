@@ -229,15 +229,15 @@ function renderCeoTerminal() {
         const toggleStyle = (active, color) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? color : '#444'}; background: ${active ? color+'22' : '#222'}; color: ${active ? color : '#666'}; margin-right: 4px;`;
 
         slidersHtml += `
-        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px; cursor:grab;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
-            <div class="ceo-slider-label">
+        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom:8px; cursor:grab; position:relative;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
+            <button class="ceo-remove-btn" data-remove-idx="${index}" style="position:absolute; top:0px; right:0px; background:#ff0033; border:none; color:white; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:bold; cursor:pointer;" title="Remove Product">✕</button>
+            <div class="ceo-slider-label" style="font-size: 0.8rem; margin-bottom: 4px; padding-right: 20px;">
                 <span title="Drag to reorder">☰ ${p.name}</span>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
                     <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
-                    <button onclick="removeCeoProduct(${index})" title="Remove Product" style="background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold; font-size: 20px; padding: 0; line-height: 1;">×</button>
                 </div>
             </div>
-            <div style="display:flex; margin-bottom: 8px;">
+            <div style="display:flex; margin-bottom: 4px;">
                 <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
                 <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
                 <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
