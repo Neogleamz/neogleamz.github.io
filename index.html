@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.12.2357"></script>
+    <script src="system-version.js?v=v.2026.04.13.0001"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
@@ -9,11 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.2357"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.13.0001"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.2357"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.13.0001"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="system-event-delegator.js?v=v.2026.04.12.2357"></script>
+    <script src="system-event-delegator.js?v=v.2026.04.13.0001"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -115,9 +115,9 @@
             max-width: 450px;
             min-width: clamp(280px, 30vw, 320px);
             flex: 1 1 320px;
-            height: auto;
-            min-height: 480px;
-            padding-top: 35px;
+            height: max-content;
+            min-height: auto;
+            padding-top: 20px;
             position: relative;
             overflow: hidden;
             box-sizing: border-box;
@@ -126,8 +126,8 @@
         }
         .hub-card:hover { transform: translateY(-10px) scale(1.02); border-color: #f97316; box-shadow: 0 15px 45px rgba(249, 115, 22, 0.3); }
         .hub-card i { 
-            font-size: 48px; 
-            margin-bottom: 20px; 
+            font-size: 28px; 
+            margin-bottom: 10px; 
             display: block; 
             filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.35)); 
             font-style: normal; 
@@ -135,13 +135,12 @@
             z-index: 1; 
         }
         .hub-card:hover i { transform: scale(1.15) rotate(5deg); color: var(--primary-color); }
-        .hub-card h2 { font-size: 22px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: 1.5px; z-index: 1; text-transform: uppercase; }
-        .hub-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 0; z-index: 1; opacity: 0.8; }
+        .hub-card h2 { font-size: 16px; font-weight: 800; margin: 0 0 5px 0; letter-spacing: 1.5px; z-index: 1; text-transform: uppercase; }
+        .hub-card p { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0; z-index: 1; opacity: 0.8; max-width: 90%; flex-shrink: 0;}
         
-        .hub-card .card-stat { font-family: 'Righteous', sans-serif; font-weight: 900; font-size: 11px; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 10px; border-radius: 20px; margin-top: 10px; border: 1px solid rgba(249, 115, 22, 0.15); text-transform: uppercase; }
-        .hub-card p { margin: 0 0 15px 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; max-width: 90%; flex-shrink: 0; }
+        .hub-card .card-stat { font-family: 'Righteous', sans-serif; font-weight: 900; font-size: 10px; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 8px; border-radius: 20px; margin-top: 5px; border: 1px solid rgba(249, 115, 22, 0.15); text-transform: uppercase; }
         
-        .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: auto; }
+        .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 5px; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: auto; }
 
         /* Globally Standardized Button Utility Classes */
         .btn-ghost-base {
@@ -222,10 +221,10 @@
             padding-top: 15px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .kpi-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
+        .kpi-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 8px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
         .kpi-row:hover { background: var(--bg-panel); border-color: var(--card-hover-border, #f97316); box-shadow: 0 2px 8px var(--card-glow, rgba(249, 115, 22, 0.15)); }
-        .kpi-row span { color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;}
-        .kpi-row strong { color: var(--text-heading); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 900; text-align: right;}
+        .kpi-row span { color: var(--text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;}
+        .kpi-row strong { color: var(--text-heading); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 900; text-align: right;}
         
         .pulse-orange { animation: pulseGlow 4s infinite ease-in-out; }
         @keyframes pulseGlow { 
@@ -3245,7 +3244,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.12.2357"></script>
+    <script src="socialz-module.js?v=v.2026.04.13.0001"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4378,16 +4377,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.12.2357"></script>
-<script src="system-tools-module.js?v=v.2026.04.12.2357"></script>
-<script src="bom-module.js?v=v.2026.04.12.2357"></script>
-<script src="inventory-module.js?v=v.2026.04.12.2357"></script>
-<script src="packerz-module.js?v=v.2026.04.12.2357"></script>
-<script src="production-module.js?v=v.2026.04.12.2357"></script>
-<script src="sales-module.js?v=v.2026.04.12.2357"></script>
-<script src="analytics-module.js?v=v.2026.04.12.2357"></script>
-<script src="ceo-module.js?v=v.2026.04.12.2357"></script>
-<script src="print-module.js?v=v.2026.04.12.2357"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.13.0001"></script>
+<script src="system-tools-module.js?v=v.2026.04.13.0001"></script>
+<script src="bom-module.js?v=v.2026.04.13.0001"></script>
+<script src="inventory-module.js?v=v.2026.04.13.0001"></script>
+<script src="packerz-module.js?v=v.2026.04.13.0001"></script>
+<script src="production-module.js?v=v.2026.04.13.0001"></script>
+<script src="sales-module.js?v=v.2026.04.13.0001"></script>
+<script src="analytics-module.js?v=v.2026.04.13.0001"></script>
+<script src="ceo-module.js?v=v.2026.04.13.0001"></script>
+<script src="print-module.js?v=v.2026.04.13.0001"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4845,18 +4844,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.2357"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.13.0001"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.2357"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.13.0001"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.2357"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.13.0001"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.2357"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.2357"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.2357"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.13.0001"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.13.0001"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.13.0001"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.12.2357"></script>
-    <script src="labelz-module.js?v=v.2026.04.12.2357"></script>
+    <script src="barcodz-module.js?v=v.2026.04.13.0001"></script>
+    <script src="labelz-module.js?v=v.2026.04.13.0001"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
