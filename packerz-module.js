@@ -155,8 +155,8 @@ function openPackerzSopTerminal(orderGroup) {
                     ${selectHtml}
                 </div>
                 <button id="qa-btn-${orderGroup.order_id}-${i.sku}"
-                    class="btn-slate-muted"
-                    style="flex-shrink:0; white-space:nowrap;"
+                    class="btn-blue"
+                    style="flex-shrink:0; white-space:nowrap; padding: 6px 12px; font-weight: 800; font-size: 11px;"
                     data-app-click="loadActiveSOP" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
                     &#128065; VIEW SOP
                 </button>
