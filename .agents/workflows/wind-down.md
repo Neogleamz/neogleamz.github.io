@@ -8,21 +8,21 @@ trigger: "/wind_down, /wind-down, end session, wind down, see you tomorrow"
 
 When the user invokes `/wind-down` (or strongly implies they are ending the session), execute the following sequence sequentially:
 
-1. **Workspace Sanitization (The Big Sync)**:
-   - Run `git status` and `git diff` to analyze uncommitted changes.
-   - Present a brief list of the modified files to the user and ask: *"Ready to commit and push these as a WIP end-of-session sync?"*
-   - Upon approval, execute `git add .`, `git commit -m "chore: end of session WIP sync"`, and `git push` (if a remote exists).
-
-2. **Knowledge Persistence (Master Reference Sync)**:
+1. **Knowledge Persistence (Master Reference Sync)**:
    - Review the current session's terminal logs and completed implementation plans.
    - Extract any new architectural patterns, hardware protocol discoveries, or database schema changes.
    - Update @/tools/SK8Lytz_App_Master_Reference.md, adhering strictly to the parameters in the *Corporate Memory Synchronization Rule*.
 
-3. **Bucket List Grooming**:
+2. **Bucket List Grooming**:
    - Parse @/tools/SK8Lytz_Bucket_List.md.
    - Mark tasks completed during this session with `[x]`.
    - Identify the next logical Task/Epic.
    - Ask the user: *"What is the absolute #1 priority for our next session?"* and move their chosen item to the top of the active list.
+
+3. **Workspace Sanitization (The Big Sync)**:
+   - Run `git status` and `git diff` to analyze uncommitted changes.
+   - Present a brief list of the modified files to the user and ask: *"Ready to commit and push these as a WIP end-of-session sync?"*
+   - Upon approval, execute `git add .`, `git commit -m "chore: end of session WIP sync"`, and `git push` (if a remote exists).
 
 4. **The State of the Union (Final SITREP)**:
    - Generate a concise summary of today's achievements.
