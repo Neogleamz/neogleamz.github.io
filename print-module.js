@@ -1,3 +1,15 @@
+/**
+ * @typedef {Object} PrintQueueRow
+ * @property {string} id
+ * @property {string} part_name
+ * @property {number} qty
+ * @property {string} status
+ * @property {string|null} wo_id
+ * @property {string|null} label
+ * @property {string} created_at
+ * @property {string|null} started_at
+ * @property {string|null} completed_at
+ */
 // --- 10. 3D PRINT QUEUE MODULE ---
 
 function formatPrintTime(mins) {

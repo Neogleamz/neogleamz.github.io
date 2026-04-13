@@ -1,3 +1,18 @@
+/**
+ * @typedef {Object} InventoryConsumptionRow
+ * @property {string} item_key
+ * @property {number} consumed_qty
+ * @property {number} manual_adjustment
+ * @property {number} produced_qty
+ * @property {number} sold_qty
+ * @property {number} min_stock
+ * @property {number} scrap_qty
+ * @property {number} [prototype_consumed_qty]
+ * @property {number} [assembly_consumed_qty]
+ * @property {number} [production_consumed_qty]
+ * @property {number} [prototype_produced_qty]
+ * @property {number} [rop_lead_time_days]
+ */
 // --- 8. INVENTORY MANAGERS & REORDER LOGIC ---
 const invStyles = document.createElement('style');
 invStyles.innerHTML = `

@@ -1,3 +1,31 @@
+/**
+ * @typedef {Object} SocialzAudienceRow
+ * @property {string} id
+ * @property {string} name
+ * @property {string|null} region
+ * @property {string|null} location
+ * @property {string|null} skater_type
+ * @property {boolean} is_favorite
+ * @property {string|null} style
+ * @property {string|null} summary
+ * @property {string|null} viral_url
+ * @property {string|null} contact_info
+ * @property {string|null} collab_tier
+ * @property {string|null} collab_status
+ * @property {string|null} handle_ig
+ * @property {string|null} handle_tt
+ * @property {string|null} handle_yt
+ * @property {string|null} handle_fb
+ * @property {string|null} link_ig
+ * @property {string|null} link_tt
+ * @property {string|null} link_yt
+ * @property {string|null} link_fb
+ * @property {number} followers_ig
+ * @property {number} followers_tt
+ * @property {number} followers_yt
+ * @property {number} followers_fb
+ * @property {number} raw_followers
+ */
 // --- Global Helpers ---
         function handleAvatarError(img) {
             const tt = img.getAttribute('data-tt'), yt = img.getAttribute('data-yt'), fb = img.getAttribute('data-fb'), p = img.getAttribute('data-provider');

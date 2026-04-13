@@ -3,6 +3,14 @@ window.isPackerzLiveEditing = false;
 // NEXUZ: PACKERZ TERMINAL LOGIC
 // ==========================================
 
+/**
+ * @typedef {Object} PackerzShipmentPayload
+ * @property {string|number} order_id
+ * @property {string} sale_date
+ * @property {string} customer
+ * @property {Array<{sku: string, recipe: string, qty: number, transaction_type: string}>} items
+ */
+
 async function fetchUnfulfilledOrders() {
     try {
         if (!supabaseClient) return console.error("Supabase client not initialized.");

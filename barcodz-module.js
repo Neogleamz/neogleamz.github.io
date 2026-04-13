@@ -2,6 +2,24 @@
 // BARCODZ MODULE — Neogleamz Label Printer Engine
 // ============================================================
 
+/**
+ * @typedef {Object} BarcodzCacheItem
+ * @property {string} name
+ * @property {string} slug
+ * @property {string} type
+ * @property {string} icon
+ * @property {string} [desc]
+ * @property {boolean} isCatalog
+ */
+
+/**
+ * @typedef {Object} BarcodzSpoolItem
+ * @property {string} name
+ * @property {string} slug
+ * @property {string} icon
+ * @property {string} type
+ * @property {number} qty
+ */
 let barcodzCache = [];
 
 function buildBarcodzCache() {

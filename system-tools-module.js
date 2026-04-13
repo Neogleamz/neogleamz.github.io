@@ -1,3 +1,9 @@
+/**
+ * @typedef {Object} AppSettingsRow
+ * @property {string} setting_key
+ * @property {any} setting_value
+ * @property {string|null} description
+ */
 // --- 12. PARSERS & FILE SYNC ---
 function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){} }
 
