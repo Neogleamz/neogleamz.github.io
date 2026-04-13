@@ -229,15 +229,15 @@ function renderCeoTerminal() {
         const toggleStyle = (active, color) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? color : '#444'}; background: ${active ? color+'22' : '#222'}; color: ${active ? color : '#666'}; margin-right: 4px;`;
 
         slidersHtml += `
-        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom:8px; cursor:grab; position:relative;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
-            <button class="ceo-remove-btn" data-remove-idx="${index}" style="position:absolute; top:0px; right:0px; background:#ff0033; border:none; color:white; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:bold; cursor:pointer;" title="Remove Product">✕</button>
-            <div class="ceo-slider-label" style="font-size: 0.8rem; margin-bottom: 4px; padding-right: 20px;">
-                <span title="Drag to reorder">☰ ${p.name}</span>
-                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
-                    <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
+        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom:8px; cursor:grab; display:flex; flex-direction:column; gap:6px;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div style="display:flex; flex-direction:column; gap:6px; font-size: 0.8rem; font-weight:bold;">
+                    <span title="Drag to reorder" style="line-height:1.2;">☰ ${p.name}</span>
+                    <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();" style="width: 80px;">
                 </div>
+                <button class="ceo-remove-btn btn-red-muted" data-remove-idx="${index}" style="padding:4px 6px; font-size:9px; font-weight:bold; cursor:pointer;" title="Remove Product">REMOVE</button>
             </div>
-            <div style="display:flex; margin-bottom: 4px;">
+            <div style="display:flex; gap:4px;">
                 <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
                 <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
                 <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
