@@ -421,9 +421,16 @@ function _syncCeoKPIs({ totals }) {
             let h = s.customer_email_hash || s.customer_phone_hash;
             if (h && h.trim() !== '') {
                 if (!window._ltvCustomerMap[h]) {
-                    window._ltvCustomerMap[h] = { orders: 0, totalNet: 0 };
+                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), totalNet: 0 };
                 }
-                window._ltvCustomerMap[h].orders += 1;
+                if (s.order_id) {
+                    if (!window._ltvCustomerMap[h].orderIds.has(s.order_id)) {
+                        window._ltvCustomerMap[h].orders += 1;
+                        window._ltvCustomerMap[h].orderIds.add(s.order_id);
+                    }
+                } else {
+                    window._ltvCustomerMap[h].orders += 1;
+                }
                 window._ltvCustomerMap[h].totalNet += net;
             }
         });
@@ -621,13 +628,57 @@ function addCeoUnifiedSelection() {
 }
 
 // --- LTV MODAL LOGIC ---
+window._ltvSortKey = window._ltvSortKey || 'net';
+window._ltvSortAsc = window._ltvSortAsc !== undefined ? window._ltvSortAsc : false;
+
+function sortLtvModal(key) {
+    if (window._ltvSortKey === key) {
+        window._ltvSortAsc = !window._ltvSortAsc;
+    } else {
+        window._ltvSortKey = key;
+        window._ltvSortAsc = false;
+    }
+    renderLtvWhalesTable();
+}
+
+function renderLtvWhalesTable() {
+    let tBody = document.getElementById('ltv-whales-tbody');
+    if (!tBody || !window._ltvCachedWhales) return;
+
+    window._ltvCachedWhales.sort((a,b) => {
+        let valA = a[window._ltvSortKey];
+        let valB = b[window._ltvSortKey];
+        if (valA < valB) return window._ltvSortAsc ? -1 : 1;
+        if (valA > valB) return window._ltvSortAsc ? 1 : -1;
+        return 0;
+    });
+
+    let topWhales = window._ltvCachedWhales.slice(0, 20);
+    let html = '';
+    
+    if (topWhales.length === 0) {
+        html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No historical hashes found.</td></tr>';
+    } else {
+        topWhales.forEach(w => {
+            let shortHash = w.hash.substring(0, 8) + '...';
+            html += `
+            <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
+                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;" title="${w.hash}">[HASH_${shortHash}]</td>
+                <td style="padding:12px 15px; font-weight:bold; color:white; text-align:center;">${w.buys}</td>
+                <td style="padding:12px 15px; font-weight:bold; color:var(--neon-green); text-align:right;">${ceoFmt.format(Math.max(0, w.net))}</td>
+            </tr>`;
+        });
+    }
+    tBody.innerHTML = html;
+}
+
 function openLtvModal() {
     let map = window._ltvCustomerMap || {};
     let hashes = Object.keys(map);
 
     // Distribution
     let distribution = { 1: 0, 2: 0, 3: 0 };
-    let whales = [];
+    window._ltvCachedWhales = [];
 
     hashes.forEach(h => {
         let orderCount = map[h].orders;
@@ -635,40 +686,21 @@ function openLtvModal() {
         else if (orderCount === 2) distribution[2]++;
         else distribution[3]++;
 
-        whales.push({ hash: h, orders: orderCount, net: map[h].totalNet });
+        window._ltvCachedWhales.push({ hash: h, buys: orderCount, net: map[h].totalNet });
     });
 
-    // Sort whales by descending net
-    whales.sort((a,b) => b.net - a.net);
-    let topWhales = whales.slice(0, 20);
-
     // Update UI DOM Elements
+    let elTotal = document.getElementById('ltv-dist-total');
     let elOne = document.getElementById('ltv-dist-1');
     let elTwo = document.getElementById('ltv-dist-2');
     let elPlus = document.getElementById('ltv-dist-plus');
 
+    if(elTotal) elTotal.innerText = hashes.length;
     if(elOne) elOne.innerText = distribution[1];
     if(elTwo) elTwo.innerText = distribution[2];
     if(elPlus) elPlus.innerText = distribution[3];
 
-    let tBody = document.getElementById('ltv-whales-tbody');
-    if (tBody) {
-        let html = '';
-        if (topWhales.length === 0) {
-            html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No historical hashes found.</td></tr>';
-        } else {
-            topWhales.forEach(w => {
-                let shortHash = w.hash.substring(0, 8) + '...';
-                html += `
-                <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
-                    <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;" title="${w.hash}">[HASH_${shortHash}]</td>
-                    <td style="padding:12px 15px; font-weight:bold; color:white; text-align:center;">${w.orders}</td>
-                    <td style="padding:12px 15px; font-weight:bold; color:var(--neon-green); text-align:right;">${ceoFmt.format(Math.max(0, w.net))}</td>
-                </tr>`;
-            });
-        }
-        tBody.innerHTML = html;
-    }
+    renderLtvWhalesTable();
 
     let modal = document.getElementById('ltv-metrics-modal');
     if (modal) modal.style.display = 'flex';
@@ -701,6 +733,12 @@ document.addEventListener('click', (e) => {
         if (sortTh) {
             let key = sortTh.getAttribute('data-ceosort');
             if (key) sortCeoTable(key);
+        }
+        
+        const ltvTh = e.target.closest('th[data-ltvsort]');
+        if (ltvTh) {
+            let key = ltvTh.getAttribute('data-ltvsort');
+            if (key) sortLtvModal(key);
         }
     } catch (err) { }
 });

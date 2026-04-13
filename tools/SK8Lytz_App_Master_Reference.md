@@ -67,6 +67,10 @@ Buttons follow a 3-intensity system (Muted, Standard/Ghost, Neon). Use the follo
 * **The `onclick=` Exemption:** While the primary UI components in `index.html` strictly adhere to the Vanilla Event Delegator pattern via `data-click` and `data-change` attributes (Rule §1), **dynamically injected HTML via JS template literals** (e.g., dynamically built table rows, dynamic checklist generation) are explicitly exempt. They may utilize inline `onclick="functionName()"` bindings.
 * **Rationale:** Since the `system-event-delegator.js` matrix relies on precompiled `switch` tokens, managing dynamic tokens on the fly is highly fragile. Safely scoping localized events inside dynamic layout injection blocks is acceptable and mathematically sound compared to attempting complex mutation observers.
 
+### K. Modal Table Sorting & Data Matrix Standards
+* **Data Matrix Layout:** For data-dense modals (e.g., `ltv-metrics-modal`), rely on `display: grid` with `grid-template-columns` utilizing `fr` units (e.g., `repeat(4, 1fr)`) to render KPI summary blocks efficiently across the top horizontal axis without relying on heavy flex constraints. Modal containers must expand horizontally via `max-width: 1000px; max-height: 90vh` to properly accommodate dense analytical tables.
+* **Modal Sort Flags:** Unlike main Executive Panes that rely on global persistent configurations, Modal table headers MUST use locally isolated custom state sort flags (e.g., `window._ltvSortKey`, `window._ltvSortAsc`) triggered strictly by dedicated native data tokens (e.g., `data-ltvsort`). Overloading existing Pane tokens (like `data-ceosort`) risks cross-contaminating view states between the background and the overlay.
+
 ### D. Master Emojis & Item Archetypes
 Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * 📦 Retail Products
