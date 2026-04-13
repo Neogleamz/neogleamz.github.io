@@ -39,9 +39,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
-### Target: `main`
-*(Epic: Socialz Outreach Kanban)*
-- [ ] `feat/socialz-outreach-kanban` : Outreach Kanban Pipeline for SOCIALZ: Moving skaters through columns matching your negotiation states (Discovered → DM'd → Contract Sent → Sponsored).
 
 
 
