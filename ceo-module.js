@@ -118,7 +118,7 @@ function initCeoCharts() {
                             formatter: (v) => {
                                 if (!v || typeof v.y === 'undefined' || typeof v.base === 'undefined') return '';
                                 let diff = Math.abs(v.y - v.base);
-                                return diff > 5 ? ceoFmt.format(diff).split('.')[0] : '';
+                                return diff > 0.49 ? ceoFmt.format(diff).split('.')[0] : '';
                             }
                         },
                         tooltip: {
@@ -153,7 +153,7 @@ function initCeoCharts() {
                     { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'], borderRadius: 4 }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0.49 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
         });
     }
 
@@ -188,7 +188,7 @@ function initCeoCharts() {
                 textStrokeWidth: 2,
                 font: { weight: 'bold', size: 10, family: "'JetBrains Mono', monospace" },
                 formatter: function(value, ctx) {
-                    if (value < 5) return '';
+                    if (value < 0.49) return '';
                     let activeP = ceoActiveProducts[ctx.dataIndex];
                     if(!activeP) return `${value.toFixed(1)}%`;
                     let isCurrent = ctx.chart.canvas.id === 'curEfficiencyChart';
@@ -216,31 +216,23 @@ function renderCeoTerminal() {
 
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
 
-    let controlHtml = `
-        <div style="background: var(--bg-surface-light); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border-color);">
-            <button class="btn-blue" onclick="openCeoAddModal()" style="width:100%; padding: 12px; font-size:14px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
-                🚀 Add Product to Analysis
-            </button>
-        </div>
-    `;
-
-    let slidersHtml = controlHtml;
+    let slidersHtml = '';
     ceoActiveProducts.forEach((p, index) => {
         const toggleStyle = (active, color) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? color : '#444'}; background: ${active ? color+'22' : '#222'}; color: ${active ? color : '#666'}; margin-right: 4px;`;
 
         slidersHtml += `
-        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom:15px; cursor:grab;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
-            <div class="ceo-slider-label">
-                <span title="Drag to reorder">☰ ${p.name}</span>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();">
-                    <button onclick="removeCeoProduct(${index})" title="Remove Product" style="background: none; border: none; color: #ff0033; cursor: pointer; font-weight: bold; font-size: 20px; padding: 0; line-height: 1;">×</button>
-                </div>
+        <div class="ceo-slider-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom:8px; cursor:grab; display:flex; flex-direction:column; gap:6px;" draggable="true" ondragstart="ceoDragStart(event, ${index})" ondragover="ceoDragOver(event)" ondrop="ceoDrop(event, ${index})" ondragend="ceoDragEnd(event)">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <span title="Drag to reorder" style="line-height:1.2; font-size: 0.8rem; font-weight:bold;">☰ ${p.name}</span>
+                <button class="ceo-remove-btn btn-red-muted" data-remove-idx="${index}" style="flex: 0 0 auto; width: max-content !important; padding: 2px 8px; font-size:10px; font-weight:800; border-radius:4px; border:1px solid #fca5a5; cursor:pointer;" title="Remove Product">REMOVE</button>
             </div>
-            <div style="display:flex; margin-bottom: 8px;">
-                <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
-                <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
-                <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:4px;">
+                    <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
+                    <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
+                    <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
+                </div>
+                <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();" style="width: 50px; text-align:center; padding: 2px; font-size: 11px;">
             </div>
         </div>`;
     });
@@ -338,7 +330,7 @@ function _buildCeoTable({ tableRows }) {
     const getThClass = (key) => (ceoSortKey === key ? `sorted-${ceoSortAsc ? 'asc' : 'desc'}` : '');
 
     let tableHtml = `
-        <div class="ceo-kpi-title" style="margin-bottom:5px;">Current vs. Test Scenario Ledger</div>
+        <!-- removed header to save vertical space -->
         <table>
             <thead>
                 <tr>
@@ -421,9 +413,16 @@ function _syncCeoKPIs({ totals }) {
             let h = s.customer_email_hash || s.customer_phone_hash;
             if (h && h.trim() !== '') {
                 if (!window._ltvCustomerMap[h]) {
-                    window._ltvCustomerMap[h] = { orders: 0, totalNet: 0 };
+                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), totalNet: 0 };
                 }
-                window._ltvCustomerMap[h].orders += 1;
+                if (s.order_id) {
+                    if (!window._ltvCustomerMap[h].orderIds.has(s.order_id)) {
+                        window._ltvCustomerMap[h].orders += 1;
+                        window._ltvCustomerMap[h].orderIds.add(s.order_id);
+                    }
+                } else {
+                    window._ltvCustomerMap[h].orders += 1;
+                }
                 window._ltvCustomerMap[h].totalNet += net;
             }
         });
@@ -621,13 +620,57 @@ function addCeoUnifiedSelection() {
 }
 
 // --- LTV MODAL LOGIC ---
+window._ltvSortKey = window._ltvSortKey || 'net';
+window._ltvSortAsc = window._ltvSortAsc !== undefined ? window._ltvSortAsc : false;
+
+function sortLtvModal(key) {
+    if (window._ltvSortKey === key) {
+        window._ltvSortAsc = !window._ltvSortAsc;
+    } else {
+        window._ltvSortKey = key;
+        window._ltvSortAsc = false;
+    }
+    renderLtvWhalesTable();
+}
+
+function renderLtvWhalesTable() {
+    let tBody = document.getElementById('ltv-whales-tbody');
+    if (!tBody || !window._ltvCachedWhales) return;
+
+    window._ltvCachedWhales.sort((a,b) => {
+        let valA = a[window._ltvSortKey];
+        let valB = b[window._ltvSortKey];
+        if (valA < valB) return window._ltvSortAsc ? -1 : 1;
+        if (valA > valB) return window._ltvSortAsc ? 1 : -1;
+        return 0;
+    });
+
+    let topWhales = window._ltvCachedWhales.slice(0, 20);
+    let html = '';
+    
+    if (topWhales.length === 0) {
+        html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No historical hashes found.</td></tr>';
+    } else {
+        topWhales.forEach(w => {
+            let shortHash = w.hash.substring(0, 8) + '...';
+            html += `
+            <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
+                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;" title="${w.hash}">[HASH_${shortHash}]</td>
+                <td style="padding:12px 15px; font-weight:bold; color:white; text-align:center;">${w.buys}</td>
+                <td style="padding:12px 15px; font-weight:bold; color:var(--neon-green); text-align:right;">${ceoFmt.format(Math.max(0, w.net))}</td>
+            </tr>`;
+        });
+    }
+    tBody.innerHTML = html;
+}
+
 function openLtvModal() {
     let map = window._ltvCustomerMap || {};
     let hashes = Object.keys(map);
 
     // Distribution
     let distribution = { 1: 0, 2: 0, 3: 0 };
-    let whales = [];
+    window._ltvCachedWhales = [];
 
     hashes.forEach(h => {
         let orderCount = map[h].orders;
@@ -635,40 +678,21 @@ function openLtvModal() {
         else if (orderCount === 2) distribution[2]++;
         else distribution[3]++;
 
-        whales.push({ hash: h, orders: orderCount, net: map[h].totalNet });
+        window._ltvCachedWhales.push({ hash: h, buys: orderCount, net: map[h].totalNet });
     });
 
-    // Sort whales by descending net
-    whales.sort((a,b) => b.net - a.net);
-    let topWhales = whales.slice(0, 20);
-
     // Update UI DOM Elements
+    let elTotal = document.getElementById('ltv-dist-total');
     let elOne = document.getElementById('ltv-dist-1');
     let elTwo = document.getElementById('ltv-dist-2');
     let elPlus = document.getElementById('ltv-dist-plus');
 
+    if(elTotal) elTotal.innerText = hashes.length;
     if(elOne) elOne.innerText = distribution[1];
     if(elTwo) elTwo.innerText = distribution[2];
     if(elPlus) elPlus.innerText = distribution[3];
 
-    let tBody = document.getElementById('ltv-whales-tbody');
-    if (tBody) {
-        let html = '';
-        if (topWhales.length === 0) {
-            html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No historical hashes found.</td></tr>';
-        } else {
-            topWhales.forEach(w => {
-                let shortHash = w.hash.substring(0, 8) + '...';
-                html += `
-                <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
-                    <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;" title="${w.hash}">[HASH_${shortHash}]</td>
-                    <td style="padding:12px 15px; font-weight:bold; color:white; text-align:center;">${w.orders}</td>
-                    <td style="padding:12px 15px; font-weight:bold; color:var(--neon-green); text-align:right;">${ceoFmt.format(Math.max(0, w.net))}</td>
-                </tr>`;
-            });
-        }
-        tBody.innerHTML = html;
-    }
+    renderLtvWhalesTable();
 
     let modal = document.getElementById('ltv-metrics-modal');
     if (modal) modal.style.display = 'flex';
@@ -701,6 +725,12 @@ document.addEventListener('click', (e) => {
         if (sortTh) {
             let key = sortTh.getAttribute('data-ceosort');
             if (key) sortCeoTable(key);
+        }
+        
+        const ltvTh = e.target.closest('th[data-ltvsort]');
+        if (ltvTh) {
+            let key = ltvTh.getAttribute('data-ltvsort');
+            if (key) sortLtvModal(key);
         }
     } catch (err) { }
 });
