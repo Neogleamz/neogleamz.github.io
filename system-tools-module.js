@@ -690,8 +690,18 @@ window.__sandboxTable1Title = "Table 1 (Primary)";
 window.__sandboxTable2Title = "Table 2 (Secondary)";
 
 window.openSandboxModal = function(payload, title, payload2=null, table1Title="Table 1 (Primary)", table2Title="Table 2 (Secondary)", liveImportMeta=null) {
-    window.__sandboxData = payload && payload.length ? [...payload] : [];
-    window.__sandboxData2 = payload2 && payload2.length ? [...payload2] : null;
+    let isMultiSheet = typeof payload === 'object' && !Array.isArray(payload) && payload !== null;
+    
+    if (isMultiSheet) {
+        window.__sandboxDataDict = payload;
+        window.__sandboxData = null;
+        window.__sandboxData2 = null;
+    } else {
+        window.__sandboxDataDict = null;
+        window.__sandboxData = payload && payload.length ? [...payload] : [];
+        window.__sandboxData2 = payload2 && payload2.length ? [...payload2] : null;
+    }
+
     window.__sandboxTitle = title || "data_payload";
     window.__pendingLiveImportMeta = liveImportMeta;
     
@@ -728,8 +738,54 @@ window.openSandboxModal = function(payload, title, payload2=null, table1Title="T
     window.__sandboxSortCol2 = null;
     window.__sandboxSortAsc = true;
     window.__sandboxSortAsc2 = true;
+
+    window.__sandboxCollapseStateDict = {};
+    window.__sandboxSortStateDict = {};
+    window.__sandboxSearchStateDict = {};
+
+    let dictPayload = window.__sandboxDataDict;
+    if (dictPayload) {
+        Object.keys(dictPayload).forEach(k => {
+            window.__sandboxCollapseStateDict[k] = true;
+            window.__sandboxSortStateDict[k] = {col: null, asc: true};
+            window.__sandboxSearchStateDict[k] = "";
+        });
+    }
+
     window._renderSandboxModal();
     document.getElementById('sandboxDataModal').style.display = 'flex';
+};
+
+window.sandboxToggleSheet = function(sName) {
+    if (window.__sandboxCollapseStateDict) {
+        window.__sandboxCollapseStateDict[sName] = !window.__sandboxCollapseStateDict[sName];
+        window._renderSandboxModal();
+    }
+};
+
+window.sortSandboxDict = function(col, sName) {
+    if (!window.__sandboxSortStateDict) return;
+    const st = window.__sandboxSortStateDict[sName];
+    if (st.col === col) st.asc = !st.asc;
+    else { st.col = col; st.asc = true; }
+    
+    let arr = window.__sandboxDataDict[sName];
+    arr.sort((a,b) => {
+        let v1 = a[col]; let v2 = b[col];
+        if(typeof v1 === 'string') v1 = v1.toLowerCase();
+        if(typeof v2 === 'string') v2 = v2.toLowerCase();
+        if (v1 < v2) return st.asc ? -1 : 1;
+        if (v1 > v2) return st.asc ? 1 : -1;
+        return 0;
+    });
+    window._renderSandboxModal();
+};
+
+window.sandboxSearchDict = function(sName, term) {
+    if(window.__sandboxSearchStateDict) {
+        window.__sandboxSearchStateDict[sName] = term.toLowerCase();
+        window._renderSandboxModal();
+    }
 };
 
 window.sortSandboxModal = function(col, tableNum=1) {
@@ -761,18 +817,19 @@ window.sortSandboxModal = function(col, tableNum=1) {
 
 window._renderSandboxModal = function() {
     let payload = window.__sandboxData;
+    let dictPayload = window.__sandboxDataDict;
     document.getElementById('sandboxModalTitle').innerText = window.__sandboxTitle;
     let body = document.getElementById('sandboxModalBody');
-    if (!payload || payload.length === 0) {
+    if ((!payload || payload.length === 0) && !dictPayload) {
         body.innerHTML = "<div style='color:#ef4444; font-weight:bold;'>Error: Evaluated payload array is physically empty.</div>";
     } else {
-        let renderTable = (data, title, tableNum) => {
-            let sortCol = tableNum === 2 ? window.__sandboxSortCol2 : window.__sandboxSortCol;
-            let sortAsc = tableNum === 2 ? window.__sandboxSortAsc2 : window.__sandboxSortAsc;
+        let renderTable = (data, title, tableNum, isDict=false, dictName=null) => {
+            let sortCol = isDict ? window.__sandboxSortStateDict[dictName].col : (tableNum === 2 ? window.__sandboxSortCol2 : window.__sandboxSortCol);
+            let sortAsc = isDict ? window.__sandboxSortStateDict[dictName].asc : (tableNum === 2 ? window.__sandboxSortAsc2 : window.__sandboxSortAsc);
             let cols = Object.keys(data[0] || {}).filter(k => !k.startsWith('_'));
             
             let h = ``;
-            if(title) h += `<h3 style="color:#10b981; margin: 15px 0 10px 0;">${title}</h3>`;
+            if(title) h += `<h3 style="color:#10b981; margin: 15px 0 10px 0; font-size:14px;">${title} <span style="font-size:11px; color:#64748b; font-weight:normal;">(${data.length} records)</span></h3>`;
             
             h += `<table style="width:100%; text-align:left; border-collapse:collapse; white-space:nowrap; margin-bottom: 20px;">`;
             h += `<thead><tr>`;
@@ -785,9 +842,14 @@ window._renderSandboxModal = function() {
                     colorRule = "color:#c084fc; border-bottom:2px solid rgba(192,132,252,0.6);";
                 } else if (c.toLowerCase().endsWith("_hash")) {
                     displayC = "🔐 " + c;
-                    colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);"; // amber logic for secure keys
+                    colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);";
                 }
-                h += `<th data-app-click="sort-sandbox-modal" data-sort-col="${c}" data-table-num="${tableNum}" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
+                
+                if (isDict) {
+                    h += `<th data-click="click_sortSandboxDict" data-sort-col="${c}" data-sheet-name="${dictName}" style="padding:10px 15px; position:sticky; top:0; background:rgba(0,0,0,0.8); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
+                } else {
+                    h += `<th data-click="click_sortSandboxModal" data-sort-col="${c}" data-table-num="${tableNum}" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
+                }
             });
             h += `</tr></thead><tbody>`;
             data.forEach(row => {
@@ -822,9 +884,51 @@ window._renderSandboxModal = function() {
             return h;
         };
         
-        let finalHtml = renderTable(window.__sandboxData, window.__sandboxTable1Title, 1);
-        if (window.__sandboxData2 && window.__sandboxData2.length > 0) {
-            finalHtml += renderTable(window.__sandboxData2, window.__sandboxTable2Title, 2);
+        let finalHtml = ``;
+        if (dictPayload) {
+            let sheets = Object.keys(dictPayload);
+            sheets.forEach((sName, idx) => {
+                let sData = dictPayload[sName];
+                if (sData && sData.length > 0) {
+                    let isCollapsed = window.__sandboxCollapseStateDict[sName];
+                    let searchTerm = window.__sandboxSearchStateDict[sName] || "";
+                    
+                    finalHtml += `<div style="margin-bottom:10px; border:1px solid rgba(255,255,255,0.1); border-radius:6px; overflow:hidden;">`;
+                    finalHtml += `<div data-click="click_sandboxToggleSheet" data-sheet-name="${sName}" style="padding:12px 15px; background:var(--bg-panel); cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#10b981; font-weight:bold; font-size:14px;">📄 Page ${idx+1} <span style="color:#64748b; margin:0 8px;">—</span> Database Table: <span style="color:#f59e0b; font-family:monospace; letter-spacing:0.5px;">${sName}</span></span>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:11px; color:#64748b; font-weight:bold;">${sData.length} records</span>
+                            <span style="color:#94a3b8; font-size:14px; font-weight:bold;">${isCollapsed ? '▼' : '▲'}</span>
+                        </div>
+                    </div>`;
+                    
+                    if (!isCollapsed) {
+                        let displayData = sData;
+                        if (searchTerm) {
+                            displayData = sData.filter(r => JSON.stringify(Object.values(r)).toLowerCase().includes(searchTerm));
+                        }
+                        
+                        finalHtml += `<div style="padding:15px; background:rgba(0,0,0,0.3); border-top:1px solid rgba(255,255,255,0.05); overflow-x:auto;">`;
+                        finalHtml += `<div style="margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                            <span style="color:#94a3b8; font-size:11px; font-weight:bold;">🔍 ROW SEARCH:</span>
+                            <input type="text" data-keyup="keyup_sandboxSearch" data-sheet-name="${sName}" value="${searchTerm.replace(/"/g, '&quot;')}" placeholder="Enter keyword to instantly filter array..." style="flex:1; padding:8px 12px; font-size:12px; background:var(--bg-panel); border:1px solid rgba(255,255,255,0.1); border-radius:4px; color:#fff;">
+                        </div>`;
+                        
+                        if (displayData.length > 0) {
+                            finalHtml += renderTable(displayData, null, null, true, sName);
+                        } else {
+                            finalHtml += `<div style="color:#ef4444; font-size:12px; font-weight:bold; padding:20px; text-align:center;">❌ No records within the [${sName}] array matched the real-time search query.</div>`;
+                        }
+                        finalHtml += `</div>`;
+                    }
+                    finalHtml += `</div>`;
+                }
+            });
+        } else {
+            finalHtml = renderTable(window.__sandboxData, window.__sandboxTable1Title, 1, false);
+            if (window.__sandboxData2 && window.__sandboxData2.length > 0) {
+                finalHtml += renderTable(window.__sandboxData2, window.__sandboxTable2Title, 2, false);
+            }
         }
         body.innerHTML = finalHtml;
     }
@@ -1185,16 +1289,30 @@ async function extractParcels(files, isTestMode=false) {
 }
 
 async function syncAndCalculate() {
+    let termId = 'recalcProgressTerminal';
     await executeWithButtonAction('btnCalc', '🧮 CALCULATING...', '✅ CALCULATED!', async () => {
+        let term = document.getElementById(termId); if(term) term.innerHTML = "";
+        if (typeof importTrace === 'function') importTrace(`INITIALIZING TRUE COST WATERFALL ENGINE`, false, termId);
+        if (typeof importTrace === 'function') importTrace(`▶ Fetching Cloud Memory shards [raw_orders, raw_parcel_summary, raw_parcel_items, full_landed_costs]...`, false, termId);
+        
         setMasterStatus("⚙️ Downloading data...", "mod-working"); sysLog("Sync/Calc..."); setSysProgress(20, 'working');
         const [oR, sR, iR, eR] = await Promise.all([ supabaseClient.from('raw_orders').select('*'), supabaseClient.from('raw_parcel_summary').select('*'), supabaseClient.from('raw_parcel_items').select('*'), supabaseClient.from('full_landed_costs').select('parcel_no, di_item_id, neogleamz_name, neogleamz_product, quantity, lot_multiplier') ]);
         if(oR.error) throw new Error(oR.error.message); if(sR.error) throw new Error(sR.error.message); if(iR.error) throw new Error(iR.error.message);
-        if(!iR.data||iR.data.length===0) { sysLog("No raw items.", true); setSysProgress(0, 'working'); return; }
+        
+        if (typeof importTrace === 'function') importTrace(`✅ Shards Locked: Orders (${(oR.data||[]).length}), Parcels (${(sR.data||[]).length}), Items (${(iR.data||[]).length})`, false, termId);
+        if(!iR.data||iR.data.length===0) { 
+            if (typeof importTrace === 'function') importTrace(`CRITICAL FAULT: Payload physically empty. Halted.`, true, termId);
+            sysLog("No raw items.", true); setSysProgress(0, 'working'); return; 
+        }
+        
+        if (typeof importTrace === 'function') importTrace(`▶ Executing Matrix Distillation & Weight Cross-Referencing...`, false, termId);
         sysLog("Calculating Math..."); setSysProgress(60, 'working'); setMasterStatus("🧮 Calculating...", "mod-working");
+        
         let eM={}; if(eR.data) eR.data.forEach(r => eM[`${r.parcel_no}_${r.di_item_id}`]=r);
         let oM={}; (oR.data||[]).forEach(o => oM[o.di_item_id]=o); let sM={}; (sR.data||[]).forEach(s => sM[s.parcel_no]=s);
         let pT={}; iR.data.forEach(i => { if(!pT[i.parcel_no]) pT[i.parcel_no]={w:0}; pT[i.parcel_no].w += Number(i.total_dist_weight_g)||0; });
         let dI=[];
+        
         iR.data.forEach(i => {
             let pN=i.parcel_no, d=i.di_item_id; let o=oM[d]||{}, s=sM[pN]||{}, e=eM[`${pN}_${d}`]||{};
             let q=e.quantity||i.quantity||1; let mult = e.lot_multiplier || 1; let up=Number(o.unit_price)||0; let uclp=Number(o.unit_china_landed_price)||up; let tw=Number(i.total_dist_weight_g)||0; let psc=Number(s.actual_paid)||0; let ptw=pT[pN].w||1;
@@ -1206,11 +1324,22 @@ async function syncAndCalculate() {
             
             dI.push({ parcel_no:pN, di_item_id:d, item_name:i.item_name||o.item_name||"", specification:i.specification||o.specification||"", quantity:q, lot_multiplier:mult, neogleamz_name:e.neogleamz_name||'', neogleamz_product:e.neogleamz_product||'', total_dist_weight_g:tw, unit_weight_g:i.unit_weight_g, order_date:o.order_date, order_no:o.order_no, alibaba_order:o.alibaba_order, order_unit_price:up, order_postage:o.postage, order_total:o.order_total, unit_china_landed_price:uclp, actual_paid:s.actual_paid, actual_chargeable_weight_g:s.actual_chargeable_weight_g, actual_shipping_fee:s.actual_shipping_fee, first_tier_cost:s.first_tier_cost, second_tier_cost:s.second_tier_cost, custom_clearance_fee:s.custom_clearance_fee, remote_area_surcharge:s.remote_area_surcharge, fuel_surcharge:s.fuel_surcharge, operating_cost:s.operating_cost, tax:s.tax, insurance:s.insurance, storage_fee:s.storage_fee, epe_loose_filling:s.epe_loose_filling, corner_protector:s.corner_protector, moister_barrier_bag:s.moister_barrier_bag, packing_video:s.packing_video, one_percent_discount:s.one_percent_discount, points_discount:s.points_discount, coupon_discount:s.coupon_discount, discount_code:s.discount_code, unit_ship_weight:roundedUws, final_cost_weight:roundedFuc, total_cost_weight:roundedTotal });
         });
+        
+        if (typeof importTrace === 'function') importTrace(`✅ Reconciliation Successful. Writing ${dI.length} normalized components to Master Ledger.`, false, termId);
         sysLog(`Pushing ${dI.length} rows...`); setSysProgress(80, 'working');
+        
         const {error} = await supabaseClient.from('full_landed_costs').upsert(dI, {onConflict:'parcel_no, di_item_id'}); if(error) throw new Error(error.message);
-        if(typeof loadData === 'function') await loadData(true); setSysProgress(100, 'success'); setMasterStatus(`✅ Calculated!`, "mod-success"); setTimeout(()=>{setSysProgress(0,'working');}, 3000);
+        
+        if (typeof importTrace === 'function') importTrace(`💯 CLOUD UPSERT COMPLETE: True Cost math dynamically synchronized to A.I. CFO Database.`, false, termId);
+        if(typeof loadData === 'function') await loadData(true); 
+        
+        setSysProgress(100, 'success'); setMasterStatus(`✅ Calculated!`, "mod-success"); 
+        setTimeout(()=>{setSysProgress(0,'working');}, 3000);
     }).catch(error => {
-        setSysProgress(100, 'error'); sysLog(error.message, true); setMasterStatus("❌ Calc Error.", "mod-error"); setTimeout(()=>setSysProgress(0,'working'), 3000);
+        let termId = 'recalcProgressTerminal';
+        if (typeof importTrace === 'function') importTrace(`CRITICAL ENGINE FAULT: ${error.message}`, true, termId);
+        setSysProgress(100, 'error'); sysLog(error.message, true); setMasterStatus("❌ Calc Error.", "mod-error"); 
+        setTimeout(()=>setSysProgress(0,'working'), 3000);
     });
 }
 
@@ -1269,29 +1398,113 @@ async function executeExport() {
 }
 
 let pendingRestoreData = {};
-function handleFileSelect(input) {
+
+window.cancelRestore = function() {
+    let termId = 'backupProgressTerminal';
+    document.getElementById('restorePreview').style.display = 'none';
+    document.getElementById('importBackupFile').value = '';
+    document.getElementById('importBackupFileTest').value = '';
+    importTrace(`🗑️ RESTORE ABORTED: Payload discarded securely.`, true, termId);
+    setMasterStatus("Ready.", "status-idle");
+    setSysProgress(0, 'working');
+    pendingRestoreData = {};
+};
+
+function handleFileSelect(input, isTestMode = false) {
     const file = input.files[0]; if (!file) return;
+    
+    let termId = 'backupProgressTerminal';
+    let term = document.getElementById(termId); if(term) term.innerHTML = "";
+    
+    importTrace(`INITIALIZING RESTORE PROTOCOL`, false, termId);
+    if(isTestMode) importTrace(`🧪 DRY RUN SANDBOX ENGAGED: Parsing Payload without writing to Supabase.`, false, termId);
+    importTrace(`Loaded payload file into memory matrix: ${file.name} (${Math.round(file.size/1024)} KB)`, false, termId);
+    
+    setSysProgress(20, 'working'); setModuleStatus("statusBackup", "⏳ Parsing...", "mod-working");
+
     const reader = new FileReader();
     reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
-        pendingRestoreData = {}; let html = '';
-        workbook.SheetNames.forEach(sheetName => {
-            const roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-            if(roa.length > 0) { pendingRestoreData[sheetName] = roa; html += `<label style="display:flex; align-items:center; justify-content:flex-start; gap:10px; font-size:13px; margin:6px 0; color:var(--text-main); font-weight:bold;"><input type="checkbox" class="restore-chk" value="${sheetName}" checked style="width:16px; height:16px; margin:0; flex-shrink:0; cursor:pointer;"> Restore ${sheetName.replace(/_/g, ' ')} (${roa.length} rows)</label>`; }
-        });
-        document.getElementById('restoreCheckboxes').innerHTML = html; document.getElementById('restorePreview').style.display = 'block';
+        importTrace(`Parsing XLSX Workbook Sheets...`, false, termId);
+        try {
+            const data = new Uint8Array(e.target.result); 
+            const workbook = XLSX.read(data, {type: 'array'});
+            pendingRestoreData = {}; let html = '';
+            
+            workbook.SheetNames.forEach(sheetName => {
+                const roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                if(roa.length > 0) { 
+                    pendingRestoreData[sheetName] = roa; 
+                    importTrace(`Processed Sheet [${sheetName}]: ${roa.length} valid row(s).`, false, termId);
+                    html += `<label style="display:flex; align-items:center; justify-content:flex-start; gap:10px; font-size:13px; margin:6px 0; color:var(--text-main); font-weight:bold;"><input type="checkbox" class="restore-chk" value="${sheetName}" checked style="width:16px; height:16px; margin:0; flex-shrink:0; cursor:pointer;"> Restore ${sheetName.replace(/_/g, ' ')} (${roa.length} rows)</label>`; 
+                }
+            });
+            
+            if (isTestMode) {
+                if (typeof window.openSandboxModal === 'function') {
+                    importTrace(`🧪 SANDBOX INTERCEPT: Array diverted directly to visual inspector.`, true, termId);
+                    setSysProgress(100, 'success'); setModuleStatus("statusBackup", "🧪 Test Parsed!", "mod-success"); 
+                    window.openSandboxModal(pendingRestoreData, `BACKUP_RESTORE_SANDBOX`, null, `Sandbox Multi-sheet Renderer`);
+                    input.value = '';
+                    setTimeout(()=> { setModuleStatus("statusBackup", "Ready.", "status-idle"); setSysProgress(0,'working'); }, 3000);
+                }
+            } else {
+                document.getElementById('restoreCheckboxes').innerHTML = html; 
+                document.getElementById('restorePreview').style.display = 'block';
+                importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Select target sheets to inspect.`, true, termId);
+                setSysProgress(100, 'success'); setModuleStatus("statusBackup", "⚠️ Select targets...", "mod-working"); 
+            }
+        } catch(err) {
+            importTrace(`CRITICAL FAULT: ${err.message}`, true, termId);
+            sysLog(err.message, true);
+            setSysProgress(100, 'error'); setModuleStatus("statusBackup", "❌ Parse Error.", "mod-error");
+            input.value = '';
+            setTimeout(()=> { setModuleStatus("statusBackup", "Ready.", "status-idle"); setSysProgress(0,'working'); }, 3000);
+        }
     };
     reader.readAsArrayBuffer(file);
 }
 
 async function executeRestore() {
+    let termId = 'backupProgressTerminal';
     const checkboxes = document.querySelectorAll('.restore-chk:checked');
-    if(checkboxes.length === 0) { sysLog("Validation Error: Backup Restoral aborted, no sheets selected.", true); return alert("Select at least one sheet."); }
-    if(!confirm("⚠️ OVERWRITE cloud data?")) return;
+    if(checkboxes.length === 0) { 
+        importTrace(`CRITICAL FAULT: No sheets selected.`, true, termId);
+        sysLog("Validation Error: Backup Restoral aborted, no sheets selected.", true); 
+        return alert("Select at least one sheet."); 
+    }
+    
+    let filteredData = {};
+    for (let chk of checkboxes) {
+        filteredData[chk.value] = pendingRestoreData[chk.value];
+    }
+    
+    if (typeof window.openSandboxModal === 'function') {
+        importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Filtered array diverted to visual inspector.`, true, termId);
+        let liveImportContext = {
+            termId: termId,
+            statId: "statusBackup",
+            inputNodeId: "importBackupFile",
+            customCommitFn: async () => {
+                await commitLiveRestore(filteredData);
+            }
+        };
+        window.openSandboxModal(filteredData, `PRODUCTION_BACKUP_TARGETS`, null, `Sandbox Multi-sheet Renderer`, null, liveImportContext);
+    }
+}
+
+async function commitLiveRestore(dataDict) {
+    let termId = 'backupProgressTerminal';
+    const sheetNames = Object.keys(dataDict);
+    
     try {
         setMasterStatus("Restoring...", "mod-working"); setSysProgress(20, 'working');
-        for (let chk of checkboxes) {
-            const sheetName = chk.value; const rawData = pendingRestoreData[sheetName]; sysLog(`Restoring sheet: ${sheetName}`);
+        importTrace(`▶ Execution Phase: Cloud Upsert initialized. Target: Supabase DB.`, false, termId);
+
+        let iterIdx = 1; let ttlChecks = sheetNames.length;
+        for (let sheetName of sheetNames) {
+            const rawData = dataDict[sheetName]; 
+            sysLog(`Restoring sheet: ${sheetName}`);
+            
             let tableName = ''; let conflictKey = ''; let parsedData = rawData;
             if (sheetName === 'Master_Ledger') { tableName = 'full_landed_costs'; conflictKey = 'parcel_no, di_item_id'; } 
             else if (sheetName === 'Recipes') { tableName = 'product_recipes'; conflictKey = 'product_name'; parsedData = rawData.map(r => ({ ...r, components: JSON.parse(r.components || '[]') })); } 
@@ -1308,13 +1521,30 @@ async function executeRestore() {
             else if (sheetName === 'Raw_Orders') { tableName = 'raw_orders'; conflictKey = 'di_item_id'; }
             else if (sheetName === 'Raw_Parcel_Summary') { tableName = 'raw_parcel_summary'; conflictKey = 'parcel_no'; }
             else if (sheetName === 'Raw_Parcel_Items') { tableName = 'raw_parcel_items'; conflictKey = 'parcel_no, di_item_id'; }
+            
             if (tableName) {
+                importTrace(`▶ Upserting ${parsedData.length} records into [${tableName}]... (${iterIdx}/${ttlChecks})`, false, termId);
                 const { error } = await supabaseClient.from(tableName).upsert(parsedData, { onConflict: conflictKey });
-                if (error) throw error;
+                if (error) { importTrace(`❌ FAIL: Write to [${tableName}] rejected: ${error.message}`, true, termId); throw error; }
+                importTrace(`✅ SUCCESS: [${tableName}] safely synchronized.`, false, termId);
             }
+            iterIdx++;
         }
-        setMasterStatus("Complete!", "mod-success"); closeBackupModal(); if(typeof loadData === 'function') await loadData(true);
-    } catch(e) { sysLog(e.message, true); setMasterStatus("Restore Error", "mod-error"); }
+        
+        importTrace(`💯 RESTORE COMPLETE: All target sheets restored to Cloud memory.`, false, termId);
+        setMasterStatus("Complete!", "mod-success"); 
+        
+        document.getElementById('restorePreview').style.display = 'none';
+        document.getElementById('importBackupFile').value = '';
+        pendingRestoreData = {};
+        
+        if(typeof loadData === 'function') await loadData(true);
+    } catch(e) { 
+        sysLog(e.message, true); 
+        importTrace(`CRITICAL FAULT DURING UPSERT: ${e.message}`, true, termId);
+        setMasterStatus("Restore Error", "mod-error"); 
+        throw e;
+    }
 }
 
 // ----------------------------------------------------

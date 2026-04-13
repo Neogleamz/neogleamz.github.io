@@ -557,6 +557,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_stopCycleCount':
                     stopCycleCount();
                     break;
+                case 'click_executeRestore':
+                    if (typeof executeRestore === 'function') executeRestore();
+                    break;
+                case 'click_cancelRestore':
+                    if (typeof cancelRestore === 'function') cancelRestore();
+                    break;
+                case 'click_executeExport':
+                    if (typeof executeExport === 'function') executeExport();
+                    break;
+                case 'click_document_getElementById_importBackupFile':
+                    document.getElementById('importBackupFile').click();
+                    break;
+                case 'click_document_getElementById_importBackupFileTest':
+                    document.getElementById('importBackupFileTest').click();
+                    break;
+                case 'click_sandboxToggleSheet':
+                    if (typeof window.sandboxToggleSheet === 'function') {
+                        window.sandboxToggleSheet(el.getAttribute('data-sheet-name'));
+                    }
+                    break;
+                case 'click_sortSandboxDict':
+                    if (typeof window.sortSandboxDict === 'function') {
+                        window.sortSandboxDict(el.getAttribute('data-sort-col'), el.getAttribute('data-sheet-name'));
+                    }
+                    break;
+                case 'click_sortSandboxModal':
+                    if (typeof window.sortSandboxModal === 'function') {
+                        window.sortSandboxModal(el.getAttribute('data-sort-col'), parseInt(el.getAttribute('data-table-num'), 10));
+                    }
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
@@ -584,6 +614,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'keyup_window_filterCcMngrItems':
                     window.filterCcMngrItems();
+                    break;
+                case 'keyup_sandboxSearch':
+                    if (typeof window.sandboxSearchDict === 'function') {
+                        window.sandboxSearchDict(el.getAttribute('data-sheet-name'), el.value);
+                    }
                     break;
             }
         } catch (error) {
@@ -829,5 +864,24 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
         }
     }, true);
+
+    document.body.addEventListener('change', function(event) {
+        const el = event.target.closest('[data-change]');
+        if (!el) return;
+        const action = el.getAttribute('data-change');
+        
+        try {
+            switch(action) {
+                case 'change_handleFileSelect_this':
+                    if (typeof handleFileSelect === 'function') handleFileSelect(el, false);
+                    break;
+                case 'change_handleFileSelectTest_this':
+                    if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
+                    break;
+            }
+        } catch (error) {
+            console.error(`[Event Delegator] Error executing ${action} on change:`, error);
+        }
+    }, false);
 
 });
