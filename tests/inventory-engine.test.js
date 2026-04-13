@@ -53,4 +53,15 @@ describe('📦 Inventory Intelligence & ROP Algorithms', () => {
         const velBearing = window.calculateTrailingVelocity('RAW-BEARING', 30);
         expect(velBearing).toBeCloseTo(0.40, 2);
     });
+
+    test('calculateDynamicROP triggers correct bounds considering velocity and lead time', () => {
+        // If Velocity is 0.40 items per day, and Supplier Lead Time is 5 days
+        // It should be 0.40 * 5 = 2.0. Then adding Safety Stock Multiplier (1.10) => 2.20
+        const rop = window.calculateDynamicROP(0.40, 5);
+        expect(rop).toBeCloseTo(2.20, 2);
+
+        // Should return 0 if no velocity to avoid infinite restocking algorithms
+        const zeroRop = window.calculateDynamicROP(0, 5);
+        expect(zeroRop).toBe(0);
+    });
 });

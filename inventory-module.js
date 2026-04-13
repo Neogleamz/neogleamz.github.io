@@ -208,6 +208,11 @@ window.calculateTrailingVelocity = function(item_key, days=30) {
     return totalQty / days;
 };
 
+window.calculateDynamicROP = function(velocity, leadTimeDays) {
+    if (velocity <= 0 || leadTimeDays <= 0) return 0;
+    return (velocity * leadTimeDays) * SAFETY_STOCK_MULTIPLIER;
+};
+
 function renderInventoryTable() {
     const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
     renderFgiTable();
@@ -219,7 +224,7 @@ function renderInventoryTable() {
         a.sort((x,y) => { let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
         a.forEach(x => { 
             let vel = window.calculateTrailingVelocity(x.k, 30);
-            let dynamicROP = vel > 0 ? (vel * x.ld) * SAFETY_STOCK_MULTIPLIER : 0;
+            let dynamicROP = window.calculateDynamicROP(vel, x.ld);
             // Use MS as fallback, but if ROP is higher, that is critical baseline
             let finalTarget = Math.max(x.ms, dynamicROP);
             
