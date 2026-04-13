@@ -4,7 +4,8 @@
   "description": "",
   "main": "analytics-module.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "version:bump": "node scripts/bump-system-version.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -24,6 +25,8 @@
   "homepage": "https://github.com/Neogleamz/neogleamz.github.io#readme",
   "devDependencies": {
     "eslint": "^10.2.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
     "prettier": "^3.8.2",
     "supabase": "^2.89.1"
   },
