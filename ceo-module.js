@@ -338,7 +338,7 @@ function _buildCeoTable({ tableRows }) {
     const getThClass = (key) => (ceoSortKey === key ? `sorted-${ceoSortAsc ? 'asc' : 'desc'}` : '');
 
     let tableHtml = `
-        <div class="ceo-kpi-title" style="margin-bottom:5px;">Current vs. Test Scenario Ledger</div>
+        <!-- removed header to save vertical space -->
         <table>
             <thead>
                 <tr>
