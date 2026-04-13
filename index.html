@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.12.2311"></script>
+    <script src="system-version.js?v=v.2026.04.13.0032"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
@@ -9,11 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.12.2311"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.13.0032"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.12.2311"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.13.0032"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="system-event-delegator.js?v=v.2026.04.12.2311"></script>
+    <script src="system-event-delegator.js?v=v.2026.04.13.0032"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -101,7 +101,7 @@
             background: var(--bg-glass); 
             border: 2px solid transparent; 
             border-radius: 20px; 
-            padding: 30px 20px; 
+            padding: 12px 10px; 
             text-align: center; 
             cursor: pointer; 
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
@@ -111,11 +111,13 @@
             justify-content: flex-start; 
             backdrop-filter: blur(16px); 
             box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
-            width: clamp(280px, 42vw, 450px);
-            flex: 0 0 clamp(280px, 42vw, 450px);
-            height: auto;
-            min-height: 480px;
-            padding-top: 35px;
+            width: 100%;
+            max-width: 450px;
+            min-width: clamp(280px, 30vw, 320px);
+            flex: 1 1 320px;
+            height: max-content;
+            min-height: auto;
+            padding-top: 20px;
             position: relative;
             overflow: hidden;
             box-sizing: border-box;
@@ -124,8 +126,8 @@
         }
         .hub-card:hover { transform: translateY(-10px) scale(1.02); border-color: #f97316; box-shadow: 0 15px 45px rgba(249, 115, 22, 0.3); }
         .hub-card i { 
-            font-size: 48px; 
-            margin-bottom: 20px; 
+            font-size: 28px; 
+            margin-bottom: 10px; 
             display: block; 
             filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.35)); 
             font-style: normal; 
@@ -133,13 +135,12 @@
             z-index: 1; 
         }
         .hub-card:hover i { transform: scale(1.15) rotate(5deg); color: var(--primary-color); }
-        .hub-card h2 { font-size: 22px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: 1.5px; z-index: 1; text-transform: uppercase; }
-        .hub-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 0; z-index: 1; opacity: 0.8; }
+        .hub-card h2 { font-size: 16px; font-weight: 800; margin: 0 0 5px 0; letter-spacing: 1.5px; z-index: 1; text-transform: uppercase; }
+        .hub-card p { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0; z-index: 1; opacity: 0.8; max-width: 90%; flex-shrink: 0;}
         
-        .hub-card .card-stat { font-family: 'Righteous', sans-serif; font-weight: 900; font-size: 11px; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 10px; border-radius: 20px; margin-top: 10px; border: 1px solid rgba(249, 115, 22, 0.15); text-transform: uppercase; }
-        .hub-card p { margin: 0 0 15px 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; max-width: 90%; flex-shrink: 0; }
+        .hub-card .card-stat { font-family: 'Righteous', sans-serif; font-weight: 900; font-size: 10px; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 8px; border-radius: 20px; margin-top: 5px; border: 1px solid rgba(249, 115, 22, 0.15); text-transform: uppercase; }
         
-        .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: auto; }
+        .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 5px; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: auto; }
 
         /* Globally Standardized Button Utility Classes */
         .btn-ghost-base {
@@ -220,10 +221,10 @@
             padding-top: 15px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .kpi-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
+        .kpi-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 8px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
         .kpi-row:hover { background: var(--bg-panel); border-color: var(--card-hover-border, #f97316); box-shadow: 0 2px 8px var(--card-glow, rgba(249, 115, 22, 0.15)); }
-        .kpi-row span { color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;}
-        .kpi-row strong { color: var(--text-heading); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 900; text-align: right;}
+        .kpi-row span { color: var(--text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;}
+        .kpi-row strong { color: var(--text-heading); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 900; text-align: right;}
         
         .pulse-orange { animation: pulseGlow 4s infinite ease-in-out; }
         @keyframes pulseGlow { 
@@ -278,12 +279,19 @@
             box-shadow: var(--glass-shadow);
             flex-shrink: 0; 
             gap: 20px; 
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             position: relative;
             z-index: 10000; /* Absolute Authority */
             overflow: visible;
         }
-        .title-block { flex: 0 1 auto; min-width: 260px; }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 15px;
+            flex-wrap: nowrap;
+        }
+        .title-block { flex: 0 1 auto; min-width: 260px; align-items: flex-start; }
         .title-block h1 { font-size: 22px; font-weight: 900; margin: 0; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .title-block .subtitle { font-size: 8px; color: var(--text-muted); margin: 2px 0 0 0; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; min-width: 0; max-width: 100%; }
         
@@ -291,7 +299,7 @@
             flex: 1 1 auto; 
             min-width: 0; /* Important for flex-shrink/ellipsis */
             display: flex; 
-            justify-content: center; 
+            justify-content: flex-start; /* safe center hack using margin auto below */
             gap: 6px; 
             align-items: center; 
             flex-wrap: nowrap; 
@@ -301,6 +309,10 @@
             padding: 4px;
         }
         .tabs::-webkit-scrollbar { display: none; } /* §3 EXCEPTION: intentionally hidden for horizontal tab strip */
+
+        /* PERFECT SAFE CENTERING HACK: Auto margins on first/last items dynamically centers them in a flex-start container, but safely collapses to 0 on squish! */
+        .tabs .tab-btn:first-child { margin-left: auto; }
+        .tabs .tab-btn:last-child { margin-right: auto; }
 
         .tab-btn { 
             padding: 8px 12px; 
@@ -841,9 +853,9 @@
         .sync-section-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-style: italic; grid-column: 1 / -1; margin-top: -2px; line-height: 1.4; }
 
         /* ========================================= */
-        /* MOBILE VIEWPORT STYLES (Max Width: 768px) */
+        /* MOBILE / TABLET VIEWPORT STYLES (Max Width: 1024px) */
         /* ========================================= */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             body { padding: 0 !important; height: auto; overflow: auto; min-height: 100vh; }
             .container { padding: 8px !important; box-shadow: none; border-radius: 6px; height: auto; min-height: 100%; flex-grow: 1; }
             
@@ -852,13 +864,25 @@
             .neo-logo { height: 45px !important; margin: 0 auto !important; transform-origin: center center !important; }
             .title-block .subtitle { font-size: clamp(8px, 3.5vw, 12px) !important; margin-top: 2px !important; margin-left: 0 !important; white-space: nowrap !important; text-align: center; }
             
-            .tabs { flex: 0 0 auto !important; height: auto !important; width: 100vw; max-width: 100%; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding-bottom: 2px; }
-            .tabs::-webkit-scrollbar { display: none; } /* §3 EXCEPTION: mobile override — intentionally hidden */
+            .tabs { flex: 0 0 auto !important; height: auto !important; width: 100%; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding-bottom: 2px; }
+            .tabs::-webkit-scrollbar { display: none; }
+            
+            .top-controls { 
+                display: flex !important; 
+                flex-direction: row !important;
+                justify-content: center !important; 
+                align-items: center !important; 
+                flex-wrap: wrap !important; 
+                gap: 12px !important; 
+                width: 100% !important; 
+                margin: 5px auto !important; 
+                padding-bottom: 4px !important; 
+            }
             
             /* Tighten Hub UI for mobile */
             .hub-landing { justify-content: flex-start !important; align-items: flex-start !important; height: auto !important; padding: 10px !important; gap: 10px !important; }
             .hub-container { padding: 10px !important; gap: 15px !important; min-height: auto !important; margin-bottom: 20px;}
-            .hub-card { width: 100% !important; min-width: 0 !important; min-height: auto !important; height: max-content !important; margin: 0 auto !important; padding: 12px 10px !important; flex: 1 1 100% !important; border-radius: 12px !important; }
+            .hub-card { min-height: auto !important; height: max-content !important; margin: 0 auto !important; padding: 12px 10px !important; border-radius: 12px !important; }
             .hub-card i { font-size: 24px !important; margin-bottom: 5px !important; }
             .hub-card h2 { font-size: 16px !important; margin: 0 0 2px 0 !important; }
             .hub-card p { font-size: 11px !important; margin-bottom: 4px !important; }
@@ -917,27 +941,21 @@
             .exec-kpi { flex-direction: column; gap: 10px; width: 100%; }
             .kpi-box { width: 100%; justify-content: space-between; }
             
-            /* Horizontal scrolling left/right for top-controls exactly like .tabs */
-            .top-controls { 
-                flex: 0 0 auto !important; 
-                height: auto !important; 
-                flex-direction: row !important; 
-                flex-wrap: nowrap !important; 
-                gap: 8px !important; 
-                margin: 0 0 5px 0 !important; 
-                padding: 4px !important; 
-                justify-content: flex-start !important;
-                overflow-x: auto !important;
-                -ms-overflow-style: none; /* IE/Edge */
-                scrollbar-width: none; /* Firefox */
-                width: 100%;
-            }
-            .top-controls::-webkit-scrollbar { display: none; }
+
             .top-action-btn { flex: 0 0 auto !important; justify-content: center; padding: 8px 12px !important; font-size: 12px !important; width: auto !important; min-height: 40px !important; height: 40px !important; }
             #themeToggle { margin-right: 0; }
-            .terminal-wrapper { width: auto !important; margin-top: 0 !important; }
+            .terminal-wrapper { width: auto !important; margin-top: 0 !important; position: static !important; }
+            #debugLog { 
+                position: absolute !important; 
+                top: calc(100% + 5px) !important; 
+                left: 0 !important; 
+                right: 0 !important; 
+                margin: 0 auto !important; 
+                width: calc(100% - 20px) !important; 
+                max-width: 450px !important; 
+            }
             #termHeader { width: auto !important; padding: 8px 12px !important; height: 40px !important; min-height: 40px !important; display: flex; align-items: center; justify-content: center; box-sizing: border-box !important; font-size: 12px !important; }
-            #debugLog { position: static; width: 100%; max-height: 200px; margin-top: 10px; }
+
             
             table { font-size: 11px; }
             td, th { padding: 4px 6px; }
@@ -960,19 +978,12 @@
         /* TABLET LANDSCAPE (769px – 1024px)          */
         /* ========================================= */
         @media (min-width: 769px) and (max-width: 1024px) {
-            .hub-card { width: clamp(260px, 44vw, 400px) !important; flex: 0 0 clamp(260px, 44vw, 400px) !important; min-height: 400px !important; }
             .hub-container { padding: 20px !important; gap: 20px !important; }
             .bom-sidebar { flex: 0 0 260px; width: 260px; }
             .control-panel { grid-template-columns: repeat(3, 1fr) !important; }
             .analytics-grid { grid-template-columns: repeat(2, 1fr) !important; }
             .ceo-kpi-row { grid-template-columns: repeat(3, 1fr) !important; }
             .tab-btn { padding: 8px 14px; font-size: 12px; }
-            
-            /* Force Header array to wrap cleanly avoiding Socialz / Executive Ledger collision */
-            .header-area { flex-wrap: wrap !important; gap: 10px; justify-content: center !important; }
-            .title-block { flex: 1 1 100% !important; justify-content: center !important; margin-bottom: 5px; }
-            .tabs { flex: 1 1 auto !important; justify-content: center !important; }
-            .top-controls { flex: 1 1 auto !important; justify-content: center !important; }
             
             /* Fulfillz Packerz Terminal Kanbans & Modals - Force stack instead of crushing at 50/50 */
             .packerz-kanban-wrapper, #packerzLiveSopSplitWrapper { flex-direction: column !important; overflow-y: auto !important; }
@@ -1320,9 +1331,9 @@
 
 <div id="appUI" class="container" style="display: none;">
     <div class="header-area">
-        <div class="title-block" style="display: flex; align-items: center; gap: 15px; flex-wrap: nowrap;">
-            <img class="neo-logo" src="neo_logo_orange.png" alt="Neogleamz Logo" style="height: 48px; width: auto; transform: scale(1.35); transform-origin: left center;">
-            <span class="subtitle" style="margin: 0; margin-top: 4px; margin-left: 65px; font-size: clamp(6.5px, 0.9vw, 12px); color: #f97316; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px;">Cloud-Native Ledger & Command Center</span>
+        <div class="title-block" style="display: flex; flex-direction: column; justify-content: center; gap: 0px; flex-wrap: nowrap;">
+            <img class="neo-logo" src="neo_logo_orange.png" alt="Neogleamz Logo" style="height: 48px; width: auto; transform: scale(1.35); transform-origin: center center;">
+            <span class="subtitle" style="margin: 0; margin-top: 4px; font-size: clamp(6px, 0.8vw, 10px); color: #f97316; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px;">Cloud-Native Ledger & Command Center</span>
         </div>
         <div class="tabs">
             <button class="tab-btn active" data-click="click_switchTab_invhub">📊 STOCKPILEZ</button>
@@ -3245,7 +3256,7 @@
 </div>
 
 <!-- Analytics Dashboard Modal -->
-    <script src="socialz-module.js?v=v.2026.04.12.2311"></script>
+    <script src="socialz-module.js?v=v.2026.04.13.0032"></script>
 
 <!-- ============================================== -->
 <!-- PACKERZ ADMIN BLUEPRINTS MODAL                 -->
@@ -4378,16 +4389,16 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.12.2311"></script>
-<script src="system-tools-module.js?v=v.2026.04.12.2311"></script>
-<script src="bom-module.js?v=v.2026.04.12.2311"></script>
-<script src="inventory-module.js?v=v.2026.04.12.2311"></script>
-<script src="packerz-module.js?v=v.2026.04.12.2311"></script>
-<script src="production-module.js?v=v.2026.04.12.2311"></script>
-<script src="sales-module.js?v=v.2026.04.12.2311"></script>
-<script src="analytics-module.js?v=v.2026.04.12.2311"></script>
-<script src="ceo-module.js?v=v.2026.04.12.2311"></script>
-<script src="print-module.js?v=v.2026.04.12.2311"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.13.0032"></script>
+<script src="system-tools-module.js?v=v.2026.04.13.0032"></script>
+<script src="bom-module.js?v=v.2026.04.13.0032"></script>
+<script src="inventory-module.js?v=v.2026.04.13.0032"></script>
+<script src="packerz-module.js?v=v.2026.04.13.0032"></script>
+<script src="production-module.js?v=v.2026.04.13.0032"></script>
+<script src="sales-module.js?v=v.2026.04.13.0032"></script>
+<script src="analytics-module.js?v=v.2026.04.13.0032"></script>
+<script src="ceo-module.js?v=v.2026.04.13.0032"></script>
+<script src="print-module.js?v=v.2026.04.13.0032"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4845,18 +4856,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.12.2311"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.13.0032"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.12.2311"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.13.0032"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.12.2311"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.13.0032"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.12.2311"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.12.2311"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.12.2311"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.13.0032"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.13.0032"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.13.0032"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.12.2311"></script>
-    <script src="labelz-module.js?v=v.2026.04.12.2311"></script>
+    <script src="barcodz-module.js?v=v.2026.04.13.0032"></script>
+    <script src="labelz-module.js?v=v.2026.04.13.0032"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -5084,7 +5095,8 @@
                 // Wrap to inject the floating arrows cleanly
                 const wrapper = document.createElement('div');
                 wrapper.style.position = 'relative';
-                wrapper.style.width = '100%';
+                wrapper.style.flex = '1 1 auto';
+                wrapper.style.minWidth = '0';
                 wrapper.style.display = 'flex';
                 wrapper.style.flexDirection = 'column';
                 wrapper.style.minHeight = '0';
@@ -5094,11 +5106,11 @@
                 
                 // Left overlay container (ignores mouse)
                 const leftContainer = document.createElement('div');
-                leftContainer.style.cssText = 'position: absolute; left: 0; top: 0; bottom: 0; width: 80px; pointer-events: none; z-index: 50; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; transition: opacity 0.3s ease; opacity: 0; background: linear-gradient(to right, rgba(45, 212, 191, 0.5) 0%, transparent 100%);';
+                leftContainer.style.cssText = 'position: absolute; left: 0; top: 0; bottom: 0; width: 40px; pointer-events: none; z-index: 50; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; transition: opacity 0.3s ease; opacity: 0; background: linear-gradient(to right, rgba(45, 212, 191, 0.5) 0%, transparent 100%);';
                 
                 // Right overlay container
                 const rightContainer = document.createElement('div');
-                rightContainer.style.cssText = 'position: absolute; right: 0; top: 0; bottom: 0; width: 80px; pointer-events: none; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; transition: opacity 0.3s ease; opacity: 0; background: linear-gradient(to left, rgba(45, 212, 191, 0.5) 0%, transparent 100%);';
+                rightContainer.style.cssText = 'position: absolute; right: 0; top: 0; bottom: 0; width: 40px; pointer-events: none; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; transition: opacity 0.3s ease; opacity: 0; background: linear-gradient(to left, rgba(45, 212, 191, 0.5) 0%, transparent 100%);';
                 
                 // Define the physical arrow UI (Matches global .nav-zone swiping arrows)
                 const arrowStyle = 'background: transparent; border: none; outline: none; margin: 0; line-height: 1; color: #2dd4bf !important; font-size: 32px !important; min-width: unset !important; min-height: unset !important; font-weight: 900 !important; font-family: inherit !important; font-style: normal !important; pointer-events: auto !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 10px !important; text-shadow: 0 0 15px rgba(45, 212, 191, 0.6) !important; z-index: 100 !important;';
@@ -5143,6 +5155,38 @@
                     el.addEventListener('scroll', updateArrows, { passive: true });
                     window.addEventListener('resize', updateArrows, { passive: true });
                 }, 200);
+                
+                // Native Desktop Mouse Drag-to-Scroll Implementation
+                let isDown = false;
+                let startX;
+                let initScrollLeft;
+
+                el.addEventListener('mousedown', (e) => {
+                    // Prevent default to stop text selection/ghosting during drag
+                    if(e.target.tagName !== 'BUTTON') e.preventDefault(); 
+                    isDown = true;
+                    el.style.cursor = 'grabbing';
+                    startX = e.pageX - el.offsetLeft;
+                    initScrollLeft = el.scrollLeft;
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    el.style.cursor = '';
+                });
+                
+                el.addEventListener('mouseup', () => {
+                    isDown = false;
+                    el.style.cursor = '';
+                });
+                
+                el.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - el.offsetLeft;
+                    const walk = (x - startX) * 1.5; // Smooth 1.5x drag multiplier
+                    el.scrollLeft = initScrollLeft - walk;
+                });
             });
         });
     </script>
