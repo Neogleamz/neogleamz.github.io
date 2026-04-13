@@ -118,7 +118,7 @@ function initCeoCharts() {
                             formatter: (v) => {
                                 if (!v || typeof v.y === 'undefined' || typeof v.base === 'undefined') return '';
                                 let diff = Math.abs(v.y - v.base);
-                                return diff > 5 ? ceoFmt.format(diff).split('.')[0] : '';
+                                return diff > 0.49 ? ceoFmt.format(diff).split('.')[0] : '';
                             }
                         },
                         tooltip: {
@@ -153,7 +153,7 @@ function initCeoCharts() {
                     { label: 'Test MSRP', data: [0,0,0,0,0,0,0], backgroundColor: ['#8b5cf6', '#ef4444', '#facc15', '#f59e0b', '#3b82f6', '#06b6d4', '#00ff66'], borderRadius: 4 }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0.49 ? ceoFmt.format(v).split('.')[0] : '' } }, scales: { y: { grid: {color:'#222'} }, x: { grid: { display: false } } } }
         });
     }
 
@@ -188,7 +188,7 @@ function initCeoCharts() {
                 textStrokeWidth: 2,
                 font: { weight: 'bold', size: 10, family: "'JetBrains Mono', monospace" },
                 formatter: function(value, ctx) {
-                    if (value < 5) return '';
+                    if (value < 0.49) return '';
                     let activeP = ceoActiveProducts[ctx.dataIndex];
                     if(!activeP) return `${value.toFixed(1)}%`;
                     let isCurrent = ctx.chart.canvas.id === 'curEfficiencyChart';
