@@ -56,6 +56,13 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🗄️ Completed & Archived Epics
 
 ### Target: `main`
+*(Epic: Automated Testing Suite)*
+- [x] `feat/automated-test-suite` : Implemented robust Jest and JSDOM integration for zero-build vanilla JS compliance.
+- [x] `test/math-engine` : Validated recursive BOM extraction via `calculateProductBreakdown`, Stripe fee mappings, 3D print durations, and `getHistoricalNetProfit`.
+- [x] `test/inventory-engine` : Tested `calculateTrailingVelocity` forecasting, reconstructed the missing `getRawMaterials` function to fix a live crash, and added bounds logic for `calculateDynamicROP`.
+- [x] `test/sales-engine` : Migrated legacy Math_Validator routines to test `Pre-Ship Exchange`, `Post-Ship returns`, and `Warranty` offset adjustments to enforce ledger fidelity.
+
+### Target: `main`
 *(Epic: Widescreen Header Consolidation)*
 - [x] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
 - [x] `feat/pure-flexbox-gui-migration` : Completely rebuilt the global layout engine to utilize 100% fluid flexbox arrays safely mitigating element overlap bugs without absolute CSS overrides.
