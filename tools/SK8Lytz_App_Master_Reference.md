@@ -60,7 +60,7 @@ Buttons follow a 3-intensity system (Muted, Standard/Ghost, Neon). Use the follo
   document.addEventListener('mousemove', doXyzResize);
   document.addEventListener('mouseup', stopXyzResize);
   ```
-* **Zero-Padding Headers:** Executive headers (`.pane-header-bar`) must be bound tightly to `height: 26px`, `padding: 0 10px` so that `.pane-header-title` remains absolutely centered (`left: 50%; transform: translate(-50%, -50%)`) without visual jumping.
+* **Pure Flex Fluid Headers:** Executive headers (`.pane-header-bar`) must be structured organically utilizing pure Flexbox. Titles (`.pane-header-title`) must naturally flow as standard flex items and are strictly forbidden from utilizing `position: absolute` or translation hacks. The header must expand vertically (`height: auto`) and wrap when content collides, ensuring mathematically perfect scaling dynamically at any view width.
 * **No Spacers:** Do NOT use empty HTML `<div>` elements as visual spacers or layout controls. Unused blocks must be explicitly set to `display: none;`.
 
 ### J. Dynamic HTML Event Exception
