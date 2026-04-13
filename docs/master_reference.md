@@ -365,11 +365,13 @@ The system natively deploys 16 tables. RLS explicitly dictates that **Authentica
 ```
 
 ### Supabase Backup & Disaster Recovery Protocol
-1. **Automated Point-in-Time Recovery (PITR)**
+1. **Native Client-Side Sandbox Restoration:**
+ The NEXUZ `Brainz` panel houses a dedicated `Backup & Restore` UI. It generates `.xlsx` exports. Restorations must route through the built-in Sandbox Test File UI for visual preview before table targeting and live execution.
+2. **Automated Point-in-Time Recovery (PITR):**
  Supabase inherently takes daily physical database backups. To Restore: Log in to the Supabase Dashboard -> Navigate to Neogleamz Project -> Database -> Backups -> Click Restore on the most recent known healthy state.
-2. **Hard Data Exports (The local safety net)**
+3. **Hard Data Exports (The local safety net):**
  Perform a monthly manual logical extraction: Open Supabase Table Editor -> Select core ledgers (`product_recipes`, `sales_ledger`, `inventory_consumption`) -> Click Export to CSV -> Store natively on `OneDrive - Neogleamz`.
-3. **High-Concurrency Racing Check**
+4. **High-Concurrency Racing Check:**
  Strict distributed locks (`SELECT FOR UPDATE`) are unnecessary overhead. If a partial network drop occurs in a multi-batch call, local `.catch()` hooks will log the structural failure allowing safe manual UI repair.
 
 ## 5. AI Automation Best Practices
@@ -431,7 +433,7 @@ Prevents the line item from incrementing the `totals.units` sold metric. Used fo
 ### BRAINZ
 **1. Backup & Restore (Data Vault):**
 - **Export Backup:** Triggers a native system operation to compile authoritative snapshots of the cloud database ledgers into a secure, downloadable `.xlsx` physical archive.
-- **Restore Cloud:** Accepts `.xlsx` vault snapshots, providing a visual checklist of which tables to overwrite, and restores the live cloud database to a previous state in the event of corruption.
+- **Restore Cloud Sandbox:** Accepts `.xlsx` vault snapshots but rigidly enforces a 3-stage validation pipeline: 1) Upload into Test Mode to render and visually inspect payload strings on-screen, 2) Manually select specific target tables via checkboxes, 3) Execute the unrecoverable live cloud wipe and restore.
 
 **2. Force Recalculation:**
 - Manually triggers a complete mathematical reconciliation of all ledger balances. 
