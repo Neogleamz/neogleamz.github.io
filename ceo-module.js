@@ -216,15 +216,7 @@ function renderCeoTerminal() {
 
     let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
 
-    let controlHtml = `
-        <div style="background: var(--bg-surface-light); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border-color);">
-            <button class="btn-blue" onclick="openCeoAddModal()" style="width:100%; padding: 12px; font-size:14px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
-                🚀 Add Product to Analysis
-            </button>
-        </div>
-    `;
-
-    let slidersHtml = controlHtml;
+    let slidersHtml = '';
     ceoActiveProducts.forEach((p, index) => {
         const toggleStyle = (active, color) => `cursor:pointer; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid ${active ? color : '#444'}; background: ${active ? color+'22' : '#222'}; color: ${active ? color : '#666'}; margin-right: 4px;`;
 
