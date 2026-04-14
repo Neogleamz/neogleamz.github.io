@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Features & Refactors
+- **Safe Database Defibrillation**: Developed the `[/schema_diff]` workflow. To eliminate database mutation anxiety, the workflow is rigidly scoped to Strict Read-Only Mode to natively diff local `/supabase/migrations` against remote instances. All state-mutating execution (e.g. `supabase migration repair`) is now completely isolated behind a secondary, mandatory *"Defibrillate"* user-authorization gate.
 - **Agentic Orchestration Overhaul**: Architected and permanently deployed the unifying `[/finalize_epic]` deploy script to mitigate manual 3-step DevOps merge collision loops. Restructured the `[/bucketlist]` branch mapping engine to aggressively prevent Phantom Ledger Divergences, and enacted the global `active_context_lock.md` structural algorithm. The AI now actively rejects cross-branch context contamination (Option A: Ticket & Toss) while supporting a native show-stopper backdoor (Option C: Commit & Detour).
 - **Agentic Evolutionary Tooling**: Built and deployed the `[/red_team]` workflow to enforce a strict persona shift where the AI acts as a malicious Penetration Tester to proactively scan Vanilla JS modules for DOM clobbering, injection vectors, and construct string exploits before code triggers deployments to production.
 - **Agentic Evolutionary Tooling**: Built and deployed the `[/ui_xray]` native diagnostic workflow, granting the AI the capability to autonomously inject layout-bounding CSS macros and physically view DOM structural collisions to resolve flexbox overlap bugs.
