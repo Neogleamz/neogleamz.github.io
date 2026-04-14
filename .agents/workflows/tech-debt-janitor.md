@@ -20,7 +20,8 @@ When the user invokes `/health-check` (or uses phrases like "run health check" o
 3. **Bucket List Integration**: 
    - Open @/tools/SK8Lytz_Bucket_List.md.
    - If the file exceeds 30,000 characters, process the edit in parts.
-   - Format findings into `- [ ]` tasks. Example: `- [ ] \`debt/security\` : Update noble library (Critical Vulnerability)`.
+   - Format findings into `- [ ]` tasks. Example: `- [ ] \`debt/security\` : Update noble library. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]`
+   - **CRITICAL TELEMETRY RULE**: You MUST explicitly append the token tracking metadata to the end of EVERY generated task.
    - Append these to a section titled `## 🧹 Technical Debt` at the bottom of the file.
 
 4. **SITREP**: 

@@ -13,6 +13,7 @@ When the user requests an actionable code or architecture change, you must route
    - Analyze the request. If it relates to an active Epic, assign it there. Otherwise, assign it to `### Target: main`.
    - Generate a short slug for the task.
    - Inject the task as a `- [ ]` markdown item into @/tools/SK8Lytz_Bucket_List.md.
+   - **CRITICAL TELEMETRY RULE**: You MUST append the token tracking tag to the end of the new task line (e.g., `[🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]`).
 3. **The Priority Override**:
    - If the user's prompt includes `"up next"`, `"bump"`, or `"priority"`, physically place the task at the absolute top of the `## 🔴 High Priority / Next Up` section in the bucket list.
 4. **Quarantine & Plan**:
