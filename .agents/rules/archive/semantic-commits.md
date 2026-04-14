@@ -10,7 +10,8 @@ trigger: always_on
 You are strictly commanded to operate in a continuous micro-commit workflow at all times, 24/7, 365 days a year. 
 - You MUST instantly execute a `git add` and `git commit` immediately after modifying ANY file in the codebase.
 - You must NOT wait until the end of a feature, workflow, or prompt to bundle changes together. 
-- Every single logical change, bug fix, or syntax tweak must be instantly locked into the local history using semantic commits. No exceptions.
+- Every single logical change, bug fix, or syntax tweak must be instantly locked into the local history using semantic commits.
+- *EXEMPTION:* Do NOT auto-commit changes to Ledger Files (`SK8Lytz_Bucket_List.md`) or Documentation (`SK8Lytz_App_Master_Reference.md`). Allow these files to batch naturally. They will be swept up during the `/wind_down` "Big Sync" to cleanly separate administrative tracking from deep logic commits.
 
 Whenever you execute "any" Git commit on behalf of the user, you are **forbidden** from writing a generic or unstructured commit message.
 

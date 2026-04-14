@@ -15,8 +15,8 @@ Whenever you are tasked with creating or modifying a user interface component, y
 
 2. **Strict Spacing & Typography Discipline**:
    - **No Magic Numbers:** You are forbidden from using arbitrary pixel values. 
-   - You must strictly adhere to an **8-point grid system** (8, 16, 24, 32, 48, 64) for all padding, margins, and heights.
-   - **Tap Targets:** For mobile interfaces, interactive elements must have a minimum height/width of 48px to accommodate users wearing protective gear.
+   - You must strictly adhere to an **8-point proportional grid system**. Rather than hardcoded pixels, use CSS `clamp()` and `calc()` mapped to 8-point baselines (e.g., `clamp(16px, 2vw, 24px)`) for padding and margins to satisfy the responsive DOM mandate.
+   - **Tap Targets:** For mobile interfaces, interactive elements must utilize `min-height` and `min-width` clamps ensuring a floor of 48px to accommodate users wearing protective gear.
    - Use a clear typographic hierarchy relying on font-weight and opacity (e.g., `rgba(255,255,255, 0.7)`) for contrast, rather than just changing colors.
 
 3. **Micro-Interactions & Feedback**:
