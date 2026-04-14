@@ -403,27 +403,46 @@ function _syncCeoKPIs({ totals }) {
 
         salesDB.forEach(s => {
             let qty = parseFloat(s.qty_sold) || 1;
-            let cogs = (typeof getEngineTrueCogs === 'function') ? getEngineTrueCogs(s.internal_recipe_name || s.item_name) * qty : 0;
-            let rev = parseFloat(s.total_received) || 0;
-            let shp = parseFloat(s.shipping_paid) || 0;
-            let stf = (rev * 0.029) + 0.30;
-            let net = rev - (cogs + shp + stf);
+            let rev = parseFloat(s.total) || ((parseFloat(s.actual_sale_price) || 0) * qty);
+            let net = parseFloat(s.net_profit) || 0;
             ltvNetSum += net;
 
             let h = s.customer_email_hash || s.customer_phone_hash;
             if (h && h.trim() !== '') {
                 if (!window._ltvCustomerMap[h]) {
-                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), totalNet: 0 };
+                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), legitimateOrderIds: new Set(), totalNet: 0, ordersMap: {} };
                 }
+                
+                let oid = s.order_id || `no_id_${Math.random()}`;
+                let tType = s.transaction_type || 'Standard';
+                let isLegitimate = (tType !== 'Warranty' && tType !== 'Gift' && tType !== 'Exchange Replacement' && tType !== 'IGNORE');
+
                 if (s.order_id) {
-                    if (!window._ltvCustomerMap[h].orderIds.has(s.order_id)) {
+                    if (isLegitimate && !window._ltvCustomerMap[h].legitimateOrderIds.has(s.order_id)) {
                         window._ltvCustomerMap[h].orders += 1;
-                        window._ltvCustomerMap[h].orderIds.add(s.order_id);
+                        window._ltvCustomerMap[h].legitimateOrderIds.add(s.order_id);
                     }
-                } else {
+                } else if (isLegitimate) {
                     window._ltvCustomerMap[h].orders += 1;
                 }
                 window._ltvCustomerMap[h].totalNet += net;
+                
+                if (!window._ltvCustomerMap[h].ordersMap[oid]) {
+                    window._ltvCustomerMap[h].ordersMap[oid] = {
+                        order_id: s.order_id || 'N/A',
+                        date: s.sale_date || s.date || 'Unknown',
+                        items: [],
+                        total: parseFloat(s.total) || ((parseFloat(s.actual_sale_price) || 0) * qty), // Capture exact total precisely once
+                        net: 0
+                    };
+                }
+                
+                let itemStr = s.internal_recipe_name || s.item_name || 'Item';
+                if (qty > 1) itemStr = `${qty}x ${itemStr}`;
+                window._ltvCustomerMap[h].ordersMap[oid].items.push(itemStr);
+                
+                // Total is already captured once. Only independently aggregate the per-line Net Profits.
+                window._ltvCustomerMap[h].ordersMap[oid].net += net;
             }
         });
 
@@ -640,24 +659,29 @@ function renderLtvWhalesTable() {
     window._ltvCachedWhales.sort((a,b) => {
         let valA = a[window._ltvSortKey];
         let valB = b[window._ltvSortKey];
+        if (typeof valA === 'string' && typeof valB === 'string') {
+            return window._ltvSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
         if (valA < valB) return window._ltvSortAsc ? -1 : 1;
         if (valA > valB) return window._ltvSortAsc ? 1 : -1;
         return 0;
     });
 
-    let topWhales = window._ltvCachedWhales.slice(0, 20);
     let html = '';
     
-    if (topWhales.length === 0) {
-        html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No historical hashes found.</td></tr>';
+    if (window._ltvCachedWhales.length === 0) {
+        html = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#666;">No historical repeat transactions found.</td></tr>';
     } else {
-        topWhales.forEach(w => {
-            let shortHash = w.hash.substring(0, 8) + '...';
+        window._ltvCachedWhales.forEach(w => {
+            let shortHash = w.pii.substring(0, 8);
             html += `
             <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
-                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;" title="${w.hash}">[HASH_${shortHash}]</td>
-                <td style="padding:12px 15px; font-weight:bold; color:white; text-align:center;">${w.buys}</td>
-                <td style="padding:12px 15px; font-weight:bold; color:var(--neon-green); text-align:right;">${ceoFmt.format(Math.max(0, w.net))}</td>
+                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#a78bfa;" title="${w.pii}">[${shortHash}]</td>
+                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#cbd5e1;">${w.order_id}</td>
+                <td style="padding:12px 15px; color:#94a3b8; font-size:12px;">${new Date(w.date).toLocaleDateString()}</td>
+                <td style="padding:12px 15px; color:white; font-size:12px; font-weight:bold;">${w.item}</td>
+                <td style="padding:12px 15px; color:white; font-weight:bold; text-align:right;">${ceoFmt.format(w.total)}</td>
+                <td style="padding:12px 15px; font-weight:bold; color:${w.net < 0 ? '#ef4444' : 'var(--neon-green)'}; text-align:right;">${ceoFmt.format(w.net)}</td>
             </tr>`;
         });
     }
@@ -678,7 +702,19 @@ function openLtvModal() {
         else if (orderCount === 2) distribution[2]++;
         else distribution[3]++;
 
-        window._ltvCachedWhales.push({ hash: h, buys: orderCount, net: map[h].totalNet });
+        // Unroll individual transactions, grouped by order
+        if (map[h].ordersMap) {
+            Object.values(map[h].ordersMap).forEach(o => {
+                window._ltvCachedWhales.push({
+                    pii: h,
+                    order_id: o.order_id,
+                    date: o.date,
+                    item: o.items.join(', '),
+                    total: o.total,
+                    net: o.net
+                });
+            });
+        }
     });
 
     // Update UI DOM Elements
