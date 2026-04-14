@@ -4,6 +4,22 @@ Welcome to your customized Neogleamz / SK8Lytz Autonomous Agent protocol directo
 
 ---
 
+## 🗺️ The Perfect Workflow (Idea to Deployment)
+If you want to perform a flawless, end-to-end code change, follow this sequence:
+
+```mermaid
+flowchart TD
+    A["💡 Phase 1: Ideation"] -->|Type: /intake OR /whiteboard| B["📝 Logged to Bucket List"]
+    B -->|Type: /bucketlist| C["⚙️ Phase 2: Active Dev"]
+    C -->|AI creates Branch & Codes| D{"🔍 Phase 3: Quality Assurance"}
+    D -->|Type: /isolated_test_and_verify| E["✅ Tests Passed"]
+    E -->|Type: /ship_it| F["🚢 Phase 4: Production Integration"]
+    F -->|AI Merges & Pushes to Main| G["🏷️ Phase 5: Patch & Tag"]
+    G -->|Type: /release| H["🧹 Phase 6: End of Session"]
+    H -->|Type: /wind_down| I["🔒 Ledgers Synced & Safe"]
+```
+
+---
 ## 🛠️ Direct Workflow Commands (IDE Auto-Suggested)
 You can access these official macros via the IDE's `/` pop-up menu. They execute structured, multi-step Standard Operating Procedures.
 
