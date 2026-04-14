@@ -20,7 +20,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟠 P1 High Priority (Core Features)
-*(No active P1 tasks)*
+### Target: `main`
+*(Epic: UI Enhancements & Fixes)*
+- [ ] `fix/cohort-intel-modal-ui` : Rebuild the Cohort Intel modal to standard ledge behavior (drag sorting), update columns (Order ID, Date, Item, Total, Net), and replace the top-right 'X' with a standard solid 'Close' rectangle button.
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -160,3 +162,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `chore/prettier-eslint-initialization` : Setup a strict `.prettierrc` and `.eslintrc.json` in the root optimized for Vanilla ES6+ Javascript. Add NPM scrips `lint` and `format` so the AI can algorithmically sanitize the codebase and catch syntax errors pre-execution.
 - [x] `feat/strict-jsdoc-typing` : Do a systematic pass over the core database sync modules (`sales-module.js`, `inventory-module.js`) and inject strict JSDoc typing (`/** @type {...} */`) for core data structures to mathematically prevent AI hallucination of payload shapes.
 - [x] `feat/automated-test-suite` : Initialize a lightweight, native JavaScript automated testing suite (e.g. Jest or Playwright) that runs against the local `.js` algorithms. Provide the AI with an `npm test` script to autonomously verify complex math (like CFO waterfall algorithms) without bothering the user for manual QA.
+
+### Target: `main`
+*(Epic: Agentic Hygiene & Workflow Refactoring)*
+- [x] `chore/agentic-rule-refactor` : Identified and repaired 5 core logical paradoxes across the agent environment. Granted `main` branch exemptions for `/release` and `/wind_down` tagging; normalized the 8-point pixel grid system to `clamp()` scaling via `modern-ui-ux.md`; fully exempted Bucket Lists and Master References from the 24/7 continuous micro-commit stream to enable graceful batch syncing; restricted the Boy Scout rule to explicit `feat/` cycles to isolate bug deployments; and officially excised the redundant `/idea_intake` workflow.

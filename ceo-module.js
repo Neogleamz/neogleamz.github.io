@@ -413,8 +413,10 @@ function _syncCeoKPIs({ totals }) {
             let h = s.customer_email_hash || s.customer_phone_hash;
             if (h && h.trim() !== '') {
                 if (!window._ltvCustomerMap[h]) {
-                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), totalNet: 0, transactions: [] };
+                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), totalNet: 0, ordersMap: {} };
                 }
+                
+                let oid = s.order_id || `no_id_${Math.random()}`;
                 if (s.order_id) {
                     if (!window._ltvCustomerMap[h].orderIds.has(s.order_id)) {
                         window._ltvCustomerMap[h].orders += 1;
@@ -424,13 +426,23 @@ function _syncCeoKPIs({ totals }) {
                     window._ltvCustomerMap[h].orders += 1;
                 }
                 window._ltvCustomerMap[h].totalNet += net;
-                window._ltvCustomerMap[h].transactions.push({
-                    order_id: s.order_id || 'N/A',
-                    date: s.sale_date || s.date || 'Unknown',
-                    item: s.internal_recipe_name || s.item_name || 'Item',
-                    total: rev,
-                    net: net
-                });
+                
+                if (!window._ltvCustomerMap[h].ordersMap[oid]) {
+                    window._ltvCustomerMap[h].ordersMap[oid] = {
+                        order_id: s.order_id || 'N/A',
+                        date: s.sale_date || s.date || 'Unknown',
+                        items: [],
+                        total: 0,
+                        net: 0
+                    };
+                }
+                
+                let itemStr = s.internal_recipe_name || s.item_name || 'Item';
+                if (qty > 1) itemStr = `${qty}x ${itemStr}`;
+                window._ltvCustomerMap[h].ordersMap[oid].items.push(itemStr);
+                
+                window._ltvCustomerMap[h].ordersMap[oid].total += rev;
+                window._ltvCustomerMap[h].ordersMap[oid].net += net;
             }
         });
 
@@ -688,15 +700,15 @@ function openLtvModal() {
         else if (orderCount === 2) distribution[2]++;
         else distribution[3]++;
 
-        // Unroll individual repeat-purchaser transactions
-        if (orderCount > 1 && map[h].transactions) {
-            map[h].transactions.forEach(t => {
+        // Unroll individual transactions, grouped by order
+        if (map[h].ordersMap) {
+            Object.values(map[h].ordersMap).forEach(o => {
                 window._ltvCachedWhales.push({
-                    order_id: t.order_id,
-                    date: t.date,
-                    item: t.item,
-                    total: t.total,
-                    net: t.net
+                    order_id: o.order_id,
+                    date: o.date,
+                    item: o.items.join(', '),
+                    total: o.total,
+                    net: o.net
                 });
             });
         }
