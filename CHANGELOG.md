@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.0.15] - 2026-04-14
+
+### Features & Refactors
+- **Framework Immutability Upgrades**: Rewrote the core Release Manager AI workflow rule to successfully tag and archive past records with `[🚀]` flags rather than routinely pruning them, establishing a mathematically impenetrable Immutable Ledger. Synthesized global metadata tracking hooks throughout the core operational workflows (Intake, Code Debt Hunts, and Product Alignment protocols), automatically enforcing metadata injections to explicitly track lifecycle AI token operations.
+- **CSS Layout Physics**: Declassified the legacy `index.html` margin hacks into `PATTERN:` flags, validating safe margin-auto flexbox architecture without triggering tech-debt anomaly alerts.
+
 ## [1.0.14] - 2026-04-14
 
 ### Features & Refactors

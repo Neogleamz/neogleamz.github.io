@@ -55,7 +55,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *0 critical outdated dependencies flagged.*
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
-- [x] `debt/css-flex-hack` : `index.html` (L327) - Review explicit CSS layout note tracked as `HACK` utilizing auto-margins for flexbox container squish centering. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
+
 
 ---
 
@@ -63,11 +63,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Agentic Framework Telemetry)*
-- [x] `feat/bucket-list-token-tracking` : Establish a visible tracking convention for LLM API token spend vs. expected spend budget directly on the Bucket List tasks and epics to monitor AI operational costs. [🤖 Gemini 3.1 Pro] [🧠 25k / 50k] [💸 $0.08 / $0.15]
+- [🚀] `feat/bucket-list-token-tracking` : Establish a visible tracking convention for LLM API token spend vs. expected spend budget directly on the Bucket List tasks and epics to monitor AI operational costs. [🤖 Gemini 3.1 Pro] [🧠 25k / 50k] [💸 $0.08 / $0.15]
 
 ### Target: `main`
 *(Epic: Code Debt Hunt)*
-- [x] `debt/css-flex-hack` : `index.html` (L327) - Review explicit CSS layout note tracked as `HACK` utilizing auto-margins for flexbox container squish centering. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
+- [🚀] `debt/css-flex-hack` : `index.html` (L327) - Review explicit CSS layout note tracked as `HACK` utilizing auto-margins for flexbox container squish centering. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `main`
 *(Epic: UI Enhancements & Fixes)*
