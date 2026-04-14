@@ -6,6 +6,7 @@ trigger: "/status, whats up, status update, where are we, what's happening"
 
 # Status Update Workflow
 
+// turbo-all
 When the user invokes `/status` (or asks "whats up", "status update", "where are we", "what's happening"), you must act as the Project Manager and execute the following sequence:
 
 1. **Gather Git Context**:

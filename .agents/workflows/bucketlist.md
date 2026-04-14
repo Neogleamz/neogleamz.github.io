@@ -6,6 +6,7 @@ trigger: "/bucketlist, /start_next, start working on the bucket list, start buck
 
 # Auto-Branching Execution Workflow
 
+// turbo-all
 When the user instructs you to start the next task (e.g., "what's next"), you must act as the Lead Engineer and execute this sequence exactly:
 
 1. **Read Status**: 
@@ -25,10 +26,10 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - If requirements are ambiguous, **HALT ALL ACTION.** Output a numbered list of clarifying questions for the user (e.g., *"1. What specific flexbox layout do you want for this UI?", "2. Should this Supabase query be cached in localStorage?"*). Wait for answers before proceeding.
 
 4. **Planning & Mandatory Review Gate (HALT)**:
-   - Generate a detailed Implementation Plan using your file-editing tools to save a copy to `docs/plans/<extracted-branch-slug>.md`.
+   - Generate a detailed Implementation Plan using your **Native Antigravity Artifact Generator** (so it visually renders in the UI) AND simultaneously copy that exact same syntax to a physical markdown file located at `docs/plans/<extracted-branch-slug>.md` for permanent storage.
    - **Crucial:** Your plan MUST start with `### Design Decisions & Rationale`. Provide a brief summary (2-3 sentences max) explaining *why* you chose the specific Vanilla JS approach or Web Bluetooth architecture.
-   - Read the file to display the plan in the chat.
-   - **HALT ALL ACTION.** Explicitly ask: *"I have generated the plan artifact. Review the plan above. Type 'proceed' to execute, or provide feedback."* Do not write code until approved.
+   - Set the `RequestFeedback` parameter in the Artifact generator to `true`.
+   - **HALT ALL ACTION.** Explicitly ask: *"I have generated the dual-synced plan artifact. Review the plan in the UI panel. Type 'proceed' to execute, or provide feedback."* Do not write code until approved.
 
 5. **Execute Work**: 
    - Once the user types "proceed", use your code-editing tools to implement the module exactly as outlined in the approved plan.

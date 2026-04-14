@@ -6,6 +6,7 @@ trigger: "/wind_down, /wind-down, end session, wind down, see you tomorrow"
 
 # The Midnight Oil Protocol (Wind Down Workflow)
 
+// turbo-all
 When the user invokes `/wind-down` (or strongly implies they are ending the session), execute the following sequence sequentially:
 
 1. **Knowledge Persistence (Master Reference Sync)**:

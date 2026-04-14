@@ -23,3 +23,8 @@ trigger: always_on
 - **Always-On Micro-Commits:** Continuously execute instant `git add/commit` actions dynamically using Semantic string logic (`feat:`, `fix:`) directly after altering any files. 
 - **Ledger Exemption:** Do NOT auto-commit tracking logs (like `SK8Lytz_Bucket_List.md` or `Master_Reference`). Let those batch naturally for `/wind_down` syncs.
 - **Corporate Brain Synchronization:** Whenever modifying Supabase APIs, immediately jump to the `SK8Lytz_App_Master_Reference.md` Schema section and surgically inject the new definitions in 30k byte chunks. Delete explicitly invalidated concepts.
+
+### 4. Deepmind Documentation OS
+- **Visual Artifacting:** Always leverage rich UI syntax (like `> [!NOTE]` or `> [!WARNING]` GitHub alerts) when outputting logs, plans, or bug traces to the user.
+- **Architecture Mapping:** When proposing complex code structures or DB schemas, enforce the use of `Mermaid` flowcharts and entity-relationship diagrams over text walls.
+- **UI Prototyping First:** Use the native `generate_image` tool to spawn visual concept artifacts for complex UI interactions before committing to raw DOM logic.

@@ -6,6 +6,7 @@ trigger: "/ship_it, /ship-it, ship it, merge task, finalize branch"
 
 # Ship It Workflow
 
+// turbo-all
 When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize branch"), you must act as the Release Manager and execute the following sequence:
 
 1. **Verify Context**: Run `git branch --show-current` to ensure we are currently on a feature branch (e.g., `feature/...`, `fix/...`, or `chore/...`).

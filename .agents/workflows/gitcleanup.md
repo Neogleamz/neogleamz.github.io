@@ -6,6 +6,7 @@ trigger: "/repo_cleanup, /cleanup, clean up the repository, clean up repo"
 
 # Repository Cleanup Workflow
 
+// turbo-all
 When the user invokes `/cleanup` (or asks to "clean up the repository"), you must act as the Version Control Manager and execute the following sequence:
 
 1. **Gather Merged Branches**:
