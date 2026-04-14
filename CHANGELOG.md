@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.0.13] - 2026-04-14
+
+### Features & Refactors
+- **Cohort Intelligence Ledger Matrix**: Rebuilt the LTV modal into a forensic transaction ledger supporting bidirectional alphanumeric drag-to-sort functionality. Deployed custom logic blocking pseudo-returns and zero-intent orders (Warranty, Gifts, Post-Ship Exchanges) from improperly flagging accounts as Repeat Buyers. Injected the encrypted PII hashes directly into the data matrix, enabling physical grouping of multi-order accounts upon column sort. Mathematically verified line-item true capture rates to prevent Total / Net revenue inflation metrics caused by Shopify's raw exports. 
+- **Automated Testing Engine Integration**: Successfully integrated a robust, zero-build Jest/JSDOM automated matrix to natively evaluate algorithm parity. Validated mathematical fidelity mathematically testing recursive BOM extraction arrays (`calculateProductBreakdown`), core Stripe fee thresholds, baseline 3D printing durations, and multi-variable sales computations via the `getHistoricalNetProfit` method. Tested predictive parameters mapping dynamically to `calculateTrailingVelocity` forecasting limits and `calculateDynamicROP`.
+
 ## [1.0.12] - 2026-04-14
 
 ### Features & Refactors
