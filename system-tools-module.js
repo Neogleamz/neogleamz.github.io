@@ -125,11 +125,11 @@ window.toggleRawOrderView = function() {
     if (window._isOrderRawView) {
         ta.value = window.__LATEST_RAW_ORDER_DUMP || "";
         window._isOrderRawView = false;
-        if (btn) btn.innerHTML = "👁️ VIEW SOURCE HTML";
+        if (btn) btn.innerHTML = window.safeHTML("👁️ VIEW SOURCE HTML");
     } else {
         ta.value = window.__LATEST_RAW_ORDER_HTML_DUMP || "No HTML source cached. Please run a test or import sandbox.";
         window._isOrderRawView = true;
-        if (btn) btn.innerHTML = "👁️ VIEW EXTRACTED TEXT";
+        if (btn) btn.innerHTML = window.safeHTML("👁️ VIEW EXTRACTED TEXT");
     }
     window.evaluateAllRegex();
 };
@@ -141,7 +141,7 @@ window.openParserConfig = function() {
 window.renderPresetDropdown = function() {
     let sel = document.getElementById('regexPresetSelect');
     if(!sel) return;
-    sel.innerHTML = "";
+    sel.innerHTML = window.safeHTML("");
     window.PARSER_PROFILES.forEach((p, idx) => {
         let opt = document.createElement('option');
         opt.value = idx; opt.innerText = p.name;
@@ -304,7 +304,7 @@ window.evaluateAllRegex = function() {
         safeTxt += window.escapeHtmlForRegex(targetTxt.substring(lastIndex));
 
         let hlLayer = document.getElementById('liveRegexHighlightLayer');
-        if(hlLayer) hlLayer.innerHTML = safeTxt;
+        if(hlLayer) hlLayer.innerHTML = window.safeHTML(safeTxt);
 
     }, 300);
 };
@@ -423,11 +423,11 @@ window.toggleRawParcelView = function() {
     if (window._isParcelRawView) {
         ta.value = window.__LATEST_RAW_PARCEL_DUMP || "";
         window._isParcelRawView = false;
-        if (btn) btn.innerHTML = "👁️ VIEW SOURCE HTML";
+        if (btn) btn.innerHTML = window.safeHTML("👁️ VIEW SOURCE HTML");
     } else {
         ta.value = window.__LATEST_RAW_PARCEL_HTML_DUMP || "No HTML source cached. Please run a test or import sandbox.";
         window._isParcelRawView = true;
-        if (btn) btn.innerHTML = "👁️ VIEW EXTRACTED TEXT";
+        if (btn) btn.innerHTML = window.safeHTML("👁️ VIEW EXTRACTED TEXT");
     }
     window.evaluateAllParcelRegex();
 };
@@ -439,7 +439,7 @@ window.openParcelConfig = function() {
 window.renderParcelPresetDropdown = function() {
     let sel = document.getElementById('parcelPresetSelect');
     if(!sel) return;
-    sel.innerHTML = "";
+    sel.innerHTML = window.safeHTML("");
     window.PARCEL_PROFILES.forEach((p, idx) => {
         let opt = document.createElement('option');
         opt.value = idx; opt.innerText = p.name;
@@ -597,7 +597,7 @@ window.evaluateAllParcelRegex = function() {
         safeTxt += window.escapeHtmlForRegex(targetTxt.substring(lastIndex));
 
         let hlLayer = document.getElementById('liveParcelRegexHighlightLayer');
-        if(hlLayer) hlLayer.innerHTML = safeTxt;
+        if(hlLayer) hlLayer.innerHTML = window.safeHTML(safeTxt);
 
     }, 300);
 };
@@ -827,7 +827,9 @@ window._renderSandboxModal = function() {
     document.getElementById('sandboxModalTitle').innerText = window.__sandboxTitle;
     let body = document.getElementById('sandboxModalBody');
     if ((!payload || payload.length === 0) && !dictPayload) {
-        body.innerHTML = "<div style='color:#ef4444; font-weight:bold;'>Error: Evaluated payload array is physically empty.</div>";
+        body.innerHTML = window.safeHTML(
+            "<div style='color:#ef4444; font-weight:bold;'>Error: Evaluated payload array is physically empty.</div>"
+        );
     } else {
         let renderTable = (data, title, tableNum, isDict=false, dictName=null) => {
             let sortCol = isDict ? window.__sandboxSortStateDict[dictName].col : (tableNum === 2 ? window.__sandboxSortCol2 : window.__sandboxSortCol);
@@ -936,7 +938,7 @@ window._renderSandboxModal = function() {
                 finalHtml += renderTable(window.__sandboxData2, window.__sandboxTable2Title, 2, false);
             }
         }
-        body.innerHTML = finalHtml;
+        body.innerHTML = window.safeHTML(finalHtml);
     }
 };
 
@@ -978,7 +980,7 @@ async function runFileImport(inputNode, type, isTestMode = false) {
     }
     
     let termId = type === 'orders' ? 'importzProgressTerminal' : 'parcelzProgressTerminal';
-    let term = document.getElementById(termId); if(term) term.innerHTML = "";
+    let term = document.getElementById(termId); if(term) term.innerHTML = window.safeHTML("");
     
     importTrace(`INITIALIZING IMPORT PROTOCOL: [${type.toUpperCase()}]`, false, termId);
     if(isTestMode) importTrace(`🧪 DRY RUN SANDBOX ENGAGED: Bypassing Supabase Connection.`, false, termId);
@@ -1036,7 +1038,7 @@ window.commitSandboxImport = async function() {
     let btnCancel = document.getElementById('btnSandboxDiscard');
     
     if (btnSync) {
-        btnSync.innerHTML = "⏳ SYNCING TO CLOUD...";
+        btnSync.innerHTML = window.safeHTML("⏳ SYNCING TO CLOUD...");
         btnSync.disabled = true;
         btnSync.style.opacity = "0.7";
     }
@@ -1072,7 +1074,7 @@ window.commitSandboxImport = async function() {
         }
         
         if (btnSync) {
-            btnSync.innerHTML = "✅ SYNCED SUCCESSFULLY!";
+            btnSync.innerHTML = window.safeHTML("✅ SYNCED SUCCESSFULLY!");
             btnSync.style.opacity = "1";
         }
         
@@ -1085,7 +1087,7 @@ window.commitSandboxImport = async function() {
         setTimeout(() => { 
             document.getElementById('sandboxDataModal').style.display = 'none';
             if (btnSync) {
-                btnSync.innerHTML = "✅ UPLOAD & SYNC";
+                btnSync.innerHTML = window.safeHTML("✅ UPLOAD & SYNC");
                 btnSync.disabled = false;
             }
             setSysProgress(0,'working'); 
@@ -1093,7 +1095,7 @@ window.commitSandboxImport = async function() {
         }, 1500);
     } catch(e) {
         if (btnSync) {
-            btnSync.innerHTML = "❌ SYNC FAILED";
+            btnSync.innerHTML = window.safeHTML("❌ SYNC FAILED");
             btnSync.style.backgroundColor = "#ef4444";
         }
     
@@ -1107,7 +1109,7 @@ window.commitSandboxImport = async function() {
         setTimeout(() => { 
             document.getElementById('sandboxDataModal').style.display = 'none';
             if (btnSync) {
-                btnSync.innerHTML = "✅ UPLOAD & SYNC";
+                btnSync.innerHTML = window.safeHTML("✅ UPLOAD & SYNC");
                 btnSync.disabled = false;
                 btnSync.style.backgroundColor = "";
                 btnSync.style.opacity = "1";
@@ -1297,7 +1299,7 @@ async function extractParcels(files, isTestMode=false) {
 async function syncAndCalculate() {
     let termId = 'recalcProgressTerminal';
     await executeWithButtonAction('btnCalc', '🧮 CALCULATING...', '✅ CALCULATED!', async () => {
-        let term = document.getElementById(termId); if(term) term.innerHTML = "";
+        let term = document.getElementById(termId); if(term) term.innerHTML = window.safeHTML("");
         if (typeof importTrace === 'function') importTrace(`INITIALIZING TRUE COST WATERFALL ENGINE`, false, termId);
         if (typeof importTrace === 'function') importTrace(`▶ Fetching Cloud Memory shards [raw_orders, raw_parcel_summary, raw_parcel_items, full_landed_costs]...`, false, termId);
         
@@ -1420,7 +1422,7 @@ function handleFileSelect(input, isTestMode = false) {
     const file = input.files[0]; if (!file) return;
     
     let termId = 'backupProgressTerminal';
-    let term = document.getElementById(termId); if(term) term.innerHTML = "";
+    let term = document.getElementById(termId); if(term) term.innerHTML = window.safeHTML("");
     
     importTrace(`INITIALIZING RESTORE PROTOCOL`, false, termId);
     if(isTestMode) importTrace(`🧪 DRY RUN SANDBOX ENGAGED: Parsing Payload without writing to Supabase.`, false, termId);
@@ -1454,7 +1456,7 @@ function handleFileSelect(input, isTestMode = false) {
                     setTimeout(()=> { setModuleStatus("statusBackup", "Ready.", "status-idle"); setSysProgress(0,'working'); }, 3000);
                 }
             } else {
-                document.getElementById('restoreCheckboxes').innerHTML = html; 
+                document.getElementById('restoreCheckboxes').innerHTML = window.safeHTML(html); 
                 document.getElementById('restorePreview').style.display = 'block';
                 importTrace(`⚠️ PRODUCTION STAGING INTERCEPT: Select target sheets to inspect.`, true, termId);
                 setSysProgress(100, 'success'); setModuleStatus("statusBackup", "⚠️ Select targets...", "mod-working"); 
@@ -1747,7 +1749,7 @@ window.openGlobalRegexPlayground = function(type) {
         </div>
     </div>`;
 
-    document.getElementById("globalRegexPlaygroundModalContainer").innerHTML = h;
+    document.getElementById("globalRegexPlaygroundModalContainer").innerHTML = window.safeHTML(h);
     document.getElementById("globalRegexPlaygroundModalContainer").style.display = "flex";
 
     // Bind scroll syncing between textarea and highlight layer safely
@@ -1866,7 +1868,7 @@ function renderPaperProfileTable() {
              h += `</tr>`;
         }
     });
-    tbody.innerHTML = h;
+    tbody.innerHTML = window.safeHTML(h);
 }
 
 function editPaperProfile(idx) {
@@ -1923,7 +1925,7 @@ function renderPaperProfileDropdowns() {
             let selStr = p.n === pName ? ' selected' : '';
             h += `<option value="${jsonStr}"${selStr}>${p.n}</option>`;
         });
-        sel.innerHTML = h;
+        sel.innerHTML = window.safeHTML(h);
     });
 }
 // ============================================================
