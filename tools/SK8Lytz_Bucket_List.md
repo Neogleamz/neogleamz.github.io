@@ -36,9 +36,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
-### Target: `epic/disaster-recovery`
-*(Epic: Safe Database Defibrillation)*
-- [ ] `feat/schema-diff-defibrillator` : Develop the `[/schema_diff]` workflow. To eliminate database mutation anxiety, the workflow must be rigidly scoped to *Strict Read-Only Mode* to diff local `/supabase/migrations` against remote instances. Any state-mutating execution (e.g. `supabase migration repair`) must be completely isolated behind a secondary, mandatory user-authorization gate. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 
 ---
 
@@ -62,6 +59,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `epic/disaster-recovery`
+*(Epic: Safe Database Defibrillation)*
+- [🚀] `feat/schema-diff-defibrillator` : Develop the `[/schema_diff]` workflow. To eliminate database mutation anxiety, the workflow must be rigidly scoped to *Strict Read-Only Mode* to diff local `/supabase/migrations` against remote instances. Any state-mutating execution (e.g. `supabase migration repair`) must be completely isolated behind a secondary, mandatory user-authorization gate. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 
 ### Target: `epic/workflow-architecture`
 *(Epic: Agentic Orchestration Overhaul)*
