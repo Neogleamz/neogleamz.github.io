@@ -25,6 +25,6 @@ trigger: always_on
 - **Corporate Brain Synchronization:** Whenever modifying Supabase APIs, immediately jump to the `SK8Lytz_App_Master_Reference.md` Schema section and surgically inject the new definitions in 30k byte chunks. Delete explicitly invalidated concepts.
 
 ### 4. Deepmind Documentation OS
-- **Visual Artifacting:** Always leverage rich UI syntax (like `> [!NOTE]` or `> [!WARNING]` GitHub alerts) when outputting logs, plans, or bug traces to the user.
+- **Visual Artifacting & Directives:** You MUST universally leverage rich UI syntax (like `> [!NOTE]` or `> [!IMPORTANT]` GitHub alerts) for ALL chat responses, especially when asking the user questions or prompting them for their next command. Never make the user guess what they need to do next; box the required command inside an alert.
 - **Architecture Mapping:** When proposing complex code structures or DB schemas, enforce the use of `Mermaid` flowcharts and entity-relationship diagrams over text walls.
 - **UI Prototyping First:** Use the native `generate_image` tool to spawn visual concept artifacts for complex UI interactions before committing to raw DOM logic.
