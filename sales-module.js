@@ -124,7 +124,7 @@ function syncTrace(msg, isErr=false) {
 
 async function processSalesCSV(isTestMode = false) {
     return new Promise((resolve, reject) => {
-        let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
+        let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = window.safeHTML("");
         syncTrace("INITIALIZING SYNC PROTOCOL...", false);
         const fileId = isTestMode ? 'salesCsvFileTest' : 'salesCsvFile';
 
@@ -288,7 +288,7 @@ async function processParsedSales(rows, isTestMode = false) {
     if(unmapped.size > 0) {
         let uList = Array.from(unmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
         uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
-        document.getElementById('unmappedSkusList').innerHTML = h;
+        document.getElementById('unmappedSkusList').innerHTML = window.safeHTML(h);
         setMasterStatus("Action Required", "mod-error"); setSysProgress(0, 'working'); return;
     }
 
@@ -296,7 +296,7 @@ async function processParsedSales(rows, isTestMode = false) {
         syncTrace("HALT WARNING: Zero valid rows inherently parsed from target file. Aborting.", true);
         setTimeout(() => showToast("No valid row structures found in this file!"), 10);
         let elUnmapped = document.getElementById('unmappedSkusList');
-        if (elUnmapped) elUnmapped.innerHTML = "";
+        if (elUnmapped) elUnmapped.innerHTML = window.safeHTML("");
 
         setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working');
         let elFile = document.getElementById('salesCsvFile');
@@ -329,7 +329,7 @@ async function saveAliasMapping() {
             let uList = Array.from(stillUnmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
             uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
             let elUnmapped = document.getElementById('unmappedSkusList');
-            if (elUnmapped) elUnmapped.innerHTML = h;
+            if (elUnmapped) elUnmapped.innerHTML = window.safeHTML(h);
         }
         if (typeof renderAliasManager === 'function') renderAliasManager();
     }).catch(e => {
@@ -516,7 +516,7 @@ async function executeSalesSync(isTestMode = false) {
                     let count = cleanPayload.length;
                     pendingSalesRows = [];
                     let elUnmapped = document.getElementById('unmappedSkusList');
-                    if (elUnmapped) elUnmapped.innerHTML = "";
+                    if (elUnmapped) elUnmapped.innerHTML = window.safeHTML("");
                     syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
 
                     renderSalesTable();
@@ -802,7 +802,7 @@ function renderSalesTable() {
         });
     }
 
-        wrap.innerHTML = h + `</tbody></table>`;
+        wrap.innerHTML = window.safeHTML(h + `</tbody></table>`);
         if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
     } catch(e) { sysLog('Sales table render error: ' + e.message, true); }
 }

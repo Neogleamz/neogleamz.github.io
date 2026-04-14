@@ -44,7 +44,9 @@
             const c = document.getElementById('toast-container'); 
             const t = document.createElement('div');
             t.className = `${type==='success'?'bg-green-500':'bg-red-500'} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 toast-enter pointer-events-auto min-w-[280px] transition-opacity duration-500`;
-            t.innerHTML = `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i><span class="font-medium text-sm">${msg}</span>`;
+            t.innerHTML = window.safeHTML(
+                `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i><span class="font-medium text-sm">${msg}</span>`
+            );
             c.appendChild(t); 
             setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
         }
@@ -143,10 +145,14 @@
                     const btn = e.currentTarget;
                     if (socialzSkaters[index].isFavorite) {
                         btn.className = btn.className.replace('text-slate-400', 'text-red-500');
-                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                        btn.innerHTML = window.safeHTML(
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                        );
                     } else {
                         btn.className = btn.className.replace('text-red-500', 'text-slate-400');
-                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                        btn.innerHTML = window.safeHTML(
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                        );
                     }
                 } else {
                     renderSkaters(); // fallback if called programmatically
@@ -201,22 +207,26 @@
 
             const sortedStyles = Array.from(uniqueStyles).sort();
             if (styleList) {
-                styleList.innerHTML = sortedStyles.map(st => `
+                styleList.innerHTML = window.safeHTML(sortedStyles.map(st => `
                     <label style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; background:transparent;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
                         <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} onchange="handleStyleToggle('${st}')">
                         <span style="font-size:12px; color:var(--text-main); font-weight:600; user-select:none;">${st}</span>
                     </label>
-                `).join('');
+                `).join(''));
             }
 
             const sortedRegions = Array.from(uniqueRegions).sort();
             const currentReg = regionSelect.value;
-            regionSelect.innerHTML = '<option value="">All Regions</option>' + sortedRegions.map(reg => `<option value="${reg}">${reg}</option>`).join('');
+            regionSelect.innerHTML = window.safeHTML(
+                '<option value="">All Regions</option>' + sortedRegions.map(reg => `<option value="${reg}">${reg}</option>`).join('')
+            );
             if (sortedRegions.includes(currentReg)) regionSelect.value = currentReg;
 
             const sortedTypes = Array.from(uniqueTypes).sort();
             const currentType = typeSelect.value;
-            typeSelect.innerHTML = '<option value="">All Types</option>' + sortedTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+            typeSelect.innerHTML = window.safeHTML(
+                '<option value="">All Types</option>' + sortedTypes.map(t => `<option value="${t}">${t}</option>`).join('')
+            );
             if (sortedTypes.includes(currentType)) typeSelect.value = currentType;
         }
 
@@ -342,11 +352,11 @@
             if(document.getElementById('stat-avg-eng')) document.getElementById('stat-avg-eng').innerText = filtered.length > 0 ? (2.4 + (reach % 100) / 100).toFixed(1) + "%" : "0%";
 
             if (filtered.length === 0) {
-                grid.innerHTML = ''; emptyState.classList.remove('hidden');
+                grid.innerHTML = window.safeHTML(''); emptyState.classList.remove('hidden');
             } else {
                 emptyState.classList.add('hidden');
                 if (viewMode === 'grid') {
-                    grid.innerHTML = filtered.map(s => {
+                    grid.innerHTML = window.safeHTML(filtered.map(s => {
                         const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
                         const styleList = s.style ? s.style.split(';').map(st => st.trim()).filter(st => st).slice(0, 3) : [];
                         const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
@@ -409,7 +419,7 @@
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
                 </div>
             </div>`;
-                    }).join('');
+                    }).join(''));
                 } else {
                     // COMPACT LIST VIEW - TABLE MODE
                     let tCols = [
@@ -475,7 +485,7 @@
                     }).join('');
                     
                     tableHtml += `</tbody></table></div>`;
-                    grid.innerHTML = tableHtml;
+                    grid.innerHTML = window.safeHTML(tableHtml);
                     setTimeout(() => { if(typeof applyTableInteractivity === 'function') applyTableInteractivity('skater-grid-wrapper'); }, 50);
                 }
             }
