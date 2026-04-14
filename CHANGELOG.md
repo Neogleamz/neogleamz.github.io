@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+
+### Features & Refactors
+- **Security Architecture Audit & Hardening**: Executed a comprehensive repository-wide security audit utilizing `xss-risk-map.js`. Discovered and systematically remediated 230 injection vectors by wrapping them dynamically with a strict `window.safeHTML()` protocol that preserves vanilla JS UI functionality. Deployed a system-wide Content-Security-Policy (CSP) across the infrastructure locking down DOM mutations directly natively.
+
 ## [1.0.15] - 2026-04-14
 
 ### Features & Refactors
