@@ -33,11 +33,16 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-
+### Target: `epic/agentic-evolution-ui`
+*(Epic: UI & Security Hardening Automation)*
+- [ ] `feat/ui-xray-debugger` : Build the `[/ui_xray]` workflow allowing the AI to autonomously inject neon CSS borders over all flex containers to visually scan, report, and verify structural DOM overlaps without requiring human visual intervention. [🤖 AI Model] [🧠 TBD] [💸 TBD]
+- [ ] `feat/red-team-protocol` : Build the `[/red_team]` workflow to enforce a strict persona shift where the AI acts as a malicious Penetration Tester to proactively scan Vanilla JS modules for DOM clobbering, injection vectors, and XSS exploits prior to release. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
-*(No active P2 tasks)*
+### Target: `epic/disaster-recovery`
+*(Epic: Safe Database Defibrillation)*
+- [ ] `feat/schema-diff-defibrillator` : Develop the `[/schema_diff]` workflow. To eliminate database mutation anxiety, the workflow must be rigidly scoped to *Strict Read-Only Mode* to diff local `/supabase/migrations` against remote instances. Any state-mutating execution (e.g. `supabase migration repair`) must be completely isolated behind a secondary, mandatory user-authorization gate. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 
 ---
 
