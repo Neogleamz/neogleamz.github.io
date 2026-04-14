@@ -16,8 +16,14 @@
  */
 // --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
 function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
-function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`; } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = `<video src="${url}" style="max-width:100%; max-height:100%; outline:none; box-shadow:0 0 40px rgba(0,0,0,0.5);" controls autoplay controlsList="nodownload"></video>`; } else { container.style.background = '#ffffff'; container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`; } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
-function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = ''; } catch(e) { sysLog(e.message, true); } }
+function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = window.safeHTML(
+    `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`
+); } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = window.safeHTML(
+    `<video src="${url}" style="max-width:100%; max-height:100%; outline:none; box-shadow:0 0 40px rgba(0,0,0,0.5);" controls autoplay controlsList="nodownload"></video>`
+); } else { container.style.background = '#ffffff'; container.innerHTML = window.safeHTML(
+    `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`
+); } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
+function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = window.safeHTML(''); } catch(e) { sysLog(e.message, true); } }
 
 function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
 function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;"><select onchange="execRT('fontSize', this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main);"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
@@ -64,7 +70,7 @@ function populateSOPDropdown() {
         options += grp('⚙️ SUB-ASSEMBLIES',  '⚙️',  subs);
         options += grp('🖨️ 3D PRINTS',       '🖨️',  prints);
     }
-    sopSelect.innerHTML = options;
+    sopSelect.innerHTML = window.safeHTML(options);
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -74,7 +80,9 @@ function renderMasterSOP() {
         const area = document.getElementById('sopMasterEditorArea');
         const qaArea = document.getElementById('productionAdminQA');
         if(!p) {
-            area.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select an item above to start writing instructions.</div>";
+            area.innerHTML = window.safeHTML(
+                "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select an item above to start writing instructions.</div>"
+            );
             if(qaArea) { qaArea.value = ''; if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview(); }
             return;
         }
@@ -96,11 +104,11 @@ function renderMasterSOP() {
         if(mappedSteps.length === 0) mappedSteps = [{}];
         let h = "";
         mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); });
-        area.innerHTML = h;
+        area.innerHTML = window.safeHTML(h);
     } catch(e) { sysLog(e.message, true); }
 }
 
-function addSOPRow(btn) { try { let newRow = document.createElement('div'); newRow.innerHTML = generateEditableSOPRow({}, 999); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
+function addSOPRow(btn) { try { let newRow = document.createElement('div'); newRow.innerHTML = window.safeHTML(generateEditableSOPRow({}, 999)); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
 function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) { sysLog("UI Error removing SOP step: " + e.message, true); } }
 function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) { sysLog("UI Error moving SOP up: " + e.message, true); } }
 function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) { sysLog("UI Error moving SOP down: " + e.message, true); } }
@@ -230,7 +238,9 @@ function renderStagedBatchItems() {
     try {
     let list = document.getElementById('stagedBatchItemsList');
     if(multiBatchItems.length === 0) {
-        list.innerHTML = '<li class="empty-state" style="list-style:none;">Cart is empty. Add products above.</li>';
+        list.innerHTML = window.safeHTML(
+            '<li class="empty-state" style="list-style:none;">Cart is empty. Add products above.</li>'
+        );
         return;
     }
 
@@ -242,7 +252,7 @@ function renderStagedBatchItems() {
             <button class="btn-red-muted btn-xs" onclick="removeBatchItem(${index})">✕</button>
         </li>`;
     });
-    list.innerHTML = h;
+    list.innerHTML = window.safeHTML(h);
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -277,7 +287,7 @@ function checkWORouting() {
 
     let keys = Object.keys(subsNeeded);
     if(keys.length === 0) {
-        rList.innerHTML = '';
+        rList.innerHTML = window.safeHTML('');
         rArea.style.display = 'none';
         return;
     }
@@ -341,7 +351,7 @@ function checkWORouting() {
         openKeys.pop();
     }
 
-    rList.innerHTML = h;
+    rList.innerHTML = window.safeHTML(h);
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -481,10 +491,10 @@ function sortReportTable(th, n, isNumeric) {
 
     table.querySelectorAll('th').forEach(h => {
         if(h !== th) h.removeAttribute('data-asc');
-        h.innerHTML = h.innerHTML.replace(' ▲', '').replace(' ▼', '').replace(' ↕', ' ↕');
+        h.innerHTML = window.safeHTML(h.innerHTML.replace(' ▲', '').replace(' ▼', '').replace(' ↕', ' ↕'));
         if(!h.innerHTML.includes('↕')) h.innerHTML += ' ↕';
     });
-    th.innerHTML = th.innerHTML.replace(' ↕', '') + (isAsc ? ' ▲' : ' ▼');
+    th.innerHTML = window.safeHTML(th.innerHTML.replace(' ↕', '') + (isAsc ? ' ▲' : ' ▼'));
 
     rows.sort((a, b) => {
         let textA = a.querySelectorAll('td')[n].innerText;
@@ -677,7 +687,7 @@ function generateMultiBatchOrderReport() {
     if(!hasBuilds) h += `<tr><td colspan="4" style="text-align:center; padding:10px; color:var(--text-muted);">No sub-assemblies built.</td></tr>`;
     h += `</tbody></table>`;
 
-    document.getElementById('batchOrderReportContent').innerHTML = h;
+    document.getElementById('batchOrderReportContent').innerHTML = window.safeHTML(h);
     document.getElementById('multiBatchOrderModal').style.display = 'none';
     document.getElementById('batchOrderReportModal').style.display = 'flex';
     } catch(e) { sysLog(e.message, true); }
@@ -740,7 +750,7 @@ async function validateAndCreateWO() {
             if(req > onHand) { let name = k.replace('RECIPE:::', ''); shortfalls.push(`<li><strong>⚙️ ${name}</strong>: Need to pull ${req.toFixed(2)}, Shelf has ${onHand.toFixed(2)}</li>`); }
         });
 
-        if(shortfalls.length > 0) { document.getElementById('woShortfallList').innerHTML = shortfalls.join(''); document.getElementById('woErrorBox').style.display = 'block'; return; }
+        if(shortfalls.length > 0) { document.getElementById('woShortfallList').innerHTML = window.safeHTML(shortfalls.join('')); document.getElementById('woErrorBox').style.display = 'block'; return; }
 
         let batchType = document.getElementById('batchTypeSelect') ? document.getElementById('batchTypeSelect').value : 'Production';
         let woId = "WO-" + Date.now().toString().slice(-6);
@@ -788,7 +798,7 @@ let woDraggedIndex = null;
 
 function renderWOList() {
     try {
-        const ui = document.getElementById('woListUI'); ui.innerHTML = "";
+        const ui = document.getElementById('woListUI'); ui.innerHTML = window.safeHTML("");
 
         let activeBatches = 0;
         let totalUnits = 0;
@@ -805,7 +815,9 @@ function renderWOList() {
         if (unitEl) unitEl.innerText = totalUnits;
 
         let activeCount = workOrdersDB.filter(w => w.status !== 'Archived').length;
-        if(activeCount === 0) { ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"; document.getElementById('woMainArea').style.display = 'none'; return; }
+        if(activeCount === 0) { ui.innerHTML = window.safeHTML(
+            "<li style='cursor:default; background:transparent; border:none;'>No active Work Orders.</li>"
+        ); document.getElementById('woMainArea').style.display = 'none'; return; }
 
         let woListHtml = [];
         workOrdersDB.forEach((wo, index) => {
@@ -830,7 +842,7 @@ function renderWOList() {
                 <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${wo.qty}</span>
             </li>`);
         });
-        ui.innerHTML = woListHtml.join('');
+        ui.innerHTML = window.safeHTML(woListHtml.join(''));
         if(!currentWO) {
             let activeWO = workOrdersDB.find(w => w.status !== 'Archived');
             if(activeWO) {
@@ -917,7 +929,9 @@ function renderActiveWO(id) {
         document.getElementById('woMainArea').style.display = 'flex';
         let isEditableQty = !wo.materials_pulled && wo.status !== 'Completed';
         let qtyDisplay = isEditableQty ? `<span onclick="editWOQty('${wo.wo_id}')" title="Edit WO Yield Target" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(14,165,233,0.15); border:1px dashed #0ea5e9; padding:2px 10px; border-radius:6px; color:#0ea5e9; transition:all 0.2s; position:relative; top:-2px;" onmouseover="this.style.background='rgba(14,165,233,0.3)'" onmouseout="this.style.background='rgba(14,165,233,0.15)'">${wo.qty} ✏️</span>` : wo.qty;
-        document.getElementById('woTitle').innerHTML = (wo.label ? `[${wo.label}] ` : '') + `${wo.wo_id}: ${wo.product_name} - [ ${qtyDisplay} UNITS ]`;
+        document.getElementById('woTitle').innerHTML = window.safeHTML(
+            (wo.label ? `[${wo.label}] ` : '') + `${wo.wo_id}: ${wo.product_name} - [ ${qtyDisplay} UNITS ]`
+        );
         document.getElementById('woQtyTarget').innerText = wo.qty;
         let b = document.getElementById('woBadge'); b.innerText = wo.status; b.className = "status-badge";
         if(wo.status === 'Queued') b.classList.add('st-queued'); else if(wo.status === 'Picking') b.classList.add('st-picking'); else if(wo.status === 'Completed') b.classList.add('st-completed'); else b.classList.add('st-production');
@@ -942,10 +956,10 @@ function renderActiveWO(id) {
             document.getElementById('sect-'+s).classList.remove('active');
         });
 
-        document.getElementById('pipe-Queued').innerHTML = '1. Queued';
-        document.getElementById('pipe-Picking').innerHTML = '2. Start Picking Parts';
-        document.getElementById('pipe-Production').innerHTML = '3. Send to Production';
-        document.getElementById('pipe-Completed').innerHTML = '4. Finalize Batch';
+        document.getElementById('pipe-Queued').innerHTML = window.safeHTML('1. Queued');
+        document.getElementById('pipe-Picking').innerHTML = window.safeHTML('2. Start Picking Parts');
+        document.getElementById('pipe-Production').innerHTML = window.safeHTML('3. Send to Production');
+        document.getElementById('pipe-Completed').innerHTML = window.safeHTML('4. Finalize Batch');
 
         let wip = wo.wip_state || {};
         const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
@@ -953,20 +967,20 @@ function renderActiveWO(id) {
         if (wo.status === 'Picking' || wo.status === 'In Production' || wo.status === 'Completed') {
             document.getElementById('pipe-Queued').style.pointerEvents = 'none';
             document.getElementById('pipe-Queued').style.opacity = '0.6';
-            document.getElementById('pipe-Queued').innerHTML = '🔒 1. Queued';
+            document.getElementById('pipe-Queued').innerHTML = window.safeHTML('🔒 1. Queued');
         }
         if (wo.status === 'In Production' || wo.status === 'Completed' || wo.materials_pulled) {
             document.getElementById('pipe-Picking').style.pointerEvents = 'none';
             document.getElementById('pipe-Picking').style.opacity = '0.6';
-            document.getElementById('pipe-Picking').innerHTML = '🔒 2. Parts Picked & Deducted';
+            document.getElementById('pipe-Picking').innerHTML = window.safeHTML('🔒 2. Parts Picked & Deducted');
         }
         if (wo.status === 'Completed') {
             document.getElementById('pipe-Production').style.pointerEvents = 'none';
             document.getElementById('pipe-Production').style.opacity = '0.6';
-            document.getElementById('pipe-Production').innerHTML = '🔒 3. Send to Production';
+            document.getElementById('pipe-Production').innerHTML = window.safeHTML('🔒 3. Send to Production');
             document.getElementById('pipe-Completed').style.pointerEvents = 'none';
             document.getElementById('pipe-Completed').style.opacity = '0.6';
-            document.getElementById('pipe-Completed').innerHTML = '🔒 4. Finalize Batch';
+            document.getElementById('pipe-Completed').innerHTML = window.safeHTML('🔒 4. Finalize Batch');
         }
 
         if(wo.status === 'Queued') { document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); }
@@ -1040,12 +1054,12 @@ function renderActiveWO(id) {
                     }
                 });
             }
-            pList.innerHTML = html + `</div>`;
+            pList.innerHTML = window.safeHTML(html + `</div>`);
         }
         else if(wo.status === 'In Production') {
             document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active');
 
-            let sList = document.getElementById('woSOPList'); sList.innerHTML = ""; let saveContainer = document.getElementById('inlineSaveContainer');
+            let sList = document.getElementById('woSOPList'); sList.innerHTML = window.safeHTML(""); let saveContainer = document.getElementById('inlineSaveContainer');
 
                             let sopGroups = [];
 
@@ -1299,7 +1313,7 @@ function renderActiveWO(id) {
                     }
                     htmlOut += `</div></div>`;
                 });
-                sList.innerHTML = htmlOut;
+                sList.innerHTML = window.safeHTML(htmlOut);
                 if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
         }
         else if(wo.status === 'Completed') {
@@ -1326,17 +1340,17 @@ async function advanceWO(newStatus, bypassModal = false) {
 
             document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(16, 185, 129, 0.1)';
             document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
-            document.getElementById('finalizeWoTitle').innerHTML = '✅ Verify Batch Finalization';
+            document.getElementById('finalizeWoTitle').innerHTML = window.safeHTML('✅ Verify Batch Finalization');
             document.getElementById('finalizeWoTitle').style.color = '#10b981';
 
             let btn = document.getElementById('finalizeWoActionBtn');
             btn.className = 'btn-green';
-            btn.innerHTML = 'Finalize & Deduct';
+            btn.innerHTML = window.safeHTML('Finalize & Deduct');
             btn.onclick = window.submitFinalizeWo;
 
             let m = document.getElementById('finalizeWoItemsList');
             if (m) {
-                m.innerHTML = tableHtml;
+                m.innerHTML = window.safeHTML(tableHtml);
                 document.getElementById('finalizeWoModal').style.display = 'flex';
             }
             return;
@@ -1538,7 +1552,9 @@ async function switchArchiveTab(tab) {
 
     if (tab === 'layerz' && !window._layerzArchiveLoaded) {
         if (typeof refreshPrintQueue === 'function') {
-            document.getElementById('archiveListArea').innerHTML = '<p style="color:var(--text-muted); text-align:center;">Fetching records...</p>';
+            document.getElementById('archiveListArea').innerHTML = window.safeHTML(
+                '<p style="color:var(--text-muted); text-align:center;">Fetching records...</p>'
+            );
             await refreshPrintQueue();
             window._layerzArchiveLoaded = true;
         }
@@ -1599,14 +1615,16 @@ function _renderArchiveCards(items) {
         const listArea = document.getElementById('archiveListArea');
     if (!listArea) return;
     if (items.length === 0) {
-        listArea.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No archived records found.</div>`;
+        listArea.innerHTML = window.safeHTML(
+            `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No archived records found.</div>`
+        );
         return;
     }
     const fmt = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
     const fmtShort = (d) => d ? new Date(d).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
     if (currentArchiveTab === 'batchez') {
-        listArea.innerHTML = items.map((wo, i) => {
+        listArea.innerHTML = window.safeHTML(items.map((wo, i) => {
             const dtC = fmt(wo.started_at || wo.created_at) || '—';
             const dtF = fmt(wo.completed_at);
             const arcId = `arc-b-${i}`;
@@ -1630,9 +1648,9 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
                 </div>
             </div>`;
-        }).join('');
+        }).join(''));
     } else {
-        listArea.innerHTML = items.map((job, i) => {
+        listArea.innerHTML = window.safeHTML(items.map((job, i) => {
             const dtC = fmt(job.started_at || job.created_at) || '—';
             const dtF = fmt(job.completed_at);
             const arcId = `arc-l-${i}`;
@@ -1659,7 +1677,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
                 </div>
             </div>`;
-        }).join('');
+        }).join(''));
     }
     } catch(e) { sysLog(e.message, true); }
 }
@@ -1860,7 +1878,9 @@ function renderProductionTelemetryPreview() {
     if(!previewContainer) return;
 
     if(!rawText.trim()) {
-        previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
+        previewContainer.innerHTML = window.safeHTML(
+            `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`
+        );
         return;
     }
 
@@ -1882,7 +1902,7 @@ function renderProductionTelemetryPreview() {
         }
     });
 
-    previewContainer.innerHTML = html;
+    previewContainer.innerHTML = window.safeHTML(html);
     processTelemetryCanvasRendering(previewContainer);
     } catch(e) { sysLog(e.message, true); }
 }
@@ -2035,7 +2055,9 @@ window.saveInlineSopBlock = async function(grpId, productName) {
 window.addInlineSOPRow = function(grpId) {
     try {
         let newRow = document.createElement('div');
-        newRow.innerHTML = typeof generateEditableSOPRow === 'function' ? generateEditableSOPRow({}, 999) : '';
+        newRow.innerHTML = window.safeHTML(
+            typeof generateEditableSOPRow === 'function' ? generateEditableSOPRow({}, 999) : ''
+        );
         let rowNode = newRow.firstChild;
         let area = document.getElementById('inlineSopSteps_' + grpId);
         if(area && rowNode) area.appendChild(rowNode);
@@ -2123,7 +2145,9 @@ window.inlineRenderTelemetryPreview = function(grpId) {
     if(!previewContainer) return;
 
     if(!rawText.trim()) {
-        previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
+        previewContainer.innerHTML = window.safeHTML(
+            `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`
+        );
         return;
     }
 
@@ -2145,7 +2169,9 @@ window.inlineRenderTelemetryPreview = function(grpId) {
         }
     });
 
-    previewContainer.innerHTML = html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`;
+    previewContainer.innerHTML = window.safeHTML(
+        html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`
+    );
 
     if (typeof processTelemetryCanvasRendering === 'function') {
         processTelemetryCanvasRendering(previewContainer);
@@ -2425,17 +2451,17 @@ window.openDraftScrapModal = function() {
 
     document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(239, 68, 68, 0.1)';
     document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
-    document.getElementById('finalizeWoTitle').innerHTML = '🗑️ Update Scrap Tally';
+    document.getElementById('finalizeWoTitle').innerHTML = window.safeHTML('🗑️ Update Scrap Tally');
     document.getElementById('finalizeWoTitle').style.color = '#ef4444';
 
     let btn = document.getElementById('finalizeWoActionBtn');
     btn.className = 'btn-red';
-    btn.innerHTML = 'Save Tally Draft';
+    btn.innerHTML = window.safeHTML('Save Tally Draft');
     btn.onclick = window.saveDraftScrap;
 
     let m = document.getElementById('finalizeWoItemsList');
     if (m) {
-        m.innerHTML = tableHtml;
+        m.innerHTML = window.safeHTML(tableHtml);
         document.getElementById('finalizeWoModal').style.display = 'flex';
     }
     } catch(e) { sysLog(e.message, true); }

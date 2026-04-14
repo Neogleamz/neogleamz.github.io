@@ -14,7 +14,8 @@ When the user invokes `/release` (or instructs you to "cut a release", "prepare 
 2. **Generate Changelog**:
    - Parse `@/tools/SK8Lytz_Bucket_List.md` (processing in chunks if it exceeds 30,000 characters).
    - Extract all tasks marked as completed (`- [x]`) since the last release.
-   - Use your native tools to update `@/CHANGELOG.md`. Inject a new section at the top with the new version number, the current date, and a bulleted list of these completed features and fixes.
+   - Use your native tools to update `@/CHANGELOG.md`. 
+   - **Crucial Unreleased Merge**: Check if there is an `## [Unreleased]` block at the top of the changelog from previous silent releases. If so, merge its contents into your new bulleted list. Rename the section or create a new header at the top with the new version number (`## [vX.Y.Z]`), the current date, and the combined bulleted list.
 3. **Bucket Ledger Integration**:
    - To maintain the Bucket List as a permanent, immutable ledger, **DO NOT delete** the completed tasks from `@/tools/SK8Lytz_Bucket_List.md`. 
    - Instead, use your code tools to safely replace the checkboxes of the items you just added to the changelog from `- [x]` to `- [🚀]` (Shipped). This permanently preserves the history in the file while preventing those tasks from being duplicated in future release logs.
