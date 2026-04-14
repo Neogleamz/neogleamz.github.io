@@ -32,7 +32,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟠 P1 High Priority (Core Features)
-*(No active P1 tasks)*
+
+### Target: `epic/security-hardening`
+*(Epic: Next Session Focus)*
+- [ ] `security/infrastructure` : Execute a comprehensive security audit and architecture hardening sweep to lock down the production environment. [🤖 Gemini 3.1 Pro] [🧠 TBD / 50k] [💸 TBD / $0.15]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
