@@ -413,7 +413,7 @@ function _syncCeoKPIs({ totals }) {
             let h = s.customer_email_hash || s.customer_phone_hash;
             if (h && h.trim() !== '') {
                 if (!window._ltvCustomerMap[h]) {
-                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), totalNet: 0 };
+                    window._ltvCustomerMap[h] = { orders: 0, orderIds: new Set(), totalNet: 0, transactions: [] };
                 }
                 if (s.order_id) {
                     if (!window._ltvCustomerMap[h].orderIds.has(s.order_id)) {
@@ -424,6 +424,13 @@ function _syncCeoKPIs({ totals }) {
                     window._ltvCustomerMap[h].orders += 1;
                 }
                 window._ltvCustomerMap[h].totalNet += net;
+                window._ltvCustomerMap[h].transactions.push({
+                    order_id: s.order_id || 'N/A',
+                    date: s.sale_date || s.date || 'Unknown',
+                    item: s.internal_recipe_name || s.item_name || 'Item',
+                    total: rev,
+                    net: net
+                });
             }
         });
 
@@ -640,24 +647,27 @@ function renderLtvWhalesTable() {
     window._ltvCachedWhales.sort((a,b) => {
         let valA = a[window._ltvSortKey];
         let valB = b[window._ltvSortKey];
+        if (typeof valA === 'string' && typeof valB === 'string') {
+            return window._ltvSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
         if (valA < valB) return window._ltvSortAsc ? -1 : 1;
         if (valA > valB) return window._ltvSortAsc ? 1 : -1;
         return 0;
     });
 
-    let topWhales = window._ltvCachedWhales.slice(0, 20);
     let html = '';
     
-    if (topWhales.length === 0) {
-        html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#666;">No historical hashes found.</td></tr>';
+    if (window._ltvCachedWhales.length === 0) {
+        html = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#666;">No historical repeat transactions found.</td></tr>';
     } else {
-        topWhales.forEach(w => {
-            let shortHash = w.hash.substring(0, 8) + '...';
+        window._ltvCachedWhales.forEach(w => {
             html += `
             <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
-                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;" title="${w.hash}">[HASH_${shortHash}]</td>
-                <td style="padding:12px 15px; font-weight:bold; color:white; text-align:center;">${w.buys}</td>
-                <td style="padding:12px 15px; font-weight:bold; color:var(--neon-green); text-align:right;">${ceoFmt.format(Math.max(0, w.net))}</td>
+                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#a78bfa;">${w.order_id}</td>
+                <td style="padding:12px 15px; color:#cbd5e1; font-size:12px;">${new Date(w.date).toLocaleDateString()}</td>
+                <td style="padding:12px 15px; color:white; font-size:12px; font-weight:bold;">${w.item}</td>
+                <td style="padding:12px 15px; color:white; font-weight:bold; text-align:right;">${ceoFmt.format(w.total)}</td>
+                <td style="padding:12px 15px; font-weight:bold; color:${w.net < 0 ? '#ef4444' : 'var(--neon-green)'}; text-align:right;">${ceoFmt.format(w.net)}</td>
             </tr>`;
         });
     }
@@ -678,7 +688,18 @@ function openLtvModal() {
         else if (orderCount === 2) distribution[2]++;
         else distribution[3]++;
 
-        window._ltvCachedWhales.push({ hash: h, buys: orderCount, net: map[h].totalNet });
+        // Unroll individual repeat-purchaser transactions
+        if (orderCount > 1 && map[h].transactions) {
+            map[h].transactions.forEach(t => {
+                window._ltvCachedWhales.push({
+                    order_id: t.order_id,
+                    date: t.date,
+                    item: t.item,
+                    total: t.total,
+                    net: t.net
+                });
+            });
+        }
     });
 
     // Update UI DOM Elements
