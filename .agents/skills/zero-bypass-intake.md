@@ -17,5 +17,5 @@ When the user requests an actionable code or architecture change, you must route
    - If the user's prompt includes `"up next"`, `"bump"`, or `"priority"`, physically place the task at the absolute top of the `## 🔴 High Priority / Next Up` section in the bucket list.
 4. **Quarantine & Plan**:
    - Save the changes to the bucket list.
-   - Execute `git checkout -b <slug>` in the terminal.
-   - Present a brief Implementation Plan to the user and await explicit approval before editing project code.
+   - **Passive Logging**: If the user just wants to "add an idea to the list" while busy, confirm the addition and STOP. Let them continue working perfectly uninterrupted on their current branch.
+   - **Zero-Bypass Execution**: If the user uses `/zero_bypass` or explicitly asks to begin work on the new task, immediately execute `git checkout -b <slug>` in the terminal, present an Implementation Plan, and await their approval.
