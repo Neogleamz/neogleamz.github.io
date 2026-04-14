@@ -15,8 +15,9 @@ When the user invokes `/release` (or instructs you to "cut a release", "prepare 
    - Parse `@/tools/SK8Lytz_Bucket_List.md` (processing in chunks if it exceeds 30,000 characters).
    - Extract all tasks marked as completed (`- [x]`) since the last release.
    - Use your native tools to update `@/CHANGELOG.md`. Inject a new section at the top with the new version number, the current date, and a bulleted list of these completed features and fixes.
-3. **Bucket List Cleanup**:
-   - Strictly adhering to the *Surgical Strike Protocol*, carefully remove the completed items that were just added to the changelog from `@/tools/SK8Lytz_Bucket_List.md` to keep the active list clean. Do not overwrite the entire file.
+3. **Bucket Ledger Integration**:
+   - To maintain the Bucket List as a permanent, immutable ledger, **DO NOT delete** the completed tasks from `@/tools/SK8Lytz_Bucket_List.md`. 
+   - Instead, use your code tools to safely replace the checkboxes of the items you just added to the changelog from `- [x]` to `- [🚀]` (Shipped). This permanently preserves the history in the file while preventing those tasks from being duplicated in future release logs.
 4. **The Release Commit & Tag**:
    - Execute `git status` to ensure you know what is currently modified.
    - Stage ONLY the release files by executing: `git add package.json CHANGELOG.md tools/SK8Lytz_Bucket_List.md`
