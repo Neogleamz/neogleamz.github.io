@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.0.12] - 2026-04-14
+
+### Features & Refactors
+- **Vertical Layout Media Query Fix**: Addressed a critical bug where the main header's `.tabs` wrapper collapsed to `0px` height when the viewport scaled below `1024px`. Extracted inline JS flex logic into a unified `.nav-tabs-wrapper` CSS class to allow strict media query overrides (`flex: 0 0 auto !important`), seamlessly preserving natural row block heights upon single-column flex-wrap inversions.
+- **Dependency Audit**: Verified 0 native system vulnerabilities and bumped `supabase` CLI to version `2.90.0`.
+
 ## [1.0.11] - 2026-04-13
 
 ### Features & Refactors
