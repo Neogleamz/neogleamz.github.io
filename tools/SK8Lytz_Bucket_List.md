@@ -11,6 +11,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 > **Token Telemetry Syntax:** Appended strictly to the end of all actionable tasks.
 > `[🤖 AI Model] [🧠 ActualTokens / ExpectedTokens] [💸 ActualCost / ExpectedCost]`
 
+> [!CAUTION]
+> **THE IMMUTABLE LEDGER DIRECTIVE:** You are STRICTLY FORBIDDEN from deleting history in this file. Even if this file becomes extremely long, do NOT "clean up" the history or truncate the `🗄️ Completed & Archived Epics` section. Completed items must remain exactly as they are until the `/release` workflow tags them with `[🚀]`.
+
 > [!NOTE]
 > **Archiving Protocol:** When all items in an Epic are marked `[x]`, the entire block is moved to the **🗄️ Completed & Archived Epics** section at the bottom of this file. This provides a clean active workspace while preserving a permanent historical record of our accomplishments!
 
