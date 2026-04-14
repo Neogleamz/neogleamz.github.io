@@ -403,11 +403,8 @@ function _syncCeoKPIs({ totals }) {
 
         salesDB.forEach(s => {
             let qty = parseFloat(s.qty_sold) || 1;
-            let cogs = (typeof getEngineTrueCogs === 'function') ? getEngineTrueCogs(s.internal_recipe_name || s.item_name) * qty : 0;
-            let rev = parseFloat(s.total_received) || 0;
-            let shp = parseFloat(s.shipping_paid) || 0;
-            let stf = (rev * 0.029) + 0.30;
-            let net = rev - (cogs + shp + stf);
+            let rev = parseFloat(s.total) || ((parseFloat(s.actual_sale_price) || 0) * qty);
+            let net = parseFloat(s.net_profit) || 0;
             ltvNetSum += net;
 
             let h = s.customer_email_hash || s.customer_phone_hash;
@@ -432,7 +429,7 @@ function _syncCeoKPIs({ totals }) {
                         order_id: s.order_id || 'N/A',
                         date: s.sale_date || s.date || 'Unknown',
                         items: [],
-                        total: 0,
+                        total: parseFloat(s.total) || ((parseFloat(s.actual_sale_price) || 0) * qty), // Capture exact total precisely once
                         net: 0
                     };
                 }
@@ -441,7 +438,7 @@ function _syncCeoKPIs({ totals }) {
                 if (qty > 1) itemStr = `${qty}x ${itemStr}`;
                 window._ltvCustomerMap[h].ordersMap[oid].items.push(itemStr);
                 
-                window._ltvCustomerMap[h].ordersMap[oid].total += rev;
+                // Total is already captured once. Only independently aggregate the per-line Net Profits.
                 window._ltvCustomerMap[h].ordersMap[oid].net += net;
             }
         });
