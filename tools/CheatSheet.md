@@ -4,37 +4,52 @@ Welcome to your customized Neogleamz / SK8Lytz Autonomous Agent protocol directo
 
 ---
 
-## 🛠️ Direct Workflow Commands (Categorized)
-You can directly type these exact `/slash-commands` into the chat to force the A.I. to execute specific Standard Operating Procedures.
+## 🛠️ Direct Workflow Commands (IDE Auto-Suggested)
+You can access these official macros via the IDE's `/` pop-up menu. They execute structured, multi-step Standard Operating Procedures.
 
-### 🚀 1. Project Management & Execution workflows
-* **`/next_task_auto_branch`** — **(The Project Engine)** Automates branching, planning, execution, and documentation for the highest priority item on the Bucket List.
-* **`/idea_intake`** — **(Brainstorm Catcher)** Captures your raw, natural language ideas and formats them into the project bucket list with structured git execution slugs.
+### 🚀 1. Project Management & Deployment
+* **`/bucketlist`** — **(The Project Engine)** Automates branching, planning, execution, and documentation for the highest priority item on the Bucket List.
 * **`/status_update`** — **(Project SITREP)** Generates a highly detailed Situation Report based on current Git context, modified files, and the active Bucket List target.
-* **`/cut_release`** — **(Release Manager)** Executes the semantic version bump, automates the `CHANGELOG.md` generation based on completed bucket list items, and pushes an official Git Tag to GitHub.
+* **`/ship_it`** — **(The Merge Protocol)** Executes the code audit, documentation check, and git merge sequence to safely finalize a feature branch into `main`.
+* **`/release`** — **(Release Manager)** Executes the semantic version bump, automates the `CHANGELOG.md` generation, and pushes an official Git Tag to GitHub.
 
-### 🛡️ 2. Diagnostics, QA & Emergency Workflows
-* **`/isolated_test_and_verify`** — **(Strict QA Flow)** Executes a rigorous QA checklist. Forces the AI to verify recent changes utilizing manual browser steps for UI/Bluetooth logic or isolated sandbox testing for Database queries.
-* **`/emergency_debug_drill`** — **(Root-Cause Analyzer)** A strict diagnostic workflow that explicitly blocks the AI from guess-fixing. Forces it to deeply instrument the DOM with console logs and form theories before writing solutions.
-* **`/panic_button`** — **(Lockdown)** Triggers a strict read-only diagnostic mode for when the application is catastrophically broken but the source is unknown.
+### 🛡️ 2. Diagnostics, QA & Code Maintenance
+* **`/health_check`** — **(Technical Debt Janitor)** Scans the codebase for vulnerabilities and technical debt, triaging the findings cleanly into the backlog.
+* **`/isolated_test_and_verify`** — **(Strict QA Flow)** Executes a rigorous QA checklist locally on 127.0.0.1:5500 to natively verify recent UI/Bluetooth/DB changes.
+* **`/gitcleanup`** — **(Local Storage Maintenance)** Safely parses and prunes local Git branches (`feat/`, `fix/`) that have already been securely merged.
 * **`/legacy_audit`** — **(Code Refactoring)** Executes a strict code audit to modernize old files up to current Vanilla JS standards.
-* **`/health_check`** — **(Technical Debt Janitor)** Scans the broader codebase for vulnerabilities, leaks, and technical debt, triaging the findings cleanly into the backlog.
 
-### 📁 3. System State & Safe-Keeping Checkpoints
-* **`/wind_down`** — **(End of Session Protocol)** Executes the end-of-session synchronization, workspace sanitization, bucket list grooming, and state saving sequence.
-* **`/version_control_escape_hatches`** — **(Timeline Protection)** Executes safety checkpoints, temporary stash saves, or destructive rollbacks to protect the codebase from rabbit holes and broken states.
-* **`/repo_cleanup`** — **(Local Storage Maintenance)** Safely parses and prunes local Git branches (`feat/`, `fix/`) that have already been securely merged.
-* **`/context_memory_compiler`** — **(Documentation Sync)** Forces the AI to scan its own recent memory of the codebase and systematically update the architectural blueprint within the Master Reference.
+### 🚨 3. Emergency Operations & Rollbacks
+* **`/bug_hunter`** — A strict diagnostic workflow for analyzing stack traces, formulating theories, and awaiting authorization before writing code.
+* **`/debug_drill`** — A strict workflow that forces the AI to instrument code with `console.log` traps and form theories before attempting to guess-fix a bug.
+* **`/panic_button`** — **(Lockdown)** Triggers a strict read-only diagnostic mode for when the application is catastrophically broken but the source is unknown.
+* **`/save-point`** — **(Timeline Protection)** Executes safety checkpoints, temporary stash saves, or destructive rollbacks to protect the codebase from rabbit holes and broken states.
+* **`/wind_down`** — **(End of Session Protocol)** Executes the end-of-session synchronization, workspace sanitization, and state saving sequence.
 
-### 🧠 4. Specialized A.I. Persona Prompts
-* **`/simulate_ux`** — Triggers a persona shift to a **Novice Quad Skater** to critically evaluate mobile web UI logic based on physical rink constraints (e.g., using a phone with wrist guards).
-* **`/bug-hunter`** — Engages a hyper-critical analysis sequence solely designed to identify edge cases in the current active logic.
-* **`/devils-advocate`** — Engages a contrarian logic sequence to challenge and poke holes in your proposed architectural database or feature decisions.
+### 🧠 4. Specialized A.I. Personas
+* **`/simulate_ux`** — Triggers a persona shift to a Novice/Customer user to evaluate Desktop web UI and Physical usability constraints.
+* **`/devils_advocate`** — Engages a contrarian logic sequence to stress-test ideas and identify production flaws before planning begins.
 
 ---
 
-## 🚀 The "Ship It" Action
-**"Ship it"** is an Architectural Security Key. The A.I. is explicitly forbidden from pushing code directly to the `main` branch. Typing this exact phrase grants the AI verbal permission to sequence a fast-forward merge and push the live code to the GitHub master branch.
+## 🕵️ Hidden Skill Commands (Natural Language Triggers)
+These commands will not show up in the IDE auto-suggest menu, but the A.I. inherently listens for them 24/7. You can type them directly into chat at any time.
+
+### 💡 1. Ideation & Intake
+* **`/intake`** or **`/zero_bypass`** — Captures your raw ideas and formats them into the Bucket List. Supports background passive logging OR instant branch checkout via the Priority Override.
+* **`/whiteboard`** or **`/brainstorm`** — Explicitly commands the AI to stop coding and execute pure conversational architectural brainstorming.
+* **`/product_alignment`** or **`/vet_idea`** — Forces the AI to audit a brainstormed feature strictly against the "Product Bible" & Anti-Goals before allowing it on the backlog.
+* **`/dependency_diet`** — Audits the application to aggressively prune bloated 3rd party plugins.
+
+### 🎓 2. Engineering & Learning
+* **`/tdd`** or **`/test_driven`** — Forces the AI to write an automated test suite *before* writing the logic feature.
+* **`/rubber_duck`** or **`/eli5`** — Triggers a learning mode where the AI natively explains a complex bug or architecture "like you're 5".
+* **`/jargon_brake`** or **`/slow_down`** — A panic button mid-conversation forcing the AI to drop the engineering speak and explain what is happening simply.
+* **`/echo`** or **`/playback`** — Forces the AI to repeat your complex logical parameters back to you mathematically to ensure it is not hallucinating before it writes code.
+
+### ⚙️ 3. Administrative Automation
+* **`/sync_db`** or **`/supabase_sync`** — Automatically documents any new Database Schema or RLS modifications natively into the Master Reference file.
+* **`/evolve`** or **`/meta_evolution`** — A self-updating mechanism that allows you to instruct the AI to dynamically spawn or rewrite one of its own Agent Rule files based on a mistake it just made.
 
 ---
 
