@@ -225,6 +225,12 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 - **Degradation behavior**: `hashPII()` is wrapped in `try/catch`. On failure it logs to `sysLog` and returns `null`. The upstream `processParsedSales` continues — customer hash fields will be `null` in the DB row rather than crashing the entire import.
 - **Zero PII guarantee**: Raw email/phone/name/address values are NEVER stored. Only the SHA-256 hex digest is persisted.
 
+### B. Client DOM Integrity & XSS Mitigation (`window.safeHTML`)
+- **Location**: `neogleamz-engine.js` (L45) — globally accessible wrapper.
+- **Algorithm**: The application architecture strictly maps all dynamic `.innerHTML` string evaluations through `window.safeHTML(...)` to sanitize injection payloads.
+- **Execution Engine**: Utilizes **DOMPurify** internally natively enforcing a specialized structural configuration (`DOMPurify.addHook('uponSanitizeAttribute')`) designed to preserve legacy functional UI events (`onclick`, `onchange`) whilst surgically destroying disguised `javascript:` payload executions.
+- **System Firewall**: The active web architecture globally utilizes a strict `Content-Security-Policy (CSP)` enforced explicitly at the `index.html` runtime via Meta Headers to sever untrusted script execution.
+
 ---
 
 ## 🧪 8. Automated Testing Architecture
