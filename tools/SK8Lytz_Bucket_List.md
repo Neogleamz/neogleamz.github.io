@@ -33,6 +33,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
+### Target: `epic/workflow-architecture`
+*(Epic: Agentic Orchestration Overhaul)*
+- [x] `feat/orchestration-overhaul` : Architect and implement the unifying `[/finalize_epic]` deploy script to mitigate 3-step merge collision loops. Restructure `[/bucketlist]` branch mapping logic to prevent Phantom Ledger Divergences, and enact the global `active_context_lock.md` algorithm enforcing single-threaded AI cognitive bounds with hotfix overrides. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
