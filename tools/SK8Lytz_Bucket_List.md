@@ -3,6 +3,15 @@
 This document acts as the permanent, living task tracker integrated directly with your autonomous AI development agents. 
 
 > [!NOTE]
+> **Global Odometer (Gemini 3.1 Pro Ultra)**
+> - **Lifetime Burned:** `25,000 Tokens` (`$0.08` equivalent)
+> - **Active Tasks Expected Burn:** `50,000 Tokens`
+
+> [!TIP]
+> **Token Telemetry Syntax:** Appended strictly to the end of all actionable tasks.
+> `[🤖 AI Model] [🧠 ActualTokens / ExpectedTokens] [💸 ActualCost / ExpectedCost]`
+
+> [!NOTE]
 > **Archiving Protocol:** When all items in an Epic are marked `[x]`, the entire block is moved to the **🗄️ Completed & Archived Epics** section at the bottom of this file. This provides a clean active workspace while preserving a permanent historical record of our accomplishments!
 
 > [!IMPORTANT]
@@ -20,7 +29,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟠 P1 High Priority (Core Features)
-*(No active P1 tasks)*
+### Target: `main`
+*(Epic: Agentic Framework Telemetry)*
+- [x] `feat/bucket-list-token-tracking` : Establish a visible tracking convention for LLM API token spend vs. expected spend budget directly on the Bucket List tasks and epics to monitor AI operational costs. [🤖 Gemini 3.1 Pro] [🧠 25k / 50k] [💸 $0.08 / $0.15]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
