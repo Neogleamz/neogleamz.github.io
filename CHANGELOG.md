@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.0.14] - 2026-04-14
+
+### Features & Refactors
+- **Agentic Framework Telemetry**: Established a visible tracking convention for LLM API token spend vs. expected spend budget directly on the Bucket List tasks and epics to precisely monitor AI operational costs. Deployed a Global Odometer header macro to permanently track cumulative project token burn natively within the Markdown tracker. (`[🤖 Gemini 3.1 Pro] [🧠 25k/50k] [💸 $0.08/$0.15]`).
+
 ## [1.0.13] - 2026-04-14
 
 ### Features & Refactors

@@ -29,9 +29,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟠 P1 High Priority (Core Features)
-### Target: `main`
-*(Epic: Agentic Framework Telemetry)*
-- [x] `feat/bucket-list-token-tracking` : Establish a visible tracking convention for LLM API token spend vs. expected spend budget directly on the Bucket List tasks and epics to monitor AI operational costs. [🤖 Gemini 3.1 Pro] [🧠 25k / 50k] [💸 $0.08 / $0.15]
+*(No active P1 tasks)*
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
