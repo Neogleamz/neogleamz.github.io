@@ -33,10 +33,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-### Target: `epic/agentic-evolution-ui`
-*(Epic: UI & Security Hardening Automation)*
-- [🚀] `feat/ui-xray-debugger` : Build the `[/ui_xray]` workflow allowing the AI to autonomously inject neon CSS borders over all flex containers to visually scan, report, and verify structural DOM overlaps without requiring human visual intervention. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
-- [ ] `feat/red-team-protocol` : Build the `[/red_team]` workflow to enforce a strict persona shift where the AI acts as a malicious Penetration Tester to proactively scan Vanilla JS modules for DOM clobbering, injection vectors, and XSS exploits prior to release. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -66,6 +62,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `epic/agentic-evolution-ui`
+*(Epic: UI & Security Hardening Automation)*
+- [🚀] `feat/ui-xray-debugger` : Build the `[/ui_xray]` workflow allowing the AI to autonomously inject neon CSS borders over all flex containers to visually scan, report, and verify structural DOM overlaps without requiring human visual intervention. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+- [x] `feat/red-team-protocol` : Build the `[/red_team]` workflow to enforce a strict persona shift where the AI acts as a malicious Penetration Tester to proactively scan Vanilla JS modules for DOM clobbering, injection vectors, and XSS exploits prior to release. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 ### Target: `epic/security-hardening`
 *(Epic: Security Architecture Audit & Hardening)*
 - [🚀] `security/infrastructure` : Executed a comprehensive repository-wide security audit utilizing `xss-risk-map.js`. Discovered and systematically remediated 230 injection vectors by wrapping them dynamically with a strict `window.safeHTML()` protocol that preserves vanilla JS UI functionality. Deployed a system-wide Content-Security-Policy (CSP) across the infrastructure locking down DOM mutations directly natively. [🤖 Gemini 3.1 Pro] [🧠 42k / 50k] [💸 $0.12 / $0.15]
