@@ -35,7 +35,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `epic/agentic-evolution-ui`
 *(Epic: UI & Security Hardening Automation)*
-- [x] `feat/ui-xray-debugger` : Build the `[/ui_xray]` workflow allowing the AI to autonomously inject neon CSS borders over all flex containers to visually scan, report, and verify structural DOM overlaps without requiring human visual intervention. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+- [🚀] `feat/ui-xray-debugger` : Build the `[/ui_xray]` workflow allowing the AI to autonomously inject neon CSS borders over all flex containers to visually scan, report, and verify structural DOM overlaps without requiring human visual intervention. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 - [ ] `feat/red-team-protocol` : Build the `[/red_team]` workflow to enforce a strict persona shift where the AI acts as a malicious Penetration Tester to proactively scan Vanilla JS modules for DOM clobbering, injection vectors, and XSS exploits prior to release. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 
 ## 🟡 P2 Medium Priority (Enhancements)
