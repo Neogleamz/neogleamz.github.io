@@ -87,122 +87,122 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: UI Enhancements & Fixes)*
-- [x] `fix/cohort-intel-modal-ui` : Rebuild the Cohort Intel modal to standard ledge behavior (drag sorting), update columns (Order ID, Date, Item, Total, Net), and replace the top-right 'X' with a standard solid 'Close' rectangle button.
+- [🚀] `fix/cohort-intel-modal-ui` : Rebuild the Cohort Intel modal to standard ledge behavior (drag sorting), update columns (Order ID, Date, Item, Total, Net), and replace the top-right 'X' with a standard solid 'Close' rectangle button.
 
 ### Target: `main`
 *(Epic: Cohort Simulator Formatting)*
-- [x] `feat/cohort-sim-formatting` : Condensed top 6 KPIs to a single row to save vertical space. Relocated "View Cohort Intelligence" button to top right header. Fixed order-count logic to use unique Order IDs instead of line items. Expanded LTV modal to include 'Total Buyers' stat, enlarged it, and applied drag-to-sort logic to the table. Documented the new modal standards in the Master Reference.
-- [x] `fix/header-responsive-wrap` : Fixed header `.top-controls` overlapping with `.tabs` on resize, enforcing mathematically perfect flex symmetry and min-content boundaries.
+- [🚀] `feat/cohort-sim-formatting` : Condensed top 6 KPIs to a single row to save vertical space. Relocated "View Cohort Intelligence" button to top right header. Fixed order-count logic to use unique Order IDs instead of line items. Expanded LTV modal to include 'Total Buyers' stat, enlarged it, and applied drag-to-sort logic to the table. Documented the new modal standards in the Master Reference.
+- [🚀] `fix/header-responsive-wrap` : Fixed header `.top-controls` overlapping with `.tabs` on resize, enforcing mathematically perfect flex symmetry and min-content boundaries.
 
 ### Target: `main`
 *(Epic: Automated Testing Suite)*
-- [x] `feat/automated-test-suite` : Implemented robust Jest and JSDOM integration for zero-build vanilla JS compliance.
-- [x] `test/math-engine` : Validated recursive BOM extraction via `calculateProductBreakdown`, Stripe fee mappings, 3D print durations, and `getHistoricalNetProfit`.
-- [x] `test/inventory-engine` : Tested `calculateTrailingVelocity` forecasting, reconstructed the missing `getRawMaterials` function to fix a live crash, and added bounds logic for `calculateDynamicROP`.
-- [x] `test/sales-engine` : Migrated legacy Math_Validator routines to test `Pre-Ship Exchange`, `Post-Ship returns`, and `Warranty` offset adjustments to enforce ledger fidelity.
+- [🚀] `feat/automated-test-suite` : Implemented robust Jest and JSDOM integration for zero-build vanilla JS compliance.
+- [🚀] `test/math-engine` : Validated recursive BOM extraction via `calculateProductBreakdown`, Stripe fee mappings, 3D print durations, and `getHistoricalNetProfit`.
+- [🚀] `test/inventory-engine` : Tested `calculateTrailingVelocity` forecasting, reconstructed the missing `getRawMaterials` function to fix a live crash, and added bounds logic for `calculateDynamicROP`.
+- [🚀] `test/sales-engine` : Migrated legacy Math_Validator routines to test `Pre-Ship Exchange`, `Post-Ship returns`, and `Warranty` offset adjustments to enforce ledger fidelity.
 
 ### Target: `main`
 *(Epic: Widescreen Header Consolidation)*
-- [x] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
-- [x] `feat/pure-flexbox-gui-migration` : Completely rebuilt the global layout engine to utilize 100% fluid flexbox arrays safely mitigating element overlap bugs without absolute CSS overrides.
+- [🚀] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
+- [🚀] `feat/pure-flexbox-gui-migration` : Completely rebuilt the global layout engine to utilize 100% fluid flexbox arrays safely mitigating element overlap bugs without absolute CSS overrides.
 
 ### Target: `main`
 *(Epic: Tailwind Modal Migration)*
-- [x] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
+- [🚀] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
 
 ### Target: `main`
 *(Epic: Sitewide Button State Feedback)*
-- [x] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
+- [🚀] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
   - [x] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
 
 ### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
-- [x] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
-- [x] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
+- [🚀] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
+- [🚀] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
 
 ### Target: `epic/webrtc-cycle-scanner`
-- [x] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
-- [x] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure the WebRTC constraint logic fully supports cross-platform execution specifically for iPhone iOS Safari, native Android, and PC webcams. Ensure consistent behavior across all scanning entry points.
+- [🚀] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
+- [🚀] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure the WebRTC constraint logic fully supports cross-platform execution specifically for iPhone iOS Safari, native Android, and PC webcams. Ensure consistent behavior across all scanning entry points.
 
 ### Target: `epic/tech-debt-clearance`
-- [x] `debt/security` : **[HIGH] RESOLVED ✅** `xlsx` (SheetJS) CVEs Prototype Pollution + ReDoS. Audited the repo to verify it wasn't required for compilation, and effectively eradicated the NPM ghost package via `npm uninstall xlsx`. `npm audit` returned 0 vulnerabilities.
-- [x] `debt/deps` : **RESOLVED ✅** `@supabase/supabase-js` bumped to `2.103.0`.
-- [x] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped to `2.89.1`.
-- [x] `debt/hmac-verification` : **RESOLVED ✅** `supabase/functions/shopify-webhook/index.ts:22` - Implemented native Deno `crypto.subtle` HMAC validation with dynamic 401 blocking. Also structurally patched the synchronous PII variables bug.
-- [x] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped from `2.89.1` to `2.90.0`.
+- [🚀] `debt/security` : **[HIGH] RESOLVED ✅** `xlsx` (SheetJS) CVEs Prototype Pollution + ReDoS. Audited the repo to verify it wasn't required for compilation, and effectively eradicated the NPM ghost package via `npm uninstall xlsx`. `npm audit` returned 0 vulnerabilities.
+- [🚀] `debt/deps` : **RESOLVED ✅** `@supabase/supabase-js` bumped to `2.103.0`.
+- [🚀] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped to `2.89.1`.
+- [🚀] `debt/hmac-verification` : **RESOLVED ✅** `supabase/functions/shopify-webhook/index.ts:22` - Implemented native Deno `crypto.subtle` HMAC validation with dynamic 401 blocking. Also structurally patched the synchronous PII variables bug.
+- [🚀] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped from `2.89.1` to `2.90.0`.
 
 ### Target: `epic/ltv-cac-metrics`
-- [x] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
-- [x] `feat/repeat-customer-engine` : Implement backend logic to digest the historical Shopify dataset and track repeat customers using anonymized metrics.
-- [x] `feat/ltv-metrics-modal` : Design and build a new UI modal (or integrate into the CEO Terminal) to visualize Repeat Customer Rates and Lifetime Value insights.
+- [🚀] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
+- [🚀] `feat/repeat-customer-engine` : Implement backend logic to digest the historical Shopify dataset and track repeat customers using anonymized metrics.
+- [🚀] `feat/ltv-metrics-modal` : Design and build a new UI modal (or integrate into the CEO Terminal) to visualize Repeat Customer Rates and Lifetime Value insights.
 
 ### Target: `epic/shopify-sync-v2`
-- [x] `feat/auth-app-security` : Auth & App Security
-- [x] `feat/orders-create-hook` : `orders/create` Inbound Edge Function
-- [x] `feat/payload-normalization` : Payload Normalization
-- [x] `feat/idempotent-db-insert` : Idempotent Database Insert
+- [🚀] `feat/auth-app-security` : Auth & App Security
+- [🚀] `feat/orders-create-hook` : `orders/create` Inbound Edge Function
+- [🚀] `feat/payload-normalization` : Payload Normalization
+- [🚀] `feat/idempotent-db-insert` : Idempotent Database Insert
 
 ### Target: `epic/stockz-rop-alerts`
-- [x] `feat/inventory-velocity` : In `inventory-module.js`, calculate daily velocity of filament usage.
-- [x] `feat/supplier-lead-time` : Hardcode a "Supplier Lead Time" (e.g., 5 days for Amazon Prime).
-- [x] `feat/rop-warning-banner` : Build a red warning banner that flashes when stock hits `(Velocity * Lead Time) + 10% Safety`.
+- [🚀] `feat/inventory-velocity` : In `inventory-module.js`, calculate daily velocity of filament usage.
+- [🚀] `feat/supplier-lead-time` : Hardcode a "Supplier Lead Time" (e.g., 5 days for Amazon Prime).
+- [🚀] `feat/rop-warning-banner` : Build a red warning banner that flashes when stock hits `(Velocity * Lead Time) + 10% Safety`.
 
 ### Target: `epic/stockz-velocity-dashboard`
-- [x] `feat/velocityz-button` : Create a "Velocityz" button next to the Low Stockz Report.
-- [x] `feat/velocity-forecasting-modal` : Build a forecasting modal that visualizes mathematical reorder constraints based on current raw sales velocity.
-- [x] `feat/velocity-filters` : Add filters to slice and analyze velocity by day, week, and month.
-- [x] `feat/sandbox-manipulation` : Enable "sandbox" manipulation where users can overwrite sold amounts to forecast hypothetical demand spikes, while strictly retaining the raw real sold velocity data unharmed.
+- [🚀] `feat/velocityz-button` : Create a "Velocityz" button next to the Low Stockz Report.
+- [🚀] `feat/velocity-forecasting-modal` : Build a forecasting modal that visualizes mathematical reorder constraints based on current raw sales velocity.
+- [🚀] `feat/velocity-filters` : Add filters to slice and analyze velocity by day, week, and month.
+- [🚀] `feat/sandbox-manipulation` : Enable "sandbox" manipulation where users can overwrite sold amounts to forecast hypothetical demand spikes, while strictly retaining the raw real sold velocity data unharmed.
 
 ### Target: `epic/cfo-waterfall`
-- [x] `feat/cfo-waterfall-chart` : In `ceo-module.js` (Chart.js block), build a Waterfall Chart.
-- [x] `feat/cfo-waterfall-mapping` : Map Gross Sales → minus COGS → minus Gateway Fees (Shopify takes 2.9% + 30c) → minus Shipping Costs → minus Social Ads.
+- [🚀] `feat/cfo-waterfall-chart` : In `ceo-module.js` (Chart.js block), build a Waterfall Chart.
+- [🚀] `feat/cfo-waterfall-mapping` : Map Gross Sales → minus COGS → minus Gateway Fees (Shopify takes 2.9% + 30c) → minus Shipping Costs → minus Social Ads.
 
 ### Target: `epic/agentic-skills-evaluation`
-- [x] `chore/audit-to-skills` : Go back through all .md files and decide if any need to be migrated to `.agents/skills/`.
-- [x] `feat/frontend-skills` : Investigate and create new .md skill files specifically tailored to a desktop-first browser-based HTML/JS application environment.
+- [🚀] `chore/audit-to-skills` : Go back through all .md files and decide if any need to be migrated to `.agents/skills/`.
+- [🚀] `feat/frontend-skills` : Investigate and create new .md skill files specifically tailored to a desktop-first browser-based HTML/JS application environment.
 
 ### Target: `epic/system-dependency-audit`
-- [x] `chore/parse-dependencies` : Scan all 41 rule/workflow/skill `.md` files for references to uncreated files or folders (e.g., Cross-Reference TXTs, Master References).
-- [x] `feat/bootstrap-missing-files` : Create the missing dependencies with as much actual payload data as expected (DB schemas, button UI tokens, etc.) to securely strap the agent to the current app state.
+- [🚀] `chore/parse-dependencies` : Scan all 41 rule/workflow/skill `.md` files for references to uncreated files or folders (e.g., Cross-Reference TXTs, Master References).
+- [🚀] `feat/bootstrap-missing-files` : Create the missing dependencies with as much actual payload data as expected (DB schemas, button UI tokens, etc.) to securely strap the agent to the current app state.
 
 ### Target: `epic/legacy-data-migration`
-- [x] `chore/git-history-scan` : Search git history to recover contents of `ui_dev_stds.md` and `roadmap.md`.
-- [x] `feat/legacy-data-integration` : Integrate recovered UI tokens into `tools/SK8Lytz_App_Master_Reference.md` and migrate roadmap ideas into `tools/SK8Lytz_Bucket_List.md`.
+- [🚀] `chore/git-history-scan` : Search git history to recover contents of `ui_dev_stds.md` and `roadmap.md`.
+- [🚀] `feat/legacy-data-integration` : Integrate recovered UI tokens into `tools/SK8Lytz_App_Master_Reference.md` and migrate roadmap ideas into `tools/SK8Lytz_Bucket_List.md`.
 
 ### Target: `epic/redundant-tools-cleanup`
-- [x] `chore/audit-agents-tools` : Inspect `.agents/tools/` for outdated duplicates.
-- [x] `feat/consolidate-tools` : Compare files with root `tools/` directory to resolve data divergence, delete the redundant folder, and update pointers.
+- [🚀] `chore/audit-agents-tools` : Inspect `.agents/tools/` for outdated duplicates.
+- [🚀] `feat/consolidate-tools` : Compare files with root `tools/` directory to resolve data divergence, delete the redundant folder, and update pointers.
 
 ### Target: `main`
 *(Epic: Master Reference Compliance Audit)*
-- [x] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
+- [🚀] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
 
 ### Target: `main`
 *(Epic: Competitive Feature Benchmarking)*
-- [x] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
+- [🚀] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
 
 ### Target: `main`
 *(Epic: Sitewide Security Audit)*
-- [x] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
+- [🚀] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
 
 ### Target: `main`
 *(Epic: Supabase CLI Repair)*
-- [x] `chore/supabase-cli-repair` : Repair the local Supabase migration history tracking to re-sync `npx supabase db push` functionality with the remote database without destroying data, resolving the "Remote migration versions not found" tracked mismatches.
+- [🚀] `chore/supabase-cli-repair` : Repair the local Supabase migration history tracking to re-sync `npx supabase db push` functionality with the remote database without destroying data, resolving the "Remote migration versions not found" tracked mismatches.
 
 ### Target: `main`
 *(Epic: Sitewide Performance Optimization)*
-- [x] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
+- [🚀] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
 
 ### Target: `main`
 *(Epic: Sitewide Button UI & Mobile Responsiveness)*
-- [x] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
+- [🚀] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
 
 ### Target: `epic/agentic-workflow-tooling`
 *(Epic: Agentic Workflow Tooling & QA Automation)*
-- [x] `chore/prettier-eslint-initialization` : Setup a strict `.prettierrc` and `.eslintrc.json` in the root optimized for Vanilla ES6+ Javascript. Add NPM scrips `lint` and `format` so the AI can algorithmically sanitize the codebase and catch syntax errors pre-execution.
-- [x] `feat/strict-jsdoc-typing` : Do a systematic pass over the core database sync modules (`sales-module.js`, `inventory-module.js`) and inject strict JSDoc typing (`/** @type {...} */`) for core data structures to mathematically prevent AI hallucination of payload shapes.
-- [x] `feat/automated-test-suite` : Initialize a lightweight, native JavaScript automated testing suite (e.g. Jest or Playwright) that runs against the local `.js` algorithms. Provide the AI with an `npm test` script to autonomously verify complex math (like CFO waterfall algorithms) without bothering the user for manual QA.
+- [🚀] `chore/prettier-eslint-initialization` : Setup a strict `.prettierrc` and `.eslintrc.json` in the root optimized for Vanilla ES6+ Javascript. Add NPM scrips `lint` and `format` so the AI can algorithmically sanitize the codebase and catch syntax errors pre-execution.
+- [🚀] `feat/strict-jsdoc-typing` : Do a systematic pass over the core database sync modules (`sales-module.js`, `inventory-module.js`) and inject strict JSDoc typing (`/** @type {...} */`) for core data structures to mathematically prevent AI hallucination of payload shapes.
+- [🚀] `feat/automated-test-suite` : Initialize a lightweight, native JavaScript automated testing suite (e.g. Jest or Playwright) that runs against the local `.js` algorithms. Provide the AI with an `npm test` script to autonomously verify complex math (like CFO waterfall algorithms) without bothering the user for manual QA.
 
 ### Target: `main`
 *(Epic: Agentic Hygiene & Workflow Refactoring)*
-- [x] `chore/agentic-rule-refactor` : Identified and repaired 5 core logical paradoxes across the agent environment. Granted `main` branch exemptions for `/release` and `/wind_down` tagging; normalized the 8-point pixel grid system to `clamp()` scaling via `modern-ui-ux.md`; fully exempted Bucket Lists and Master References from the 24/7 continuous micro-commit stream to enable graceful batch syncing; restricted the Boy Scout rule to explicit `feat/` cycles to isolate bug deployments; and officially excised the redundant `/idea_intake` workflow.
+- [🚀] `chore/agentic-rule-refactor` : Identified and repaired 5 core logical paradoxes across the agent environment. Granted `main` branch exemptions for `/release` and `/wind_down` tagging; normalized the 8-point pixel grid system to `clamp()` scaling via `modern-ui-ux.md`; fully exempted Bucket Lists and Master References from the 24/7 continuous micro-commit stream to enable graceful batch syncing; restricted the Boy Scout rule to explicit `feat/` cycles to isolate bug deployments; and officially excised the redundant `/idea_intake` workflow.
