@@ -102,6 +102,10 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **The Architecture:** Raw data must *not* be de-duplicated or wiped by the parsing function beforehand. Let the Sandbox grid physically render all rows visually to the user.
 * **The Commit Hook:** Execution logic and data deduplication must only occur inside the `customCommitFn` callback when the user clicks 'Upload & Sync'. This enforces explicit user consent before data hits the Supabase instance, preventing runaway blind overwrites.
 
+### I. Scraper Foundry (Visual Extraction Engine)
+* **Row Integrity Architecture:** The Scraper Foundry leverages a strict Two-Step Parent-Child bounding algorithm. 
+* **Execution Constraint:** Global string queries (`document.querySelectorAll`) are forbidden for child fields to prevent cross-row layout corruption. The engine MUST identify the Parent Row wrapper first, count the rows, and then map all child elements *relative* to the specific instance of the outer wrapper. Missing DOM elements in anomalous rows will safely degrade to `""` rather than misaligning the underlying matrix array.
+
 ### I. WebRTC Scanner Layouts & iOS Compatibility
 * **Dual-Card Architecture:** When building inline hardware camera scanners (like the Cycle Count engine), you must NEVER use abrasive full-screen blackout modals. You must deploy a responsive `flex-wrap` layout (`align-items: stretch`) where the Primary Form and the Scanner Card lock into a rigid side-by-side array natively.
 * **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#barcode-reader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
