@@ -593,6 +593,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.sortSandboxModal(el.getAttribute('data-sort-col'), parseInt(el.getAttribute('data-table-num'), 10));
                     }
                     break;
+                case 'click_openScraperFoundry':
+                    if (typeof openScraperFoundry === 'function') openScraperFoundry();
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
