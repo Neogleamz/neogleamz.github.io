@@ -995,7 +995,7 @@ function renderActiveWO(id) {
                 let isTop3D = typeof productsDB !== 'undefined' && productsDB[wo.product_name] && productsDB[wo.product_name].is_3d_print;
                 let topLevelTitle = isTop3D ? `🟠 Build: 🖨️ ${wo.product_name} (x${wo.qty})` : (isTopSub ? `🟠 Build: ⚙️ ${wo.product_name} (x${wo.qty})` : `📦 Direct Raw Materials`);
 
-                html += `<div class="kitting-card"><h4>${topLevelTitle} <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                html += `<div class="kitting-card"><h4>${topLevelTitle} <button class="btn-blue btn-check-all" data-grp-id="${currentGrpId}" style="float:right; width:auto; padding:2px 8px; font-size:10px;">✓ All</button></h4>`;
                 Object.keys(directRaws).forEach(k => {
                     let req = directRaws[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                     let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
@@ -1004,7 +1004,7 @@ function renderActiveWO(id) {
                     let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
 
                     let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
+                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk wip-checkbox" data-key="${chkKey}" ${isDone}> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                 });
                 html += `</div>`;
             }
@@ -1019,10 +1019,10 @@ function renderActiveWO(id) {
             });
             if(shelfPulls.length > 0) {
                 let currentGrpId = `pickgrp_${grpCounter++}`;
-                html += `<div class="kitting-card route-card-pull"><h4>🟢 Pull Pre-Built from Shelf <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                html += `<div class="kitting-card route-card-pull"><h4>🟢 Pull Pre-Built from Shelf <button class="btn-blue btn-check-all" data-grp-id="${currentGrpId}" style="float:right; width:auto; padding:2px 8px; font-size:10px;">✓ All</button></h4>`;
                 shelfPulls.forEach(sub => {
                     let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; color:#15803d; flex-grow:1;"><strong>${sub.q.toFixed(2)}x</strong> ${sub.name}</div></div>`;
+                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk wip-checkbox" data-key="${chkKey}" ${isDone}> <div class="chk-text" style="font-size:13px; color:#15803d; flex-grow:1;"><strong>${sub.q.toFixed(2)}x</strong> ${sub.name}</div></div>`;
                 });
                 html += `</div>`;
             }
@@ -1038,7 +1038,7 @@ function renderActiveWO(id) {
                         let subDirect = getDirectMaterials(cleanSubName, qty);
                         if(Object.keys(subDirect).length > 0) {
                             let currentGrpId = `pickgrp_${grpCounter++}`;
-                            html += `<div class="kitting-card route-card-build"><h4>🟠 Build: ${titleEmoji} ${cleanSubName} (x${qty}) <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                            html += `<div class="kitting-card route-card-build"><h4>🟠 Build: ${titleEmoji} ${cleanSubName} (x${qty}) <button class="btn-blue btn-check-all" data-grp-id="${currentGrpId}" style="float:right; width:auto; padding:2px 8px; font-size:10px;">✓ All</button></h4>`;
                             Object.keys(subDirect).forEach(k => {
                                 let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                                 let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
@@ -1047,7 +1047,7 @@ function renderActiveWO(id) {
                                 let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
 
                                 let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                                html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
+                                html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk wip-checkbox" data-key="${chkKey}" ${isDone}> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                             });
                             html += `</div>`;
                         }
@@ -1055,6 +1055,14 @@ function renderActiveWO(id) {
                 });
             }
             pList.innerHTML = window.safeHTML(html + `</div>`);
+            pList.querySelectorAll('.btn-check-all').forEach(btn => {
+                let grpId = btn.getAttribute('data-grp-id');
+                btn.addEventListener('click', (e) => { e.stopPropagation(); checkAllInGroup(grpId); });
+            });
+            pList.querySelectorAll('.wip-checkbox').forEach(chk => {
+                let key = chk.getAttribute('data-key');
+                chk.addEventListener('change', (e) => { toggleWIPCheckbox(chk, key); });
+            });
         }
         else if(wo.status === 'In Production') {
             document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active');
@@ -1126,15 +1134,15 @@ function renderActiveWO(id) {
                     if(isEditing) { disp = 'block'; chev = '▼'; }
 
                     htmlOut += `
-                    <div class="sop-grp-card" id="sopgrp_${grp.id}" draggable="true" ondragstart="batchezSopDragStart(event, '${grp.id}')" ondragover="batchezSopDragOver(event)" ondrop="batchezSopDrop(event, '${grp.id}', '${wo.product_name.replace(/'/g, "\\'")}')" ondragend="batchezSopDragEnd(event)" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
-                        <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);" onclick="if(!${isEditing}){ toggleBatchezSopGroup('${grp.id}'); }">
-                            <div style="flex-grow:1;">
+                    <div class="sop-grp-card" id="sopgrp_${grp.id}" draggable="true" data-grp-id="${grp.id}" data-prod-name="${wo.product_name.replace(/'/g, "\\'")}" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
+                        <div class="sop-grp-header-click" data-grp-id="${grp.id}" style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);">
+                            <div style="flex-grow:1; pointer-events:none;">
                                 ${grp.title} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px;" onclick="event.stopPropagation()">
-                                <button class="btn-slate" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${grp.rawName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
-                                <button onclick="toggleInlineEditor('${grp.id}')" class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
-                                <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" onclick="toggleBatchezSopGroup('${grp.id}')" id="sopgrp_icon_${grp.id}">${chev}</div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <button class="btn-slate sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="font-size:10px; padding:2px 8px;">🖨️ PRINT</button>
+                                <button class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'} sop-edit-btn" data-grp-id="${grp.id}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
+                                <div class="sop-chev-btn" data-grp-id="${grp.id}" style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" id="sopgrp_icon_${grp.id}">${chev}</div>
                             </div>
                         </div>
                         <div id="sopgrp_body_${grp.id}" style="display:${disp}; padding:10px 15px; border-top:1px solid var(--border-color);">
@@ -1271,9 +1279,9 @@ function renderActiveWO(id) {
                                     let chkKey = `sop_tele_${grp.id}_${qIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
                                     let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, qIdx) : q;
                                     if (q.startsWith('> ')) {
-                                        htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:2px 8px 2px 28px; width:100%; transition:all 0.2s; margin-bottom:2px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
+                                        htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:2px 8px 2px 28px; width:100%; transition:all 0.2s; margin-bottom:2px;"><input type="checkbox" class="wip-checkbox" ${isDone} data-key="${chkKey}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
                                     } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
-                                        htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:4px 8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-container); width:100%; transition:all 0.2s; margin-bottom:4px;"><input type="checkbox" onchange="toggleWIPCheckbox(this, '${chkKey}')" ${isDone} data-key="${chkKey}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:0px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
+                                        htmlOut += `<label class="checklist-item ${doneCls}" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:4px 8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-container); width:100%; transition:all 0.2s; margin-bottom:4px;"><input type="checkbox" class="wip-checkbox" ${isDone} data-key="${chkKey}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:0px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
                                     } else {
                                         htmlOut += `<div style="width:100%; margin-bottom:6px; font-size:11px;">${parsed}</div>`;
                                     }
@@ -1292,21 +1300,21 @@ function renderActiveWO(id) {
                                             let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\\\'").replace(/"/g, '"');
                                             if (m.type === 'img') {
                                                 let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl;
-                                                attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${imgThumbUrl}', 'img')">`;
+                                                attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb sop-media-img" data-url="${imgThumbUrl}" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;">`;
                                             } else {
                                                 let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
                                                 if (isNativeVid) {
-                                                    attachmentHtml += `<div class="media-thumb" style="max-height:100px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safeUrl}', 'vid')"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:24px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:10px; font-weight:bold;">VIDEO</span></div></div>`;
+                                                    attachmentHtml += `<div class="media-thumb sop-media-vid" data-url="${safeUrl}" style="max-height:100px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:24px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:10px; font-weight:bold;">VIDEO</span></div></div>`;
                                                 } else {
                                                     let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
                                                     if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
-                                                    attachmentHtml += `<div class="media-thumb" style="max-height:100px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${mediaUrl}', 'iframe')"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`;
+                                                    attachmentHtml += `<div class="media-thumb sop-media-iframe" data-url="${mediaUrl}" style="max-height:100px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;"><iframe loading="lazy" src="${mediaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe></div>`;
                                                 }
                                             }
                                         }
                                     });
                                     attachmentHtml += `</div>`;
-                                    htmlOut += `<div class="checklist-item ${doneCls}" style="padding:4px 8px; margin-bottom:4px;"><input type="checkbox" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="width:100%; font-size:11px;"><strong style="color:#0ea5e9; font-size:12px;">Step ${stepCounter++}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
+                                    htmlOut += `<div class="checklist-item ${doneCls}" style="padding:4px 8px; margin-bottom:4px;"><input type="checkbox" class="wip-checkbox" data-key="${chkKey}" ${isDone}> <div class="chk-text" style="width:100%; font-size:11px;"><strong style="color:#0ea5e9; font-size:12px;">Step ${stepCounter++}:</strong><br> ${s.text} ${attachmentHtml}</div></div>`;
                                 });
                             }
                         }
@@ -1314,6 +1322,53 @@ function renderActiveWO(id) {
                     htmlOut += `</div></div>`;
                 });
                 sList.innerHTML = window.safeHTML(htmlOut);
+
+                // Re-bind events stripped by DOMPurify
+                sList.querySelectorAll('.sop-grp-card').forEach(card => {
+                    let grpId = card.getAttribute('data-grp-id');
+                    let rawName = card.getAttribute('data-prod-name');
+                    card.addEventListener('dragstart', (e) => batchezSopDragStart(e, grpId));
+                    card.addEventListener('dragover', (e) => batchezSopDragOver(e));
+                    card.addEventListener('drop', (e) => batchezSopDrop(e, grpId, rawName));
+                    card.addEventListener('dragend', (e) => batchezSopDragEnd(e));
+                });
+                sList.querySelectorAll('.sop-grp-header-click').forEach(el => {
+                    let grpId = el.getAttribute('data-grp-id');
+                    el.addEventListener('click', () => { 
+                        if(!(window.activeInlineSopEditors && window.activeInlineSopEditors[grpId])) {
+                            toggleBatchezSopGroup(grpId); 
+                        }
+                    });
+                });
+                sList.querySelectorAll('.sop-print-btn').forEach(btn => {
+                    let rawName = btn.getAttribute('data-raw-name');
+                    btn.addEventListener('click', (e) => { e.stopPropagation(); openPrintSOP(rawName); });
+                });
+                sList.querySelectorAll('.sop-edit-btn').forEach(btn => {
+                    let grpId = btn.getAttribute('data-grp-id');
+                    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleInlineEditor(grpId); });
+                });
+                sList.querySelectorAll('.sop-chev-btn').forEach(btn => {
+                    let grpId = btn.getAttribute('data-grp-id');
+                    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleBatchezSopGroup(grpId); });
+                });
+                sList.querySelectorAll('.sop-media-img').forEach(img => {
+                    let url = img.getAttribute('data-url');
+                    img.addEventListener('click', (e) => { e.stopPropagation(); openMediaModal(url, 'img'); });
+                });
+                sList.querySelectorAll('.sop-media-vid').forEach(vid => {
+                    let url = vid.getAttribute('data-url');
+                    vid.addEventListener('click', (e) => { e.stopPropagation(); openMediaModal(url, 'vid'); });
+                });
+                sList.querySelectorAll('.sop-media-iframe').forEach(ifr => {
+                    let url = ifr.getAttribute('data-url');
+                    ifr.addEventListener('click', (e) => { e.stopPropagation(); openMediaModal(url, 'iframe'); });
+                });
+                sList.querySelectorAll('.wip-checkbox').forEach(chk => {
+                    let key = chk.getAttribute('data-key');
+                    chk.addEventListener('change', (e) => { toggleWIPCheckbox(chk, key); });
+                });
+
                 if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
         }
         else if(wo.status === 'Completed') {
@@ -1749,6 +1804,8 @@ function printPickList() {
                 html += `<tr><td colspan="4" class="group-header" style="background:#d1fae5; color:#15803d;">🟢 Pull Pre-Built from Shelf</td></tr>`;
                 pulls.forEach(sub => { html += `<tr><td>[   ]</td><td colspan="2">⚙️ ${sub.name}</td><td><strong>${sub.q.toFixed(2)}</strong></td></tr>`; });
             }
+        }
+        if(currentWO.routing) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
                     let subDirect = getDirectMaterials(sub, currentWO.routing[sub].build);
