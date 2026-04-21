@@ -27,6 +27,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🔴 P0 Critical (Blockers & Hotfixes)
+*(No active blockers)*
 
 
 ---
@@ -59,6 +60,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+*(Epic: Socialz UI Hotfixes)*
+- [🚀] `fix/socialz-blank-tab-render` : Investigate and fix the issue where the Socialz tab renders a completely blank screen instead of the expected UI. [🤖 AI Model] [🧠 40k / 5k] [💸 $0.15 / $0.02]
 
 ### Target: `main`
 *(Epic: Batchez UI Fixes)*

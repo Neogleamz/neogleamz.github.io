@@ -1,7 +1,10 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.18] - 2026-04-21
+
+### Features & Refactors
 - **Orderz Sorting & Duplicates**: Fixed the bug in Revenuez where ORDERZ columns cannot be sorted, and resolved duplicated Shopify order (#1039) via webhook upsert logic. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- **Socialz UI Hotfixes**: Investigated and fixed the issue where the Socialz tab rendered a completely blank screen instead of the expected UI. Re-engineered event delegation targeting, natively injected brand SVGs to bypass missing FontAwesome libraries, expanded inputs to fit viral URLs, and built a global error capture listener to prevent DOMPurify from purging avatar error-fallback states. [🤖 AI Model] [🧠 40k / 5k] [💸 $0.15 / $0.02]
 
 ## [1.0.17] - 2026-04-20
 
