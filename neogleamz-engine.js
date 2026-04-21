@@ -45,7 +45,7 @@ window.addEventListener('unhandledrejection', (event) => {
 // ==========================================
 window.safeHTML = function(dirtyHTML) {
     if (typeof DOMPurify !== 'undefined') {
-        return DOMPurify.sanitize(dirtyHTML);
+        return DOMPurify.sanitize(dirtyHTML, { ADD_ATTR: ['target'] });
     }
     // Fallback if DOMPurify failed to load
     console.warn("DOMPurify not loaded. Using fallback HTML escaper.");
