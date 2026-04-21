@@ -40,6 +40,13 @@
             } else img.style.display = 'none';
         }
 
+        // Global capture listener to catch image load errors (bypasses DOMPurify stripping inline onerrors)
+        document.addEventListener('error', function(event) {
+            if (event.target && event.target.tagName === 'IMG' && event.target.hasAttribute('data-provider')) {
+                handleAvatarError(event.target);
+            }
+        }, true);
+
         function showToast(msg, type='success') {
             const c = document.getElementById('toast-container'); 
             const t = document.createElement('div');
@@ -398,7 +405,7 @@
                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                    <div style="width: 64px; height: 64px; border-radius: 50%; position: relative; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
                        <div style="position: absolute; inset:0; background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
-                       ${src ? `<img loading="lazy" src="${src}" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}
+                       ${src ? `<img loading="lazy" src="${src}" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}">` : ''}
                    </div>
                    <div style="overflow: hidden; flex-grow: 1;">
                        <h2 style="font-weight: bold; font-size: 20px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: var(--text-heading); margin: 0;">${s.name}</h2>
