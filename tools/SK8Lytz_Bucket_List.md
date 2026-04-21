@@ -30,6 +30,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Batchez UI Fixes)*
 - [🚀] `fix/batchez-sop-row-interactions` : Fix the bug in Batchez where SOP rows cannot be expanded or collapsed, and row-level print/edit buttons are unresponsive. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] `fix/orderz-sorting-and-duplicates` : Fix the bug in Revenuez where ORDERZ columns cannot be sorted, and investigate/resolve duplicated Shopify order (#1039) from webhook payloads. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
