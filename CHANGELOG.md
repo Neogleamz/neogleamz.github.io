@@ -1,6 +1,7 @@
 # SK8Lytz Application Changelog
 
 ## [Unreleased]
+- **Orderz Sorting & Duplicates**: Fixed the bug in Revenuez where ORDERZ columns cannot be sorted, and resolved duplicated Shopify order (#1039) via webhook upsert logic. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ## [1.0.17] - 2026-04-20
 
