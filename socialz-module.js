@@ -40,12 +40,19 @@
             } else img.style.display = 'none';
         }
 
+        // Global capture listener to catch image load errors (bypasses DOMPurify stripping inline onerrors)
+        document.addEventListener('error', function(event) {
+            if (event.target && event.target.tagName === 'IMG' && event.target.hasAttribute('data-provider')) {
+                handleAvatarError(event.target);
+            }
+        }, true);
+
         function showToast(msg, type='success') {
             const c = document.getElementById('toast-container'); 
             const t = document.createElement('div');
             t.className = `${type==='success'?'bg-green-500':'bg-red-500'} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 toast-enter pointer-events-auto min-w-[280px] transition-opacity duration-500`;
             t.innerHTML = window.safeHTML(
-                `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i><span class="font-medium text-sm">${msg}</span>`
+                `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"> </i><span class="font-medium text-sm">${msg}</span>`
             );
             c.appendChild(t); 
             setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
@@ -116,7 +123,7 @@
             return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
         }
 
-                function generateSocial(link, followers, icon, colorClass, handle) {
+        function generateSocial(link, followers, icon, colorClass, handle) {
             if (!handle || handle === '-' || handle === '') return "";
             let tc = ''; let hb = '';
             if (colorClass === 'pink') { tc = '#ec4899'; hb = 'rgba(236,72,153, 0.1)'; }
@@ -124,35 +131,44 @@
             else if(colorClass === 'red') { tc = '#ef4444'; hb = 'rgba(239,68,68, 0.1)'; }
             else if(colorClass === 'blue') { tc = '#3b82f6'; hb = 'rgba(59,130,246, 0.1)'; }
             
+            let safeLink = link ? link.trim() : '';
+            if (safeLink && !safeLink.startsWith('http://') && !safeLink.startsWith('https://')) {
+                safeLink = 'https://' + safeLink;
+            }
+
             return `
-                <a href="${link}" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; transition: all 0.2s; flex: 1; min-width: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none; background: var(--bg-panel); border: 1px solid var(--border-color);" onmouseover="this.style.background='${hb}'" onmouseout="this.style.background='var(--bg-panel)'">
+                <a href="${safeLink}" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; transition: all 0.2s; flex: 1; min-width: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none; background: var(--bg-panel); border: 1px solid var(--border-color);" onmouseover="this.style.background='${hb}'" onmouseout="this.style.background='var(--bg-panel)'">
                     <span style="font-size: 14px; color: ${tc}; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; font-weight: 500; text-align: center;">${handle}</span>
                     <div style="display: flex; align-items: center; gap: 8px; min-width: 0; justify-content: center; width: 100%;">
-                        <i class="fa-brands ${icon}" style="color: ${tc}; font-size: 24px;"></i>
+                        <i class="fa-brands ${icon}" style="color: ${tc}; font-size: 24px;"> </i>
                         <span style="font-size: 16px; font-weight: bold; color: var(--text-heading);">${followers}</span>
                     </div>
                 </a>
             `;
         }
 
-        async function toggleFavorite(index, e) {
-            if (e) e.stopPropagation();
+        window.toggleFavorite = async function toggleFavorite(index, e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
             if (index > -1 && index < socialzSkaters.length) {
                 socialzSkaters[index].isFavorite = !socialzSkaters[index].isFavorite;
                 
                 // Visually update the button without re-rendering the whole table or grid layout to prevent snapping/flicker
-                if (e && e.currentTarget) {
-                    const btn = e.currentTarget;
-                    if (socialzSkaters[index].isFavorite) {
-                        btn.className = btn.className.replace('text-slate-400', 'text-red-500');
-                        btn.innerHTML = window.safeHTML(
-                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
-                        );
+                if (e && e.target) {
+                    const btn = e.target.closest('[data-click="click_toggleFavorite"]');
+                    if (btn) {
+                        if (socialzSkaters[index].isFavorite) {
+                            btn.style.color = '#ef4444';
+                            btn.innerHTML = window.safeHTML(
+                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                            );
+                        } else {
+                            btn.style.color = 'var(--text-muted)';
+                            btn.innerHTML = window.safeHTML(
+                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                            );
+                        }
                     } else {
-                        btn.className = btn.className.replace('text-red-500', 'text-slate-400');
-                        btn.innerHTML = window.safeHTML(
-                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
-                        );
+                        renderSkaters();
                     }
                 } else {
                     renderSkaters(); // fallback if called programmatically
@@ -291,7 +307,7 @@
             renderSkaters();
         }
 
-        function handleSortChange(v) { 
+        window.handleSortChange = function handleSortChange(v) { 
             if (typeof isResizing !== 'undefined' && isResizing) return; 
             if (socialzCurrentSort === v) {
                 socialzSortDirection = socialzSortDirection === 'asc' ? 'desc' : 'asc';
@@ -379,7 +395,7 @@
 
                         return `<div class="socialz-influencer-card" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color);">
                <!-- Favorite Heart -->
-               <button onclick="toggleFavorite(${originalIndex}, event)" class="btn-icon-sq" style="position: absolute; top: 16px; right: 16px; z-index: 20; border-radius: 50%; background: var(--bg-main); border: 1px solid var(--border-color); color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};">
+               <button data-click="click_toggleFavorite" data-index="${originalIndex}" class="btn-icon-sq" style="position: absolute; top: 16px; right: 16px; z-index: 20; border-radius: 50%; background: var(--bg-main); border: 1px solid var(--border-color); color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};">
                    ${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}
                </button>
                <!-- Viral Star -->
@@ -389,12 +405,12 @@
                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                    <div style="width: 64px; height: 64px; border-radius: 50%; position: relative; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
                        <div style="position: absolute; inset:0; background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
-                       ${src ? `<img loading="lazy" src="${src}" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}" onerror="handleAvatarError(this)">` : ''}
+                       ${src ? `<img loading="lazy" src="${src}" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}">` : ''}
                    </div>
                    <div style="overflow: hidden; flex-grow: 1;">
                        <h2 style="font-weight: bold; font-size: 20px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: var(--text-heading); margin: 0;">${s.name}</h2>
                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; font-size: 14px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                           <i class="fa-solid fa-location-dot text-brand w-3"></i> ${s.location} 
+                           <i class="fa-solid fa-location-dot text-brand w-3"> </i> ${s.location} 
                            ${s.region ? `<span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; ${regStyles}">${s.region}</span>` : ''} 
                            <span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase;" class="${typeClass}">${s.type || ''}</span>
                        </div>
@@ -412,7 +428,7 @@
                     </div>
 
                     <div style="display: flex; justify-content: flex-end;">
-                        <button onclick="editSkater(${originalIndex})" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='#f97316'"><i class="fa-solid fa-pen"></i> EDIT</button>
+                        <button data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='#f97316'"><i class="fa-solid fa-pen"> </i> EDIT</button>
                     </div>
                 </div></div>
                <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
@@ -436,7 +452,7 @@
                         {k: 'total', label: 'Total Reach'},
                         {k: 'edit', label: 'Edit', min: '80px'}
                     ];
-                    let ths = tCols.map(c => `<th onclick="${['fav','viral','edit'].includes(c.k) ? '' : `handleSortChange('${c.k}')`}" class="${c.k === socialzCurrentSort ? (socialzSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} ${c.label==='Name'||c.label==='Location'?'text-left':'text-center'} px-3 py-2 cursor-pointer select-none" title="Sort by ${c.label}">${c.label}</th>`).join('');
+                    let ths = tCols.map(c => `<th ${['fav','viral','edit'].includes(c.k) ? '' : `data-click="click_socialzSort" data-sort="${c.k}"`} class="${c.k === socialzCurrentSort ? (socialzSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} ${c.label==='Name'||c.label==='Location'?'text-left':'text-center'} px-3 py-2 cursor-pointer select-none" title="Sort by ${c.label}">${c.label}</th>`).join('');
                     
                     let tableHtml = `<div style="overflow-x:auto; width:100%;"><table class="neo-table hover-rows" id="socialzListTable" style="width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; text-align:left;">
                         <thead style="position:sticky; top:0; z-index:40; background:var(--bg-panel);"><tr style="color:var(--text-heading); border-bottom:1px solid var(--border-color); font-weight:800;">${ths}</tr></thead><tbody id="socialz-table-body">`;
@@ -460,7 +476,7 @@
                         
                         return `<tr style="border-bottom:1px solid var(--border-color); background:var(--bg-panel);" onmouseover="this.style.background='rgba(59, 130, 246, 0.05)'" onmouseout="this.style.background='var(--bg-panel)'">
                             <td class="overflow-hidden" style="padding:4px; text-align:center;">
-                                <button onclick="toggleFavorite(${originalIndex}, event)" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; transition: transform 0.2s; color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
+                                <button data-click="click_toggleFavorite" data-index="${originalIndex}" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; transition: transform 0.2s; color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
                             </td>
                             <td class="trunc-col" style="padding:4px 12px; font-weight:bold; color:var(--text-heading); text-align:left;">
                                 <div style="display: flex; align-items: center; gap: 8px; min-width: 0; width: 100%;">
@@ -480,7 +496,7 @@
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.fb||'#'}" target="_blank" style="font-weight:800; color:#3b82f6; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.fb||'0'}</a></td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; height: 100%; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
                             <td class="overflow-hidden" style="padding:4px; text-align:right; font-weight:900; color:var(--text-heading); font-size:13px;">${formatCountShort(s.rawFollowers)}</td>
-                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><button onclick="editSkater(${originalIndex})" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9px; display: flex; align-items: center; justify-content: center; gap: 4px; margin: 0 auto; transition: color 0.2s; color: var(--text-muted); background: var(--bg-input); border: 1px solid var(--border-color);" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='var(--text-muted)'"><i class="fa-solid fa-pen"></i> EDIT</button></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><button data-click="click_editSkater" data-index="${originalIndex}" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9px; display: flex; align-items: center; justify-content: center; gap: 4px; margin: 0 auto; transition: color 0.2s; color: var(--text-muted); background: var(--bg-input); border: 1px solid var(--border-color);" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='var(--text-muted)'"><i class="fa-solid fa-pen"> </i> EDIT</button></td>
                         </tr>`;
                     }).join('');
                     
@@ -590,7 +606,7 @@
         // --- CRUD Modals ---
         function openModal() { document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('skater-form').reset(); document.getElementById('edit-index').value = "-1"; document.getElementById('modal-title').innerText = "Add New Skater"; }
         function closeModal() { document.getElementById('skater-modal').style.display = 'none'; }
-        function editSkater(index) {
+        window.editSkater = function editSkater(index) {
             const s = socialzSkaters[index]; document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('edit-index').value = index; document.getElementById('modal-title').innerText = "Edit Skater";
             document.getElementById('input-name').value = s.name; document.getElementById('input-location').value = s.location; document.getElementById('input-region').value = s.region; document.getElementById('input-contact').value = s.contactInfo; document.getElementById('input-style').value = s.style; document.getElementById('input-type').value = s.type; document.getElementById('input-collab-tier').value = s.collabTier; document.getElementById('input-collab-status').value = s.collabStatus; document.getElementById('input-summary').value = s.summary; document.getElementById('input-viral').value = s.viralUrl;
             document.getElementById('input-favorite').checked = s.isFavorite || false;

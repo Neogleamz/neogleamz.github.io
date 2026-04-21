@@ -358,6 +358,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_deleteSkaterFromModal':
                     deleteSkaterFromModal();
                     break;
+                case 'click_toggleFavorite':
+                    if (typeof toggleFavorite === 'function') toggleFavorite(parseInt(el.getAttribute('data-index'), 10), event);
+                    break;
+                case 'click_editSkater':
+                    if (typeof editSkater === 'function') editSkater(parseInt(el.getAttribute('data-index'), 10));
+                    break;
+                case 'click_socialzSort':
+                    if (typeof handleSortChange === 'function') handleSortChange(el.getAttribute('data-sort'));
+                    break;
                 case 'click_document_getElementById_recipe':
                     document.getElementById('recipeActionModal').style.display='none';
                     break;
