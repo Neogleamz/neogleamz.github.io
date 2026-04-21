@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.0.17] - 2026-04-20
+
+### Features & Refactors
+- **Batchez UI Fixes**: Fix the bug in Batchez where SOP rows cannot be expanded or collapsed, and row-level print/edit buttons are unresponsive. Restored Stage 2 Pick List interactions and fixed empty print lists. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+
 ## [1.0.16] - 2026-04-14
 
 ### Features & Refactors

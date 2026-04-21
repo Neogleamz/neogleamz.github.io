@@ -27,7 +27,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🔴 P0 Critical (Blockers & Hotfixes)
-*(No active blockers).*
+### Target: `main`
+*(Epic: Batchez UI Fixes)*
+- [🚀] `fix/batchez-sop-row-interactions` : Fix the bug in Batchez where SOP rows cannot be expanded or collapsed, and row-level print/edit buttons are unresponsive. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
