@@ -33,6 +33,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟠 P1 High Priority (Core Features)
+### Target: `main`
+*(Epic: Inventory Enhancements)*
+- [ ] `feat/inventory-column-filters` : Add ability to filter columns in DATAZ and EDITZ ledgers. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 
 ## 🟡 P2 Medium Priority (Enhancements)
