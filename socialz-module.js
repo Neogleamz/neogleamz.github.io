@@ -141,23 +141,27 @@
         }
 
         window.toggleFavorite = async function toggleFavorite(index, e) {
-            if (e) e.stopPropagation();
+            if (e) { e.preventDefault(); e.stopPropagation(); }
             if (index > -1 && index < socialzSkaters.length) {
                 socialzSkaters[index].isFavorite = !socialzSkaters[index].isFavorite;
                 
                 // Visually update the button without re-rendering the whole table or grid layout to prevent snapping/flicker
-                if (e && e.currentTarget) {
-                    const btn = e.currentTarget;
-                    if (socialzSkaters[index].isFavorite) {
-                        btn.className = btn.className.replace('text-slate-400', 'text-red-500');
-                        btn.innerHTML = window.safeHTML(
-                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
-                        );
+                if (e && e.target) {
+                    const btn = e.target.closest('[data-click="click_toggleFavorite"]');
+                    if (btn) {
+                        if (socialzSkaters[index].isFavorite) {
+                            btn.style.color = '#ef4444';
+                            btn.innerHTML = window.safeHTML(
+                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                            );
+                        } else {
+                            btn.style.color = 'var(--text-muted)';
+                            btn.innerHTML = window.safeHTML(
+                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                            );
+                        }
                     } else {
-                        btn.className = btn.className.replace('text-red-500', 'text-slate-400');
-                        btn.innerHTML = window.safeHTML(
-                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
-                        );
+                        renderSkaters();
                     }
                 } else {
                     renderSkaters(); // fallback if called programmatically
