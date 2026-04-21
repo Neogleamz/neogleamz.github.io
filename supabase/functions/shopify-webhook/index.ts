@@ -148,11 +148,42 @@ serve(async (req: Request) => {
         });
       }
 
-    // 3. Inject to Database
-    const { error: insertErr } = await supabase.from('sales_ledger').insert(ledgerRows)
-    if (insertErr) {
-        console.error("Insert Error", insertErr)
-        return new Response(JSON.stringify({ error: insertErr.message }), { status: 500 })
+    // 3. Inject to Database (Upsert Logic)
+    const { data: existingRecords } = await supabase
+      .from('sales_ledger')
+      .select('id, order_id, storefront_sku')
+      .eq('order_id', orderIdStr);
+
+    const insertRows: any[] = [];
+    const updatePromises: any[] = [];
+
+    ledgerRows.forEach(row => {
+      const existing = existingRecords?.find((e: any) => String(e.order_id) === String(row.order_id) && String(e.storefront_sku) === String(row.storefront_sku));
+      if (existing && existing.id) {
+        const updatePayload = { ...row };
+        delete updatePayload.id;
+        delete updatePayload.created_at;
+        updatePromises.push(supabase.from('sales_ledger').update(updatePayload).eq('id', existing.id));
+      } else {
+        insertRows.push(row);
+      }
+    });
+
+    if (insertRows.length > 0) {
+      const { error: insertErr } = await supabase.from('sales_ledger').insert(insertRows);
+      if (insertErr) {
+        console.error("Insert Error", insertErr);
+        return new Response(JSON.stringify({ error: insertErr.message }), { status: 500 });
+      }
+    }
+
+    if (updatePromises.length > 0) {
+      const results = await Promise.all(updatePromises);
+      const firstError = results.find(r => r.error);
+      if (firstError && firstError.error) {
+        console.error("Update Error", firstError.error);
+        return new Response(JSON.stringify({ error: firstError.error.message }), { status: 500 });
+      }
     }
 
     // NOTE: Inventory updates via API edge function would require reading current qty and adding to it,
