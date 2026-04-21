@@ -225,6 +225,11 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 
 ---
 
+## 🌐 7. Edge Functions & Webhooks
+* **Shopify Webhook Deduplication (`shopify-webhook`)**: The Shopify webhook natively processes inbound JSON payloads and injects them into the `sales_ledger`. To prevent compounding data corruption from Shopify retries, the edge function MUST execute a manual pre-flight deduplication loop. It queries the `sales_ledger` for existing `order_id` values, strictly segregating rows into `insertRows` and `updateRows`, applying `.update()` to existing entities mapped strictly by the primary key `id` rather than blindly inserting duplicates.
+
+---
+
 ## Security Patterns
 
 ### A. PII Hashing (`hashPII`)
