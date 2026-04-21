@@ -116,7 +116,7 @@
             return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
         }
 
-                function generateSocial(link, followers, icon, colorClass, handle) {
+        function generateSocial(link, followers, icon, colorClass, handle) {
             if (!handle || handle === '-' || handle === '') return "";
             let tc = ''; let hb = '';
             if (colorClass === 'pink') { tc = '#ec4899'; hb = 'rgba(236,72,153, 0.1)'; }
@@ -124,8 +124,13 @@
             else if(colorClass === 'red') { tc = '#ef4444'; hb = 'rgba(239,68,68, 0.1)'; }
             else if(colorClass === 'blue') { tc = '#3b82f6'; hb = 'rgba(59,130,246, 0.1)'; }
             
+            let safeLink = link ? link.trim() : '';
+            if (safeLink && !safeLink.startsWith('http://') && !safeLink.startsWith('https://')) {
+                safeLink = 'https://' + safeLink;
+            }
+
             return `
-                <a href="${link}" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; transition: all 0.2s; flex: 1; min-width: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none; background: var(--bg-panel); border: 1px solid var(--border-color);" onmouseover="this.style.background='${hb}'" onmouseout="this.style.background='var(--bg-panel)'">
+                <a href="${safeLink}" target="_blank" onclick="window.open(this.href, '_blank', 'noopener,noreferrer'); return false;" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; transition: all 0.2s; flex: 1; min-width: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none; background: var(--bg-panel); border: 1px solid var(--border-color);" onmouseover="this.style.background='${hb}'" onmouseout="this.style.background='var(--bg-panel)'">
                     <span style="font-size: 14px; color: ${tc}; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; font-weight: 500; text-align: center;">${handle}</span>
                     <div style="display: flex; align-items: center; gap: 8px; min-width: 0; justify-content: center; width: 100%;">
                         <i class="fa-brands ${icon}" style="color: ${tc}; font-size: 24px;"></i>
@@ -135,7 +140,7 @@
             `;
         }
 
-        async function toggleFavorite(index, e) {
+        window.toggleFavorite = async function toggleFavorite(index, e) {
             if (e) e.stopPropagation();
             if (index > -1 && index < socialzSkaters.length) {
                 socialzSkaters[index].isFavorite = !socialzSkaters[index].isFavorite;
@@ -291,7 +296,7 @@
             renderSkaters();
         }
 
-        function handleSortChange(v) { 
+        window.handleSortChange = function handleSortChange(v) { 
             if (typeof isResizing !== 'undefined' && isResizing) return; 
             if (socialzCurrentSort === v) {
                 socialzSortDirection = socialzSortDirection === 'asc' ? 'desc' : 'asc';
@@ -590,7 +595,7 @@
         // --- CRUD Modals ---
         function openModal() { document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('skater-form').reset(); document.getElementById('edit-index').value = "-1"; document.getElementById('modal-title').innerText = "Add New Skater"; }
         function closeModal() { document.getElementById('skater-modal').style.display = 'none'; }
-        function editSkater(index) {
+        window.editSkater = function editSkater(index) {
             const s = socialzSkaters[index]; document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('edit-index').value = index; document.getElementById('modal-title').innerText = "Edit Skater";
             document.getElementById('input-name').value = s.name; document.getElementById('input-location').value = s.location; document.getElementById('input-region').value = s.region; document.getElementById('input-contact').value = s.contactInfo; document.getElementById('input-style').value = s.style; document.getElementById('input-type').value = s.type; document.getElementById('input-collab-tier').value = s.collabTier; document.getElementById('input-collab-status').value = s.collabStatus; document.getElementById('input-summary').value = s.summary; document.getElementById('input-viral').value = s.viralUrl;
             document.getElementById('input-favorite').checked = s.isFavorite || false;
