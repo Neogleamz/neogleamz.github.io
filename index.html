@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.04.20.2303"></script>
+    <script src="system-version.js?v=v.2026.04.20.2307"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.20.2303"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.04.20.2307"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.20.2303"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.04.20.2307"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="system-event-delegator.js?v=v.2026.04.20.2303"></script>
+    <script src="system-event-delegator.js?v=v.2026.04.20.2307"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -2930,25 +2930,33 @@
                             <label>Followers</label>
 
                             <!-- Instagram -->
-                            <div class="social-icon-wrapper" style="color: #ec4899;"><i class="fa-brands fa-instagram"> </i></div>
+                            <div class="social-icon-wrapper" style="color: #ec4899; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="24" height="24"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
+                            </div>
                             <input type="text" id="input-ig" placeholder="@user" >
                             <input type="text" id="input-ig-link" placeholder="https://instagram.com/..." >
                             <input type="text" id="input-ig-followers" placeholder="e.g. 1.2M" >
 
                             <!-- TikTok -->
-                            <div class="social-icon-wrapper" style="color: #06b6d4;"><i class="fa-brands fa-tiktok"> </i></div>
+                            <div class="social-icon-wrapper" style="color: #06b6d4; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="24" height="24"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
+                            </div>
                             <input type="text" id="input-tt" placeholder="@user" >
                             <input type="text" id="input-tt-link" placeholder="https://tiktok.com/..." >
                             <input type="text" id="input-tt-followers" placeholder="e.g. 500k" >
 
                             <!-- YouTube -->
-                            <div class="social-icon-wrapper" style="color: #ef4444;"><i class="fa-brands fa-youtube"> </i></div>
+                            <div class="social-icon-wrapper" style="color: #ef4444; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor" width="24" height="24"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
+                            </div>
                             <input type="text" id="input-yt" placeholder="@user" >
                             <input type="text" id="input-yt-link" placeholder="https://youtube.com/..." >
                             <input type="text" id="input-yt-followers" placeholder="e.g. 10k" >
 
                             <!-- Facebook -->
-                            <div class="social-icon-wrapper" style="color: #3b82f6;"><i class="fa-brands fa-facebook"> </i></div>
+                            <div class="social-icon-wrapper" style="color: #3b82f6; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" width="24" height="24"><path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"/></svg>
+                            </div>
                             <input type="text" id="input-fb" placeholder="User" >
                             <input type="text" id="input-fb-link" placeholder="https://facebook.com/..." >
                             <input type="text" id="input-fb-followers" placeholder="e.g. 5k" >
@@ -4439,18 +4447,18 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.04.20.2303"></script>
-<script src="system-tools-module.js?v=v.2026.04.20.2303"></script>
-<script src="bom-module.js?v=v.2026.04.20.2303"></script>
-<script src="inventory-module.js?v=v.2026.04.20.2303"></script>
-<script src="packerz-module.js?v=v.2026.04.20.2303"></script>
-<script src="production-module.js?v=v.2026.04.20.2303"></script>
-<script src="sales-module.js?v=v.2026.04.20.2303"></script>
-<script src="analytics-module.js?v=v.2026.04.20.2303"></script>
-<script src="ceo-module.js?v=v.2026.04.20.2303"></script>
-<script src="print-module.js?v=v.2026.04.20.2303"></script>
-<script src="scraper-module.js?v=v.2026.04.20.2303"></script>
-<script src="socialz-module.js?v=v.2026.04.20.2303"></script>
+<script src="neogleamz-engine.js?v=v.2026.04.20.2307"></script>
+<script src="system-tools-module.js?v=v.2026.04.20.2307"></script>
+<script src="bom-module.js?v=v.2026.04.20.2307"></script>
+<script src="inventory-module.js?v=v.2026.04.20.2307"></script>
+<script src="packerz-module.js?v=v.2026.04.20.2307"></script>
+<script src="production-module.js?v=v.2026.04.20.2307"></script>
+<script src="sales-module.js?v=v.2026.04.20.2307"></script>
+<script src="analytics-module.js?v=v.2026.04.20.2307"></script>
+<script src="ceo-module.js?v=v.2026.04.20.2307"></script>
+<script src="print-module.js?v=v.2026.04.20.2307"></script>
+<script src="scraper-module.js?v=v.2026.04.20.2307"></script>
+<script src="socialz-module.js?v=v.2026.04.20.2307"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -4908,18 +4916,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.20.2303"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.04.20.2307"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.20.2303"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.04.20.2307"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.20.2303"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.04.20.2307"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.20.2303"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.20.2303"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.20.2303"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.04.20.2307"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.04.20.2307"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.04.20.2307"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.04.20.2303"></script>
-    <script src="labelz-module.js?v=v.2026.04.20.2303"></script>
+    <script src="barcodz-module.js?v=v.2026.04.20.2307"></script>
+    <script src="labelz-module.js?v=v.2026.04.20.2307"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
