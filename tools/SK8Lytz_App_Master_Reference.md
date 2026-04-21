@@ -14,6 +14,11 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 * **Action Tokens**: All interactive elements MUST be tagged with native data attributes like `data-click`, `data-change`, or `data-input` containing specific string tokens (e.g., `data-click="closeModal"`).
 * **The Intercept**: The delegator bounds to `document.body` and natively catches all bubbled interactions. It maps the `data-*` tokens directly to legacy functions within standard `switch()` matrices, providing maximum DOM performance and mitigating memory leaks.
 
+### DOM Security & Injection (safeHTML)
+* **The safeHTML Protocol**: All dynamically generated HTML strings MUST be injected using `window.safeHTML(string)`. This relies on DOMPurify to strip away XSS vectors.
+* **Inline Handlers Scrubbed**: `DOMPurify` will violently scrub all inline JavaScript execution attributes (`onclick`, `onchange`, `ondragstart`, etc.) from HTML strings.
+* **The Solution**: When generating complex dynamic DOM elements (like lists or SOP groups), you MUST assign explicit CSS classes or `data-*` attributes within the template string. Immediately following the `innerHTML = window.safeHTML(html)` assignment, you MUST natively attach event handlers via `querySelectorAll` and `addEventListener()`. Relying on inline string execution will result in dead UI components.
+
 ### Local State Caching Matrix
 * **Synchronous Speed Priority**: `localStorage` is used exclusively for global toggles, persistent states, and zero-latency configs.
 * **Storage Keys**:
