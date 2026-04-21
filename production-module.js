@@ -995,7 +995,7 @@ function renderActiveWO(id) {
                 let isTop3D = typeof productsDB !== 'undefined' && productsDB[wo.product_name] && productsDB[wo.product_name].is_3d_print;
                 let topLevelTitle = isTop3D ? `🟠 Build: 🖨️ ${wo.product_name} (x${wo.qty})` : (isTopSub ? `🟠 Build: ⚙️ ${wo.product_name} (x${wo.qty})` : `📦 Direct Raw Materials`);
 
-                html += `<div class="kitting-card"><h4>${topLevelTitle} <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                html += `<div class="kitting-card"><h4>${topLevelTitle} <button class="btn-blue btn-check-all" data-grp-id="${currentGrpId}" style="float:right; width:auto; padding:2px 8px; font-size:10px;">✓ All</button></h4>`;
                 Object.keys(directRaws).forEach(k => {
                     let req = directRaws[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                     let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
@@ -1004,7 +1004,7 @@ function renderActiveWO(id) {
                     let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
 
                     let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
+                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk wip-checkbox" data-key="${chkKey}" ${isDone}> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                 });
                 html += `</div>`;
             }
@@ -1019,10 +1019,10 @@ function renderActiveWO(id) {
             });
             if(shelfPulls.length > 0) {
                 let currentGrpId = `pickgrp_${grpCounter++}`;
-                html += `<div class="kitting-card route-card-pull"><h4>🟢 Pull Pre-Built from Shelf <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                html += `<div class="kitting-card route-card-pull"><h4>🟢 Pull Pre-Built from Shelf <button class="btn-blue btn-check-all" data-grp-id="${currentGrpId}" style="float:right; width:auto; padding:2px 8px; font-size:10px;">✓ All</button></h4>`;
                 shelfPulls.forEach(sub => {
                     let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; color:#15803d; flex-grow:1;"><strong>${sub.q.toFixed(2)}x</strong> ${sub.name}</div></div>`;
+                    html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk wip-checkbox" data-key="${chkKey}" ${isDone}> <div class="chk-text" style="font-size:13px; color:#15803d; flex-grow:1;"><strong>${sub.q.toFixed(2)}x</strong> ${sub.name}</div></div>`;
                 });
                 html += `</div>`;
             }
@@ -1038,7 +1038,7 @@ function renderActiveWO(id) {
                         let subDirect = getDirectMaterials(cleanSubName, qty);
                         if(Object.keys(subDirect).length > 0) {
                             let currentGrpId = `pickgrp_${grpCounter++}`;
-                            html += `<div class="kitting-card route-card-build"><h4>🟠 Build: ${titleEmoji} ${cleanSubName} (x${qty}) <button class="btn-blue" style="float:right; width:auto; padding:2px 8px; font-size:10px;" onclick="checkAllInGroup('${currentGrpId}')">✓ All</button></h4>`;
+                            html += `<div class="kitting-card route-card-build"><h4>🟠 Build: ${titleEmoji} ${cleanSubName} (x${qty}) <button class="btn-blue btn-check-all" data-grp-id="${currentGrpId}" style="float:right; width:auto; padding:2px 8px; font-size:10px;">✓ All</button></h4>`;
                             Object.keys(subDirect).forEach(k => {
                                 let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                                 let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
@@ -1047,7 +1047,7 @@ function renderActiveWO(id) {
                                 let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
 
                                 let chkKey = `pick_${chkIdx++}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
-                                html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk" data-key="${chkKey}" ${isDone} onchange="toggleWIPCheckbox(this, '${chkKey}')"> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
+                                html += `<div class="checklist-item ${doneCls}" style="padding: 8px 10px;"><input type="checkbox" class="${currentGrpId}-chk wip-checkbox" data-key="${chkKey}" ${isDone}> <div class="chk-text" style="font-size:13px; flex-grow:1;"><strong>${req.toFixed(2)}x</strong> ${name} <div style="color:var(--text-muted); font-size:10px;">${displaySpec}</div></div></div>`;
                             });
                             html += `</div>`;
                         }
@@ -1055,6 +1055,14 @@ function renderActiveWO(id) {
                 });
             }
             pList.innerHTML = window.safeHTML(html + `</div>`);
+            pList.querySelectorAll('.btn-check-all').forEach(btn => {
+                let grpId = btn.getAttribute('data-grp-id');
+                btn.addEventListener('click', (e) => { e.stopPropagation(); checkAllInGroup(grpId); });
+            });
+            pList.querySelectorAll('.wip-checkbox').forEach(chk => {
+                let key = chk.getAttribute('data-key');
+                chk.addEventListener('change', (e) => { toggleWIPCheckbox(chk, key); });
+            });
         }
         else if(wo.status === 'In Production') {
             document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active');
@@ -1796,6 +1804,8 @@ function printPickList() {
                 html += `<tr><td colspan="4" class="group-header" style="background:#d1fae5; color:#15803d;">🟢 Pull Pre-Built from Shelf</td></tr>`;
                 pulls.forEach(sub => { html += `<tr><td>[   ]</td><td colspan="2">⚙️ ${sub.name}</td><td><strong>${sub.q.toFixed(2)}</strong></td></tr>`; });
             }
+        }
+        if(currentWO.routing) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
                     let subDirect = getDirectMaterials(sub, currentWO.routing[sub].build);
