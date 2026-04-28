@@ -16,7 +16,8 @@ When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize 
    - Performance bottlenecks (e.g., memory leaks from uncleared native event listeners, expensive DOM reflows, unoptimized loops).
    - Code cleanliness and proper modular architecture.
    *If any issues are flagged, list them out and **HALT**. Wait for permission to either fix them or proceed.*
-4. **Knowledge Audit Gate**: Evaluate if this feature branch established new critical knowledge (DB tables, Bluetooth commands, global contexts). If yes, ensure it is documented in @/tools/SK8Lytz_App_Master_Reference.md using your standard editing tools before proceeding.
+4. **Ledger Reconciliation**: Open `@/tools/SK8Lytz_Bucket_List.md`. Review the active queues (P0, P1, P2). Did the code changes you just made accidentally or intentionally fulfill any *other* unchecked `[ ]` tasks, even if they belong to a different Epic block? If yes, explicitly check them off (`[x]`) right now to prevent orphaned tasks.
+5. **Knowledge Audit Gate**: Evaluate if this feature branch established new critical knowledge (DB tables, Bluetooth commands, global contexts). If yes, ensure it is documented in @/tools/SK8Lytz_App_Master_Reference.md using your standard editing tools before proceeding.
 5. **Merge Routine & Conflict Check**:
    - Run `git checkout <base-branch>`.
    - Run `git merge --no-ff <feature-branch> -m "chore(merge): integrate <feature-branch>"`.

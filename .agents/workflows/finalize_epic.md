@@ -14,7 +14,11 @@ When the user invokes `/finalize_epic` (or instructs you to "deploy epic" or "fi
    - If the active branch is a feature branch (`feat/*`), you must **HALT** immediately. Warn the user: *"You have un-shipped code stuck on a feature branch! You must execute `[/ship_it]` to safely merge this specific task into your Epic before we can finalize the Epic."*
    - If the branch is an `epic/*` branch, you may proceed.
 
-2. **The Spillover Scan Gate**:
+2. **The Ledger Reconciliation**:
+   - Open `@/tools/SK8Lytz_Bucket_List.md`. 
+   - Perform a global sweep of all active queues (P0, P1, P2). Did any of the recently merged work accidentally or intentionally fulfill other orphaned `[ ]` tasks sitting in different Epics? Check them off (`[x]`) to ensure the ledger is fully accurate before we begin archiving.
+
+3. **The Spillover Scan Gate**:
    - Parse `@/tools/SK8Lytz_Bucket_List.md` specifically targeting the active Epic's task block.
    - Count any remaining incomplete tasks (`- [ ]`).
    - If there are ANY incomplete tasks, **HALT** and ask: *"Warning: This Epic has unfinished tasks. Do you want to **[A]** Abandon Finalization and keep coding, or **[B]** Finalize anyway and Spillover?"* 
