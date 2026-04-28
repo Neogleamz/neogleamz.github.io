@@ -36,12 +36,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `epic/math-verification-audit`
 *(Epic: Sitewide Mathematical Verification Audit)*
-- [ ] `test/cogs-bom-rollup` : Audit recursive Bill of Materials (BOM) cost roll-ups, raw goods quantity conversions, and 3D printing time/cost algorithms to verify exact unit COGS. [🤖 Gemini 3.1 Pro] [🧠 TBD / 20k] [💸 TBD / $0.05]
-- [ ] `test/item-net-profit` : Verify item-level net profit algorithms, ensuring individual product margins correctly deduct proportional shipping, packaging weights, and gateway fees. [🤖 Gemini 3.1 Pro] [🧠 TBD / 20k] [💸 TBD / $0.05]
-- [ ] `test/global-financial-waterfall` : Thoroughly investigate global CFO Waterfall, Gross Sales, Total Net Profit, Gateway Fees, Shipping, and Social Ad spend calculations for exact cross-page match. [🤖 Gemini 3.1 Pro] [🧠 TBD / 20k] [💸 TBD / $0.05]
-- [ ] `test/inventory-velocity-engine` : Audit all inventory formulas including Reorder Points (ROP), Trailing Velocity, Lead Times, and Safety Stock calculations for strict mathematical fidelity. [🤖 Gemini 3.1 Pro] [🧠 TBD / 15k] [💸 TBD / $0.04]
-- [ ] `test/sales-adjustments-audit` : Deep-dive into Sales Engine metrics: verify Pre-Ship Exchange, Post-Ship returns, and Warranty offset adjustments against the true profit ledgers. [🤖 Gemini 3.1 Pro] [🧠 TBD / 15k] [💸 TBD / $0.04]
-- [ ] `test/ltv-cac-cohort-math` : Audit Lifetime Value (LTV), Customer Acquisition Cost (CAC), repeat purchase rates, and Cohort Simulator predictive math for absolute correctness. [🤖 Gemini 3.1 Pro] [🧠 TBD / 15k] [💸 TBD / $0.04]
+- [x] `test/cogs-bom-rollup` : Audit recursive Bill of Materials (BOM) cost roll-ups, raw goods quantity conversions, and 3D printing time/cost algorithms to verify exact unit COGS. [🤖 Gemini 3.1 Pro] [🧠 TBD / 20k] [💸 TBD / $0.05]
+- [x] `test/item-net-profit` : Verify item-level net profit algorithms, ensuring individual product margins correctly deduct proportional shipping, packaging weights, and gateway fees. [🤖 Gemini 3.1 Pro] [🧠 TBD / 20k] [💸 TBD / $0.05]
+- [x] `test/global-financial-waterfall` : Thoroughly investigate global CFO Waterfall, Gross Gross Sales, Total Net Profit, Gateway Fees, Shipping, and Social Ad spend calculations for exact cross-page match. [🤖 Gemini 3.1 Pro] [🧠 TBD / 20k] [💸 TBD / $0.05]
+- [x] `test/inventory-velocity-engine` : Audit all inventory formulas including Reorder Points (ROP), Trailing Velocity, Lead Times, and Safety Stock calculations for strict mathematical fidelity. [🤖 Gemini 3.1 Pro] [🧠 TBD / 15k] [💸 TBD / $0.04]
+- [x] `test/sales-adjustments-audit` : Deep-dive into Sales Engine metrics: verify Pre-Ship Exchange, Post-Ship returns, and Warranty offset adjustments against the true profit ledgers. [🤖 Gemini 3.1 Pro] [🧠 TBD / 15k] [💸 TBD / $0.04]
+- [x] `test/ltv-cac-cohort-math` : Audit Lifetime Value (LTV), Customer Acquisition Cost (CAC), repeat purchase rates, and Cohort Simulator predictive math for absolute correctness. [🤖 Gemini 3.1 Pro] [🧠 TBD / 15k] [💸 TBD / $0.04]
 ## 🟡 P2 Medium Priority (Enhancements)
 
 
