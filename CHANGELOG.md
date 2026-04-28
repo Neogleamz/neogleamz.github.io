@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Features & Refactors
+- **Sitewide Mathematical Verification Audit**: Audited recursive BOM cost roll-ups, item-level net profit algorithms, global CFO waterfall mathematics, and Reorder Point (ROP) inventory velocity calculations for strict mathematical fidelity. Validated LTV/CAC predictive cohort simulator math and integrated robust Jest unit test suites for continuous autonomous verification. [🤖 Gemini 3.1 Pro] [🧠 105k / 100k] [💸 $0.23 / $0.27]
 - **Inventory Column Filters**: Added ability to filter columns in DATAZ and EDITZ ledgers. [🤖 AI Model] [🧠 25k / 5k] [💸 $0.08 / $0.02]
 
 ## [1.0.18] - 2026-04-21
