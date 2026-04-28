@@ -153,7 +153,7 @@ function renderFgiTable() {
             }
         });
     }
-    wrap.innerHTML = window.safeHTML(h); applyTableInteractivity('fgiTableWrap');
+    wrap.innerHTML = h; applyTableInteractivity('fgiTableWrap');
 }
 
 let SUPPLIER_LEAD_TIME_DAYS = parseFloat(localStorage.getItem('neogleamz_default_lead_time')) || 5;
@@ -238,7 +238,7 @@ function renderInventoryTable() {
 
         });
     }
-    wrap.innerHTML = window.safeHTML(h + `</tbody></table>`); applyTableInteractivity('invTableWrap');
+    wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('invTableWrap');
 }
 
 async function handleInvEdit(cell, key, p, c, a, sq, mode) {
@@ -623,9 +623,8 @@ window.renderVelocityzFGI = function() {
     let keys = Object.keys(velocityzState).sort();
     
     if (keys.length === 0) {
-        tbody.innerHTML = window.safeHTML(
-            '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">No FGI history found.</td></tr>'
-        );
+        tbody.innerHTML = 
+            '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">No FGI history found.</td></tr>';
         return;
     }
 
@@ -660,7 +659,7 @@ window.renderVelocityzFGI = function() {
         </tr>`;
     });
     
-    tbody.innerHTML = window.safeHTML(html);
+    tbody.innerHTML = html;
 };
 
 window.buildVelocityzTreeHTML = function(pName, reqQty, isRoot = false, idPath = "") {
@@ -773,7 +772,7 @@ window.runVelocityzExplosion = function() {
         html = '<div style="text-align: center; color: var(--text-muted); padding: 50px;">Input forecast targets to explode BOM</div>';
     }
 
-    outContainer.innerHTML = window.safeHTML(html);
+    outContainer.innerHTML = html;
 };
 
 // ========================================================
@@ -933,12 +932,12 @@ window.filterCcMngrItems = function() {
     if(!window.cachedCcMngrOptions) return;
     
     if(term === '') {
-        dropdown.innerHTML = window.safeHTML(window.cachedCcMngrOptions);
+        dropdown.innerHTML = window.cachedCcMngrOptions;
         dropdown.style.display = 'none';
         return;
     }
     
-    dropdown.innerHTML = window.safeHTML(window.cachedCcMngrOptions);
+    dropdown.innerHTML = window.cachedCcMngrOptions;
     
     let items = dropdown.querySelectorAll('.cc-dropdown-item');
     items.forEach(o => {
@@ -950,9 +949,8 @@ window.filterCcMngrItems = function() {
     if(dropdown.querySelectorAll('.cc-dropdown-item').length > 0) {
         dropdown.style.display = 'block';
     } else {
-        dropdown.innerHTML = window.safeHTML(
-            '<div style="padding:10px; color:var(--text-muted); text-align:center;">No items found.</div>'
-        );
+        dropdown.innerHTML = 
+            '<div style="padding:10px; color:var(--text-muted); text-align:center;">No items found.</div>';
         dropdown.style.display = 'block';
     }
 };
@@ -1040,8 +1038,8 @@ window.openCycleCountManager = function() {
     if (labelProds.length > 0) { finalHtml += optGroups.label; finalNativeHtml += nativeGroups.label; }
     if (rawArr.length > 0) { finalHtml += optGroups.raw; finalNativeHtml += nativeGroups.raw; }
     
-    document.getElementById('ccMngrDropdown').innerHTML = window.safeHTML(finalHtml);
-    select.innerHTML = window.safeHTML(finalNativeHtml);
+    document.getElementById('ccMngrDropdown').innerHTML = finalHtml;
+    select.innerHTML = finalNativeHtml;
     window.cachedCcMngrOptions = finalHtml;
     
     let searchEl = document.getElementById('ccMngrSearch');

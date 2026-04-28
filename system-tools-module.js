@@ -1749,7 +1749,7 @@ window.openGlobalRegexPlayground = function(type) {
         </div>
     </div>`;
 
-    document.getElementById("globalRegexPlaygroundModalContainer").innerHTML = window.safeHTML(h);
+    document.getElementById("globalRegexPlaygroundModalContainer").innerHTML = h;
     document.getElementById("globalRegexPlaygroundModalContainer").style.display = "flex";
 
     // Bind scroll syncing between textarea and highlight layer safely
@@ -1868,7 +1868,7 @@ function renderPaperProfileTable() {
              h += `</tr>`;
         }
     });
-    tbody.innerHTML = window.safeHTML(h);
+    tbody.innerHTML = h;
 }
 
 function editPaperProfile(idx) {
