@@ -52,7 +52,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 *0 native system vulnerabilities globally found.*
 
 ### 🟡 Outdated Dependencies (npm outdated)
-- [x] `debt/deps` : Bump outdated dependencies: @supabase/supabase-js to 2.105.0, supabase CLI to 2.95.5, eslint to 10.2.1, prettier to 3.8.3. [🤖 Gemini 3.1 Pro] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
 *0 new code-debt items found.*
@@ -153,6 +152,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped to `2.89.1`.
 - [🚀] `debt/hmac-verification` : **RESOLVED ✅** `supabase/functions/shopify-webhook/index.ts:22` - Implemented native Deno `crypto.subtle` HMAC validation with dynamic 401 blocking. Also structurally patched the synchronous PII variables bug.
 - [🚀] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped from `2.89.1` to `2.90.0`.
+- [🚀] `debt/deps` : **RESOLVED ✅** Bump outdated dependencies: @supabase/supabase-js to 2.105.0, supabase CLI to 2.95.5, eslint to 10.2.1, prettier to 3.8.3. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `epic/ltv-cac-metrics`
 - [🚀] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
