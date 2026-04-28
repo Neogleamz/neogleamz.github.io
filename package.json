@@ -24,13 +24,13 @@
   },
   "homepage": "https://github.com/Neogleamz/neogleamz.github.io#readme",
   "devDependencies": {
-    "eslint": "^10.2.0",
+    "eslint": "^10.2.1",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
-    "prettier": "^3.8.2",
-    "supabase": "^2.90.0"
+    "prettier": "^3.8.3",
+    "supabase": "^2.95.5"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.103.0"
+    "@supabase/supabase-js": "^2.105.0"
   }
 }
