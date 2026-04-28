@@ -17,6 +17,7 @@ To be used immediately after running `/ship_it` on an Epic merging to `main`, wh
 1. **Scan the Ledger**:
    - Parse `@/tools/SK8Lytz_Bucket_List.md`.
    - Identify all completed items (`- [x]`) that have been verified as shipped.
+   - **CRITICAL:** Ensure you scan the entire document globally. Pay special attention to the `## 🧹 Technical Debt` section to catch standalone orphan tasks that were not part of the active Epic block.
 2. **Commit Archival Tags (`[🚀]`)**:
    - Use your file editing tools to surgically replace the `- [x]` checkboxes for those completed tasks with the `- [🚀]` tag.
    - **CRITICAL:** Do NOT delete the tasks. They must remain exactly where they are in the *🗄️ Completed & Archived Epics* section. 

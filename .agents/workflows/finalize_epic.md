@@ -34,6 +34,7 @@ When the user invokes `/finalize_epic` (or instructs you to "deploy epic" or "fi
    - Open `@/tools/SK8Lytz_Bucket_List.md`.
    - Convert all `- [x]` marks inside the target Epic block into `- [🚀]`.
    - Physically sweep the entire Epic block (headers and tasks) down to the very bottom under the `## 🗄️ Completed & Archived Epics` heading.
+   - **CRITICAL (Stray Task Sweep):** Perform a global document scan for any orphaned `- [x]` tags sitting outside the Epic block (specifically inside `## 🧹 Technical Debt`). Move any discovered strays into their own block under `🗄️ Completed & Archived Epics`, and convert them to `- [🚀]`.
 
 5. **The Release Routing Decision**:
    - **HALT**. Ask the user explicitly: *"Epic merged firmly into Main! Do you want me to formally version-bump this public release `[/release]`, or stealth-sync the internal changelog `[/release_silent]`?"*

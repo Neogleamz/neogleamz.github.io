@@ -14,6 +14,7 @@ When the user invokes `/release` (or instructs you to "cut a release", "prepare 
 2. **Generate Changelog**:
    - Parse `@/tools/SK8Lytz_Bucket_List.md` (processing in chunks if it exceeds 30,000 characters).
    - Extract all tasks marked as completed (`- [x]`) since the last release.
+   - **CRITICAL:** Ensure you scan the entire document globally. Pay special attention to the `## 🧹 Technical Debt` section to catch standalone orphan tasks that were not part of an active Epic.
    - Use your native tools to update `@/CHANGELOG.md`. 
    - **Crucial Unreleased Merge**: Check if there is an `## [Unreleased]` block at the top of the changelog from previous silent releases. If so, merge its contents into your new bulleted list. Rename the section or create a new header at the top with the new version number (`## [vX.Y.Z]`), the current date, and the combined bulleted list.
 3. **Bucket Ledger Integration**:
