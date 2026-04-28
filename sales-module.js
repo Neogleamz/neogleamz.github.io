@@ -822,9 +822,56 @@ window.updateSaleType = async function(sel, orderId, sku) {
         setMasterStatus("Saving...", "mod-working");
         let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
         if(row) {
-            row.transaction_type = newVal;
-            const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
+            let payload = { transaction_type: newVal };
+            
+            // --- POWERED BY MASTER ENGINE: Dynamic Recalculation ---
+            let sim = { ...row, transaction_type: newVal };
+            let qty = parseFloat(sim.qty_sold) || 1;
+            let pr = parseFloat(sim.actual_sale_price) || 0;
+            let ship = parseFloat(sim.shipping) || 0;
+            let tax = parseFloat(sim.taxes) || 0;
+            let disc = parseFloat(sim.discount_amount) || 0;
+            let bal = parseFloat(sim['Outstanding Balance']) || 0;
+            let src = sim['Source'] || "web";
+            let rec = sim.internal_recipe_name;
+            let type = sim.transaction_type || 'Standard';
+
+            sim.subtotal = qty * pr;
+            sim.total = sim.subtotal + ship + tax - disc;
+            
+            let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
+            sim.cogs_at_sale = (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') ? 0 : window.getEngineTrueCogs(rec);
+            
+            let trueLineCaptured = isCostOnlyItem ? 0 : sim.total;
+            let stripeCaptureTarget = trueLineCaptured - bal;
+            
+            sim.transaction_fees = (isCostOnlyItem || type === 'Cancelled') ? 0 : window.getEngineStripeFee(stripeCaptureTarget, src);
+            
+            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (ship > 0 ? ship : (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty);
+            
+            let gross = isCostOnlyItem ? 0 : pr * qty;
+            let shipRev = isCostOnlyItem ? 0 : ship;
+            let taxRev = isCostOnlyItem ? 0 : tax;
+            let discRev = isCostOnlyItem ? 0 : disc;
+            
+            let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, discRev, actualShipCost, rec, qty, src);
+            sim.net_profit = rawNet;
+            
+            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') sim.net_profit = 0;
+            if (type === 'Pre-Ship Exchange') sim.net_profit += window.getEngineTrueCogs(rec);
+            if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') sim.net_profit = 0 - actualShipCost - sim.cogs_at_sale;
+
+            payload.subtotal = sim.subtotal;
+            payload.total = sim.total;
+            payload.cogs_at_sale = sim.cogs_at_sale;
+            payload.transaction_fees = sim.transaction_fees;
+            payload.net_profit = sim.net_profit;
+            // --------------------------------------------------------
+
+            const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku);
             if(error) throw new Error("DB Error saving type: " + error.message);
+
+            Object.keys(payload).forEach(k => { row[k] = payload[k]; });
 
             setMasterStatus("Saved!", "mod-success");
             renderSalesTable();
@@ -853,10 +900,59 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
 
         let payload = { [col]: dbVal };
 
+        // --- POWERED BY MASTER ENGINE: Dynamic Recalculation ---
+        let mathCols = ['actual_sale_price', 'qty_sold', 'shipping', 'taxes', 'discount_amount', 'internal_recipe_name', 'Source', 'Outstanding Balance'];
+        if (mathCols.includes(col)) {
+            // Create a simulated future row state
+            let sim = { ...row, [col]: dbVal };
+            let qty = parseFloat(sim.qty_sold) || 0;
+            let pr = parseFloat(sim.actual_sale_price) || 0;
+            let ship = parseFloat(sim.shipping) || 0;
+            let tax = parseFloat(sim.taxes) || 0;
+            let disc = parseFloat(sim.discount_amount) || 0;
+            let bal = parseFloat(sim['Outstanding Balance']) || 0;
+            let src = sim['Source'] || "web";
+            let rec = sim.internal_recipe_name;
+            let type = sim.transaction_type || 'Standard';
+
+            sim.subtotal = qty * pr;
+            sim.total = sim.subtotal + ship + tax - disc;
+            
+            let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
+            sim.cogs_at_sale = (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') ? 0 : window.getEngineTrueCogs(rec);
+            
+            let trueLineCaptured = isCostOnlyItem ? 0 : sim.total;
+            let stripeCaptureTarget = trueLineCaptured - bal;
+            
+            sim.transaction_fees = (isCostOnlyItem || type === 'Cancelled') ? 0 : window.getEngineStripeFee(stripeCaptureTarget, src);
+            
+            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (ship > 0 ? ship : (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty);
+            
+            let gross = isCostOnlyItem ? 0 : pr * qty;
+            let shipRev = isCostOnlyItem ? 0 : ship;
+            let taxRev = isCostOnlyItem ? 0 : tax;
+            let discRev = isCostOnlyItem ? 0 : disc;
+            
+            let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, discRev, actualShipCost, rec, qty, src);
+            sim.net_profit = rawNet;
+            
+            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') sim.net_profit = 0;
+            if (type === 'Pre-Ship Exchange') sim.net_profit += window.getEngineTrueCogs(rec);
+            if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') sim.net_profit = 0 - actualShipCost - sim.cogs_at_sale;
+
+            payload.subtotal = sim.subtotal;
+            payload.total = sim.total;
+            payload.cogs_at_sale = sim.cogs_at_sale;
+            payload.transaction_fees = sim.transaction_fees;
+            payload.net_profit = sim.net_profit;
+        }
+        // --------------------------------------------------------
+
         const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku);
         if(error) throw new Error(error.message);
 
-        row[col] = dbVal;
+        // Update local memory securely
+        Object.keys(payload).forEach(k => { row[k] = payload[k]; });
 
         if(col === 'qty_sold' || col === 'internal_recipe_name') {
             let invUps = [];
