@@ -13,9 +13,10 @@ When the user invokes `/health-check` (or uses phrases like "run health check" o
    - Analyze the output. Prioritize vulnerabilities in "dependencies" (production code) over "devDependencies".
    - Note major version updates that might break the Vanilla JS/Browser environment.
 
-2. **The TODO Hunt**: 
-   - Use the `grep_search` tool to scan the codebase for: `TODO:`, `FIXME:`, and `HACK:`.
-   - Extract the file path, line number, and a brief snippet of context for each.
+2. **The Code Quality & Security Hunt**: 
+   - Use the `grep_search` tool to scan the codebase for explicitly marked debt: `TODO:`, `FIXME:`, and `HACK:`.
+   - **CRITICAL ZERO-TRUST SCAN:** Use `grep_search` to actively hunt for `.innerHTML` and `.insertAdjacentHTML`. If the target node is receiving dynamic data that is NOT explicitly wrapped in `window.safeHTML()` or `DOMPurify.sanitize()`, you must instantly flag it.
+   - Extract the file path, line number, and a brief snippet of context for each discovery.
 
 3. **Bucket List Integration**: 
    - Open @/tools/SK8Lytz_Bucket_List.md.

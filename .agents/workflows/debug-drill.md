@@ -9,11 +9,12 @@ trigger: "/emergency_debug_drill, debug this:, critical bug:, let's debug"
 When the user invokes "debug this:", "critical bug:", or "let's debug", you must halt all standard project management and feature development flows and enter Emergency Debug Mode:
 
 1. **Isolation (Halt Fixes)**: You must NOT modify or guess-fix any production logic immediately. You are currently a diagnostic tool, not a surgeon.
-2. **Instrumentation**: 
-   - Adhering to the *Surgical Strike Protocol*, use your code-editing tools to inject highly specific `console.log()`, `console.warn()`, `console.trace()`, or `debugger;` statements strictly isolated within the suspected Vanilla JS component.
+2. **Instrumentation (Deep Telemetry)**: 
+   - Adhering to the *Surgical Strike Protocol*, use your code-editing tools to inject our native deep object serializer `sysLog(msg, color, payload)` into the suspected Vanilla JS component.
+   - **CRITICAL:** You are strictly forbidden from injecting basic `console.log()` statements. You must extract actual state using the payload parameter (e.g., `sysLog('Cart Check', 'orange', { cartArray })`).
 3. **Telemetry Collection**: 
    - Instruct the user to trigger the bug in their running browser app with the DevTools console open. 
-   - **CRITICAL:** Explicitly ask the user to copy and paste the resulting console output back into the chat. You cannot proceed to Step 4 until they provide the real logs.
+   - **CRITICAL:** Explicitly ask the user to copy and paste the resulting `sysLog` output back into the chat. You cannot proceed to Step 4 until they provide the real logs.
 4. **Theory Formulation**: 
    - Based ONLY on the pasted logs and the codebase context, output exactly **three** distinct, highly technical theories explaining the root cause.
 5. **Approval Gate (HALT)**: 

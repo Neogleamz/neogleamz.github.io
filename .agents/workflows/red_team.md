@@ -23,9 +23,9 @@ When the user invokes `/red_team` (or explicitly requests a penetration test or 
      - Unprotected `<form>` inputs passing raw payloads into Supabase.
 
 3. **Exploit Manifestation (Zero False Positives Protocol)**:
-   - If an unprotected vector is found (e.g., dynamic strings passed into `innerHTML` without your standard `window.safeHTML()` protocol encapsulation), **you must prove it**.
+   - If an unprotected vector is found (e.g., dynamic strings passed into `innerHTML` without your standard `window.safeHTML()` or `DOMPurify.sanitize()` encapsulation), **you must prove it**.
    - Do not passively warn the user. You must physically write out the precise string payload (e.g., `"><img src=x onerror=alert('PWNED')>`) that you would inject into the DOM to break the execution flow or steal an active token.
-   - Document exactly which file and line number the vulnerability exists on.
+   - **CRITICAL**: You must autonomously open `@/tools/SK8Lytz_Bucket_List.md` and log this exploit as a **P0 Critical Vulnerability** under the active Epic queue, documenting the exact file and line number.
 
 4. **Debriefing Halt**:
    - Present your Vulnerability Report clearly, listing each discovered vector and its executable payload.

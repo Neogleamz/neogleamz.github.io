@@ -11,6 +11,7 @@ When my prompt contains a raw stack trace, an error message, or starts with "Fix
 1. **Root Cause Analysis (Halt & Report)**: 
    - Analyze the stack trace and the codebase to identify the exact file and line causing the failure.
    - Do NOT immediately start rewriting code. 
+   - **Deep Telemetry Check:** If the stack trace is ambiguous, you must inject `sysLog('CRASH CONTEXT', 'red', { stateObject })` to pull full Supabase payloads and Hex arrays. You are strictly forbidden from using basic `console.log()`.
    - Output a brief summary explaining *why* the crash occurred (e.g., "The Zengge Bluetooth service is timing out because the MAC address variable is undefined").
 2. **Propose the Fix**: 
    - Provide a snippet of the corrected code.

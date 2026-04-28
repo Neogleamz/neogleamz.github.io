@@ -35,10 +35,11 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
 5. **Execute Work**: 
    - Once the user types "proceed", use your code-editing tools to implement the module exactly as outlined in the approved plan.
 
-6. **Self-Review & Refactor Phase**:
+6. **Self-Review, QA & Refactor Phase**:
    - Before committing, act as a Senior Security & Performance Engineer.
    - Review your newly written code. Look for: hardcoded Supabase keys, memory leaks (e.g., un-removed DOM event listeners), missing `try/catch` blocks, or poor naming conventions.
-   - Output a brief "Code Review Report". If flaws are found, refactor them immediately. If pristine, state "Code Review Passed."
+   - **Continuous QA Gate (CRITICAL):** You MUST execute `npm test` and `npx eslint .` in the terminal to verify zero regressions and zero syntax flaws. You are strictly forbidden from committing code if either command throws an error.
+   - Output a brief "Code Review Report". If flaws or test failures are found, refactor them immediately. If pristine and tests pass, state "Code Review Passed."
 
 7. **Commit & Sync Phase**:
    - Check if your changes affected Supabase schemas, Web Bluetooth logic, or core system architecture.
@@ -47,7 +48,8 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - Execute: `git commit -m "feat(<scope>): complete <extracted-branch-slug>"`
 
 8. **Update Tracking, Archive & Halt**: 
-   - Modify `@/tools/SK8Lytz_Bucket_List.md` and change the checkbox for this item to `- [x]`.
+   - Modify `@/tools/SK8Lytz_Bucket_List.md`. **CRITICAL:** Ensure the required token metadata `[🤖 AI Model] [🧠 Actual / Expected] [💸 Cost]` is correctly appended to the task string *before* you mark it complete.
+   - Change the checkbox for this item to `- [x]`.
    - **Enforce Archiving Protocol**: Scan the surrounding epic `### Target:` block. If every single item in this specific Epic is now marked as `[x]`, you MUST autonomously cut the entire block (the `### Target:` header, the `*(Epic...)*` subheader, and all the `[x]` tasks) and paste it at the absolute bottom of the file under the `🗄️ Completed & Archived Epics` section to keep the active list clean. **NEVER DELETE THE RAW TASKS**. The Bucket List is an immutable ledger.
    - If the Epic block was just fully completed and archived, you must output a massive warning message: **"EPIC COMPLETE. You MUST execute `[/finalize_epic]` from your epic branch before starting a new Bucket List task to avoid phantom ledger wipeouts!"**
    - Output a clean confirmation message to the chat that the task is complete and the branch is ready for testing. Do not automatically start the next task.

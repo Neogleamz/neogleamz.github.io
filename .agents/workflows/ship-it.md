@@ -11,11 +11,12 @@ When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize 
 
 1. **Verify Context**: Run `git branch --show-current` to ensure we are currently on a feature branch (e.g., `feature/...`, `fix/...`, or `chore/...`).
 2. **Find Base**: If you remember the Epic Target from the bucket list context, use it. If unable to determine the base branch, explicitly ask the user which branch to merge into (e.g., `epic/device-registration` or `main`).
-3. **Pre-Flight Code Audit**: Act as a Senior Vanilla JS Engineer. Review the critical files changed on this feature branch for:
+3. **Pre-Flight Code Audit (Zero-Trust Gate)**: Act as a Senior Vanilla JS Engineer. Review the critical files changed on this feature branch for:
    - Security flaws (e.g., hardcoded secrets, unhandled exceptions).
    - Performance bottlenecks (e.g., memory leaks from uncleared native event listeners, expensive DOM reflows, unoptimized loops).
    - Code cleanliness and proper modular architecture.
-   *If any issues are flagged, list them out and **HALT**. Wait for permission to either fix them or proceed.*
+   - **Continuous QA Command (CRITICAL):** You MUST execute `npm test` and `npx eslint .` in the terminal to verify zero regressions and zero syntax flaws. You are strictly forbidden from executing a merge if either command throws an error.
+   *If any issues or test failures are flagged, list them out and **HALT**. Wait for permission to either fix them or abort the merge.*
 4. **Ledger Reconciliation**: Open `@/tools/SK8Lytz_Bucket_List.md`. Review the active queues (P0, P1, P2). Did the code changes you just made accidentally or intentionally fulfill any *other* unchecked `[ ]` tasks, even if they belong to a different Epic block? If yes, explicitly check them off (`[x]`) right now to prevent orphaned tasks.
 5. **Knowledge Audit Gate**: Evaluate if this feature branch established new critical knowledge (DB tables, Bluetooth commands, global contexts). If yes, ensure it is documented in @/tools/SK8Lytz_App_Master_Reference.md using your standard editing tools before proceeding.
 5. **Merge Routine & Conflict Check**:

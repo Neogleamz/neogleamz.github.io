@@ -14,9 +14,10 @@ When the user invokes `/wind-down` (or strongly implies they are ending the sess
    - Extract any new architectural patterns, hardware protocol discoveries, or database schema changes.
    - Update @/tools/SK8Lytz_App_Master_Reference.md, adhering strictly to the parameters in the *Corporate Memory Synchronization Rule*.
 
-2. **Bucket List Grooming**:
+2. **Bucket List Grooming (Zero-Trust Ledger Sync)**:
    - Parse @/tools/SK8Lytz_Bucket_List.md.
    - Mark tasks completed during this session with `[x]`.
+   - **CRITICAL (Stray Task Sweep):** Run a global scan of the document. If you find any orphaned `[x]` tasks (especially inside `## 🧹 Technical Debt`) that are not part of an active Epic block, you MUST autonomously move them into the `🗄️ Completed & Archived Epics` section and tag them with `[🚀]`. You are forbidden from shutting down the server if phantom tasks exist.
    - Identify the next logical Task/Epic.
    - Ask the user: *"What is the absolute #1 priority for our next session?"* and move their chosen item to the top of the active list.
 
