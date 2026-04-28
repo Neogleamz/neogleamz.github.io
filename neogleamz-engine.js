@@ -131,10 +131,16 @@ window.getRawMaterials = function(pName, qty = 1) {
  * @returns {number} The computed transaction overhead.
  */
 window.getEngineStripeFee = function(amt, source) { 
-    if (source && String(source).toLowerCase().includes('ebay')) {
-        return (parseFloat(amt) || 0) * window.NEOGLEAMZ_CONFIG.EBAY_BLENDED_FEE; 
+    let parsedAmt = parseFloat(amt) || 0;
+    if (parsedAmt <= 0) return 0; // Prevent 30-cent phantom fees on $0 captures
+    
+    let src = source ? String(source).toLowerCase().trim() : 'web';
+    if (src.includes('manual')) return 0; // Manual invoices/cash bypass gateways
+    
+    if (src.includes('ebay')) {
+        return parsedAmt * window.NEOGLEAMZ_CONFIG.EBAY_BLENDED_FEE; 
     }
-    return ((parseFloat(amt) || 0) * window.NEOGLEAMZ_CONFIG.STRIPE_PERCENTAGE) + window.NEOGLEAMZ_CONFIG.STRIPE_FLAT_FEE; 
+    return (parsedAmt * window.NEOGLEAMZ_CONFIG.STRIPE_PERCENTAGE) + window.NEOGLEAMZ_CONFIG.STRIPE_FLAT_FEE; 
 };
 
 window.getEngineLiveMsrp = function(pName) { return typeof pricingDB !== 'undefined' && pricingDB[pName] ? parseFloat(pricingDB[pName]?.msrp) || 0 : 0; };
