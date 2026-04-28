@@ -255,3 +255,9 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
   1. `math-engine.test.js`: Validates True COGS, 3D Print Times, Stripe/eBay Fees, and Predictive LTV/CAC Metrics.
   2. `inventory-engine.test.js`: Validates Reorder Point (ROP) math, Trailing Velocity trailing averages, and Safety Stock calculations.
   3. `sales-engine.test.js`: Validates the complex revenue-shifting logic required to properly calculate the absolute True Net Profit when standard orders are chained to Pre-Ship Exchanges, Post-Ship Refunds, or Warranty claims.
+
+---
+
+## 📡 9. Diagnostic Telemetry & Observability
+* **Global `sysLog` Infrastructure**: The primary method for terminal telemetry is `sysLog(msg, color, payload)`.
+* **Payload Deep Inspection**: The `sysLog` method has been natively upgraded to accept an optional third argument: `payload`. When passing deep JS objects or arrays (e.g., Supabase inbound hooks, database upsert mapping arrays), `sysLog` will intelligently serialize the payload and render it as a collapsible, monospaced `[Payload Data]` block natively within the Command Center terminal. This strictly negates the need to use `console.log()` for complex async state inspection.
