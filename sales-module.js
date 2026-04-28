@@ -288,7 +288,7 @@ async function processParsedSales(rows, isTestMode = false) {
     if(unmapped.size > 0) {
         let uList = Array.from(unmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
         uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
-        document.getElementById('unmappedSkusList').innerHTML = window.safeHTML(h);
+        document.getElementById('unmappedSkusList').innerHTML = h;
         setMasterStatus("Action Required", "mod-error"); setSysProgress(0, 'working'); return;
     }
 
@@ -296,7 +296,7 @@ async function processParsedSales(rows, isTestMode = false) {
         syncTrace("HALT WARNING: Zero valid rows inherently parsed from target file. Aborting.", true);
         setTimeout(() => showToast("No valid row structures found in this file!"), 10);
         let elUnmapped = document.getElementById('unmappedSkusList');
-        if (elUnmapped) elUnmapped.innerHTML = window.safeHTML("");
+        if (elUnmapped) elUnmapped.innerHTML = "";
 
         setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working');
         let elFile = document.getElementById('salesCsvFile');
@@ -329,7 +329,7 @@ async function saveAliasMapping() {
             let uList = Array.from(stillUnmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
             uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
             let elUnmapped = document.getElementById('unmappedSkusList');
-            if (elUnmapped) elUnmapped.innerHTML = window.safeHTML(h);
+            if (elUnmapped) elUnmapped.innerHTML = h;
         }
         if (typeof renderAliasManager === 'function') renderAliasManager();
     }).catch(e => {
@@ -516,7 +516,7 @@ async function executeSalesSync(isTestMode = false) {
                     let count = cleanPayload.length;
                     pendingSalesRows = [];
                     let elUnmapped = document.getElementById('unmappedSkusList');
-                    if (elUnmapped) elUnmapped.innerHTML = window.safeHTML("");
+                    if (elUnmapped) elUnmapped.innerHTML = "";
                     syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
 
                     renderSalesTable();
@@ -802,7 +802,7 @@ function renderSalesTable() {
         });
     }
 
-        wrap.innerHTML = window.safeHTML(h + `</tbody></table>`);
+        wrap.innerHTML = h + `</tbody></table>`;
         
         wrap.querySelectorAll('th[data-sortcol]').forEach(th => {
             th.addEventListener('click', () => {
@@ -820,54 +820,44 @@ window.updateSaleType = async function(sel, orderId, sku) {
         let newVal = sel.value;
         sysLog(`Editing Sale Type ${orderId}: ${newVal}`);
         setMasterStatus("Saving...", "mod-working");
-        let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku);
+        let row = salesDB.find(s => s.order_id == orderId && s.storefront_sku == sku);
+        if(!row) {
+            console.error(`Row not found for orderId: ${orderId}, sku: ${sku}`);
+            alert("Error: Cannot find local row data to update.");
+            return;
+        }
+
         if(row) {
             let payload = { transaction_type: newVal };
-            
-            // --- POWERED BY MASTER ENGINE: Dynamic Recalculation ---
-            let sim = { ...row, transaction_type: newVal };
-            let qty = parseFloat(sim.qty_sold) || 1;
-            let pr = parseFloat(sim.actual_sale_price) || 0;
-            let ship = parseFloat(sim.shipping) || 0;
-            let tax = parseFloat(sim.taxes) || 0;
-            let disc = parseFloat(sim.discount_amount) || 0;
-            let bal = parseFloat(sim['Outstanding Balance']) || 0;
-            let src = sim['Source'] || "web";
-            let rec = sim.internal_recipe_name;
-            let type = sim.transaction_type || 'Standard';
 
-            sim.subtotal = qty * pr;
-            sim.total = sim.subtotal + ship + tax - disc;
-            
-            let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
-            sim.cogs_at_sale = (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') ? 0 : window.getEngineTrueCogs(rec);
-            
-            let trueLineCaptured = isCostOnlyItem ? 0 : sim.total;
-            let stripeCaptureTarget = trueLineCaptured - bal;
-            
-            sim.transaction_fees = (isCostOnlyItem || type === 'Cancelled') ? 0 : window.getEngineStripeFee(stripeCaptureTarget, src);
-            
-            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (ship > 0 ? ship : (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty);
-            
-            let gross = isCostOnlyItem ? 0 : pr * qty;
-            let shipRev = isCostOnlyItem ? 0 : ship;
-            let taxRev = isCostOnlyItem ? 0 : tax;
-            let discRev = isCostOnlyItem ? 0 : disc;
-            
-            let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, discRev, actualShipCost, rec, qty, src);
-            sim.net_profit = rawNet;
-            
-            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') sim.net_profit = 0;
-            if (type === 'Pre-Ship Exchange') sim.net_profit += window.getEngineTrueCogs(rec);
-            if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') sim.net_profit = 0 - actualShipCost - sim.cogs_at_sale;
+            // INJECT MASTER CALCULATION ENGINE
+            try {
+                if (typeof window.getEngineTrueCogs === 'function') {
+                    payload.cogs_at_sale = window.getEngineTrueCogs(row.internal_recipe_name, row.qty_sold);
+                }
+                if (typeof window.getEngineStripeFee === 'function') {
+                    payload.transaction_fees = window.getEngineStripeFee(
+                        row.total, row.shipping, row.taxes, newVal, row.exchAdj || 0
+                    );
+                }
+                
+                let rev = (parseFloat(row.total) + parseFloat(row.exchAdj || 0)) || 0;
+                let cost = payload.cogs_at_sale !== undefined ? payload.cogs_at_sale : (row.liveCogs || 0);
+                let ship = parseFloat(row.shipping) || 0;
+                let fee = payload.transaction_fees !== undefined ? payload.transaction_fees : (row.stripeFee || 0);
+                
+                // Pure Waterfall
+                let net = rev - cost - ship - fee;
+                
+                if (newVal === 'Cancelled' || newVal === 'Refund') net = -cost;
+                else if (newVal === 'Warranty' || newVal === 'Exchange Replacement') net = -(cost + ship);
 
-            payload.subtotal = sim.subtotal;
-            payload.total = sim.total;
-            payload.cogs_at_sale = sim.cogs_at_sale;
-            payload.transaction_fees = sim.transaction_fees;
-            payload.net_profit = sim.net_profit;
-            // --------------------------------------------------------
+                payload.net_profit = net;
+            } catch(e) {
+                console.error("Sales Engine Injection Failed:", e);
+            }
 
+            sysLog(`Pushing Sale Type update to Supabase for ${orderId}...`, false, payload);
             const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku);
             if(error) throw new Error("DB Error saving type: " + error.message);
 
@@ -895,7 +885,7 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
         }
 
         sysLog(`Editing Sale ${orderId}: ${col}`); setMasterStatus("Saving...", "mod-working");
-        let row = salesDB.find(s => s.order_id === orderId && s.storefront_sku === sku); if(!row) return;
+        let row = salesDB.find(s => s.order_id == orderId && s.storefront_sku == sku); if(!row) return;
         let oldQty = row.qty_sold; let oldRec = row.internal_recipe_name;
 
         let payload = { [col]: dbVal };
@@ -940,14 +930,15 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
             if (type === 'Pre-Ship Exchange') sim.net_profit += window.getEngineTrueCogs(rec);
             if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') sim.net_profit = 0 - actualShipCost - sim.cogs_at_sale;
 
-            payload.subtotal = sim.subtotal;
-            payload.total = sim.total;
-            payload.cogs_at_sale = sim.cogs_at_sale;
-            payload.transaction_fees = sim.transaction_fees;
-            payload.net_profit = sim.net_profit;
+            payload.subtotal = isNaN(sim.subtotal) ? null : sim.subtotal;
+            payload.total = isNaN(sim.total) ? null : sim.total;
+            payload.cogs_at_sale = isNaN(sim.cogs_at_sale) ? null : sim.cogs_at_sale;
+            payload.transaction_fees = isNaN(sim.transaction_fees) ? null : sim.transaction_fees;
+            payload.net_profit = isNaN(sim.net_profit) ? null : sim.net_profit;
         }
         // --------------------------------------------------------
 
+        sysLog(`Pushing Sale Cell update to Supabase for ${orderId}...`, false, payload);
         const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku);
         if(error) throw new Error(error.message);
 

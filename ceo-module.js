@@ -258,7 +258,7 @@ function updateCeoEngine() {
     } catch (e) { sysLog("Engine Fault: " + (e.message || e), true); }
 }
 
-function _calculateCeoMetrics() {
+window._calculateCeoMetrics = function() {
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
     let cacEl = document.getElementById('globalCacNum');
     let gCac = cacEl ? parseFloat(cacEl.value) || 0 : 0;
@@ -298,7 +298,7 @@ function _calculateCeoMetrics() {
         totals.curAff += (curMetrics.aff * p.vol);
         totals.warr += (testMetrics.warr * p.vol);
         totals.curWarr += (curMetrics.warr * p.vol);
-        totals.ship += (testMetrics.ship * p.vol);
+        totals.ship += (-testMetrics.merchantShipMargin * p.vol);
         totals.cac += (effCac * p.vol);
 
         charts.labels.push(p.name);
@@ -380,7 +380,7 @@ function _buildCeoTable({ tableRows }) {
     }
 }
 
-function _syncCeoKPIs({ totals }) {
+window._syncCeoKPIs = function({ totals }) {
     let elKpiGross = document.getElementById('kpiGross');
     if (elKpiGross) elKpiGross.innerText = ceoFmt.format(totals.gross).split('.')[0];
 

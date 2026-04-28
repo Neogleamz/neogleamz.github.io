@@ -66,15 +66,44 @@ describe('💳 Financial Gateway & Fee Logic', () => {
 
 describe('📈 True Net Profit Calculator (CFO Core Engine)', () => {
     test('getHistoricalNetProfit calculates net correctly for standard purchase', () => {
-        // gross, shipCol, tax, disc, actShip, pName, qty, source
         // Example: Base $45.00 product, $8.00 shipping charged, $0 tax, $5.00 discount, Actual Ship Cost $8.00, Stripe Web
-        // Gross = $45
         // Captured = 45 + 8 - 5 = 48
-        // Stripe Fee = 48 * 0.029 + 0.30 = 1.392 + 0.30 = 1.69
+        // Stripe Fee = 48 * 0.029 + 0.30 = 1.69
         // COGS = 8.75
         // Net = 45 (gross) + 8 (shipCol) - 5 (disc) - 1.69 (fee) - 8 (actShip) - 8.75 (cogs) = 29.56
         const net = window.getHistoricalNetProfit(45.00, 8.00, 0, 5.00, 8.00, 'PRO-SKATE-WHEEL', 1, 'web');
         expect(net).toBeCloseTo(29.56, 2);
+    });
+
+    test('getHistoricalNetProfit handles 100% discount free replacement mathematically correct', () => {
+        // Replacement order: $45.00 gross, $0 shipping charged, 100% discount ($45.00), actual ship cost $8.00
+        // Captured = 0
+        // Stripe Fee = 0 (no fee on $0 capture)
+        // COGS = 8.75
+        // Net = 45 (gross) + 0 - 45 - 0 - 8 - 8.75 = -16.75
+        const net = window.getHistoricalNetProfit(45.00, 0, 0, 45.00, 8.00, 'PRO-SKATE-WHEEL', 1, 'web');
+        expect(net).toBeCloseTo(-16.75, 2);
+    });
+
+    test('getHistoricalNetProfit processes manual payments with 0% gateway fees', () => {
+        // Manual payment should have $0 stripe fee.
+        // Gross $45, $8 ship col, no discount, actual ship $8
+        // Captured = 53
+        // Fee = 0
+        // Net = 45 + 8 - 0 - 0 - 8 - 8.75 = 36.25
+        const net = window.getHistoricalNetProfit(45.00, 8.00, 0, 0, 8.00, 'PRO-SKATE-WHEEL', 1, 'manual');
+        expect(net).toBeCloseTo(36.25, 2);
+    });
+
+    test('getHistoricalNetProfit handles quantity multiplier exactly', () => {
+        // Qty 3 purchase
+        // Gross $135 (45*3), $12 ship col, $10 disc, actual ship $12
+        // Captured = 135 + 12 - 10 = 137
+        // Fee = 137 * 0.029 + 0.30 = 3.973 + 0.30 = 4.27
+        // COGS = 8.75 * 3 = 26.25
+        // Net = 135 + 12 - 10 - 4.27 - 12 - 26.25 = 94.48
+        const net = window.getHistoricalNetProfit(135.00, 12.00, 0, 10.00, 12.00, 'PRO-SKATE-WHEEL', 3, 'web');
+        expect(net).toBeCloseTo(94.48, 2);
     });
 });
 

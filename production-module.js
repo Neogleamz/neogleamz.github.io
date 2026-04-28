@@ -390,7 +390,7 @@ function getDirectMaterials(name, amount) {
     return res;
 }
 
-function calculateExactWODeductions(wo) {
+window.calculateExactWODeductions = function(wo) {
     let raws_production = {}; let raws_assembly = {}; let pulls = {}; let raws_total = {};
     let built_subs = {};
     function traverseBOM(recipeName, qty, isTopLevel) {
