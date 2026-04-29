@@ -576,7 +576,6 @@ function syncImportzStats() {
             absoluteRawSpend += parseFloat(r['Total Landed Cost ($)']) || parseFloat(r.total_cost_weight) || 0;
             pureGoodsCost += goodsCost;
 
-            let pno = r['Parcel No'] || r.parcel_no;
             if (pno && String(pno).trim().toUpperCase() !== 'MANUAL') {
                 if (!pkgs.has(pno)) {
                     pkgs.add(pno);
