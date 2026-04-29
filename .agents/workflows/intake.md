@@ -19,4 +19,4 @@ When the user requests an actionable code or architecture change, you must route
 4. **Quarantine & Plan**:
    - Save the changes to the bucket list.
    - **Passive Logging**: If the user just wants to "add an idea to the list" while busy, confirm the addition and STOP. Let them continue working perfectly uninterrupted on their current branch.
-   - **Zero-Bypass Execution**: If the user uses `/zero_bypass` or explicitly asks to begin work on the new task, immediately execute `git checkout -b <slug>` in the terminal, present an Implementation Plan, and await their approval.
+   - **Zero-Bypass Execution**: If the user uses `/zero_bypass` or explicitly asks to begin work on the new task, immediately execute `git checkout -b <slug>` in the terminal, present an Implementation Plan, and await their approval. **Crucial:** When linking the `implementation_plan.md` in chat, NEVER surround the Markdown link with backticks (e.g. ``[plan.md](file:///...)``). ALWAYS use pure Markdown hyperlink syntax so it remains natively clickable.
