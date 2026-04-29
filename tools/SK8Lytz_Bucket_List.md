@@ -33,16 +33,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 ## 🟡 P2 Medium Priority (Enhancements)
-
 ### Target: main
 *(Epic: Orderz Financial Visibility)*
 
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
-### Target: main
-*(Epic: Shopify Flow Automation)*
-- [ ] `research/shopify-flow-auto-tag` : Investigate building a Shopify Flow that automatically tags orders with the `Label: <price>` format when a shipping label is purchased or printed, feeding natively into the webhook parser. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
@@ -252,3 +248,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Orderz Financial Visibility)*
 - [🚀] `feat/actual-net-modal` : Build an "Actual Net" button in Orderz that launches a new modal displaying the full mathematical breakdown per order (COGS, Shipping, Taxes, Fees, Net). The modal must support expanding/collapsing line items, sorting, and live searching. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
+
+### Target: `main`
+*(Epic: Shopify Flow Automation)*
+- [x] `research/shopify-flow-auto-tag` : Investigate building a Shopify Flow that automatically tags orders with the `Label: <price>` format when a shipping label is purchased or printed, feeding natively into the webhook parser. (Finding: Impossible, relying on CSV) [🤖 Gemini 3.1 Pro] [🧠 10k / 5k] [💸 $0.03 / $0.02]
