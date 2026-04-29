@@ -57,7 +57,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Orderz Financial Visibility)*
-- [dYs?] `test/actual-net-matrix-verification` : Build a test modal or verification script to validate Actual Net math across complex order combinations (e.g., unshipped items keeping revenue vs. post-ship exchanges vs. replacement exchanges without returning the original, ref: Orders 1017, 1019). [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
+- [🚀] `test/actual-net-matrix-verification` : Build a test modal or verification script to validate Actual Net math across complex order combinations (e.g., unshipped items keeping revenue vs. post-ship exchanges vs. replacement exchanges without returning the original, ref: Orders 1017, 1019). [🤖 Gemini 3.1 Pro] [🧠 60k / 10k] [💸 $0.20 / $0.05]
 
 ### Target: `epic/hub-card-math-validation`
 *(Epic: Hub Card Math Validation)*
