@@ -426,14 +426,13 @@ function syncLayerzStats() {
     setStat('statLayerzDone', fmtNum(done));
     setStat('statLayerzPending', fmtNum(active.filter(p => p.status === 'Queued').length));
 
-    let mat = 0, hrs = 0;
+    let mat = 0;
     active.forEach(p => {
         let pt = window.getPrintTime(p.part_name);
         let wt = 0;
         let cat = typeof catalogByName !== 'undefined' ? catalogByName[p.part_name] : null;
         if (cat) wt = parseFloat(cat.unit_weight_g) || 0;
         
-        hrs += (pt * (p.qty || 1));
         mat += (wt * (p.qty || 1));
     });
     setStat('statLayerzMat', fmtNum(Math.round(mat)));
@@ -585,7 +584,7 @@ function syncImportzStats() {
             }
         });
         
-        freight = absoluteRawSpend - pureGoodsCost;
+        let freight = absoluteRawSpend - pureGoodsCost;
         if (freight < 0) freight = 0;
         
         setStat('statImpzSpend', fmtMoney(capex));
