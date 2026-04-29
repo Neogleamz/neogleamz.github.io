@@ -27,7 +27,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🔴 P0 Critical (Blockers & Hotfixes)
-
+### Target: `main`
+*(Epic: UI Enhancements)*
+- [x] `feat/salez-card-30d-metrics` : Change the SALEZ hub card to remove 'Unmapped Etsy' and 'Unmapped Shopify', replacing them with 'Orders (30D)' and 'Actual Net (30D)'. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 

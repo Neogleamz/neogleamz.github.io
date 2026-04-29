@@ -603,7 +603,7 @@ function syncSalezStats() {
     let mapped = Object.keys(aliasDB).length;
     setStat('statSalzMap', fmtNum(mapped));
     
-    let unmappedS = 0, unmappedE = 0, rev30 = 0;
+    let unmappedS = 0, unmappedE = 0, rev30 = 0, net30 = 0;
     let processedOrdersFor30hRev = new Set();
     if (typeof salesDB !== 'undefined') {
         let now = new Date();
@@ -614,6 +614,7 @@ function syncSalezStats() {
                     rev30 += parseFloat(s.total) || 0;
                     processedOrdersFor30hRev.add(s.order_id);
                 }
+                net30 += parseFloat(s.net_profit) || 0;
             }
             if (!aliasDB[s.storefront_sku]) {
                 let src = (s.source||"").toLowerCase();
@@ -622,8 +623,8 @@ function syncSalezStats() {
             }
         });
     }
-    setStat('statSalzUnShop', fmtNum(unmappedS));
-    setStat('statSalzUnEtsy', fmtNum(unmappedE));
+    setStat('statSalzOrd30', fmtNum(processedOrdersFor30hRev.size));
+    setStat('statSalzNet30', fmtMoney(net30));
     setStat('statSalz30d', fmtMoney(rev30));
     setStat('statSalzHealth', (unmappedS + unmappedE) === 0 ? 'NOMINAL' : 'UNMAPPED ALIAS');
 }
