@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 ### Features & Refactors
+- **Stripe Fee Decoupling Logic**: Resolved Gateway fee inflation anomalies and ghost revenue by actively decoupling voided and replacement transactions during Sandbox processing. Added an `orderRefund` reduction check to `trueOrderFee` baseline extraction to prevent negative revenue projections.
+- **Export Backup Fix**: Ensured the 'EXPORT BACKUP' button in the NEXUZ command center correctly displays progress tracking strings during execution.
 - **Actual Net Matrix Verification**: Built an interactive Math Simulator modal inside the Orderz UI to validate Net Profit algorithms natively across complex order combinations (Pre-Ship exchanges, Post-Ship replacements, etc.). [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 - **UI Enhancements**: Changed the SALEZ hub card to remove 'Unmapped Etsy' and 'Unmapped Shopify', replacing them with 'Orders (30D)' and 'Actual Net (30D)' for accurate 30-day performance tracking. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - **Hub Card Math Validation**: Validated all mathematical algorithms for all hubs, fixing a geometric inflation bug in the IMPORTZ card's Total Goods Cost computation by implementing robust Set-based deduplication logic for global Parcel/Order tracking. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]

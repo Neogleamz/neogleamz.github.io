@@ -57,7 +57,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Orderz Financial Visibility)*
-- [x] `test/actual-net-matrix-verification` : Build a test modal or verification script to validate Actual Net math across complex order combinations (e.g., unshipped items keeping revenue vs. post-ship exchanges vs. replacement exchanges without returning the original, ref: Orders 1017, 1019). [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
+- [dYs?] `test/actual-net-matrix-verification` : Build a test modal or verification script to validate Actual Net math across complex order combinations (e.g., unshipped items keeping revenue vs. post-ship exchanges vs. replacement exchanges without returning the original, ref: Orders 1017, 1019). [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 
 ### Target: `epic/hub-card-math-validation`
 *(Epic: Hub Card Math Validation)*
@@ -138,7 +138,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Sitewide Button State Feedback)*
 - [🚀] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
-  - [x] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
+  - [dYs?] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
 
 ### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
