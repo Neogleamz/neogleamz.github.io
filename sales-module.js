@@ -693,7 +693,7 @@ function renderSalesTable() {
 
     // DECOUPLED LOGISTICS TRANSFER: Accurately map true financial footprints natively in UI
     Object.values(orderGroups).forEach(group => {
-        let primes = group.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
+        let primes = group.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange' || x.transaction_type === 'Unshipped (Keep Rev)');
         let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
         if (primes.length > 0 && replacements.length > 0) {
             let u = primes[0]; let r = replacements[0];
@@ -709,6 +709,11 @@ function renderSalesTable() {
                 r.discount_amount = u.discount_amount;
                 r.shipping = u.shipping;
                 r.taxes = u.taxes;
+                
+                // Shift Total Captured Visuals & Aggregation Flag
+                r.total = u.total;
+                r.exchAdj = u.exchAdj;
+                r.isCostOnlyItem = false;
 
                 // 2. Original Item is left isolated as a pure loss string (burns ship cost + stripe fee)
                 u.actual_sale_price = 0;
@@ -716,16 +721,24 @@ function renderSalesTable() {
                 u.discount_amount = 0;
                 u.taxes = 0;
                 u.liveCogs = 0; // Restocked
+                u.total = 0;
+                u.exchAdj = 0;
+                u.isCostOnlyItem = true;
 
                 let secureNetLoss = 0 - (parseFloat(u.actualShipCost) || 0) - (parseFloat(u.stripeFee) || 0);
                 u.net = isNaN(secureNetLoss) ? 0 : secureNetLoss;
             } else {
-                // Ghost Transfer for Unshipped (Pre-Ship)
+                // Ghost Transfer for Unshipped (Pre-Ship) and Unshipped (Keep Rev)
                 r.net += (parseFloat(u.net) || 0);
                 r.stripeFee += (parseFloat(u.stripeFee) || 0);
                 r.actual_sale_price = u.actual_sale_price;
                 r.discount_amount = u.discount_amount;
                 r.shipping = u.shipping;
+                
+                // Shift Total Captured Visuals & Aggregation Flag
+                r.total = u.total;
+                r.exchAdj = u.exchAdj;
+                r.isCostOnlyItem = false;
 
                 u.actual_sale_price = 0;
                 u.stripeFee = 0;
@@ -735,6 +748,9 @@ function renderSalesTable() {
                 u.taxes = 0;
                 u.actualShipCost = 0;
                 u.liveCogs = 0;
+                u.total = 0;
+                u.exchAdj = 0;
+                u.isCostOnlyItem = true;
             }
 
             u.isExchanged = true;
@@ -759,7 +775,6 @@ function renderSalesTable() {
                 // If it's an exchange, offset the visual total by whatever outstanding balance generated
                 let orderBalance = group.reduce((sum, r) => sum + (parseFloat(r["Outstanding Balance"]) || 0), 0);
                 if(orderBalance > 0) {
-                    nonZeroTotal.exchAdj = -orderBalance;
                     zeroTotal.isExchanged = true;
                     nonZeroTotal.isExchanged = true;
 
