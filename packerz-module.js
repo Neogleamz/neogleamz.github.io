@@ -617,7 +617,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                         QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', {
                             margin: 1, width: 45, color: { dark: '#000', light: '#fff' }
                         }).catch(()=>{});
-                    } catch(e) {}
+                    } catch(e) { console.error(e); }
                 });
             }
 
@@ -1631,7 +1631,7 @@ async function deleteSOPMedia(path, isFolder) {
 async function createSOPMediaFolder() {
     const name = prompt('Enter folder name (letters, numbers, hyphens):');
     if (!name || !name.trim()) return;
-    const safe = name.trim().replace(/[^a-zA-Z0-9_\-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const safe = name.trim().replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     if (!safe) { alert('Invalid folder name.'); return; }
     const fullPath = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${safe}/.emptyFolderPlaceholder` : `${safe}/.emptyFolderPlaceholder`;
     const statusEl = document.getElementById('sopMediaUploadStatus');
@@ -1911,7 +1911,7 @@ async function openCameraScanner(expectedValue, rowId, itemName) {
 
     // Clear previous reader instance
     if (_html5QrScanner) {
-        try { await _html5QrScanner.stop(); } catch(e) {}
+        try { await _html5QrScanner.stop(); } catch(e) { console.error(e); }
         _html5QrScanner = null;
     }
     // Clear the DOM element so html5-qrcode can re-mount
@@ -1934,7 +1934,7 @@ async function openCameraScanner(expectedValue, rowId, itemName) {
 
 async function closeCameraScanner() {
     if (_html5QrScanner) {
-        try { await _html5QrScanner.stop(); } catch(e) {}
+        try { await _html5QrScanner.stop(); } catch(e) { console.error(e); }
         _html5QrScanner = null;
     }
     document.getElementById('sopCameraModal').style.display = 'none';

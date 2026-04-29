@@ -37,12 +37,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `epic/historical-data-sync`
 *(Epic: Shopify Historical Backfill Engine)*
 - [🚀] `feat/historical-shopify-backfill` : Architect a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
-- [ ] `feat/billing-csv-importer` : Build a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [x] `feat/billing-csv-importer` : Build a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 - [ ] `feat/shopify-tag-parser` : Develop a forward-looking Webhook/Sync module to automatically extract "order type" and "shipping label cost" directly from Shopify Order Tags as they are generated, eliminating the need for future manual CSV imports. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
-
+### Target: main
+*(Epic: Orderz Financial Visibility)*
+- [ ] `feat/actual-net-modal` : Build an "Actual Net" button in Orderz that launches a new modal displaying the full mathematical breakdown per order (COGS, Shipping, Taxes, Fees, Net). The modal must support expanding/collapsing line items, sorting, and live searching. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)

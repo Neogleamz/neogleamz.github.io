@@ -5,7 +5,7 @@
  * @property {string|null} description
  */
 // --- 12. PARSERS & FILE SYNC ---
-function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){} }
+function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){ console.error(x); } }
 
 // Global Configuration Object for RegEx Settings
 const DEFAULT_PARSER_RULES = {
@@ -259,7 +259,7 @@ window.evaluateAllRegex = function() {
                         regionsToHighlight.push({ start: m.index, end: m.index + m[0].length, id: 'SEARCH' });
                     }
                 }
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         }
 
         ids.forEach(id => {
@@ -534,7 +534,7 @@ window.evaluateAllParcelRegex = function() {
                         regionsToHighlight.push({ start: m.index, end: m.index + m[0].length, id: 'SEARCH' });
                     }
                 }
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         }
 
         ids.forEach(id => {
@@ -1917,7 +1917,7 @@ function renderPaperProfileDropdowns() {
         if (!sel) return;
         let pValStr = sel.value; 
         let pName = "";
-        try { pName = JSON.parse(pValStr).n; } catch(e) {}
+        try { pName = JSON.parse(pValStr).n; } catch(e) { console.error(e); }
         
         let h = '';
         window.activePaperProfiles.forEach(p => {

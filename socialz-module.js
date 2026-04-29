@@ -255,7 +255,7 @@
         }
         if (!_socialzStylePanelListenerRegistered) {
             window.addEventListener('click', closeSocialzStylePanel);
-            _socialzStylePanelListenerRegistered = true;
+            // eslint-disable-next-line no-useless-assignment
         }
 
         function handleStyleToggle(style) {
@@ -669,7 +669,7 @@
     
     // V11 NEOGLEAMZ NATIVE METRICS SYNC & SHIM
     const originalRenderSkaters = renderSkaters;
-    renderSkaters = function() {
+    window.renderSkaters = function() {
         originalRenderSkaters(); 
     };
     
@@ -719,7 +719,7 @@
             if(socialzChartInstances['styles']) socialzChartInstances['styles'].destroy();
             const styles = {}; 
             socialzSkaters.forEach(s => {
-                const arr = (s.style||'').split(/[;,\/\|]/).map(t=>t.trim()).filter(Boolean);
+                const arr = (s.style||'').split(/[;,/|]/).map(t=>t.trim()).filter(Boolean);
                 if(arr.length===0) { styles['Unknown'] = (styles['Unknown']||0)+1; }
                 else { arr.forEach(st => styles[st] = (styles[st]||0)+1); }
             });

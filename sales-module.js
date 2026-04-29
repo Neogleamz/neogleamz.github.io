@@ -70,7 +70,7 @@ async function addManualSale() {
         // --- POWERED BY MASTER ENGINE ---
         let cogs = getEngineTrueCogs(rec);
         let stripeFee = getEngineStripeFee(total, source);
-        let actualShipCost = (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty;
+        let actualShipCost = 0; // Manual sales start with 0 shipping cost until backfilled by CSV
         let lineNet = getHistoricalNetProfit(pr * qty, ship, tax, discAmt, actualShipCost, rec, qty, source);
         // --------------------------------
 
@@ -172,7 +172,7 @@ async function processParsedSales(rows, isTestMode = false) {
 
         // Removed pre-parsing deduplication here so the unified Sandbox Modal can natively display the full matrix for physical layout/formatting review prior to final sync.
 
-        let dateStr = "";
+        let dateStr;
         if (typeof rawDate === 'number') {
             let excelEpoch = new Date(1899, 11, 30);
             let jsDate = new Date(excelEpoch.getTime() + rawDate * 86400000);
@@ -392,8 +392,7 @@ async function executeSalesSync(isTestMode = false) {
 
             let fee = (isCostOnlyItem || type === 'Cancelled') ? 0 : getEngineStripeFee(stripeCaptureTarget, r["Source"]);
 
-            const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
-            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (parseFloat(r.shipping || 0) > 0 ? parseFloat(r.shipping) : (SHIP_COST * r.qty_sold));
+            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : parseFloat(r.actual_shipping_cost || 0);
 
             // Calculate true net strictly honoring the rules.
             let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
@@ -429,8 +428,7 @@ async function executeSalesSync(isTestMode = false) {
 
         // REVENUE TRANSFER BATCH
         let pg = {};
-        // DEFENSIVE SHIP COST RESOLVER
-        const LOCAL_SHIP = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+        // DEFENSIVE SHIP COST RESOLVER (Deprecated Legacy Assumption)
 
         salesPayload.forEach(x => { if(!pg[x.order_id]) pg[x.order_id] = []; pg[x.order_id].push(x); });
         Object.values(pg).forEach(group => {
@@ -446,7 +444,7 @@ async function executeSalesSync(isTestMode = false) {
                     r.net_profit += uRawRev; // Replacement absorbs the pure revenue
 
                     // 2. Original row loses the revenue (shipped to r), and loses its COGS (restocked), leaving ONLY the pure logistical losses:
-                    let activeShipValue = parseFloat(u.shipping || 0) > 0 ? parseFloat(u.shipping || 0) : LOCAL_SHIP;
+                    let activeShipValue = parseFloat(u.actual_shipping_cost || 0);
                     let uStripeValue = parseFloat(u.transaction_fees || 0);
 
                     let secureNet = 0 - activeShipValue - uStripeValue;
@@ -687,15 +685,7 @@ function renderSalesTable() {
                 r.exchAdj = (r.exchAdj || 0) - actualDeductibleRefund;
                 refundDeducted = true;
             }
-            if (r.transaction_type !== 'Pre-Ship Exchange' && r.transaction_type !== 'Gift' && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && r.transaction_type !== 'NEEDS ATTENTION') {
-                if (r.isFirstRow === false) {
-                    // Refund the redundant standalone SHIP_COST from secondary items sharing the box ONLY if it was forced by the algorithm
-                    if (r.actualShipCost === (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00)) {
-                        r.net += r.actualShipCost;
-                        r.actualShipCost = 0;
-                    }
-                }
-            }
+
         });
     });
 
@@ -982,7 +972,7 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
             
             sim.transaction_fees = (isCostOnlyItem || type === 'Cancelled') ? 0 : window.getEngineStripeFee(stripeCaptureTarget, src);
             
-            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (ship > 0 ? ship : (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00) * qty);
+            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : parseFloat(sim.actual_shipping_cost || 0);
             
             let gross = isCostOnlyItem ? 0 : pr * qty;
             let shipRev = isCostOnlyItem ? 0 : ship;

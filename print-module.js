@@ -293,7 +293,7 @@ function renderActivePrintJob(id) {
                                 </div>
                                 
                                 <!-- Dedicated Vertical Resizer Handle -->
-                                <div id="inlineResizer_{grpId}" class="h-resizer" onmousedown="if(typeof initInlineResize===\'function\'){initInlineResize(event, \'${grpId}\');}"></div>
+                                <div id="inlineResizer_${grpId}" class="h-resizer" onmousedown="if(typeof initInlineResize==='function'){initInlineResize(event, '${grpId}');}"></div>
                                 
                                 <!-- Pane 2: Rich Text Steps -->
                                 <div id="inlineRightPane_${grpId}" style="flex: 1; min-width:30px; display:flex; flex-direction:column; padding:15px; background:var(--bg-body); border-left:1px solid var(--border-color);  overflow:hidden;">
@@ -366,7 +366,7 @@ function renderActivePrintJob(id) {
                                     document.addEventListener('mouseup', stopPrintSopResize);
                                 }
                             }, 20);
-                            <\/script>
+                            </script>
             `;
         } else {
             if (qa.length === 0 && steps.length === 0) {
@@ -494,7 +494,7 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
                         try {
                             const { data } = await supabaseClient.from('work_orders').select('*').eq('wo_id', currentPrintJob.wo_id).single();
                             parentWO = data;
-                        } catch(e) {}
+                        } catch(e) { console.error(e); }
                     }
                     if (parentWO) {
                         let pNameClean = parentWO.product_name.replace('RECIPE:::', '');
