@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof closeActualNetModal === 'function') closeActualNetModal();
                     break;
                 case 'click_runMathSimulator':
-                    if (typeof runMathSimulator === 'function') runMathSimulator();
+                    if (typeof initMathSimulator === 'function') initMathSimulator();
                     break;
                 case 'click_closeMathSimulator':
                     if (typeof closeMathSimulator === 'function') closeMathSimulator();
