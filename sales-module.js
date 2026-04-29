@@ -1104,15 +1104,15 @@ function renderSimulatorOrder(orderId) {
             </div>
             <div style="display:flex; gap: 1rem; font-size:12px; color:#aaa; margin-top:0.5rem;">
                 <div style="display:flex; flex-direction:column;">
-                    <span>Gross</span>
+                    <span>Actual Price</span>
                     <span style="color:#fff;">$${(row.actual_sale_price * row.qty_sold).toFixed(2)}</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
-                    <span>Shipping</span>
+                    <span>Ship Col.</span>
                     <span style="color:#fff;">$${parseFloat(row.shipping||0).toFixed(2)}</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
-                    <span>Taxes</span>
+                    <span>Tax Col.</span>
                     <span style="color:#fff;">$${parseFloat(row.taxes||0).toFixed(2)}</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
@@ -1120,7 +1120,11 @@ function renderSimulatorOrder(orderId) {
                     <span style="color:#fff;">-$${parseFloat(row.discount_amount||0).toFixed(2)}</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
-                    <span>Ship Cost</span>
+                    <span>Total Capture</span>
+                    <span style="color:#10b981;">$${((row.actual_sale_price * row.qty_sold) + parseFloat(row.shipping||0) + parseFloat(row.taxes||0) - parseFloat(row.discount_amount||0)).toFixed(2)}</span>
+                </div>
+                <div style="display:flex; flex-direction:column;">
+                    <span>Ship Exp.</span>
                     <span style="color:#ef4444;">-$${parseFloat(row.actual_ship_cost||8.0).toFixed(2)}</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
@@ -1203,8 +1207,9 @@ function recomputeSimulator() {
     }
     
     salesPayload.forEach(row => {
+        let totalCapture = (row.gross + row.shipRev + row.taxRev - row.disc);
         log(`&nbsp;&nbsp;> Row: <span style="color:#fff;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>)`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Equation: [($${row.gross.toFixed(2)} Gross + $${row.shipRev.toFixed(2)} Ship + $${row.taxRev.toFixed(2)} Tax - $${row.disc.toFixed(2)} Disc) - $${Math.abs(row.fee).toFixed(2)} Stripe] - $${row.actShipCost.toFixed(2)} ShipCost - $${row.cogs.toFixed(2)} COGS</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Equation: [($${row.gross.toFixed(2)} Actual Price + $${row.shipRev.toFixed(2)} Ship Col. + $${row.taxRev.toFixed(2)} Tax Col. - $${row.disc.toFixed(2)} Discount) = <span style="color:#10b981;">$${totalCapture.toFixed(2)} Total Capture</span>] - $${Math.abs(row.fee).toFixed(2)} Stripe Fee - $${row.actShipCost.toFixed(2)} Ship Exp. - $${row.cogs.toFixed(2)} True COGS</span>`);
         let nc = row.net < 0 ? '#ef4444' : '#10b981';
         log(`&nbsp;&nbsp;&nbsp;&nbsp;FINAL NET PROFIT: <span style="color:${nc}; font-weight:bold;">$${row.net.toFixed(2)}</span>`);
         log(`<br/>`);
