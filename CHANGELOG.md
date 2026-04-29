@@ -1,6 +1,6 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.22] - 2026-04-29
 ### Features & Refactors
 - **Stripe Fee Decoupling Logic**: Resolved Gateway fee inflation anomalies and ghost revenue by actively decoupling voided and replacement transactions during Sandbox processing. Added an `orderRefund` reduction check to `trueOrderFee` baseline extraction to prevent negative revenue projections.
 - **Export Backup Fix**: Ensured the 'EXPORT BACKUP' button in the NEXUZ command center correctly displays progress tracking strings during execution.
