@@ -2096,7 +2096,7 @@ window.change_handleShopifyBillingUpload = async function(e) {
             
             // Fetch relevant ledger targets
             const orderTagsList = matchedCosts.map(m => m.parsed_order_id);
-            const { data: ledgerRows, error: ledgerError } = await window._supabase
+            const { data: ledgerRows, error: ledgerError } = await supabaseClient
                 .from('sales_ledger')
                 .select('id, order_id, actual_shipping_cost')
                 .in('order_id', orderTagsList)
@@ -2155,7 +2155,7 @@ window.change_handleShopifyBillingUpload = async function(e) {
                 customCommitFn: async function() {
                     billingTrace(`▶ Execution Phase: Updating database securely...`, false);
                     for (let updateObj of updatesToApply) {
-                        const { error } = await window._supabase
+                        const { error } = await supabaseClient
                             .from('sales_ledger')
                             .update({ actual_shipping_cost: updateObj.actual_shipping_cost })
                             .eq('id', updateObj.id);
