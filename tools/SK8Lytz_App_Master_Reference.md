@@ -241,8 +241,8 @@ The Edge Function relies on the following secrets stored in Supabase (Settings -
 * `SHOPIFY_WEBHOOK_SECRET`: The HMAC verification key provided by Shopify to prevent unauthorized POST requests.
 * `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`: Native Supabase client bypass variables.
 
-### C. Deduplication Logic (`shopify-webhook`)
-To prevent compounding data corruption from Shopify retries, the edge function MUST execute a manual pre-flight deduplication loop. It queries the `sales_ledger` for existing `order_id` values, strictly segregating rows into `insertRows` and `updateRows`, applying `.update()` to existing entities mapped strictly by the primary key `id` rather than blindly inserting duplicates.
+### C. Deduplication Logic & Financial Idempotency (`shopify-webhook`)
+To prevent compounding data corruption from Shopify retries, the edge function MUST execute a manual pre-flight deduplication loop. It queries the `sales_ledger` for existing `order_id` values, strictly segregating rows into `insertRows` and `updateRows`, applying `.update()` to existing entities mapped strictly by the primary key `id` rather than blindly inserting duplicates. Furthermore, the upsert logic strictly enforces **Financial Idempotency**: it explicitly blocks Shopify payloads from overwriting existing `actual_shipping_cost` or manual COGS overrides with `null` or `0`, preserving local data integrity.
 ---
 
 ## Security Patterns

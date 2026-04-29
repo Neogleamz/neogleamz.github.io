@@ -33,10 +33,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟠 P1 High Priority (Core Features)
-
-### Target: `epic/revenuez-fulfillment-expansion`
-*(Epic: Revenuez Fulfillment & Cost Tracking)*
-- [🚀] `feat/revenuez-fulfillment-expansion` : Intercept Shopify webhooks (orders/updated and fulfillments/create) and execute GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Update the Supabase `sales_ledger` schema and modify the Revenuez UI data grid to surface this operational data directly with clickable tracking links and high-cost warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
+*(No active high priority tasks)*
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -232,3 +229,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Agentic Hygiene & Workflow Refactoring)*
 - [🚀] `chore/agentic-rule-refactor` : Identified and repaired 5 core logical paradoxes across the agent environment. Granted `main` branch exemptions for `/release` and `/wind_down` tagging; normalized the 8-point pixel grid system to `clamp()` scaling via `modern-ui-ux.md`; fully exempted Bucket Lists and Master References from the 24/7 continuous micro-commit stream to enable graceful batch syncing; restricted the Boy Scout rule to explicit `feat/` cycles to isolate bug deployments; and officially excised the redundant `/idea_intake` workflow.
+
+### Target: `epic/revenuez-fulfillment-expansion`
+*(Epic: Revenuez Fulfillment & Cost Tracking)*
+- [🚀] `feat/revenuez-fulfillment-expansion` : Intercept Shopify webhooks (orders/updated and fulfillments/create) and execute GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Update the Supabase `sales_ledger` schema and modify the Revenuez UI data grid to surface this operational data directly with clickable tracking links and high-cost warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
