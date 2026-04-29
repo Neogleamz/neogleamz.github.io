@@ -1046,6 +1046,100 @@ function closeActualNetModal() {
     if(modal) modal.style.display = 'none';
 }
 
+function closeMathSimulator() {
+    let m = document.getElementById('math-simulator-modal');
+    if(m) m.style.display = 'none';
+}
+
+function runMathSimulator() {
+    let m = document.getElementById('math-simulator-modal');
+    if(m) m.style.display = 'flex';
+    let consoleDiv = document.getElementById('math-simulator-console');
+    if(!consoleDiv) return;
+    
+    consoleDiv.innerHTML = `<div style="color:#3b82f6; font-weight:bold; margin-bottom:10px;">[EXECUTING] NEOGLEAMZ ACTUAL NET SIMULATION ENGINE v1.0</div>`;
+    
+    let htmlLogs = "";
+    function log(msg) { htmlLogs += `<div>${msg}</div>`; }
+    
+    function execSim(testName, rows) {
+        log(`<div style="color:#fcd34d; font-weight:bold; margin-top:15px;">--- ${testName} ---</div>`);
+        
+        let salesPayload = rows.map(r => {
+            let type = r.transaction_type || 'Standard';
+            let cogs = window.getEngineTrueCogs(r.internal_recipe_name);
+            let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
+            
+            if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION') { cogs = 0; }
+            
+            let actShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (r.actual_ship_cost || 8.00);
+            
+            let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
+            let shipRev = isCostOnlyItem ? 0 : parseFloat(r.shipping || 0);
+            let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
+            let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
+            
+            let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actShipCost, r.internal_recipe_name, r.qty_sold, 'web');
+            
+            let net = rawNet;
+            if (type === 'IGNORE') net = 0;
+            if (type === 'Pre-Ship Exchange') net += window.getEngineTrueCogs(r.internal_recipe_name); // Keep revenue but didn't ship
+            if (isCostOnlyItem && type !== 'Cancelled') net = 0 - actShipCost - cogs;
+            if (type === 'Cancelled') net = 0;
+            
+            let trueLineCaptured = isCostOnlyItem ? 0 : gross + shipRev + taxRev - disc;
+            let fee = isCostOnlyItem ? 0 : window.getEngineStripeFee(trueLineCaptured, 'web');
+
+            return { ...r, cogs, fee, net };
+        });
+        
+        let primes = salesPayload.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
+        let replacements = salesPayload.filter(x => x.transaction_type === 'Exchange Replacement');
+        
+        if (primes.length > 0 && replacements.length > 0) {
+            let u = primes[0]; let rp = replacements[0];
+            if (u.transaction_type === 'Post-Ship Exchange') {
+                rp.net += rp.cogs; // We restocked the return physically
+                log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Post-Ship Exchange detected. Restocking returned physical unit (+$${rp.cogs.toFixed(2)} COGS back to Net).</span>`);
+            } else if (u.transaction_type === 'Pre-Ship Exchange') {
+                log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Pre-Ship Exchange detected. Original never shipped. Absorbing captured revenue.</span>`);
+            }
+            rp.net += u.net;
+            rp.net = Math.round(rp.net * 100) / 100;
+            let tempNet = u.net;
+            u.net = 0;
+            log(`<span style="color:#10b981;">[MATH TRANSFER] Transferred $${tempNet.toFixed(2)} ghost-revenue to physical replacement line.</span>`);
+        }
+        
+        salesPayload.forEach(row => {
+            log(`&nbsp;&nbsp;> Row: <span style="color:#fff;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>)`);
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;COGS applied: <span style="color:#ef4444;">-$${row.cogs.toFixed(2)}</span> | Stripe Fee: <span style="color:#ef4444;">-$${row.fee.toFixed(2)}</span>`);
+            let nc = row.net < 0 ? '#ef4444' : '#10b981';
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;FINAL NET PROFIT: <span style="color:${nc}; font-weight:bold;">$${row.net.toFixed(2)}</span>`);
+        });
+    }
+
+    execSim("Order 1017: Post-Ship Exchange (Returned item to warehouse)", [
+        { qty_sold: 1, actual_sale_price: 139.99, shipping: 10.09, taxes: 0, discount_amount: 17.98, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Post-Ship Exchange', actual_ship_cost: 8.00 },
+        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
+    ]);
+    
+    execSim("Order 1019: Pre-Ship Exchange (Never Shipped Original)", [
+        { qty_sold: 1, actual_sale_price: 129.99, shipping: 7.30, taxes: 0, discount_amount: 12.99, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Pre-Ship Exchange', actual_ship_cost: 8.00 },
+        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
+    ]);
+    
+    execSim("Order 1050: Exchange Replacement ONLY (Original kept by customer)", [
+        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
+    ]);
+
+    execSim("Order 1060: Standard Warranty (Free Zero Revenue)", [
+        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Warranty', actual_ship_cost: 8.00 }
+    ]);
+    
+    consoleDiv.innerHTML += htmlLogs;
+}
+
 function actualNetSort(col) {
     if(window._netSortKey.column === col) {
         window._netSortKey.direction = window._netSortKey.direction === 'asc' ? 'desc' : 'asc';
