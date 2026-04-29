@@ -35,6 +35,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 ### Target: main
 *(Epic: Orderz Financial Visibility)*
+- [ ] `test/actual-net-matrix-verification` : Build a test modal or verification script to validate Actual Net math across complex order combinations (e.g., unshipped items keeping revenue vs. post-ship exchanges vs. replacement exchanges without returning the original, ref: Orders 1017, 1019). [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 
 ---
 
