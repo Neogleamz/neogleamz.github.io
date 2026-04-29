@@ -106,7 +106,26 @@ serve(async (req: Request) => {
           trackNum = f.tracking_numbers?.[0] || f.tracking_number || null;
           carrName = f.tracking_company || null;
       }
-      const extData = { trackingNumber: trackNum, carrierName: carrName, shippingCost: 0 };
+
+      // Shopify tags are a comma-separated string
+      const tagsStr = String(order.tags || "");
+      
+      // Extract Label Cost (e.g. "Label: 4.55" or "Label: $5.00")
+      let tagShippingCost = 0;
+      const costMatch = tagsStr.match(/Label:\s*\$?(\d+(?:\.\d{1,2})?)/i);
+      if (costMatch && costMatch[1]) {
+          tagShippingCost = parseFloat(costMatch[1]);
+      }
+
+      // Extract Transaction Type (e.g. "Type: Warranty", "Type: Gift", "Type: Pre-Ship Exchange")
+      let tagTransactionType: string | null = null;
+      const typeMatch = tagsStr.match(/Type:\s*([A-Za-z\- \t]+)(?:,|$)/i);
+      if (typeMatch && typeMatch[1]) {
+          tagTransactionType = typeMatch[1].trim();
+      }
+
+      // extData shippingCost falls back to tag extraction if present
+      const extData = { trackingNumber: trackNum, carrierName: carrName, shippingCost: tagShippingCost };
       const piiEmail = await hashPII(order.email);
       const piiPhone = await hashPII(order.phone || order.customer?.phone);
       const piiShipName = await hashPII(order.shipping_address?.name);
@@ -165,6 +184,11 @@ serve(async (req: Request) => {
               if (fStat === 'refunded' || fStat === 'partially_refunded') tType = 'Cancelled';
           } else if (fStat === 'refunded' || fStat === 'partially_refunded') {
               tType = 'Refund';
+          }
+
+          // Override deduction with Explicit Tag if present
+          if (tagTransactionType) {
+              tType = tagTransactionType;
           }
 
           // Net Profit deducts Refunds naturally if they occurred.
