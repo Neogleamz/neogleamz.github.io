@@ -27,7 +27,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🔴 P0 Critical (Blockers & Hotfixes)
-*(No active blockers)*
 
 
 ---
@@ -64,6 +63,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `epic/hub-card-math-validation`
+*(Epic: Hub Card Math Validation)*
+- [🚀] `fix/importz-total-goods-cost` : Validate all math on the cards for all hubs, starting with investigating why the IMPORTZ card shows a massively inflated Total Goods Cost. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 
 ### Target: `main`
 *(Epic: Sitewide Mathematical Verification Audit)*
