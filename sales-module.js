@@ -546,7 +546,7 @@ function renderSalesTable() {
     if(!wrap) return;
 
     // Updated Headers based on System Standard
-    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="d" style="cursor:pointer;">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="o" style="cursor:pointer;">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="src" style="cursor:pointer;">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="sku" style="cursor:pointer;">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="int" style="cursor:pointer;">Recipe</th> <th class="${currentSalesSort.column==='type'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="type" style="cursor:pointer;">Type</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="q" style="cursor:pointer;">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="p" style="cursor:pointer;">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="disc" style="cursor:pointer;">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="ship" style="cursor:pointer;">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="tax" style="cursor:pointer;">Tax Col.</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="tot" style="cursor:pointer;">Total Captured</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="c" style="cursor:pointer;">True COGS</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="stripe" style="cursor:pointer;">Stripe/eBay</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="net" style="cursor:pointer;">Actual Net</th>`;
+    let ths = ` <th class="${currentSalesSort.column==='d'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="d" style="cursor:pointer;">Sale Date</th> <th class="${currentSalesSort.column==='o'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="o" style="cursor:pointer;">Order ID</th> <th class="${currentSalesSort.column==='src'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="src" style="cursor:pointer;">Source</th> <th class="${currentSalesSort.column==='sku'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="sku" style="cursor:pointer;">Storefront SKU</th> <th class="${currentSalesSort.column==='int'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="int" style="cursor:pointer;">Recipe</th> <th class="${currentSalesSort.column==='type'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="type" style="cursor:pointer;">Type</th> <th class="${currentSalesSort.column==='q'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="q" style="cursor:pointer;">Qty</th> <th class="${currentSalesSort.column==='p'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="p" style="cursor:pointer;">Actual Price</th> <th class="${currentSalesSort.column==='disc'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="disc" style="cursor:pointer;">Discount</th> <th class="${currentSalesSort.column==='ship'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="ship" style="cursor:pointer;">Ship Col.</th> <th class="${currentSalesSort.column==='tax'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="tax" style="cursor:pointer;">Tax Col.</th> <th class="${currentSalesSort.column==='carr'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="carr" style="cursor:pointer;">Carrier</th> <th class="${currentSalesSort.column==='trk'?'sorted-'+currentSalesSort.direction:''}" data-sortcol="trk" style="cursor:pointer;">Tracking</th> <th class="${currentSalesSort.column==='tot'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="tot" style="cursor:pointer;">Total Captured</th> <th class="${currentSalesSort.column==='c'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="c" style="cursor:pointer;">True COGS</th> <th class="${currentSalesSort.column==='lcost'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="lcost" style="cursor:pointer;">Label Cost</th> <th class="${currentSalesSort.column==='stripe'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="stripe" style="cursor:pointer;">Stripe/eBay</th> <th class="${currentSalesSort.column==='payout'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="payout" style="cursor:pointer;">Actual Payout</th> <th class="${currentSalesSort.column==='net'?'sorted-'+currentSalesSort.direction:''} text-right" data-sortcol="net" style="cursor:pointer;">Actual Net</th>`;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
 
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
@@ -591,12 +591,74 @@ function renderSalesTable() {
         }
         // --------------------------------
 
-        return { ...x, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false, isCostOnlyItem, actualShipCost };
+        let dbActualPayout = parseFloat(x.actual_payout) || 0;
+        let dbActualShipCost = parseFloat(x.actual_shipping_cost) || 0;
+        let carr = x.carrier_name || '';
+        let trk = x.tracking_number || '';
+
+        return { ...x, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: 0, isExchanged: false, isCostOnlyItem, actualShipCost, dbActualPayout, dbActualShipCost, carrier_name: carr, tracking_number: trk };
     });
 
     // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
     let orderGroups = {};
     a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
+
+    // --- OPERATIONAL FIDELITY TRUE-UP ---
+    Object.values(orderGroups).forEach(group => {
+        let orderHasExactPayout = false;
+        let exactPayout = 0;
+        let orderHasExactShip = false;
+        let exactShipCost = 0;
+        
+        group.forEach(r => {
+            if (parseFloat(r.dbActualPayout) > 0) { orderHasExactPayout = true; exactPayout += parseFloat(r.dbActualPayout); }
+            if (parseFloat(r.dbActualShipCost) > 0) { orderHasExactShip = true; exactShipCost += parseFloat(r.dbActualShipCost); }
+        });
+
+        if (orderHasExactShip || orderHasExactPayout) {
+            let appliedShip = false;
+            let appliedFee = false;
+            
+            let orderCaptured = group.reduce((sum, r) => sum + (r.isCostOnlyItem ? 0 : (parseFloat(r.actual_sale_price||0)*parseFloat(r.qty_sold||0) + parseFloat(r.shipping||0) + parseFloat(r.taxes||0) - parseFloat(r.discount_amount||0))), 0);
+            let trueOrderFee = orderHasExactPayout ? (orderCaptured - exactPayout) : 0;
+            
+            group.forEach(r => {
+                if (orderHasExactShip) {
+                    if (!appliedShip && r.transaction_type !== 'Cancelled') {
+                        r.actualShipCost = exactShipCost;
+                        appliedShip = true;
+                    } else {
+                        r.actualShipCost = 0;
+                    }
+                }
+                
+                if (orderHasExactPayout) {
+                    if (!appliedFee && !r.isCostOnlyItem && r.transaction_type !== 'Cancelled') {
+                        r.stripeFee = trueOrderFee;
+                        appliedFee = true;
+                    } else {
+                        if (!r.isCostOnlyItem) r.stripeFee = 0;
+                    }
+                }
+                
+                // Recalculate net if overriding default engine estimates
+                let p = parseFloat(r.actual_sale_price || 0);
+                let q = parseFloat(r.qty_sold || 0);
+                let s = parseFloat(r.shipping || 0);
+                let d = parseFloat(r.discount_amount || 0);
+                
+                if (r.transaction_type === 'IGNORE' || r.transaction_type === 'NEEDS ATTENTION' || r.transaction_type === 'Cancelled') {
+                    r.net = 0;
+                } else if (r.transaction_type === 'Pre-Ship Exchange') {
+                    r.net = r.liveCogs;
+                } else if (r.isCostOnlyItem) {
+                    r.net = 0 - r.actualShipCost - r.liveCogs;
+                } else {
+                    r.net = (p*q) + s - d - r.stripeFee - r.actualShipCost - r.liveCogs;
+                }
+            });
+        }
+    });
 
     // CALCULATE GHOST REVENUE
     let voidedRevenueByOrder = {};
@@ -753,10 +815,10 @@ function renderSalesTable() {
     // ----------------------------------
 
     if(a.length===0){
-        h += "<tr><td colspan='16' style='text-align:center;'>No sales synced yet.</td></tr>";
+        h += "<tr><td colspan='19' style='text-align:center;'>No sales synced yet.</td></tr>";
     } else {
         a.sort((x,y) => {
-            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', type:'transaction_type', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', adj:'exchAdj', bal:'Outstanding Balance', stripe:'stripeFee', net:'net'};
+            let map = {d:'sale_date', o:'order_id', src:'Source', sku:'storefront_sku', int:'internal_recipe_name', type:'transaction_type', q:'qty_sold', p:'actual_sale_price', c:'liveCogs', ship:'shipping', tax:'taxes', disc:'discount_amount', tot:'total', adj:'exchAdj', bal:'Outstanding Balance', stripe:'stripeFee', net:'net', carr:'carrier_name', trk:'tracking_number', lcost:'actualShipCost', payout:'dbActualPayout'};
             let col = map[currentSalesSort.column];
             let u = x[col]; let v = y[col];
             if (typeof u === 'number' && typeof v === 'number') return currentSalesSort.direction === 'asc' ? u - v : v - u;
@@ -794,9 +856,13 @@ function renderSalesTable() {
             <td class="text-right" style="color:#f59e0b;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
             <td class="text-right" title="${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? 'Actual Ship Expense Override' : 'Shipping Revenue'}" style="color:${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? '#ef4444' : 'var(--text-muted)'};">$${parseFloat(x.shipping || 0).toFixed(2)}</td>
             <td class="text-right" style="color:var(--text-muted);">$${parseFloat(x.taxes || 0).toFixed(2)}</td>
+            <td style="color:#0ea5e9;">${x.carrier_name || '--'}</td>
+            <td>${x.tracking_number ? `<a href="https://www.google.com/search?q=${x.tracking_number}" target="_blank" style="color:#8b5cf6; text-decoration:none; font-family:monospace;">${x.tracking_number}</a>` : '<span style="color:var(--text-muted);">--</span>'}</td>
             <td class="text-right" style="font-weight:bold;">$${(parseFloat(x.total || 0) + (x.exchAdj || 0)).toFixed(2)}</td>
             <td class="text-right" style="color:#ef4444; font-weight:bold;">$${x.liveCogs.toFixed(2)}</td>
-            <td class="text-right" style="color:#888;">-$${x.stripeFee.toFixed(2)}</td>
+            <td class="text-right" style="color:${x.actualShipCost > 15 ? '#ef4444' : '#f59e0b'}; font-weight:bold;">-$${x.actualShipCost.toFixed(2)}</td>
+            <td class="text-right" style="color:#888;" title="${x.dbActualPayout > 0 ? 'True Platform Payout Math' : 'Estimated Engine Fee'}">-$${x.stripeFee.toFixed(2)}</td>
+            <td class="text-right" style="color:#10b981; font-weight:bold;">${x.dbActualPayout > 0 ? '$'+x.dbActualPayout.toFixed(2) : '--'}</td>
             <td class="text-right" style="color:${netColor}; font-weight:900;">$${x.net.toFixed(2)}</td>
             </tr>`;
         });

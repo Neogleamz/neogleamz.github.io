@@ -18,11 +18,12 @@ When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize 
    - **Continuous QA Command (CRITICAL):** You MUST execute `npm test` and `npx eslint .` in the terminal to verify zero regressions and zero syntax flaws. You are strictly forbidden from executing a merge if either command throws an error.
    *If any issues or test failures are flagged, list them out and **HALT**. Wait for permission to either fix them or abort the merge.*
 4. **Ledger Reconciliation**: Open `@/tools/SK8Lytz_Bucket_List.md`. Review the active queues (P0, P1, P2). Did the code changes you just made accidentally or intentionally fulfill any *other* unchecked `[ ]` tasks, even if they belong to a different Epic block? If yes, explicitly check them off (`[x]`) right now to prevent orphaned tasks.
-5. **Knowledge Audit Gate**: Evaluate if this feature branch established new critical knowledge (DB tables, Bluetooth commands, global contexts). If yes, ensure it is documented in @/tools/SK8Lytz_App_Master_Reference.md using your standard editing tools before proceeding.
-5. **Merge Routine & Conflict Check**:
+5. **Database Sync Gate**: Check if any `.sql` files in `supabase/migrations/` were created or modified. If yes, you MUST invoke the `/supabase_sync` protocol to ensure `npx supabase db push` is executed and documentation is updated BEFORE merging.
+6. **Knowledge Audit Gate**: Evaluate if this feature branch established new critical knowledge (DB tables, Bluetooth commands, global contexts). If yes, ensure it is documented in @/tools/SK8Lytz_App_Master_Reference.md using your standard editing tools before proceeding.
+7. **Merge Routine & Conflict Check**:
    - Run `git checkout <base-branch>`.
    - Run `git merge --no-ff <feature-branch> -m "chore(merge): integrate <feature-branch>"`.
-   - **CRITICAL:** Run `git status`. If there are merge conflicts, you must **HALT**, output the conflicted files to the chat, and wait for the user to resolve them. Do NOT proceed to step 6.
+   - **CRITICAL:** Run `git status`. If there are merge conflicts, you must **HALT**, output the conflicted files to the chat, and wait for the user to resolve them. Do NOT proceed to step 8.
 6. **Push to Remote**: If the merge was clean, run `git push origin <base-branch>` (if a remote is configured).
 7. **Clean Local**: Run `git branch -d <feature-branch>`.
 8. **Halt and Confirm**: State that the merge was successful and the local feature branch was cleaned up. Ask the user what the next priority is.

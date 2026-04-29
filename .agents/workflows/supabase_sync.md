@@ -8,7 +8,9 @@ trigger: "/sync_db, /supabase_sync, sync the database, update schema docs"
 
 Whenever you are instructed to alter a Supabase Database table, modify RLS (Row Level Security) logic, or run a Supabase MCP server migration command, you must execute the following sequence:
 
-1. **Execution**: Execute the requested DB schema change or MCP tool action (`apply_migration`).
+1. **Infrastructure-as-Code Mandate**: 
+   - **BANNED:** You and the user are strictly forbidden from copying `.sql` file contents and running them manually in the Supabase Cloud browser dashboard. This destroys the tracking ledger and causes migration drift.
+   - **MANDATORY:** All database modifications MUST be executed by running `npx supabase db push` in the terminal to ensure the Git repository remains the 100% source of truth.
 2. **Compilation**: Immediately pause and compile a clear, vanilla-compatible data dictionary of the new columns, data types, and RLS logic you just implemented.
 3. **Targeted Documentation Sync**: 
    - Open @/tools/SK8Lytz_App_Master_Reference.md. (Remember to process in chunks if the file exceeds 30,000 characters).

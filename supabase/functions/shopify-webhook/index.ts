@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { serve } from "std/http/server.ts"
+import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -14,7 +14,7 @@ async function hashPII(rawStr: any) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
-async function verifyShopifyWebhook(rawBody: string, hmacHeader: string, secret: string) {
+async function verifyShopifyWebhook(rawBuffer: ArrayBuffer, hmacHeader: string, secret: string) {
     if (!secret || !hmacHeader) return false;
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
@@ -24,10 +24,12 @@ async function verifyShopifyWebhook(rawBody: string, hmacHeader: string, secret:
         false,
         ['sign', 'verify']
     );
-    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+    const signature = await crypto.subtle.sign('HMAC', key, rawBuffer);
     const base64Signature = btoa(String.fromCharCode(...new Uint8Array(signature)));
     return base64Signature === hmacHeader;
 }
+// GRAPHQL Fetch completely removed due to Shopify Dev Dashboard API constraints.
+// System strictly relies on Webhook pushed payloads.
 
 serve(async (req: Request) => {
   if (req.method !== 'POST') {
@@ -36,20 +38,40 @@ serve(async (req: Request) => {
 
   const hmacHeader = req.headers.get('x-shopify-hmac-sha256');
   const shopifySecret = Deno.env.get('SHOPIFY_WEBHOOK_SECRET');
+  const topic = req.headers.get('x-shopify-topic');
+  // API Token intentionally removed as Shopify requires Dev Dashboard OAuth server.
   
   try {
-    const rawBody = await req.text()
+    const rawBuffer = await req.arrayBuffer();
 
-    if (!hmacHeader || !await verifyShopifyWebhook(rawBody, hmacHeader, shopifySecret || '')) {
+    if (!hmacHeader || !await verifyShopifyWebhook(rawBuffer, hmacHeader, shopifySecret || '')) {
         console.error("HMAC Verification Failed! Unauthorized access attempt.");
         return new Response('Unauthorized', { status: 401 });
     }
 
-    const order = JSON.parse(rawBody)
+    const rawBody = new TextDecoder().decode(rawBuffer);
+
+    const payload = JSON.parse(rawBody)
 
     // Initialize Supabase Admin Client
     const supabase = createClient(supabaseUrl, supabaseKey)
 
+    // TOPIC ROUTER: If it's a pure fulfillment create, handle lightweight tracking update
+    if (topic === 'fulfillments/create') {
+        const tracking_number = payload.tracking_numbers?.[0] || null;
+        const carrier_name = payload.tracking_company || null;
+        if (tracking_number) {
+            await supabase.from('sales_ledger')
+                .update({ tracking_number, carrier_name, fulfillment_status: 'fulfilled' })
+                .eq('linked_order_id', String(payload.order_id));
+        }
+        return new Response(JSON.stringify({ success: true, mode: 'fulfillment_update' }), { status: 200 });
+    }
+
+    // Default to full Order parsing
+    const order = payload;
+
+    // Supabase Admin Client already initialized at top of block
     // 1. Fetch alias mapping to convert Shopify SKUs to Internal Recipes
     const { data: aliases } = await supabase.from('storefront_aliases').select('*')
     const aliasMap: Record<string, string> = {}
@@ -72,6 +94,19 @@ serve(async (req: Request) => {
 
       const orderIdStr = order.name || String(order.id); // Define orderIdStr here
 
+      // No API available to fetch exact payouts or historical tracking on initial order load.
+      // System will fallback to estimated fees. Real tracking injected later via fulfillments/create webhook.
+      const trueFee = fee;
+      const truePayout = tot - trueFee;
+      
+      let trackNum = null;
+      let carrName = null;
+      if (order.fulfillments && order.fulfillments.length > 0) {
+          const f = order.fulfillments[0];
+          trackNum = f.tracking_numbers?.[0] || f.tracking_number || null;
+          carrName = f.tracking_company || null;
+      }
+      const extData = { trackingNumber: trackNum, carrierName: carrName, shippingCost: 0 };
       const piiEmail = await hashPII(order.email);
       const piiPhone = await hashPII(order.phone || order.customer?.phone);
       const piiShipName = await hashPII(order.shipping_address?.name);
@@ -94,13 +129,46 @@ serve(async (req: Request) => {
           // Segregate specific order-level aggregate fees/shipping only onto the FIRST row to perfectly replicate CSV behavior
           const rowShip = index === 0 ? ship : 0;
           const rowTax = index === 0 ? tax : 0;
-          const rowFee = index === 0 ? fee : 0;
+          const rowFee = index === 0 ? trueFee : 0;
           const rowBalance = index === 0 ? balance : 0;
           const rowCartTotal = index === 0 ? tot : 0;
+          const rowPayout = index === 0 ? truePayout : 0;
+          const rowActualShippingCost = index === 0 ? extData.shippingCost : 0;
 
           // Accurately calculate True Net Profit for this specific loop matrix
           const subtotal = price * qty;
-          const net = subtotal + rowShip + rowTax - lineDiscount - rowFee;
+          
+          let orderTotalRefunded = parseFloat(order.total_refunded) || 0;
+          if (orderTotalRefunded === 0 && order.refunds && order.refunds.length > 0) {
+              order.refunds.forEach((r: any) => {
+                  if (r.transactions) {
+                      r.transactions.forEach((t: any) => {
+                          if (t.kind === 'refund' && t.status === 'success') {
+                              orderTotalRefunded += parseFloat(t.amount || 0);
+                          }
+                      });
+                  }
+              });
+          }
+          const rowRefundedAmount = index === 0 ? orderTotalRefunded : 0;
+          
+          // Deduce Transaction Type Native Match
+          let itemFulfill = String(item.fulfillment_status || "pending").trim().toLowerCase();
+          if (itemFulfill === 'null' || itemFulfill === '') itemFulfill = 'pending';
+          const fStat = String(order.financial_status || "").trim().toLowerCase();
+          
+          let tType = 'Standard';
+          if (tot === 0 && fStat !== 'refunded') {
+              tType = 'NEEDS ATTENTION';
+          } else if (itemFulfill === 'pending' || itemFulfill === 'unfulfilled') {
+              if (fStat === 'paid') tType = 'Pre-Ship Exchange';
+              if (fStat === 'refunded' || fStat === 'partially_refunded') tType = 'Cancelled';
+          } else if (fStat === 'refunded' || fStat === 'partially_refunded') {
+              tType = 'Refund';
+          }
+
+          // Net Profit deducts Refunds naturally if they occurred.
+          const net = subtotal + rowShip + rowTax - lineDiscount - rowFee - rowActualShippingCost - rowRefundedAmount;
 
           ledgerRows.push({
             order_id: orderIdStr,
@@ -123,6 +191,8 @@ serve(async (req: Request) => {
             // EXTENDED ORDER DATA (NON-PII)
             financial_status: order.financial_status || null,
             fulfillment_status: order.fulfillment_status || null,
+            cancelled_at: order.cancelled_at || null,
+            cancel_reason: order.cancel_reason || null,
             lineitem_compare_at_price: parseFloat(item.compare_at_price) || 0,
             lineitem_fulfillment_status: item.fulfillment_status || null,
             tags: order.tags || null,
@@ -138,7 +208,13 @@ serve(async (req: Request) => {
             customer_phone_hash: piiPhone,
             shipping_name_hash: piiShipName,
             shipping_address_hash: piiShipAddr,
-            refunded_amount: 0
+            refunded_amount: rowRefundedAmount,
+            tracking_number: extData.trackingNumber,
+            carrier_name: extData.carrierName,
+            actual_shipping_cost: rowActualShippingCost,
+            actual_payout: rowPayout,
+            linked_order_id: String(order.id),
+            transaction_type: tType
           });
 
           invUpdates.push({
@@ -151,7 +227,7 @@ serve(async (req: Request) => {
     // 3. Inject to Database (Upsert Logic)
     const { data: existingRecords } = await supabase
       .from('sales_ledger')
-      .select('id, order_id, storefront_sku')
+      .select('*')
       .eq('order_id', orderIdStr);
 
     const insertRows: any[] = [];
@@ -160,9 +236,28 @@ serve(async (req: Request) => {
     ledgerRows.forEach(row => {
       const existing = existingRecords?.find((e: any) => String(e.order_id) === String(row.order_id) && String(e.storefront_sku) === String(row.storefront_sku));
       if (existing && existing.id) {
+        
+        // Carry forward existing manually injected values that the webhook does not natively receive
+        const dbShippingCost = parseFloat(existing.actual_shipping_cost) || 0;
+        const dbCogs = parseFloat(existing.cogs_at_sale) || 0;
+        
+        // Recalculate Net Profit and Actual Payout preserving the database's existing cost data
+        const updatedNetProfit = row.subtotal + row.shipping + row.taxes - row.discount_amount - row.transaction_fees - dbShippingCost - row.refunded_amount - dbCogs;
+        const updatedPayout = row.total - row.transaction_fees - row.refunded_amount;
+        
+        row.actual_shipping_cost = dbShippingCost;
+        row.cogs_at_sale = dbCogs;
+        row.net_profit = updatedNetProfit;
+        row.actual_payout = updatedPayout;
+
         const updatePayload = { ...row };
         delete updatePayload.id;
         delete updatePayload.created_at;
+        
+        // Prevent wiping fulfillment data if it was already injected
+        if (updatePayload.tracking_number === null && existing.tracking_number !== null) delete updatePayload.tracking_number;
+        if (updatePayload.carrier_name === null && existing.carrier_name !== null) delete updatePayload.carrier_name;
+
         updatePromises.push(supabase.from('sales_ledger').update(updatePayload).eq('id', existing.id));
       } else {
         insertRows.push(row);

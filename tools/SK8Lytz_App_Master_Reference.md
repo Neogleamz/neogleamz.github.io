@@ -226,8 +226,23 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 ---
 
 ## 🌐 7. Edge Functions & Webhooks
-* **Shopify Webhook Deduplication (`shopify-webhook`)**: The Shopify webhook natively processes inbound JSON payloads and injects them into the `sales_ledger`. To prevent compounding data corruption from Shopify retries, the edge function MUST execute a manual pre-flight deduplication loop. It queries the `sales_ledger` for existing `order_id` values, strictly segregating rows into `insertRows` and `updateRows`, applying `.update()` to existing entities mapped strictly by the primary key `id` rather than blindly inserting duplicates.
 
+### A. Active Shopify Webhook Infrastructure
+The `shopify-webhook` Edge Function natively processes inbound JSON payloads directly from Shopify. Because Shopify requires OAuth Dev Apps for historical API pulls, this application relies **strictly** on live Webhook pushes for operational data.
+
+**Required Shopify Admin Configuration:**
+To ensure data flows correctly into the `sales_ledger`, the following Webhooks MUST be manually configured in the Shopify Admin Panel (Settings -> Notifications -> Webhooks) pointing to the Supabase Edge Function URL:
+1. **Event:** `Order creation` (Pushes initial sales data, items, and estimated fees)
+2. **Event:** `Fulfillment creation` (Pushes the actual Tracking Number and Carrier Name the moment a label is generated)
+3. **Event:** `Order update` (Critical for mapping refunds, cancellations, and tag changes backwards into the ledger)
+
+### B. Required Environment Variables
+The Edge Function relies on the following secrets stored in Supabase (Settings -> Edge Functions -> Secrets):
+* `SHOPIFY_WEBHOOK_SECRET`: The HMAC verification key provided by Shopify to prevent unauthorized POST requests.
+* `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`: Native Supabase client bypass variables.
+
+### C. Deduplication Logic (`shopify-webhook`)
+To prevent compounding data corruption from Shopify retries, the edge function MUST execute a manual pre-flight deduplication loop. It queries the `sales_ledger` for existing `order_id` values, strictly segregating rows into `insertRows` and `updateRows`, applying `.update()` to existing entities mapped strictly by the primary key `id` rather than blindly inserting duplicates.
 ---
 
 ## Security Patterns
