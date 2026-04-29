@@ -184,6 +184,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_showSalezPane_commandz':
                     showSalezPane('commandz');
                     break;
+                case 'click_openActualNetModal':
+                    if (typeof openActualNetModal === 'function') openActualNetModal();
+                    break;
+                case 'click_closeActualNetModal':
+                    if (typeof closeActualNetModal === 'function') closeActualNetModal();
+                    break;
+                case 'click_actualNetSort_o':
+                    if (typeof actualNetSort === 'function') actualNetSort('o');
+                    break;
+                case 'click_actualNetSort_d':
+                    if (typeof actualNetSort === 'function') actualNetSort('d');
+                    break;
+                case 'click_actualNetSort_g':
+                    if (typeof actualNetSort === 'function') actualNetSort('g');
+                    break;
+                case 'click_actualNetSort_c':
+                    if (typeof actualNetSort === 'function') actualNetSort('c');
+                    break;
+                case 'click_actualNetSort_s':
+                    if (typeof actualNetSort === 'function') actualNetSort('s');
+                    break;
+                case 'click_actualNetSort_t':
+                    if (typeof actualNetSort === 'function') actualNetSort('t');
+                    break;
+                case 'click_actualNetSort_f':
+                    if (typeof actualNetSort === 'function') actualNetSort('f');
+                    break;
+                case 'click_actualNetSort_n':
+                    if (typeof actualNetSort === 'function') actualNetSort('n');
+                    break;
                 case 'click_openLtvModal':
                     openLtvModal();
                     break;
@@ -611,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -644,7 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -669,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -751,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -786,9 +816,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'input_filterSOPAuditLog':
                     filterSOPAuditLog();
                     break;
+                case 'input_actualNetSearch':
+                    if (typeof renderActualNetList === 'function') renderActualNetList();
+                    break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -807,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -826,7 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -842,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, false);
 
@@ -858,7 +891,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, true);
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * @typedef {Object} SalesLedgerRow
  * @property {string|number} order_id
@@ -1023,4 +1024,145 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
         if(typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; alert("Error updating cell: \n" + e.message); }
+}
+
+// --- ACTUAL NET MODAL LOGIC ---
+window._netSortKey = { column: 'd', direction: 'desc' };
+
+function openActualNetModal() {
+    let modal = document.getElementById('actual-net-modal');
+    if(modal) {
+        modal.style.display = 'flex';
+        let searchInput = document.getElementById('actualNetSearch');
+        if(searchInput) {
+            searchInput.value = "";
+        }
+        renderActualNetList();
+    }
+}
+
+function closeActualNetModal() {
+    let modal = document.getElementById('actual-net-modal');
+    if(modal) modal.style.display = 'none';
+}
+
+function actualNetSort(col) {
+    if(window._netSortKey.column === col) {
+        window._netSortKey.direction = window._netSortKey.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        window._netSortKey.column = col;
+        window._netSortKey.direction = 'desc';
+    }
+    renderActualNetList();
+}
+
+function renderActualNetList() {
+    let container = document.getElementById('actualNetContainer');
+    if(!container) return;
+    
+    let searchTerm = (document.getElementById('actualNetSearch') ? document.getElementById('actualNetSearch').value.toLowerCase() : "");
+    
+    let data = window.processedSalesDB || [];
+    let orderMap = {};
+    data.forEach(r => {
+        let oid = r.order_id;
+        if(!orderMap[oid]) {
+            orderMap[oid] = {
+                order_id: oid,
+                date: r.sale_date,
+                gross: 0,
+                cogs: 0,
+                shipping: 0,
+                taxes: 0,
+                fees: 0,
+                net: 0,
+                lines: []
+            };
+        }
+        orderMap[oid].lines.push(r);
+        
+        let p = parseFloat(r.actual_sale_price || 0);
+        let q = parseFloat(r.qty_sold || 0);
+        let s = parseFloat(r.shipping || 0);
+        let t = parseFloat(r.taxes || 0);
+        let d = parseFloat(r.discount_amount || 0);
+        
+        let isCostOnly = r.isCostOnlyItem;
+        orderMap[oid].gross += isCostOnly ? 0 : (p * q) + s + t - d + (r.exchAdj || 0); 
+        orderMap[oid].cogs += (r.liveCogs || 0);
+        orderMap[oid].shipping += (r.actualShipCost || 0);
+        orderMap[oid].taxes += isCostOnly ? 0 : t;
+        orderMap[oid].fees += (r.stripeFee || 0);
+        orderMap[oid].net += (r.net || 0);
+    });
+
+    let grouped = Object.values(orderMap);
+    
+    if(searchTerm) {
+        grouped = grouped.filter(g => g.order_id.toLowerCase().includes(searchTerm) || g.lines.some(l => l.storefront_sku.toLowerCase().includes(searchTerm)));
+    }
+    
+    grouped.sort((a,b) => {
+        let map = { o: 'order_id', d: 'date', g: 'gross', c: 'cogs', s: 'shipping', t: 'taxes', f: 'fees', n: 'net' };
+        let col = map[window._netSortKey.column];
+        let u = a[col]; let v = b[col];
+        if(typeof u === 'number' && typeof v === 'number') return window._netSortKey.direction === 'asc' ? u - v : v - u;
+        u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase();
+        if(u<v) return window._netSortKey.direction==='asc'?-1:1;
+        if(u>v) return window._netSortKey.direction==='asc'?1:-1; return 0;
+    });
+
+    let html = "";
+    grouped.forEach(g => {
+        let netColor = g.net < 0 ? '#ef4444' : '#10b981';
+        html += `<tr style='border-bottom: 1px solid var(--border-color); background: var(--bg-main);' class='net-modal-parent' data-oid='${g.order_id}'>
+            <td style='text-align:center; color:#888; cursor:pointer;' class='expander-icon'>▶</td>
+            <td style='font-weight:bold;'>${g.order_id}</td>
+            <td style='color:#888;'>${g.date}</td>
+            <td class='text-right' style='color:#10b981;'>$${g.gross.toFixed(2)}</td>
+            <td class='text-right' style='color:#ef4444;'>$${g.cogs.toFixed(2)}</td>
+            <td class='text-right' style='color:#f59e0b;'>-$${g.shipping.toFixed(2)}</td>
+            <td class='text-right' style='color:#888;'>$${g.taxes.toFixed(2)}</td>
+            <td class='text-right' style='color:#888;'>-$${g.fees.toFixed(2)}</td>
+            <td class='text-right' style='color:${netColor}; font-weight:900;'>$${g.net.toFixed(2)}</td>
+        </tr>`;
+        
+        let childHtml = "";
+        g.lines.forEach(l => {
+            childHtml += `<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted var(--border-input); font-size:11px;'>
+                <span style='flex:2; color:#0ea5e9;'>${l.storefront_sku} (Qty: ${l.qty_sold})</span>
+                <span style='flex:1; text-align:right;'>Gross: $${((parseFloat(l.actual_sale_price||0)*parseFloat(l.qty_sold||0))+parseFloat(l.shipping||0)+parseFloat(l.taxes||0)-parseFloat(l.discount_amount||0)).toFixed(2)}</span>
+                <span style='flex:1; text-align:right;'>COGS: -$${(l.liveCogs||0).toFixed(2)}</span>
+                <span style='flex:1; text-align:right;'>Ship: -$${(l.actualShipCost||0).toFixed(2)}</span>
+                <span style='flex:1; text-align:right;'>Fee: -$${(l.stripeFee||0).toFixed(2)}</span>
+                <span style='flex:1; text-align:right; font-weight:bold; color:${l.net < 0 ? '#ef4444' : '#10b981'};'>Net: $${(l.net||0).toFixed(2)}</span>
+            </div>`;
+        });
+        
+        html += `<tr class='net-modal-child' id='net-child-${g.order_id}' style='display:none; background:var(--bg-panel);'>
+            <td></td>
+            <td colspan='8' style='padding:10px;'>${childHtml}</td>
+        </tr>`;
+    });
+    
+    if(grouped.length === 0) {
+        html = `<tr><td colspan='9' style='text-align:center; padding:20px; color:#888;'>No results found.</td></tr>`;
+    }
+    
+    container.innerHTML = html;
+    
+    container.querySelectorAll('.net-modal-parent').forEach(tr => {
+        tr.addEventListener('click', () => {
+            let oid = tr.getAttribute('data-oid');
+            let child = document.getElementById(`net-child-${oid}`);
+            let icon = tr.querySelector('.expander-icon');
+            if(child.style.display === 'none') {
+                child.style.display = 'table-row';
+                icon.innerHTML = '▼';
+            } else {
+                child.style.display = 'none';
+                icon.innerHTML = '▶';
+            }
+        });
+    });
 }
