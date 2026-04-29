@@ -243,6 +243,14 @@ The Edge Function relies on the following secrets stored in Supabase (Settings -
 
 ### C. Deduplication Logic & Financial Idempotency (`shopify-webhook`)
 To prevent compounding data corruption from Shopify retries, the edge function MUST execute a manual pre-flight deduplication loop. It queries the `sales_ledger` for existing `order_id` values, strictly segregating rows into `insertRows` and `updateRows`, applying `.update()` to existing entities mapped strictly by the primary key `id` rather than blindly inserting duplicates. Furthermore, the upsert logic strictly enforces **Financial Idempotency**: it explicitly blocks Shopify payloads from overwriting existing `actual_shipping_cost` or manual COGS overrides with `null` or `0`, preserving local data integrity.
+
+### D. Historical API Backfill Architecture (`backfill-shopify-operational-data.js`)
+* **Execution:** A standalone Node.js script used to retroactively sync historical Shopify order data (tracking numbers, carriers, and actual payouts) bypassing the 60-day read limit.
+* **Authentication Matrix:** Due to Shopify deprecating static Admin API passwords, this script relies on a **Custom App Client Credentials OAuth Flow**. It natively exchanges `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` (stored securely in `.env.local`) for an ephemeral access token before executing GraphQL queries.
+* **Permission Scopes:** The Custom App must explicitly be granted `read_orders`, `read_fulfillments`, and critically, `read_all_orders` (to access history beyond 60 days).
+* **Payout Logic:** The `actual_payout` extraction specifically searches for `SALE` or `CAPTURE` transaction events within the order's history. It is a calculated field: `(Captured Amount) - (Shopify Payment Fees)`.
+* **The Label Cost Limitation:** Due to structural API limitations, Shopify's public API does NOT expose specific shipping label costs purchased through Shopify Shipping. This is intentionally omitted from the backfill script; label costs must be calculated via internal COGS estimation or manual CSV billing imports.
+
 ---
 
 ## Security Patterns
