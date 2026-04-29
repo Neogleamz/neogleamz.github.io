@@ -170,7 +170,7 @@ serve(async (req: Request) => {
           // Net Profit deducts Refunds naturally if they occurred.
           const net = subtotal + rowShip + rowTax - lineDiscount - rowFee - rowActualShippingCost - rowRefundedAmount;
 
-          ledgerRows.push({
+            ledgerRows.push({
             order_id: orderIdStr,
             sale_date: dateStr,
             storefront_sku: skuName,
@@ -214,7 +214,8 @@ serve(async (req: Request) => {
             actual_shipping_cost: rowActualShippingCost,
             actual_payout: rowPayout,
             linked_order_id: String(order.id),
-            transaction_type: tType
+            transaction_type: tType,
+            isFirstRow: index === 0
           });
 
           invUpdates.push({

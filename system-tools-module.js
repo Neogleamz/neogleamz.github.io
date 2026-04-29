@@ -2100,7 +2100,7 @@ window.change_handleShopifyBillingUpload = async function(e) {
                 .from('sales_ledger')
                 .select('id, order_id, actual_shipping_cost')
                 .in('order_id', orderTagsList)
-                .eq('isFirstRow', true);
+                .order('id', { ascending: true });
                 
             if(ledgerError) throw new Error("Failed to fetch target orders from the database: " + ledgerError.message);
             
@@ -2154,14 +2154,24 @@ window.change_handleShopifyBillingUpload = async function(e) {
                 resObj: { table: 'sales_ledger', count: updatesToApply.length, data: updatesToApply },
                 customCommitFn: async function() {
                     billingTrace(`▶ Execution Phase: Updating database securely...`, false);
+                    let successCount = 0;
+                    let totalCost = 0;
                     for (let updateObj of updatesToApply) {
                         const { error } = await supabaseClient
                             .from('sales_ledger')
                             .update({ actual_shipping_cost: updateObj.actual_shipping_cost })
                             .eq('id', updateObj.id);
                             
-                        if (error) throw new Error(`Failed updating Order ${updateObj.order_id}: ${error.message}`);
+                        if (error) {
+                            billingTrace(`❌ Failed updating Order ${updateObj.order_id}: ${error.message}`, true);
+                            throw new Error(`Failed updating Order ${updateObj.order_id}: ${error.message}`);
+                        } else {
+                            successCount++;
+                            totalCost += updateObj.actual_shipping_cost;
+                        }
                     }
+                    billingTrace(`✅ Successfully updated ${successCount} orders with actual shipping costs.`);
+                    billingTrace(`💰 Total shipping cost mapped to Ledger: $${totalCost.toFixed(2)}`);
                     billingTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
                     setTimeout(() => showToast(`✅ Success! ${updatesToApply.length} shipping costs structurally updated.`), 10);
                     if (typeof loadSalesLedger === 'function') loadSalesLedger(); // refresh sales board dynamically
