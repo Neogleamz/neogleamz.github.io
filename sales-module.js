@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * @typedef {Object} SalesLedgerRow
  * @property {string|number} order_id
