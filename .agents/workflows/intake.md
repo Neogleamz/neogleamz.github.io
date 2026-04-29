@@ -1,22 +1,23 @@
 ---
 name: zero_bypass_intake
-description: "Triggers when the user requests an actionable modification to logic, UI, or architecture to formally triage the task."
-trigger: "/zero_bypass, /intake, log this task, formal intake"
+description: "Triggers when the user requests to urgently pivot and execute a hotfix or major feature mid-session, interrupting their current workflow."
+trigger: "/zero_bypass_intake, pivot to this, fix this bug right now, emergency hotfix"
 ---
 
-# The Zero-Bypass Protocol (Strict Intake Enforcement)
+# The Zero-Bypass Protocol (Emergency Pivot & Defibrillator)
 
-When the user requests an actionable code or architecture change, you must route it through the formal intake system before executing any code modifications:
+When the user requests to actively pivot their session and drop everything to fix a new bug or build an urgent feature, execute this sequence:
 
-1. **The Intercept**: Acknowledge the request by stating: *"Intercepting request. Routing through formal intake..."*
-2. **Triaging & Injection**: 
-   - Analyze the request. If it relates to an active Epic, assign it there. Otherwise, assign it to `### Target: main`.
-   - Generate a short slug for the task.
-   - Inject the task as a `- [ ]` markdown item into @/tools/SK8Lytz_Bucket_List.md.
-   - **CRITICAL TELEMETRY RULE**: You MUST append the token tracking tag to the end of the new task line (e.g., `[🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]`).
-3. **The Priority Override**:
-   - If the user's prompt includes `"up next"`, `"bump"`, or `"priority"`, physically place the task at the absolute top of the `## 🔴 High Priority / Next Up` section in the bucket list.
-4. **Quarantine & Plan**:
-   - Save the changes to the bucket list.
-   - **Passive Logging**: If the user just wants to "add an idea to the list" while busy, confirm the addition and STOP. Let them continue working perfectly uninterrupted on their current branch.
-   - **Zero-Bypass Execution**: If the user uses `/zero_bypass` or explicitly asks to begin work on the new task, immediately execute `git checkout -b <slug>` in the terminal, present an Implementation Plan, and await their approval. **Crucial:** When linking the `implementation_plan.md` in chat, NEVER surround the Markdown link with backticks (e.g. ``[plan.md](file:///...)``). ALWAYS use pure Markdown hyperlink syntax so it remains natively clickable.
+1. **The Intercept**: Acknowledge the request by stating: *"Emergency pivot initiated. Stashing active context and routing through zero-bypass..."*
+2. **Context Preservation (WIP Stash)**:
+   - Run `git status` to check for active modifications.
+   - If modifications exist, instantly execute `git add .` and `git commit -m "chore: WIP stash before emergency pivot"` to securely freeze their active epic context locally.
+3. **Triaging & Injection**: 
+   - Analyze the request. Generate a short slug for the task (e.g. `fix/auth-crash`).
+   - Inject the task as a `- [ ]` markdown item into the top of the `## 🔴 P0 Critical (Blockers & Hotfixes)` section in @/tools/SK8Lytz_Bucket_List.md.
+   - Append the token tracking tag (e.g., `[🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]`).
+4. **Environment Reset & Execution**:
+   - Execute `git checkout main`
+   - Execute `git pull origin main` (if remote exists)
+   - Execute `git checkout -b <slug>` to create the new hotfix workspace.
+   - Present a highly-detailed Implementation Plan for the bug fix/feature, and await their approval to begin coding.
