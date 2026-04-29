@@ -236,6 +236,9 @@ To ensure data flows correctly into the `sales_ledger`, the following Webhooks M
 2. **Event:** `Fulfillment creation` (Pushes the actual Tracking Number and Carrier Name the moment a label is generated)
 3. **Event:** `Order update` (Critical for mapping refunds, cancellations, and tag changes backwards into the ledger)
 
+**Shopify Tag Parsing Logic:**
+To bypass the limitation of Shopify's API not exposing exact label costs, the Edge Function algorithmically scans `order.tags` for specific syntaxes. If it finds `Label: <cost>` or `Type: <transaction_type>`, it actively overrides the True Net Profit shipping cost deductions and transaction types before inserting them into the database.
+
 ### B. Required Environment Variables
 The Edge Function relies on the following secrets stored in Supabase (Settings -> Edge Functions -> Secrets):
 * `SHOPIFY_WEBHOOK_SECRET`: The HMAC verification key provided by Shopify to prevent unauthorized POST requests.
