@@ -1092,44 +1092,67 @@ function renderSimulatorOrder(orderId) {
         let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Cancelled', 'NEEDS ATTENTION'];
         let typeHtml = typeOpts.map(t => `<option value="${t}" ${row.transaction_type === t ? 'selected' : ''}>${t}</option>`).join('');
         
-        let cogs = window.getEngineTrueCogs(row.internal_recipe_name) || 0;
+        let src = row['Source'] || 'web';
         
         html += `
-        <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:0.5rem;">
                 <div style="color:#fff; font-weight:bold; font-size:14px;">${row.internal_recipe_name} <span style="color:#888; font-size:12px; font-weight:normal;">(QTY: ${row.qty_sold})</span></div>
-                <select class="sim-type-sel" data-idx="${i}" style="background:#000; color:#10b981; border:1px solid #333; padding:4px; border-radius:4px; font-size:12px; outline:none; cursor:pointer;">
-                    ${typeHtml}
-                </select>
+                <div style="display:flex; gap:1rem; align-items:center;">
+                    <span style="color:#888; font-size:11px;">SOURCE: <span style="color:#0ea5e9;">${src}</span></span>
+                    <select class="sim-type-sel" data-idx="${i}" style="background:#000; color:#10b981; border:1px solid #333; padding:4px; border-radius:4px; font-size:12px; outline:none; cursor:pointer;">
+                        ${typeHtml}
+                    </select>
+                </div>
             </div>
-            <div style="display:flex; gap: 1rem; font-size:12px; color:#aaa; margin-top:0.5rem;">
+            
+            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; font-size:12px; color:#aaa; margin-top:0.25rem; padding-bottom:0.5rem; border-bottom:1px dashed #333;">
                 <div style="display:flex; flex-direction:column;">
                     <span>Actual Price</span>
-                    <span style="color:#fff;">$${(row.actual_sale_price * row.qty_sold).toFixed(2)}</span>
+                    <span id="sim-gross-${i}" style="color:#fff;">$0.00</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
                     <span>Ship Col.</span>
-                    <span style="color:#fff;">$${parseFloat(row.shipping||0).toFixed(2)}</span>
+                    <span id="sim-shipcol-${i}" style="color:#fff;">$0.00</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
                     <span>Tax Col.</span>
-                    <span style="color:#fff;">$${parseFloat(row.taxes||0).toFixed(2)}</span>
+                    <span id="sim-taxcol-${i}" style="color:#fff;">$0.00</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
                     <span>Discount</span>
-                    <span style="color:#fff;">-$${parseFloat(row.discount_amount||0).toFixed(2)}</span>
+                    <span id="sim-disc-${i}" style="color:#fff;">-$0.00</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
+                    <span style="color:#f59e0b;" title="Outstanding Balance applied to this line">Out. Bal.</span>
+                    <span id="sim-outbal-${i}" style="color:#f59e0b;">-$0.00</span>
+                </div>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; font-size:12px; color:#aaa; margin-top:0.25rem;">
+                <div style="display:flex; flex-direction:column;">
                     <span>Total Capture</span>
-                    <span style="color:#10b981;">$${((row.actual_sale_price * row.qty_sold) + parseFloat(row.shipping||0) + parseFloat(row.taxes||0) - parseFloat(row.discount_amount||0)).toFixed(2)}</span>
+                    <span id="sim-capture-${i}" style="color:#10b981; font-weight:bold;">$0.00</span>
+                </div>
+                <div style="display:flex; flex-direction:column;">
+                    <span>Stripe Fee</span>
+                    <span id="sim-fee-${i}" style="color:#ef4444;">-$0.00</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
                     <span>Ship Exp.</span>
-                    <span style="color:#ef4444;">-$${parseFloat(row.actual_ship_cost||8.0).toFixed(2)}</span>
+                    <span id="sim-shipexp-${i}" style="color:#ef4444;">-$0.00</span>
                 </div>
                 <div style="display:flex; flex-direction:column;">
                     <span>True COGS</span>
-                    <span style="color:#ef4444;">-$${cogs.toFixed(2)}</span>
+                    <span id="sim-cogs-${i}" style="color:#ef4444;">-$0.00</span>
+                </div>
+                <div style="display:flex; flex-direction:column;">
+                    <span style="color:#8b5cf6;" title="Ghost Revenue Transferred">Ghost Rev.</span>
+                    <span id="sim-ghost-${i}" style="color:#8b5cf6;">$0.00</span>
+                </div>
+                <div style="display:flex; flex-direction:column;">
+                    <span style="color:#fff;">Actual Net</span>
+                    <span id="sim-net-${i}" style="color:#10b981; font-weight:bold; font-size:14px;">$0.00</span>
                 </div>
             </div>
         </div>
@@ -1160,21 +1183,21 @@ function recomputeSimulator() {
     let rows = window.currentSimPayload;
     if(!rows || rows.length === 0) return;
     
-    let salesPayload = rows.map(r => {
+    let salesPayload = rows.map((r, idx) => {
         let type = r.transaction_type || 'Standard';
         let cogs = window.getEngineTrueCogs(r.internal_recipe_name) || 0;
         let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
         
         if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION') { cogs = 0; }
         
-        let actShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : (r.actual_ship_cost || 8.00);
+        let actShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : parseFloat(r.actual_ship_cost || 8.00);
         
-        let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
+        let gross = isCostOnlyItem ? 0 : parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 0);
         let shipRev = isCostOnlyItem ? 0 : parseFloat(r.shipping || 0);
         let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
         let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
         
-        let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actShipCost, r.internal_recipe_name, r.qty_sold, 'web');
+        let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actShipCost, r.internal_recipe_name, r.qty_sold, r['Source'] || 'web');
         
         let net = rawNet;
         if (type === 'IGNORE') net = 0;
@@ -1183,9 +1206,12 @@ function recomputeSimulator() {
         if (type === 'Cancelled') net = 0;
         
         let trueLineCaptured = isCostOnlyItem ? 0 : gross + shipRev + taxRev - disc;
-        let fee = isCostOnlyItem ? 0 : window.getEngineStripeFee(trueLineCaptured, 'web');
+        let outBal = parseFloat(r['Outstanding Balance']) || 0;
+        let feeTarget = trueLineCaptured - outBal;
+        let src = r['Source'] || 'web';
+        let fee = isCostOnlyItem ? 0 : window.getEngineStripeFee(feeTarget, src);
 
-        return { ...r, cogs, fee, net, gross, shipRev, taxRev, disc, actShipCost };
+        return { ...r, uiIdx: idx, cogs, fee, net, gross, shipRev, taxRev, disc, actShipCost, trueLineCaptured, outBal, src, ghostRev: 0 };
     });
     
     let primes = salesPayload.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
@@ -1195,7 +1221,7 @@ function recomputeSimulator() {
         let u = primes[0]; let rp = replacements[0];
         if (u.transaction_type === 'Post-Ship Exchange') {
             rp.net += rp.cogs; 
-            log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Post-Ship Exchange detected. Restocking returned physical unit (+$${rp.cogs.toFixed(2)} COGS back to Net).</span>`);
+            log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Post-Ship Exchange detected. Restocking physical unit (+$${rp.cogs.toFixed(2)} COGS back to Net).</span>`);
         } else if (u.transaction_type === 'Pre-Ship Exchange') {
             log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Pre-Ship Exchange detected. Original never shipped. Absorbing captured revenue.</span>`);
         }
@@ -1203,13 +1229,59 @@ function recomputeSimulator() {
         rp.net = Math.round(rp.net * 100) / 100;
         let tempNet = u.net;
         u.net = 0;
+        
+        u.ghostRev = -tempNet;
+        rp.ghostRev = tempNet;
+        
         log(`<span style="color:#10b981;">[MATH TRANSFER] Transferred $${tempNet.toFixed(2)} ghost-revenue to physical replacement line.</span>`);
     }
     
     salesPayload.forEach(row => {
-        let totalCapture = (row.gross + row.shipRev + row.taxRev - row.disc);
+        let i = row.uiIdx;
+        
+        // Update DOM live
+        let elGross = document.getElementById(`sim-gross-${i}`);
+        let elShipCol = document.getElementById(`sim-shipcol-${i}`);
+        let elTaxCol = document.getElementById(`sim-taxcol-${i}`);
+        let elDisc = document.getElementById(`sim-disc-${i}`);
+        let elOutBal = document.getElementById(`sim-outbal-${i}`);
+        
+        let elCapture = document.getElementById(`sim-capture-${i}`);
+        let elFee = document.getElementById(`sim-fee-${i}`);
+        let elShipExp = document.getElementById(`sim-shipexp-${i}`);
+        let elCogs = document.getElementById(`sim-cogs-${i}`);
+        let elGhost = document.getElementById(`sim-ghost-${i}`);
+        let elNet = document.getElementById(`sim-net-${i}`);
+        
+        if(elGross) elGross.innerText = `$${row.gross.toFixed(2)}`;
+        if(elShipCol) elShipCol.innerText = `$${row.shipRev.toFixed(2)}`;
+        if(elTaxCol) elTaxCol.innerText = `$${row.taxRev.toFixed(2)}`;
+        if(elDisc) elDisc.innerText = `-$${row.disc.toFixed(2)}`;
+        if(elOutBal) elOutBal.innerText = `-$${row.outBal.toFixed(2)}`;
+        
+        if(elCapture) elCapture.innerText = `$${row.trueLineCaptured.toFixed(2)}`;
+        if(elFee) elFee.innerText = `-$${row.fee.toFixed(2)}`;
+        if(elShipExp) elShipExp.innerText = `-$${row.actShipCost.toFixed(2)}`;
+        if(elCogs) elCogs.innerText = `-$${row.cogs.toFixed(2)}`;
+        
+        if(elGhost) {
+            elGhost.innerText = row.ghostRev >= 0 ? `+$${row.ghostRev.toFixed(2)}` : `-$${Math.abs(row.ghostRev).toFixed(2)}`;
+            elGhost.style.color = row.ghostRev !== 0 ? '#8b5cf6' : '#555';
+        }
+        
+        if(elNet) {
+            elNet.innerText = `$${row.net.toFixed(2)}`;
+            elNet.style.color = row.net < 0 ? '#ef4444' : '#10b981';
+        }
+        
+        // Build Console Output
         log(`&nbsp;&nbsp;> Row: <span style="color:#fff;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>)`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Equation: [($${row.gross.toFixed(2)} Actual Price + $${row.shipRev.toFixed(2)} Ship Col. + $${row.taxRev.toFixed(2)} Tax Col. - $${row.disc.toFixed(2)} Discount) = <span style="color:#10b981;">$${totalCapture.toFixed(2)} Total Capture</span>] - $${Math.abs(row.fee).toFixed(2)} Stripe Fee - $${row.actShipCost.toFixed(2)} Ship Exp. - $${row.cogs.toFixed(2)} True COGS</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Equation: [($${row.gross.toFixed(2)} Price + $${row.shipRev.toFixed(2)} Ship Col. + $${row.taxRev.toFixed(2)} Tax Col. - $${row.disc.toFixed(2)} Disc) = <span style="color:#10b981;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Stripe Target: ($${row.trueLineCaptured.toFixed(2)} Capture - $${row.outBal.toFixed(2)} Out. Bal.) = $${(row.trueLineCaptured - row.outBal).toFixed(2)} via <span style="color:#0ea5e9">${row.src}</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Deductions: -$${row.fee.toFixed(2)} Stripe Fee - $${row.actShipCost.toFixed(2)} Ship Exp. - $${row.cogs.toFixed(2)} True COGS</span>`);
+        if(row.ghostRev !== 0) {
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b5cf6;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
+        }
         let nc = row.net < 0 ? '#ef4444' : '#10b981';
         log(`&nbsp;&nbsp;&nbsp;&nbsp;FINAL NET PROFIT: <span style="color:${nc}; font-weight:bold;">$${row.net.toFixed(2)}</span>`);
         log(`<br/>`);
