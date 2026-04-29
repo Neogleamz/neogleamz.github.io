@@ -36,7 +36,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: main
 *(Epic: Orderz Financial Visibility)*
-- [ ] `feat/actual-net-modal` : Build an "Actual Net" button in Orderz that launches a new modal displaying the full mathematical breakdown per order (COGS, Shipping, Taxes, Fees, Net). The modal must support expanding/collapsing line items, sorting, and live searching. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
+
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
@@ -248,3 +248,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: UI Enhancements)*
 - [🚀] `feat/salez-card-30d-metrics` : Change the SALEZ hub card to remove 'Unmapped Etsy' and 'Unmapped Shopify', replacing them with 'Orders (30D)' and 'Actual Net (30D)'. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+
+### Target: `main`
+*(Epic: Orderz Financial Visibility)*
+- [🚀] `feat/actual-net-modal` : Build an "Actual Net" button in Orderz that launches a new modal displaying the full mathematical breakdown per order (COGS, Shipping, Taxes, Fees, Net). The modal must support expanding/collapsing line items, sorting, and live searching. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
