@@ -387,7 +387,7 @@ async function executeSalesSync(isTestMode = false) {
             if (type === 'Cancelled') { cogs = 0; }
             if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') { cogs = 0; }
 
-            let trueLineCaptured = isCostOnlyItem ? 0 : parseFloat(r.total || 0);
+            let trueLineCaptured = isCostOnlyItem ? 0 : (r.actual_sale_price * r.qty_sold) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0) - parseFloat(r.discount_amount || 0);
             let outBal = parseFloat(r['Outstanding Balance']) || 0;
             let stripeCaptureTarget = trueLineCaptured - outBal;
 
@@ -396,7 +396,7 @@ async function executeSalesSync(isTestMode = false) {
             let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : parseFloat(r.actual_shipping_cost || 0);
 
             // Calculate true net strictly honoring the rules.
-            let gross = isCostOnlyItem ? 0 : parseFloat(r.subtotal || 0);
+            let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
             let shipRev = isCostOnlyItem ? 0 : parseFloat(r.shipping || 0);
             let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
             let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
@@ -425,7 +425,7 @@ async function executeSalesSync(isTestMode = false) {
             let fS = Math.round(fee * 100) / 100;
             let nS = Math.round(net * 100) / 100;
 
-            return { ...r, cogs_at_sale: cS, transaction_fees: fS, net_profit: nS, transaction_type: type };
+            return { ...r, cogs_at_sale: cS, transaction_fees: fS, net_profit: nS, transaction_type: type, trueLineCapture: trueLineCaptured };
         });
 
         // REVENUE TRANSFER BATCH
@@ -647,7 +647,7 @@ function renderSalesTable() {
                 } else if (r.isCostOnlyItem) {
                     r.net = 0 - r.actualShipCost - r.liveCogs;
                 } else {
-                    r.net = parseFloat(r.total || 0) - parseFloat(r.taxes || 0) - r.stripeFee - r.actualShipCost - r.liveCogs + (parseFloat(r.exchAdj) || 0);
+                    r.net = parseFloat(r.trueLineCapture || 0) - parseFloat(r.taxes || 0) - r.stripeFee - r.actualShipCost - r.liveCogs + (parseFloat(r.exchAdj) || 0);
                 }
             });
         }
@@ -692,7 +692,7 @@ function renderSalesTable() {
 
             if (u.transaction_type === 'Post-Ship Exchange') {
                 // Physical Reality Decoupling
-                let uRawRev = parseFloat(u.total || 0) - parseFloat(u.taxes || 0);
+                let uRawRev = parseFloat(u.trueLineCapture || 0) - parseFloat(u.taxes || 0);
 
                 // 1. Shift Customer Payment Revenue to Replacement
                 r.net += (parseFloat(uRawRev) || 0);
@@ -704,6 +704,7 @@ function renderSalesTable() {
                 // Shift Total Captured Visuals & Aggregation Flag
                 r.total = u.total;
                 r.subtotal = u.subtotal;
+                r.trueLineCapture = u.trueLineCapture;
                 r.exchAdj = u.exchAdj;
                 r.isCostOnlyItem = false;
 
@@ -1302,6 +1303,11 @@ function recomputeSimulator() {
         // Build Console Output
         log(`&nbsp;&nbsp;> Row: <span style="color:#fff; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>) ${verifiedBadge}`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">[FORENSIC RAW DB] Price: '${row.actual_sale_price}', ShipCol: '${row.shipping}', TaxCol: '${row.taxes}', Disc: '${row.discount_amount}', OutBal: '${row['Outstanding Balance']}'</span>`);
+        
+        if (parseFloat(row.total || 0) > 0 && Math.abs(parseFloat(row.total || 0) - row.trueLineCaptured) > 0.01) {
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ef4444; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
+        }
+
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Capture Eq: [($${row.rawGross.toFixed(2)} Price + $${row.rawShipRev.toFixed(2)} Ship Col. + $${row.rawTaxRev.toFixed(2)} Tax Col. - $${row.rawDisc.toFixed(2)} Disc) = <span style="color:#10b981;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Stripe Target: ($${row.trueLineCaptured.toFixed(2)} Capture - $${row.outBal.toFixed(2)} Out. Bal.) = $${(row.trueLineCaptured - row.outBal).toFixed(2)} via <span style="color:#0ea5e9">${row.src}</span></span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Deductions: -$${row.fee.toFixed(2)} Stripe Fee - $${row.actShipCost.toFixed(2)} Ship Exp. - $${row.cogs.toFixed(2)} True COGS</span>`);
@@ -1369,13 +1375,13 @@ function renderActualNetList() {
         
         orderMap[oid].price += p; // aggregate for visual but less meaningful at order level, qty is better
         orderMap[oid].qty += q;
-        orderMap[oid].subtot += subtot;
-        orderMap[oid].disc += d;
-        orderMap[oid].shipCol += s;
-        orderMap[oid].taxCol += t;
-        orderMap[oid].outBal += ob;
+        orderMap[oid].subtot = subtot;
+        orderMap[oid].disc = d;
+        orderMap[oid].shipCol = s;
+        orderMap[oid].taxCol = t;
+        orderMap[oid].outBal = ob;
         
-        orderMap[oid].totalCap += tot;
+        orderMap[oid].totalCap = tot;
         orderMap[oid].refunds += parseFloat(r.refunded_amount || r.exchAdj || 0);
         orderMap[oid].cogs += parseFloat(r.cogs_at_sale || r.liveCogs || 0);
         orderMap[oid].labelCost += parseFloat(r.actual_shipping_cost || r.actualShipCost || 0);
@@ -1429,9 +1435,11 @@ function renderActualNetList() {
         let childHtml = "";
         g.lines.forEach(l => {
             let adjStr = l.exchAdj ? `<span style='flex:1; text-align:right; color:${l.exchAdj < 0 ? '#ef4444' : '#10b981'};'>Adj: ${l.exchAdj > 0 ? '+' : ''}$${l.exchAdj.toFixed(2)}</span>` : `<span style='flex:1; text-align:right; color:#888;'>Adj: --</span>`;
+            let trueCapHtml = (l.trueLineCapture !== undefined) ? `<span style='color:#f59e0b;'>Sliced Line Cap: $${parseFloat(l.trueLineCapture).toFixed(2)}</span>` : '';
+            
             childHtml += `<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted var(--border-input); font-size:10px;'>
                 <span style='flex:2; color:#0ea5e9;'>${l.storefront_sku} (Qty: ${l.qty_sold})</span>
-                <span style='flex:1; text-align:right;'>Cap: $${parseFloat(l.total||0).toFixed(2)}</span>
+                <span style='flex:2; text-align:right;'>Raw Order Tot: $${parseFloat(l.total||0).toFixed(2)} <br/> ${trueCapHtml}</span>
                 ${adjStr}
                 <span style='flex:1; text-align:right;'>COGS: -$${(l.liveCogs||0).toFixed(2)}</span>
                 <span style='flex:1; text-align:right;'>Label: -$${(l.actualShipCost||0).toFixed(2)}</span>
