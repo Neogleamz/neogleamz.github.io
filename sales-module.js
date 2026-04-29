@@ -1067,8 +1067,7 @@ function runMathSimulator() {
         
         let salesPayload = rows.map(r => {
             let type = r.transaction_type || 'Standard';
-            let cogs = window.getEngineTrueCogs(r.internal_recipe_name);
-            if (!cogs || cogs === 0) cogs = r.internal_recipe_name.includes('White') ? 35.00 : 30.00;
+            let cogs = window.getEngineTrueCogs(r.internal_recipe_name) || 0;
             
             let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
             
@@ -1121,22 +1120,32 @@ function runMathSimulator() {
         });
     }
 
-    execSim("Order 1017: Post-Ship Exchange (Returned item to warehouse)", [
-        { qty_sold: 1, actual_sale_price: 139.99, shipping: 10.09, taxes: 0, discount_amount: 17.98, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Post-Ship Exchange', actual_ship_cost: 8.00 },
-        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
-    ]);
+    let o1017 = window.processedSalesDB ? window.processedSalesDB.filter(x => String(x.order_id) === '1017') : [];
+    if (o1017.length > 0) {
+        execSim("Order 1017: Live DB Post-Ship Exchange", o1017);
+    } else {
+        execSim("Order 1017: Post-Ship Exchange (Fallback Mock)", [
+            { qty_sold: 1, actual_sale_price: 139.99, shipping: 10.09, taxes: 0, discount_amount: 17.98, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Post-Ship Exchange', actual_ship_cost: 8.00 },
+            { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
+        ]);
+    }
     
-    execSim("Order 1019: Pre-Ship Exchange (Never Shipped Original)", [
-        { qty_sold: 1, actual_sale_price: 129.99, shipping: 7.30, taxes: 0, discount_amount: 12.99, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Pre-Ship Exchange', actual_ship_cost: 8.00 },
-        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
-    ]);
+    let o1019 = window.processedSalesDB ? window.processedSalesDB.filter(x => String(x.order_id) === '1019') : [];
+    if (o1019.length > 0) {
+        execSim("Order 1019: Live DB Pre-Ship Exchange", o1019);
+    } else {
+        execSim("Order 1019: Pre-Ship Exchange (Fallback Mock)", [
+            { qty_sold: 1, actual_sale_price: 129.99, shipping: 7.30, taxes: 0, discount_amount: 12.99, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Pre-Ship Exchange', actual_ship_cost: 8.00 },
+            { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
+        ]);
+    }
     
     execSim("Order 1050: Exchange Replacement ONLY (Original kept by customer)", [
-        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
+        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'SK8Lytz - Underglow Kit (Standard)', transaction_type: 'Exchange Replacement', actual_ship_cost: 8.00 }
     ]);
 
     execSim("Order 1060: Standard Warranty (Free Zero Revenue)", [
-        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'Black', transaction_type: 'Warranty', actual_ship_cost: 8.00 }
+        { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, internal_recipe_name: 'SK8Lytz - Underglow Kit (Standard)', transaction_type: 'Warranty', actual_ship_cost: 8.00 }
     ]);
     
     consoleDiv.innerHTML += htmlLogs;
