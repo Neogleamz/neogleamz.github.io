@@ -13,15 +13,40 @@ try {
 // We expect these in environment, or prompt user to supply them.
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const SHOPIFY_TOKEN = process.env.SUPABASE_SHOPIFY_ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
+const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
+const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN || 'neogleamz.myshopify.com';
 
-if (!SUPABASE_URL || !SUPABASE_KEY || !SHOPIFY_TOKEN) {
-    console.error("❌ Missing required environment variables! Please provide SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and SUPABASE_SHOPIFY_ADMIN_TOKEN in .env.local");
+if (!SUPABASE_URL || !SUPABASE_KEY || !SHOPIFY_CLIENT_ID || !SHOPIFY_CLIENT_SECRET) {
+    console.error("❌ Missing required environment variables! Please provide SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SHOPIFY_CLIENT_ID, and SHOPIFY_CLIENT_SECRET in .env.local");
     process.exit(1);
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let SHOPIFY_TOKEN = null;
+
+async function getShopifyAccessToken() {
+    console.log("🔐 Generating secure access token via Client Credentials...");
+    const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/oauth/access_token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            client_id: SHOPIFY_CLIENT_ID,
+            client_secret: SHOPIFY_CLIENT_SECRET,
+            grant_type: 'client_credentials'
+        })
+    });
+    
+    const data = await response.json();
+    if (data.access_token) {
+        SHOPIFY_TOKEN = data.access_token;
+        console.log("✅ Token generated successfully.");
+    } else {
+        console.error("❌ Failed to generate access token:", data);
+        process.exit(1);
+    }
+}
 
 async function fetchExtendedOrderData(orderId) {
     // The Shopify orderId might be the numeric string or the gid
@@ -83,7 +108,7 @@ async function fetchExtendedOrderData(orderId) {
                 }
             }
             if (order.transactions) {
-                const saleTx = order.transactions.find(tx => tx.kind === 'SALE' && tx.status === 'SUCCESS');
+                const saleTx = order.transactions.find(tx => (tx.kind === 'SALE' || tx.kind === 'CAPTURE') && tx.status === 'SUCCESS');
                 if (saleTx) {
                     const amount = parseFloat(saleTx.amountSet?.shopMoney?.amount || 0);
                     let totalFees = 0;
@@ -121,6 +146,8 @@ async function getShopifyOrderMap() {
                 map[o.name] = o.id; // #1007 -> 1234567890
                 map[o.id.toString()] = o.id;
             });
+        } else {
+            console.error("❌ Shopify API Error:", json);
         }
         
         // Pagination logic would go here if > 250 orders, simplified for backfill
@@ -131,6 +158,7 @@ async function getShopifyOrderMap() {
 
 async function runBackfill() {
     console.log("🚀 Starting Historical Backfill Engine...");
+    await getShopifyAccessToken();
     
     // 1. Fetch target orders from local Supabase
     const { data: orders, error } = await supabase
