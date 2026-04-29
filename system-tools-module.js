@@ -4,6 +4,8 @@
  * @property {any} setting_value
  * @property {string|null} description
  */
+/* global sysLog, prompt, loadParserConfig, setSysProgress, DOMParser, XLSX, FileReader, loadParcelConfig, executeWithButtonAction, setMasterStatus, loadData, openBackupModal, closeBackupModal, executeExport, handleFileSelect, executeRestore, loadPaperProfiles, addPaperProfile, showToast, loadSalesLedger */
+/* eslint-disable no-unused-vars */
 // --- 12. PARSERS & FILE SYNC ---
 function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){ console.error(x); } }
 
