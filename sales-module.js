@@ -560,7 +560,7 @@ function renderSalesTable() {
         let t = parseFloat(x.taxes) || 0;
         let d = parseFloat(x.discount_amount) || 0;
 
-        let liveCogs = x.cogs_at_sale != null ? parseFloat(x.cogs_at_sale) : getEngineTrueCogs(x.internal_recipe_name) * qty;
+        let liveCogs = (x.cogs_at_sale != null ? parseFloat(x.cogs_at_sale) : getEngineTrueCogs(x.internal_recipe_name)) * qty;
         let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
 
         if (isCostOnlyItem && x.cogs_at_sale == null) {
