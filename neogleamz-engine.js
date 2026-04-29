@@ -428,7 +428,6 @@ function syncLayerzStats() {
 
     let mat = 0;
     active.forEach(p => {
-        let pt = window.getPrintTime(p.part_name);
         let wt = 0;
         let cat = typeof catalogByName !== 'undefined' ? catalogByName[p.part_name] : null;
         if (cat) wt = parseFloat(cat.unit_weight_g) || 0;
@@ -736,7 +735,7 @@ window.doNeoSidebarResize = function(e) {
     sidebar.style.flex = `0 0 ${newWidth}px`;
 };
 
-window.stopNeoSidebarResize = function(e) {
+window.stopNeoSidebarResize = function() {
     if (isNeoSidebarResizing && activeResizingSidebarId) {
         const p = document.getElementById(activeResizingSidebarId);
         if (p) {
