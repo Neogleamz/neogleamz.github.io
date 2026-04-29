@@ -1113,10 +1113,18 @@ function renderSimulatorOrder(orderId) {
         let src = row['Source'] || 'web';
         
         let rawPrice = parseFloat(row.actual_sale_price || 0).toFixed(2);
+        let rawQty = parseFloat(row.qty_sold || 0).toFixed(2);
+        let rawSubtot = ((parseFloat(row.actual_sale_price || 0) * parseFloat(row.qty_sold || 0)) || 0).toFixed(2);
         let rawShip = parseFloat(row.shipping || 0).toFixed(2);
         let rawTax = parseFloat(row.taxes || 0).toFixed(2);
         let rawDisc = parseFloat(row.discount_amount || 0).toFixed(2);
         let rawOutBal = parseFloat(row['Outstanding Balance'] || 0).toFixed(2);
+        let rawTotal = ((parseFloat(row.actual_sale_price||0)*parseFloat(row.qty_sold||0))+parseFloat(row.shipping||0)+parseFloat(row.taxes||0)-parseFloat(row.discount_amount||0)).toFixed(2);
+        let rawRef = parseFloat(row.exchAdj || 0).toFixed(2);
+        let rawFee = parseFloat(row.stripeFee || 0).toFixed(2);
+        let rawShipC = parseFloat(row.actualShipCost || 0).toFixed(2);
+        let rawCogs = parseFloat(row.liveCogs || 0).toFixed(2);
+        let rawNet = parseFloat(row.net || 0).toFixed(2);
 
         html += `
         <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
@@ -1132,22 +1140,23 @@ function renderSimulatorOrder(orderId) {
             
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:0.25rem;">
                 <!-- ROW 1: GOSPEL -->
-                <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
-                    <div style="display:flex; flex-direction:column; gap:2px;">
-                        <span style="color:#f59e0b; font-weight:bold; font-size:9px; letter-spacing:0.5px;">[RAW DATABASE]</span>
-                        <div style="display:flex; justify-content:space-between;"><span>Actual Price:</span> <span style="color:#fff;">$${rawPrice}</span></div>
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
+                <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
+                    <span style="color:#f59e0b; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
+                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
+                        <div style="display:flex; justify-content:space-between;"><span>Price:</span> <span style="color:#fff;">$${rawPrice}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Subtot:</span> <span style="color:#fff;">$${rawSubtot}</span></div>
                         <div style="display:flex; justify-content:space-between;"><span>Ship Col:</span> <span style="color:#fff;">$${rawShip}</span></div>
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
                         <div style="display:flex; justify-content:space-between;"><span>Tax Col:</span> <span style="color:#fff;">$${rawTax}</span></div>
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
-                        <div style="display:flex; justify-content:space-between;"><span>Discount:</span> <span style="color:#fff;">-$${rawDisc}</span></div>
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
+                        <div style="display:flex; justify-content:space-between;"><span>Discount:</span> <span style="color:#ef4444;">-$${rawDisc}</span></div>
                         <div style="display:flex; justify-content:space-between;"><span style="color:#f59e0b;">Out. Bal:</span> <span style="color:#f59e0b;">-$${rawOutBal}</span></div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-top:4px;">
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#10b981;">Tot Cap:</span> <span style="color:#10b981; font-weight:bold;">$${rawTotal}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Refunds:</span> <span style="color:#ef4444;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>DB COGS:</span> <span style="color:#ef4444;">-$${rawCogs}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>DB Label:</span> <span style="color:#f59e0b;">-$${rawShipC}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>DB Fee:</span> <span style="color:#ef4444;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#10b981;">DB Net:</span> <span style="color:#10b981; font-weight:bold;">$${rawNet}</span></div>
                     </div>
                 </div>
                 
@@ -1340,13 +1349,19 @@ function renderActualNetList() {
             orderMap[oid] = {
                 order_id: oid,
                 date: r.sale_date,
-                gross: 0,
+                price: 0,
+                qty: 0,
+                subtot: 0,
+                disc: 0,
+                shipCol: 0,
+                taxCol: 0,
+                outBal: 0,
+                totalCap: 0,
+                refunds: 0,
                 cogs: 0,
-                shipping: 0,
-                taxes: 0,
+                labelCost: 0,
                 fees: 0,
                 net: 0,
-                adj: 0,
                 lines: []
             };
         }
@@ -1357,13 +1372,22 @@ function renderActualNetList() {
         let s = parseFloat(r.shipping || 0);
         let t = parseFloat(r.taxes || 0);
         let d = parseFloat(r.discount_amount || 0);
+        let ob = parseFloat(r['Outstanding Balance'] || 0);
         
         let isCostOnly = r.isCostOnlyItem;
-        orderMap[oid].gross += isCostOnly ? 0 : (p * q) + s + t - d;
-        orderMap[oid].adj += (r.exchAdj || 0);
+        
+        orderMap[oid].price += p; // aggregate for visual but less meaningful at order level, qty is better
+        orderMap[oid].qty += q;
+        orderMap[oid].subtot += (p * q);
+        orderMap[oid].disc += d;
+        orderMap[oid].shipCol += s;
+        orderMap[oid].taxCol += t;
+        orderMap[oid].outBal += ob;
+        
+        orderMap[oid].totalCap += isCostOnly ? 0 : (p * q) + s + t - d;
+        orderMap[oid].refunds += (r.exchAdj || 0); // treating exchAdj as refunds/adj
         orderMap[oid].cogs += (r.liveCogs || 0);
-        orderMap[oid].shipping += (r.actualShipCost || 0);
-        orderMap[oid].taxes += isCostOnly ? 0 : t;
+        orderMap[oid].labelCost += (r.actualShipCost || 0);
         orderMap[oid].fees += (r.stripeFee || 0);
         orderMap[oid].net += (r.net || 0);
     });
@@ -1375,8 +1399,12 @@ function renderActualNetList() {
     }
     
     grouped.sort((a,b) => {
-        let map = { o: 'order_id', d: 'date', g: 'gross', a: 'adj', c: 'cogs', s: 'shipping', t: 'taxes', f: 'fees', n: 'net' };
-        let col = map[window._netSortKey.column];
+        const sortMap = { 
+            o: 'order_id', d: 'date', p: 'price', q: 'qty', sub: 'subtot', di: 'disc',
+            sc: 'shipCol', t: 'taxCol', ob: 'outBal', g: 'totalCap', a: 'refunds', 
+            c: 'cogs', s: 'labelCost', f: 'fees', n: 'net' 
+        };
+        let col = sortMap[window._netSortKey.column];
         let u = a[col]; let v = b[col];
         if(typeof u === 'number' && typeof v === 'number') return window._netSortKey.direction === 'asc' ? u - v : v - u;
         u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase();
@@ -1387,16 +1415,22 @@ function renderActualNetList() {
     let html = "";
     grouped.forEach(g => {
         let netColor = g.net < 0 ? '#ef4444' : '#10b981';
-        let adjColor = g.adj === 0 ? '#888' : (g.adj < 0 ? '#ef4444' : '#10b981');
-        html += `<tr style='border-bottom: 1px solid var(--border-color); background: var(--bg-main);' class='net-modal-parent' data-oid='${g.order_id}'>
+        let refColor = g.refunds === 0 ? '#888' : (g.refunds < 0 ? '#ef4444' : '#10b981');
+        html += `<tr style='border-bottom: 1px solid var(--border-color); background: var(--bg-main); font-size:11px;' class='net-modal-parent' data-oid='${g.order_id}'>
             <td style='text-align:center; color:#888; cursor:pointer;' class='expander-icon'>▶</td>
             <td style='font-weight:bold;'>${g.order_id}</td>
             <td style='color:#888;'>${g.date}</td>
-            <td class='text-right' style='color:#10b981;'>$${g.gross.toFixed(2)}</td>
-            <td class='text-right' style='color:${adjColor};'>${g.adj === 0 ? '--' : (g.adj > 0 ? '+' : '') + '$' + g.adj.toFixed(2)}</td>
+            <td class='text-right'>$${g.price.toFixed(2)}</td>
+            <td class='text-right'>${g.qty}</td>
+            <td class='text-right'>$${g.subtot.toFixed(2)}</td>
+            <td class='text-right' style='color:#ef4444;'>-$${g.disc.toFixed(2)}</td>
+            <td class='text-right' style='color:#0ea5e9;'>$${g.shipCol.toFixed(2)}</td>
+            <td class='text-right' style='color:#888;'>$${g.taxCol.toFixed(2)}</td>
+            <td class='text-right' style='color:#f59e0b;'>$${g.outBal.toFixed(2)}</td>
+            <td class='text-right' style='color:#10b981; font-weight:bold;'>$${g.totalCap.toFixed(2)}</td>
+            <td class='text-right' style='color:${refColor};'>${g.refunds === 0 ? '--' : (g.refunds > 0 ? '+' : '') + '$' + g.refunds.toFixed(2)}</td>
             <td class='text-right' style='color:#ef4444;'>-$${g.cogs.toFixed(2)}</td>
-            <td class='text-right' style='color:#f59e0b;'>-$${g.shipping.toFixed(2)}</td>
-            <td class='text-right' style='color:#888;'>$${g.taxes.toFixed(2)}</td>
+            <td class='text-right' style='color:#f59e0b;'>-$${g.labelCost.toFixed(2)}</td>
             <td class='text-right' style='color:#ef4444;'>-$${g.fees.toFixed(2)}</td>
             <td class='text-right' style='color:${netColor}; font-weight:bold;'>$${g.net.toFixed(2)}</td>
         </tr>`;
@@ -1404,9 +1438,9 @@ function renderActualNetList() {
         let childHtml = "";
         g.lines.forEach(l => {
             let adjStr = l.exchAdj ? `<span style='flex:1; text-align:right; color:${l.exchAdj < 0 ? '#ef4444' : '#10b981'};'>Adj: ${l.exchAdj > 0 ? '+' : ''}$${l.exchAdj.toFixed(2)}</span>` : `<span style='flex:1; text-align:right; color:#888;'>Adj: --</span>`;
-            childHtml += `<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted var(--border-input); font-size:11px;'>
+            childHtml += `<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted var(--border-input); font-size:10px;'>
                 <span style='flex:2; color:#0ea5e9;'>${l.storefront_sku} (Qty: ${l.qty_sold})</span>
-                <span style='flex:1; text-align:right;'>Capture: $${((parseFloat(l.actual_sale_price||0)*parseFloat(l.qty_sold||0))+parseFloat(l.shipping||0)+parseFloat(l.taxes||0)-parseFloat(l.discount_amount||0)).toFixed(2)}</span>
+                <span style='flex:1; text-align:right;'>Cap: $${((parseFloat(l.actual_sale_price||0)*parseFloat(l.qty_sold||0))+parseFloat(l.shipping||0)+parseFloat(l.taxes||0)-parseFloat(l.discount_amount||0)).toFixed(2)}</span>
                 ${adjStr}
                 <span style='flex:1; text-align:right;'>COGS: -$${(l.liveCogs||0).toFixed(2)}</span>
                 <span style='flex:1; text-align:right;'>Label: -$${(l.actualShipCost||0).toFixed(2)}</span>
@@ -1417,12 +1451,12 @@ function renderActualNetList() {
         
         html += `<tr class='net-modal-child' id='net-child-${g.order_id}' style='display:none; background:var(--bg-panel);'>
             <td></td>
-            <td colspan='9' style='padding:10px;'>${childHtml}</td>
+            <td colspan='15' style='padding:10px;'>${childHtml}</td>
         </tr>`;
     });
     
     if(grouped.length === 0) {
-        html = `<tr><td colspan='9' style='text-align:center; padding:20px; color:#888;'>No results found.</td></tr>`;
+        html = `<tr><td colspan='16' style='text-align:center; padding:20px; color:#888;'>No results found.</td></tr>`;
     }
     
     container.innerHTML = html;
