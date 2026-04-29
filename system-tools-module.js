@@ -1917,7 +1917,9 @@ function renderPaperProfileDropdowns() {
         if (!sel) return;
         let pValStr = sel.value; 
         let pName = "";
-        try { pName = JSON.parse(pValStr).n; } catch(e) { console.error(e); }
+        if (pValStr) {
+            try { pName = JSON.parse(pValStr).n; } catch(e) { console.warn("Paper profile JSON parse skipped:", e.message); }
+        }
         
         let h = '';
         window.activePaperProfiles.forEach(p => {
