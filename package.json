@@ -1,6 +1,6 @@
 {
   "name": "neogleamz.github.io",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "",
   "main": "analytics-module.js",
   "scripts": {
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/Neogleamz/neogleamz.github.io#readme",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "eslint": "^10.2.1",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",

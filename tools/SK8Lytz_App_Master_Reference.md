@@ -236,6 +236,9 @@ To ensure data flows correctly into the `sales_ledger`, the following Webhooks M
 2. **Event:** `Fulfillment creation` (Pushes the actual Tracking Number and Carrier Name the moment a label is generated)
 3. **Event:** `Order update` (Critical for mapping refunds, cancellations, and tag changes backwards into the ledger)
 
+**Shopify Tag Parsing Logic:**
+To bypass the limitation of Shopify's API not exposing exact label costs, the Edge Function algorithmically scans `order.tags` for specific syntaxes. If it finds `Label: <cost>` or `Type: <transaction_type>`, it actively overrides the True Net Profit shipping cost deductions and transaction types before inserting them into the database.
+
 ### B. Required Environment Variables
 The Edge Function relies on the following secrets stored in Supabase (Settings -> Edge Functions -> Secrets):
 * `SHOPIFY_WEBHOOK_SECRET`: The HMAC verification key provided by Shopify to prevent unauthorized POST requests.
@@ -249,7 +252,7 @@ To prevent compounding data corruption from Shopify retries, the edge function M
 * **Authentication Matrix:** Due to Shopify deprecating static Admin API passwords, this script relies on a **Custom App Client Credentials OAuth Flow**. It natively exchanges `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` (stored securely in `.env.local`) for an ephemeral access token before executing GraphQL queries.
 * **Permission Scopes:** The Custom App must explicitly be granted `read_orders`, `read_fulfillments`, and critically, `read_all_orders` (to access history beyond 60 days).
 * **Payout Logic:** The `actual_payout` extraction specifically searches for `SALE` or `CAPTURE` transaction events within the order's history. It is a calculated field: `(Captured Amount) - (Shopify Payment Fees)`.
-* **The Label Cost Limitation:** Due to structural API limitations, Shopify's public API does NOT expose specific shipping label costs purchased through Shopify Shipping. This is intentionally omitted from the backfill script; label costs must be calculated via internal COGS estimation or manual CSV billing imports.
+* **The Label Cost Limitation:** Due to structural API limitations, Shopify's public API does NOT expose specific shipping label costs purchased through Shopify Shipping. This is intentionally omitted from the backfill script; label costs must be calculated via internal COGS estimation or manually backfilled via the Shopify Billing CSV Importer in the CEO Dashboard, which maps raw charges to the `sales_ledger`.
 
 ---
 
@@ -278,6 +281,9 @@ To prevent compounding data corruption from Shopify retries, the edge function M
   1. `math-engine.test.js`: Validates True COGS, 3D Print Times, Stripe/eBay Fees, and Predictive LTV/CAC Metrics.
   2. `inventory-engine.test.js`: Validates Reorder Point (ROP) math, Trailing Velocity trailing averages, and Safety Stock calculations.
   3. `sales-engine.test.js`: Validates the complex revenue-shifting logic required to properly calculate the absolute True Net Profit when standard orders are chained to Pre-Ship Exchanges, Post-Ship Refunds, or Warranty claims.
+
+### Static Code Analysis
+* **ESLint Flat Config:** The project utilizes a modern ESLint v10 Flat Configuration (`eslint.config.mjs`) to strictly enforce Vanilla JS best practices and syntax sanitization. The `npm run lint` script performs algorithmic sanitization of the codebase pre-execution.
 
 ---
 

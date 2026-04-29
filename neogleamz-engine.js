@@ -536,7 +536,7 @@ function syncImportzStats() {
     let syncCount = localStorage.getItem('statImpzSyncs') || 0;
     setStat('statImpzSyncs', fmtNum(parseInt(syncCount)));
     if (typeof finalResults !== 'undefined') {
-        let capex = 0, customs = 0, freight = 0, weight = 0, pkgs = new Set();
+        let capex = 0, customs = 0, weight = 0, pkgs = new Set();
         let absoluteRawSpend = 0, pureGoodsCost = 0;
         
         finalResults.forEach(r => {

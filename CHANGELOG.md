@@ -1,5 +1,8 @@
 # SK8Lytz Application Changelog
 
+## [1.0.21] - 2026-04-28
+### Features & Refactors
+- **Shopify Historical Backfill Engine**: Built a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 ## [1.0.20] - 2026-04-28
 ### Features & Refactors
 - **Shopify Historical Backfill Engine**: Architected a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) via Client Credentials OAuth flow without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]

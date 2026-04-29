@@ -301,11 +301,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_document_getElementById_salesC_5':
                     document.getElementById('salesCsvFileTest').click();
                     break;
-                case 'click_backfillFinancials':
-                    backfillFinancials();
+                case 'click_document_getElementById_ceoBillingCsvUpload':
+                    document.getElementById('ceoBillingCsvUpload').click();
+                    break;
+                case 'click_document_getElementById_ceoBillingCsvUploadTest':
+                    document.getElementById('ceoBillingCsvUploadTest').click();
+                    break;
+                case 'click_backfillFinancials_sales':
+                    backfillFinancials('sales');
+                    break;
+                case 'click_backfillFinancials_billing':
+                    backfillFinancials('billing');
                     break;
                 case 'click_alert_BACKFILL_FINANCIALS_n_nT':
-                    alert('BACKFILL FINANCIALS:\\n\\nThis mathematical tool sequentially loops through all historical orders and dynamically recalculates your exact Net Profit and Transaction Fees based on your currently active Engine specifications (like updated BOM costs and Live eBay/Stripe Fee logic) and pushes those two specific fields up to your master database.\\n\\nIt strictly performs read operations on your original imported CSV physical parameters to execute el, explicitly refusing to overwrite your established Shopify source data strings.');
+                    alert('BACKFILL FINANCIALS:\\n\\nThis mathematical tool sequentially loops through all historical orders and dynamically recalculates your exact Net Profit and Transaction Fees based on your currently active Engine specifications.\\n\\nIt strictly performs read operations on your original imported CSV physical parameters to execute, explicitly refusing to overwrite your established Shopify source data strings.');
+                    break;
+                case 'click_alert_BILLING_BACKFILL_GUIDE_n_nT':
+                    alert('BILLING BACKFILL GUIDE:\\n\\nThis mathematical tool sequentially loops through all historical orders and dynamically recalculates your exact Net Profit and Transaction Fees based on your currently active Engine specifications and true actual_shipping_cost label values.\\n\\nUse this immediately after importing historical labels via the Shopify Billing CSV to mathematically purge legacy flat-rate shipping assumptions and align all historical data to reality.');
                     break;
                 case 'click_openAliasModal':
                     openAliasModal('');
@@ -572,15 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_stopCycleCount':
                     stopCycleCount();
                     break;
-                case 'click_executeRestore':
-                    if (typeof executeRestore === 'function') executeRestore();
-                    break;
-                case 'click_cancelRestore':
-                    if (typeof cancelRestore === 'function') cancelRestore();
-                    break;
-                case 'click_executeExport':
-                    if (typeof executeExport === 'function') executeExport();
-                    break;
+
                 case 'click_document_getElementById_importBackupFile':
                     document.getElementById('importBackupFile').click();
                     break;
@@ -696,6 +700,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_executeWithButtonAction_btnSal_4':
                     executeWithButtonAction('btnSalezImportTest', '⏳ PARSING...', '📋 READY FOR TEST', () => processSalesCSV(true));
+                    break;
+                case 'change_handleShopifyBillingUpload':
+                    if (typeof window.change_handleShopifyBillingUpload === 'function') window.change_handleShopifyBillingUpload(event);
                     break;
                 case 'change_handleFileSelect_this':
                     handleFileSelect(el);

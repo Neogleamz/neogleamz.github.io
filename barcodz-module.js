@@ -121,7 +121,7 @@ function renderBarcodzGrid(forceRebuild = false) {
         const groupsToRender = Object.keys(grouped).sort((a,b) => typeOrder.indexOf(a) - typeOrder.indexOf(b));
 
         let savedState = null;
-        try { savedState = JSON.parse(localStorage.getItem('barcodzGroupState')); } catch(e){}
+        try { savedState = JSON.parse(localStorage.getItem('barcodzGroupState')); } catch(e){ console.error(e); }
         window.barcodzGroupState = window.barcodzGroupState || savedState || {};
         let html = '';
         groupsToRender.forEach(type => {

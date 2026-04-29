@@ -34,19 +34,19 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-### Target: `epic/historical-data-sync`
-*(Epic: Shopify Historical Backfill Engine)*
-- [🚀] `feat/historical-shopify-backfill` : Architect a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
-- [ ] `feat/billing-csv-importer` : Build a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
-- [ ] `feat/shopify-tag-parser` : Develop a forward-looking Webhook/Sync module to automatically extract "order type" and "shipping label cost" directly from Shopify Order Tags as they are generated, eliminating the need for future manual CSV imports. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
-
+### Target: main
+*(Epic: Orderz Financial Visibility)*
+- [ ] `feat/actual-net-modal` : Build an "Actual Net" button in Orderz that launches a new modal displaying the full mathematical breakdown per order (COGS, Shipping, Taxes, Fees, Net). The modal must support expanding/collapsing line items, sorting, and live searching. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
-*(No active ideas in backlog)*
+### Target: main
+*(Epic: Shopify Flow Automation)*
+- [ ] `research/shopify-flow-auto-tag` : Investigate building a Shopify Flow that automatically tags orders with the `Label: <price>` format when a shipping label is purchased or printed, feeding natively into the webhook parser. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
@@ -238,3 +238,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `epic/revenuez-fulfillment-expansion`
 *(Epic: Revenuez Fulfillment & Cost Tracking)*
 - [🚀] `feat/revenuez-fulfillment-expansion` : Intercept Shopify webhooks (orders/updated and fulfillments/create) and execute GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Update the Supabase `sales_ledger` schema and modify the Revenuez UI data grid to surface this operational data directly with clickable tracking links and high-cost warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
+
+### Target: `epic/historical-data-sync`
+*(Epic: Shopify Historical Backfill Engine)*
+- [🚀] `feat/historical-shopify-backfill` : Architect a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [🚀] `feat/billing-csv-importer` : Build a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [x] `feat/shopify-tag-parser` : Develop a forward-looking Webhook/Sync module to automatically extract "order type" and "shipping label cost" directly from Shopify Order Tags as they are generated, eliminating the need for future manual CSV imports. [🤖 Gemini 3.1 Pro] [🧠 15k / 25k] [💸 $0.05 / $0.08]
