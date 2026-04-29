@@ -1,7 +1,8 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.19] - 2026-04-28
 ### Features & Refactors
+- **Revenuez Fulfillment Expansion**: Intercepted Shopify webhooks (orders/updated and fulfillments/create) and executed GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Updated the Supabase `sales_ledger` schema and modified the Revenuez UI data grid to surface operational data with clickable tracking links and warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
 - **Sitewide Mathematical Verification Audit**: Audited recursive BOM cost roll-ups, item-level net profit algorithms, global CFO waterfall mathematics, and Reorder Point (ROP) inventory velocity calculations for strict mathematical fidelity. Validated LTV/CAC predictive cohort simulator math and integrated robust Jest unit test suites for continuous autonomous verification. [🤖 Gemini 3.1 Pro] [🧠 105k / 100k] [💸 $0.23 / $0.27]
 - **Dependency Bumps**: Updated `@supabase/supabase-js` to `2.105.0`, `supabase` CLI to `2.95.5`, `eslint` to `10.2.1`, and `prettier` to `3.8.3`. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 - **Inventory Column Filters**: Added ability to filter columns in DATAZ and EDITZ ledgers. [🤖 AI Model] [🧠 25k / 5k] [💸 $0.08 / $0.02]

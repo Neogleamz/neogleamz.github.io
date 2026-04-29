@@ -36,7 +36,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `epic/revenuez-fulfillment-expansion`
 *(Epic: Revenuez Fulfillment & Cost Tracking)*
-- [x] `feat/revenuez-fulfillment-expansion` : Intercept Shopify webhooks (orders/updated and fulfillments/create) and execute GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Update the Supabase `sales_ledger` schema and modify the Revenuez UI data grid to surface this operational data directly with clickable tracking links and high-cost warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
+- [🚀] `feat/revenuez-fulfillment-expansion` : Intercept Shopify webhooks (orders/updated and fulfillments/create) and execute GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Update the Supabase `sales_ledger` schema and modify the Revenuez UI data grid to surface this operational data directly with clickable tracking links and high-cost warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
