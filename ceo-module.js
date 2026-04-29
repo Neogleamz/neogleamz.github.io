@@ -10,7 +10,7 @@
  */
 // --- CEO TERMINAL: OPERATION APEX 2.1 ---
 
-let ceoWaterfallChart, ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;
+let ceoWaterfallChart, ceoExpenseChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 // Global Drag & Drop + Sorting State
@@ -812,3 +812,131 @@ document.addEventListener('dragend', (e) => {
     const sliderGroup = e.target.closest('.ceo-slider-group');
     if (sliderGroup) ceoDragEnd(e);
 });
+
+// --- SHOPIFY BILLING CSV IMPORTER ---
+window.change_handleShopifyBillingUpload = async function(e) {
+    if(!e.target || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    sysLog("Initializing Shopify Billing Importer...", true);
+    setSysProgress(10, 'working');
+    
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+        try {
+            setSysProgress(30, 'working');
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            if(workbook.SheetNames.length === 0) throw new Error("CSV file appears to be empty or corrupted.");
+            
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const roa = XLSX.utils.sheet_to_json(firstSheet);
+            
+            if(roa.length === 0) throw new Error("No data rows found in the provided CSV file.");
+            
+            // Extract the shipping charges securely
+            let matchedCosts = [];
+            roa.forEach(row => {
+                let cType = row['Charge category'] || row['Charge Category'] || "";
+                let orderTag = row['Order'] || "";
+                let amt = parseFloat(row['Amount']);
+                
+                if (cType.toString().toLowerCase().trim() === 'shipping_fee' && orderTag.toString().trim().startsWith('#') && !isNaN(amt)) {
+                    matchedCosts.push({
+                        parsed_order_id: orderTag.toString().trim(),
+                        parsed_shipping_cost: amt
+                    });
+                }
+            });
+            
+            if (matchedCosts.length === 0) {
+                alert("No shipping_fee charges found with valid Order tags (#xxxx) in this CSV.");
+                setSysProgress(100, 'success');
+                e.target.value = '';
+                return;
+            }
+            
+            setSysProgress(50, 'working');
+            sysLog(`Found ${matchedCosts.length} shipping charges. Cross-referencing sales_ledger...`, true);
+            
+            // Fetch relevant ledger targets
+            const orderTagsList = matchedCosts.map(m => m.parsed_order_id);
+            const { data: ledgerRows, error: ledgerError } = await window._supabase
+                .from('sales_ledger')
+                .select('id, order_id, actual_shipping_cost')
+                .in('order_id', orderTagsList)
+                .eq('isFirstRow', true);
+                
+            if(ledgerError) throw new Error("Failed to fetch target orders from the database: " + ledgerError.message);
+            
+            let updatesToApply = [];
+            
+            matchedCosts.forEach(cost => {
+                let targetRow = ledgerRows.find(lr => lr.order_id === cost.parsed_order_id);
+                if (targetRow) {
+                    updatesToApply.push({
+                        id: targetRow.id,
+                        order_id: targetRow.order_id,
+                        actual_shipping_cost: cost.parsed_shipping_cost,
+                        old_shipping_cost: targetRow.actual_shipping_cost || 0
+                    });
+                }
+            });
+            
+            if (updatesToApply.length === 0) {
+                alert("Extracted shipping costs did not match any historical orders in the current Ledger.");
+                setSysProgress(100, 'success');
+                e.target.value = '';
+                return;
+            }
+            
+            setSysProgress(80, 'working');
+            
+            // Delegate back to Sandbox Visual Engine to enforce Zero-Bypass
+            let liveImportContext = {
+                action: 'UPDATE',
+                table: 'sales_ledger',
+                count: updatesToApply.length,
+                customCommitFn: async function() {
+                    for (let updateObj of updatesToApply) {
+                        const { error } = await window._supabase
+                            .from('sales_ledger')
+                            .update({ actual_shipping_cost: updateObj.actual_shipping_cost })
+                            .eq('id', updateObj.id);
+                            
+                        if (error) throw new Error(`Failed updating Order ${updateObj.order_id}: ${error.message}`);
+                    }
+                    if (typeof loadSalesLedger === 'function') loadSalesLedger(); // refresh sales board dynamically
+                }
+            };
+            
+            if (typeof window.openSandboxModal === 'function') {
+                window.openSandboxModal(
+                    updatesToApply, 
+                    `BILLING_CSV_SHOPIFY_IMPORTS`, 
+                    null, 
+                    `Matched Shipping Label Costs`, 
+                    null, 
+                    liveImportContext
+                );
+            } else {
+                throw new Error("Sandbox engine not found. Aborting execution for safety.");
+            }
+            
+            setSysProgress(100, 'success');
+            e.target.value = '';
+            
+        } catch(err) {
+            sysLog("CSV Parsing Error: " + err.message, true);
+            alert("Error parsing the CSV file. Please check console.");
+            setSysProgress(100, 'error');
+            e.target.value = '';
+        }
+    };
+    reader.onerror = function(err) {
+        sysLog("FileReader failed: " + err, true);
+        setSysProgress(100, 'error');
+        e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+};
