@@ -302,3 +302,6 @@ The core financial engine operates by aggregating raw data into logical blocks b
 
 ### B. Stripe/Gateway Fee Baseline Extraction
 Gateway fees are dynamically calculated by subtracting `exactPayout` from `orderCaptured`. To prevent inflated fee estimations caused by downstream refunds, the system strictly injects an `orderRefund` reduction check directly into the aggregation loop (`group.reduce(...) - orderRefund`). By isolating the true net revenue before comparing it to the exact payout, the engine successfully avoids hallucinating massive negative fee structures when transactions are partially refunded.
+
+### C. Mathematical Multiplier Strictness (Ternary Precedence)
+When calculating aggregate metrics like COGS or true revenue captures derived from dynamic fallback functions, the engine MUST enforce strict mathematical parentheses around ternary conditional operators before multiplying by quantity (`qty`). (e.g., `let liveCogs = (x.cogs_at_sale != null ? parseFloat(x.cogs_at_sale) : getEngineTrueCogs(x.recipe)) * qty;`). Failing to wrap the ternary blocks evaluates the multiplier against only the false condition, breaking multi-item order mathematics globally.
