@@ -223,6 +223,7 @@ function syncDatazStats() {
     if (typeof finalResults === 'undefined') return;
     let parcels = new Set(), totalWt = 0;
     let absoluteRawSpend = 0, pureGoodsCost = 0;
+    let processedOrdersForPureGoods = new Set();
     finalResults.forEach(s => {
         let pno = s['Parcel No'];
         if (pno && String(pno).trim().toUpperCase() !== 'MANUAL') {
@@ -236,7 +237,17 @@ function syncDatazStats() {
         
         let uCost = parseFloat(s['Order Unit Price']) || parseFloat(s.order_unit_price) || 0;
         let qVal = parseFloat(s['Quantity']) || parseFloat(s.quantity) || 1;
-        pureGoodsCost += uCost > 0 ? (uCost * qVal) : (parseFloat(s['Order Total']) || parseFloat(s.order_total) || 0);
+        let goodsCost = 0;
+        if (uCost > 0) {
+            goodsCost = (uCost * qVal);
+        } else {
+            let orderId = s['Order No'] || s.order_no || pno || s.parcel_no;
+            if (orderId && !processedOrdersForPureGoods.has(orderId)) {
+                goodsCost = parseFloat(s['Order Total']) || parseFloat(s.order_total) || 0;
+                processedOrdersForPureGoods.add(orderId);
+            }
+        }
+        pureGoodsCost += goodsCost;
     });
     
     let totalLogisticsSpend = absoluteRawSpend - pureGoodsCost;
@@ -471,15 +482,19 @@ function syncOrderzStats() {
         setStat('statOrderzAon', fmtMoney(aon));
         setStat('statOrderzBurden', (pTotals.burdenPct || 0).toFixed(1) + '%');
     } else if (typeof salesDB !== 'undefined') {
-        setStat('statOrderzTotal', fmtNum(salesDB.length));
+        let orderSetForVal = new Set();
         let units = 0, shopify = 0, val = 0;
         salesDB.forEach(s => {
-            units += (s.quantity || 1);
-            val += parseFloat(s.total) || 0;
-            let so = (s.source || "").toLowerCase();
+            units += (parseFloat(s.quantity || s.qty_sold) || 1);
+            if (s.order_id && !orderSetForVal.has(s.order_id)) {
+                val += parseFloat(s.total) || 0;
+                orderSetForVal.add(s.order_id);
+            }
+            let so = (s.source || s.Source || "").toLowerCase();
             if (so.includes("shopify")) shopify++;
         });
-        let aon = salesDB.length > 0 ? (val / salesDB.length) : 0;
+        setStat('statOrderzTotal', fmtNum(orderSetForVal.size));
+        let aon = orderSetForVal.size > 0 ? (val / orderSetForVal.size) : 0;
         setStat('statOrderzUnits', fmtNum(units));
         setStat('statOrderzShopify', fmtNum(shopify));
         setStat('statOrderzAon', fmtMoney(aon));
@@ -538,11 +553,24 @@ function syncImportzStats() {
     if (typeof finalResults !== 'undefined') {
         let capex = 0, customs = 0, weight = 0, pkgs = new Set();
         let absoluteRawSpend = 0, pureGoodsCost = 0;
+        let processedOrdersForTotal = new Set();
         
         finalResults.forEach(r => {
             let uCost = parseFloat(r['Order Unit Price']) || parseFloat(r.order_unit_price) || 0;
             let qVal = parseFloat(r['Quantity']) || parseFloat(r.quantity) || 1;
-            let goodsCost = uCost > 0 ? (uCost * qVal) : (parseFloat(r['Order Total']) || parseFloat(r.order_total) || 0);
+            
+            let pno = r['Parcel No'] || r.parcel_no;
+            let orderId = r['Order No'] || r.order_no || pno;
+            
+            let goodsCost = 0;
+            if (uCost > 0) {
+                goodsCost = (uCost * qVal);
+            } else {
+                if (orderId && !processedOrdersForTotal.has(orderId)) {
+                    goodsCost = parseFloat(r['Order Total']) || parseFloat(r.order_total) || 0;
+                    processedOrdersForTotal.add(orderId);
+                }
+            }
             capex += goodsCost;
             
             absoluteRawSpend += parseFloat(r['Total Landed Cost ($)']) || parseFloat(r.total_cost_weight) || 0;
@@ -578,12 +606,18 @@ function syncSalezStats() {
     let mapped = Object.keys(aliasDB).length;
     setStat('statSalzMap', fmtNum(mapped));
     
-    let unmappedS = 0, unmappedE = 0, rev24 = 0;
+    let unmappedS = 0, unmappedE = 0, rev30 = 0;
+    let processedOrdersFor30hRev = new Set();
     if (typeof salesDB !== 'undefined') {
         let now = new Date();
         salesDB.forEach(s => {
-            let dt = new Date(s.date);
-            if ((now - dt) < 86400000) rev24 += parseFloat(s.total) || 0;
+            let dt = new Date(s.sale_date || s.date);
+            if ((now - dt) < 2592000000) {
+                if (s.order_id && !processedOrdersFor30hRev.has(s.order_id)) {
+                    rev30 += parseFloat(s.total) || 0;
+                    processedOrdersFor30hRev.add(s.order_id);
+                }
+            }
             if (!aliasDB[s.storefront_sku]) {
                 let src = (s.source||"").toLowerCase();
                 if (src.includes('shopify')) unmappedS++;
@@ -593,7 +627,7 @@ function syncSalezStats() {
     }
     setStat('statSalzUnShop', fmtNum(unmappedS));
     setStat('statSalzUnEtsy', fmtNum(unmappedE));
-    setStat('statSalz24h', fmtMoney(rev24));
+    setStat('statSalz30d', fmtMoney(rev30));
     setStat('statSalzHealth', (unmappedS + unmappedE) === 0 ? 'NOMINAL' : 'UNMAPPED ALIAS');
 }
 
