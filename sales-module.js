@@ -373,7 +373,7 @@ async function executeSalesSync(isTestMode = false) {
         let voidedRevenueByOrder = {};
         pendingSalesRows.forEach(r => {
             if (r.transaction_type === 'Cancelled') {
-                voidedRevenueByOrder[r.order_id] = (voidedRevenueByOrder[r.order_id] || 0) + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+                voidedRevenueByOrder[r.order_id] = (voidedRevenueByOrder[r.order_id] || 0) + parseFloat(r.subtotal || 0);
             }
         });
 
@@ -387,7 +387,7 @@ async function executeSalesSync(isTestMode = false) {
             if (type === 'Cancelled') { cogs = 0; }
             if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') { cogs = 0; }
 
-            let trueLineCaptured = isCostOnlyItem ? 0 : (r.actual_sale_price * r.qty_sold) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0) - parseFloat(r.discount_amount || 0);
+            let trueLineCaptured = isCostOnlyItem ? 0 : parseFloat(r.total || 0);
             let outBal = parseFloat(r['Outstanding Balance']) || 0;
             let stripeCaptureTarget = trueLineCaptured - outBal;
 
@@ -396,7 +396,7 @@ async function executeSalesSync(isTestMode = false) {
             let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : parseFloat(r.actual_shipping_cost || 0);
 
             // Calculate true net strictly honoring the rules.
-            let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
+            let gross = isCostOnlyItem ? 0 : parseFloat(r.subtotal || 0);
             let shipRev = isCostOnlyItem ? 0 : parseFloat(r.shipping || 0);
             let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
             let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
@@ -442,7 +442,7 @@ async function executeSalesSync(isTestMode = false) {
                 // DECOUPLED PHYSICAL REALITY ACCOUNTING
                 if (u.transaction_type === 'Post-Ship Exchange') {
                     // 1. Shift the purely positive raw revenue component onto the replacement.
-                    let uRawRev = (parseFloat(u.actual_sale_price || 0) * parseFloat(u.qty_sold || 0)) + parseFloat(u.shipping || 0) - parseFloat(u.discount_amount || 0);
+                    let uRawRev = parseFloat(u.total || 0) - parseFloat(u.taxes || 0);
                     r.net_profit += uRawRev; // Replacement absorbs the pure revenue
 
                     // 2. Original row loses the revenue (shipped to r), and loses its COGS (restocked), leaving ONLY the pure logistical losses:
@@ -560,39 +560,35 @@ function renderSalesTable() {
         let t = parseFloat(x.taxes) || 0;
         let d = parseFloat(x.discount_amount) || 0;
 
-        let liveCogs = getEngineTrueCogs(x.internal_recipe_name) * qty;
+        let liveCogs = x.cogs_at_sale != null ? parseFloat(x.cogs_at_sale) : getEngineTrueCogs(x.internal_recipe_name) * qty;
         let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
 
-        // --- CUSTOM EXCEPTION OVERRIDES ---
-        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
-            liveCogs = 0;
-        }
-        if (isCostOnlyItem) {
+        if (isCostOnlyItem && x.cogs_at_sale == null) {
             p = 0; s = 0; t = 0; d = 0;
         }
 
-        // BUGFIX: Base Stripe Fee on True Line Capture, avoiding Shopify's merged Total inflation
-        let trueLineCaptured = (p * qty) + s + t - d;
-        let stripeFee = isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured, x['Source']);
+        let trueLineCaptured = parseFloat(x.total || 0);
+        let stripeFee = x.transaction_fees != null ? parseFloat(x.transaction_fees) : (isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured, x['Source']));
 
         let dbActualPayout = parseFloat(x.actual_payout) || 0;
         let dbActualShipCost = parseFloat(x.actual_shipping_cost) || 0;
 
-        // --- POWERED BY MASTER ENGINE ---
-        let actualShipCost = type === 'Pre-Ship Exchange' ? 0 :
-                             type === 'IGNORE' ? 0 :
-                             type === 'NEEDS ATTENTION' ? 0 :
-                             (dbActualShipCost > 0 ? dbActualShipCost : (s > 0 ? s : SHIP_COST)); // Prioritize Label Cost from DB, fallback to Ship Col, then flat rate
-        let net = getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
+        let actualShipCost = x.actual_shipping_cost != null ? parseFloat(x.actual_shipping_cost) :
+                             type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' ? 0 :
+                             (s > 0 ? s : SHIP_COST);
 
-        if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
-            net = 0;
-        } else if (type === 'Pre-Ship Exchange') {
-            net += liveCogs; // refund the dynamic COGS that engine deducted
-        } else if (isCostOnlyItem) {
-            net = 0 - actualShipCost - liveCogs;
+        let net = x.net_profit != null ? parseFloat(x.net_profit) : getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
+
+        // Only override null net calculations
+        if (x.net_profit == null) {
+            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
+                net = 0;
+            } else if (type === 'Pre-Ship Exchange') {
+                net += liveCogs; 
+            } else if (isCostOnlyItem) {
+                net = 0 - actualShipCost - liveCogs;
+            }
         }
-        // --------------------------------
 
         let carr = x.carrier_name || '';
         let trk = x.tracking_number || '';
@@ -621,7 +617,7 @@ function renderSalesTable() {
             let appliedFee = false;
             
             let orderRefund = group.reduce((sum, r) => sum + (parseFloat(r.refunded_amount) || 0), 0);
-            let orderCaptured = group.reduce((sum, r) => sum + (parseFloat(r.exchAdj) || 0) + (r.isCostOnlyItem ? 0 : (parseFloat(r.actual_sale_price||0)*parseFloat(r.qty_sold||0) + parseFloat(r.shipping||0) + parseFloat(r.taxes||0) - parseFloat(r.discount_amount||0))), 0) - orderRefund;
+            let orderCaptured = group.reduce((sum, r) => sum + (parseFloat(r.exchAdj) || 0) + (r.isCostOnlyItem ? 0 : parseFloat(r.total||0)), 0) - orderRefund;
             let trueOrderFee = orderHasExactPayout ? Math.max(0, (orderCaptured - exactPayout)) : 0;
             
             group.forEach(r => {
@@ -644,11 +640,6 @@ function renderSalesTable() {
                 }
                 
                 // Recalculate net if overriding default engine estimates
-                let p = parseFloat(r.actual_sale_price || 0);
-                let q = parseFloat(r.qty_sold || 0);
-                let s = parseFloat(r.shipping || 0);
-                let d = parseFloat(r.discount_amount || 0);
-                
                 if (r.transaction_type === 'IGNORE' || r.transaction_type === 'NEEDS ATTENTION' || r.transaction_type === 'Cancelled') {
                     r.net = 0;
                 } else if (r.transaction_type === 'Pre-Ship Exchange') {
@@ -656,7 +647,7 @@ function renderSalesTable() {
                 } else if (r.isCostOnlyItem) {
                     r.net = 0 - r.actualShipCost - r.liveCogs;
                 } else {
-                    r.net = (p*q) + s - d - r.stripeFee - r.actualShipCost - r.liveCogs + (parseFloat(r.exchAdj) || 0);
+                    r.net = parseFloat(r.total || 0) - parseFloat(r.taxes || 0) - r.stripeFee - r.actualShipCost - r.liveCogs + (parseFloat(r.exchAdj) || 0);
                 }
             });
         }
@@ -668,9 +659,7 @@ function renderSalesTable() {
         let voidRev = 0;
         group.forEach(r => {
             if (r.transaction_type === 'Cancelled') {
-                let qty = parseFloat(r.qty_sold || 1);
-                let price = parseFloat(r.actual_sale_price || 0);
-                voidRev += (price * qty);
+                voidRev += parseFloat(r.subtotal || 0);
             }
         });
         voidedRevenueByOrder[group[0].order_id] = voidRev;
@@ -703,7 +692,7 @@ function renderSalesTable() {
 
             if (u.transaction_type === 'Post-Ship Exchange') {
                 // Physical Reality Decoupling
-                let uRawRev = (parseFloat(u.actual_sale_price || 0) * (parseFloat(u.qty_sold) || 0)) + parseFloat(u.shipping || 0) - parseFloat(u.discount_amount || 0);
+                let uRawRev = parseFloat(u.total || 0) - parseFloat(u.taxes || 0);
 
                 // 1. Shift Customer Payment Revenue to Replacement
                 r.net += (parseFloat(uRawRev) || 0);
@@ -714,6 +703,7 @@ function renderSalesTable() {
                 
                 // Shift Total Captured Visuals & Aggregation Flag
                 r.total = u.total;
+                r.subtotal = u.subtotal;
                 r.exchAdj = u.exchAdj;
                 r.isCostOnlyItem = false;
 
@@ -722,8 +712,9 @@ function renderSalesTable() {
                 u.shipping = 0;
                 u.discount_amount = 0;
                 u.taxes = 0;
-                u.liveCogs = 0; // Restocked\n                u.total = 0;\n                u.exchAdj = 0;
+                u.liveCogs = 0; // Restocked
                 u.total = 0;
+                u.subtotal = 0;
                 u.exchAdj = 0;
                 u.isCostOnlyItem = true;
 
@@ -1440,7 +1431,7 @@ function renderActualNetList() {
             let adjStr = l.exchAdj ? `<span style='flex:1; text-align:right; color:${l.exchAdj < 0 ? '#ef4444' : '#10b981'};'>Adj: ${l.exchAdj > 0 ? '+' : ''}$${l.exchAdj.toFixed(2)}</span>` : `<span style='flex:1; text-align:right; color:#888;'>Adj: --</span>`;
             childHtml += `<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted var(--border-input); font-size:10px;'>
                 <span style='flex:2; color:#0ea5e9;'>${l.storefront_sku} (Qty: ${l.qty_sold})</span>
-                <span style='flex:1; text-align:right;'>Cap: $${((parseFloat(l.actual_sale_price||0)*parseFloat(l.qty_sold||0))+parseFloat(l.shipping||0)+parseFloat(l.taxes||0)-parseFloat(l.discount_amount||0)).toFixed(2)}</span>
+                <span style='flex:1; text-align:right;'>Cap: $${parseFloat(l.total||0).toFixed(2)}</span>
                 ${adjStr}
                 <span style='flex:1; text-align:right;'>COGS: -$${(l.liveCogs||0).toFixed(2)}</span>
                 <span style='flex:1; text-align:right;'>Label: -$${(l.actualShipCost||0).toFixed(2)}</span>
