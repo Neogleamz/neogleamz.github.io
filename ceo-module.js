@@ -10,7 +10,7 @@
  */
 // --- CEO TERMINAL: OPERATION APEX 2.1 ---
 
-let ceoWaterfallChart, ceoExpenseChart, ceoProfitChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart, ceoLineChart;
+let ceoWaterfallChart, ceoExpenseChart, ceoUnitChart, ceoEfficiencyChart, ceoCurEfficiencyChart;
 const ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 // Global Drag & Drop + Sorting State
@@ -259,7 +259,7 @@ function updateCeoEngine() {
 }
 
 window._calculateCeoMetrics = function() {
-    const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+
     let cacEl = document.getElementById('globalCacNum');
     let gCac = cacEl ? parseFloat(cacEl.value) || 0 : 0;
     let affEl = document.getElementById('globalAffNum');
@@ -768,14 +768,14 @@ document.addEventListener('click', (e) => {
             let key = ltvTh.getAttribute('data-ltvsort');
             if (key) sortLtvModal(key);
         }
-    } catch (err) { }
+    } catch (err) { console.error(err); }
 });
 
 document.addEventListener('change', (e) => {
     try {
         const testMsrpInput = e.target.closest('.ceo-test-msrp-listen');
         if (testMsrpInput) updateCeoEngine();
-    } catch (err) { }
+    } catch (err) { console.error(err); }
 });
 
 document.addEventListener('input', (e) => {
@@ -787,7 +787,7 @@ document.addEventListener('input', (e) => {
             if(dup) dup.value = volInput.value;
             updateCeoEngine();
         }
-    } catch (err) { }
+    } catch (err) { console.error(err); }
 });
 
 document.addEventListener('dragstart', (e) => {
@@ -812,3 +812,5 @@ document.addEventListener('dragend', (e) => {
     const sliderGroup = e.target.closest('.ceo-slider-group');
     if (sliderGroup) ceoDragEnd(e);
 });
+
+// --- SHOPIFY BILLING CSV IMPORTER DELETED ---

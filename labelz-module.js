@@ -232,7 +232,7 @@ function updateLabelCanvasSize() {
     
     let sizeStr = document.getElementById('labelzDesignerSize').value;
     let pObj = {w: 2.25, h: 1.25};
-    try { pObj = JSON.parse(sizeStr); } catch(e) {}
+    try { pObj = JSON.parse(sizeStr); } catch(e) { console.error(e); }
     
     let pxWidth = pObj.w * PPI;
     let pxHeight = pObj.h * PPI;

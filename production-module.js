@@ -697,7 +697,7 @@ function printBatchOrderReport() {
     const printContent = document.getElementById('batchOrderReportContent').innerHTML;
     const printWindow = window.open('', '', 'height=600,width=800');
     // Ensure styles map to printable black/white/red/green versions for paper
-    printWindow.document.write(`<html><head><title>Batch Order Projection</title><style>body{font-family:sans-serif; padding:20px; color:#000;} table{width:100%; border-collapse:collapse; margin-bottom:20px;} th,td{border-bottom:1px solid #ccc; padding:8px; text-align:left;} th.right, td.right{text-align:right;} h3{border-bottom:2px solid #000; padding-bottom:5px; margin-top:20px;}</style></head><body><h1>📦 Batch Order Projection</h1>${printContent.replace(/color:#ef4444/g, 'color:red').replace(/color:#10b981/g, 'color:green').replace(/color:var\(--text-[^\)]+\)/g, 'color:black').replace(/ ▲| ▼| ↕/g, '')}</body></html>`);
+    printWindow.document.write(`<html><head><title>Batch Order Projection</title><style>body{font-family:sans-serif; padding:20px; color:#000;} table{width:100%; border-collapse:collapse; margin-bottom:20px;} th,td{border-bottom:1px solid #ccc; padding:8px; text-align:left;} th.right, td.right{text-align:right;} h3{border-bottom:2px solid #000; padding-bottom:5px; margin-top:20px;}</style></head><body><h1>📦 Batch Order Projection</h1>${printContent.replace(/color:#ef4444/g, 'color:red').replace(/color:#10b981/g, 'color:green').replace(/color:var\(--text-[^)]+\)/g, 'color:black').replace(/ ▲| ▼| ↕/g, '')}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => { printWindow.print(); }, 250);
@@ -1113,7 +1113,7 @@ function renderActiveWO(id) {
 
                 // Sort Groups based on saved localStorage order
                 let savedSort = [];
-                try { savedSort = JSON.parse(localStorage.getItem('batchezSopSort_' + wo.product_name)) || []; } catch(e){}
+                try { savedSort = JSON.parse(localStorage.getItem('batchezSopSort_' + wo.product_name)) || []; } catch(e){ console.error(e); }
 
                 if (savedSort.length > 0) {
                     sopGroups.sort((a,b) => {
@@ -1198,7 +1198,7 @@ function renderActiveWO(id) {
                                 </div>
 
                                 <!-- Dedicated Vertical Resizer Handle -->
-                                <div id="inlineResizer_{grp.id}" class="h-resizer" onmousedown="if(typeof initInlineResize===\'function\'){initInlineResize(event, \'${grp.id}\');}"></div>
+                                <div id="inlineResizer_${grp.id}" class="h-resizer" onmousedown="if(typeof initInlineResize==='function'){initInlineResize(event, '${grp.id}');}"></div>
 
                                 <!-- Pane 2: Rich Text Steps -->
                                 <div id="inlineRightPane_${grp.id}" style="flex: 1; min-width:30px; display:flex; flex-direction:column; padding:15px; background:var(--bg-body); border-left:1px solid var(--border-color);  overflow:hidden;">
@@ -1267,7 +1267,7 @@ function renderActiveWO(id) {
                                 document.addEventListener('mouseup', stopInlineSOPResize_${grp.id});
                             }
                         }, 20);
-                        <\/script>
+                        </script>
                         `;
                     } else {
                         if (grp.qa.length === 0 && grp.steps.length === 0) {
@@ -1860,7 +1860,7 @@ function printSOP() {
 }
 
 function parseProductionTelemetryLine(q, contextIdx) {
-    let html = '';
+    let html;
 
     function parseInputs(text) { return text.replace(/\[INPUT\]/gi, `<input type="text" placeholder="..." style="padding:4px 8px; border-radius:4px; background:rgba(255,255,255,0.1); border:1px solid #10b981; color:#fff; font-family:monospace; font-size:12px; width:120px; font-weight:bold; margin:0 6px;">`); }
 
@@ -2118,7 +2118,7 @@ window.addInlineSOPRow = function(grpId) {
         let rowNode = newRow.firstChild;
         let area = document.getElementById('inlineSopSteps_' + grpId);
         if(area && rowNode) area.appendChild(rowNode);
-    } catch(e) {}
+    } catch(e) { console.error(e); }
 };
 
 window.toggleHorizontalPreview = function(paneId, colId, btnEl) {

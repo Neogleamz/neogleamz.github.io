@@ -36,8 +36,7 @@ function renderAnalyticsDashboard() {
             builtInvValue += (s * getEngineTrueCogs(p)); 
         });
 
-        // 3. Aggregated Financials for Charts
-        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+
         
         // --- INHERIT MASTER LEDGER PHYSICS ---
         // We inherit identical math from the sales-module instantly to perfectly support Warranty/Exchange logic offsets
@@ -82,7 +81,7 @@ function renderAnalyticsDashboard() {
         renderTrendsChart(trendData);
 
         // 4. Matrix (FILTERED to hide Sub-Assemblies)
-        renderProfitabilityMatrix(SHIP_COST);
+        renderProfitabilityMatrix();
 
     } catch(e) { console.error("Analytics Error:", e); sysLog(e.message, true); }
 }
@@ -224,7 +223,7 @@ function renderTrendsChart(trendData) {
     } catch(e) { sysLog('Trends chart render error: ' + e.message, true); }
 }
 
-function renderProfitabilityMatrix(SHIP_COST) {
+function renderProfitabilityMatrix() {
     try {
     let wrap = document.getElementById('analyticsTableWrap'); if(!wrap) return;
     let ths = ` <th class="${currentAnalyticsSort.column==='n'?'sorted-'+currentAnalyticsSort.direction:''}" onclick="sortAnalytics('n')">Retail Product</th> <th class="${currentAnalyticsSort.column==='tc'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tc')">True COGS</th> <th class="${currentAnalyticsSort.column==='ms'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ms')">Live MSRP</th> <th class="${currentAnalyticsSort.column==='mg'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('mg')">Gross Margin %</th> <th class="${currentAnalyticsSort.column==='ts'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('ts')">Total Units Sold</th> <th class="${currentAnalyticsSort.column==='tp'?'sorted-'+currentAnalyticsSort.direction:''} text-right" onclick="sortAnalytics('tp')">Actual Net Profit</th> `;
@@ -260,18 +259,21 @@ function renderProfitabilityMatrix(SHIP_COST) {
     } catch(e) { sysLog('Profitability matrix render error: ' + e.message, true); }
 }
 
-async function backfillFinancials() {
+async function backfillFinancials(context = 'sales') {
     if(!confirm("This will recalculate fees and profit for ALL historical sales based on CURRENT engine rules and sync them to the database. Continue?")) return;
     
-    let t = document.getElementById('syncProgressTerminal'); if(t) t.innerHTML = "";
-    if (typeof syncTrace === 'function') syncTrace("INITIALIZING RAPID FINANCIAL BACKFILL...", false);
+    let terminalId = context === 'billing' ? 'billingProgressTerminal' : 'syncProgressTerminal';
+    let tracer = context === 'billing' ? billingTrace : syncTrace;
+
+    let t = document.getElementById(terminalId); if(t) t.innerHTML = "";
+    if (typeof tracer === 'function') tracer("INITIALIZING RAPID FINANCIAL BACKFILL...", false);
     setMasterStatus("Backfilling Financials...", "mod-working");
     setSysProgress(10, 'working');
     sysLog("Starting financial backfill for all existing sales...");
-    if (typeof syncTrace === 'function') syncTrace(`Engaging Master Engine ruleset for ${salesDB.length} historical ledger rows...`);
+    if (typeof tracer === 'function') tracer(`Engaging Master Engine ruleset for ${salesDB.length} historical ledger rows...`);
     
     try {
-        const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
+
         let count = 0;
         
         // Loop through local cache and push updates row-by-row
@@ -285,7 +287,7 @@ async function backfillFinancials() {
             
             let lineGross = p * qty;
             let stripeFee = getEngineStripeFee(trueLineCaptured, s["Source"]);
-            let actualShipCost = SHIP_COST * qty;
+            let actualShipCost = parseFloat(s.actual_shipping_cost || 0);
             let lineNet = getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name, qty, s["Source"]);
             
             let roundedFee = Math.round(stripeFee * 100) / 100;
@@ -304,8 +306,9 @@ async function backfillFinancials() {
             }
             
             // Trace every record to give granular feedback
-            if (typeof syncTrace === 'function') {
-                syncTrace(`Analyzed ${s.order_id} (${s.Source || 'Unknown'}): Base $${trueLineCaptured.toFixed(2)} -> Fee: $${roundedFee.toFixed(2)} | Net: $${roundedNet.toFixed(2)}`);
+            if (typeof tracer === 'function') {
+                let cogs = getEngineTrueCogs(s.internal_recipe_name) * qty;
+                tracer(`Analyzed #${s.order_id} (${s.Source || 'Unknown'}): Base $${trueLineCaptured.toFixed(2)} | COGS: $${cogs.toFixed(2)} | Ship: $${actualShipCost.toFixed(2)} | Tax: $${parseFloat(s.taxes || 0).toFixed(2)} | Fee: $${roundedFee.toFixed(2)} | Net: $${roundedNet.toFixed(2)}`);
             }
             
             // UI Status Update feedback
@@ -316,17 +319,17 @@ async function backfillFinancials() {
         }
         
         sysLog(`Successfully backfilled ${count} sales records with updated financials.`);
-        if (typeof syncTrace === 'function') syncTrace(`PROCESS COMPLETE. ${count} transactions finalized under current Engine Parameters.`, false);
+        if (typeof tracer === 'function') tracer(`PROCESS COMPLETE. ${count} transactions finalized under current Engine Parameters.`, false);
         setMasterStatus("Backfill Complete!", "mod-success");
         setSysProgress(100, 'success');
         
         // Refresh local data to reflect the newly persisted IDs/values
-        if(typeof loadData === 'function') await loadData();
+        if(typeof loadData === 'function') await loadData(true);
         renderAnalyticsDashboard();
         
     } catch(e) {
         sysLog("Backfill Error: " + e.message, true);
-        if (typeof syncTrace === 'function') syncTrace(`CRITICAL FAULT: ${e.message}`, true);
+        if (typeof tracer === 'function') tracer(`CRITICAL FAULT: ${e.message}`, true);
         setMasterStatus("Backfill Failed", "mod-error");
     }
 }

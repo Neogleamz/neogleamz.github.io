@@ -458,7 +458,7 @@ function printReorderReport() {
                     let ok = stock >= totalReq;
                     let statStr = ok ? `<span class="stock-badge" style="background:#d1fae5; color:#065f46; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">✅ OK</span>` : `<span class="stock-badge" style="background:#fee2e2; color:#991b1b; display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:8px;">🔴 SHORT ${ (totalReq - stock).toFixed(2).replace(/\.?0+$/,'') }</span>`;
                     
-                    let displayName = subK;
+                    // unused
                     if (isProd) {
                         let s = subK.replace('RECIPE:::', '');
                         let is3D = !!(productsDB[s] && productsDB[s].is_3d_print);
@@ -677,7 +677,7 @@ window.buildVelocityzTreeHTML = function(pName, reqQty, isRoot = false, idPath =
         let totalReq = qPer * reqQty;
         
         let isProd = subK.startsWith('RECIPE:::');
-        let displayName = subK;
+        // unused
         
         if (isProd) {
             let s = subK.replace('RECIPE:::', '');
@@ -804,7 +804,7 @@ window.startCycleCount = async function() {
     
     // Completely destroy previous instance to prevent iOS Safari Promise locks
     if (html5QrCode) {
-        try { await html5QrCode.stop(); } catch(e) {}
+        try { await html5QrCode.stop(); } catch(e) { console.error(e); }
         html5QrCode = null;
     }
     const readerEl = document.getElementById("barcode-reader");
@@ -864,7 +864,7 @@ window.onScanSuccess = function(decodedText) {
         setTimeout(() => flash.style.display = 'none', 300);
     }
 
-    let actualKey = "";
+    let actualKey;
     let pName = decodedText.replace('RECIPE:::', '');
     
     // Validate barcode exists in system
@@ -1085,7 +1085,7 @@ window.updateCcMngrStock = function() {
     
     let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'");
     let inv = inventoryDB[rKey] || {};
-    let stock = 0;
+    let stock;
     
     if (rKey.startsWith('RECIPE:::')) {
         let p    = parseFloat(inv.produced_qty) || 0;
