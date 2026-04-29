@@ -567,7 +567,7 @@ function renderSalesTable() {
             p = 0; s = 0; t = 0; d = 0;
         }
 
-        let trueLineCaptured = parseFloat(x.total || 0);
+        let trueLineCaptured = isCostOnlyItem ? 0 : (p * qty) + s + t - d;
         let stripeFee = x.transaction_fees != null ? parseFloat(x.transaction_fees) : (isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured, x['Source']));
 
         let dbActualPayout = parseFloat(x.actual_payout) || 0;
@@ -593,7 +593,7 @@ function renderSalesTable() {
         let carr = x.carrier_name || '';
         let trk = x.tracking_number || '';
 
-        return { ...x, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: (parseFloat(x.exchAdj) || 0), isExchanged: false, isCostOnlyItem, actualShipCost, dbActualPayout, dbActualShipCost, carrier_name: carr, tracking_number: trk };
+        return { ...x, trueLineCapture: trueLineCaptured, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: (parseFloat(x.exchAdj) || 0), isExchanged: false, isCostOnlyItem, actualShipCost, dbActualPayout, dbActualShipCost, carrier_name: carr, tracking_number: trk };
     });
 
     // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
