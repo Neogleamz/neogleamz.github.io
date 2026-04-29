@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Features & Refactors
+- **Actual Net Matrix Verification**: Built an interactive Math Simulator modal inside the Orderz UI to validate Net Profit algorithms natively across complex order combinations (Pre-Ship exchanges, Post-Ship replacements, etc.). [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 - **UI Enhancements**: Changed the SALEZ hub card to remove 'Unmapped Etsy' and 'Unmapped Shopify', replacing them with 'Orders (30D)' and 'Actual Net (30D)' for accurate 30-day performance tracking. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - **Hub Card Math Validation**: Validated all mathematical algorithms for all hubs, fixing a geometric inflation bug in the IMPORTZ card's Total Goods Cost computation by implementing robust Set-based deduplication logic for global Parcel/Order tracking. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 - **Shopify Tag Parser**: Developed a forward-looking Webhook/Sync module to automatically extract "order type" and "shipping label cost" directly from Shopify Order Tags as they are generated, eliminating the need for future manual CSV imports. [🤖 Gemini 3.1 Pro] [🧠 15k / 25k] [💸 $0.05 / $0.08]

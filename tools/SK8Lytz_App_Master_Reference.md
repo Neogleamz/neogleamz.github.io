@@ -291,3 +291,14 @@ To prevent compounding data corruption from Shopify retries, the edge function M
 ## 📡 9. Diagnostic Telemetry & Observability
 * **Global `sysLog` Infrastructure**: The primary method for terminal telemetry is `sysLog(msg, color, payload)`.
 * **Payload Deep Inspection**: The `sysLog` method has been natively upgraded to accept an optional third argument: `payload`. When passing deep JS objects or arrays (e.g., Supabase inbound hooks, database upsert mapping arrays), `sysLog` will intelligently serialize the payload and render it as a collapsible, monospaced `[Payload Data]` block natively within the Command Center terminal. This strictly negates the need to use `console.log()` for complex async state inspection.
+
+## 💸 10. Financial Engine & Decoupling Architecture
+
+### A. The Net Profit Sandbox (`sales-module.js`)
+The core financial engine operates by aggregating raw data into logical blocks before executing final profit extraction. To prevent "ghost revenue" and double-counting during complex fulfillment flows (e.g., Post-Ship Exchanges), the system strictly decouples the Original Voided Transaction from the Replacement Transaction.
+
+*   **Original Transaction (Voided)**: Visual aggregated properties (`r.total`, `r.exchAdj`) are explicitly zeroed out (`u.total = 0; u.exchAdj = 0;`). The system strictly retains its raw historical costs (Label Costs, Stripe Fees, COGS if un-restocked) to track the true loss of the transaction. It does NOT generate net revenue.
+*   **Replacement Transaction**: The system actively transfers the original captured revenue (`r.total = u.total;`) and any Outstanding Balance (`r.exchAdj = u.exchAdj;`) to this node. During Sandbox mapping, the Outstanding Balance (`outBal`) is specifically appended to `rawNet` (`let net = rawNet + outBal;`) to guarantee the actual payment difference is reflected in the final Net Profit visualizer.
+
+### B. Stripe/Gateway Fee Baseline Extraction
+Gateway fees are dynamically calculated by subtracting `exactPayout` from `orderCaptured`. To prevent inflated fee estimations caused by downstream refunds, the system strictly injects an `orderRefund` reduction check directly into the aggregation loop (`group.reduce(...) - orderRefund`). By isolating the true net revenue before comparing it to the exact payout, the engine successfully avoids hallucinating massive negative fee structures when transactions are partially refunded.

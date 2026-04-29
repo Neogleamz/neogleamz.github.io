@@ -190,6 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_closeActualNetModal':
                     if (typeof closeActualNetModal === 'function') closeActualNetModal();
                     break;
+                case 'click_runMathSimulator':
+                    if (typeof initMathSimulator === 'function') initMathSimulator();
+                    break;
+                case 'click_closeMathSimulator':
+                    if (typeof closeMathSimulator === 'function') closeMathSimulator();
+                    break;
                 case 'click_actualNetSort_o':
                     if (typeof actualNetSort === 'function') actualNetSort('o');
                     break;
