@@ -1114,17 +1114,17 @@ function renderSimulatorOrder(orderId) {
         
         let rawPrice = parseFloat(row.actual_sale_price || 0).toFixed(2);
         let rawQty = parseFloat(row.qty_sold || 0).toFixed(2);
-        let rawSubtot = ((parseFloat(row.actual_sale_price || 0) * parseFloat(row.qty_sold || 0)) || 0).toFixed(2);
+        let rawSubtot = parseFloat(row.subtotal || 0).toFixed(2);
         let rawShip = parseFloat(row.shipping || 0).toFixed(2);
         let rawTax = parseFloat(row.taxes || 0).toFixed(2);
         let rawDisc = parseFloat(row.discount_amount || 0).toFixed(2);
         let rawOutBal = parseFloat(row['Outstanding Balance'] || 0).toFixed(2);
-        let rawTotal = ((parseFloat(row.actual_sale_price||0)*parseFloat(row.qty_sold||0))+parseFloat(row.shipping||0)+parseFloat(row.taxes||0)-parseFloat(row.discount_amount||0)).toFixed(2);
-        let rawRef = parseFloat(row.exchAdj || 0).toFixed(2);
-        let rawFee = parseFloat(row.stripeFee || 0).toFixed(2);
-        let rawShipC = parseFloat(row.actualShipCost || 0).toFixed(2);
-        let rawCogs = parseFloat(row.liveCogs || 0).toFixed(2);
-        let rawNet = parseFloat(row.net || 0).toFixed(2);
+        let rawTotal = parseFloat(row.total || 0).toFixed(2);
+        let rawRef = parseFloat(row.refunded_amount || row.exchAdj || 0).toFixed(2);
+        let rawFee = parseFloat(row.transaction_fees || row.stripeFee || 0).toFixed(2);
+        let rawShipC = parseFloat(row.actual_shipping_cost || row.actualShipCost || 0).toFixed(2);
+        let rawCogs = parseFloat(row.cogs_at_sale || row.liveCogs || 0).toFixed(2);
+        let rawNet = parseFloat(row.net_profit || row.net || 0).toFixed(2);
 
         html += `
         <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
@@ -1369,27 +1369,27 @@ function renderActualNetList() {
         
         let p = parseFloat(r.actual_sale_price || 0);
         let q = parseFloat(r.qty_sold || 0);
+        let subtot = parseFloat(r.subtotal || 0);
         let s = parseFloat(r.shipping || 0);
         let t = parseFloat(r.taxes || 0);
         let d = parseFloat(r.discount_amount || 0);
         let ob = parseFloat(r['Outstanding Balance'] || 0);
-        
-        let isCostOnly = r.isCostOnlyItem;
+        let tot = parseFloat(r.total || 0);
         
         orderMap[oid].price += p; // aggregate for visual but less meaningful at order level, qty is better
         orderMap[oid].qty += q;
-        orderMap[oid].subtot += (p * q);
+        orderMap[oid].subtot += subtot;
         orderMap[oid].disc += d;
         orderMap[oid].shipCol += s;
         orderMap[oid].taxCol += t;
         orderMap[oid].outBal += ob;
         
-        orderMap[oid].totalCap += isCostOnly ? 0 : (p * q) + s + t - d;
-        orderMap[oid].refunds += (r.exchAdj || 0); // treating exchAdj as refunds/adj
-        orderMap[oid].cogs += (r.liveCogs || 0);
-        orderMap[oid].labelCost += (r.actualShipCost || 0);
-        orderMap[oid].fees += (r.stripeFee || 0);
-        orderMap[oid].net += (r.net || 0);
+        orderMap[oid].totalCap += tot;
+        orderMap[oid].refunds += parseFloat(r.refunded_amount || r.exchAdj || 0);
+        orderMap[oid].cogs += parseFloat(r.cogs_at_sale || r.liveCogs || 0);
+        orderMap[oid].labelCost += parseFloat(r.actual_shipping_cost || r.actualShipCost || 0);
+        orderMap[oid].fees += parseFloat(r.transaction_fees || r.stripeFee || 0);
+        orderMap[oid].net += parseFloat(r.net_profit || r.net || 0);
     });
 
     let grouped = Object.values(orderMap);
