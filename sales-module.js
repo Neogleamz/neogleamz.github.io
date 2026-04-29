@@ -1112,6 +1112,12 @@ function renderSimulatorOrder(orderId) {
         
         let src = row['Source'] || 'web';
         
+        let rawPrice = parseFloat(row.actual_sale_price || 0).toFixed(2);
+        let rawShip = parseFloat(row.shipping || 0).toFixed(2);
+        let rawTax = parseFloat(row.taxes || 0).toFixed(2);
+        let rawDisc = parseFloat(row.discount_amount || 0).toFixed(2);
+        let rawOutBal = parseFloat(row['Outstanding Balance'] || 0).toFixed(2);
+
         html += `
         <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:0.5rem;">
@@ -1124,53 +1130,53 @@ function renderSimulatorOrder(orderId) {
                 </div>
             </div>
             
-            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; font-size:12px; color:#aaa; margin-top:0.25rem; padding-bottom:0.5rem; border-bottom:1px dashed #333;">
-                <div style="display:flex; flex-direction:column;">
-                    <span>Actual Price</span>
-                    <span id="sim-gross-${i}" style="color:#fff;">$0.00</span>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:0.25rem;">
+                <!-- ROW 1: GOSPEL -->
+                <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
+                    <div style="display:flex; flex-direction:column; gap:2px;">
+                        <span style="color:#f59e0b; font-weight:bold; font-size:9px; letter-spacing:0.5px;">[RAW DATABASE]</span>
+                        <div style="display:flex; justify-content:space-between;"><span>Actual Price:</span> <span style="color:#fff;">$${rawPrice}</span></div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
+                        <div style="display:flex; justify-content:space-between;"><span>Ship Col:</span> <span style="color:#fff;">$${rawShip}</span></div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
+                        <div style="display:flex; justify-content:space-between;"><span>Tax Col:</span> <span style="color:#fff;">$${rawTax}</span></div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
+                        <div style="display:flex; justify-content:space-between;"><span>Discount:</span> <span style="color:#fff;">-$${rawDisc}</span></div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:2px; justify-content:flex-end;">
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#f59e0b;">Out. Bal:</span> <span style="color:#f59e0b;">-$${rawOutBal}</span></div>
+                    </div>
                 </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span>Ship Col.</span>
-                    <span id="sim-shipcol-${i}" style="color:#fff;">$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span>Tax Col.</span>
-                    <span id="sim-taxcol-${i}" style="color:#fff;">$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span>Discount</span>
-                    <span id="sim-disc-${i}" style="color:#fff;">-$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span style="color:#f59e0b;" title="Outstanding Balance applied to this line">Out. Bal.</span>
-                    <span id="sim-outbal-${i}" style="color:#f59e0b;">-$0.00</span>
-                </div>
-            </div>
-            
-            <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; font-size:12px; color:#aaa; margin-top:0.25rem;">
-                <div style="display:flex; flex-direction:column;">
-                    <span>Total Captured</span>
-                    <span id="sim-capture-${i}" style="color:#10b981; font-weight:bold;">$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span>Stripe/eBay</span>
-                    <span id="sim-fee-${i}" style="color:#ef4444;">-$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span>Label Cost</span>
-                    <span id="sim-shipexp-${i}" style="color:#ef4444;">-$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span>True COGS</span>
-                    <span id="sim-cogs-${i}" style="color:#ef4444;">-$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span style="color:#8b5cf6;" title="Refunds or Transferred Adjustments">Refunds/Adj.</span>
-                    <span id="sim-ghost-${i}" style="color:#8b5cf6;">$0.00</span>
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span style="color:#fff;">Actual Net</span>
-                    <span id="sim-net-${i}" style="color:#10b981; font-weight:bold; font-size:14px;">$0.00</span>
+                
+                <!-- ROW 2: LIVE ENGINE CALCS -->
+                <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; font-size:12px; color:#aaa; background:#1a1a1a; padding:10px 12px; border-radius:6px; border:1px solid #0ea5e9;">
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Engine Capture</span>
+                        <span id="sim-capture-${i}" style="color:#10b981; font-weight:bold;">$0.00</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Stripe/eBay</span>
+                        <span id="sim-fee-${i}" style="color:#ef4444;">-$0.00</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Label Cost</span>
+                        <span id="sim-shipexp-${i}" style="color:#ef4444;">-$0.00</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ True COGS</span>
+                        <span id="sim-cogs-${i}" style="color:#ef4444;">-$0.00</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#8b5cf6; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;" title="Refunds or Transferred Adjustments">⚙️ Refunds/Adj.</span>
+                        <span id="sim-ghost-${i}" style="color:#8b5cf6;">$0.00</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#fff; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">Final Net Profit</span>
+                        <span id="sim-net-${i}" style="color:#10b981; font-weight:bold; font-size:15px;">$0.00</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1269,24 +1275,12 @@ function recomputeSimulator() {
         let i = row.uiIdx;
         
         // Update DOM live
-        let elGross = document.getElementById(`sim-gross-${i}`);
-        let elShipCol = document.getElementById(`sim-shipcol-${i}`);
-        let elTaxCol = document.getElementById(`sim-taxcol-${i}`);
-        let elDisc = document.getElementById(`sim-disc-${i}`);
-        let elOutBal = document.getElementById(`sim-outbal-${i}`);
-        
         let elCapture = document.getElementById(`sim-capture-${i}`);
         let elFee = document.getElementById(`sim-fee-${i}`);
         let elShipExp = document.getElementById(`sim-shipexp-${i}`);
         let elCogs = document.getElementById(`sim-cogs-${i}`);
         let elGhost = document.getElementById(`sim-ghost-${i}`);
         let elNet = document.getElementById(`sim-net-${i}`);
-        
-        if(elGross) elGross.innerText = `$${(row.rawGross/parseFloat(row.qty_sold||1)).toFixed(2)}`;
-        if(elShipCol) elShipCol.innerText = `$${row.rawShipRev.toFixed(2)}`;
-        if(elTaxCol) elTaxCol.innerText = `$${row.rawTaxRev.toFixed(2)}`;
-        if(elDisc) elDisc.innerText = `-$${row.rawDisc.toFixed(2)}`;
-        if(elOutBal) elOutBal.innerText = `-$${row.outBal.toFixed(2)}`;
         
         if(elCapture) elCapture.innerText = `$${row.trueLineCaptured.toFixed(2)}`;
         if(elFee) elFee.innerText = `-$${row.fee.toFixed(2)}`;
@@ -1303,10 +1297,12 @@ function recomputeSimulator() {
             elNet.style.color = row.net < 0 ? '#ef4444' : '#10b981';
         }
         
+        let verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
+        
         // Build Console Output
-        log(`&nbsp;&nbsp;> Row: <span style="color:#fff;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>)`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">[FORENSIC RAW DB] actual_sale_price: '${row.actual_sale_price}', shipping: '${row.shipping}', type: '${row.transaction_type}'</span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Equation: [($${row.rawGross.toFixed(2)} Price + $${row.rawShipRev.toFixed(2)} Ship Col. + $${row.rawTaxRev.toFixed(2)} Tax Col. - $${row.rawDisc.toFixed(2)} Disc) = <span style="color:#10b981;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
+        log(`&nbsp;&nbsp;> Row: <span style="color:#fff; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>) ${verifiedBadge}`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">[FORENSIC RAW DB] Price: '${row.actual_sale_price}', ShipCol: '${row.shipping}', TaxCol: '${row.taxes}', Disc: '${row.discount_amount}', OutBal: '${row['Outstanding Balance']}'</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Capture Eq: [($${row.rawGross.toFixed(2)} Price + $${row.rawShipRev.toFixed(2)} Ship Col. + $${row.rawTaxRev.toFixed(2)} Tax Col. - $${row.rawDisc.toFixed(2)} Disc) = <span style="color:#10b981;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Stripe Target: ($${row.trueLineCaptured.toFixed(2)} Capture - $${row.outBal.toFixed(2)} Out. Bal.) = $${(row.trueLineCaptured - row.outBal).toFixed(2)} via <span style="color:#0ea5e9">${row.src}</span></span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Deductions: -$${row.fee.toFixed(2)} Stripe Fee - $${row.actShipCost.toFixed(2)} Ship Exp. - $${row.cogs.toFixed(2)} True COGS</span>`);
         if(row.ghostRev !== 0) {
