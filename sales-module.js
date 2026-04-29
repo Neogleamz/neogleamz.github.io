@@ -1068,6 +1068,8 @@ function runMathSimulator() {
         let salesPayload = rows.map(r => {
             let type = r.transaction_type || 'Standard';
             let cogs = window.getEngineTrueCogs(r.internal_recipe_name);
+            if (!cogs || cogs === 0) cogs = r.internal_recipe_name.includes('White') ? 35.00 : 30.00;
+            
             let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
             
             if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION') { cogs = 0; }
