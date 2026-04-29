@@ -2024,3 +2024,179 @@ document.addEventListener('change', function(e) {
         if (conf && typeof window[conf.onDropdownChangeFn] === 'function') window[conf.onDropdownChangeFn]();
     }
 });
+
+// --- SHOPIFY BILLING CSV IMPORTER ---
+function billingTrace(msg, isErr=false) {
+    let t = document.getElementById('billingProgressTerminal');
+    if(t) {
+        let line = document.createElement('div');
+        line.style.color = isErr ? '#ef4444' : '#38bdf8';
+        line.style.paddingBottom = '3px';
+        line.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        line.innerText = `> ${msg}`;
+        t.appendChild(line);
+        t.parentElement.scrollTop = t.parentElement.scrollHeight;
+    }
+}
+
+window.change_handleShopifyBillingUpload = async function(e) {
+    if(!e.target || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const isTestMode = e.target.id === 'ceoBillingCsvUploadTest';
+    
+    let t = document.getElementById('billingProgressTerminal'); if(t) t.innerHTML = window.safeHTML("");
+    billingTrace("INITIALIZING BILLING SYNC PROTOCOL...", false);
+    if(isTestMode) billingTrace("🧪 DRY RUN SANDBOX ENGAGED: Bypassing Supabase Connection.", false);
+    
+    sysLog("Initializing Shopify Billing Importer...", false);
+    setSysProgress(10, 'working');
+    billingTrace(`Loaded Payload: ${file.name} (${Math.round(file.size/1024)} KB)`);
+    
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+        try {
+            setSysProgress(30, 'working');
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            if(workbook.SheetNames.length === 0) throw new Error("CSV file appears to be empty or corrupted.");
+            
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const roa = XLSX.utils.sheet_to_json(firstSheet);
+            
+            if(roa.length === 0) throw new Error("No data rows found in the provided CSV file.");
+            
+            billingTrace(`File parsed successfully. Target rows length: ${roa.length}`);
+            billingTrace("Scanning for missing Storefront SKUs inside Local Dictionary...");
+            
+            // Extract the shipping charges securely
+            let matchedCosts = [];
+            roa.forEach(row => {
+                let cType = row['Charge category'] || row['Charge Category'] || "";
+                let orderTag = row['Order'] || "";
+                let amt = parseFloat(row['Amount']);
+                
+                if (cType.toString().toLowerCase().trim() === 'shipping_fee' && orderTag.toString().trim().startsWith('#') && !isNaN(amt)) {
+                    matchedCosts.push({
+                        parsed_order_id: orderTag.toString().trim(),
+                        parsed_shipping_cost: amt
+                    });
+                }
+            });
+            
+            if (matchedCosts.length === 0) {
+                alert("No shipping_fee charges found with valid Order tags (#xxxx) in this CSV.");
+                billingTrace("ERROR: No shipping_fee charges found with valid Order tags.", true);
+                setSysProgress(100, 'success');
+                e.target.value = '';
+                return;
+            }
+            
+            setSysProgress(50, 'working');
+            billingTrace(`Found ${matchedCosts.length} shipping charges. Cross-referencing sales_ledger...`, false);
+            
+            // Fetch relevant ledger targets
+            const orderTagsList = matchedCosts.map(m => m.parsed_order_id);
+            const { data: ledgerRows, error: ledgerError } = await window._supabase
+                .from('sales_ledger')
+                .select('id, order_id, actual_shipping_cost')
+                .in('order_id', orderTagsList)
+                .eq('isFirstRow', true);
+                
+            if(ledgerError) throw new Error("Failed to fetch target orders from the database: " + ledgerError.message);
+            
+            let updatesToApply = [];
+            
+            matchedCosts.forEach(cost => {
+                let targetRow = ledgerRows.find(lr => lr.order_id === cost.parsed_order_id);
+                if (targetRow) {
+                    updatesToApply.push({
+                        id: targetRow.id,
+                        order_id: targetRow.order_id,
+                        actual_shipping_cost: cost.parsed_shipping_cost,
+                        old_shipping_cost: targetRow.actual_shipping_cost || 0
+                    });
+                }
+            });
+            
+            if (updatesToApply.length === 0) {
+                alert("Extracted shipping costs did not match any historical orders in the current Ledger.");
+                billingTrace("Extracted shipping costs did not match any historical orders in the current Ledger.", true);
+                setSysProgress(100, 'success');
+                e.target.value = '';
+                return;
+            }
+            
+            setSysProgress(80, 'working');
+            
+            // Delegate back to Sandbox Visual Engine to enforce Zero-Bypass
+            if (isTestMode) {
+                billingTrace(`🧪 SANDBOX INTERCEPT: Supabase connection physically bypassed.`, true);
+                billingTrace(`Payload matrix cleanly routed directly to Global Data Modal.`, false);
+                setSysProgress(100, 'success');
+                
+                if (typeof window.openSandboxModal === 'function') {
+                    window.openSandboxModal(updatesToApply, "SANDBOX_BILLING_IMPORTS");
+                }
+                
+                e.target.value = '';
+                return;
+            }
+            
+            billingTrace(`▶ Routing Production payload to Modal for final review...`, false);
+            
+            let liveImportContext = {
+                termId: 'billingProgressTerminal',
+                statId: 'statusOrders',
+                inputNodeId: e.target.id,
+                action: 'UPDATE',
+                table: 'sales_ledger',
+                count: updatesToApply.length,
+                resObj: { table: 'sales_ledger', count: updatesToApply.length, data: updatesToApply },
+                customCommitFn: async function() {
+                    billingTrace(`▶ Execution Phase: Updating database securely...`, false);
+                    for (let updateObj of updatesToApply) {
+                        const { error } = await window._supabase
+                            .from('sales_ledger')
+                            .update({ actual_shipping_cost: updateObj.actual_shipping_cost })
+                            .eq('id', updateObj.id);
+                            
+                        if (error) throw new Error(`Failed updating Order ${updateObj.order_id}: ${error.message}`);
+                    }
+                    billingTrace("COMPLETED ALL PROCEDURES. Synchronized data to live database objects.");
+                    setTimeout(() => showToast(`✅ Success! ${updatesToApply.length} shipping costs structurally updated.`), 10);
+                    if (typeof loadSalesLedger === 'function') loadSalesLedger(); // refresh sales board dynamically
+                }
+            };
+            
+            if (typeof window.openSandboxModal === 'function') {
+                window.openSandboxModal(
+                    updatesToApply, 
+                    `PRODUCTION_BILLING_IMPORTS`, 
+                    null, 
+                    `sales_ledger (Primary)`, 
+                    null, 
+                    liveImportContext
+                );
+            } else {
+                throw new Error("Sandbox engine not found. Aborting execution for safety.");
+            }
+            
+            setSysProgress(100, 'success');
+            e.target.value = '';
+            
+        } catch(err) {
+            billingTrace(`CRITICAL FAULT: ${err.message}`, true);
+            sysLog("CSV Parsing Error: " + err.message, true);
+            alert("Error parsing the CSV file. Please check console.");
+            setSysProgress(100, 'error');
+            e.target.value = '';
+        }
+    };
+    reader.onerror = function(err) {
+        billingTrace(`CRITICAL FAULT: FileReader failed`, true);
+        sysLog("FileReader failed: " + err, true);
+        setSysProgress(100, 'error');
+        e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+};

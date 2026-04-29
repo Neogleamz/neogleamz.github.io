@@ -301,6 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_document_getElementById_salesC_5':
                     document.getElementById('salesCsvFileTest').click();
                     break;
+                case 'click_document_getElementById_ceoBillingCsvUpload':
+                    document.getElementById('ceoBillingCsvUpload').click();
+                    break;
+                case 'click_document_getElementById_ceoBillingCsvUploadTest':
+                    document.getElementById('ceoBillingCsvUploadTest').click();
+                    break;
                 case 'click_backfillFinancials':
                     backfillFinancials();
                     break;
@@ -696,6 +702,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_executeWithButtonAction_btnSal_4':
                     executeWithButtonAction('btnSalezImportTest', '⏳ PARSING...', '📋 READY FOR TEST', () => processSalesCSV(true));
+                    break;
+                case 'change_handleShopifyBillingUpload':
+                    if (typeof window.change_handleShopifyBillingUpload === 'function') window.change_handleShopifyBillingUpload(event);
                     break;
                 case 'change_handleFileSelect_this':
                     handleFileSelect(el);
