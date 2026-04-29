@@ -401,13 +401,14 @@ async function executeSalesSync(isTestMode = false) {
             let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
             let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
 
+            let exchAdj = isFirstRow ? parseFloat(r['Outstanding Balance'] || 0) : 0;
             let rawNet = getHistoricalNetProfit(gross, shipRev, taxRev, disc, actualShipCost, r.internal_recipe_name, r.qty_sold, r["Source"]);
             let refAmt = parseFloat(r.refunded_amount) || 0;
             // Erase the cancelled line-item values from the global refund penalty to prevent double-dipping ghost loops
             let voidedRev = voidedRevenueByOrder[r.order_id] || 0;
             let actualDeductibleRefund = Math.max(0, refAmt - voidedRev);
 
-            let net = rawNet;
+            let net = rawNet + outBal;
 
             if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') net = 0;
             if (type === 'Pre-Ship Exchange') net += getEngineTrueCogs(r.internal_recipe_name); // Re-add the true COGS (engine deducted it, but we didn't physically ship this)
@@ -619,7 +620,8 @@ function renderSalesTable() {
             let appliedShip = false;
             let appliedFee = false;
             
-            let orderCaptured = group.reduce((sum, r) => sum + (parseFloat(r.exchAdj) || 0) + (r.isCostOnlyItem ? 0 : (parseFloat(r.actual_sale_price||0)*parseFloat(r.qty_sold||0) + parseFloat(r.shipping||0) + parseFloat(r.taxes||0) - parseFloat(r.discount_amount||0))), 0);
+            let orderRefund = group.reduce((sum, r) => sum + (parseFloat(r.refunded_amount) || 0), 0);
+            let orderCaptured = group.reduce((sum, r) => sum + (parseFloat(r.exchAdj) || 0) + (r.isCostOnlyItem ? 0 : (parseFloat(r.actual_sale_price||0)*parseFloat(r.qty_sold||0) + parseFloat(r.shipping||0) + parseFloat(r.taxes||0) - parseFloat(r.discount_amount||0))), 0) - orderRefund;
             let trueOrderFee = orderHasExactPayout ? Math.max(0, (orderCaptured - exactPayout)) : 0;
             
             group.forEach(r => {
@@ -654,7 +656,7 @@ function renderSalesTable() {
                 } else if (r.isCostOnlyItem) {
                     r.net = 0 - r.actualShipCost - r.liveCogs;
                 } else {
-                    r.net = (p*q) + s - d - r.stripeFee - r.actualShipCost - r.liveCogs;
+                    r.net = (p*q) + s - d - r.stripeFee - r.actualShipCost - r.liveCogs + (parseFloat(r.exchAdj) || 0);
                 }
             });
         }
@@ -720,7 +722,7 @@ function renderSalesTable() {
                 u.shipping = 0;
                 u.discount_amount = 0;
                 u.taxes = 0;
-                u.liveCogs = 0; // Restocked
+                u.liveCogs = 0; // Restocked\n                u.total = 0;\n                u.exchAdj = 0;
                 u.total = 0;
                 u.exchAdj = 0;
                 u.isCostOnlyItem = true;
@@ -1227,7 +1229,7 @@ function recomputeSimulator() {
         
         let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actShipCost, r.internal_recipe_name, r.qty_sold, r['Source'] || 'web');
         
-        let net = rawNet;
+        let net = rawNet + outBal;
         if (type === 'IGNORE') net = 0;
         if (type === 'Pre-Ship Exchange') net += window.getEngineTrueCogs(r.internal_recipe_name); 
         if (isCostOnlyItem && type !== 'Cancelled') net = 0 - actShipCost - cogs;
