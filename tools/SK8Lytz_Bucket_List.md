@@ -44,7 +44,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
-*(No active ideas in backlog)*
+### Target: main
+*(Epic: Shopify Flow Automation)*
+- [ ] `research/shopify-flow-auto-tag` : Investigate building a Shopify Flow that automatically tags orders with the `Label: <price>` format when a shipping label is purchased or printed, feeding natively into the webhook parser. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
