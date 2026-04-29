@@ -805,6 +805,201 @@ document.addEventListener('drop', (e) => {
     const sliderGroup = e.target.closest('.ceo-slider-group');
     if (sliderGroup) {
         let idx = sliderGroup.getAttribute('data-slider-idx');
+    if(selections.length === 0) return alert("Please select quantities for at least one item.");
+
+    let bNameRaw = document.getElementById('ceo-u-bundle-name').value.trim();
+
+    if(bNameRaw) {
+        // Create as BUNDLE
+        let finalName = "📦 " + bNameRaw;
+        let tCogs = 0; let tMsrp = 0;
+        selections.forEach(s => { tCogs += s.qty * s.cogs; tMsrp += s.qty * s.msrp; });
+
+        ceoActiveProducts.push({ name: finalName, isBundle:true, applyCac:false, applyAff:false, applyWarr:false, currentMsrp: tMsrp, testMsrp: tMsrp, cogs: tCogs, vol: 0 });
+    } else {
+        // Add INDIVIDUALLY
+        selections.forEach(s => {
+            // If already on board, maybe skip or alert? I'll allow duplicates for now or use unique naming
+            let baseName = s.name;
+            if(ceoActiveProducts.some(p => p.name === baseName)) {
+                alert(`Note: ${baseName} is already on the board. Skipping duplicate add.`);
+                return;
+            }
+            ceoActiveProducts.push({ name: baseName, isBundle:false, applyCac:false, applyAff:false, applyWarr:false, currentMsrp: s.msrp, testMsrp: s.msrp, cogs: s.cogs, vol: 0 });
+        });
+    }
+
+    document.getElementById('ceoAddModal').style.display = 'none';
+    renderCeoTerminal();
+}
+
+// --- LTV MODAL LOGIC ---
+window._ltvSortKey = window._ltvSortKey || 'net';
+window._ltvSortAsc = window._ltvSortAsc !== undefined ? window._ltvSortAsc : false;
+
+function sortLtvModal(key) {
+    if (window._ltvSortKey === key) {
+        window._ltvSortAsc = !window._ltvSortAsc;
+    } else {
+        window._ltvSortKey = key;
+        window._ltvSortAsc = false;
+    }
+    renderLtvWhalesTable();
+}
+
+function renderLtvWhalesTable() {
+    let tBody = document.getElementById('ltv-whales-tbody');
+    if (!tBody || !window._ltvCachedWhales) return;
+
+    window._ltvCachedWhales.sort((a,b) => {
+        let valA = a[window._ltvSortKey];
+        let valB = b[window._ltvSortKey];
+        if (typeof valA === 'string' && typeof valB === 'string') {
+            return window._ltvSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        if (valA < valB) return window._ltvSortAsc ? -1 : 1;
+        if (valA > valB) return window._ltvSortAsc ? 1 : -1;
+        return 0;
+    });
+
+    let html = '';
+    
+    if (window._ltvCachedWhales.length === 0) {
+        html = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#666;">No historical repeat transactions found.</td></tr>';
+    } else {
+        window._ltvCachedWhales.forEach(w => {
+            let shortHash = w.pii.substring(0, 8);
+            html += `
+            <tr class="group" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05); transition:background 0.2s;">
+                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#a78bfa;" title="${w.pii}">[${shortHash}]</td>
+                <td style="padding:12px 15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#cbd5e1;">${w.order_id}</td>
+                <td style="padding:12px 15px; color:#94a3b8; font-size:12px;">${new Date(w.date).toLocaleDateString()}</td>
+                <td style="padding:12px 15px; color:white; font-size:12px; font-weight:bold;">${w.item}</td>
+                <td style="padding:12px 15px; color:white; font-weight:bold; text-align:right;">${ceoFmt.format(w.total)}</td>
+                <td style="padding:12px 15px; font-weight:bold; color:${w.net < 0 ? '#ef4444' : 'var(--neon-green)'}; text-align:right;">${ceoFmt.format(w.net)}</td>
+            </tr>`;
+        });
+    }
+    tBody.innerHTML = html;
+}
+
+function openLtvModal() {
+    let map = window._ltvCustomerMap || {};
+    let hashes = Object.keys(map);
+
+    // Distribution
+    let distribution = { 1: 0, 2: 0, 3: 0 };
+    window._ltvCachedWhales = [];
+
+    hashes.forEach(h => {
+        let orderCount = map[h].orders;
+        if (orderCount === 1) distribution[1]++;
+        else if (orderCount === 2) distribution[2]++;
+        else distribution[3]++;
+
+        // Unroll individual transactions, grouped by order
+        if (map[h].ordersMap) {
+            Object.values(map[h].ordersMap).forEach(o => {
+                window._ltvCachedWhales.push({
+                    pii: h,
+                    order_id: o.order_id,
+                    date: o.date,
+                    item: o.items.join(', '),
+                    total: o.total,
+                    net: o.net
+                });
+            });
+        }
+    });
+
+    // Update UI DOM Elements
+    let elTotal = document.getElementById('ltv-dist-total');
+    let elOne = document.getElementById('ltv-dist-1');
+    let elTwo = document.getElementById('ltv-dist-2');
+    let elPlus = document.getElementById('ltv-dist-plus');
+
+    if(elTotal) elTotal.innerText = hashes.length;
+    if(elOne) elOne.innerText = distribution[1];
+    if(elTwo) elTwo.innerText = distribution[2];
+    if(elPlus) elPlus.innerText = distribution[3];
+
+    renderLtvWhalesTable();
+
+    let modal = document.getElementById('ltv-metrics-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeLtvModal() {
+    let modal = document.getElementById('ltv-metrics-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// --- CEO Terminal Global Event Delegation ---
+document.addEventListener('click', (e) => {
+    try {
+        if (e.target.closest('#btn-open-ceo-add-modal')) openCeoAddModal();
+        
+        const toggleBtn = e.target.closest('.ceo-toggle-btn');
+        if (toggleBtn) {
+            let idx = toggleBtn.getAttribute('data-toggle-idx');
+            let prop = toggleBtn.getAttribute('data-toggle-prop');
+            if (idx !== null && prop) toggleCeoBtn(parseInt(idx), prop);
+        }
+        
+        const removeBtn = e.target.closest('.ceo-remove-btn');
+        if (removeBtn) {
+            let idx = removeBtn.getAttribute('data-remove-idx');
+            if (idx !== null) removeCeoProduct(parseInt(idx));
+        }
+        
+        const sortTh = e.target.closest('th[data-ceosort]');
+        if (sortTh) {
+            let key = sortTh.getAttribute('data-ceosort');
+            if (key) sortCeoTable(key);
+        }
+        
+        const ltvTh = e.target.closest('th[data-ltvsort]');
+        if (ltvTh) {
+            let key = ltvTh.getAttribute('data-ltvsort');
+            if (key) sortLtvModal(key);
+        }
+    } catch (err) { }
+});
+
+document.addEventListener('change', (e) => {
+    try {
+        const testMsrpInput = e.target.closest('.ceo-test-msrp-listen');
+        if (testMsrpInput) updateCeoEngine();
+    } catch (err) { }
+});
+
+document.addEventListener('input', (e) => {
+    try {
+        const volInput = e.target.closest('.ceo-vol-listen');
+        if (volInput) {
+            let idx = volInput.getAttribute('data-vol-idx');
+            let dup = document.getElementById(`ceo-vol-${idx}`);
+            if(dup) dup.value = volInput.value;
+            updateCeoEngine();
+        }
+    } catch (err) { }
+});
+
+document.addEventListener('dragstart', (e) => {
+    const sliderGroup = e.target.closest('.ceo-slider-group');
+    if (sliderGroup) {
+        let idx = sliderGroup.getAttribute('data-slider-idx');
+        if (idx !== null) ceoDragStart(e, parseInt(idx));
+    }
+});
+document.addEventListener('dragover', (e) => {
+    const sliderGroup = e.target.closest('.ceo-slider-group');
+    if (sliderGroup) ceoDragOver(e);
+});
+document.addEventListener('drop', (e) => {
+    const sliderGroup = e.target.closest('.ceo-slider-group');
+    if (sliderGroup) {
+        let idx = sliderGroup.getAttribute('data-slider-idx');
         if (idx !== null) ceoDrop(e, parseInt(idx));
     }
 });
