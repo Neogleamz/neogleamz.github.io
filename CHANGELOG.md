@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.20] - 2026-04-28
+### Features & Refactors
+- **Shopify Historical Backfill Engine**: Architected a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) via Client Credentials OAuth flow without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+
 ## [1.0.19] - 2026-04-28
 ### Features & Refactors
 - **Revenuez Fulfillment Expansion**: Intercepted Shopify webhooks (orders/updated and fulfillments/create) and executed GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Updated the Supabase `sales_ledger` schema and modified the Revenuez UI data grid to surface operational data with clickable tracking links and warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
