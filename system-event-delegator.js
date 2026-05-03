@@ -190,15 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openMultiBatchModal_3d':
                     window.openMultiBatchModal('3d');
                     break;
-                case 'click_teSwitchView_list':
-                    if(typeof window.teSwitchView==='function') window.teSwitchView('list', el);
-                    break;
-                case 'click_teSwitchView_board':
-                    if(typeof window.teSwitchView==='function') window.teSwitchView('board', el);
-                    break;
-                case 'click_teSwitchView_calendar':
-                    if(typeof window.teSwitchView==='function') window.teSwitchView('calendar', el);
-                    break;
                 case 'click_teSwitchView_inbox':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('inbox', el);
                     break;
@@ -257,39 +248,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     break;
-                case 'click_closeTaskPlanner':
-                    if(typeof window.closeTaskPlanner==='function') window.closeTaskPlanner();
-                    break;
-                case 'click_teCreateNewTask':
-                    if(typeof window.teCreateNewTask==='function') window.teCreateNewTask();
-                    break;
-                case 'click_teOpenTaskContext':
-                    if(typeof window.teOpenTaskContext==='function') window.teOpenTaskContext(el.getAttribute('data-task-id'));
-                    break;
                 case 'click_teToggleTaskDone':
                     event.stopPropagation();
                     if(typeof window.teCycleStatus==='function') window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
-                    break;
-                case 'click_teCycleStatus':
-                    event.stopPropagation();
-                    if(typeof window.teCycleStatus==='function') window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
-                    break;
-                case 'click_closeTaskContext':
-                    if(typeof window.closeTaskContext==='function') window.closeTaskContext();
                     break;
                 case 'click_teToggleTaskDoneInFlyout':
                     if(typeof window.teCycleStatus==='function' && window.currentOpenTaskId) {
                         window.teCycleStatus(window.currentOpenTaskId);
                     }
-                    break;
-                case 'click_teToggleTemplateMenu':
-                    if(typeof window.teToggleTemplateMenu==='function') window.teToggleTemplateMenu();
-                    break;
-                case 'click_teSpawnSOP_Batchez':
-                    if(typeof window.teSpawnSOP==='function') window.teSpawnSOP('batchez');
-                    break;
-                case 'click_teSpawnSOP_Print':
-                    if(typeof window.teSpawnSOP==='function') window.teSpawnSOP('print');
                     break;
                 case 'click_teAddSubtask':
                     if(typeof window.teAddSubtask==='function') window.teAddSubtask();
