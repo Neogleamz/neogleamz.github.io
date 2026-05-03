@@ -169,6 +169,7 @@ function teRenderTaskGrid(filter = 'list') {
     let displayTasks = taskList.filter(t => {
         if (filter === 'blocked') return t.status === 'Blocked';
         if (filter === 'completed') return t.status === 'Done';
+        if (filter === 'inbox') return t.status !== 'Done' && !t.parent_task_id;
         if (filter === 'my_tasks') {
             let meta = t.metadata || {};
             if (meta.spoofed_assignee === currentUser) return true;
@@ -364,9 +365,14 @@ window.teRenderSubtasks = function(taskId) {
     const container = document.getElementById('te-flyout-subtasks-container');
     const header = document.getElementById('te-flyout-subtasks-header');
     if (!container) return;
+    if (!taskId) {
+        if (header) header.textContent = 'SUBTASKS (0/0)';
+        container.innerHTML = '';
+        return;
+    }
     
     // Find relational subtasks
-    let subtasks = taskEngineDB.taskz.filter(t => t.parent_task_id === taskId);
+    let subtasks = taskEngineDB.taskz.filter(t => t.parent_task_id === taskId && t.parent_task_id != null);
     
     if (header) {
         let doneCount = subtasks.filter(t => t.status === 'Done').length;
@@ -735,57 +741,10 @@ window.teSwitchView = function(view, btnEl) {
         let title = document.getElementById('te-main-header-title');
         if (title) title.textContent = 'Completed Tasks';
     } else if (view === 'inbox') {
-        header.style.display = 'none';
+        header.style.display = 'grid';
+        teRenderTaskGrid('inbox');
         let title = document.getElementById('te-main-header-title');
         if (title) title.textContent = 'Inbox View';
-        
-        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
-        
-        let relevantEvents = [];
-        // Just merge comments and activity. For inbox, maybe we just show everything if no user, or filtered if user.
-        taskEngineDB.comments.forEach(c => {
-            if (currentUser === 'none' || (c.comment_text && c.comment_text.includes('@' + currentUser))) {
-                relevantEvents.push({ type: 'comment', data: c, ts: new Date(c.created_at).getTime() });
-            }
-        });
-        taskEngineDB.activity.forEach(a => {
-            if (currentUser === 'none') {
-                relevantEvents.push({ type: 'activity', data: a, ts: new Date(a.timestamp).getTime() });
-            }
-        });
-        
-        relevantEvents.sort((a,b) => b.ts - a.ts); // descending
-        
-        if (relevantEvents.length === 0) {
-            wrapper.innerHTML = `<div style="padding: 20px; color: var(--text-muted); text-align: center;">You're all caught up! No recent activity for ${currentUser}.</div>`;
-            return;
-        }
-        
-        let html = '<div class="task-timeline-container" style="padding: 20px;">';
-        relevantEvents.forEach(ev => {
-            let t = taskEngineDB.taskz.find(tk => tk.id === ev.data.task_id);
-            let taskTitle = t ? t.title : 'Unknown Task';
-            
-            if (ev.type === 'comment') {
-                html += `
-                <div style="position: relative; margin-top: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer;" onclick="window.teOpenTaskContext('${ev.data.task_id}')">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <div style="font-size: 12px; color: var(--text-muted);">From: <strong>${ev.data.author_id}</strong> on task <span style="color:white;">${taskTitle}</span></div>
-                        <div style="font-size: 10px; color: var(--text-muted);">${new Date(ev.data.created_at).toLocaleString()}</div>
-                    </div>
-                    <div style="font-size: 13px; color: #ccc;">${ev.data.comment_text}</div>
-                </div>`;
-            } else {
-                html += `
-                <div style="position: relative; margin-top: 10px; padding: 10px 15px; border-left: 2px solid #8b5cf6; cursor: pointer;" onclick="window.teOpenTaskContext('${ev.data.task_id}')">
-                    <div style="font-size: 12px; color: var(--text-muted);">${new Date(ev.data.timestamp).toLocaleString()}</div>
-                    <div style="font-size: 13px; color: white;"><strong>${ev.data.actor_type}</strong> ${ev.data.action_text} on <span style="color:#2dd4bf;">${taskTitle}</span></div>
-                </div>`;
-            }
-        });
-        html += '</div>';
-        wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
-        
     } else if (view === 'board') {
         header.style.display = 'none';
         
