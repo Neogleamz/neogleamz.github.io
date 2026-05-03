@@ -199,9 +199,19 @@ function teBuildTaskRowHTML(t, isChild) {
     let meta = t.metadata || {};
     let ownerInitials = 'UN';
     let ownerBg = '#3b82f6';
-    if (meta.spoofed_assignee) {
+    let ownerTitle = 'Unassigned';
+    
+    if (t.assigned_team_id) {
+        let team = taskEngineDB.teams.find(tm => tm.id === t.assigned_team_id);
+        if (team) {
+            ownerInitials = team.name.substring(0,2).toUpperCase();
+            ownerBg = team.color_hex || '#8b5cf6';
+            ownerTitle = team.name;
+        }
+    } else if (meta.spoofed_assignee) {
         ownerInitials = meta.spoofed_assignee.substring(0,2).toUpperCase();
         ownerBg = '#10b981'; // Green for spoofed users
+        ownerTitle = meta.spoofed_assignee;
     }
 
     let dueStr = t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No Date';
@@ -217,7 +227,7 @@ function teBuildTaskRowHTML(t, isChild) {
             </div>
         </div>
         <div style="display: flex; align-items: center;">
-            <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);" title="${meta.spoofed_assignee || 'Unassigned'}">${ownerInitials}</div>
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);" title="${ownerTitle}">${ownerInitials}</div>
         </div>
         <div>
             <span class="status-pill ${statusColorClass}" data-click="click_teCycleStatus" style="position: relative; z-index: 2;">${t.status}</span>
@@ -267,8 +277,26 @@ window.teOpenTaskContext = function(taskId) {
             
             const assigneeSelect = document.getElementById('te-flyout-assignee');
             if (assigneeSelect) {
+                let opts = '<option value="">Unassigned</option>';
+                opts += '<optgroup label="Users">';
+                opts += '<option value="Chris">Chris</option><option value="Andy">Andy</option><option value="Tyson">Tyson</option>';
+                opts += '</optgroup>';
+                
+                if (taskEngineDB.teams && taskEngineDB.teams.length > 0) {
+                    opts += '<optgroup label="Teams">';
+                    taskEngineDB.teams.forEach(team => {
+                        opts += `<option value="team_${team.id}">${team.name}</option>`;
+                    });
+                    opts += '</optgroup>';
+                }
+                assigneeSelect.innerHTML = opts;
+                
                 let meta = task.metadata || {};
-                assigneeSelect.value = meta.spoofed_assignee || '';
+                if (task.assigned_team_id) {
+                    assigneeSelect.value = 'team_' + task.assigned_team_id;
+                } else {
+                    assigneeSelect.value = meta.spoofed_assignee || '';
+                }
             }
             
             const cycleSelect = document.getElementById('te-flyout-cycle');
@@ -455,12 +483,24 @@ window.teUpdateTaskAssignee = async function(taskId, assignee) {
     if (!task) return;
     
     let meta = task.metadata || {};
-    meta.spoofed_assignee = assignee;
-    task.metadata = meta;
+    let updatePayload = {};
     
+    if (assignee && assignee.startsWith('team_')) {
+        let teamId = assignee.replace('team_', '');
+        task.assigned_team_id = teamId;
+        delete meta.spoofed_assignee;
+        updatePayload = { assigned_team_id: teamId, metadata: meta };
+    } else {
+        task.assigned_team_id = null;
+        meta.spoofed_assignee = assignee;
+        updatePayload = { assigned_team_id: null, metadata: meta };
+    }
+    
+    task.metadata = meta;
     teRenderTaskGrid();
+    
     try {
-        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', taskId);
+        await supabaseClient.from('taskz').update(updatePayload).eq('id', taskId);
     } catch(e) { console.error(e); }
 };
 
