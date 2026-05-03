@@ -1218,11 +1218,11 @@ window.teSwitchView = function(view, btnEl) {
                     let tasksHtml = taskEngineDB.taskz.filter(t => (status === 'Completed' ? (t.status === 'Completed' || t.status === 'Done') : t.status === status)).map(t => {
                         let color = status === 'Completed' ? '#10b981' : (status === 'Todo' ? '#64748b' : '#3b82f6');
                         return `
-                        <div class="kanban-card" data-task-id="${t.id}" style="background: var(--bg-container); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-left: 3px solid ${color};">
+                        <div class="kanban-card" data-task-id="${t.id}" data-click="click_teOpenTaskContext" style="background: var(--bg-container); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-left: 3px solid ${color};">
                             <div style="font-weight: 500; font-size: 14px; margin-bottom: 8px; color: white;">${t.title}</div>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-size: 11px; color: var(--text-muted);">⏱️ ${t.estimated_minutes || 0}m</span>
-                                <span class="status-pill status-${status.toLowerCase().replace(' ', '-')}" style="font-size: 10px; padding: 2px 6px;">${status}</span>
+                                <span class="status-pill status-${status.toLowerCase().replace(' ', '-')}" data-click="click_teOpenStatusDropdown" data-task-id="${t.id}" style="font-size: 10px; padding: 2px 6px; cursor: pointer;">${status}</span>
                             </div>
                         </div>`;
                     }).join('');
