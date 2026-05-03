@@ -45,7 +45,44 @@ window.closeTaskContext = function() {
 // KEYBOARD ARCHITECTURE (Linear-style)
 // ==========================================
 document.addEventListener('keydown', (e) => {
-    // Do not intercept if user is typing in an input or textarea
+    // Cmd+K or Ctrl+K for Global Command Palette
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const palette = document.getElementById('neoCommandPalette');
+        const input = document.getElementById('neoCommandInput');
+        if (palette) {
+            if (palette.classList.contains('hidden')) {
+                palette.classList.remove('hidden');
+                if (input) {
+                    input.value = ''; // clear input
+                    input.focus();
+                }
+            } else {
+                palette.classList.add('hidden');
+                if (input) input.blur();
+            }
+        }
+        return;
+    }
+
+    // Press 'Escape' to close Task Planner, Context Flyout, or Command Palette
+    if (e.key === 'Escape') {
+        const palette = document.getElementById('neoCommandPalette');
+        if (palette && !palette.classList.contains('hidden')) {
+            palette.classList.add('hidden');
+            return;
+        }
+
+        const flyout = document.getElementById('taskContextFlyout');
+        if (flyout && !flyout.classList.contains('hidden')) {
+            window.closeTaskContext();
+        } else if (isTaskPlannerOpen) {
+            window.closeTaskPlanner();
+        }
+        return;
+    }
+
+    // Do not intercept generic hotkeys if user is typing in an input or textarea
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
         return;
     }
@@ -57,16 +94,6 @@ document.addEventListener('keydown', (e) => {
             window.closeTaskPlanner();
         } else {
             window.openTaskPlanner();
-        }
-    }
-
-    // Press 'Escape' to close Task Planner or Context Flyout
-    if (e.key === 'Escape') {
-        const flyout = document.getElementById('taskContextFlyout');
-        if (flyout && !flyout.classList.contains('hidden')) {
-            window.closeTaskContext();
-        } else if (isTaskPlannerOpen) {
-            window.closeTaskPlanner();
         }
     }
 
