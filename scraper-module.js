@@ -242,25 +242,29 @@ function closeScraperFoundry() {
 }
 
 function _scraperBindEvents() {
-    document.getElementById('scraperCloseBtn').addEventListener('click', closeScraperFoundry);
+    if (window.scraperEventController) window.scraperEventController.abort();
+    window.scraperEventController = new AbortController();
+    const signal = window.scraperEventController.signal;
+
+    document.getElementById('scraperCloseBtn').addEventListener('click', closeScraperFoundry, { signal });
     document.getElementById('scraperFileInput').addEventListener('change', (e) => {
         if (e.target.files[0]) _scraperIngestFile(e.target.files[0]);
-    });
+    }, { signal });
 
     const pane1 = document.getElementById('scraperPane1');
-    pane1.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+    pane1.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); }, { signal });
     pane1.addEventListener('drop', (e) => {
         e.preventDefault(); e.stopPropagation();
         const f = e.dataTransfer.files[0];
         if (f && (f.name.endsWith('.html') || f.name.endsWith('.htm'))) _scraperIngestFile(f);
-    });
+    }, { signal });
 
-    document.getElementById('scraperSetContainerBtn').addEventListener('click', _scraperSetContainerBounds);
-    document.getElementById('scraperExtractChildBtn').addEventListener('click', _scraperMapChildColumn);
+    document.getElementById('scraperSetContainerBtn').addEventListener('click', _scraperSetContainerBounds, { signal });
+    document.getElementById('scraperExtractChildBtn').addEventListener('click', _scraperMapChildColumn, { signal });
     
-    document.getElementById('scraperExportXlsxBtn').addEventListener('click', _scraperExportXLSX);
-    document.getElementById('scraperCopyBtn').addEventListener('click', _scraperCopyJSON);
-    document.getElementById('scraperClearBtn').addEventListener('click', _scraperClearDataset);
+    document.getElementById('scraperExportXlsxBtn').addEventListener('click', _scraperExportXLSX, { signal });
+    document.getElementById('scraperCopyBtn').addEventListener('click', _scraperCopyJSON, { signal });
+    document.getElementById('scraperClearBtn').addEventListener('click', _scraperClearDataset, { signal });
 }
 
 function _scraperIngestFile(file) {
