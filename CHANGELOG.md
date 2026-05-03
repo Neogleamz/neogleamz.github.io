@@ -7,6 +7,7 @@
 - **Task Sorting & Prioritization**: Implement the ability to sort tasks globally and prioritize them (e.g., via drag-and-drop) within specific cycles.
 - **List View Column Sorting**: Enable dynamic sorting by clicking on any column header within the List/Row view (Owner, Status, Timeline, Priority).
 - **Task Timelines & Calendar Sync**: Implement date picking/timelines for individual tasks and map them to render dynamically on the Calendar view.
+- **Task Engine UI Colorization**: Inject more vibrant colors into the left sidebar pane and the top navigation of the right pane (List/Board/Calendar) to create clearer visual distinction for active states.
 ## [1.0.24] - 2026-05-02
 ### Features & Refactors
 - **Phase 7 (Communication & Inbox)**: Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
