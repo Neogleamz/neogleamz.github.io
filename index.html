@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.05.03.0424"></script>
+    <script src="system-version.js?v=v.2026.05.03.0430"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.03.0424"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.03.0430"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.03.0424"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.03.0430"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="system-event-delegator.js?v=v.2026.05.03.0424"></script>
+    <script src="system-event-delegator.js?v=v.2026.05.03.0430"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1384,18 +1384,52 @@
         font-size: 13px;
         font-weight: 500;
         cursor: pointer;
-        transition: background 0.2s, color 0.2s;
+        transition: all 0.2s ease-in-out;
         display: flex;
         align-items: center;
         margin-bottom: 2px;
+        box-shadow: inset 0 0 0 transparent;
     }
     .task-nav-link:hover {
         background: rgba(255,255,255,0.05);
     }
     .task-nav-link.active {
-        background: rgba(239, 68, 68, 0.15);
-        color: #ef4444;
+        background: rgba(45, 212, 191, 0.15);
+        color: #2dd4bf;
         font-weight: bold;
+        box-shadow: inset 3px 0 0 #2dd4bf;
+    }
+    .task-view-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 4px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+        transition: all 0.2s ease-in-out;
+        position: relative;
+    }
+    .task-view-btn:hover {
+        color: white;
+        background: rgba(255,255,255,0.05);
+    }
+    .task-view-btn.active {
+        color: white;
+        background: rgba(45, 212, 191, 0.1);
+        text-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
+    }
+    .task-view-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 10%;
+        width: 80%;
+        height: 2px;
+        background: #2dd4bf;
+        border-radius: 2px;
+        box-shadow: 0 0 6px #2dd4bf;
     }
     .task-grid-header {
         display: grid;
@@ -4819,19 +4853,19 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.05.03.0424"></script>
-<script src="system-tools-module.js?v=v.2026.05.03.0424"></script>
-<script src="bom-module.js?v=v.2026.05.03.0424"></script>
-<script src="inventory-module.js?v=v.2026.05.03.0424"></script>
-<script src="packerz-module.js?v=v.2026.05.03.0424"></script>
-<script src="production-module.js?v=v.2026.05.03.0424"></script>
-<script src="sales-module.js?v=v.2026.05.03.0424"></script>
-<script src="analytics-module.js?v=v.2026.05.03.0424"></script>
-<script src="ceo-module.js?v=v.2026.05.03.0424"></script>
-<script src="task-engine.js?v=v.2026.05.03.0424"></script>
-<script src="print-module.js?v=v.2026.05.03.0424"></script>
-<script src="scraper-module.js?v=v.2026.05.03.0424"></script>
-<script src="socialz-module.js?v=v.2026.05.03.0424"></script>
+<script src="neogleamz-engine.js?v=v.2026.05.03.0430"></script>
+<script src="system-tools-module.js?v=v.2026.05.03.0430"></script>
+<script src="bom-module.js?v=v.2026.05.03.0430"></script>
+<script src="inventory-module.js?v=v.2026.05.03.0430"></script>
+<script src="packerz-module.js?v=v.2026.05.03.0430"></script>
+<script src="production-module.js?v=v.2026.05.03.0430"></script>
+<script src="sales-module.js?v=v.2026.05.03.0430"></script>
+<script src="analytics-module.js?v=v.2026.05.03.0430"></script>
+<script src="ceo-module.js?v=v.2026.05.03.0430"></script>
+<script src="task-engine.js?v=v.2026.05.03.0430"></script>
+<script src="print-module.js?v=v.2026.05.03.0430"></script>
+<script src="scraper-module.js?v=v.2026.05.03.0430"></script>
+<script src="socialz-module.js?v=v.2026.05.03.0430"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5289,18 +5323,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.03.0424"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.03.0430"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.03.0424"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.03.0430"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.03.0424"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.03.0430"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.03.0424"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.03.0424"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.03.0424"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.03.0430"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.03.0430"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.03.0430"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.05.03.0424"></script>
-    <script src="labelz-module.js?v=v.2026.05.03.0424"></script>
+    <script src="barcodz-module.js?v=v.2026.05.03.0430"></script>
+    <script src="labelz-module.js?v=v.2026.05.03.0430"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -5562,9 +5596,9 @@
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <h1 id="te-main-header-title" style="margin: 0; font-weight: 300; font-size: 24px; color: white;">Inbox</h1>
                         <div id="te-view-toggles" style="display: flex; gap: 4px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                            <button data-click="click_teSwitchView_list" class="task-view-btn active" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">List</button>
-                            <button data-click="click_teSwitchView_board" class="task-view-btn" style="background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">Board</button>
-                            <button data-click="click_teSwitchView_calendar" class="task-view-btn" style="background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">Calendar</button>
+                            <button data-click="click_teSwitchView_list" class="task-view-btn active">List</button>
+                            <button data-click="click_teSwitchView_board" class="task-view-btn">Board</button>
+                            <button data-click="click_teSwitchView_calendar" class="task-view-btn">Calendar</button>
                         </div>
                     </div>
                     
