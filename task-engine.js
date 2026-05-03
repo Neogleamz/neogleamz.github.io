@@ -474,7 +474,7 @@ window.teOpenStatusDropdown = function(taskId, element) {
         document.body.appendChild(dropdown);
         
         document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !e.target.closest('[data-click="click_teOpenStatusDropdown"]')) {
+            if (!dropdown.contains(e.target) && !e.target.closest('[data-click="click_teOpenStatusDropdown"]') && !e.target.closest('[data-click="click_teBulkStatusDropdown"]')) {
                 dropdown.style.display = 'none';
             }
         });
@@ -495,24 +495,24 @@ window.teOpenStatusDropdown = function(taskId, element) {
 
 window.teSetStatus = async function(status, directTaskId = null) {
     let taskIds = [];
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    const dropdown = document.getElementById('te-status-dropdown');
     
-    if (window.bulkStatusMode && window.bulkSelectedIds) {
-        taskIds = window.bulkSelectedIds;
-        const dropdown = document.getElementById('te-status-dropdown');
+    if (checkboxes.length > 0) {
+        taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
         if (dropdown) dropdown.style.display = 'none';
+        
         window.bulkStatusMode = false;
         window.bulkSelectedIds = null;
         
         // Uncheck all main tasks after action
         const selectAll = document.getElementById('te-main-select-all');
         if (selectAll) selectAll.checked = false;
-        const checkboxes = document.querySelectorAll('.te-task-checkbox');
         checkboxes.forEach(cb => cb.checked = false);
-        window.teUpdateMainSelection();
+        if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
     } else {
         let taskId = directTaskId;
         if (!taskId) {
-            const dropdown = document.getElementById('te-status-dropdown');
             if (!dropdown) return;
             taskId = dropdown.getAttribute('data-task-id');
             if (dropdown) dropdown.style.display = 'none';
