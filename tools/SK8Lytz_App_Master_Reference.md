@@ -312,3 +312,10 @@ Gateway fees are dynamically calculated by subtracting `exactPayout` from `order
 
 ### C. Mathematical Multiplier Strictness (Ternary Precedence)
 When calculating aggregate metrics like COGS or true revenue captures derived from dynamic fallback functions, the engine MUST enforce strict mathematical parentheses around ternary conditional operators before multiplying by quantity (`qty`). (e.g., `let liveCogs = (x.cogs_at_sale != null ? parseFloat(x.cogs_at_sale) : getEngineTrueCogs(x.recipe)) * qty;`). Failing to wrap the ternary blocks evaluates the multiplier against only the false condition, breaking multi-item order mathematics globally.
+
+---
+
+## 🛠️ 11. Task Engine Architecture
+* **Command Palette (Cmd+K)**: The application utilizes a global Command Palette (ID: `#neoCommandPalette`) summoned via `Cmd+K` or `Ctrl+K` from any context. This serves as the primary navigation and action hub.
+* **Spreadsheet Data Grid**: The task lists utilize a strict `display: grid` CSS layout to align `Task`, `Owner`, `Status`, `Timeline`, and `Priority` columns dynamically without `flex` wrapping failures.
+* **Activity Timeline**: The Context Flyout uses a vertical CSS `border-left` connector (`.task-timeline-container`) combined with absolute-positioned `.task-timeline-node` dots to visualize the linear history of task interactions and user comments.
