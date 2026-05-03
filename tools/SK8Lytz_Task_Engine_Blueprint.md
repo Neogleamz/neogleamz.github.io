@@ -81,7 +81,14 @@ Inside the modal, the UI will instantly swap between three native Vanilla JS ren
 
 ## 4. Deep Module Integrations (Cross-Module Synergy)
 
-The true power of this system is that it physically hooks into the existing Neogleamz architecture.
+The true power of this system is that it physically hooks into the existing Neogleamz architecture. We will transcend standard "To-Do" text lists by turning the tasks themselves into **Embedded UI Wrappers**.
+
+### Actionable Task Payloads (Embedded Modals)
+Tasks will not just link you to another page—they will physically embed the relevant tools *inside* the task view itself.
+- **Recurring Cycle Counts:** A recurring monthly task called "Warehouse Cycle Count" is generated. When you open the task, it doesn't just say "go count stuff". The **Cycle Count Scanner UI** is physically embedded inside the task body. You use your phone camera to scan right there, and the task automatically marks itself as `Done` when the count is submitted.
+- **Low Stockz Triggers:** When a Retail Product hits its `minimum_stock_level`, the automation generates a "Reorder Low Stock" task. When you open this task, the **Low Stockz Report** data-grid is physically injected into the task description area, letting you review exactly what needs ordering without navigating away to the Inventory Hub.
+
+### Global Hooks
 
 - **Inventory (DATAZ/EDITZ):** If a product hits its `minimum_stock_level`, the system auto-spawns a High Priority task: *"Restock SKU-123"*. Clicking the task opens the EDITZ modal instantly.
 - **Production Manager:** Converting a Custom Order into a Work Order auto-generates a task timeline (Assembly -> QA -> Boxing).
