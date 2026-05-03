@@ -209,26 +209,35 @@ function teRenderTaskGrid(filter = null) {
             
             if (meta.assigned_team_id) {
                 let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
-                if (team && team.members && team.members.includes(currentUser)) {
-                    // Include team tasks only if they are actively claimed by someone (not unassigned triage)
-                    if (assignee !== 'UNASSIGNED' && assignee.trim() !== '') return true;
-                }
+                // If it is assigned to my team, it belongs in My Tasks regardless of individual claim status.
+                if (team && team.members && team.members.includes(currentUser)) return true;
             }
             return false;
         }
         return t.status !== 'Completed' && t.status !== 'Done'; // Default 'list' view hides done
     });
     
-    // UI Hierarchy Safety: If a subtask passes a filter (e.g. My Tasks), its Parent MUST be in displayTasks to render the accordion.
-    let parentIdsToAdd = new Set();
+    // UI Hierarchy Safety: Ensure full atomic rendering of parent-child relationships
+    // 1. If a subtask is visible, ensure its Parent is visible so the accordion functions.
+    // 2. If a Parent is visible, ensure ALL its Subtasks are visible so the team sees the breakdown.
+    let extraIdsToAdd = new Set();
     displayTasks.forEach(t => {
         if (t.parent_task_id && !displayTasks.some(p => p.id === t.parent_task_id)) {
-            parentIdsToAdd.add(t.parent_task_id);
+            extraIdsToAdd.add(t.parent_task_id);
+        }
+        if (!t.parent_task_id) {
+            let children = taskEngineDB.taskz.filter(child => child.parent_task_id === t.id && child.status !== 'Archived');
+            children.forEach(c => {
+                if (!displayTasks.some(dt => dt.id === c.id)) {
+                    extraIdsToAdd.add(c.id);
+                }
+            });
         }
     });
-    parentIdsToAdd.forEach(pid => {
-        let parentTask = taskEngineDB.taskz.find(t => t.id === pid);
-        if (parentTask) displayTasks.push(parentTask);
+    
+    extraIdsToAdd.forEach(id => {
+        let task = taskEngineDB.taskz.find(t => t.id === id);
+        if (task) displayTasks.push(task);
     });
 
     // Group by Cycle
