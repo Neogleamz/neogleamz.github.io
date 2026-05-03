@@ -413,6 +413,31 @@ window.teOpenTaskContext = function(taskId) {
                 cycleSelect.value = task.cycle_id || '';
             }
             
+            const startDateInput = document.getElementById('te-flyout-start-date');
+            if (startDateInput) {
+                let meta = task.metadata || {};
+                startDateInput.value = meta.start_date ? meta.start_date.substring(0, 10) : '';
+            }
+            
+            const dueDateInput = document.getElementById('te-flyout-due-date');
+            if (dueDateInput) {
+                dueDateInput.value = task.due_date ? String(task.due_date).substring(0, 10) : '';
+            }
+
+            const timerBtn = document.getElementById('te-flyout-timer-btn');
+            if (timerBtn) {
+                let meta = task.metadata || {};
+                if (meta.timer_start_time) {
+                    timerBtn.textContent = 'Stop Timer';
+                    timerBtn.className = 'btn-red';
+                    timerBtn.style.animation = 'pulse 2s infinite';
+                } else {
+                    timerBtn.textContent = 'Start Timer';
+                    timerBtn.className = 'btn-orange';
+                    timerBtn.style.animation = 'none';
+                }
+            }
+            
             teRenderSubtasks(taskId);
             teRenderActivityFeed(taskId);
         }
@@ -506,7 +531,7 @@ window.teToggleTaskDone = async function(taskId) {
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    let nextStatus = (task.status === 'Completed' || task.status === 'Done') ? 'Todo' : 'Completed';
+    let nextStatus = (task.status === 'Done') ? 'Todo' : 'Done';
     await window.teSetStatus(nextStatus, taskId, true);
 };
 
@@ -599,7 +624,24 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
         
         task.status = status;
         task.is_archived = isArchived;
-        updatedTasks.push(id);
+        
+        let meta = Object.assign({}, task.metadata || {});
+        let timerUpdate = false;
+        if (status === 'In Progress' && !meta.timer_start_time) {
+            meta.timer_start_time = Date.now().toString();
+            task.metadata = meta;
+            timerUpdate = true;
+        } else if ((status === 'Done' || status === 'Todo') && meta.timer_start_time) {
+            let startTime = parseInt(meta.timer_start_time);
+            let elapsedMs = Date.now() - startTime;
+            let elapsedMinutes = Math.floor(elapsedMs / 60000);
+            task.actual_minutes = (task.actual_minutes || 0) + Math.max(1, elapsedMinutes);
+            delete meta.timer_start_time;
+            task.metadata = meta;
+            timerUpdate = true;
+        }
+        
+        updatedTasks.push({ id: id, timerUpdate: timerUpdate, meta: meta, actual: task.actual_minutes });
         
         const newAct = {
             task_id: id,
@@ -616,16 +658,22 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
     teRenderTaskGrid();
     
     try {
-        const updatePromises = updatedTasks.map(taskId => 
-            supabaseClient.from('taskz').update({ status: status, is_archived: isArchived }).eq('id', taskId)
-        );
+        const updatePromises = updatedTasks.map(tData => {
+            let payload = { status: status, is_archived: isArchived };
+            if (tData.timerUpdate) {
+                payload.metadata = tData.meta;
+                payload.actual_minutes = tData.actual;
+            }
+            return supabaseClient.from('taskz').update(payload).eq('id', tData.id);
+        });
         await Promise.all(updatePromises);
         if (activities.length > 0) {
             await supabaseClient.from('task_activity').insert(activities);
         }
         
         if (window.currentOpenTaskId) {
-            if (updatedTasks.includes(window.currentOpenTaskId) || taskEngineDB.taskz.some(t => updatedTasks.includes(t.parent_task_id) && t.parent_task_id === window.currentOpenTaskId)) {
+            let updatedIds = updatedTasks.map(u => u.id);
+            if (updatedIds.includes(window.currentOpenTaskId) || taskEngineDB.taskz.some(t => updatedIds.includes(t.parent_task_id) && t.parent_task_id === window.currentOpenTaskId)) {
                 window.teOpenTaskContext(window.currentOpenTaskId);
             }
         }
@@ -688,6 +736,71 @@ window.teUpdateTaskDescription = async function(taskId, newDesc) {
     try {
         await supabaseClient.from('taskz').update({ description: newDesc }).eq('id', taskId);
     } catch(e) { console.error(e); }
+};
+
+// Timeline & Timer Functions
+window.teUpdateStartDate = async function(taskId, dateValue) {
+    if (!taskId) return;
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    let meta = Object.assign({}, task.metadata || {});
+    meta.start_date = dateValue;
+    task.metadata = meta;
+    
+    teRenderTaskGrid();
+    try {
+        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', taskId);
+    } catch(e) { console.error('[TaskEngine] Start date update failed', e); }
+};
+
+window.teUpdateDueDate = async function(taskId, dateValue) {
+    if (!taskId) return;
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.due_date = dateValue ? new Date(dateValue).toISOString() : null;
+    
+    teRenderTaskGrid();
+    try {
+        await supabaseClient.from('taskz').update({ due_date: task.due_date }).eq('id', taskId);
+    } catch(e) { console.error('[TaskEngine] Due date update failed', e); }
+};
+
+window.teToggleTimer = async function(taskId, forceStop = false) {
+    if (!taskId) return;
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    let meta = Object.assign({}, task.metadata || {});
+    let isRunning = !!meta.timer_start_time;
+    let updateNeeded = false;
+    
+    if (isRunning) {
+        // Stop the timer
+        let startTime = parseInt(meta.timer_start_time);
+        let elapsedMs = Date.now() - startTime;
+        let elapsedMinutes = Math.floor(elapsedMs / 60000);
+        
+        task.actual_minutes = (task.actual_minutes || 0) + Math.max(1, elapsedMinutes); // Minimum 1 minute recorded
+        delete meta.timer_start_time;
+        updateNeeded = true;
+    } else if (!forceStop) {
+        // Start the timer
+        meta.timer_start_time = Date.now().toString();
+        updateNeeded = true;
+    }
+    
+    if (updateNeeded) {
+        task.metadata = meta;
+        teOpenTaskContext(taskId); // Refresh Flyout UI
+        try {
+            await supabaseClient.from('taskz').update({ 
+                metadata: meta, 
+                actual_minutes: task.actual_minutes 
+            }).eq('id', taskId);
+        } catch(e) { console.error('[TaskEngine] Timer toggle failed', e); }
+    }
 };
 
 window.teUpdateTaskAssignee = async function(taskId, assignee) {
@@ -1058,19 +1171,63 @@ window.teSwitchView = function(view, btnEl) {
             calendarHtml += `<div style="background: rgba(0,0,0,0.2); min-height: 100px;"></div>`;
         }
         
+        let calendarTasks = taskEngineDB.taskz.filter(t => {
+            let meta = t.metadata || {};
+            if (!t.due_date && !meta.start_date) return false;
+            let sd = meta.start_date ? new Date(meta.start_date) : new Date(t.due_date);
+            let ed = t.due_date ? new Date(t.due_date) : new Date(meta.start_date);
+            sd.setHours(0,0,0,0);
+            ed.setHours(23,59,59,999);
+            let monthStart = new Date(currentYear, currentMonth, 1);
+            let monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+            return (sd <= monthEnd && ed >= monthStart);
+        });
+        
+        calendarTasks.sort((a, b) => {
+            let aMeta = a.metadata || {};
+            let bMeta = b.metadata || {};
+            let aSd = aMeta.start_date ? new Date(aMeta.start_date) : new Date(a.due_date);
+            let bSd = bMeta.start_date ? new Date(bMeta.start_date) : new Date(b.due_date);
+            return aSd - bSd;
+        });
+        
         for (let i = 1; i <= daysInMonth; i++) {
-            let dayTasks = taskEngineDB.taskz.filter(t => {
-                if (!t.due_date) return false;
-                let d = new Date(t.due_date);
-                return d.getDate() === i && d.getMonth() === currentMonth;
-            });
+            let currentDayDate = new Date(currentYear, currentMonth, i);
+            currentDayDate.setHours(12,0,0,0);
             
-            let tasksHtml = dayTasks.map(t => `<div style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;" onclick="window.teOpenTaskContext('${t.id}')">${t.title}</div>`).join('');
+            let tasksHtml = calendarTasks.map(t => {
+                let meta = t.metadata || {};
+                let sd = meta.start_date ? new Date(meta.start_date) : new Date(t.due_date);
+                let ed = t.due_date ? new Date(t.due_date) : new Date(meta.start_date);
+                sd.setHours(0,0,0,0);
+                ed.setHours(23,59,59,999);
+                
+                let isActive = currentDayDate >= sd && currentDayDate <= ed;
+                if (!isActive) return `<div style="height: 20px; margin-top: 4px;"></div>`;
+                
+                let isStart = currentDayDate.getDate() === sd.getDate() && currentDayDate.getMonth() === sd.getMonth();
+                let isEnd = currentDayDate.getDate() === ed.getDate() && currentDayDate.getMonth() === ed.getMonth();
+                
+                let radius = '0px';
+                if (isStart && isEnd) radius = '4px';
+                else if (isStart) radius = '4px 0 0 4px';
+                else if (isEnd) radius = '0 4px 4px 0';
+                
+                let borderStyle = '1px solid rgba(45, 212, 191, 0.4)';
+                if (!isStart) borderStyle = '1px solid rgba(45, 212, 191, 0.4); border-left: none;';
+                if (!isEnd) borderStyle += ' border-right: none;';
+                
+                let text = isStart ? t.title : '&nbsp;';
+                
+                return `<div style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; ${borderStyle} border-radius: ${radius}; height: 20px; font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-left: ${isStart ? '6px' : '0'}; line-height: 18px;" onclick="window.teOpenTaskContext('${t.id}')">${text}</div>`;
+            }).join('');
             
             calendarHtml += `
-                <div style="background: var(--bg-container); min-height: 100px; padding: 10px; border: 1px solid rgba(0,0,0,0.5);">
-                    <div style="font-size: 12px; font-weight: bold; color: ${i === today.getDate() ? 'white' : 'var(--text-muted)'};">${i}</div>
-                    ${tasksHtml}
+                <div style="background: var(--bg-container); min-height: 100px; padding: 10px 0; border: 1px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden;">
+                    <div style="font-size: 12px; font-weight: bold; color: ${i === today.getDate() ? 'white' : 'var(--text-muted)'}; padding-left: 10px;">${i}</div>
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;">
+                        ${tasksHtml}
+                    </div>
                 </div>
             `;
         }
