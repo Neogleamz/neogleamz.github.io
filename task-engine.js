@@ -5,7 +5,7 @@
 
 let isTaskPlannerOpen = false;
 
-let taskEngineDB = { taskz: [], cyclez: [], teams: [] };
+let taskEngineDB = { taskz: [], cyclez: [], teams: [], comments: [], activity: [] };
 
 window.initTaskEngine = async function() {
     console.log('[TaskEngine] Initialization check complete.');
@@ -23,19 +23,62 @@ window.initTaskEngine = async function() {
  */
 async function teFetchAllData() {
     try {
-        const [taskzRes, cyclezRes, teamsRes] = await Promise.all([
+        const [taskzRes, cyclezRes, teamsRes, commentsRes, activityRes] = await Promise.all([
             supabaseClient.from('taskz').select('*').order('created_at', { ascending: false }),
             supabaseClient.from('cyclez').select('*').order('start_date', { ascending: false }),
-            supabaseClient.from('teams').select('*').order('name', { ascending: true })
+            supabaseClient.from('teams').select('*').order('name', { ascending: true }),
+            supabaseClient.from('task_comments').select('*').order('created_at', { ascending: false }),
+            supabaseClient.from('task_activity').select('*').order('timestamp', { ascending: false })
         ]);
         if (taskzRes.data) taskEngineDB.taskz = taskzRes.data;
         if (cyclezRes.data) taskEngineDB.cyclez = cyclezRes.data;
         if (teamsRes.data) taskEngineDB.teams = teamsRes.data;
+        if (commentsRes.data) taskEngineDB.comments = commentsRes.data;
+        if (activityRes.data) taskEngineDB.activity = activityRes.data;
+        
+        // Ensure dropdown matches local storage identity
+        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
+        let spoofer = document.getElementById('te-identity-spoofer');
+        if (spoofer) spoofer.value = currentUser;
         
         teRenderSidebar();
         teRenderTaskGrid();
+        teUpdateInboxBadge();
     } catch (err) {
         console.error('[TaskEngine] Failed to fetch data', err);
+    }
+}
+
+window.teChangeIdentity = function(userId) {
+    if (!userId || userId === 'none') {
+        localStorage.removeItem('neogleamz_current_user');
+    } else {
+        localStorage.setItem('neogleamz_current_user', userId);
+    }
+    teUpdateInboxBadge();
+    // Refresh inbox if that's what we are viewing
+    let title = document.getElementById('te-main-header-title');
+    if (title && title.textContent === 'Inbox View') {
+        window.teSwitchView('inbox');
+    }
+};
+
+function teUpdateInboxBadge() {
+    const badge = document.getElementById('te-inbox-badge');
+    if (!badge) return;
+    let currentUser = localStorage.getItem('neogleamz_current_user');
+    if (!currentUser || currentUser === 'none') {
+        badge.style.display = 'none';
+        return;
+    }
+    // Count unread or relevant items (e.g. mentions in comments or activity on tasks they own)
+    // For now, let's just count comments containing "@" + currentUser
+    let count = taskEngineDB.comments.filter(c => c.comment_text && c.comment_text.includes('@' + currentUser)).length;
+    if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
     }
 }
 
@@ -139,22 +182,88 @@ window.teCreateNewTask = async function() {
 
 window.teOpenTaskContext = function(taskId) {
     if (!taskId) return;
+    window.currentOpenTaskId = taskId;
     const flyout = document.getElementById('taskContextFlyout');
     if (flyout) {
         const task = taskEngineDB.taskz.find(t => t.id === taskId);
         if (task) {
-            // Update Flyout Header Title
             const flyoutTitle = flyout.querySelector('h2');
             if (flyoutTitle) flyoutTitle.textContent = task.title;
-            // Additional updates to flyout DOM would go here based on task ID
-            teFetchTaskActivity(taskId);
+            
+            teRenderSubtasks(taskId);
+            teRenderActivityFeed(taskId);
         }
         flyout.classList.remove('hidden');
     }
 };
 
+window.teRenderSubtasks = function(taskId) {
+    const container = document.getElementById('te-flyout-subtasks-container');
+    if (!container) return;
+    
+    const task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    let meta = task.metadata || {};
+    let subtasks = meta.subtasks || [];
+    
+    let html = '';
+    subtasks.forEach((st, idx) => {
+        let isDone = st.status === 'Done';
+        html += `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div data-click="click_teToggleSubtask" data-subtask-id="${idx}" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-input); cursor: pointer; display: flex; align-items: center; justify-content: center; background: ${isDone ? 'var(--primary-color)' : 'transparent'};">
+                ${isDone ? '<span style="color:white; font-size:10px;">✓</span>' : ''}
+            </div>
+            <span style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; font-size: 13px;">${st.title}</span>
+        </div>`;
+    });
+    
+    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+};
+
+window.teRenderActivityFeed = function(taskId) {
+    const container = document.getElementById('te-flyout-activity-container');
+    if (!container) return;
+    
+    let relevantEvents = [];
+    taskEngineDB.comments.filter(c => c.task_id === taskId).forEach(c => {
+        relevantEvents.push({ type: 'comment', data: c, ts: new Date(c.created_at).getTime() });
+    });
+    taskEngineDB.activity.filter(a => a.task_id === taskId).forEach(a => {
+        relevantEvents.push({ type: 'activity', data: a, ts: new Date(a.timestamp).getTime() });
+    });
+    
+    relevantEvents.sort((a,b) => b.ts - a.ts); // descending
+    
+    if (relevantEvents.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; text-align: center;">No activity yet.</div>';
+        return;
+    }
+    
+    let html = '';
+    relevantEvents.forEach(ev => {
+        if (ev.type === 'comment') {
+            html += `
+            <div style="margin-bottom: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <strong style="font-size: 11px; color: var(--text-muted);">${ev.data.author_id}</strong>
+                    <span style="font-size: 10px; color: var(--text-muted);">${new Date(ev.data.created_at).toLocaleString()}</span>
+                </div>
+                <div style="font-size: 13px; color: white;">${ev.data.comment_text}</div>
+            </div>`;
+        } else {
+            html += `
+            <div style="margin-bottom: 10px; padding-left: 10px; border-left: 2px solid #8b5cf6;">
+                <div style="font-size: 12px; color: var(--text-muted);"><strong style="color: #ccc;">${ev.data.actor_type}</strong> ${ev.data.action_text}</div>
+                <div style="font-size: 10px; color: var(--text-muted);">${new Date(ev.data.timestamp).toLocaleString()}</div>
+            </div>`;
+        }
+    });
+    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+};
+
 window.teCycleStatus = async function(taskId) {
-    // Prevent event bubbling if necessary (done in delegator conceptually, but just in case)
     if (!taskId) return;
     
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
@@ -164,41 +273,107 @@ window.teCycleStatus = async function(taskId) {
     let idx = statusCycle.indexOf(task.status);
     let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
     
-    // Update local cache optimistically
+    let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
+    
     task.status = nextStatus;
     teRenderTaskGrid();
     
     try {
         await supabaseClient.from('taskz').update({ status: nextStatus }).eq('id', taskId);
-        await supabaseClient.from('task_activity').insert([{
-            task_id: taskId,
-            actor_type: 'System',
-            action_text: `Status changed to ${nextStatus}`
-        }]);
         
-        // Refresh context flyout activity feed if it is currently open for this task
-        teFetchTaskActivity(taskId);
+        const newAct = {
+            task_id: taskId,
+            actor_type: currentUser,
+            action_text: `Status changed to ${nextStatus}`,
+            timestamp: new Date().toISOString()
+        };
+        
+        await supabaseClient.from('task_activity').insert([newAct]);
+        taskEngineDB.activity.push(newAct);
+        
+        if (window.currentOpenTaskId === taskId) {
+            teRenderActivityFeed(taskId);
+        }
     } catch(e) {
         console.error('[TaskEngine] Status update failed:', e);
     }
 };
 
-async function teFetchTaskActivity(taskId) {
-    // Scaffold for Phase 5 to render task_activity into the context flyout timeline
+window.teAddSubtask = async function() {
+    if (!window.currentOpenTaskId) return;
+    let input = document.getElementById('te-flyout-subtask-input');
+    if (!input || !input.value.trim()) return;
+    
+    let task = taskEngineDB.taskz.find(t => t.id === window.currentOpenTaskId);
+    if (!task) return;
+    
+    let meta = task.metadata || {};
+    let subtasks = meta.subtasks || [];
+    subtasks.push({ title: input.value.trim(), status: 'Todo' });
+    meta.subtasks = subtasks;
+    task.metadata = meta;
+    
+    input.value = '';
+    teRenderSubtasks(task.id);
+    
     try {
-        const { data, error } = await supabaseClient.from('task_activity')
-            .select('*')
-            .eq('task_id', taskId)
-            .order('timestamp', { ascending: false });
-            
-        if (!error && data) {
-            // We would dynamically render this into the flyout's timeline container
-            console.log(`[TaskEngine] Fetched ${data.length} activity logs for task ${taskId}`);
-        }
-    } catch (e) {
-        console.error('[TaskEngine] Activity fetch failed:', e);
+        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', task.id);
+    } catch(e) {
+        console.error('Failed to add subtask', e);
     }
-}
+};
+
+window.teToggleSubtask = async function(subtaskIdx) {
+    if (!window.currentOpenTaskId) return;
+    let task = taskEngineDB.taskz.find(t => t.id === window.currentOpenTaskId);
+    if (!task) return;
+    
+    let meta = task.metadata || {};
+    let subtasks = meta.subtasks || [];
+    if (!subtasks[subtaskIdx]) return;
+    
+    subtasks[subtaskIdx].status = subtasks[subtaskIdx].status === 'Done' ? 'Todo' : 'Done';
+    task.metadata = meta;
+    
+    teRenderSubtasks(task.id);
+    
+    try {
+        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', task.id);
+    } catch(e) {
+        console.error('Failed to toggle subtask', e);
+    }
+};
+
+window.tePostComment = async function() {
+    if (!window.currentOpenTaskId) return;
+    let input = document.getElementById('te-flyout-comment-input');
+    if (!input || !input.value.trim()) return;
+    
+    let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
+    let text = input.value.trim();
+    
+    let newComment = {
+        task_id: window.currentOpenTaskId,
+        author_id: currentUser,
+        comment_text: text,
+        created_at: new Date().toISOString()
+    };
+    
+    input.value = '';
+    
+    try {
+        const { data, error } = await supabaseClient.from('task_comments').insert([newComment]).select();
+        if (!error && data && data.length > 0) {
+            taskEngineDB.comments.push(data[0]);
+        } else {
+            // fallback optimistic if no return
+            taskEngineDB.comments.push(newComment);
+        }
+        teRenderActivityFeed(window.currentOpenTaskId);
+    } catch(e) {
+        console.error('Failed to post comment', e);
+    }
+};
 
 window.teSwitchView = function(view, btnEl) {
     // Update UI buttons
@@ -221,6 +396,60 @@ window.teSwitchView = function(view, btnEl) {
     if (view === 'list') {
         header.style.display = 'grid';
         teRenderTaskGrid();
+        let title = document.getElementById('te-main-header-title');
+        if (title) title.textContent = 'All Tasks';
+    } else if (view === 'inbox') {
+        header.style.display = 'none';
+        let title = document.getElementById('te-main-header-title');
+        if (title) title.textContent = 'Inbox View';
+        
+        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
+        
+        let relevantEvents = [];
+        // Just merge comments and activity. For inbox, maybe we just show everything if no user, or filtered if user.
+        taskEngineDB.comments.forEach(c => {
+            if (currentUser === 'none' || (c.comment_text && c.comment_text.includes('@' + currentUser))) {
+                relevantEvents.push({ type: 'comment', data: c, ts: new Date(c.created_at).getTime() });
+            }
+        });
+        taskEngineDB.activity.forEach(a => {
+            if (currentUser === 'none') {
+                relevantEvents.push({ type: 'activity', data: a, ts: new Date(a.timestamp).getTime() });
+            }
+        });
+        
+        relevantEvents.sort((a,b) => b.ts - a.ts); // descending
+        
+        if (relevantEvents.length === 0) {
+            wrapper.innerHTML = `<div style="padding: 20px; color: var(--text-muted); text-align: center;">You're all caught up! No recent activity for ${currentUser}.</div>`;
+            return;
+        }
+        
+        let html = '<div class="task-timeline-container" style="padding: 20px;">';
+        relevantEvents.forEach(ev => {
+            let t = taskEngineDB.taskz.find(tk => tk.id === ev.data.task_id);
+            let taskTitle = t ? t.title : 'Unknown Task';
+            
+            if (ev.type === 'comment') {
+                html += `
+                <div style="position: relative; margin-top: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer;" onclick="window.teOpenTaskContext('${ev.data.task_id}')">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <div style="font-size: 12px; color: var(--text-muted);">From: <strong>${ev.data.author_id}</strong> on task <span style="color:white;">${taskTitle}</span></div>
+                        <div style="font-size: 10px; color: var(--text-muted);">${new Date(ev.data.created_at).toLocaleString()}</div>
+                    </div>
+                    <div style="font-size: 13px; color: #ccc;">${ev.data.comment_text}</div>
+                </div>`;
+            } else {
+                html += `
+                <div style="position: relative; margin-top: 10px; padding: 10px 15px; border-left: 2px solid #8b5cf6; cursor: pointer;" onclick="window.teOpenTaskContext('${ev.data.task_id}')">
+                    <div style="font-size: 12px; color: var(--text-muted);">${new Date(ev.data.timestamp).toLocaleString()}</div>
+                    <div style="font-size: 13px; color: white;"><strong>${ev.data.actor_type}</strong> ${ev.data.action_text} on <span style="color:#2dd4bf;">${taskTitle}</span></div>
+                </div>`;
+            }
+        });
+        html += '</div>';
+        wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        
     } else if (view === 'board') {
         header.style.display = 'none';
         

@@ -190,6 +190,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openMultiBatchModal_3d':
                     window.openMultiBatchModal('3d');
                     break;
+                case 'click_teSwitchView_list':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('list', el);
+                    break;
+                case 'click_teSwitchView_board':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('board', el);
+                    break;
+                case 'click_teSwitchView_calendar':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('calendar', el);
+                    break;
+                case 'click_teSwitchView_inbox':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('inbox', el);
+                    break;
+                case 'click_teSwitchView_my_tasks':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('my_tasks', el);
+                    break;
+                case 'click_teSwitchView_blocked':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('blocked', el);
+                    break;
+                case 'click_closeTaskPlanner':
+                    if(typeof window.closeTaskPlanner==='function') window.closeTaskPlanner();
+                    break;
+                case 'click_teCreateNewTask':
+                    if(typeof window.teCreateNewTask==='function') window.teCreateNewTask();
+                    break;
+                case 'click_teOpenTaskContext':
+                    if(typeof window.teOpenTaskContext==='function') window.teOpenTaskContext(el.getAttribute('data-task-id'));
+                    break;
+                case 'click_teToggleTaskDone':
+                    event.stopPropagation();
+                    if(typeof window.teCycleStatus==='function') window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                    break;
+                case 'click_teCycleStatus':
+                    event.stopPropagation();
+                    if(typeof window.teCycleStatus==='function') window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                    break;
+                case 'click_closeTaskContext':
+                    if(typeof window.closeTaskContext==='function') window.closeTaskContext();
+                    break;
+                case 'click_teToggleTemplateMenu':
+                    if(typeof window.teToggleTemplateMenu==='function') window.teToggleTemplateMenu();
+                    break;
+                case 'click_teSpawnSOP_Batchez':
+                    if(typeof window.teSpawnSOP==='function') window.teSpawnSOP('batchez');
+                    break;
+                case 'click_teSpawnSOP_Print':
+                    if(typeof window.teSpawnSOP==='function') window.teSpawnSOP('print');
+                    break;
+                case 'click_teAddSubtask':
+                    if(typeof window.teAddSubtask==='function') window.teAddSubtask();
+                    break;
+                case 'click_teToggleSubtask':
+                    if(typeof window.teToggleSubtask==='function') window.teToggleSubtask(el.getAttribute('data-subtask-id'));
+                    break;
+                case 'click_tePostComment':
+                    if(typeof window.tePostComment==='function') window.tePostComment();
+                    break;
+                case 'click_window_openSOPMasterModal_bat':
+                    window.openSOPMasterModal('batchez');
+                    break;
                 case 'click_window_openSOPMasterModal_3d':
                     window.openSOPMasterModal('3d');
                     break;
@@ -992,6 +1051,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleFileSelectTest_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
+                    break;
+                case 'change_teChangeIdentity':
+                    if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
                     break;
             }
         } catch (error) {
