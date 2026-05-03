@@ -50,6 +50,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `feat/task-engine-column-sort` : **List View Column Sorting** - Enable dynamic sorting by clicking on any column header within the List/Row view (Owner, Status, Timeline, Priority). [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - [ ] `feat/task-engine-timelines` : **Task Timelines & Calendar Sync** - Implement date picking/timelines for individual tasks and map them to render dynamically on the Calendar view. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
 - [ ] `feat/task-engine-ui-colors` : **Task Engine UI Colorization** - Inject more vibrant colors into the left sidebar pane and the top navigation of the right pane (List/Board/Calendar) to create clearer visual distinction for active states. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] `feat/task-engine-board-interactions` : **Task Engine Board View Interactions** - Enable full interaction, opening, and working of individual tasks directly from within the Kanban Board view. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.04]
 
 **Other Ideas**
 
