@@ -84,7 +84,7 @@ function teUpdateInboxBadge() {
     }
     // Count unread or relevant items (e.g. mentions in comments or activity on tasks they own)
     // For now, let's just count comments containing "@" + currentUser
-    let count = taskEngineDB.comments.filter(c => c.comment_text && c.comment_text.includes('@' + currentUser)).length;
+    let count = taskEngineDB.comments.filter(c => c.content && c.content.includes('@' + currentUser)).length;
     if (count > 0) {
         badge.textContent = count;
         badge.style.display = 'inline-block';
@@ -148,7 +148,21 @@ function teRenderSidebar() {
     }
 }
 
-function teRenderTaskGrid(filter = 'list') {
+function teRenderTaskGrid(filter = null) {
+    if (!filter) {
+        let activeNav = document.querySelector('.task-nav-link.active');
+        if (activeNav) {
+            let txt = activeNav.textContent.toLowerCase();
+            if (txt.includes('inbox')) filter = 'inbox';
+            else if (txt.includes('my tasks')) filter = 'my_tasks';
+            else if (txt.includes('in progress')) filter = 'in_progress';
+            else if (txt.includes('completed')) filter = 'completed';
+            else if (txt.includes('archive')) filter = 'archive';
+            else filter = 'list';
+        } else {
+            filter = 'list';
+        }
+    }
     const wrapper = document.getElementById('te-task-rows-wrapper');
     if (!wrapper) return;
     
@@ -168,21 +182,64 @@ function teRenderTaskGrid(filter = 'list') {
     // Filter tasks based on view
     let displayTasks = taskList.filter(t => {
         if (t.is_archived) return false;
-        if (filter === 'blocked') return t.status === 'Blocked';
-        if (filter === 'completed') return t.status === 'Done';
-        if (filter === 'inbox') return t.status !== 'Done' && !t.parent_task_id;
+        if (filter === 'in_progress') return t.status === 'In Progress';
+        if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
+        if (filter === 'inbox') {
+            if (t.status === 'Completed' || t.status === 'Done') return false;
+            let meta = t.metadata || {};
+            let assignee = meta.spoofed_assignee || 'UNASSIGNED';
+            
+            if (assignee === 'UNASSIGNED' || assignee.trim() === '') {
+                if (meta.assigned_team_id) {
+                    let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
+                    if (team && team.members && team.members.includes(currentUser)) return true;
+                    return false; // unassigned but belongs to another team
+                }
+                return true; // globally unassigned
+            }
+            
+            if (assignee === currentUser) return true;
+            return false;
+        }
         if (filter === 'my_tasks') {
             let meta = t.metadata || {};
-            if (meta.spoofed_assignee === currentUser) return true;
+            let assignee = meta.spoofed_assignee || 'UNASSIGNED';
+            
+            if (assignee === currentUser) return true;
+            
             if (meta.assigned_team_id) {
                 let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
+                // If it is assigned to my team, it belongs in My Tasks regardless of individual claim status.
                 if (team && team.members && team.members.includes(currentUser)) return true;
             }
             return false;
         }
-        return t.status !== 'Done'; // Default 'list' view hides done
+        return t.status !== 'Completed' && t.status !== 'Done'; // Default 'list' view hides done
     });
     
+    // UI Hierarchy Safety: Ensure full atomic rendering of parent-child relationships
+    // 1. If a subtask is visible, ensure its Parent is visible so the accordion functions.
+    // 2. If a Parent is visible, ensure ALL its Subtasks are visible so the team sees the breakdown.
+    let extraIdsToAdd = new Set();
+    displayTasks.forEach(t => {
+        if (t.parent_task_id && !displayTasks.some(p => p.id === t.parent_task_id)) {
+            extraIdsToAdd.add(t.parent_task_id);
+        }
+        if (!t.parent_task_id) {
+            let children = taskEngineDB.taskz.filter(child => child.parent_task_id === t.id && child.status !== 'Archived');
+            children.forEach(c => {
+                if (!displayTasks.some(dt => dt.id === c.id)) {
+                    extraIdsToAdd.add(c.id);
+                }
+            });
+        }
+    });
+    
+    extraIdsToAdd.forEach(id => {
+        let task = taskEngineDB.taskz.find(t => t.id === id);
+        if (task) displayTasks.push(task);
+    });
+
     // Group by Cycle
     let cycleGroups = {
         'unassigned': { title: 'No Cycle', tasks: [] }
@@ -237,9 +294,9 @@ function teRenderTaskGrid(filter = 'list') {
 
 function teBuildTaskRowHTML(t, isChild) {
     let statusColorClass = 'status-in-progress';
-    if (t.status === 'Done') statusColorClass = 'status-done';
+    if (t.status === 'Done' || t.status === 'Completed') statusColorClass = 'status-completed';
     if (t.status === 'Todo' || t.status === 'Backlog') statusColorClass = 'status-todo';
-    if (t.status === 'Blocked') statusColorClass = 'status-blocked';
+    if (t.status === 'Archived') statusColorClass = 'status-archived';
     
     let meta = t.metadata || {};
     let ownerInitials = 'UN';
@@ -266,7 +323,7 @@ function teBuildTaskRowHTML(t, isChild) {
     return `
     <div class="task-row" data-task-id="${t.id}" data-click="click_teOpenTaskContext" style="padding: ${rowPadding}; min-height: unset;">
         <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-            <div class="task-checkbox" style="flex-shrink: 0;" data-click="click_teToggleTaskDone"></div>
+            <input type="checkbox" class="te-task-checkbox" data-id="${t.id}" style="cursor: pointer; width:16px; height:16px; accent-color: var(--primary-color); flex-shrink: 0;" data-change="change_teUpdateMainSelection">
             <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
                 <span style="color: white; font-weight: ${titleWeight}; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">${t.title}</span>
             </div>
@@ -275,7 +332,7 @@ function teBuildTaskRowHTML(t, isChild) {
             <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);" title="${ownerTitle}">${ownerInitials}</div>
         </div>
         <div>
-            <span class="status-pill ${statusColorClass}" data-click="click_teCycleStatus" style="position: relative; z-index: 2;">${t.status}</span>
+            <span class="status-pill ${statusColorClass}" data-click="click_teOpenStatusDropdown" style="position: relative; z-index: 2; cursor: pointer;">${t.status}</span>
         </div>
         <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
             ${dueStr}
@@ -355,6 +412,31 @@ window.teOpenTaskContext = function(taskId) {
                 cycleSelect.value = task.cycle_id || '';
             }
             
+            const startDateInput = document.getElementById('te-flyout-start-date');
+            if (startDateInput) {
+                let meta = task.metadata || {};
+                startDateInput.value = meta.start_date ? meta.start_date.substring(0, 10) : '';
+            }
+            
+            const dueDateInput = document.getElementById('te-flyout-due-date');
+            if (dueDateInput) {
+                dueDateInput.value = task.due_date ? String(task.due_date).substring(0, 10) : '';
+            }
+
+            const timerBtn = document.getElementById('te-flyout-timer-btn');
+            if (timerBtn) {
+                let meta = task.metadata || {};
+                if (meta.timer_start_time) {
+                    timerBtn.textContent = 'Stop Timer';
+                    timerBtn.className = 'btn-red';
+                    timerBtn.style.animation = 'pulse 2s infinite';
+                } else {
+                    timerBtn.textContent = 'Start Timer';
+                    timerBtn.className = 'btn-orange';
+                    timerBtn.style.animation = 'none';
+                }
+            }
+            
             teRenderSubtasks(taskId);
             teRenderActivityFeed(taskId);
         }
@@ -376,19 +458,17 @@ window.teRenderSubtasks = function(taskId) {
     let subtasks = taskEngineDB.taskz.filter(t => t.parent_task_id === taskId && t.parent_task_id != null);
     
     if (header) {
-        let doneCount = subtasks.filter(t => t.status === 'Done').length;
+        let doneCount = subtasks.filter(t => t.status === 'Completed' || t.status === 'Done').length;
         header.textContent = `SUBTASKS (${doneCount}/${subtasks.length})`;
     }
     
     let html = '';
     subtasks.forEach(st => {
-        let isDone = st.status === 'Done';
+        let isDone = st.status === 'Completed' || st.status === 'Done';
         html += `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div data-click="click_teCycleStatus" data-task-id="${st.id}" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-input); cursor: pointer; display: flex; align-items: center; justify-content: center; background: ${isDone ? 'var(--primary-color)' : 'transparent'};">
-                ${isDone ? '<span style="color:white; font-size:10px;">✓</span>' : ''}
-            </div>
-            <span data-click="click_teOpenTaskContext" data-task-id="${st.id}" style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; font-size: 13px; cursor: pointer; flex-grow: 1;">${st.title}</span>
+            <input type="checkbox" data-id="${st.id}" ${isDone ? 'checked' : ''} style="cursor: pointer; width:16px; height:16px; accent-color: #2dd4bf; flex-shrink: 0;" data-change="change_teToggleSubtaskDone">
+            <span data-click="click_teOpenTaskContext" data-task-id="${st.id}" style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; text-decoration-color: #2dd4bf; text-decoration-thickness: 2px; font-size: 13px; cursor: pointer; flex-grow: 1;">${st.title}</span>
         </div>`;
     });
     
@@ -417,13 +497,21 @@ window.teRenderActivityFeed = function(taskId) {
     let html = '';
     relevantEvents.forEach(ev => {
         if (ev.type === 'comment') {
+            let displayAuthor = ev.data.author_id || 'System';
+            let displayContent = ev.data.content || '';
+            if (displayContent.startsWith('SPOOF:')) {
+                let parts = displayContent.split('|||');
+                displayAuthor = parts[0].replace('SPOOF:', '');
+                displayContent = parts.slice(1).join('|||');
+            }
+            
             html += `
             <div style="margin-bottom: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <strong style="font-size: 11px; color: var(--text-muted);">${ev.data.author_id}</strong>
+                    <strong style="font-size: 11px; color: var(--text-muted);">${displayAuthor}</strong>
                     <span style="font-size: 10px; color: var(--text-muted);">${new Date(ev.data.created_at).toLocaleString()}</span>
                 </div>
-                <div style="font-size: 13px; color: white;">${ev.data.comment_text}</div>
+                <div style="font-size: 13px; color: white;">${displayContent}</div>
             </div>`;
         } else {
             html += `
@@ -436,39 +524,159 @@ window.teRenderActivityFeed = function(taskId) {
     container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 };
 
-window.teCycleStatus = async function(taskId) {
+window.teToggleTaskDone = async function(taskId) {
     if (!taskId) return;
     
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    const statusCycle = ['Todo', 'In Progress', 'Blocked', 'Done'];
-    let idx = statusCycle.indexOf(task.status);
-    let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
+    let nextStatus = (task.status === 'Done') ? 'Todo' : 'Done';
+    await window.teSetStatus(nextStatus, taskId, true);
+};
+
+window.teOpenStatusDropdown = function(taskId, element) {
+    if (!taskId) return;
+    
+    let dropdown = document.getElementById('te-status-dropdown');
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = 'te-status-dropdown';
+        dropdown.style.cssText = 'display: none; position: absolute; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 100005; padding: 4px; flex-direction: column; gap: 4px; min-width: 120px;';
+        
+        const options = [
+            { status: 'Todo', class: 'status-todo' },
+            { status: 'In Progress', class: 'status-in-progress' },
+            { status: 'Completed', class: 'status-completed' },
+            { status: 'Archived', class: 'status-archived' }
+        ];
+        
+        let html = '';
+        options.forEach(opt => {
+            html += `
+            <div data-click="click_teSetStatus" data-status="${opt.status}" style="padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; color: var(--text-color); display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+                <span class="status-pill ${opt.class}" style="font-size: 10px; width: auto; display: inline-block;">${opt.status}</span>
+            </div>`;
+        });
+        
+        dropdown.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        document.body.appendChild(dropdown);
+        
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && !e.target.closest('[data-click="click_teOpenStatusDropdown"]') && !e.target.closest('[data-click="click_teBulkStatusDropdown"]')) {
+                dropdown.style.display = 'none';
+            }
+        });
+    }
+
+    if (dropdown.style.display === 'flex' && dropdown.getAttribute('data-task-id') === taskId) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    dropdown.setAttribute('data-task-id', taskId);
+    
+    const rect = element.getBoundingClientRect();
+    dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
+    dropdown.style.left = `${rect.left + window.scrollX}px`;
+    dropdown.style.display = 'flex';
+};
+
+window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = false) {
+    let taskIds = [];
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    const dropdown = document.getElementById('te-status-dropdown');
+    
+    let isArchived = (status === 'Archived');
+    let activities = [];
+    let updatedTasks = [];
+    
+    if (!ignoreBulk && checkboxes.length > 0) {
+        taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+        if (dropdown) dropdown.style.display = 'none';
+        
+        window.bulkStatusMode = false;
+        window.bulkSelectedIds = null;
+        
+        // Uncheck all main tasks after action
+        const selectAll = document.getElementById('te-main-select-all');
+        if (selectAll) selectAll.checked = false;
+        checkboxes.forEach(cb => cb.checked = false);
+        if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
+    } else {
+        let taskId = directTaskId;
+        if (!taskId) {
+            if (!dropdown) return;
+            taskId = dropdown.getAttribute('data-task-id');
+            if (dropdown) dropdown.style.display = 'none';
+        }
+        if (taskId) taskIds.push(taskId);
+    }
+    
+    if (taskIds.length === 0) return;
     
     let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
     
-    task.status = nextStatus;
+    for (let id of taskIds) {
+        let task = taskEngineDB.taskz.find(t => t.id === id);
+        if (!task || task.status === status) continue;
+        
+        task.status = status;
+        task.is_archived = isArchived;
+        
+        let meta = Object.assign({}, task.metadata || {});
+        let timerUpdate = false;
+        if (status === 'In Progress' && !meta.timer_start_time) {
+            meta.timer_start_time = Date.now().toString();
+            task.metadata = meta;
+            timerUpdate = true;
+        } else if ((status === 'Done' || status === 'Todo') && meta.timer_start_time) {
+            let startTime = parseInt(meta.timer_start_time);
+            let elapsedMs = Date.now() - startTime;
+            let elapsedMinutes = Math.floor(elapsedMs / 60000);
+            task.actual_minutes = (task.actual_minutes || 0) + Math.max(1, elapsedMinutes);
+            delete meta.timer_start_time;
+            task.metadata = meta;
+            timerUpdate = true;
+        }
+        
+        updatedTasks.push({ id: id, timerUpdate: timerUpdate, meta: meta, actual: task.actual_minutes });
+        
+        const newAct = {
+            task_id: id,
+            actor_type: currentUser,
+            action_text: `Status changed to ${status}`,
+            timestamp: new Date().toISOString()
+        };
+        activities.push(newAct);
+        taskEngineDB.activity.push(newAct);
+    }
+    
+    if (updatedTasks.length === 0) return;
+    
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ status: nextStatus }).eq('id', taskId);
+        const updatePromises = updatedTasks.map(tData => {
+            let payload = { status: status, is_archived: isArchived };
+            if (tData.timerUpdate) {
+                payload.metadata = tData.meta;
+                payload.actual_minutes = tData.actual;
+            }
+            return supabaseClient.from('taskz').update(payload).eq('id', tData.id);
+        });
+        await Promise.all(updatePromises);
+        if (activities.length > 0) {
+            await supabaseClient.from('task_activity').insert(activities);
+        }
         
-        const newAct = {
-            task_id: taskId,
-            actor_type: currentUser,
-            action_text: `Status changed to ${nextStatus}`,
-            timestamp: new Date().toISOString()
-        };
-        
-        await supabaseClient.from('task_activity').insert([newAct]);
-        taskEngineDB.activity.push(newAct);
-        
-        if (window.currentOpenTaskId === taskId) {
-            teRenderActivityFeed(taskId);
+        if (window.currentOpenTaskId) {
+            let updatedIds = updatedTasks.map(u => u.id);
+            if (updatedIds.includes(window.currentOpenTaskId) || taskEngineDB.taskz.some(t => updatedIds.includes(t.parent_task_id) && t.parent_task_id === window.currentOpenTaskId)) {
+                window.teOpenTaskContext(window.currentOpenTaskId);
+            }
         }
     } catch(e) {
-        console.error('[TaskEngine] Status update failed:', e);
+        console.error('[TaskEngine] Bulk status update failed:', e);
     }
 };
 
@@ -528,38 +736,139 @@ window.teUpdateTaskDescription = async function(taskId, newDesc) {
     } catch(e) { console.error(e); }
 };
 
-window.teUpdateTaskAssignee = async function(taskId, assignee) {
+// Timeline & Timer Functions
+window.teUpdateStartDate = async function(taskId, dateValue) {
+    if (!taskId) return;
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    let meta = task.metadata || {};
+    let meta = Object.assign({}, task.metadata || {});
+    meta.start_date = dateValue;
+    task.metadata = meta;
     
-    if (assignee && assignee.startsWith('team_')) {
-        let teamId = assignee.replace('team_', '');
-        meta.assigned_team_id = teamId;
-        delete meta.spoofed_assignee;
-    } else {
-        delete meta.assigned_team_id;
-        meta.spoofed_assignee = assignee;
+    teRenderTaskGrid();
+    try {
+        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', taskId);
+    } catch(e) { console.error('[TaskEngine] Start date update failed', e); }
+};
+
+window.teUpdateDueDate = async function(taskId, dateValue) {
+    if (!taskId) return;
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.due_date = dateValue ? new Date(dateValue).toISOString() : null;
+    
+    teRenderTaskGrid();
+    try {
+        await supabaseClient.from('taskz').update({ due_date: task.due_date }).eq('id', taskId);
+    } catch(e) { console.error('[TaskEngine] Due date update failed', e); }
+};
+
+window.teToggleTimer = async function(taskId, forceStop = false) {
+    if (!taskId) return;
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    let meta = Object.assign({}, task.metadata || {});
+    let isRunning = !!meta.timer_start_time;
+    let updateNeeded = false;
+    
+    if (isRunning) {
+        // Stop the timer
+        let startTime = parseInt(meta.timer_start_time);
+        let elapsedMs = Date.now() - startTime;
+        let elapsedMinutes = Math.floor(elapsedMs / 60000);
+        
+        task.actual_minutes = (task.actual_minutes || 0) + Math.max(1, elapsedMinutes); // Minimum 1 minute recorded
+        delete meta.timer_start_time;
+        updateNeeded = true;
+    } else if (!forceStop) {
+        // Start the timer
+        meta.timer_start_time = Date.now().toString();
+        updateNeeded = true;
     }
     
-    task.metadata = meta;
+    if (updateNeeded) {
+        task.metadata = meta;
+        teOpenTaskContext(taskId); // Refresh Flyout UI
+        try {
+            await supabaseClient.from('taskz').update({ 
+                metadata: meta, 
+                actual_minutes: task.actual_minutes 
+            }).eq('id', taskId);
+        } catch(e) { console.error('[TaskEngine] Timer toggle failed', e); }
+    }
+};
+
+window.teUpdateTaskAssignee = async function(taskId, assignee) {
+    let taskIds = [taskId];
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    if (checkboxes.length > 0) {
+        taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+        const selectAll = document.getElementById('te-main-select-all');
+        if (selectAll) selectAll.checked = false;
+        checkboxes.forEach(cb => cb.checked = false);
+        if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
+    }
+    
+    let updatePromises = [];
+    
+    for (let id of taskIds) {
+        let task = taskEngineDB.taskz.find(t => t.id === id);
+        if (!task) continue;
+        
+        let meta = Object.assign({}, task.metadata || {});
+        
+        if (assignee && assignee.startsWith('team_')) {
+            let teamId = assignee.replace('team_', '');
+            meta.assigned_team_id = teamId;
+            delete meta.spoofed_assignee;
+        } else {
+            delete meta.assigned_team_id;
+            meta.spoofed_assignee = assignee;
+        }
+        
+        task.metadata = meta;
+        updatePromises.push(supabaseClient.from('taskz').update({ metadata: meta }).eq('id', id));
+    }
+    
+    if (updatePromises.length === 0) return;
+    
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', taskId);
+        await Promise.all(updatePromises);
     } catch(e) { console.error(e); }
 };
 
 window.teUpdateTaskCycle = async function(taskId, cycleId) {
-    let task = taskEngineDB.taskz.find(t => t.id === taskId);
-    if (!task) return;
+    let taskIds = [taskId];
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    if (checkboxes.length > 0) {
+        taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+        const selectAll = document.getElementById('te-main-select-all');
+        if (selectAll) selectAll.checked = false;
+        checkboxes.forEach(cb => cb.checked = false);
+        if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
+    }
     
-    task.cycle_id = cycleId || null;
+    let updatePromises = [];
+    
+    for (let id of taskIds) {
+        let task = taskEngineDB.taskz.find(t => t.id === id);
+        if (!task) continue;
+        
+        task.cycle_id = cycleId || null;
+        updatePromises.push(supabaseClient.from('taskz').update({ cycle_id: cycleId || null }).eq('id', id));
+    }
+    
+    if (updatePromises.length === 0) return;
+    
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ cycle_id: cycleId || null }).eq('id', taskId);
+        await Promise.all(updatePromises);
     } catch(e) { console.error(e); }
 };
 
@@ -682,8 +991,9 @@ window.tePostComment = async function() {
     
     let newComment = {
         task_id: window.currentOpenTaskId,
-        author_id: currentUser,
-        comment_text: text,
+        // Bypassing UUID strictness by spoofing author into the content string
+        // since auth.users is not fully wired up yet.
+        content: `SPOOF:${currentUser}|||${text}`,
         created_at: new Date().toISOString()
     };
     
@@ -694,6 +1004,7 @@ window.tePostComment = async function() {
         if (!error && data && data.length > 0) {
             taskEngineDB.comments.push(data[0]);
         } else {
+            console.error('Insert error:', error);
             // fallback optimistic if no return
             taskEngineDB.comments.push(newComment);
         }
@@ -704,17 +1015,25 @@ window.tePostComment = async function() {
 };
 
 window.teSwitchView = function(view, btnEl) {
-    // Update UI buttons
-    document.querySelectorAll('.task-view-btn').forEach(b => {
-        b.classList.remove('active');
-        b.style.background = 'transparent';
-        b.style.color = 'var(--text-muted)';
-    });
-    
+    // Update UI buttons based on what was clicked
     if (btnEl) {
-        btnEl.classList.add('active');
-        btnEl.style.background = 'rgba(255,255,255,0.1)';
-        btnEl.style.color = 'white';
+        if (btnEl.classList.contains('task-nav-link')) {
+            document.querySelectorAll('.task-nav-link').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = '';
+                b.style.color = '';
+            });
+            btnEl.classList.add('active');
+        } else if (btnEl.classList.contains('task-view-btn')) {
+            document.querySelectorAll('.task-view-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.color = 'var(--text-muted)';
+            });
+            btnEl.classList.add('active');
+            btnEl.style.background = 'rgba(255,255,255,0.1)';
+            btnEl.style.color = 'white';
+        }
     }
     
     const wrapper = document.getElementById('te-task-rows-wrapper');
@@ -740,19 +1059,20 @@ window.teSwitchView = function(view, btnEl) {
     
     if (view === 'list') {
         header.style.display = 'grid';
-        teRenderTaskGrid('list');
+        teRenderTaskGrid(null);
+        let activeNav = document.querySelector('.task-nav-link.active');
         let title = document.getElementById('te-main-header-title');
-        if (title) title.textContent = 'All Tasks';
+        if (title) title.textContent = activeNav ? activeNav.textContent : 'All Tasks';
     } else if (view === 'my_tasks') {
         header.style.display = 'grid';
         teRenderTaskGrid('my_tasks');
         let title = document.getElementById('te-main-header-title');
         if (title) title.textContent = 'My Tasks';
-    } else if (view === 'blocked') {
+    } else if (view === 'in_progress') {
         header.style.display = 'grid';
-        teRenderTaskGrid('blocked');
+        teRenderTaskGrid('in_progress');
         let title = document.getElementById('te-main-header-title');
-        if (title) title.textContent = 'Blocked Tasks';
+        if (title) title.textContent = 'In Progress Tasks';
     } else if (view === 'completed') {
         header.style.display = 'grid';
         teRenderTaskGrid('completed');
@@ -768,9 +1088,9 @@ window.teSwitchView = function(view, btnEl) {
         
         let boardHTML = `
             <div style="display: flex; gap: 20px; height: 100%; align-items: stretch; overflow-x: auto; padding-bottom: 20px;">
-                ${['Todo', 'In Progress', 'Blocked', 'Done'].map(status => {
-                    let tasksHtml = taskEngineDB.taskz.filter(t => t.status === status).map(t => {
-                        let color = status === 'Done' ? '#10b981' : (status === 'Blocked' ? '#ef4444' : (status === 'Todo' ? '#64748b' : '#3b82f6'));
+                ${['Todo', 'In Progress', 'Completed'].map(status => {
+                    let tasksHtml = taskEngineDB.taskz.filter(t => (status === 'Completed' ? (t.status === 'Completed' || t.status === 'Done') : t.status === status)).map(t => {
+                        let color = status === 'Completed' ? '#10b981' : (status === 'Todo' ? '#64748b' : '#3b82f6');
                         return `
                         <div class="kanban-card" data-task-id="${t.id}" style="background: var(--bg-container); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-left: 3px solid ${color};">
                             <div style="font-weight: 500; font-size: 14px; margin-bottom: 8px; color: white;">${t.title}</div>
@@ -832,15 +1152,30 @@ window.teSwitchView = function(view, btnEl) {
     } else if (view === 'calendar') {
         header.style.display = 'none';
         
-        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        if (typeof window.teCalendarMonth === 'undefined') window.teCalendarMonth = new Date().getMonth();
+        if (typeof window.teCalendarYear === 'undefined') window.teCalendarYear = new Date().getFullYear();
+        let currentMonth = window.teCalendarMonth;
+        let currentYear = window.teCalendarYear;
+        
+        let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
         let calendarHtml = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px;">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: -0.5px;">${monthNames[currentMonth]} ${currentYear}</div>
+                <div style="display: flex; gap: 8px;">
+                    <button data-click="click_teChangeCalendarMonth_prev" style="padding: 6px 16px; font-size: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; cursor: pointer; transition: all 0.2s;">&lt;</button>
+                    <button data-click="click_teChangeCalendarMonth_next" style="padding: 6px 16px; font-size: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; cursor: pointer; transition: all 0.2s;">&gt;</button>
+                </div>
+            </div>
+        `;
+        
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        calendarHtml += `
             <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
                 ${days.map(d => `<div style="padding: 10px; text-align: center; font-weight: bold; background: var(--bg-panel); color: var(--text-muted); font-size: 12px;">${d}</div>`).join('')}
         `;
         
         let today = new Date();
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
         let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         let firstDay = new Date(currentYear, currentMonth, 1).getDay();
         let offset = firstDay === 0 ? 6 : firstDay - 1; // Mon = 0
@@ -849,19 +1184,63 @@ window.teSwitchView = function(view, btnEl) {
             calendarHtml += `<div style="background: rgba(0,0,0,0.2); min-height: 100px;"></div>`;
         }
         
+        let calendarTasks = taskEngineDB.taskz.filter(t => {
+            let meta = t.metadata || {};
+            if (!t.due_date && !meta.start_date) return false;
+            let sd = meta.start_date ? new Date(meta.start_date) : new Date(t.due_date);
+            let ed = t.due_date ? new Date(t.due_date) : new Date(meta.start_date);
+            sd.setHours(0,0,0,0);
+            ed.setHours(23,59,59,999);
+            let monthStart = new Date(currentYear, currentMonth, 1);
+            let monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+            return (sd <= monthEnd && ed >= monthStart);
+        });
+        
+        calendarTasks.sort((a, b) => {
+            let aMeta = a.metadata || {};
+            let bMeta = b.metadata || {};
+            let aSd = aMeta.start_date ? new Date(aMeta.start_date) : new Date(a.due_date);
+            let bSd = bMeta.start_date ? new Date(bMeta.start_date) : new Date(b.due_date);
+            return aSd - bSd;
+        });
+        
         for (let i = 1; i <= daysInMonth; i++) {
-            let dayTasks = taskEngineDB.taskz.filter(t => {
-                if (!t.due_date) return false;
-                let d = new Date(t.due_date);
-                return d.getDate() === i && d.getMonth() === currentMonth;
-            });
+            let currentDayDate = new Date(currentYear, currentMonth, i);
+            currentDayDate.setHours(12,0,0,0);
             
-            let tasksHtml = dayTasks.map(t => `<div style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;" onclick="window.teOpenTaskContext('${t.id}')">${t.title}</div>`).join('');
+            let tasksHtml = calendarTasks.map(t => {
+                let meta = t.metadata || {};
+                let sd = meta.start_date ? new Date(meta.start_date) : new Date(t.due_date);
+                let ed = t.due_date ? new Date(t.due_date) : new Date(meta.start_date);
+                sd.setHours(0,0,0,0);
+                ed.setHours(23,59,59,999);
+                
+                let isActive = currentDayDate >= sd && currentDayDate <= ed;
+                if (!isActive) return `<div style="height: 20px; margin-top: 4px;"></div>`;
+                
+                let isStart = currentDayDate.getDate() === sd.getDate() && currentDayDate.getMonth() === sd.getMonth();
+                let isEnd = currentDayDate.getDate() === ed.getDate() && currentDayDate.getMonth() === ed.getMonth();
+                
+                let radius = '0px';
+                if (isStart && isEnd) radius = '4px';
+                else if (isStart) radius = '4px 0 0 4px';
+                else if (isEnd) radius = '0 4px 4px 0';
+                
+                let borderStyle = '1px solid rgba(45, 212, 191, 0.4)';
+                if (!isStart) borderStyle = '1px solid rgba(45, 212, 191, 0.4); border-left: none;';
+                if (!isEnd) borderStyle += ' border-right: none;';
+                
+                let text = isStart ? t.title : '&nbsp;';
+                
+                return `<div style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; ${borderStyle} border-radius: ${radius}; height: 20px; font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-left: ${isStart ? '6px' : '0'}; line-height: 18px;" onclick="window.teOpenTaskContext('${t.id}')">${text}</div>`;
+            }).join('');
             
             calendarHtml += `
-                <div style="background: var(--bg-container); min-height: 100px; padding: 10px; border: 1px solid rgba(0,0,0,0.5);">
-                    <div style="font-size: 12px; font-weight: bold; color: ${i === today.getDate() ? 'white' : 'var(--text-muted)'};">${i}</div>
-                    ${tasksHtml}
+                <div style="background: var(--bg-container); min-height: 100px; padding: 10px 0; border: 1px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden;">
+                    <div style="font-size: 12px; font-weight: bold; color: ${i === today.getDate() ? 'white' : 'var(--text-muted)'}; padding-left: 10px;">${i}</div>
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;">
+                        ${tasksHtml}
+                    </div>
                 </div>
             `;
         }
@@ -869,6 +1248,21 @@ window.teSwitchView = function(view, btnEl) {
         calendarHtml += `</div>`;
         wrapper.innerHTML = window.safeHTML ? window.safeHTML(calendarHtml) : calendarHtml;
     }
+};
+
+window.teChangeCalendarMonth = function(dir) {
+    if (typeof window.teCalendarMonth === 'undefined') window.teCalendarMonth = new Date().getMonth();
+    if (typeof window.teCalendarYear === 'undefined') window.teCalendarYear = new Date().getFullYear();
+    
+    window.teCalendarMonth += dir;
+    if (window.teCalendarMonth > 11) {
+        window.teCalendarMonth = 0;
+        window.teCalendarYear += 1;
+    } else if (window.teCalendarMonth < 0) {
+        window.teCalendarMonth = 11;
+        window.teCalendarYear -= 1;
+    }
+    teSwitchView('calendar');
 };
 
 window.teToggleTemplateMenu = function() {
@@ -1081,7 +1475,7 @@ window.teArchiveEntity = async function(type, id) {
                 let txt = activeView.textContent.toLowerCase();
                 if (txt.includes('inbox')) viewName = 'inbox';
                 else if (txt.includes('my tasks')) viewName = 'my_tasks';
-                else if (txt.includes('blocked')) viewName = 'blocked';
+                else if (txt.includes('in progress')) viewName = 'in_progress';
                 else if (txt.includes('completed')) viewName = 'completed';
                 else if (txt.includes('archive')) viewName = 'archive';
             }
@@ -1139,5 +1533,49 @@ window.teBulkDelete = async function() {
     for (const cb of checkboxes) {
         await window.teHardDeleteEntity(cb.getAttribute('data-type'), cb.getAttribute('data-id'));
     }
+};
+
+window.teUpdateMainSelection = function() {
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    const bulkBar = document.getElementById('te-bulk-action-bar');
+    const countSpan = document.getElementById('te-bulk-count');
+    
+    if (checkboxes.length > 0) {
+        if (countSpan) countSpan.textContent = checkboxes.length;
+        if (bulkBar) bulkBar.style.display = 'flex';
+    } else {
+        if (bulkBar) bulkBar.style.display = 'none';
+        const selectAll = document.getElementById('te-main-select-all');
+        if (selectAll) selectAll.checked = false;
+    }
+};
+
+window.teToggleAllMain = function() {
+    const selectAll = document.getElementById('te-main-select-all');
+    const isChecked = selectAll ? selectAll.checked : false;
+    const checkboxes = document.querySelectorAll('.te-task-checkbox');
+    checkboxes.forEach(cb => cb.checked = isChecked);
+    window.teUpdateMainSelection();
+};
+
+window.teBulkStatusDropdown = function(element) {
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    if (checkboxes.length === 0) return;
+    
+    window.bulkSelectedIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+    window.bulkStatusMode = true;
+    
+    let dropdown = document.getElementById('te-status-dropdown');
+    if (!dropdown) {
+        window.teOpenStatusDropdown(window.bulkSelectedIds[0], element); 
+        dropdown = document.getElementById('te-status-dropdown');
+    }
+    
+    dropdown.removeAttribute('data-task-id');
+    
+    const rect = element.getBoundingClientRect();
+    dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
+    dropdown.style.left = `${rect.left + window.scrollX}px`;
+    dropdown.style.display = 'flex';
 };
 

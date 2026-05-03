@@ -13,6 +13,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('click', function(event) {
+        if (event.target.type === 'checkbox') return;
         const el = event.target.closest('[data-click]');
         if (!el) return;
         const action = el.getAttribute('data-click');
@@ -58,14 +59,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_closeTaskContext':
                     if (window.closeTaskContext) window.closeTaskContext();
                     break;
+                case 'click_teToggleTimer':
+                    if (typeof window.teToggleTimer === 'function' && window.currentOpenTaskId) {
+                        window.teToggleTimer(window.currentOpenTaskId);
+                    }
+                    break;
+                case 'click_teChangeCalendarMonth_prev':
+                    if (typeof window.teChangeCalendarMonth === 'function') window.teChangeCalendarMonth(-1);
+                    break;
+                case 'click_teChangeCalendarMonth_next':
+                    if (typeof window.teChangeCalendarMonth === 'function') window.teChangeCalendarMonth(1);
+                    break;
                 case 'click_teCreateNewTask':
                     if (window.teCreateNewTask) window.teCreateNewTask();
                     break;
                 case 'click_teOpenTaskContext':
                     if (window.teOpenTaskContext) window.teOpenTaskContext(el.getAttribute('data-task-id'));
                     break;
-                case 'click_teCycleStatus':
-                    if (window.teCycleStatus) window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                case 'click_teOpenStatusDropdown':
+                    if (window.teOpenStatusDropdown) {
+                        const taskId = el.closest('[data-task-id]') ? el.closest('[data-task-id]').getAttribute('data-task-id') : el.getAttribute('data-task-id');
+                        window.teOpenStatusDropdown(taskId, el);
+                    }
+                    break;
+                case 'click_teSetStatus':
+                    if (window.teSetStatus) window.teSetStatus(el.getAttribute('data-status'));
                     break;
                 case 'click_teSwitchView_list':
                     if (window.teSwitchView) window.teSwitchView('list', el);
@@ -196,8 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSwitchView_my_tasks':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('my_tasks', el);
                     break;
-                case 'click_teSwitchView_blocked':
-                    if(typeof window.teSwitchView==='function') window.teSwitchView('blocked', el);
+                case 'click_teSwitchView_in_progress':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('in_progress', el);
                     break;
                 case 'click_teSwitchView_completed':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('completed', el);
@@ -230,6 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_teBulkRestore':
                     if(typeof window.teBulkRestore==='function') window.teBulkRestore();
+                    break;
+                case 'click_teBulkStatusDropdown':
+                    if(typeof window.teBulkStatusDropdown==='function') window.teBulkStatusDropdown(el);
                     break;
                 case 'click_teBulkDelete':
                     if(typeof window.teBulkDelete==='function') window.teBulkDelete();
@@ -268,11 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_teToggleTaskDone':
                     event.stopPropagation();
-                    if(typeof window.teCycleStatus==='function') window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                    if(typeof window.teToggleTaskDone==='function') window.teToggleTaskDone(el.closest('.task-row').getAttribute('data-task-id'));
                     break;
                 case 'click_teToggleTaskDoneInFlyout':
-                    if(typeof window.teCycleStatus==='function' && window.currentOpenTaskId) {
-                        window.teCycleStatus(window.currentOpenTaskId);
+                    if(typeof window.teToggleTaskDone==='function' && window.currentOpenTaskId) {
+                        window.teToggleTaskDone(window.currentOpenTaskId);
                     }
                     break;
                 case 'click_teAddSubtask':
@@ -943,6 +964,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.teUpdateTaskCycle(window.currentOpenTaskId, el.value);
                     }
                     break;
+                case 'change_teToggleAllMain':
+                    if (typeof window.teToggleAllMain === 'function') window.teToggleAllMain();
+                    break;
+                case 'change_teToggleSubtaskDone':
+                    if(typeof window.teToggleTaskDone==='function') {
+                        window.teToggleTaskDone(el.getAttribute('data-id'));
+                    }
+                    break;
+                case 'change_teUpdateMainSelection':
+                    if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
+                    break;
                 case 'change_teToggleAllArchive': {
                     const archiveCbs = document.querySelectorAll('.te-archive-checkbox');
                     archiveCbs.forEach(cb => cb.checked = el.checked);
@@ -1131,6 +1163,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_teChangeIdentity':
                     if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
+                    break;
+                case 'change_teUpdateStartDate':
+                    if (typeof window.teUpdateStartDate === 'function' && window.currentOpenTaskId) window.teUpdateStartDate(window.currentOpenTaskId, el.value);
+                    break;
+                case 'change_teUpdateDueDate':
+                    if (typeof window.teUpdateDueDate === 'function' && window.currentOpenTaskId) window.teUpdateDueDate(window.currentOpenTaskId, el.value);
                     break;
             }
         } catch (error) {
