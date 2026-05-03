@@ -76,6 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSwitchView_calendar':
                     if (window.teSwitchView) window.teSwitchView('calendar', el);
                     break;
+                case 'click_teToggleTemplateMenu':
+                    if (window.teToggleTemplateMenu) window.teToggleTemplateMenu();
+                    break;
+                case 'click_teSpawnSOP_Batchez':
+                    if (window.teSpawnSOP) window.teSpawnSOP('batchez');
+                    break;
+                case 'click_teSpawnSOP_Print':
+                    if (window.teSpawnSOP) window.teSpawnSOP('print');
+                    break;
                 case 'click_toggleTerminal':
                     toggleTerminal();
                     break;
