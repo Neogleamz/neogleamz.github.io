@@ -1,5 +1,14 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Features & Refactors
+- **Purge Inline onclick Handlers (production-module.js)**: Migrate all ~40 inline `onclick=` handlers to `data-click` delegators registered in `system-event-delegator.js`.
+- **Purge Inline onclick Handlers (print-module.js)**: Migrate all ~15 inline `onclick=` handlers to `data-click` delegators.
+- **Purge Inline onclick Handlers (packerz-module.js)**: Migrate all ~10 inline `onclick=` handlers to `data-click` delegators.
+- **Purge Inline onclick Handlers (labelz-module.js)**: Migrate all ~10 inline `onclick=` handlers to `data-click` delegators.
+- **Purge Inline onclick Handlers (system-tools-module.js)**: Migrate all ~8 inline `onclick=` handlers to `data-click` delegators.
+- **Purge Inline onclick Handlers (sales, ceo, barcodz, analytics, task-engine)**: Migrate remaining ~17 inline `onclick=` handlers across 5 smaller modules.
+
 ## [1.0.25] - 2026-05-03
 ### Features & Refactors
 - **Task Engine Board View Interactions**: Enable full interaction, opening, and working of individual tasks directly from within the Kanban Board view.
