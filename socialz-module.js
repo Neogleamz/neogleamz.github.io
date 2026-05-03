@@ -52,7 +52,9 @@
             const t = document.createElement('div');
             t.className = `${type==='success'?'bg-green-500':'bg-red-500'} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 toast-enter pointer-events-auto min-w-[280px] transition-opacity duration-500`;
             t.innerHTML = 
-                `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"> </i><span class="font-medium text-sm">${msg}</span>`;
+                window.safeHTML ? window.safeHTML(
+                    `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"> </i><span class="font-medium text-sm">${msg}</span>`
+                ) : `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"> </i><span class="font-medium text-sm">${msg}</span>`;
             c.appendChild(t); 
             setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
         }
@@ -158,11 +160,15 @@
                         if (socialzSkaters[index].isFavorite) {
                             btn.style.color = '#ef4444';
                             btn.innerHTML = 
-                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                                window.safeHTML ? window.safeHTML(
+                                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                                ) : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
                         } else {
                             btn.style.color = 'var(--text-muted)';
                             btn.innerHTML = 
-                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                                window.safeHTML ? window.safeHTML(
+                                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                                ) : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
                         }
                     } else {
                         renderSkaters();
@@ -220,7 +226,12 @@
 
             const sortedStyles = Array.from(uniqueStyles).sort();
             if (styleList) {
-                styleList.innerHTML = sortedStyles.map(st => `
+                styleList.innerHTML = window.safeHTML ? window.safeHTML(sortedStyles.map(st => `
+                    <label style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; background:transparent;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} onchange="handleStyleToggle('${st}')">
+                        <span style="font-size:12px; color:var(--text-main); font-weight:600; user-select:none;">${st}</span>
+                    </label>
+                `).join('')) : sortedStyles.map(st => `
                     <label style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; background:transparent;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
                         <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} onchange="handleStyleToggle('${st}')">
                         <span style="font-size:12px; color:var(--text-main); font-weight:600; user-select:none;">${st}</span>
@@ -231,13 +242,17 @@
             const sortedRegions = Array.from(uniqueRegions).sort();
             const currentReg = regionSelect.value;
             regionSelect.innerHTML = 
-                '<option value="">All Regions</option>' + sortedRegions.map(reg => `<option value="${reg}">${reg}</option>`).join('');
+                window.safeHTML ? window.safeHTML(
+                    '<option value="">All Regions</option>' + sortedRegions.map(reg => `<option value="${reg}">${reg}</option>`).join('')
+                ) : '<option value="">All Regions</option>' + sortedRegions.map(reg => `<option value="${reg}">${reg}</option>`).join('');
             if (sortedRegions.includes(currentReg)) regionSelect.value = currentReg;
 
             const sortedTypes = Array.from(uniqueTypes).sort();
             const currentType = typeSelect.value;
             typeSelect.innerHTML = 
-                '<option value="">All Types</option>' + sortedTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+                window.safeHTML ? window.safeHTML(
+                    '<option value="">All Types</option>' + sortedTypes.map(t => `<option value="${t}">${t}</option>`).join('')
+                ) : '<option value="">All Types</option>' + sortedTypes.map(t => `<option value="${t}">${t}</option>`).join('');
             if (sortedTypes.includes(currentType)) typeSelect.value = currentType;
         }
 
@@ -363,11 +378,74 @@
             if(document.getElementById('stat-avg-eng')) document.getElementById('stat-avg-eng').innerText = filtered.length > 0 ? (2.4 + (reach % 100) / 100).toFixed(1) + "%" : "0%";
 
             if (filtered.length === 0) {
-                grid.innerHTML = ''; emptyState.classList.remove('hidden');
+                grid.innerHTML = window.safeHTML ? window.safeHTML('') : ''; emptyState.classList.remove('hidden');
             } else {
                 emptyState.classList.add('hidden');
                 if (viewMode === 'grid') {
-                    grid.innerHTML = filtered.map(s => {
+                    grid.innerHTML = window.safeHTML ? window.safeHTML(filtered.map(s => {
+                        const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
+                        const styleList = s.style ? s.style.split(';').map(st => st.trim()).filter(st => st).slice(0, 3) : [];
+                        const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
+                        const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
+
+                        let src = ''; let prov = '';
+                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; prov = 'tiktok'; }
+                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; prov = 'youtube'; }
+                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; prov = 'facebook'; }
+                        
+                        const typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
+                            'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
+                            ((s.type || '').toLowerCase() === 'indoor' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300');
+
+                        const regStyles = getRegionStyleConfig(s.region);
+                        const igHtml = generateSocial(s.links.ig, s.followers.ig, 'fa-instagram', 'pink', s.handles.ig);
+                        const ttHtml = generateSocial(s.links.tt, s.followers.tt, 'fa-tiktok', 'cyan', s.handles.tt);
+                        const ytHtml = generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);
+                        const fbHtml = generateSocial(s.links.fb, s.followers.fb, 'fa-facebook', 'blue', s.handles.fb);
+
+                        return `<div class="socialz-influencer-card" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color);">
+               <!-- Favorite Heart -->
+               <button data-click="click_toggleFavorite" data-index="${originalIndex}" class="btn-icon-sq" style="position: absolute; top: 16px; right: 16px; z-index: 20; border-radius: 50%; background: var(--bg-main); border: 1px solid var(--border-color); color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};">
+                   ${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}
+               </button>
+               <!-- Viral Star -->
+               ${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" style="position: absolute; top: 16px; right: 54px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-main); border: 1px solid var(--border-color); color: #FBBF24; filter: drop-shadow(0 0 2px rgba(251,191,36,0.3)); z-index: 20;" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : ''}
+
+                <div style="padding: 12px 16px 16px 16px; position: relative; flex-grow: 1; display: flex; flex-direction: column;">
+               <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                   <div style="width: 64px; height: 64px; border-radius: 50%; position: relative; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
+                       <div style="position: absolute; inset:0; background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
+                       ${src ? `<img loading="lazy" src="${src}" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}">` : ''}
+                   </div>
+                   <div style="overflow: hidden; flex-grow: 1;">
+                       <h2 style="font-weight: bold; font-size: 20px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: var(--text-heading); margin: 0;">${s.name}</h2>
+                       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; font-size: 14px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                           <i class="fa-solid fa-location-dot text-brand w-3"> </i> ${s.location} 
+                           ${s.region ? `<span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; ${regStyles}">${s.region}</span>` : ''} 
+                           <span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase;" class="${typeClass}">${s.type || ''}</span>
+                       </div>
+                   </div>
+               </div>
+               <p style="font-size: 14px; margin-top: 12px; margin-bottom: 16px; min-height: 60px; line-height: 1.5; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${s.summary || '<span class="italic opacity-50">No summary.</span>'}</p>
+                <div style="border-top: 1px solid var(--border-color); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; padding-top: 12px; margin-top: auto; gap: 8px;">
+                    <div style="display: flex; flex-wrap: nowrap; gap: 4px; overflow: hidden;">
+                        ${s.collabStatus ? `<span style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; background:rgba(99,102,241,0.1); color:#818cf8; white-space:nowrap; flex-shrink:0;">${s.collabStatus}</span>` : ''}
+                        ${styleList.map(st => `<div style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase; background:var(--bg-input); color:var(--text-muted); border:1px solid var(--border-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${st}</div>`).join('')}
+                    </div>
+                    
+                    <div style="padding: 3px 8px; border-radius: 6px; background: var(--bg-input); border: 1px solid var(--border-color); display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size: 11px; font-weight: 900; color: #f59e0b; text-transform: uppercase;">${formatCountShort(s.rawFollowers)} REACH</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='#f97316'"><i class="fa-solid fa-pen"> </i> EDIT</button>
+                    </div>
+                </div></div>
+               <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
+                   ${igHtml}${ttHtml}${ytHtml}${fbHtml}
+                </div>
+            </div>`;
+                    }).join('')) : filtered.map(s => {
                         const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
                         const styleList = s.style ? s.style.split(';').map(st => st.trim()).filter(st => st).slice(0, 3) : [];
                         const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
@@ -496,7 +574,7 @@
                     }).join('');
                     
                     tableHtml += `</tbody></table></div>`;
-                    grid.innerHTML = tableHtml;
+                    grid.innerHTML = window.safeHTML ? window.safeHTML(tableHtml) : tableHtml;
                     setTimeout(() => { if(typeof applyTableInteractivity === 'function') applyTableInteractivity('skater-grid-wrapper'); }, 50);
                 }
             }

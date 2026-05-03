@@ -23,7 +23,7 @@ window.renderBulkAddBody = function() {
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bulkAddBody">`; let qStr = document.getElementById('bulkSearch').value.toLowerCase(); let filtered = bulkAddData.filter(x => x.nn.toLowerCase().includes(qStr) || x.np.toLowerCase().includes(qStr) || x.n.toLowerCase().includes(qStr) || x.sp.toLowerCase().includes(qStr));
     filtered.sort((x,y) => { let u = x[currentBulkSort.column]; let v = y[currentBulkSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBulkSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBulkSort.direction==='asc'?-1:1; if(u>v) return currentBulkSort.direction==='asc'?1:-1; return 0; });
     filtered.forEach(x => { let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" data-app-input="updateBulkQty" data-key="${sk}" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" data-app-input="updateBulkQty" data-key="${sk}" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
-    wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('bulkAddTableWrap');
+    wrap.innerHTML = window.safeHTML ? window.safeHTML(h + `</tbody></table>`) : h + `</tbody></table>`; applyTableInteractivity('bulkAddTableWrap');
 }
 window.saveBulkAdd = async function() { await executeWithButtonAction('btnSaveBulkAdd', '💾 SAVING...', '✅ SAVED!', async () => { let addedCount = 0; bulkAddData.forEach(i => { let v = parseFloat(i.q); if(v > 0) { let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } addedCount++; } }); if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); await window.syncRecipe(currentProduct); window.renderProductBOM(); window.renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); } else { throw new Error("No quantities greater than 0 were entered."); } }).catch(e => { alert(e.message); }); }
 
@@ -177,7 +177,7 @@ window.renderProductList = function() {
         });
     } catch(e) { sysLog(`Error in product list cleanup: ${e.message}`, true); }
 
-    const ui = document.getElementById('productListUI'); ui.innerHTML = "";
+    const ui = document.getElementById('productListUI'); ui.innerHTML = window.safeHTML ? window.safeHTML("") : "";
     let allProds = Object.keys(productsDB);
 
     // Sort based on saved preference if available
@@ -192,7 +192,9 @@ window.renderProductList = function() {
         allProds.sort();
     }
 
-    if(allProds.length===0){ ui.innerHTML = "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; }
+    if(allProds.length===0){ ui.innerHTML = window.safeHTML ? window.safeHTML(
+        "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"
+    ) : "<li style='cursor:default; background:transparent; border:none; color:var(--text-main);'>No products.</li>"; document.getElementById('bomMainArea').style.display='none'; return; }
     let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
     let labelProds = allProds.filter(p => productsDB[p] && productsDB[p].is_label);
 
@@ -231,11 +233,11 @@ window.renderProductList = function() {
         if (!el) return;
         if (el.style.display === 'none') {
             el.style.display = 'block';
-            btn.innerHTML = '▼';
+            btn.innerHTML = window.safeHTML ? window.safeHTML('▼') : '▼';
             window.recipeGroupState[catId] = true;
         } else {
             el.style.display = 'none';
-            btn.innerHTML = '▶';
+            btn.innerHTML = window.safeHTML ? window.safeHTML('▶') : '▶';
             window.recipeGroupState[catId] = false;
         }
         localStorage.setItem('recipeGroupState', JSON.stringify(window.recipeGroupState));
@@ -281,7 +283,7 @@ window.renderProductList = function() {
         html += `</div>`;
     }
 
-    ui.innerHTML = html;
+    ui.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     if(currentProduct) window.renderProductBOM();
 }
 
@@ -339,7 +341,7 @@ window.renderProductBOM = function() {
         a.sort((x,y) => { let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; });
         a.forEach(x => { let sk = String(x.rawKey).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.rawKey.startsWith('RECIPE:::')) { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">Sub-Assembly</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" data-app-focus="bomStoreOldVal" data-app-blur="updateBOMQty">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" data-app-click="removeBOMPart">X</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" data-app-focus="bomStoreOldVal" data-app-blur="updateBOMQty">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" data-app-click="removeBOMPart">X</button></td></tr>`; } });
     }
-    wrap.innerHTML = h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${getEngineTrueCogs(currentProduct).toFixed(2)}`; applyTableInteractivity('bomTableWrap');
+    wrap.innerHTML = window.safeHTML ? window.safeHTML(h + `</tbody></table>`) : h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${getEngineTrueCogs(currentProduct).toFixed(2)}`; applyTableInteractivity('bomTableWrap');
 }
 window.updateBOMQty = async function(cell) { try { let v = parseFloat(cell.innerText.replace(/[^0-9.-]+/g,"")); if(isNaN(v) || v<=0) { cell.innerText=oldValTemp; return; } if(v.toString()===oldValTemp) return; let k = cell.getAttribute('data-key').replace(/\\'/g, "'"); let p = productsDB[currentProduct].find(x => String(x.item_key || x.di_item_id || x.name) === k); if(p) { p.quantity = v; p.qty = v; cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000); await window.syncRecipe(currentProduct); window.renderProductList(); } } catch(e) { sysLog(e.message, true); } }
 window.removePart = async function(btn) { try { if(!currentProduct) return; let k = btn.getAttribute('data-key').replace(/\\'/g, "'"); let arr = productsDB[currentProduct]; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === k) { arr.splice(i, 1); } } await window.syncRecipe(currentProduct); window.renderProductBOM(); window.renderProductList(); } catch(e) { sysLog(e.message, true); } }

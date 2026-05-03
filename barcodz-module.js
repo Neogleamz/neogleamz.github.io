@@ -106,7 +106,9 @@ function renderBarcodzGrid(forceRebuild = false) {
         );
 
         if (filtered.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No labels found matching search.</div>`;
+            grid.innerHTML = window.safeHTML ? window.safeHTML(
+                `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No labels found matching search.</div>`
+            ) : `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No labels found matching search.</div>`;
             return;
         }
 
@@ -170,7 +172,7 @@ function renderBarcodzGrid(forceRebuild = false) {
 
         // Push grid layout down into details elements
         grid.style.display = 'block';
-        grid.innerHTML = html;
+        grid.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     } catch(e) { sysLog('Barcodz grid render error: ' + e.message, true); }
 }
 
@@ -288,7 +290,7 @@ function renderBarcodzSpool() {
         });
     }
     
-    lists.forEach(list => list.innerHTML = html);
+    lists.forEach(list => list.innerHTML = window.safeHTML ? window.safeHTML(html) : html);
     counters.forEach(c => c.innerText = totalQty);
 }
 
@@ -308,7 +310,7 @@ function executeBatchPrint() {
     if (!printArea) return alert("Printable area missing from DOM.");
     
     // Clear Area
-    printArea.innerHTML = '';
+    printArea.innerHTML = window.safeHTML ? window.safeHTML('') : '';
     
     // Parse JSON injected value
     let pObj = {w: 4, h: 6, n: "Default Paper"};
@@ -318,7 +320,7 @@ function executeBatchPrint() {
 
     let pageCss = `@page { size: ${pW}in ${pH}in; margin: 0; }`;
     if (pageCss) {
-        printArea.innerHTML = `<style>${pageCss}</style>`;
+        printArea.innerHTML = window.safeHTML ? window.safeHTML(`<style>${pageCss}</style>`) : `<style>${pageCss}</style>`;
     }
     
     let totalInjected = 0;
@@ -340,10 +342,14 @@ function executeBatchPrint() {
             
             if (pW >= 4 && pH >= 6) {
                 wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.25in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
-                wrapper.innerHTML = `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`;
+                wrapper.innerHTML = window.safeHTML ? window.safeHTML(
+                    `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`
+                ) : `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`;
             } else {
                 wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
-                wrapper.innerHTML = `<div style="font-size:${fontSizeTitle}pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? `width:${bcHeight}in; height:${bcHeight}in; object-fit:contain; margin:0 auto; display:block;` : `width:100%; height:${bcHeight}in;`}">${isQR ? '' : '</svg>'}`;
+                wrapper.innerHTML = window.safeHTML ? window.safeHTML(
+                    `<div style="font-size:${fontSizeTitle}pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? `width:${bcHeight}in; height:${bcHeight}in; object-fit:contain; margin:0 auto; display:block;` : `width:100%; height:${bcHeight}in;`}">${isQR ? '' : '</svg>'}`
+                ) : `<div style="font-size:${fontSizeTitle}pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? `width:${bcHeight}in; height:${bcHeight}in; object-fit:contain; margin:0 auto; display:block;` : `width:100%; height:${bcHeight}in;`}">${isQR ? '' : '</svg>'}`;
             }
 
             printArea.appendChild(wrapper);
@@ -407,7 +413,7 @@ function executeBatchPrint() {
         consumeThermalMedia(totalInjected, activeSizeSelect);
         
         setTimeout(() => {
-            printArea.innerHTML = '';
+            printArea.innerHTML = window.safeHTML ? window.safeHTML('') : '';
             // Auto Clear Queue as defined in standard operating logic
             clearBarcodzSpool();
         }, 1500); // cleanup delay allowing OS to snapshot
