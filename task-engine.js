@@ -1152,19 +1152,13 @@ window.teSwitchView = function(view, btnEl) {
         if (btnEl.classList.contains('task-nav-link')) {
             document.querySelectorAll('.task-nav-link').forEach(b => {
                 b.classList.remove('active');
-                b.style.background = '';
-                b.style.color = '';
             });
             btnEl.classList.add('active');
         } else if (btnEl.classList.contains('task-view-btn')) {
             document.querySelectorAll('.task-view-btn').forEach(b => {
                 b.classList.remove('active');
-                b.style.background = 'transparent';
-                b.style.color = 'var(--text-muted)';
             });
             btnEl.classList.add('active');
-            btnEl.style.background = 'rgba(255,255,255,0.1)';
-            btnEl.style.color = 'white';
         }
     }
     
