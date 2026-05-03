@@ -1154,15 +1154,28 @@ window.teSwitchView = function(view, btnEl) {
     } else if (view === 'calendar') {
         header.style.display = 'none';
         
-        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        if (typeof window.teCalendarMonth === 'undefined') window.teCalendarMonth = new Date().getMonth();
+        if (typeof window.teCalendarYear === 'undefined') window.teCalendarYear = new Date().getFullYear();
+        let currentMonth = window.teCalendarMonth;
+        let currentYear = window.teCalendarYear;
+        
+        let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
         let calendarHtml = `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 10px;">
+                <button class="btn-slate" onclick="window.teChangeCalendarMonth(-1)" style="padding: 5px 15px;">&lt; Prev</button>
+                <div style="font-size: 16px; font-weight: bold; color: white;">${monthNames[currentMonth]} ${currentYear}</div>
+                <button class="btn-slate" onclick="window.teChangeCalendarMonth(1)" style="padding: 5px 15px;">Next &gt;</button>
+            </div>
+        `;
+        
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        calendarHtml += `
             <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
                 ${days.map(d => `<div style="padding: 10px; text-align: center; font-weight: bold; background: var(--bg-panel); color: var(--text-muted); font-size: 12px;">${d}</div>`).join('')}
         `;
         
         let today = new Date();
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
         let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         let firstDay = new Date(currentYear, currentMonth, 1).getDay();
         let offset = firstDay === 0 ? 6 : firstDay - 1; // Mon = 0
@@ -1235,6 +1248,21 @@ window.teSwitchView = function(view, btnEl) {
         calendarHtml += `</div>`;
         wrapper.innerHTML = window.safeHTML ? window.safeHTML(calendarHtml) : calendarHtml;
     }
+};
+
+window.teChangeCalendarMonth = function(dir) {
+    if (typeof window.teCalendarMonth === 'undefined') window.teCalendarMonth = new Date().getMonth();
+    if (typeof window.teCalendarYear === 'undefined') window.teCalendarYear = new Date().getFullYear();
+    
+    window.teCalendarMonth += dir;
+    if (window.teCalendarMonth > 11) {
+        window.teCalendarMonth = 0;
+        window.teCalendarYear += 1;
+    } else if (window.teCalendarMonth < 0) {
+        window.teCalendarMonth = 11;
+        window.teCalendarYear -= 1;
+    }
+    teRenderTaskGrid('calendar');
 };
 
 window.teToggleTemplateMenu = function() {

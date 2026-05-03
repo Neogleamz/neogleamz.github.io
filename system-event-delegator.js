@@ -59,6 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_closeTaskContext':
                     if (window.closeTaskContext) window.closeTaskContext();
                     break;
+                case 'click_teToggleTimer':
+                    if (typeof window.teToggleTimer === 'function' && window.currentOpenTaskId) {
+                        window.teToggleTimer(window.currentOpenTaskId);
+                    }
+                    break;
                 case 'click_teCreateNewTask':
                     if (window.teCreateNewTask) window.teCreateNewTask();
                     break;
@@ -956,6 +961,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_teToggleAllMain':
                     if (typeof window.teToggleAllMain === 'function') window.teToggleAllMain();
                     break;
+                case 'change_teToggleSubtaskDone':
+                    if(typeof window.teToggleTaskDone==='function') {
+                        window.teToggleTaskDone(el.getAttribute('data-id'));
+                    }
+                    break;
                 case 'change_teUpdateMainSelection':
                     if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
                     break;
@@ -1147,6 +1157,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_teChangeIdentity':
                     if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
+                    break;
+                case 'change_teUpdateStartDate':
+                    if (typeof window.teUpdateStartDate === 'function' && window.currentOpenTaskId) window.teUpdateStartDate(window.currentOpenTaskId, el.value);
+                    break;
+                case 'change_teUpdateDueDate':
+                    if (typeof window.teUpdateDueDate === 'function' && window.currentOpenTaskId) window.teUpdateDueDate(window.currentOpenTaskId, el.value);
                     break;
             }
         } catch (error) {
