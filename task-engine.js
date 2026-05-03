@@ -148,7 +148,21 @@ function teRenderSidebar() {
     }
 }
 
-function teRenderTaskGrid(filter = 'list') {
+function teRenderTaskGrid(filter = null) {
+    if (!filter) {
+        let activeNav = document.querySelector('.task-nav-link.active');
+        if (activeNav) {
+            let txt = activeNav.textContent.toLowerCase();
+            if (txt.includes('inbox')) filter = 'inbox';
+            else if (txt.includes('my tasks')) filter = 'my_tasks';
+            else if (txt.includes('blocked')) filter = 'blocked';
+            else if (txt.includes('completed')) filter = 'completed';
+            else if (txt.includes('archive')) filter = 'archive';
+            else filter = 'list';
+        } else {
+            filter = 'list';
+        }
+    }
     const wrapper = document.getElementById('te-task-rows-wrapper');
     if (!wrapper) return;
     
@@ -910,9 +924,10 @@ window.teSwitchView = function(view, btnEl) {
     
     if (view === 'list') {
         header.style.display = 'grid';
-        teRenderTaskGrid('list');
+        teRenderTaskGrid(null);
+        let activeNav = document.querySelector('.task-nav-link.active');
         let title = document.getElementById('te-main-header-title');
-        if (title) title.textContent = 'All Tasks';
+        if (title) title.textContent = activeNav ? activeNav.textContent : 'All Tasks';
     } else if (view === 'my_tasks') {
         header.style.display = 'grid';
         teRenderTaskGrid('my_tasks');
