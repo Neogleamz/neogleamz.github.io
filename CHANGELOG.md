@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.23] - 2026-05-02
+### Features & Refactors
+- **Buildz Step Time Tracking**: Built capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics natively in the Work Orders archive. Addressed global UI instability by removing aggressive CSS hover jumps from modal close buttons.
+
 ## [1.0.22] - 2026-04-29
 ### Features & Refactors
 - **Stripe Fee Decoupling Logic**: Resolved Gateway fee inflation anomalies and ghost revenue by actively decoupling voided and replacement transactions during Sandbox processing. Added an `orderRefund` reduction check to `trueOrderFee` baseline extraction to prevent negative revenue projections.
