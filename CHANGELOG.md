@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Features & Refactors
+- **Phase 5 (Embedded UI Payloads)**: Wired up the cross-module hooks and implemented the Supabase data pipeline for the Task Engine (dynamic sidebar, caching, `task_activity` logging, and status mutation logic).
 - **Phase 4 (Deep UX Synthesis & Command Palette)**: Implemented global Cmd+K palette and Asana/Monday-style grid architectures for the Task Engine Command Center.
 - **Phase 3 (The UI Takeover)**: Built the fullscreen glassmorphism modal, the split-pane layout, and the slide-out Context Panel (Anti-Modal) for the Task Engine Command Center.
 - **Phase 1 (Multi-User Identity)**: Integrated Supabase Auth for Chris, Andy, and Tyson, natively building the identity capture logic and dynamic UI header rendering to track active sessions across the Command Center.
