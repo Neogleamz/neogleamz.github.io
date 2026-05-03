@@ -170,7 +170,26 @@ function teRenderTaskGrid(filter = 'list') {
         if (t.is_archived) return false;
         if (filter === 'blocked') return t.status === 'Blocked';
         if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
-        if (filter === 'inbox') return t.status !== 'Completed' && t.status !== 'Done' && !t.parent_task_id;
+        if (filter === 'inbox') {
+            if (t.status === 'Completed' || t.status === 'Done' || t.parent_task_id) return false;
+            let meta = t.metadata || {};
+            let assignee = meta.spoofed_assignee || 'UNASSIGNED';
+            
+            // 1. Unassigned globally (needs triage)
+            if (assignee === 'UNASSIGNED' || assignee.trim() === '') return true;
+            
+            // 2. Assigned directly to me
+            if (assignee === currentUser) return true;
+            
+            // 3. Assigned to a team I belong to
+            if (meta.assigned_team_id) {
+                let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
+                if (team && team.members && team.members.includes(currentUser)) return true;
+            }
+            
+            // If it's explicitly assigned to someone else (e.g. Andy), and I am Chris, hide it from my Inbox!
+            return false;
+        }
         if (filter === 'my_tasks') {
             let meta = t.metadata || {};
             if (meta.spoofed_assignee === currentUser) return true;
