@@ -84,7 +84,7 @@ function teUpdateInboxBadge() {
     }
     // Count unread or relevant items (e.g. mentions in comments or activity on tasks they own)
     // For now, let's just count comments containing "@" + currentUser
-    let count = taskEngineDB.comments.filter(c => c.comment_text && c.comment_text.includes('@' + currentUser)).length;
+    let count = taskEngineDB.comments.filter(c => c.content && c.content.includes('@' + currentUser)).length;
     if (count > 0) {
         badge.textContent = count;
         badge.style.display = 'inline-block';
@@ -386,8 +386,8 @@ window.teRenderSubtasks = function(taskId) {
         let isDone = st.status === 'Completed' || st.status === 'Done';
         html += `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <input type="checkbox" class="te-task-checkbox" data-id="${st.id}" style="cursor: pointer; width:16px; height:16px; accent-color: var(--primary-color); flex-shrink: 0;" data-change="change_teUpdateMainSelection">
-            <span data-click="click_teOpenTaskContext" data-task-id="${st.id}" style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; font-size: 13px; cursor: pointer; flex-grow: 1;">${st.title}</span>
+            <input type="checkbox" data-id="${st.id}" ${isDone ? 'checked' : ''} style="cursor: pointer; width:16px; height:16px; accent-color: #2dd4bf; flex-shrink: 0;" data-change="change_teToggleSubtaskDone">
+            <span data-click="click_teOpenTaskContext" data-task-id="${st.id}" style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; text-decoration-color: #2dd4bf; text-decoration-thickness: 2px; font-size: 13px; cursor: pointer; flex-grow: 1;">${st.title}</span>
         </div>`;
     });
     
@@ -416,13 +416,21 @@ window.teRenderActivityFeed = function(taskId) {
     let html = '';
     relevantEvents.forEach(ev => {
         if (ev.type === 'comment') {
+            let displayAuthor = ev.data.author_id || 'System';
+            let displayContent = ev.data.content || '';
+            if (displayContent.startsWith('SPOOF:')) {
+                let parts = displayContent.split('|||');
+                displayAuthor = parts[0].replace('SPOOF:', '');
+                displayContent = parts.slice(1).join('|||');
+            }
+            
             html += `
             <div style="margin-bottom: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <strong style="font-size: 11px; color: var(--text-muted);">${ev.data.author_id}</strong>
+                    <strong style="font-size: 11px; color: var(--text-muted);">${displayAuthor}</strong>
                     <span style="font-size: 10px; color: var(--text-muted);">${new Date(ev.data.created_at).toLocaleString()}</span>
                 </div>
-                <div style="font-size: 13px; color: white;">${ev.data.comment_text}</div>
+                <div style="font-size: 13px; color: white;">${displayContent}</div>
             </div>`;
         } else {
             html += `
@@ -442,7 +450,7 @@ window.teToggleTaskDone = async function(taskId) {
     if (!task) return;
     
     let nextStatus = (task.status === 'Completed' || task.status === 'Done') ? 'Todo' : 'Completed';
-    await window.teSetStatus(nextStatus, taskId);
+    await window.teSetStatus(nextStatus, taskId, true);
 };
 
 window.teOpenStatusDropdown = function(taskId, element) {
@@ -493,12 +501,16 @@ window.teOpenStatusDropdown = function(taskId, element) {
     dropdown.style.display = 'flex';
 };
 
-window.teSetStatus = async function(status, directTaskId = null) {
+window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = false) {
     let taskIds = [];
     const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
     const dropdown = document.getElementById('te-status-dropdown');
     
-    if (checkboxes.length > 0) {
+    let isArchived = (status === 'Archived');
+    let activities = [];
+    let updatedTasks = [];
+    
+    if (!ignoreBulk && checkboxes.length > 0) {
         taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
         if (dropdown) dropdown.style.display = 'none';
         
@@ -522,11 +534,7 @@ window.teSetStatus = async function(status, directTaskId = null) {
     
     if (taskIds.length === 0) return;
     
-    let isArchived = (status === 'Archived');
     let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
-    
-    let updatedTasks = [];
-    let activities = [];
     
     for (let id of taskIds) {
         let task = taskEngineDB.taskz.find(t => t.id === id);
@@ -551,14 +559,17 @@ window.teSetStatus = async function(status, directTaskId = null) {
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ status: status, is_archived: isArchived }).in('id', updatedTasks);
+        const updatePromises = updatedTasks.map(taskId => 
+            supabaseClient.from('taskz').update({ status: status, is_archived: isArchived }).eq('id', taskId)
+        );
+        await Promise.all(updatePromises);
         if (activities.length > 0) {
             await supabaseClient.from('task_activity').insert(activities);
         }
         
         if (window.currentOpenTaskId) {
             if (updatedTasks.includes(window.currentOpenTaskId) || taskEngineDB.taskz.some(t => updatedTasks.includes(t.parent_task_id) && t.parent_task_id === window.currentOpenTaskId)) {
-                renderTaskContext(window.currentOpenTaskId);
+                window.teOpenTaskContext(window.currentOpenTaskId);
             }
         }
     } catch(e) {
@@ -623,37 +634,73 @@ window.teUpdateTaskDescription = async function(taskId, newDesc) {
 };
 
 window.teUpdateTaskAssignee = async function(taskId, assignee) {
-    let task = taskEngineDB.taskz.find(t => t.id === taskId);
-    if (!task) return;
-    
-    let meta = task.metadata || {};
-    
-    if (assignee && assignee.startsWith('team_')) {
-        let teamId = assignee.replace('team_', '');
-        meta.assigned_team_id = teamId;
-        delete meta.spoofed_assignee;
-    } else {
-        delete meta.assigned_team_id;
-        meta.spoofed_assignee = assignee;
+    let taskIds = [taskId];
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    if (checkboxes.length > 0) {
+        taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+        const selectAll = document.getElementById('te-main-select-all');
+        if (selectAll) selectAll.checked = false;
+        checkboxes.forEach(cb => cb.checked = false);
+        if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
     }
     
-    task.metadata = meta;
+    let updatePromises = [];
+    
+    for (let id of taskIds) {
+        let task = taskEngineDB.taskz.find(t => t.id === id);
+        if (!task) continue;
+        
+        let meta = Object.assign({}, task.metadata || {});
+        
+        if (assignee && assignee.startsWith('team_')) {
+            let teamId = assignee.replace('team_', '');
+            meta.assigned_team_id = teamId;
+            delete meta.spoofed_assignee;
+        } else {
+            delete meta.assigned_team_id;
+            meta.spoofed_assignee = assignee;
+        }
+        
+        task.metadata = meta;
+        updatePromises.push(supabaseClient.from('taskz').update({ metadata: meta }).eq('id', id));
+    }
+    
+    if (updatePromises.length === 0) return;
+    
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', taskId);
+        await Promise.all(updatePromises);
     } catch(e) { console.error(e); }
 };
 
 window.teUpdateTaskCycle = async function(taskId, cycleId) {
-    let task = taskEngineDB.taskz.find(t => t.id === taskId);
-    if (!task) return;
+    let taskIds = [taskId];
+    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
+    if (checkboxes.length > 0) {
+        taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+        const selectAll = document.getElementById('te-main-select-all');
+        if (selectAll) selectAll.checked = false;
+        checkboxes.forEach(cb => cb.checked = false);
+        if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
+    }
     
-    task.cycle_id = cycleId || null;
+    let updatePromises = [];
+    
+    for (let id of taskIds) {
+        let task = taskEngineDB.taskz.find(t => t.id === id);
+        if (!task) continue;
+        
+        task.cycle_id = cycleId || null;
+        updatePromises.push(supabaseClient.from('taskz').update({ cycle_id: cycleId || null }).eq('id', id));
+    }
+    
+    if (updatePromises.length === 0) return;
+    
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ cycle_id: cycleId || null }).eq('id', taskId);
+        await Promise.all(updatePromises);
     } catch(e) { console.error(e); }
 };
 
@@ -776,8 +823,9 @@ window.tePostComment = async function() {
     
     let newComment = {
         task_id: window.currentOpenTaskId,
-        author_id: currentUser,
-        comment_text: text,
+        // Bypassing UUID strictness by spoofing author into the content string
+        // since auth.users is not fully wired up yet.
+        content: `SPOOF:${currentUser}|||${text}`,
         created_at: new Date().toISOString()
     };
     
@@ -788,6 +836,7 @@ window.tePostComment = async function() {
         if (!error && data && data.length > 0) {
             taskEngineDB.comments.push(data[0]);
         } else {
+            console.error('Insert error:', error);
             // fallback optimistic if no return
             taskEngineDB.comments.push(newComment);
         }
@@ -798,17 +847,25 @@ window.tePostComment = async function() {
 };
 
 window.teSwitchView = function(view, btnEl) {
-    // Update UI buttons
-    document.querySelectorAll('.task-view-btn').forEach(b => {
-        b.classList.remove('active');
-        b.style.background = 'transparent';
-        b.style.color = 'var(--text-muted)';
-    });
-    
+    // Update UI buttons based on what was clicked
     if (btnEl) {
-        btnEl.classList.add('active');
-        btnEl.style.background = 'rgba(255,255,255,0.1)';
-        btnEl.style.color = 'white';
+        if (btnEl.classList.contains('task-nav-link')) {
+            document.querySelectorAll('.task-nav-link').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = '';
+                b.style.color = '';
+            });
+            btnEl.classList.add('active');
+        } else if (btnEl.classList.contains('task-view-btn')) {
+            document.querySelectorAll('.task-view-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.color = 'var(--text-muted)';
+            });
+            btnEl.classList.add('active');
+            btnEl.style.background = 'rgba(255,255,255,0.1)';
+            btnEl.style.color = 'white';
+        }
     }
     
     const wrapper = document.getElementById('te-task-rows-wrapper');
