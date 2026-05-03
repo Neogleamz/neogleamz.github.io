@@ -1264,7 +1264,7 @@ window.teChangeCalendarMonth = function(dir) {
         window.teCalendarMonth = 11;
         window.teCalendarYear -= 1;
     }
-    teRenderTaskGrid('calendar');
+    teSwitchView('calendar');
 };
 
 window.teToggleTemplateMenu = function() {
