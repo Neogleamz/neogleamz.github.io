@@ -64,6 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.teToggleTimer(window.currentOpenTaskId);
                     }
                     break;
+                case 'click_teChangeCalendarMonth_prev':
+                    if (typeof window.teChangeCalendarMonth === 'function') window.teChangeCalendarMonth(-1);
+                    break;
+                case 'click_teChangeCalendarMonth_next':
+                    if (typeof window.teChangeCalendarMonth === 'function') window.teChangeCalendarMonth(1);
+                    break;
                 case 'click_teCreateNewTask':
                     if (window.teCreateNewTask) window.teCreateNewTask();
                     break;

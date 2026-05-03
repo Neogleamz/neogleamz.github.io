@@ -1162,10 +1162,12 @@ window.teSwitchView = function(view, btnEl) {
         let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         
         let calendarHtml = `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 10px;">
-                <button class="btn-slate" onclick="window.teChangeCalendarMonth(-1)" style="padding: 5px 15px;">&lt; Prev</button>
-                <div style="font-size: 16px; font-weight: bold; color: white;">${monthNames[currentMonth]} ${currentYear}</div>
-                <button class="btn-slate" onclick="window.teChangeCalendarMonth(1)" style="padding: 5px 15px;">Next &gt;</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px;">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: -0.5px;">${monthNames[currentMonth]} ${currentYear}</div>
+                <div style="display: flex; gap: 8px;">
+                    <button data-click="click_teChangeCalendarMonth_prev" style="padding: 6px 16px; font-size: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; cursor: pointer; transition: all 0.2s;">&lt;</button>
+                    <button data-click="click_teChangeCalendarMonth_next" style="padding: 6px 16px; font-size: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; cursor: pointer; transition: all 0.2s;">&gt;</button>
+                </div>
             </div>
         `;
         
