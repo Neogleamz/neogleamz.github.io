@@ -13,6 +13,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('click', function(event) {
+        if (event.target.type === 'checkbox') return;
         const el = event.target.closest('[data-click]');
         if (!el) return;
         const action = el.getAttribute('data-click');
@@ -238,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(typeof window.teBulkRestore==='function') window.teBulkRestore();
                     break;
                 case 'click_teBulkStatusDropdown':
-                    if(typeof window.teBulkStatusDropdown==='function') window.teBulkStatusDropdown(target);
+                    if(typeof window.teBulkStatusDropdown==='function') window.teBulkStatusDropdown(el);
                     break;
                 case 'click_teBulkDelete':
                     if(typeof window.teBulkDelete==='function') window.teBulkDelete();
