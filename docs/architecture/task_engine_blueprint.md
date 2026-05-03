@@ -39,13 +39,39 @@ I have halted all UI code and audited the `20260502000000_task_engine_schema.sql
 
 ---
 
-## 🗺️ Redefined Execution Phases
+## 🗺️ Redefined Execution Phases & Testing Criteria
 
-Because of this audit, the roadmap is now strictly defined:
+Because of this audit, the roadmap is now strictly defined with explicit testing gates to ensure no scope is missed:
 
-- ✅ **Phase 1:** Architecture & Ledger Sync
-- ✅ **Phase 2:** Supabase Relational Schema
-- ✅ **Phase 3:** The Base UI Shell (Modal, Split-Pane, Flyout)
-- 🟡 **Phase 4: The Deep UX Synthesis** (Injecting the Monday.com Grid, the Asana Activity Feed, and the Linear `Cmd+K` Palette).
-- ⏳ **Phase 5: The Supabase Data Pipeline** (Wiring the `teams`, `cyclez`, and `taskz` to the UI via JS fetch calls).
-- ⏳ **Phase 6: The Process Street Engine** (Building the Template spawner).
+### ✅ Phase 1 & 2: Architecture & Database Schema
+*   **Status:** Complete.
+*   **Testing Criteria:** Verify `20260502000000_task_engine_schema.sql` exists and contains 10 explicit tables with Zero-Trust RLS policies enabled.
+
+### ✅ Phase 3: The Base UI Shell
+*   **Status:** Complete.
+*   **Testing Criteria:** 
+    *   Verify the `T` hotkey opens/closes the modal.
+    *   Verify the `.h-resizer` allows fluid dragging of the left sidebar.
+    *   Verify clicking a task row triggers the slide-out Context Flyout (CSS animation).
+
+### 🟡 Phase 4: Deep UX Synthesis & Command Palette
+*   **Status:** Next.
+*   **Testing Criteria:**
+    *   Verify `Cmd+K` (or `Cmd+P`) toggles the global search palette.
+    *   Verify the UI list view renders as a strict Monday.com-style spreadsheet grid.
+    *   Verify status pills are color-coded (e.g., Green = Done, Red = Blocked).
+    *   Verify the Context Flyout activity feed mimics Asana's timeline layout.
+
+### ⏳ Phase 5: The Supabase Data Pipeline (Read/Write)
+*   **Status:** Pending.
+*   **Testing Criteria:**
+    *   Verify clicking `+ New Task` writes a record to the `public.taskz` table in Supabase.
+    *   Verify sidebar dynamically renders active `cyclez` and `teams` fetched from the database.
+    *   Verify updating a task status triggers an automatic `task_activity` log insertion.
+    *   Verify switching to `Board` and `Calendar` views successfully filters and sorts the live database payloads.
+
+### ⏳ Phase 6: The Process Street Engine
+*   **Status:** Pending.
+*   **Testing Criteria:**
+    *   Verify clicking `+ New Task` prompts for "Blank" vs "Template".
+    *   Verify selecting a Template spawns a parent task and auto-generates child rows in `public.taskz` based on `template_subtasks`.
