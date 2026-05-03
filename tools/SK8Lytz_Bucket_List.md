@@ -30,7 +30,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-- [ ] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrate Supabase Auth, create distinct accounts for Chris, Andy, and Tyson, and build the login gate.
+- [ ] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables.
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -40,7 +40,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 **Epic: The Task Engine (ERP Command Center)**
 *(See: `@/tools/SK8Lytz_Task_Engine_Blueprint.md` for full architectural specs)*
-- [ ] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables.
 - [ ] `feat/task-engine-p3` : **Phase 3 (The UI Takeover)** - Build the fullscreen glassmorphism modal, the split-pane layout, and the slide-out Context Panel (Anti-Modal).
 - [ ] `feat/task-engine-p4` : **Phase 4 (The 3-Way Render Engine)** - Implement the Vanilla JS logic to swap between List, Kanban, and Calendar views seamlessly.
 - [ ] `feat/task-engine-p5` : **Phase 5 (Embedded UI Payloads)** - Wire up the cross-module hooks (embedding Cycle Counts and Low Stockz reports natively inside tasks).
@@ -266,3 +265,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: Shopify Flow Automation)*
 - [🚀] `research/shopify-flow-auto-tag` : Investigate building a Shopify Flow that automatically tags orders with the `Label: <price>` format when a shipping label is purchased or printed, feeding natively into the webhook parser. (Finding: Impossible, relying on CSV) [🤖 Gemini 3.1 Pro] [🧠 10k / 5k] [💸 $0.03 / $0.02]
+
+### Target: `main`
+*(Epic: The Task Engine)*
+- [x] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrated Supabase Auth for Chris, Andy, and Tyson, and natively built the identity capture logic and UI header rendering. *(Shipped in v.2026.05.02.2013)*
