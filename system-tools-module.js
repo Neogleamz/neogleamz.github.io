@@ -1735,11 +1735,11 @@ window.openGlobalRegexPlayground = function(type) {
                 </h3>
                 <input type="text" id="${conf.searchBoxId}" class="input-dark" style="margin-bottom:10px; font-size:12px; font-family:monospace; width:100%;" placeholder="🔍 Search:   Type to instantly find and highlight string matches..." data-app-keyup="evaluate-regex-all">
                 
-                <div style="position:relative; flex:1; border:1px solid rgba(255,255,255,0.1); border-radius:6px; overflow:hidden;">
-                    <textarea id="${conf.livePlaygroundPayloadId}" style="position:absolute; top:0; left:0; width:100%; height:100%; background:transparent; color:transparent; caret-color:#10b981; font-family:monospace; font-size:11px; padding:10px; resize:none; border:none; z-index:1;" data-app-input="evaluate-regex-all" spellcheck="false"></textarea>
+                <div class="grid-stack" style="flex:1; border:1px solid rgba(255,255,255,0.1); border-radius:6px; overflow:hidden;">
+                    <textarea id="${conf.livePlaygroundPayloadId}" style="width:100%; height:100%; background:transparent; color:transparent; caret-color:#10b981; font-family:monospace; font-size:11px; padding:10px; resize:none; border:none; z-index:1;" data-app-input="evaluate-regex-all" spellcheck="false"></textarea>
                     
                     <!-- Visualization Layer below the transparent text -->
-                    <div id="${type}liveRegexHighlightLayer" style="position:absolute; top:0; left:0; width:100%; height:100%; font-family:monospace; font-size:11px; padding:10px; pointer-events:none; z-index:0; overflow:hidden; white-space:pre-wrap; word-wrap:break-word; color:#cbd5e1; background:black;"></div>
+                    <div id="${type}liveRegexHighlightLayer" style="width:100%; height:100%; font-family:monospace; font-size:11px; padding:10px; pointer-events:none; z-index:0; overflow:hidden; white-space:pre-wrap; word-wrap:break-word; color:#cbd5e1; background:black;"></div>
                 </div>
             </div>
         </div>
