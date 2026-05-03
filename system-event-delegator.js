@@ -58,6 +58,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_closeTaskContext':
                     if (window.closeTaskContext) window.closeTaskContext();
                     break;
+                case 'click_teCreateNewTask':
+                    if (window.teCreateNewTask) window.teCreateNewTask();
+                    break;
+                case 'click_teOpenTaskContext':
+                    if (window.teOpenTaskContext) window.teOpenTaskContext(el.getAttribute('data-task-id'));
+                    break;
+                case 'click_teCycleStatus':
+                    if (window.teCycleStatus) window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                    break;
+                case 'click_teSwitchView_list':
+                    if (window.teSwitchView) window.teSwitchView('list', el);
+                    break;
+                case 'click_teSwitchView_board':
+                    if (window.teSwitchView) window.teSwitchView('board', el);
+                    break;
+                case 'click_teSwitchView_calendar':
+                    if (window.teSwitchView) window.teSwitchView('calendar', el);
+                    break;
                 case 'click_toggleTerminal':
                     toggleTerminal();
                     break;
