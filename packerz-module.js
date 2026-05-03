@@ -17,7 +17,9 @@ async function fetchUnfulfilledOrders() {
         const queueContainer = document.getElementById('packerzAwaitingQueue');
         if (!queueContainer) return;
 
-        queueContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-style:italic;">Querying Supabase edge nodes...</div>';
+        queueContainer.innerHTML = window.safeHTML ? window.safeHTML(
+            '<div style="text-align:center; padding:20px; color:var(--text-muted); font-style:italic;">Querying Supabase edge nodes...</div>'
+        ) : '<div style="text-align:center; padding:20px; color:var(--text-muted); font-style:italic;">Querying Supabase edge nodes...</div>';
 
         // 1. Fetch exactly the physical rows mathematically marked globally as incomplete
         const { data, error } = await supabaseClient
@@ -58,11 +60,13 @@ async function fetchUnfulfilledOrders() {
         if(kpiTracker) kpiTracker.innerText = distinctOrderIds.length.toString();
 
         if (distinctOrderIds.length === 0) {
-            queueContainer.innerHTML = '<div style="text-align:center; padding:60px; color:#10b981; font-size:14px; font-weight:900; font-style:italic; opacity:0.9;">ALL ACTIVE QUEUES CLEARED!</div>';
+            queueContainer.innerHTML = window.safeHTML ? window.safeHTML(
+                '<div style="text-align:center; padding:60px; color:#10b981; font-size:14px; font-weight:900; font-style:italic; opacity:0.9;">ALL ACTIVE QUEUES CLEARED!</div>'
+            ) : '<div style="text-align:center; padding:60px; color:#10b981; font-size:14px; font-weight:900; font-style:italic; opacity:0.9;">ALL ACTIVE QUEUES CLEARED!</div>';
             return;
         }
 
-        queueContainer.innerHTML = '';
+        queueContainer.innerHTML = window.safeHTML ? window.safeHTML('') : '';
 
         // 4. Architect Physical Order Cards in the DOM Container
         const fragment = document.createDocumentFragment();
@@ -77,7 +81,15 @@ async function fetchUnfulfilledOrders() {
             const shortDate = new Date(order.sale_date).toLocaleDateString();
             const itemsPreview = order.items.map(i => `<span style="display:block; margin-top:4px;"><b>${i.qty}x</b> ${i.recipe}</span>`).join('');
 
-            card.innerHTML = `
+            card.innerHTML = window.safeHTML ? window.safeHTML(`
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:4px;">
+                    <strong style="color:var(--text-heading); font-size:15px; font-weight:900;">ORDER ${order.order_id}</strong>
+                    <span style="font-size:11px; color:#F59E0B; font-weight:900; background:rgba(245,158,11,0.1); padding:4px 10px; border-radius:6px; letter-spacing:0.5px;">${shortDate}</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-main); font-weight:700; background:var(--bg-bar); padding:10px; border-radius:8px;">
+                    ${itemsPreview}
+                </div>
+            `) : `
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:4px;">
                     <strong style="color:var(--text-heading); font-size:15px; font-weight:900;">ORDER ${order.order_id}</strong>
                     <span style="font-size:11px; color:#F59E0B; font-weight:900; background:rgba(245,158,11,0.1); padding:4px 10px; border-radius:6px; letter-spacing:0.5px;">${shortDate}</span>
@@ -99,7 +111,9 @@ async function fetchUnfulfilledOrders() {
 
     } catch (err) {
         console.error("PACKERZ Fetch Error:", err);
-        document.getElementById('packerzAwaitingQueue').innerHTML = `<div style="color:#ef4444; padding:20px; font-size:12px; font-weight:800;">Data hook structurally failed: ${err.message}</div>`;
+        document.getElementById('packerzAwaitingQueue').innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style="color:#ef4444; padding:20px; font-size:12px; font-weight:800;">Data hook structurally failed: ${err.message}</div>`
+        ) : `<div style="color:#ef4444; padding:20px; font-size:12px; font-weight:800;">Data hook structurally failed: ${err.message}</div>`;
     }
 }
 
@@ -173,7 +187,23 @@ function openPackerzSopTerminal(orderGroup) {
         `;
     }).join('');
 
-    activeQueue.innerHTML = `
+    activeQueue.innerHTML = window.safeHTML ? window.safeHTML(`
+    <div style="padding:25px; background:var(--bg-container); border-radius:12px; border:2px solid #F59E0B; box-shadow: 0 10px 30px rgba(245,158,11,0.15);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; color:#F59E0B; font-size:18px; font-weight:900; letter-spacing:1px;">ACTIVE TARGET: ${orderGroup.order_id}</h3>
+            <span style="font-size:11px; font-weight:900; color:var(--text-muted);">${new Date(orderGroup.sale_date).toLocaleDateString()}</span>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-muted); font-weight:700; margin-bottom:20px;">Review the mandatory Pick-List and clear all SOP QA checks before closing out this active order block.</p>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:25px;">
+            ${itemsHtml}
+        </div>
+
+        <button id="btnCompleteAssembly_${orderGroup.order_id}" class="btn-orange-neon" style="width:100%; padding:16px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; font-size:14px; transition:transform 0.2s;">
+            AWAITING QA CLEARANCE
+        </button>
+    </div>`) : `
     <div style="padding:25px; background:var(--bg-container); border-radius:12px; border:2px solid #F59E0B; box-shadow: 0 10px 30px rgba(245,158,11,0.15);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="margin:0; color:#F59E0B; font-size:18px; font-weight:900; letter-spacing:1px;">ACTIVE TARGET: ${orderGroup.order_id}</h3>
@@ -296,7 +326,9 @@ window.renderPackerzLiveInlineTelemetryPreview = function() {
     if(!previewContainer) return;
 
     if(!rawText.trim()) {
-        previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
+        previewContainer.innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`
+        ) : `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
         return;
     }
 
@@ -318,7 +350,9 @@ window.renderPackerzLiveInlineTelemetryPreview = function() {
         }
     });
 
-    previewContainer.innerHTML = html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`;
+    previewContainer.innerHTML = window.safeHTML ? window.safeHTML(
+        html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`
+    ) : html || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">No checklist steps to preview.</div>`;
 
     if (typeof processTelemetryCanvasRendering === 'function') {
         processTelemetryCanvasRendering(previewContainer);
@@ -332,7 +366,9 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     scanConfirmations.clear();
 
     document.getElementById('packerzSopViewerModal').style.display = 'flex';
-    document.getElementById('packerzSopViewerTitle').innerHTML = window.isPackerzLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`;
+    document.getElementById('packerzSopViewerTitle').innerHTML = window.safeHTML ? window.safeHTML(
+        window.isPackerzLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`
+    ) : window.isPackerzLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`;
     document.getElementById('packerzSopViewerSubtitle').innerText = `Target Alias: ${sku}`;
 
     // We target the outer wrapper directly when editing so we can overwrite its layout
@@ -343,7 +379,23 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
 
     if(!window.isPackerzLiveEditing) {
         // Normal split-pane setup restored strictly
-        wrapper.innerHTML = `
+        wrapper.innerHTML = window.safeHTML ? window.safeHTML(`
+            <div id="packerzLiveSopLeftPane" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container);">
+                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
+                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
+                    <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
+                </div>
+                <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
+                    <button id="btnPackerzSopSignoff" class="btn-green-neon" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" data-app-click="signoffQA">
+                        COMPLETE QA CHECKS
+                    </button>
+                </div>
+            </div>
+            <div id="packerzLiveSopResizer" class="h-resizer" data-app-mousedown="initPackerzResize"></div>
+            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
+                <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
+            </div>
+        `) : `
             <div id="packerzLiveSopLeftPane" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container);">
                 <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
                     <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
@@ -365,13 +417,17 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         qaList = document.getElementById('packerzSopViewerQAList');
         btnSignoff = document.getElementById('btnPackerzSopSignoff');
 
-        body.innerHTML = `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`;
-        qaList.innerHTML = '';
+        body.innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`
+        ) : `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`;
+        qaList.innerHTML = window.safeHTML ? window.safeHTML('') : '';
         btnSignoff.style.opacity = '0.5';
         btnSignoff.style.cursor = 'not-allowed';
         btnSignoff.onclick = null;
     } else {
-        wrapper.innerHTML = `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`;
+        wrapper.innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`
+        ) : `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`;
         btnSignoff.style.display = 'none';
     }
 
@@ -439,7 +495,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 </div>
             </div>
             `;
-            wrapper.innerHTML = editHtml;
+            wrapper.innerHTML = window.safeHTML ? window.safeHTML(editHtml) : editHtml;
             setTimeout(() => { if(typeof renderPackerzLiveInlineTelemetryPreview==='function') renderPackerzLiveInlineTelemetryPreview(); }, 150);
             return; // EXIT here so we don't render read-only checkboxes!
         }
@@ -486,11 +542,13 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 <div style="font-size:18px; font-weight:900; color:var(--text-heading); font-family:monospace;">📦 ${data.required_box_sku}</div>
             </div>` + h;
         }
-        body.innerHTML = h;
+        body.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
 
         // 2. Render Checkboxes
         if(qaChecks.length === 0) {
-            qaList.innerHTML = `<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No custom QA parameters required for this module. Free clear.</div>`;
+            qaList.innerHTML = window.safeHTML ? window.safeHTML(
+                `<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No custom QA parameters required for this module. Free clear.</div>`
+            ) : `<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No custom QA parameters required for this module. Free clear.</div>`;
             checkPackerzSopSignoffState(); // Automatically unlocks button
         } else {
             let html = '';
@@ -600,7 +658,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     `;
                 }
             });
-            qaList.innerHTML = html;
+            qaList.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 
             // Hydrate scan row QR codes after innerHTML
             if (typeof QRCode !== 'undefined') {
@@ -640,8 +698,10 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         }
 
     } catch(err) {
-        body.innerHTML = `<div style='padding:40px 20px; text-align:center; color:#ef4444; font-weight:900;'>SOP Hook Failed: ${err.message}<br><br><span style="color:var(--text-muted); font-size:12px; font-weight:normal;">If this item does not strictly require a physical procedure (e.g. Raw Materials or Legacy Orders), you may click COMPLETE below to securely bypass this check.</span></div>`;
-        qaList.innerHTML = '';
+        body.innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style='padding:40px 20px; text-align:center; color:#ef4444; font-weight:900;'>SOP Hook Failed: ${err.message}<br><br><span style="color:var(--text-muted); font-size:12px; font-weight:normal;">If this item does not strictly require a physical procedure (e.g. Raw Materials or Legacy Orders), you may click COMPLETE below to securely bypass this check.</span></div>`
+        ) : `<div style='padding:40px 20px; text-align:center; color:#ef4444; font-weight:900;'>SOP Hook Failed: ${err.message}<br><br><span style="color:var(--text-muted); font-size:12px; font-weight:normal;">If this item does not strictly require a physical procedure (e.g. Raw Materials or Legacy Orders), you may click COMPLETE below to securely bypass this check.</span></div>`;
+        qaList.innerHTML = window.safeHTML ? window.safeHTML('') : '';
         checkPackerzSopSignoffState();
     }
 }
@@ -827,7 +887,9 @@ async function executePackerzCompletion(orderId) {
             if (typeof renderInventoryTable === 'function') renderInventoryTable();
 
             // 2. Clear Active UI Node
-            document.getElementById('packerzActiveQueue').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>';
+            document.getElementById('packerzActiveQueue').innerHTML = window.safeHTML ? window.safeHTML(
+                '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>'
+            ) : '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>';
 
             // 3. Re-Sync Live Queue
             fetchUnfulfilledOrders();
@@ -960,7 +1022,7 @@ function movePackerzSOPDown(btn) { let row = btn.closest('.sop-step-row'); if(ro
 function removePackerzSOPRow(btn) { btn.closest('.sop-step-row').remove(); }
 function addPackerzSOPRow(btn) {
     let newRow = document.createElement('div');
-    newRow.innerHTML = generatePackerzEditableSOPRow({text:""}, 999);
+    newRow.innerHTML = window.safeHTML ? window.safeHTML(generatePackerzEditableSOPRow({text:""}, 999)) : generatePackerzEditableSOPRow({text:""}, 999);
     let rowNode = newRow.firstChild;
     if(btn) {
         let currentRow = btn.closest('.sop-step-row');
@@ -986,9 +1048,11 @@ async function initPackerzAdmin() {
             opts += grp('📦 RETAIL PRODUCTS', '📦', retail);
             opts += grp('⚙️ SUB-ASSEMBLIES',  '⚙️',  subs);
             opts += grp('🖨️ 3D PRINTS',       '🖨️',  prints);
-            ddl.innerHTML = opts;
+            ddl.innerHTML = window.safeHTML ? window.safeHTML(opts) : opts;
         } else {
-            ddl.innerHTML = '<option value="">CRITICAL: global productsDB undefined in namespace</option>';
+            ddl.innerHTML = window.safeHTML ? window.safeHTML(
+                '<option value="">CRITICAL: global productsDB undefined in namespace</option>'
+            ) : '<option value="">CRITICAL: global productsDB undefined in namespace</option>';
         }
     } catch(e) { console.error('PACKERZ Config Error:', e); }
 }
@@ -1037,7 +1101,9 @@ function renderPackerzTelemetryPreview() {
     if(!previewContainer) return;
 
     if(!rawText.trim()) {
-        previewContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
+        previewContainer.innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`
+        ) : `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>`;
         return;
     }
 
@@ -1167,7 +1233,7 @@ function renderPackerzTelemetryPreview() {
         }
     });
 
-    previewContainer.innerHTML = html;
+    previewContainer.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 
     // --- Hydrate barcodes (JsBarcode) ---
     if (typeof JsBarcode !== 'undefined') {
@@ -1196,11 +1262,15 @@ async function loadPackerzSopFromDB() {
     const sku = document.getElementById('packerzAdminRecipeSelect').value;
     const area = document.getElementById('packerzSopEditorArea');
     if(!sku) {
-        area.innerHTML = "<div style='text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;'>Select a target recipe on the left to begin compiling standard operating procedures.</div>";
+        area.innerHTML = window.safeHTML ? window.safeHTML(
+            "<div style='text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;'>Select a target recipe on the left to begin compiling standard operating procedures.</div>"
+        ) : "<div style='text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;'>Select a target recipe on the left to begin compiling standard operating procedures.</div>";
         return;
     }
 
-    area.innerHTML = "<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching structural SOP payload from Supabase Edge...</div>";
+    area.innerHTML = window.safeHTML ? window.safeHTML(
+        "<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching structural SOP payload from Supabase Edge...</div>"
+    ) : "<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching structural SOP payload from Supabase Edge...</div>";
 
     try {
         const { data, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku).single();
@@ -1222,7 +1292,7 @@ async function loadPackerzSopFromDB() {
         steps.forEach((s, idx) => { h += generatePackerzEditableSOPRow(s, idx); });
         h += `</div>`;
 
-        area.innerHTML = h;
+        area.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
 
     } catch(e) {
         console.error("SOP Fetch Bound Error:", e);
@@ -1232,9 +1302,11 @@ async function loadPackerzSopFromDB() {
 
             document.getElementById('packerzAdminQA').value = '';
             let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">` + generatePackerzEditableSOPRow({}, 0) + `</div>`;
-            area.innerHTML = h;
+            area.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
         } else {
-            area.innerHTML = `<div style='padding:20px; color:red; font-weight:900;'>API Disconnect: ${e.message}</div>`;
+            area.innerHTML = window.safeHTML ? window.safeHTML(
+                `<div style='padding:20px; color:red; font-weight:900;'>API Disconnect: ${e.message}</div>`
+            ) : `<div style='padding:20px; color:red; font-weight:900;'>API Disconnect: ${e.message}</div>`;
         }
     }
 }
@@ -1378,7 +1450,9 @@ function closeSOPMediaPicker() {
 async function refreshSOPMediaGrid() {
     const grid = document.getElementById('sopMediaGrid');
     if (!grid) return;
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading...</div>`;
+    grid.innerHTML = window.safeHTML ? window.safeHTML(
+        `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading...</div>`
+    ) : `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">Loading...</div>`;
     updateSOPMediaBreadcrumb();
 
     try {
@@ -1391,10 +1465,12 @@ async function refreshSOPMediaGrid() {
         const files   = (data || []).filter(f => f.id !== null && f.name !== '.emptyFolderPlaceholder');
 
         if (folders.length === 0 && files.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">${currentSOPMediaFolder ? 'This folder is empty.' : 'No files yet. Upload your first image above.'}</div>`;
+            grid.innerHTML = window.safeHTML ? window.safeHTML(
+                `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">${currentSOPMediaFolder ? 'This folder is empty.' : 'No files yet. Upload your first image above.'}</div>`
+            ) : `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">${currentSOPMediaFolder ? 'This folder is empty.' : 'No files yet. Upload your first image above.'}</div>`;
             return;
         }
-        grid.innerHTML = '';
+        grid.innerHTML = window.safeHTML ? window.safeHTML('') : '';
 
         // Back-navigation card
         if (currentSOPMediaFolder) {
@@ -1403,7 +1479,9 @@ async function refreshSOPMediaGrid() {
             upCard.onmouseover = () => upCard.style.borderColor = '#0ea5e9';
             upCard.onmouseout  = () => upCard.style.borderColor = 'var(--border-color)';
             upCard.onclick = () => { const p = currentSOPMediaFolder.split('/'); p.pop(); navigateSOPMediaFolder(p.join('/')); };
-            upCard.innerHTML = `<div style="font-size:28px; color:var(--text-muted);">⬆</div><div style="font-size:10px; color:var(--text-muted); font-weight:700;">Parent Folder</div>`;
+            upCard.innerHTML = window.safeHTML ? window.safeHTML(
+                `<div style="font-size:28px; color:var(--text-muted);">⬆</div><div style="font-size:10px; color:var(--text-muted); font-weight:700;">Parent Folder</div>`
+            ) : `<div style="font-size:28px; color:var(--text-muted);">⬆</div><div style="font-size:10px; color:var(--text-muted); font-weight:700;">Parent Folder</div>`;
             grid.appendChild(upCard);
         }
 
@@ -1418,7 +1496,11 @@ async function refreshSOPMediaGrid() {
             card.onmouseover = () => { card.style.borderColor = '#10b981'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
 
-            card.innerHTML = `
+            card.innerHTML = window.safeHTML ? window.safeHTML(`
+                <div style="font-size:36px;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">📁</div>
+                <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">${folder.name}</div>
+                <button data-click="click_deleteSOPMedia" data-path="${fullPath.replace(/"/g, '&quot;')}" data-folder="true" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
+            `) : `
                 <div style="font-size:36px;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">📁</div>
                 <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">${folder.name}</div>
                 <button data-click="click_deleteSOPMedia" data-path="${fullPath.replace(/"/g, '&quot;')}" data-folder="true" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
@@ -1444,14 +1526,19 @@ async function refreshSOPMediaGrid() {
                 ? `<img src="${url}" loading="lazy" style="width:100%; height:110px; object-fit:cover; pointer-events:none;"><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;" title="${file.name}">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`
                 : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; pointer-events:none;">📄</div><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`;
 
-            card.innerHTML = `
+            card.innerHTML = window.safeHTML ? window.safeHTML(`
+                <div style="flex-grow:1; display:flex; flex-direction:column;" data-click="click_insertSOPToken" data-token="[IMG:${url.replace(/"/g, '&quot;')}]">${contentHtml}</div>
+                <button data-click="click_deleteSOPMedia" data-path="${filePath.replace(/"/g, '&quot;')}" data-folder="false" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
+            `) : `
                 <div style="flex-grow:1; display:flex; flex-direction:column;" data-click="click_insertSOPToken" data-token="[IMG:${url.replace(/"/g, '&quot;')}]">${contentHtml}</div>
                 <button data-click="click_deleteSOPMedia" data-path="${filePath.replace(/"/g, '&quot;')}" data-folder="false" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
             `;
             grid.appendChild(card);
         });
     } catch(e) {
-        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#ef4444; font-size:12px;">⚠️ Could not load media library: ${e.message}<br><span style="font-size:11px; color:var(--text-muted);">Ensure the '${SOP_MEDIA_BUCKET}' bucket exists with public read access.</span></div>`;
+        grid.innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#ef4444; font-size:12px;">⚠️ Could not load media library: ${e.message}<br><span style="font-size:11px; color:var(--text-muted);">Ensure the '${SOP_MEDIA_BUCKET}' bucket exists with public read access.</span></div>`
+        ) : `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#ef4444; font-size:12px;">⚠️ Could not load media library: ${e.message}<br><span style="font-size:11px; color:var(--text-muted);">Ensure the '${SOP_MEDIA_BUCKET}' bucket exists with public read access.</span></div>`;
     }
 }
 
@@ -1528,7 +1615,7 @@ function updateSOPMediaBreadcrumb() {
     const el = document.getElementById('sopMediaBreadcrumb');
     if (!el) return;
     if (!currentSOPMediaFolder) {
-        el.innerHTML = `<span style="color:#0ea5e9; font-weight:700;">📁 Root</span>`;
+        el.innerHTML = window.safeHTML ? window.safeHTML(`<span style="color:#0ea5e9; font-weight:700;">📁 Root</span>`) : `<span style="color:#0ea5e9; font-weight:700;">📁 Root</span>`;
         return;
     }
     const parts = currentSOPMediaFolder.split('/');
@@ -1543,7 +1630,7 @@ function updateSOPMediaBreadcrumb() {
             ? `<span style="color:var(--text-heading); font-weight:900;">${p}</span>`
             : `<span style="color:#0ea5e9; cursor:pointer;" data-click="click_navigateSOPMediaFolder" data-path="${cp}">${p}</span>`;
     });
-    el.innerHTML = html;
+    el.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 }
 
 // ---- Drag and Drop Moving ----
@@ -1702,7 +1789,9 @@ function closeSOPAuditLog() {
 
 async function loadSOPAuditLog() {
     const body = document.getElementById('sopAuditLogBody');
-    body.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">Loading archive records...</div>`;
+    body.innerHTML = window.safeHTML ? window.safeHTML(
+        `<div style="text-align:center; padding:40px; color:var(--text-muted);">Loading archive records...</div>`
+    ) : `<div style="text-align:center; padding:40px; color:var(--text-muted);">Loading archive records...</div>`;
 
     try {
         const { data, error } = await supabaseClient
@@ -1774,7 +1863,10 @@ async function loadSOPAuditLog() {
 
         renderSOPAuditLogRows(sopAuditLogCache);
     } catch(e) {
-        body.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444;">
+        body.innerHTML = window.safeHTML ? window.safeHTML(`<div style="text-align:center; padding:20px; color:#ef4444;">
+            ⚠️ Could not load audit log: ${e.message}<br>
+            <span style="font-size:11px; color:var(--text-muted);">Make sure the 'sop_archives' table exists in Supabase.</span>
+        </div>`) : `<div style="text-align:center; padding:20px; color:#ef4444;">
             ⚠️ Could not load audit log: ${e.message}<br>
             <span style="font-size:11px; color:var(--text-muted);">Make sure the 'sop_archives' table exists in Supabase.</span>
         </div>`;
@@ -1794,11 +1886,85 @@ function filterSOPAuditLog() {
 function renderSOPAuditLogRows(rows) {
     const body = document.getElementById('sopAuditLogBody');
     if (!rows || rows.length === 0) {
-        body.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No QA archive records found yet. Records are created automatically when a QA sign-off is completed.</div>`;
+        body.innerHTML = window.safeHTML ? window.safeHTML(
+            `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No QA archive records found yet. Records are created automatically when a QA sign-off is completed.</div>`
+        ) : `<div style="text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No QA archive records found yet. Records are created automatically when a QA sign-off is completed.</div>`;
         return;
     }
 
-    body.innerHTML = rows.map((order, i) => {
+    body.innerHTML = window.safeHTML ? window.safeHTML(rows.map((order, i) => {
+        const placedDt = order._sale_date ? new Date(order._sale_date).toLocaleString() : 'N/A';
+        const completedDt = order._completed_at ? new Date(order._completed_at).toLocaleString() : 'N/A';
+
+        let totalChecks = 0;
+        let totalPassed = 0;
+        let recipeNames = [];
+
+        const itemsHtml = (order.items || []).map((item, idx) => {
+            const telemetry = Array.isArray(item.packer_telemetry) ? item.packer_telemetry : [];
+            const checks    = telemetry.filter(t => t.type === 'check');
+            const inputs    = telemetry.filter(t => t.type === 'input');
+            const passed    = checks.filter(c => c.valid).length;
+            const total     = checks.length;
+
+            totalChecks += total;
+            totalPassed += passed;
+            recipeNames.push(item.internal_recipe_name);
+
+            return `
+            <div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
+                <div style="font-size:13px; font-weight:900; color:#0ea5e9; margin-bottom:10px;">📦 ${item.internal_recipe_name} <span style="font-size:10px; color:var(--text-muted); float:right;">Signed: ${item.qa_passed_at ? new Date(item.qa_passed_at).toLocaleTimeString() : 'N/A'}</span></div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div>
+                        <div style="font-size:11px; font-weight:900; color:#10b981; letter-spacing:1px; margin-bottom:8px;">TELEMETRY CHECKS</div>
+                        ${checks.length === 0 ? '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None recorded</div>' :
+                          checks.map(c => `<div style="font-size:12px; padding:3px 0; color:${c.valid ? '#10b981' : '#ef4444'};">${c.valid ? '✅' : '❌'} ${c.text || ''}</div>`).join('')}
+                        ${inputs.length > 0 ? `<div style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:1px; margin:10px 0 6px;">INPUT VALUES</div>
+                        ${inputs.map(inp => `<div style="font-size:12px; padding:3px 0; color:var(--text-muted);">📝 ${inp.text}: <b style="color:var(--text-main); font-family:monospace;">${inp.value || '(blank)'}</b></div>`).join('')}` : ''}
+                    </div>
+                    <div>
+                        <button data-click="click_toggleOriginalBlueprint" style="background:transparent; border:1px solid #0ea5e9; color:#0ea5e9; padding:6px 12px; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer;" onmouseover="this.style.background='rgba(14,165,233,0.1)'" onmouseout="this.style.background='transparent'">View Original Blueprint</button>
+                        <div style="display:none; font-size:11px; color:var(--text-muted); background:rgba(0,0,0,0.15); padding:10px; border-radius:6px; max-height:150px; overflow-y:auto; font-family:monospace; line-height:1.6; margin-top:8px;">
+                            <div style="font-size:10px; font-weight:900; color:#0ea5e9; letter-spacing:1px; margin-bottom:6px;">IMMUTABLE SNAPSHOT:</div>
+                            ${formatSOPSnapshotPreview(item.sop_snapshot)}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        let sumRecipes = recipeNames.join(', ');
+        if (sumRecipes.length > 30) sumRecipes = sumRecipes.substring(0, 27) + '...';
+        if (!sumRecipes) sumRecipes = "LEGACY ARCHIVE ITEM";
+        // Note: For orders with 0 QA passed items in sop_archives (e.g. MISC_APPAREL), they wouldn't even appear here anymore because this array is driven by sop_archives explicitly!
+
+        return `
+        <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; overflow:hidden;">
+            <!-- Row header —— always visible -->
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; transition:background 0.2s;"
+                 data-click="click_toggleSOPAuditDetail" data-target="sop-audit-detail-${i}"
+                 onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background=''">
+                <div style="background:#10b981; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; flex-shrink:0;">✓ QA PASSED</div>
+                <div style="font-weight:900; color:var(--text-heading); font-size:13px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:0;">${order.order_id || '—'}</div>
+                <div style="font-size:12px; color:#0ea5e9; font-weight:700; flex:1;">${sumRecipes} <span style="color:var(--text-muted); font-size:10px;">(${(order.items || []).length} items)</span></div>
+
+                <!-- Timestamp Block -->
+                <div style="display:flex; flex-direction:column; gap:2px; flex-shrink:0; text-align:right;">
+                    <div style="font-size:10px; color:var(--text-muted);"><span style="color:#f59e0b; font-weight:bold;">PLACED:</span> ${placedDt}</div>
+                    <div style="font-size:10px; color:var(--text-muted);"><span style="color:#10b981; font-weight:bold;">CLOSED:</span> ${completedDt}</div>
+                </div>
+
+                <div style="font-size:11px; color:${totalPassed === totalChecks && totalChecks > 0 ? '#10b981' : '#f59e0b'}; font-weight:700; flex-shrink:0; margin-left:10px;">${totalPassed}/${totalChecks} checks</div>
+                <button data-click="click_unarchivePackerzOrder" data-id="${order.order_id}" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex: none; white-space: nowrap; width: max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">UNARCHIVE</button>
+                <div style="color:var(--text-muted); font-size:12px; margin-left:8px;">▼</div>
+            </div>
+
+            <!-- Expandable detail -->
+            <div id="sop-audit-detail-${i}" style="display:none; padding:16px; border-top:1px solid var(--border-color); background:var(--bg-body);">
+                ${itemsHtml}
+            </div>
+        </div>`;
+    }).join("")) : rows.map((order, i) => {
         const placedDt = order._sale_date ? new Date(order._sale_date).toLocaleString() : 'N/A';
         const completedDt = order._completed_at ? new Date(order._completed_at).toLocaleString() : 'N/A';
 
@@ -1916,7 +2082,7 @@ async function openCameraScanner(expectedValue, rowId, itemName) {
     }
     // Clear the DOM element so html5-qrcode can re-mount
     const readerEl = document.getElementById('sopCameraReader');
-    readerEl.innerHTML = '';
+    readerEl.innerHTML = window.safeHTML ? window.safeHTML('') : '';
 
     try {
         _html5QrScanner = new Html5Qrcode('sopCameraReader');
@@ -1938,7 +2104,7 @@ async function closeCameraScanner() {
         _html5QrScanner = null;
     }
     document.getElementById('sopCameraModal').style.display = 'none';
-    document.getElementById('sopCameraReader').innerHTML = '';
+    document.getElementById('sopCameraReader').innerHTML = window.safeHTML ? window.safeHTML('') : '';
     _activeScanRowId = null;
 }
 

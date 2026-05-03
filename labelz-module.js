@@ -98,7 +98,12 @@ function renderLabelzGrid() {
         const filtered = labelzDB.filter(l => l.product_name.toLowerCase().includes(search));
 
         if (filtered.length === 0) {
-            grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
+            grid.innerHTML = window.safeHTML ? window.safeHTML(
+                `<div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
+                    <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
+                    ${search ? 'No labels match your search.' : 'No custom labels yet. Click <strong>+ NEW LABEL</strong> to create your first one.'}
+                </div>`
+            ) : `<div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
                 <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
                 ${search ? 'No labels match your search.' : 'No custom labels yet. Click <strong>+ NEW LABEL</strong> to create your first one.'}
             </div>`;
@@ -152,7 +157,7 @@ function renderLabelzGrid() {
         });
 
         html += '</div>';
-        grid.innerHTML = html;
+        grid.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     } catch(e) { sysLog('Labelz grid render error: ' + e.message, true); }
 }
 
@@ -536,7 +541,9 @@ function regenerateBarcodeImage(obj, text, format) {
 
 function onCanvasSelectionCleared() {
     const pnl = document.getElementById('labelzPropertiesPanel');
-    pnl.innerHTML = '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-style:italic;">Select an element to edit properties.</div>';
+    pnl.innerHTML = window.safeHTML ? window.safeHTML(
+        '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-style:italic;">Select an element to edit properties.</div>'
+    ) : '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-style:italic;">Select an element to edit properties.</div>';
 }
 
 function onCanvasSelection(e) {
@@ -628,7 +635,7 @@ function onCanvasSelection(e) {
         </div>
     `;
     html += `</div>`;
-    pnl.innerHTML = html;
+    pnl.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 }
 
 // Global update handlers for property panel inputs
@@ -690,7 +697,9 @@ function searchLabelzCatalog() {
     try {
         const q = document.getElementById('labelzCatalogSearch').value.toLowerCase();
         const resDiv = document.getElementById('labelzCatalogResults');
-        if(!q || q.length < 2) { resDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>'; return; }
+        if(!q || q.length < 2) { resDiv.innerHTML = window.safeHTML ? window.safeHTML(
+            '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>'
+        ) : '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>'; return; }
 
         let results = [];
         
@@ -717,7 +726,9 @@ function searchLabelzCatalog() {
             });
         }
 
-        if(results.length === 0) { resDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px;">No results found.</div>'; return; }
+        if(results.length === 0) { resDiv.innerHTML = window.safeHTML ? window.safeHTML(
+            '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px;">No results found.</div>'
+        ) : '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px;">No results found.</div>'; return; }
 
         let html = '';
         results.slice(0, 15).forEach(r => {
@@ -733,7 +744,7 @@ function searchLabelzCatalog() {
                 </div>
             `;
         });
-        resDiv.innerHTML = html;
+        resDiv.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     } catch(e) { sysLog('Labelz Catalog Search error: ' + e.message, true); }
 }
 
@@ -771,7 +782,7 @@ function toggleLabelzEmojiPicker() {
 }
 function assignLabelzDesignerEmoji(emoji) {
     document.getElementById('labelzDesignerEmojiVal').value = emoji;
-    document.getElementById('labelzDesignerEmojiBtn').innerHTML = emoji + ' <span style="font-size:10px">▼</span>';
+    document.getElementById('labelzDesignerEmojiBtn').innerHTML = window.safeHTML ? window.safeHTML(emoji + ' <span style="font-size:10px">▼</span>') : emoji + ' <span style="font-size:10px">▼</span>';
     const p = document.getElementById('labelzDesignerEmojiPicker');
     if(p) p.style.display = 'none';
 }

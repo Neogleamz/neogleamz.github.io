@@ -62,14 +62,16 @@ let printDraggedIndex = null;
 function renderPrintQueue() {
     const ui = document.getElementById('printListUI');
     if (!ui) return;
-    ui.innerHTML = "";
+    ui.innerHTML = window.safeHTML ? window.safeHTML("") : "";
 
     let totalWaitTime = 0;
     let totalTasks = 0;
     const activePrints = printQueueDB.filter(p => p.status !== 'Archived');
 
     if (activePrints.length === 0) {
-        ui.innerHTML = "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>";
+        ui.innerHTML = window.safeHTML ? window.safeHTML(
+            "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>"
+        ) : "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>";
         document.getElementById('printMainArea').style.display = 'none';
     } else {
         let printListHtml = [];
@@ -109,7 +111,7 @@ function renderPrintQueue() {
                 <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${job.qty}</span>
             </li>`);
         });
-        ui.innerHTML = printListHtml.join('');
+        ui.innerHTML = window.safeHTML ? window.safeHTML(printListHtml.join('')) : printListHtml.join('');
     }
 
     const tasksEl = document.getElementById('totalPrintTasks');
@@ -402,7 +404,7 @@ function renderActivePrintJob(id) {
         }
         
         htmlOut += `</div></div>`;
-        sopList.innerHTML = htmlOut;
+        sopList.innerHTML = window.safeHTML ? window.safeHTML(htmlOut) : htmlOut;
         if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sopList);
     }
 }
@@ -640,7 +642,7 @@ function openManualPrintModal() {
                 manualPrintHtml.push(`<option value="RECIPE:::${String(k).replace(/"/g, '&quot;')}">🖨️ ${k}</option>`);
             }
         });
-        sel.innerHTML = manualPrintHtml.join('');
+        sel.innerHTML = window.safeHTML ? window.safeHTML(manualPrintHtml.join('')) : manualPrintHtml.join('');
     }
     const q = document.getElementById('manualPrintQty');
     if(q) q.value = 1;

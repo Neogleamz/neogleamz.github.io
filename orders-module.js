@@ -33,7 +33,9 @@ window.renderOrderzTable = function() {
         if (!listBody) return;
 
         if (!ordersDB || ordersDB.length === 0) {
-            listBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 50px; color: var(--text-muted);">No Order Data Found in Ledger.</td></tr>`;
+            listBody.innerHTML = window.safeHTML ? window.safeHTML(
+                `<tr><td colspan="8" style="text-align:center; padding: 50px; color: var(--text-muted);">No Order Data Found in Ledger.</td></tr>`
+            ) : `<tr><td colspan="8" style="text-align:center; padding: 50px; color: var(--text-muted);">No Order Data Found in Ledger.</td></tr>`;
             return;
         }
 
@@ -62,7 +64,7 @@ window.renderOrderzTable = function() {
             `;
         });
 
-        listBody.innerHTML = html;
+        listBody.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     } catch(e) { sysLog('ORDERZ render error: ' + e.message, true); }
 };
 
