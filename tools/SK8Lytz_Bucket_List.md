@@ -43,6 +43,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `feat/task-engine-p5` : **Phase 5 (Embedded UI Payloads)** - Wire up the cross-module hooks (embedding Cycle Counts and Low Stockz reports natively inside tasks).
 - [🚀] `feat/task-engine-p6` : **Phase 6 (Automations & Templates)** - Build the logic that auto-spawns SOP tasks and dynamically generates children workflows. [🤖 Gemini 3.1 Pro] [🧠 15k / 20k] [💸 $0.05 / $0.06]
 - [🚀] `feat/task-engine-p7` : **Phase 7 (Communication & Inbox)** - Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
+- [ ] `feat/task-engine-archive` : **Task Engine Archive** - Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.04]
+- [ ] `feat/task-status-dropdown` : **Status Selector Refactor** - Replace the click-to-cycle logic on task status pills with a native dropdown/selector menu for precise status assignments. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 **Other Ideas**
 
