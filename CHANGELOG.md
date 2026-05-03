@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Features & Refactors
+- **Legacy var → let/const Upgrade**: Systematically upgrade all legacy `var` declarations to block-scoped `let`/`const` across all 16 production modules, verifying no hoisting-dependent logic breaks.
+- **Event Listener Memory Leak Audit**: Add `removeEventListener` cleanup to the 10 modules missing it (task-engine, sales, scraper, orders, labelz, inventory, ceo, bom, barcodz, analytics) to prevent memory leaks on view re-renders.
+
 ## [1.0.26] - 2026-05-03
 ### Features & Refactors
 - **Purge Inline onclick Handlers (production-module.js)**: Migrate all ~40 inline `onclick=` handlers to `data-click` delegators registered in `system-event-delegator.js`.
