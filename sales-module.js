@@ -288,7 +288,7 @@ async function processParsedSales(rows, isTestMode = false) {
 
     if(unmapped.size > 0) {
         let uList = Array.from(unmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
-        uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
+        uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" data-click="click_openAliasModal" data-sku="${u.replace(/'/g, "\\'")}">🔗 Map SKU: ${u}</button>`);
         document.getElementById('unmappedSkusList').innerHTML = h;
         setMasterStatus("Action Required", "mod-error"); setSysProgress(0, 'working'); return;
     }
@@ -328,7 +328,7 @@ async function saveAliasMapping() {
         if(stillUnmapped.size === 0) executeSalesSync();
         else {
             let uList = Array.from(stillUnmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
-            uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" onclick="openAliasModal('${u.replace(/'/g, "\\'")}')">🔗 Map SKU: ${u}</button>`);
+            uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" data-click="click_openAliasModal" data-sku="${u.replace(/'/g, "\\'")}">🔗 Map SKU: ${u}</button>`);
             let elUnmapped = document.getElementById('unmappedSkusList');
             if (elUnmapped) elUnmapped.innerHTML = h;
         }

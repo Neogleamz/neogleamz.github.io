@@ -138,14 +138,14 @@ function renderLabelzGrid() {
                         </div>
                         
                         <!-- Spool Button Top Right -->
-                        <button class="btn-white" onclick="addLabelzToSpool('${cleanName}', '${safeEmoji}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
+                        <button class="btn-white" data-click="click_addLabelzToSpool" data-name="${cleanName}" data-emoji="${safeEmoji}" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                     </div>
                     
                     <!-- Content & Edit Base -->
                     <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
                         <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
                         
-                        <button class="btn-orange" onclick="openEditLabelModal('${cleanName}')" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
+                        <button class="btn-orange" data-click="click_openEditLabelModal" data-name="${cleanName}" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
                     </div>
                 </div>
             `;
@@ -568,9 +568,9 @@ function onCanvasSelection(e) {
         
         <!-- PRO Layer Controls -->
         <div style="display:flex; gap:6px;">
-            <button onclick="fCanvas.bringForward(fCanvas.getActiveObject()); saveLabelzHistory(); fCanvas.renderAll();" style="flex:1; padding:4px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); border-radius:4px; color:white; font-size:11px; cursor:pointer;" title="Bring Forward">🔼 Up</button>
-            <button onclick="fCanvas.sendBackwards(fCanvas.getActiveObject()); saveLabelzHistory(); fCanvas.renderAll();" style="flex:1; padding:4px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); border-radius:4px; color:white; font-size:11px; cursor:pointer;" title="Send Backward">🔽 Down</button>
-            <button onclick="lblzDuplicateSelected()" style="flex:1; padding:4px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:4px; color:#10b981; font-size:11px; font-weight:bold; cursor:pointer;" title="Duplicate Element (Ctrl+D)">📄 Copy</button>
+            <button data-click="click_labelzBringForward" style="flex:1; padding:4px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); border-radius:4px; color:white; font-size:11px; cursor:pointer;" title="Bring Forward">🔼 Up</button>
+            <button data-click="click_labelzSendBackward" style="flex:1; padding:4px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); border-radius:4px; color:white; font-size:11px; cursor:pointer;" title="Send Backward">🔽 Down</button>
+            <button data-click="click_lblzDuplicateSelected" style="flex:1; padding:4px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:4px; color:#10b981; font-size:11px; font-weight:bold; cursor:pointer;" title="Duplicate Element (Ctrl+D)">📄 Copy</button>
         </div>
     `;
 
@@ -584,9 +584,9 @@ function onCanvasSelection(e) {
                 <div style="flex:1;"><label style="font-size:10px;">Weight</label><select onchange="updObj('fontWeight', this.value)" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"><option value="normal" ${obj.fontWeight==='normal'?'selected':''}>Normal</option><option value="bold" ${obj.fontWeight==='bold'?'selected':''}>Bold</option></select></div>
             </div>
             <div style="display:flex; gap:4px; margin-top:4px;">
-               <button onclick="updObj('textAlign', 'left')" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇤</button>
-               <button onclick="updObj('textAlign', 'center')" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇥⇤</button>
-               <button onclick="updObj('textAlign', 'right')" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇥</button>
+               <button data-click="click_lblzUpdObj" data-key="textAlign" data-val="left" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇤</button>
+               <button data-click="click_lblzUpdObj" data-key="textAlign" data-val="center" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇥⇤</button>
+               <button data-click="click_lblzUpdObj" data-key="textAlign" data-val="right" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇥</button>
             </div>
         `;
     }
@@ -621,10 +621,10 @@ function onCanvasSelection(e) {
     // Locking tool
     html += `
         <div style="margin-top:10px; display:flex; gap:6px;">
-           <button onclick="updObj('lockMovementX', !${!!obj.lockMovementX}); updObj('lockMovementY', !${!!obj.lockMovementY});  updObj('lockScalingX', !${!!obj.lockScalingX}); updObj('lockScalingY', !${!!obj.lockScalingY}); onCanvasSelection({target: fCanvas.getActiveObject()});" style="flex:1; background:${obj.lockMovementX ? '#ef4444' : 'var(--bg-bar)'}; color:white; border:1px solid var(--border-color); padding:4px; font-size:10px; border-radius:4px; cursor:pointer;">
+           <button data-click="click_lblzToggleLock" data-locked="${!!obj.lockMovementX}" style="flex:1; background:${obj.lockMovementX ? '#ef4444' : 'var(--bg-bar)'}; color:white; border:1px solid var(--border-color); padding:4px; font-size:10px; border-radius:4px; cursor:pointer;">
              ${obj.lockMovementX ? '🔒 UNLOCK' : '🔓 LOCK POS'}
            </button>
-           <button onclick="lblzDeleteSelected()" class="btn-red" style="padding:4px; flex:1; font-size:11px;">🗑️ Delete</button>
+           <button data-click="click_lblzDeleteSelected" class="btn-red" style="padding:4px; flex:1; font-size:11px;">🗑️ Delete</button>
         </div>
     `;
     html += `</div>`;
@@ -724,7 +724,7 @@ function searchLabelzCatalog() {
             let safeName = r.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             let safeVal = String(r.val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
             html += `
-                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.borderColor='#0ea5e9'" onmouseout="this.style.borderColor='var(--border-color)'" onclick="applyCatalogData('${safeName}', '${safeVal}', ${r.cogs})">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.borderColor='#0ea5e9'" onmouseout="this.style.borderColor='var(--border-color)'" data-click="click_applyCatalogData" data-name="${safeName}" data-val="${safeVal}" data-cogs="${r.cogs}">
                     <div style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:2px;">${r.name}</div>
                     <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted);">
                         <span>[${r.source}] ${r.spec}</span>

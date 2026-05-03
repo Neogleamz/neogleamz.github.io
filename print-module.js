@@ -100,7 +100,7 @@ function renderPrintQueue() {
                 ondragover="printDragOver(event)" 
                 ondrop="printDrop(event, ${index})" 
                 ondragend="printDragEnd(event)"
-                onclick="selectPrintJob('${job.id}')" 
+                data-click="click_selectPrintJob" data-id="${job.id}"
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
                     <span style="font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">☰ ${dot} ${displayID}: ${displayName}${timeStr}</span>
@@ -234,14 +234,14 @@ function renderActivePrintJob(id) {
         
         let htmlOut = `
         <div class="sop-grp-card" id="sopgrp_${grpId}" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
-            <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);" onclick="if(!${isEditing}){ let d=document.getElementById('sopgrp_body_${grpId}'); let ic=document.getElementById('sopgrp_icon_${grpId}'); if(d.style.display==='none'){d.style.display='block';ic.innerText='▼';localStorage.setItem('layerzSopExpanded_${grpId}','true');}else{d.style.display='none';ic.innerText='▶';localStorage.setItem('layerzSopExpanded_${grpId}','false');} }">
+            <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);" data-click="click_toggleLayerzSopGroup" data-grp="${grpId}">
                 <div style="flex-grow:1;">
                     🖨️ 3D Print Instructions: ${cleanPartName} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;" onclick="event.stopPropagation()">
-                    <button class="btn-slate" style="font-size:10px; padding:2px 8px;" onclick="openPrintSOP('${cleanPartName.replace(/'/g, "\\'")}')">🖨️ PRINT</button>
-                    <button onclick="toggleInlineEditor('${grpId}')" class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
-                    <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" onclick="let d=document.getElementById('sopgrp_body_${grpId}'); if(d.style.display==='none'){d.style.display='block';this.innerText='▼';localStorage.setItem('layerzSopExpanded_${grpId}','true');}else{d.style.display='none';this.innerText='▶';localStorage.setItem('layerzSopExpanded_${grpId}','false');}" id="sopgrp_icon_${grpId}">${chev}</div>
+                <div style="display:flex; align-items:center; gap:8px;" data-click="click_stopPropagation">
+                    <button class="btn-slate" style="font-size:10px; padding:2px 8px;" data-click="click_openPrintSOP" data-name="${cleanPartName.replace(/"/g, '&quot;')}">🖨️ PRINT</button>
+                    <button data-click="click_toggleInlineEditor" data-grp="${grpId}" class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
+                    <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" data-click="click_toggleLayerzSopGroup" data-grp="${grpId}" data-icon="true" id="sopgrp_icon_${grpId}">${chev}</div>
                 </div>
             </div>
             <div id="sopgrp_body_${grpId}" style="display:${disp}; padding:10px 15px; border-top:1px solid var(--border-color);">
@@ -255,7 +255,7 @@ function renderActivePrintJob(id) {
             mappedSteps.forEach((s, idx) => {
                 let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
                 let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-                stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${typeof getRTToolbar === 'function' ? getRTToolbar() : ''}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+                stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${typeof getRTToolbar === 'function' ? getRTToolbar() : ''}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
             });
             
             htmlOut += `
@@ -270,16 +270,16 @@ function renderActivePrintJob(id) {
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                                             <div style="display:flex; gap:8px;">
-                                                <button onclick="openMediaManager('telemetry')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
-                                                <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
-                                                <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('inlineLeftPane_${grpId}', 'inlinePreviewContainer_${grpId}', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                                                <button data-click="click_openMediaManager" data-type="telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                                                <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
+                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grpId}" data-preview="inlinePreviewContainer_${grpId}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                                             </div>
                                         </div>
                                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
                                             <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;·&nbsp;
                                             <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;·&nbsp;
                                             <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;·&nbsp;
-                                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN]</b> Bin &nbsp;— <span style="color:#F59E0B; cursor:pointer; font-weight:700;" onclick="openSOPTokenGuide()">❓ Guide</span>
+                                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN]</b> Bin &nbsp;— <span style="color:#F59E0B; cursor:pointer; font-weight:700;" data-click="click_openSOPTokenGuide">❓ Guide</span>
                                         </div>
                                         <textarea id="inlineSopQA_${grpId}" oninput="if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grpId}')" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaText}</textarea>
                                     </div>
@@ -302,15 +302,15 @@ function renderActivePrintJob(id) {
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Rich Text Instructions</h3>
                                         </div>
                                         <div id="inlineSopSteps_${grpId}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${stepsHtml}</div>
-                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" onclick="if(typeof addInlineSOPRow==='function') addInlineSOPRow('${grpId}')">+ ADD PROCEDURE STEP</button>
+                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" data-click="click_addInlineSOPRow" data-grp="${grpId}">+ ADD PROCEDURE STEP</button>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Save Actions -->
                             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
-                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" onclick="if(typeof toggleInlineEditor==='function') toggleInlineEditor('${grpId}')">✕ Cancel Changes</button>
-                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" onclick="if(typeof saveInlineSopBlock==='function') { saveInlineSopBlock('${grpId}', '${cleanPartName.replace(/'/g, "\\'")}'); setTimeout(()=>renderActivePrintJob(currentPrintJob.id), 500); }">💾 SAVE SOP MASTER BLUEPRINT</button>
+                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" data-click="click_toggleInlineEditor" data-grp="${grpId}">✕ Cancel Changes</button>
+                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" data-click="click_saveInlineSopBlock_print" data-grp="${grpId}" data-rawname="${cleanPartName.replace(/"/g, '&quot;')}">💾 SAVE SOP MASTER BLUEPRINT</button>
                             </div>
 
                             <!-- Injecting Drag Handlers for Resizer -->

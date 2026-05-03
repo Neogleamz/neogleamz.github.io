@@ -1688,9 +1688,9 @@ window.openGlobalRegexPlayground = function(type) {
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:11px; color:#fff; font-weight:bold;">Active Regex Profile</span>
                         <div style="display:flex; gap:6px;">
-                            <button onclick="window.${conf.saveNewFn}()" class="btn-blue-muted btn-sm" style="font-size:9px;">💾 Save As New</button>
-                            <button id="btnOverwritePreset" onclick="window.${conf.overwriteFn}()" class="btn-orange-muted btn-sm" style="font-size:9px; display:none;">🔄 Overwrite</button>
-                            <button id="btnDeletePreset" onclick="window.${conf.deleteFn}()" class="btn-red-muted btn-sm" style="font-size:9px; display:none;">🗑️ Delete</button>
+                            <button data-app-click="save-new-regex-preset" class="btn-blue-muted btn-sm" style="font-size:9px;">💾 Save As New</button>
+                            <button id="btnOverwritePreset" data-app-click="overwrite-regex-preset" class="btn-orange-muted btn-sm" style="font-size:9px; display:none;">🔄 Overwrite</button>
+                            <button id="btnDeletePreset" data-app-click="delete-regex-preset" class="btn-red-muted btn-sm" style="font-size:9px; display:none;">🗑️ Delete</button>
                         </div>
                     </div>
                     <select id="${conf.presetDropdownId}" class="input-dark" style="font-size:11px; padding:4px; width:100%; border:1px solid ${type==='orders'?'#38bdf8':'#f59e0b'};" data-app-change="regex-preset-dropdown"></select>
@@ -1852,7 +1852,7 @@ function renderPaperProfileTable() {
              h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"><input type="number" id="inlineEditH_${idx}" value="${p.h}" style="width:60px; padding:4px; font-size:12px; text-align:right; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;"></td>`;
              h += `<td style="padding:10px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1);">
                       <div style="display:flex; justify-content:center; gap:6px;">
-                          <button class="btn-green btn-action-dense" style="display:flex; justify-content:center; align-items:center;" onclick="saveInlineEditPaper(${idx})">SAVE</button>
+                          <button class="btn-green btn-action-dense" style="display:flex; justify-content:center; align-items:center;" data-app-click="save-paper-inline" data-idx="${idx}">SAVE</button>
                       </div>
                    </td>`;
              h += `</tr>`;
@@ -1863,8 +1863,8 @@ function renderPaperProfileTable() {
              h += `<td style="padding:10px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.1);">${p.h}"</td>`;
              h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);">
                       <div style="display:flex; justify-content:center; gap:6px;">
-                          <button class="btn-ghost-base btn-ghost-brand btn-action-dense" style="display:flex; justify-content:center; align-items:center;" onclick="editPaperProfile(${idx})">✏️</button>
-                          <button class="btn-red-muted btn-action-dense" style="display:flex; justify-content:center; align-items:center;" onclick="deletePaperProfile(${idx})">🗑️</button>
+                          <button class="btn-ghost-base btn-ghost-brand btn-action-dense" style="display:flex; justify-content:center; align-items:center;" data-app-click="edit-paper-profile" data-idx="${idx}">✏️</button>
+                          <button class="btn-red-muted btn-action-dense" style="display:flex; justify-content:center; align-items:center;" data-app-click="delete-paper-profile" data-idx="${idx}">🗑️</button>
                       </div>
                    </td>`;
              h += `</tr>`;

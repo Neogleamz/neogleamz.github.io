@@ -1358,7 +1358,7 @@ window.teSwitchView = function(view, btnEl) {
                 
                 let text = isStart ? t.title : '&nbsp;';
                 
-                return `<div style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; ${borderStyle} border-radius: ${radius}; height: 20px; font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-left: ${isStart ? '6px' : '0'}; line-height: 18px;" onclick="window.teOpenTaskContext('${t.id}')">${text}</div>`;
+                return `<div style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; ${borderStyle} border-radius: ${radius}; height: 20px; font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-left: ${isStart ? '6px' : '0'}; line-height: 18px;" data-click="click_teOpenTaskContext" data-id="${t.id}">${text}</div>`;
             }).join('');
             
             calendarHtml += `
