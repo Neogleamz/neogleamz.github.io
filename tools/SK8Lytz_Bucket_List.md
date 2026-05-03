@@ -67,9 +67,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 *0 native system vulnerabilities globally found.* ✅
 
 ### 🟡 Outdated Dependencies (npm outdated)
-- [ ] `chore/dep-supabase-js` : **@supabase/supabase-js** `2.105.0` → `2.105.1` (patch). [🤖 AI Model] [🧠 TBD / 1k] [💸 TBD / $0.01]
-- [ ] `chore/dep-eslint` : **eslint** `10.2.1` → `10.3.0` (minor). [🤖 AI Model] [🧠 TBD / 1k] [💸 TBD / $0.01]
-- [ ] `chore/dep-supabase-cli` : **supabase** `2.95.5` → `2.98.0` (minor). [🤖 AI Model] [🧠 TBD / 1k] [💸 TBD / $0.01]
+- [x] `chore/dep-supabase-js` : **@supabase/supabase-js** `2.105.0` → `2.105.1` (patch). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+- [x] `chore/dep-eslint` : **eslint** `10.2.1` → `10.3.0` (minor). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+- [x] `chore/dep-supabase-cli` : **supabase** `2.95.5` → `2.98.0` (minor). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
 *0 new code-debt items found.* ✅
