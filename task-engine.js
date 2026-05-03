@@ -159,7 +159,7 @@ function teRenderTaskGrid(filter = 'list') {
     
     // Render loop
     for (const [cid, group] of Object.entries(cycleGroups)) {
-        if (group.tasks.length === 0 && cid === 'unassigned') continue;
+        if (group.tasks.length === 0) continue;
         
         let headerColor = group.color || '#64748b';
         html += `
