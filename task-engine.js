@@ -406,6 +406,24 @@ function teRenderTaskGrid(filter = null) {
     }
 }
 
+window.teFormatTimeline = function(startDateStr, dueDateStr) {
+    if (!startDateStr && !dueDateStr) return 'No Timeline';
+    
+    let formatOptions = { month: 'short', day: 'numeric' };
+    
+    if (startDateStr && !dueDateStr) {
+        return new Date(startDateStr).toLocaleDateString('en-US', formatOptions);
+    }
+    
+    if (!startDateStr && dueDateStr) {
+        return new Date(dueDateStr).toLocaleDateString('en-US', formatOptions);
+    }
+    
+    let d1 = new Date(startDateStr);
+    let d2 = new Date(dueDateStr);
+    return `${d1.toLocaleDateString('en-US', formatOptions)} - ${d2.toLocaleDateString('en-US', formatOptions)}`;
+};
+
 function teBuildTaskRowHTML(t, isChild) {
     let statusColorClass = 'status-in-progress';
     if (t.status === 'Done' || t.status === 'Completed') statusColorClass = 'status-completed';
@@ -430,7 +448,7 @@ function teBuildTaskRowHTML(t, isChild) {
         ownerTitle = meta.spoofed_assignee;
     }
 
-    let dueStr = t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No Date';
+    let timelineStr = window.teFormatTimeline(meta.start_date, t.due_date);
     let rowPadding = isChild ? '5px 15px' : '10px 15px';
     let titleWeight = isChild ? '400' : '500';
 
@@ -449,7 +467,7 @@ function teBuildTaskRowHTML(t, isChild) {
             <span class="status-pill ${statusColorClass}" data-click="click_teOpenStatusDropdown" style="position: relative; z-index: 2; cursor: pointer;">${t.status}</span>
         </div>
         <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
-            ${dueStr}
+            ${timelineStr}
         </div>
         <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
             #normal
@@ -1376,7 +1394,9 @@ window.teChangeCalendarMonth = function(dir) {
         window.teCalendarMonth = 11;
         window.teCalendarYear -= 1;
     }
-    teSwitchView('calendar');
+    if (typeof window.teSwitchView === 'function') {
+        window.teSwitchView('calendar');
+    }
 };
 
 window.teToggleTemplateMenu = function() {
