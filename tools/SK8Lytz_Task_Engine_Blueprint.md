@@ -37,28 +37,36 @@ To support dependencies, infinite nesting, and cross-module hooks, our database 
 
 ---
 
-## 2. The UX & Navigation (The Vanilla JS Execution)
+## 2. UI/UX Craftsmanship (The Executive Polish)
 
-### The Entry Point
-- **Header Button:** A persistent button sitting in the top right of the main App Header (next to Tipz/Settings).
-- **The Red Badge (Notifications):** If an automated task is generated (e.g., Inventory Low Stock) or a blocker is removed, a small red notification bubble (like an unread text message) will appear on this header button, alerting you that something needs attention without interrupting your current workflow.
-- **Fullscreen Modal:** Clicking the header button instantly summons a massive, fullscreen glassmorphism overlay containing the entire Task Engine. 
+To ensure this feels like a premium, enterprise-grade tool rather than a generic to-do list, we will strictly enforce the following UI/UX architecture natively within Vanilla JS:
 
-### Keyboard Shortcuts (Linear Speed)
+### The Premium Entry Point & Glassmorphism
+- **Header Button & Notification Badge:** A persistent button sitting in the top right of the main App Header. If an automated task is generated, a sleek `.badge-red-neon` bubble pulsates subtly to draw attention without breaking focus.
+- **The Screen Takeover:** Clicking the button instantly summons the `.modal-overlay`. We will use deep `backdrop-filter: blur(12px)` over a dark `#0A0A0A` gradient to create a massive, floating glassmorphism workspace that feels distinct from the background modules.
+
+### The Split-Pane Canvas (Layout Geometry)
+Inside the massive modal, we will utilize Neogleamz's standard `<div class="bom-layout">` separated by an `.h-resizer`:
+- **Left Sidebar (The Navigation Spine):** A narrow, 250px column housing your Filters ("My Tasks", "Due Today"), standard Cycles, and Template generators. 
+- **Right Canvas (The View Engine):** The massive area where the tasks actually render. It instantly swaps between three native Vanilla JS render functions:
+  1. **Triage Dashboard (List View):** Clean, horizontally stacked rows.
+  2. **Kanban Board:** Pure CSS Flexbox columns (Todo -> In Progress -> Done).
+  3. **Calendar Grid:** A responsive CSS Grid mapping deadlines visually.
+
+### The Sliding Context Panel (Zero Context Switching)
+- **The Anti-Modal Rule:** When you click a specific Task to view its details, it does **not** open another modal on top of the modal. 
+- **The Flyout:** Instead, a sleek Context Panel slides in from the right edge of the screen (CSS `transform: translateX(0); transition: 0.3s ease;`).
+- **The Payload:** This right-side panel houses the description, the Subtask checklists, the "Start Timer" button, and crucially, the **Embedded Actionable Modals** (like the Cycle Count scanner). You can interact with the embedded tools while still seeing the main task list to your left.
+
+### Micro-Interactions & The 4-State Matrix
+- **Hover Elevations:** Every task row/card uses subtle CSS transitions (`box-shadow: 0 4px 12px rgba(0,0,0,0.5); transform: translateY(-1px);`) on hover.
+- **Quick Actions:** Hovering over a task row subtly reveals Ghost Buttons (`.btn-ghost-green` for Complete, `.btn-ghost-red` for Delete) that remain hidden otherwise to keep the UI clean.
+- **The 4-State Compliance:** The engine will explicitly render beautiful states for **Loading** (pulsing CSS skeleton blocks), **Empty** (a clean illustration with a neon "Create First Task" button), **Error** (API failure bounds), and **Success**.
+
+### Keyboard Speed (Linear Architecture)
 - We will bind native Javascript `keydown` listeners to the `document`.
 - Hit `T` from anywhere in the app to instantly open the Task Planner modal.
-- Once inside the modal, hit `C` to create a new task instantly, bypassing mouse clicks.
-
-### The 3-Way UI View Engine
-Inside the modal, the UI will instantly swap between three native Vanilla JS render functions:
-
-1. **The Triage Dashboard (List View):** 
-   - A top-down list prioritizing tasks by `due_date`. Groups tasks into "Overdue", "Due Today", and "Upcoming".
-2. **The Kanban Board (Status Flow):** 
-   - Pure CSS Flexbox columns based on Linear's statuses (`Todo`, `In Progress`, `Done`). 
-   - Uses Monday.com style visual "Status Pills" (bright, color-coded badges).
-3. **The Calendar Grid (Deadline Map):** 
-   - A responsive CSS Grid representation of the month.
+- Once inside, hit `C` to instantly focus a new task creation input line, bypassing the mouse entirely.
 
 ---
 
