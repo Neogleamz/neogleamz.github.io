@@ -208,6 +208,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSwitchView_blocked':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('blocked', el);
                     break;
+                case 'click_teSwitchView_completed':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('completed', el);
+                    break;
+                case 'click_teCreateCycle':
+                    if(typeof window.teCreateCycle==='function') window.teCreateCycle();
+                    break;
+                case 'click_teCreateTeam':
+                    if(typeof window.teCreateTeam==='function') window.teCreateTeam();
+                    break;
+                case 'click_teToggleCycleGroup':
+                    {
+                        const cycleId = el.getAttribute('data-cycle-id');
+                        const groupEl = document.getElementById('te-cycle-group-' + cycleId);
+                        if (groupEl) {
+                            if (groupEl.style.display === 'none') {
+                                groupEl.style.display = 'flex';
+                                el.textContent = '▼';
+                            } else {
+                                groupEl.style.display = 'none';
+                                el.textContent = '▶';
+                            }
+                        }
+                    }
+                    break;
                 case 'click_closeTaskPlanner':
                     if(typeof window.closeTaskPlanner==='function') window.closeTaskPlanner();
                     break;
@@ -227,6 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_closeTaskContext':
                     if(typeof window.closeTaskContext==='function') window.closeTaskContext();
+                    break;
+                case 'click_teToggleTaskDoneInFlyout':
+                    if(typeof window.teCycleStatus==='function' && window.currentOpenTaskId) {
+                        window.teCycleStatus(window.currentOpenTaskId);
+                    }
                     break;
                 case 'click_teToggleTemplateMenu':
                     if(typeof window.teToggleTemplateMenu==='function') window.teToggleTemplateMenu();
@@ -895,6 +924,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_window_updateCcMngrStock':
                     window.updateCcMngrStock();
                     break;
+                case 'change_teAssignUser':
+                    if(typeof window.teUpdateTaskAssignee==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskAssignee(window.currentOpenTaskId, el.value);
+                    }
+                    break;
+                case 'change_teAssignCycle':
+                    if(typeof window.teUpdateTaskCycle==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskCycle(window.currentOpenTaskId, el.value);
+                    }
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
@@ -1032,6 +1071,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'blur_window_handleCcMngrTelemetryEd_19':
                     window.handleCcMngrTelemetryEdit(el, 5);
+                    break;
+                case 'blur_teSaveTitle':
+                    if(typeof window.teUpdateTaskTitle==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskTitle(window.currentOpenTaskId, el.value);
+                    }
+                    break;
+                case 'blur_teSaveDescription':
+                    if(typeof window.teUpdateTaskDescription==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskDescription(window.currentOpenTaskId, el.value);
+                    }
                     break;
             }
         } catch (error) {

@@ -110,54 +110,126 @@ function teRenderSidebar() {
     }
 }
 
-function teRenderTaskGrid() {
+function teRenderTaskGrid(filter = 'list') {
     const wrapper = document.getElementById('te-task-rows-wrapper');
     if (!wrapper) return;
     
     let html = '';
-    taskEngineDB.taskz.forEach(t => {
-        let statusColorClass = 'status-in-progress';
-        if (t.status === 'Done') statusColorClass = 'status-done';
-        if (t.status === 'Todo' || t.status === 'Backlog') statusColorClass = 'status-todo';
-        if (t.status === 'Blocked') statusColorClass = 'status-blocked';
-        
-        let ownerInitials = 'UN';
-        let ownerBg = '#3b82f6';
-        if (t.assigned_team_id) {
-            let team = taskEngineDB.teams.find(tm => tm.id === t.assigned_team_id);
-            if (team) { ownerInitials = team.name.substring(0,2).toUpperCase(); ownerBg = team.color_hex || ownerBg; }
+    
+    // Determine filters
+    let currentUser = localStorage.getItem('neogleamz_current_user');
+    let taskList = taskEngineDB.taskz;
+    
+    if (filter === 'my_tasks' && currentUser && currentUser !== 'none') {
+        // filter by assignee or by created_by if no assignee logic is robust yet. We'll check assigned_to_id or created_by_id? 
+        // We only have the name in currentUser right now. We should map it to an actual user ID if we had one, but we are spoofing.
+        // Let's assume for spoofing we just match the metadata or title temporarily, or if we assign via teams.
+        // Actually, the assignment dropdown sets the value to "Chris", "Andy", etc. We will store that in `metadata.spoofed_assignee`.
+    }
+    
+    // Filter tasks based on view
+    let displayTasks = taskList.filter(t => {
+        if (filter === 'blocked') return t.status === 'Blocked';
+        if (filter === 'completed') return t.status === 'Done';
+        if (filter === 'my_tasks') {
+            let meta = t.metadata || {};
+            return meta.spoofed_assignee === currentUser;
         }
-
-        let dueStr = t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No Date';
-
-        html += `
-        <div class="task-row" data-task-id="${t.id}" data-click="click_teOpenTaskContext">
-            <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-                <div class="task-checkbox" style="flex-shrink: 0;" data-click="click_teToggleTaskDone"></div>
-                <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                    <span style="color: white; font-weight: 500; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">${t.title}</span>
-                    <div style="display: flex; gap: 10px; font-size: 11px; color: var(--text-muted);">
-                        <span>⏱️ ${t.estimated_minutes}m</span>
-                    </div>
-                </div>
-            </div>
-            <div style="display: flex; align-items: center;">
-                <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);">${ownerInitials}</div>
-            </div>
-            <div>
-                <span class="status-pill ${statusColorClass}" data-click="click_teCycleStatus" style="position: relative; z-index: 2;">${t.status}</span>
-            </div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
-                ${dueStr}
-            </div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
-                #normal
-            </div>
-        </div>
-        `;
+        return t.status !== 'Done'; // Default 'list' view hides done
     });
     
+    // Group by Cycle
+    let cycleGroups = {
+        'unassigned': { title: 'No Cycle', tasks: [] }
+    };
+    
+    taskEngineDB.cyclez.forEach(c => {
+        cycleGroups[c.id] = { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [] };
+    });
+    
+    // Sort tasks into cycles (only top-level tasks)
+    displayTasks.filter(t => !t.parent_task_id).forEach(t => {
+        let cid = t.cycle_id;
+        if (cid && cycleGroups[cid]) {
+            cycleGroups[cid].tasks.push(t);
+        } else {
+            cycleGroups['unassigned'].tasks.push(t);
+        }
+    });
+    
+    // Render loop
+    for (const [cid, group] of Object.entries(cycleGroups)) {
+        if (group.tasks.length === 0 && cid === 'unassigned') continue;
+        
+        let headerColor = group.color || '#64748b';
+        html += `
+        <div style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">
+            <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">▼</div>
+            <div style="font-size: 14px; font-weight: bold; color: white;">${group.title}</div>
+            <div style="flex-grow: 1; height: 1px; background: rgba(255,255,255,0.1); margin-left: 10px;"></div>
+        </div>
+        <div id="te-cycle-group-${cid}" style="display: flex; flex-direction: column; gap: 4px;">
+        `;
+        
+        group.tasks.forEach(t => {
+            html += teBuildTaskRowHTML(t, false);
+            // Render children
+            let children = displayTasks.filter(child => child.parent_task_id === t.id);
+            if (children.length > 0) {
+                html += `<div id="te-subtasks-wrapper-${t.id}" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px;">`;
+                children.forEach(child => {
+                    html += teBuildTaskRowHTML(child, true);
+                });
+                html += `</div>`;
+            }
+        });
+        
+        html += `</div>`;
+    }
+    
     wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+}
+
+function teBuildTaskRowHTML(t, isChild) {
+    let statusColorClass = 'status-in-progress';
+    if (t.status === 'Done') statusColorClass = 'status-done';
+    if (t.status === 'Todo' || t.status === 'Backlog') statusColorClass = 'status-todo';
+    if (t.status === 'Blocked') statusColorClass = 'status-blocked';
+    
+    let meta = t.metadata || {};
+    let ownerInitials = 'UN';
+    let ownerBg = '#3b82f6';
+    if (meta.spoofed_assignee) {
+        ownerInitials = meta.spoofed_assignee.substring(0,2).toUpperCase();
+        ownerBg = '#10b981'; // Green for spoofed users
+    }
+
+    let dueStr = t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No Date';
+    let rowPadding = isChild ? '5px 15px' : '10px 15px';
+    let titleWeight = isChild ? '400' : '500';
+
+    return `
+    <div class="task-row" data-task-id="${t.id}" data-click="click_teOpenTaskContext" style="padding: ${rowPadding}; min-height: unset;">
+        <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+            <div class="task-checkbox" style="flex-shrink: 0;" data-click="click_teToggleTaskDone"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                <span style="color: white; font-weight: ${titleWeight}; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">${t.title}</span>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);" title="${meta.spoofed_assignee || 'Unassigned'}">${ownerInitials}</div>
+        </div>
+        <div>
+            <span class="status-pill ${statusColorClass}" data-click="click_teCycleStatus" style="position: relative; z-index: 2;">${t.status}</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
+            ${dueStr}
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
+            #normal
+        </div>
+    </div>
+    `;
 }
 
 window.teCreateNewTask = async function() {
@@ -187,8 +259,28 @@ window.teOpenTaskContext = function(taskId) {
     if (flyout) {
         const task = taskEngineDB.taskz.find(t => t.id === taskId);
         if (task) {
-            const flyoutTitle = flyout.querySelector('h2');
-            if (flyoutTitle) flyoutTitle.textContent = task.title;
+            const titleInput = document.getElementById('te-flyout-title');
+            if (titleInput) titleInput.value = task.title;
+            
+            const descInput = document.getElementById('te-flyout-description');
+            if (descInput) descInput.value = task.description || '';
+            
+            const assigneeSelect = document.getElementById('te-flyout-assignee');
+            if (assigneeSelect) {
+                let meta = task.metadata || {};
+                assigneeSelect.value = meta.spoofed_assignee || '';
+            }
+            
+            const cycleSelect = document.getElementById('te-flyout-cycle');
+            if (cycleSelect) {
+                // Populate options first
+                let opts = '<option value="">No Cycle</option>';
+                taskEngineDB.cyclez.forEach(c => {
+                    opts += `<option value="${c.id}">${c.title}</option>`;
+                });
+                cycleSelect.innerHTML = opts;
+                cycleSelect.value = task.cycle_id || '';
+            }
             
             teRenderSubtasks(taskId);
             teRenderActivityFeed(taskId);
@@ -199,23 +291,26 @@ window.teOpenTaskContext = function(taskId) {
 
 window.teRenderSubtasks = function(taskId) {
     const container = document.getElementById('te-flyout-subtasks-container');
+    const header = document.getElementById('te-flyout-subtasks-header');
     if (!container) return;
     
-    const task = taskEngineDB.taskz.find(t => t.id === taskId);
-    if (!task) return;
+    // Find relational subtasks
+    let subtasks = taskEngineDB.taskz.filter(t => t.parent_task_id === taskId);
     
-    let meta = task.metadata || {};
-    let subtasks = meta.subtasks || [];
+    if (header) {
+        let doneCount = subtasks.filter(t => t.status === 'Done').length;
+        header.textContent = `SUBTASKS (${doneCount}/${subtasks.length})`;
+    }
     
     let html = '';
-    subtasks.forEach((st, idx) => {
+    subtasks.forEach(st => {
         let isDone = st.status === 'Done';
         html += `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div data-click="click_teToggleSubtask" data-subtask-id="${idx}" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-input); cursor: pointer; display: flex; align-items: center; justify-content: center; background: ${isDone ? 'var(--primary-color)' : 'transparent'};">
+            <div data-click="click_teCycleStatus" data-task-id="${st.id}" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-input); cursor: pointer; display: flex; align-items: center; justify-content: center; background: ${isDone ? 'var(--primary-color)' : 'transparent'};">
                 ${isDone ? '<span style="color:white; font-size:10px;">✓</span>' : ''}
             </div>
-            <span style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; font-size: 13px;">${st.title}</span>
+            <span data-click="click_teOpenTaskContext" data-task-id="${st.id}" style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; font-size: 13px; cursor: pointer; flex-grow: 1;">${st.title}</span>
         </div>`;
     });
     
@@ -304,44 +399,118 @@ window.teAddSubtask = async function() {
     let input = document.getElementById('te-flyout-subtask-input');
     if (!input || !input.value.trim()) return;
     
-    let task = taskEngineDB.taskz.find(t => t.id === window.currentOpenTaskId);
-    if (!task) return;
-    
-    let meta = task.metadata || {};
-    let subtasks = meta.subtasks || [];
-    subtasks.push({ title: input.value.trim(), status: 'Todo' });
-    meta.subtasks = subtasks;
-    task.metadata = meta;
-    
+    let title = input.value.trim();
     input.value = '';
-    teRenderSubtasks(task.id);
     
     try {
-        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', task.id);
+        const { data, error } = await supabaseClient.from('taskz').insert([{
+            title: title,
+            status: 'Todo',
+            parent_task_id: window.currentOpenTaskId
+        }]).select();
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            taskEngineDB.taskz.push(data[0]);
+            teRenderSubtasks(window.currentOpenTaskId);
+            
+            // Re-render list to show the new subtask
+            let titleEl = document.getElementById('te-main-header-title');
+            if (titleEl && titleEl.textContent === 'All Tasks') {
+                teRenderTaskGrid();
+            }
+        }
     } catch(e) {
         console.error('Failed to add subtask', e);
     }
 };
 
-window.teToggleSubtask = async function(subtaskIdx) {
-    if (!window.currentOpenTaskId) return;
-    let task = taskEngineDB.taskz.find(t => t.id === window.currentOpenTaskId);
+window.teUpdateTaskTitle = async function(taskId, newTitle) {
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    if (task.title === newTitle) return; // no change
+    
+    task.title = newTitle;
+    teRenderTaskGrid();
+    teRenderSubtasks(task.parent_task_id); // In case it's a subtask being edited
+    
+    try {
+        await supabaseClient.from('taskz').update({ title: newTitle }).eq('id', taskId);
+    } catch(e) { console.error(e); }
+};
+
+window.teUpdateTaskDescription = async function(taskId, newDesc) {
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    if (task.description === newDesc) return;
+    
+    task.description = newDesc;
+    try {
+        await supabaseClient.from('taskz').update({ description: newDesc }).eq('id', taskId);
+    } catch(e) { console.error(e); }
+};
+
+window.teUpdateTaskAssignee = async function(taskId, assignee) {
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
     let meta = task.metadata || {};
-    let subtasks = meta.subtasks || [];
-    if (!subtasks[subtaskIdx]) return;
-    
-    subtasks[subtaskIdx].status = subtasks[subtaskIdx].status === 'Done' ? 'Todo' : 'Done';
+    meta.spoofed_assignee = assignee;
     task.metadata = meta;
     
-    teRenderSubtasks(task.id);
+    teRenderTaskGrid();
+    try {
+        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', taskId);
+    } catch(e) { console.error(e); }
+};
+
+window.teUpdateTaskCycle = async function(taskId, cycleId) {
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.cycle_id = cycleId || null;
+    teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', task.id);
-    } catch(e) {
-        console.error('Failed to toggle subtask', e);
-    }
+        await supabaseClient.from('taskz').update({ cycle_id: cycleId || null }).eq('id', taskId);
+    } catch(e) { console.error(e); }
+};
+
+window.teCreateCycle = async function() {
+    let title = prompt("Enter new cycle name:");
+    if (!title) return;
+    
+    try {
+        const { data, error } = await supabaseClient.from('cyclez').insert([{
+            title: title,
+            color_hex: '#10b981'
+        }]).select();
+        
+        if (error) throw error;
+        if (data && data.length > 0) {
+            taskEngineDB.cyclez.push(data[0]);
+            teRenderSidebar();
+        }
+    } catch(e) { console.error(e); }
+};
+
+window.teCreateTeam = async function() {
+    let name = prompt("Enter new team name:");
+    if (!name) return;
+    
+    try {
+        const { data, error } = await supabaseClient.from('teams').insert([{
+            name: name,
+            color_hex: '#8b5cf6'
+        }]).select();
+        
+        if (error) throw error;
+        if (data && data.length > 0) {
+            taskEngineDB.teams.push(data[0]);
+            teRenderSidebar();
+        }
+    } catch(e) { console.error(e); }
 };
 
 window.tePostComment = async function() {
@@ -395,9 +564,24 @@ window.teSwitchView = function(view, btnEl) {
     
     if (view === 'list') {
         header.style.display = 'grid';
-        teRenderTaskGrid();
+        teRenderTaskGrid('list');
         let title = document.getElementById('te-main-header-title');
         if (title) title.textContent = 'All Tasks';
+    } else if (view === 'my_tasks') {
+        header.style.display = 'grid';
+        teRenderTaskGrid('my_tasks');
+        let title = document.getElementById('te-main-header-title');
+        if (title) title.textContent = 'My Tasks';
+    } else if (view === 'blocked') {
+        header.style.display = 'grid';
+        teRenderTaskGrid('blocked');
+        let title = document.getElementById('te-main-header-title');
+        if (title) title.textContent = 'Blocked Tasks';
+    } else if (view === 'completed') {
+        header.style.display = 'grid';
+        teRenderTaskGrid('completed');
+        let title = document.getElementById('te-main-header-title');
+        if (title) title.textContent = 'Completed Tasks';
     } else if (view === 'inbox') {
         header.style.display = 'none';
         let title = document.getElementById('te-main-header-title');
