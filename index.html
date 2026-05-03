@@ -1370,10 +1370,7 @@
         <div class="top-controls">
             <button id="tipzBtn" class="top-action-btn" data-click="click_openTipzModal" style="border-color: #f97316; color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">💡 Tipz</button>
             <button id="themeToggle" class="top-action-btn" data-click="click_toggleTheme" style="border-color: #0ea5e9; color: #0ea5e9; box-shadow: 0 0 10px rgba(14, 165, 233, 0.15);">🌙 Dark</button>
-            <div style="display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 13px; margin-right: 15px; font-weight: 600;">
-                <span id="activeUserBadge" style="opacity: 0.8;">👤 System</span>
-            </div>
-            <button class="top-action-btn logout-btn" data-click="click_handleLogout">🚪 Logout</button>
+            <button id="activeUserBadge" class="top-action-btn logout-btn" data-click="click_handleLogout" style="min-width: 90px; white-space: nowrap;">🚪 Logout</button>
             <div class="terminal-wrapper" style="position: relative;">
                 <div id="termHeader" class="sys-good" data-click="click_toggleTerminal" style="width: 140px; min-width: 140px; max-width: 140px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
                     <span id="termStatusIcon" style="flex-grow: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right:10px; text-align: left;">🟢 System Online</span>
@@ -3739,7 +3736,7 @@
         let alias = email.split('@')[0];
         let capitalized = alias.charAt(0).toUpperCase() + alias.slice(1);
         let badge = document.getElementById('activeUserBadge');
-        if (badge) badge.innerText = `👤 ${capitalized}`;
+        if (badge) badge.innerText = `🚪 ${capitalized}`;
     }
 
     async function handleLogin() {
