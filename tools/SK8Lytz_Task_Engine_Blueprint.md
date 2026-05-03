@@ -88,11 +88,12 @@ Tasks will not just link you to another page—they will physically embed the re
 - **Recurring Cycle Counts:** A recurring monthly task called "Warehouse Cycle Count" is generated. When you open the task, it doesn't just say "go count stuff". The **Cycle Count Scanner UI** is physically embedded inside the task body. You use your phone camera to scan right there, and the task automatically marks itself as `Done` when the count is submitted.
 - **Low Stockz Triggers:** When a Retail Product hits its `minimum_stock_level`, the automation generates a "Reorder Low Stock" task. When you open this task, the **Low Stockz Report** data-grid is physically injected into the task description area, letting you review exactly what needs ordering without navigating away to the Inventory Hub.
 
-### Global Hooks
+### Neogleamz-Specific Operations (The ERP Command Center)
 
-- **Inventory (DATAZ/EDITZ):** If a product hits its `minimum_stock_level`, the system auto-spawns a High Priority task: *"Restock SKU-123"*. Clicking the task opens the EDITZ modal instantly.
-- **Production Manager:** Converting a Custom Order into a Work Order auto-generates a task timeline (Assembly -> QA -> Boxing).
-- **A.I. CFO:** The system schedules automated, recurring tasks on the 1st of every month to *"Review Previous Month True Profit Waterfall"*.
+- **FULFILLZ (Embedded Packing & Printing):** When a high-priority Custom Order comes in, a task is created to "Pack & Ship Order #1042". The task itself renders the `PACKERZ` checklist (with `[SCAN]` and `[IMG]` validation tokens) and embeds the `manualPrintModal` controls. You scan the final item, click "Print Label", it fires to your PrintNode API, and the task auto-completes.
+- **SOCIALZ (CRM Auto-Triage):** For managing sponsored skaters or key customers in the SOCIALZ Roster, you can set a rule: "Remind me to follow up with John Doe in 30 days." The task physically renders the `.skater-card` for John Doe (including his Lifetime Value metrics) inside the task body so you can reach out without losing context.
+- **IMPORTZ (Sandbox Reconciliation):** A recurring monthly task is generated for financial reconciliation. Inside that task, we physically embed the `sandboxDataModal`. You can drag-and-drop the Shopify CSV right into the task. The task intelligently verifies that the `customCommitFn` succeeded before it allows you to mark the task as `Done`.
+- **MAKERZ (Intelligent SOP Checklists):** When creating a task for an employee to "Build 50 Sub-Assemblies", the task pulls the specific JSON array from the `production_sops` table and renders the exact step-by-step checklist inside the task. By leveraging the `actual_minutes` tracker, the task records exact execution time for A.I. CFO labor calculations.
 
 ---
 
