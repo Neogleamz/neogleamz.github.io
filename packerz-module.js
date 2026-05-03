@@ -516,11 +516,11 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                       } else {
                           let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
                           if (isNativeVid) {
-                              mediaHtml += `<div class="media-thumb" style="position:relative; background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="vid"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div style="position:absolute; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:8px;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
+                              mediaHtml += `<div class="media-thumb grid-stack" style="background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="vid"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div class="overlay-center-flex" style="flex-direction:column; gap:8px; z-index:1;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
                           } else {
                               let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
                               if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
-                              mediaHtml += `<div class="media-thumb" style="position:relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" data-app-click="openMediaContext" data-url="${mediaUrl}" data-type="iframe"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`;
+                              mediaHtml += `<div class="media-thumb grid-stack" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" data-app-click="openMediaContext" data-url="${mediaUrl}" data-type="iframe"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`;
                           }
                       }
                   }
@@ -1489,7 +1489,8 @@ async function refreshSOPMediaGrid() {
         folders.forEach(folder => {
             const fullPath = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${folder.name}` : folder.name;
             const card = document.createElement('div');
-            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:110px; gap:6px; padding:8px; position:relative;';
+            card.classList.add('grid-stack');
+            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; cursor:pointer; transition:all 0.2s; min-height:110px; padding:8px;';
             card.ondragover = (e) => { e.preventDefault(); card.style.borderColor = '#10b981'; card.style.backgroundColor = 'rgba(16,185,129,0.1)'; };
             card.ondragleave = (e) => { card.style.borderColor = 'var(--border-color)'; card.style.backgroundColor = 'var(--bg-panel)'; };
             card.ondrop = (e) => sopHandleDrop(e, fullPath);
@@ -1497,13 +1498,21 @@ async function refreshSOPMediaGrid() {
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
 
             card.innerHTML = window.safeHTML ? window.safeHTML(`
-                <div style="font-size:36px;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">📁</div>
-                <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">${folder.name}</div>
-                <button data-click="click_deleteSOPMedia" data-path="${fullPath.replace(/"/g, '&quot;')}" data-folder="true" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
+                <div class="overlay-center-flex" style="flex-direction:column; gap:6px; z-index:0;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">
+                    <div style="font-size:36px;">📁</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;">${folder.name}</div>
+                </div>
+                <div class="top-right-action-flex" style="z-index:1;">
+                    <button data-click="click_deleteSOPMedia" data-path="${fullPath.replace(/"/g, '&quot;')}" data-folder="true" style="background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
+                </div>
             `) : `
-                <div style="font-size:36px;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">📁</div>
-                <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">${folder.name}</div>
-                <button data-click="click_deleteSOPMedia" data-path="${fullPath.replace(/"/g, '&quot;')}" data-folder="true" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
+                <div class="overlay-center-flex" style="flex-direction:column; gap:6px; z-index:0;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">
+                    <div style="font-size:36px;">📁</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;">${folder.name}</div>
+                </div>
+                <div class="top-right-action-flex" style="z-index:1;">
+                    <button data-click="click_deleteSOPMedia" data-path="${fullPath.replace(/"/g, '&quot;')}" data-folder="true" style="background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
+                </div>
             `;
             grid.appendChild(card);
         });
@@ -1517,8 +1526,9 @@ async function refreshSOPMediaGrid() {
             const sizeKb = file.metadata?.size ? Math.round(file.metadata.size / 1024) : '?';
             const card = document.createElement('div');
             card.draggable = true;
+            card.classList.add('grid-stack');
             card.ondragstart = (e) => sopHandleDragStart(e, filePath);
-            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; cursor:grab; transition:all 0.2s; display:flex; flex-direction:column; position:relative;';
+            card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; cursor:grab; transition:all 0.2s; display:flex; flex-direction:column;';
             card.onmouseover = () => { card.style.borderColor = '#0ea5e9'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
 
@@ -1527,11 +1537,15 @@ async function refreshSOPMediaGrid() {
                 : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; pointer-events:none;">📄</div><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`;
 
             card.innerHTML = window.safeHTML ? window.safeHTML(`
-                <div style="flex-grow:1; display:flex; flex-direction:column;" data-click="click_insertSOPToken" data-token="[IMG:${url.replace(/"/g, '&quot;')}]">${contentHtml}</div>
-                <button data-click="click_deleteSOPMedia" data-path="${filePath.replace(/"/g, '&quot;')}" data-folder="false" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
+                <div style="flex-grow:1; display:flex; flex-direction:column; z-index:0;" data-click="click_insertSOPToken" data-token="[IMG:${url.replace(/"/g, '&quot;')}]">${contentHtml}</div>
+                <div class="top-right-action-flex" style="z-index:1;">
+                    <button data-click="click_deleteSOPMedia" data-path="${filePath.replace(/"/g, '&quot;')}" data-folder="false" style="background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
+                </div>
             `) : `
-                <div style="flex-grow:1; display:flex; flex-direction:column;" data-click="click_insertSOPToken" data-token="[IMG:${url.replace(/"/g, '&quot;')}]">${contentHtml}</div>
-                <button data-click="click_deleteSOPMedia" data-path="${filePath.replace(/"/g, '&quot;')}" data-folder="false" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
+                <div style="flex-grow:1; display:flex; flex-direction:column; z-index:0;" data-click="click_insertSOPToken" data-token="[IMG:${url.replace(/"/g, '&quot;')}]">${contentHtml}</div>
+                <div class="top-right-action-flex" style="z-index:1;">
+                    <button data-click="click_deleteSOPMedia" data-path="${filePath.replace(/"/g, '&quot;')}" data-folder="false" style="background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
+                </div>
             `;
             grid.appendChild(card);
         });

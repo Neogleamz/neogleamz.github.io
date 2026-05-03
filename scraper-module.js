@@ -297,12 +297,18 @@ function _scraperParseAndXray(rawHtml, fileName) {
         el.setAttribute('data-xray-id', idCounter);
         el.style.outline = `2px dashed ${color}`;
         el.style.outlineOffset = '-1px';
-        el.style.position = 'relative';
+        el.classList.add('grid-stack');
+        const contentWrap = doc.createElement('div');
+        contentWrap.style.gridArea = '1 / 1';
+        while (el.firstChild) contentWrap.appendChild(el.firstChild);
+        el.appendChild(contentWrap);
 
         const badge = doc.createElement('span');
-        badge.textContent = `#${idCounter}`;
-        badge.style.cssText = `position:absolute;top:-2px;left:-2px;background:${color};color:#fff;font-size:9px;font-weight:900;padding:1px 4px;border-radius:0 0 4px 0;z-index:9999;line-height:1.2;pointer-events:none;font-family:monospace;`;
-        el.insertBefore(badge, el.firstChild);
+        badge.className = 'top-left-action-flex';
+        badge.style.gridArea = '1 / 1';
+        badge.style.zIndex = '9999';
+        badge.innerHTML = `<span style="background:${color}; color:#fff; font-size:9px; font-weight:900; padding:1px 4px; border-radius:0 0 4px 0; line-height:1.2; font-family:monospace;">#${idCounter}</span>`;
+        el.appendChild(badge);
 
         _scraperXrayIndex.push({ id: idCounter, tag, classes: el.className || '' });
         idCounter++;

@@ -465,13 +465,13 @@ function printReorderReport() {
                         let isSub = !!isSubassemblyDB[s];
                         let icn = is3D ? "🖨️ " : (isSub ? "⚙️ " : "📦 ");
                         displayName = icn + s;
-                        thtml += `<li style='margin:5px 0; font-size:14px; padding-left:25px; position:relative;'><span style='position:absolute; left:0; top:-5px; font-size:18px; color:#cbd5e1;'>⌞</span><strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}`;
+                        thtml += `<li style='margin:5px 0; font-size:14px; display:flex; align-items:flex-start; gap:8px;'><span style='width:12px; flex-shrink:0; font-size:18px; color:#cbd5e1; line-height:1; margin-top:-2px;'>⌞</span><div style="flex:1;"><strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}`;
                         if (!ok) thtml += buildTree(s, totalReq - stock);
                         thtml += `</li>`;
                     } else {
                         let c = catalogCache[subK];
                         displayName = c ? (c.neoName || c.itemName) : subK;
-                        thtml += `<li style='margin:5px 0; font-size:14px; padding-left:25px; position:relative;'><span style='position:absolute; left:0; top:-5px; font-size:18px; color:#cbd5e1;'>⌞</span>🧵 <strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}</li>`;
+                        thtml += `<li style='margin:5px 0; font-size:14px; display:flex; align-items:flex-start; gap:8px;'><span style='width:12px; flex-shrink:0; font-size:18px; color:#cbd5e1; line-height:1; margin-top:-2px;'>⌞</span><div style="flex:1;">🧵 <strong>${displayName}</strong> <span style="color:#64748b; font-size:12px;">(Req: ${totalReq.toFixed(2).replace(/\.?0+$/,'')} | On Hand: ${stock.toFixed(2).replace(/\.?0+$/,'')})</span> ${statStr}</div></li>`;
                     }
                 });
                 thtml += "</ul>";
