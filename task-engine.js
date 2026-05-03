@@ -189,27 +189,30 @@ function teRenderTaskGrid(filter = null) {
             let meta = t.metadata || {};
             let assignee = meta.spoofed_assignee || 'UNASSIGNED';
             
-            // 1. Unassigned globally (needs triage)
-            if (assignee === 'UNASSIGNED' || assignee.trim() === '') return true;
-            
-            // 2. Assigned directly to me
-            if (assignee === currentUser) return true;
-            
-            // 3. Assigned to a team I belong to
-            if (meta.assigned_team_id) {
-                let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
-                if (team && team.members && team.members.includes(currentUser)) return true;
+            if (assignee === 'UNASSIGNED' || assignee.trim() === '') {
+                if (meta.assigned_team_id) {
+                    let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
+                    if (team && team.members && team.members.includes(currentUser)) return true;
+                    return false; // unassigned but belongs to another team
+                }
+                return true; // globally unassigned
             }
             
-            // If it's explicitly assigned to someone else (e.g. Andy), and I am Chris, hide it from my Inbox!
+            if (assignee === currentUser) return true;
             return false;
         }
         if (filter === 'my_tasks') {
             let meta = t.metadata || {};
-            if (meta.spoofed_assignee === currentUser) return true;
+            let assignee = meta.spoofed_assignee || 'UNASSIGNED';
+            
+            if (assignee === currentUser) return true;
+            
             if (meta.assigned_team_id) {
                 let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
-                if (team && team.members && team.members.includes(currentUser)) return true;
+                if (team && team.members && team.members.includes(currentUser)) {
+                    // Include team tasks only if they are actively claimed by someone (not unassigned triage)
+                    if (assignee !== 'UNASSIGNED' && assignee.trim() !== '') return true;
+                }
             }
             return false;
         }
