@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Features & Refactors
+- **Phase 6 (Automations & Kanban Ecosystem)**: Built a dynamic CSS Grid Calendar matrix, integrated `SortableJS` for buttery smooth Kanban drag-and-drop operations, and deployed the Deep Context Flyout Automations dropdown to instantly spawn cross-module work orders (Batchez, Layerz).
 - **Phase 5 (Embedded UI Payloads)**: Wired up the cross-module hooks and implemented the Supabase data pipeline for the Task Engine (dynamic sidebar, caching, `task_activity` logging, and status mutation logic).
 - **Phase 4 (Deep UX Synthesis & Command Palette)**: Implemented global Cmd+K palette and Asana/Monday-style grid architectures for the Task Engine Command Center.
 - **Phase 3 (The UI Takeover)**: Built the fullscreen glassmorphism modal, the split-pane layout, and the slide-out Context Panel (Anti-Modal) for the Task Engine Command Center.
