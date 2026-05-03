@@ -6,6 +6,7 @@
 - **Task Engine Archive**: Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view.
 - **Task Sorting & Prioritization**: Implement the ability to sort tasks globally and prioritize them (e.g., via drag-and-drop) within specific cycles.
 - **List View Column Sorting**: Enable dynamic sorting by clicking on any column header within the List/Row view (Owner, Status, Timeline, Priority).
+- **Task Timelines & Calendar Sync**: Implement date picking/timelines for individual tasks and map them to render dynamically on the Calendar view.
 ## [1.0.24] - 2026-05-02
 ### Features & Refactors
 - **Phase 7 (Communication & Inbox)**: Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
