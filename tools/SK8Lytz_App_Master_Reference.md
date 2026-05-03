@@ -116,9 +116,22 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **Dual-Card Architecture:** When building inline hardware camera scanners (like the Cycle Count engine), you must NEVER use abrasive full-screen blackout modals. You must deploy a responsive `flex-wrap` layout (`align-items: stretch`) where the Primary Form and the Scanner Card lock into a rigid side-by-side array natively.
 * **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#barcode-reader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
 
+### L. Hardened Layout Patterns (Zero-Trust)
+* **The Stacking Pattern**: To eliminate `position: absolute` for layered UI (badges, overlays, buttons), use the project-standard `.grid-stack` architecture:
+  ```css
+  .grid-stack { display: grid; }
+  .grid-stack > * { grid-area: 1 / 1; }
+  ```
+* **Utility Overlays**:
+  - `.top-right-action-flex`: Absolute centering for top-right corner actions.
+  - `.top-left-action-flex`: Absolute centering for top-left corner actions (badges).
+  - `.overlay-center-flex`: Full centering overlay for media play buttons or status icons.
+* **Dropdown Anchoring**: Utility classes like `.task-dropdown-menu` are used to standardize absolute coordinate anchoring for menus while keeping logic clean of inline `style` tags.
+
 ---
 
 ## 🗄️ 3. Database Schemas (Supabase)
+
 Known verified tables currently in active use across the JavaScript modules:
 
 ### Core Ledgers
