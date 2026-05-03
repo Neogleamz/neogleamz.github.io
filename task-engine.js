@@ -223,10 +223,162 @@ window.teSwitchView = function(view, btnEl) {
         teRenderTaskGrid();
     } else if (view === 'board') {
         header.style.display = 'none';
-        wrapper.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);"><h3>Kanban Board</h3><p>Live payloads fetched: ${taskEngineDB.taskz.length} tasks. CSS Grid scaffold pending Phase 6.</p></div>`;
+        
+        let boardHTML = `
+            <div style="display: flex; gap: 20px; height: 100%; align-items: stretch; overflow-x: auto; padding-bottom: 20px;">
+                ${['Todo', 'In Progress', 'Blocked', 'Done'].map(status => {
+                    let tasksHtml = taskEngineDB.taskz.filter(t => t.status === status).map(t => {
+                        let color = status === 'Done' ? '#10b981' : (status === 'Blocked' ? '#ef4444' : (status === 'Todo' ? '#64748b' : '#3b82f6'));
+                        return `
+                        <div class="kanban-card" data-task-id="${t.id}" style="background: var(--bg-container); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-left: 3px solid ${color};">
+                            <div style="font-weight: 500; font-size: 14px; margin-bottom: 8px; color: white;">${t.title}</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: var(--text-muted);">⏱️ ${t.estimated_minutes || 0}m</span>
+                                <span class="status-pill status-${status.toLowerCase().replace(' ', '-')}" style="font-size: 10px; padding: 2px 6px;">${status}</span>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    
+                    return `
+                    <div style="flex: 1; min-width: 250px; background: rgba(0,0,0,0.2); border-radius: 12px; display: flex; flex-direction: column;">
+                        <div style="padding: 15px; font-weight: bold; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; font-size: 12px;">${status}</div>
+                        <div class="kanban-column" data-status="${status}" style="flex: 1; padding: 15px; overflow-y: auto; min-height: 200px;">
+                            ${tasksHtml}
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+        `;
+        wrapper.innerHTML = window.safeHTML ? window.safeHTML(boardHTML) : boardHTML;
+        
+        // Initialize SortableJS
+        if (typeof Sortable !== 'undefined') {
+            document.querySelectorAll('.kanban-column').forEach(col => {
+                new Sortable(col, {
+                    group: 'kanban',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: async function(evt) {
+                        const itemEl = evt.item;
+                        const taskId = itemEl.getAttribute('data-task-id');
+                        const newStatus = evt.to.getAttribute('data-status');
+                        const oldStatus = evt.from.getAttribute('data-status');
+                        
+                        if (newStatus !== oldStatus) {
+                            let task = taskEngineDB.taskz.find(t => t.id === taskId);
+                            if (task) task.status = newStatus;
+                            
+                            const pill = itemEl.querySelector('.status-pill');
+                            if (pill) {
+                                pill.textContent = newStatus;
+                                pill.className = `status-pill status-${newStatus.toLowerCase().replace(' ', '-')}`;
+                            }
+                            
+                            try {
+                                await supabaseClient.from('taskz').update({ status: newStatus }).eq('id', taskId);
+                                await supabaseClient.from('task_activity').insert([{
+                                    task_id: taskId,
+                                    actor_type: 'System',
+                                    action_text: `Dragged to ${newStatus}`
+                                }]);
+                            } catch(e) { console.error('[TaskEngine] Sortable update failed', e); }
+                        }
+                    }
+                });
+            });
+        }
     } else if (view === 'calendar') {
         header.style.display = 'none';
-        wrapper.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);"><h3>Calendar View</h3><p>Live payloads fetched: ${taskEngineDB.taskz.length} tasks. Calendar scaffold pending Phase 6.</p></div>`;
+        
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        let calendarHtml = `
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                ${days.map(d => `<div style="padding: 10px; text-align: center; font-weight: bold; background: var(--bg-panel); color: var(--text-muted); font-size: 12px;">${d}</div>`).join('')}
+        `;
+        
+        let today = new Date();
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+        let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        let offset = firstDay === 0 ? 6 : firstDay - 1; // Mon = 0
+        
+        for (let i = 0; i < offset; i++) {
+            calendarHtml += `<div style="background: rgba(0,0,0,0.2); min-height: 100px;"></div>`;
+        }
+        
+        for (let i = 1; i <= daysInMonth; i++) {
+            let dayTasks = taskEngineDB.taskz.filter(t => {
+                if (!t.due_date) return false;
+                let d = new Date(t.due_date);
+                return d.getDate() === i && d.getMonth() === currentMonth;
+            });
+            
+            let tasksHtml = dayTasks.map(t => `<div style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;" onclick="window.teOpenTaskContext('${t.id}')">${t.title}</div>`).join('');
+            
+            calendarHtml += `
+                <div style="background: var(--bg-container); min-height: 100px; padding: 10px; border: 1px solid rgba(0,0,0,0.5);">
+                    <div style="font-size: 12px; font-weight: bold; color: ${i === today.getDate() ? 'white' : 'var(--text-muted)'};">${i}</div>
+                    ${tasksHtml}
+                </div>
+            `;
+        }
+        
+        calendarHtml += `</div>`;
+        wrapper.innerHTML = window.safeHTML ? window.safeHTML(calendarHtml) : calendarHtml;
+    }
+};
+
+window.teToggleTemplateMenu = function() {
+    const menu = document.getElementById('te-template-dropdown');
+    if (menu) {
+        menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+    }
+};
+
+window.teSpawnSOP = async function(type) {
+    if (window.teToggleTemplateMenu) window.teToggleTemplateMenu(); // Close menu
+    let title = 'Automated Workflow';
+    let est = 0;
+    
+    if (type === 'batchez') {
+        title = 'SOP: Batchez Production Run';
+        est = 120;
+    } else if (type === 'print') {
+        title = 'SOP: Layerz 3D Print Queue';
+        est = 240;
+    }
+    
+    try {
+        const { data, error } = await supabaseClient.from('taskz').insert([{
+            title: title,
+            status: 'Todo',
+            estimated_minutes: est
+        }]).select();
+        
+        if (!error && data && data.length > 0) {
+            taskEngineDB.taskz.unshift(data[0]);
+            
+            // Re-render currently active view
+            const activeBtn = document.querySelector('.task-view-btn.active');
+            if (activeBtn && window.teSwitchView) {
+                let viewType = 'list';
+                if (activeBtn.textContent.includes('Board')) viewType = 'board';
+                if (activeBtn.textContent.includes('Calendar')) viewType = 'calendar';
+                window.teSwitchView(viewType, activeBtn);
+            } else {
+                teRenderTaskGrid();
+            }
+            
+            // Invoke Cross-Module Modals via global window context
+            if (type === 'batchez' && typeof window.openNewWOModal_create === 'function') {
+                window.openNewWOModal_create();
+            } else if (type === 'print' && typeof window.openManualPrintModal === 'function') {
+                window.openManualPrintModal();
+            }
+        }
+    } catch(e) {
+        console.error('[TaskEngine] SOP Auto-Spawn Failed:', e);
     }
 };
 

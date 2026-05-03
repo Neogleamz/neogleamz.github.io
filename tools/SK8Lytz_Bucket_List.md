@@ -41,7 +41,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `feat/task-engine-p3` : **Phase 3 (The UI Takeover)** - Build the fullscreen glassmorphism modal, the split-pane layout, and the slide-out Context Panel (Anti-Modal). *(Shipped in v.2026.05.02.2102)*
 - [🚀] `feat/task-engine-p4` : **Phase 4 (Deep UX Synthesis & Command Palette)** - Implemented global Cmd+K palette and Asana/Monday-style grid architectures.
 - [🚀] `feat/task-engine-p5` : **Phase 5 (Embedded UI Payloads)** - Wire up the cross-module hooks (embedding Cycle Counts and Low Stockz reports natively inside tasks).
-- [ ] `feat/task-engine-p6` : **Phase 6 (Automations & Templates)** - Build the logic that auto-spawns SOP tasks and dynamically generates children workflows.
+- [x] `feat/task-engine-p6` : **Phase 6 (Automations & Templates)** - Build the logic that auto-spawns SOP tasks and dynamically generates children workflows. [🤖 Gemini 3.1 Pro] [🧠 15k / 20k] [💸 $0.05 / $0.06]
 - [ ] `feat/task-engine-p7` : **Phase 7 (Communication & Inbox)** - Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
 
 **Other Ideas**
