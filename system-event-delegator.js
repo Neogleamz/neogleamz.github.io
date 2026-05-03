@@ -237,6 +237,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teBulkRestore':
                     if(typeof window.teBulkRestore==='function') window.teBulkRestore();
                     break;
+                case 'click_teBulkStatusDropdown':
+                    if(typeof window.teBulkStatusDropdown==='function') window.teBulkStatusDropdown(target);
+                    break;
                 case 'click_teBulkDelete':
                     if(typeof window.teBulkDelete==='function') window.teBulkDelete();
                     break;
@@ -948,6 +951,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(typeof window.teUpdateTaskCycle==='function' && window.currentOpenTaskId) {
                         window.teUpdateTaskCycle(window.currentOpenTaskId, el.value);
                     }
+                    break;
+                case 'change_teToggleAllMain':
+                    if (typeof window.teToggleAllMain === 'function') window.teToggleAllMain();
+                    break;
+                case 'change_teUpdateMainSelection':
+                    if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
                     break;
                 case 'change_teToggleAllArchive': {
                     const archiveCbs = document.querySelectorAll('.te-archive-checkbox');
