@@ -30,8 +30,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-- [x] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables. [🤖 Gemini 3.1 Pro] [🧠 20k / 10k] [💸 $0.05 / $0.02]
-
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ---
@@ -269,3 +267,4 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 *(Epic: The Task Engine)*
 - [🚀] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrated Supabase Auth for Chris, Andy, and Tyson, and natively built the identity capture logic and UI header rendering. *(Shipped in v.2026.05.02.2013)*
+- [🚀] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables. [🤖 Gemini 3.1 Pro] [🧠 20k / 10k] [💸 $0.05 / $0.02]
