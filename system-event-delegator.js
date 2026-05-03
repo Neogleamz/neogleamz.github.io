@@ -46,6 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_handleLogout':
                     handleLogout();
                     break;
+                case 'click_openTaskPlanner':
+                    if (window.openTaskPlanner) window.openTaskPlanner();
+                    break;
+                case 'click_closeTaskPlanner':
+                    if (window.closeTaskPlanner) window.closeTaskPlanner();
+                    break;
+                case 'click_openTaskContext':
+                    if (window.openTaskContext) window.openTaskContext();
+                    break;
+                case 'click_closeTaskContext':
+                    if (window.closeTaskContext) window.closeTaskContext();
+                    break;
                 case 'click_toggleTerminal':
                     toggleTerminal();
                     break;
