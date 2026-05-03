@@ -190,6 +190,85 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openMultiBatchModal_3d':
                     window.openMultiBatchModal('3d');
                     break;
+                case 'click_teSwitchView_inbox':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('inbox', el);
+                    break;
+                case 'click_teSwitchView_my_tasks':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('my_tasks', el);
+                    break;
+                case 'click_teSwitchView_blocked':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('blocked', el);
+                    break;
+                case 'click_teSwitchView_completed':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('completed', el);
+                    break;
+                case 'click_teCreateCycle':
+                    if(typeof window.teCreateCycle==='function') window.teCreateCycle();
+                    break;
+                case 'click_teCreateTeam':
+                    if(typeof window.teCreateTeam==='function') window.teCreateTeam();
+                    break;
+                case 'click_teDeleteCycle':
+                    event.stopPropagation();
+                    if(typeof window.teDeleteCycle==='function') window.teDeleteCycle(el.getAttribute('data-cycle-id'));
+                    break;
+                case 'click_teDeleteTeam':
+                    event.stopPropagation();
+                    if(typeof window.teDeleteTeam==='function') window.teDeleteTeam(el.getAttribute('data-team-id'));
+                    break;
+                case 'click_teToggleTeamMembers':
+                    {
+                        const teamId = el.getAttribute('data-team-id');
+                        const memDiv = document.getElementById('te-team-members-' + teamId);
+                        if (memDiv) {
+                            memDiv.style.display = memDiv.style.display === 'none' ? 'flex' : 'none';
+                        }
+                    }
+                    break;
+                case 'click_teAddTeamMember':
+                    event.stopPropagation();
+                    if(typeof window.teAddTeamMember==='function') window.teAddTeamMember(el.getAttribute('data-team-id'));
+                    break;
+                case 'click_teRemoveTeamMember':
+                    event.stopPropagation();
+                    if(typeof window.teRemoveTeamMember==='function') window.teRemoveTeamMember(el.getAttribute('data-team-id'), el.getAttribute('data-member-name'));
+                    break;
+                case 'click_teToggleCycleGroup':
+                    {
+                        const cycleId = el.getAttribute('data-cycle-id');
+                        const groupEl = document.getElementById('te-cycle-group-' + cycleId);
+                        if (groupEl) {
+                            if (groupEl.style.display === 'none') {
+                                groupEl.style.display = 'flex';
+                                el.textContent = '▼';
+                            } else {
+                                groupEl.style.display = 'none';
+                                el.textContent = '▶';
+                            }
+                        }
+                    }
+                    break;
+                case 'click_teToggleTaskDone':
+                    event.stopPropagation();
+                    if(typeof window.teCycleStatus==='function') window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                    break;
+                case 'click_teToggleTaskDoneInFlyout':
+                    if(typeof window.teCycleStatus==='function' && window.currentOpenTaskId) {
+                        window.teCycleStatus(window.currentOpenTaskId);
+                    }
+                    break;
+                case 'click_teAddSubtask':
+                    if(typeof window.teAddSubtask==='function') window.teAddSubtask();
+                    break;
+                case 'click_teToggleSubtask':
+                    if(typeof window.teToggleSubtask==='function') window.teToggleSubtask(el.getAttribute('data-subtask-id'));
+                    break;
+                case 'click_tePostComment':
+                    if(typeof window.tePostComment==='function') window.tePostComment();
+                    break;
+                case 'click_window_openSOPMasterModal_bat':
+                    window.openSOPMasterModal('batchez');
+                    break;
                 case 'click_window_openSOPMasterModal_3d':
                     window.openSOPMasterModal('3d');
                     break;
@@ -836,6 +915,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_window_updateCcMngrStock':
                     window.updateCcMngrStock();
                     break;
+                case 'change_teAssignUser':
+                    if(typeof window.teUpdateTaskAssignee==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskAssignee(window.currentOpenTaskId, el.value);
+                    }
+                    break;
+                case 'change_teAssignCycle':
+                    if(typeof window.teUpdateTaskCycle==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskCycle(window.currentOpenTaskId, el.value);
+                    }
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
@@ -974,6 +1063,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'blur_window_handleCcMngrTelemetryEd_19':
                     window.handleCcMngrTelemetryEdit(el, 5);
                     break;
+                case 'blur_teSaveTitle':
+                    if(typeof window.teUpdateTaskTitle==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskTitle(window.currentOpenTaskId, el.value);
+                    }
+                    break;
+                case 'blur_teSaveDescription':
+                    if(typeof window.teUpdateTaskDescription==='function' && window.currentOpenTaskId) {
+                        window.teUpdateTaskDescription(window.currentOpenTaskId, el.value);
+                    }
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
@@ -992,6 +1091,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleFileSelectTest_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
+                    break;
+                case 'change_teChangeIdentity':
+                    if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
                     break;
             }
         } catch (error) {
