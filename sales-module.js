@@ -542,6 +542,10 @@ function sortSales(c) { if(isResizing) return; currentSalesSort = { column: c, d
 
 function renderSalesTable() {
     try {
+    if (window.salesRenderEventController) window.salesRenderEventController.abort();
+    window.salesRenderEventController = new AbortController();
+    const signal = window.salesRenderEventController.signal;
+
     let wrap = document.getElementById('salesTableWrap');
     if(!wrap) return;
 
@@ -875,7 +879,7 @@ function renderSalesTable() {
             th.addEventListener('click', () => {
                 let col = th.getAttribute('data-sortcol');
                 if (col) sortSales(col);
-            });
+            }, { signal });
         });
 
         if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
@@ -1085,6 +1089,10 @@ function initMathSimulator() {
 }
 
 function renderSimulatorOrder(orderId) {
+    if (window.simEventController) window.simEventController.abort();
+    window.simEventController = new AbortController();
+    const signal = window.simEventController.signal;
+
     let sandbox = document.getElementById('math-simulator-sandbox');
     let consoleDiv = document.getElementById('math-simulator-console');
     
@@ -1191,7 +1199,7 @@ function renderSimulatorOrder(orderId) {
             let idx = parseInt(e.target.getAttribute('data-idx'));
             window.currentSimPayload[idx].transaction_type = e.target.value;
             recomputeSimulator();
-        });
+        }, { signal });
     });
     
     recomputeSimulator();
@@ -1333,6 +1341,10 @@ function actualNetSort(col) {
 }
 
 function renderActualNetList() {
+    if (window.actualNetEventController) window.actualNetEventController.abort();
+    window.actualNetEventController = new AbortController();
+    const signal = window.actualNetEventController.signal;
+
     let container = document.getElementById('actualNetContainer');
     if(!container) return;
     
@@ -1472,6 +1484,6 @@ function renderActualNetList() {
                 child.style.display = 'none';
                 icon.innerHTML = '▶';
             }
-        });
+        }, { signal });
     });
 }

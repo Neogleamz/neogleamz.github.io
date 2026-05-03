@@ -189,12 +189,11 @@ function initFabricCanvas() {
     fCanvas.on('object:added', (e) => { saveLabelzHistory(); });
     fCanvas.on('object:removed', (e) => { saveLabelzHistory(); });
 
-    // Global copy/paste & keyboard listener injection (only registers once per session)
-    if (!window.lblzKeyListenerBound) {
-        window.addEventListener('paste', handleLabelzPaste);
-        window.addEventListener('keydown', handleLabelzKeyboard);
-        window.lblzKeyListenerBound = true;
-    }
+    // Global copy/paste & keyboard listener cleanup and injection
+    window.removeEventListener('paste', handleLabelzPaste);
+    window.removeEventListener('keydown', handleLabelzKeyboard);
+    window.addEventListener('paste', handleLabelzPaste);
+    window.addEventListener('keydown', handleLabelzKeyboard);
 }
 
 function handleLabelzKeyboard(e) {

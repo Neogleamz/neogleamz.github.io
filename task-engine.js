@@ -693,11 +693,17 @@ window.teOpenStatusDropdown = function(taskId, element) {
         dropdown.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
         document.body.appendChild(dropdown);
         
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !e.target.closest('[data-click="click_teOpenStatusDropdown"]') && !e.target.closest('[data-click="click_teBulkStatusDropdown"]')) {
-                dropdown.style.display = 'none';
-            }
-        });
+        if (!window._teHandleDropdownClickOut) {
+            window._teHandleDropdownClickOut = function(e) {
+                const dd = document.getElementById('te-status-dropdown');
+                if (!dd) return;
+                if (!dd.contains(e.target) && !e.target.closest('[data-click="click_teOpenStatusDropdown"]') && !e.target.closest('[data-click="click_teBulkStatusDropdown"]')) {
+                    dd.style.display = 'none';
+                }
+            };
+        }
+        document.removeEventListener('click', window._teHandleDropdownClickOut);
+        document.addEventListener('click', window._teHandleDropdownClickOut);
     }
 
     if (dropdown.style.display === 'flex' && dropdown.getAttribute('data-task-id') === taskId) {
@@ -1451,7 +1457,6 @@ window.openTaskPlanner = function() {
     const modal = document.getElementById('taskPlannerModal');
     if (modal) {
         modal.style.display = 'flex';
-        console.log('[TaskEngine] Modal Opened.');
     }
 };
 
@@ -1460,7 +1465,6 @@ window.closeTaskPlanner = function() {
     const modal = document.getElementById('taskPlannerModal');
     if (modal) {
         modal.style.display = 'none';
-        console.log('[TaskEngine] Modal Closed.');
     }
 };
 
