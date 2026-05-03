@@ -6,6 +6,7 @@
 let isTaskPlannerOpen = false;
 
 let taskEngineDB = { taskz: [], cyclez: [], teams: [], comments: [], activity: [] };
+window.teCurrentSort = { col: null, dir: 'asc' };
 
 window.initTaskEngine = async function() {
     console.log('[TaskEngine] Initialization check complete.');
@@ -148,6 +149,11 @@ function teRenderSidebar() {
     }
 }
 
+/**
+ * Renders the main task list grid view based on the current filter criteria,
+ * grouping items by cycle and recursively constructing parent/child DOM relationships.
+ * @param {string|null} filter - The string identifier for the active filter view.
+ */
 function teRenderTaskGrid(filter = null) {
     if (!filter) {
         let activeNav = document.querySelector('.task-nav-link.active');
@@ -259,6 +265,37 @@ function teRenderTaskGrid(filter = null) {
         }
     });
     
+    // Apply sorting to cycleGroups
+    for (const [cid, group] of Object.entries(cycleGroups)) {
+        group.tasks.sort((a, b) => {
+            if (window.teCurrentSort && window.teCurrentSort.col) {
+                let dir = window.teCurrentSort.dir === 'asc' ? 1 : -1;
+                let col = window.teCurrentSort.col;
+                let valA, valB;
+                if (col === 'title') {
+                    valA = (a.title || '').toLowerCase();
+                    valB = (b.title || '').toLowerCase();
+                } else if (col === 'owner') {
+                    valA = ((a.metadata && a.metadata.spoofed_assignee) || '').toLowerCase();
+                    valB = ((b.metadata && b.metadata.spoofed_assignee) || '').toLowerCase();
+                } else if (col === 'status') {
+                    valA = (a.status || '').toLowerCase();
+                    valB = (b.status || '').toLowerCase();
+                } else if (col === 'timeline') {
+                    valA = a.due_date ? new Date(a.due_date).getTime() : 0;
+                    valB = b.due_date ? new Date(b.due_date).getTime() : 0;
+                }
+                if (valA < valB) return -1 * dir;
+                if (valA > valB) return 1 * dir;
+                return 0;
+            } else {
+                let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
+                let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
+                return aSort - bSort;
+            }
+        });
+    }
+    
     // Render loop
     for (const [cid, group] of Object.entries(cycleGroups)) {
         if (group.tasks.length === 0) continue;
@@ -270,26 +307,103 @@ function teRenderTaskGrid(filter = null) {
             <div style="font-size: 14px; font-weight: bold; color: white;">${group.title}</div>
             <div style="flex-grow: 1; height: 1px; background: rgba(255,255,255,0.1); margin-left: 10px;"></div>
         </div>
-        <div id="te-cycle-group-${cid}" style="display: flex; flex-direction: column; gap: 4px;">
+        <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: flex; flex-direction: column; gap: 4px;">
         `;
         
         group.tasks.forEach(t => {
+            html += `<div class="te-list-sortable-item" data-id="${t.id}" style="display: flex; flex-direction: column;">`;
             html += teBuildTaskRowHTML(t, false);
             // Render children
             let children = displayTasks.filter(child => child.parent_task_id === t.id);
             if (children.length > 0) {
-                html += `<div id="te-subtasks-wrapper-${t.id}" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px;">`;
+                html += `<div id="te-subtasks-wrapper-${t.id}" class="te-sortable-subtask-list" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px;">`;
+                children.sort((a,b) => {
+                    let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
+                    let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
+                    return aSort - bSort;
+                });
                 children.forEach(child => {
-                    html += teBuildTaskRowHTML(child, true);
+                    html += `<div class="te-list-sortable-child" data-id="${child.id}">` + teBuildTaskRowHTML(child, true) + `</div>`;
                 });
                 html += `</div>`;
             }
+            html += `</div>`;
         });
         
         html += `</div>`;
     }
     
     wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    
+    // Initialize SortableJS
+    if (typeof Sortable !== 'undefined' && (!window.teCurrentSort || !window.teCurrentSort.col)) {
+        document.querySelectorAll('.te-sortable-cycle-list').forEach(listEl => {
+            new Sortable(listEl, {
+                group: 'list-view-tasks',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                handle: '.task-row',
+                onEnd: async function(evt) {
+                    if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
+                    let childDivs = Array.from(evt.to.children);
+                    let updates = [];
+                    for (let i = 0; i < childDivs.length; i++) {
+                        let div = childDivs[i];
+                        let tId = div.getAttribute('data-id');
+                        if (!tId) continue;
+                        let task = taskEngineDB.taskz.find(tk => tk.id === tId);
+                        if (task) {
+                            let meta = task.metadata || {};
+                            meta.sort_order = i;
+                            task.metadata = meta;
+                            let toCycleId = evt.to.id.replace('te-cycle-group-', '');
+                            if (toCycleId === 'unassigned') toCycleId = null;
+                            if (task.cycle_id !== toCycleId) task.cycle_id = toCycleId;
+                            updates.push({ id: tId, metadata: meta, cycle_id: toCycleId });
+                        }
+                    }
+                    if (updates.length > 0) {
+                        try {
+                            const promises = updates.map(u => supabaseClient.from('taskz').update({ metadata: u.metadata, cycle_id: u.cycle_id }).eq('id', u.id));
+                            await Promise.all(promises);
+                        } catch(e) { console.error('[TaskEngine] Sortable update failed', e); }
+                    }
+                }
+            });
+        });
+        
+        document.querySelectorAll('.te-sortable-subtask-list').forEach(listEl => {
+            new Sortable(listEl, {
+                group: 'list-view-subtasks',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                handle: '.task-row',
+                onEnd: async function(evt) {
+                    if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
+                    let childDivs = Array.from(evt.to.children);
+                    let updates = [];
+                    for (let i = 0; i < childDivs.length; i++) {
+                        let div = childDivs[i];
+                        let tId = div.getAttribute('data-id');
+                        if (!tId) continue;
+                        let task = taskEngineDB.taskz.find(tk => tk.id === tId);
+                        if (task) {
+                            let meta = task.metadata || {};
+                            meta.sort_order = i;
+                            task.metadata = meta;
+                            updates.push({ id: tId, metadata: meta });
+                        }
+                    }
+                    if (updates.length > 0) {
+                        try {
+                            const promises = updates.map(u => supabaseClient.from('taskz').update({ metadata: u.metadata }).eq('id', u.id));
+                            await Promise.all(promises);
+                        } catch(e) { console.error('[TaskEngine] Sortable subtask update failed', e); }
+                    }
+                }
+            });
+        });
+    }
 }
 
 function teBuildTaskRowHTML(t, isChild) {
@@ -1548,6 +1662,32 @@ window.teUpdateMainSelection = function() {
         const selectAll = document.getElementById('te-main-select-all');
         if (selectAll) selectAll.checked = false;
     }
+};
+
+window.teSortColumn = function(colName) {
+    if (window.teCurrentSort && window.teCurrentSort.col === colName) {
+        // Toggle direction or clear
+        if (window.teCurrentSort.dir === 'asc') {
+            window.teCurrentSort.dir = 'desc';
+        } else {
+            window.teCurrentSort = { col: null, dir: 'asc' };
+        }
+    } else {
+        window.teCurrentSort = { col: colName, dir: 'asc' };
+    }
+    
+    // Update header icons
+    const headers = document.querySelectorAll('.te-list-header');
+    headers.forEach(h => {
+        let text = h.textContent.replace(' ▲', '').replace(' ▼', '');
+        if (window.teCurrentSort && window.teCurrentSort.col === h.getAttribute('data-col')) {
+            text += window.teCurrentSort.dir === 'asc' ? ' ▲' : ' ▼';
+        }
+        h.textContent = text;
+    });
+    
+    // Re-render
+    if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
 };
 
 window.teToggleAllMain = function() {
