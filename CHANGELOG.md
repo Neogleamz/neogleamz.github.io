@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Features & Refactors
+- **Phase 1 (Multi-User Identity)**: Integrated Supabase Auth for Chris, Andy, and Tyson, natively building the identity capture logic and dynamic UI header rendering to track active sessions across the Command Center.
+
 ## [1.0.23] - 2026-05-02
 ### Features & Refactors
 - **Buildz Step Time Tracking**: Built capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics natively in the Work Orders archive. Addressed global UI instability by removing aggressive CSS hover jumps from modal close buttons.
