@@ -30,7 +30,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟠 P1 High Priority (Core Features)
 
-
+- [ ] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrate Supabase Auth, create distinct accounts for Chris, Andy, and Tyson, and build the login gate.
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -40,7 +40,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 **Epic: The Task Engine (ERP Command Center)**
 *(See: `@/tools/SK8Lytz_Task_Engine_Blueprint.md` for full architectural specs)*
-- [ ] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrate Supabase Auth, create distinct accounts for Chris, Andy, and Tyson, and build the login gate.
 - [ ] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables.
 - [ ] `feat/task-engine-p3` : **Phase 3 (The UI Takeover)** - Build the fullscreen glassmorphism modal, the split-pane layout, and the slide-out Context Panel (Anti-Modal).
 - [ ] `feat/task-engine-p4` : **Phase 4 (The 3-Way Render Engine)** - Implement the Vanilla JS logic to swap between List, Kanban, and Calendar views seamlessly.
@@ -49,7 +48,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `feat/task-engine-p7` : **Phase 7 (Communication & Inbox)** - Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
 
 **Other Ideas**
-- [ ] `feat/buildz-step-time-tracking` : Build capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics in the Work Orders archive.
 
 ---
 
@@ -69,6 +67,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🗄️ Completed & Archived Epics
 
 ### Target: `main`
+- [🚀] `feat/buildz-step-time-tracking` : Build capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics in the Work Orders archive.
 *(Epic: Orderz Financial Visibility)*
 - [🚀] `test/actual-net-matrix-verification` : Build a test modal or verification script to validate Actual Net math across complex order combinations (e.g., unshipped items keeping revenue vs. post-ship exchanges vs. replacement exchanges without returning the original, ref: Orders 1017, 1019). [🤖 Gemini 3.1 Pro] [🧠 60k / 10k] [💸 $0.20 / $0.05]
 
