@@ -169,8 +169,8 @@ function teRenderTaskGrid(filter = 'list') {
     let displayTasks = taskList.filter(t => {
         if (t.is_archived) return false;
         if (filter === 'blocked') return t.status === 'Blocked';
-        if (filter === 'completed') return t.status === 'Done';
-        if (filter === 'inbox') return t.status !== 'Done' && !t.parent_task_id;
+        if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
+        if (filter === 'inbox') return t.status !== 'Completed' && t.status !== 'Done' && !t.parent_task_id;
         if (filter === 'my_tasks') {
             let meta = t.metadata || {};
             if (meta.spoofed_assignee === currentUser) return true;
@@ -180,7 +180,7 @@ function teRenderTaskGrid(filter = 'list') {
             }
             return false;
         }
-        return t.status !== 'Done'; // Default 'list' view hides done
+        return t.status !== 'Completed' && t.status !== 'Done'; // Default 'list' view hides done
     });
     
     // Group by Cycle
@@ -237,9 +237,10 @@ function teRenderTaskGrid(filter = 'list') {
 
 function teBuildTaskRowHTML(t, isChild) {
     let statusColorClass = 'status-in-progress';
-    if (t.status === 'Done') statusColorClass = 'status-done';
+    if (t.status === 'Done' || t.status === 'Completed') statusColorClass = 'status-completed';
     if (t.status === 'Todo' || t.status === 'Backlog') statusColorClass = 'status-todo';
     if (t.status === 'Blocked') statusColorClass = 'status-blocked';
+    if (t.status === 'Archived') statusColorClass = 'status-archived';
     
     let meta = t.metadata || {};
     let ownerInitials = 'UN';
@@ -376,13 +377,13 @@ window.teRenderSubtasks = function(taskId) {
     let subtasks = taskEngineDB.taskz.filter(t => t.parent_task_id === taskId && t.parent_task_id != null);
     
     if (header) {
-        let doneCount = subtasks.filter(t => t.status === 'Done').length;
+        let doneCount = subtasks.filter(t => t.status === 'Completed' || t.status === 'Done').length;
         header.textContent = `SUBTASKS (${doneCount}/${subtasks.length})`;
     }
     
     let html = '';
     subtasks.forEach(st => {
-        let isDone = st.status === 'Done';
+        let isDone = st.status === 'Completed' || st.status === 'Done';
         html += `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
             <div data-click="click_teToggleTaskDone" data-task-id="${st.id}" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-input); cursor: pointer; display: flex; align-items: center; justify-content: center; background: ${isDone ? 'var(--primary-color)' : 'transparent'};">
@@ -442,7 +443,7 @@ window.teToggleTaskDone = async function(taskId) {
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    let nextStatus = task.status === 'Done' ? 'Todo' : 'Done';
+    let nextStatus = (task.status === 'Completed' || task.status === 'Done') ? 'Todo' : 'Completed';
     await window.teSetStatus(nextStatus, taskId);
 };
 
@@ -459,7 +460,8 @@ window.teOpenStatusDropdown = function(taskId, element) {
             { status: 'Todo', class: 'status-todo' },
             { status: 'In Progress', class: 'status-in-progress' },
             { status: 'Blocked', class: 'status-blocked' },
-            { status: 'Done', class: 'status-done' }
+            { status: 'Completed', class: 'status-completed' },
+            { status: 'Archived', class: 'status-archived' }
         ];
         
         let html = '';
@@ -513,10 +515,11 @@ window.teSetStatus = async function(status, directTaskId = null) {
     let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
     
     task.status = status;
+    task.is_archived = (status === 'Archived');
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ status: status }).eq('id', taskId);
+        await supabaseClient.from('taskz').update({ status: status, is_archived: task.is_archived }).eq('id', taskId);
         
         const newAct = {
             task_id: taskId,
@@ -832,9 +835,9 @@ window.teSwitchView = function(view, btnEl) {
         
         let boardHTML = `
             <div style="display: flex; gap: 20px; height: 100%; align-items: stretch; overflow-x: auto; padding-bottom: 20px;">
-                ${['Todo', 'In Progress', 'Blocked', 'Done'].map(status => {
-                    let tasksHtml = taskEngineDB.taskz.filter(t => t.status === status).map(t => {
-                        let color = status === 'Done' ? '#10b981' : (status === 'Blocked' ? '#ef4444' : (status === 'Todo' ? '#64748b' : '#3b82f6'));
+                ${['Todo', 'In Progress', 'Blocked', 'Completed'].map(status => {
+                    let tasksHtml = taskEngineDB.taskz.filter(t => (status === 'Completed' ? (t.status === 'Completed' || t.status === 'Done') : t.status === status)).map(t => {
+                        let color = status === 'Completed' ? '#10b981' : (status === 'Blocked' ? '#ef4444' : (status === 'Todo' ? '#64748b' : '#3b82f6'));
                         return `
                         <div class="kanban-card" data-task-id="${t.id}" style="background: var(--bg-container); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-left: 3px solid ${color};">
                             <div style="font-weight: 500; font-size: 14px; margin-bottom: 8px; color: white;">${t.title}</div>
