@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Features & Refactors
+- **Status Selector Refactor**: Replace the click-to-cycle logic on task status pills with a native dropdown/selector menu for precise status assignments, and replaced the obsolete Blocked view with an active In-Progress view.
 - **Task Engine Archive**: Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view.
 ## [1.0.24] - 2026-05-02
 ### Features & Refactors
