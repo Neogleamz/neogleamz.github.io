@@ -139,6 +139,13 @@ Known verified tables currently in active use across the JavaScript modules:
 - `raw_orders`, `raw_parcel_summary`, `raw_parcel_items`: Webhook inbound raw data caches.
 - `socialz_audience`: Outreach CRM for skaters (`name`, `is_favorite`).
 
+### Task Engine (ERP Command Center)
+- `teams`, `team_members`: Identity architecture grouping users for assignments.
+- `cyclez`: Linear-style timeboxing and sprint milestones (`start_date`, `end_date`, `assigned_team_id`).
+- `taskz`: Core dependency matrix linking tasks to physical modules (`linked_module`, `estimated_minutes`).
+- `task_dependencies`, `task_comments`, `task_activity`: Relational hooks for blocking, rich text threading, and immutable state-change audits.
+- `task_templates`, `template_subtasks`: Process Street scaffolding for generating dynamic SOPs.
+
 ---
 
 ## 🛡️ 4. Supabase Disaster Recovery & Backups
