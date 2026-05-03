@@ -1,63 +1,48 @@
-# 🦅 Task Engine Phase 3: The UI Takeover
+# 🚀 Task Engine UI Expansion: The "Big Three" Synthesis
 
-This plan outlines the architecture for the frontend visualization of the Task Engine. We are building a massive, premium glassmorphism modal that overtakes the screen, providing a split-pane layout and a slide-out Context Panel without triggering nested modals.
+Based on your request, I've analyzed the core UX philosophies of **Linear, Asana, and Monday.com**. We are going to extract the best elements from each and inject them natively into our Vanilla JS environment to create a truly world-class Command Center.
 
-## 🧠 Design Decisions & Rationale
-To maintain strict adherence to the Vanilla JS / Zero-Build rule, the entire Task Engine UI will be constructed using native DOM nodes styled via `index.html`'s global CSS block. The layout leverages pure Flexbox and CSS Grid for the split-pane mechanics and responsive scaling. The sliding Context Panel utilizes hardware-accelerated CSS transforms (`translateX`) instead of JavaScript width animations to ensure 60fps micro-interactions on both desktop and mobile views. The entire system hooks into our existing `system-event-delegator.js` using strict `data-click` tokens to prevent memory leaks.
+## 🧬 Feature Extraction & Synthesis
+
+### 1. The Linear Paradigm (Speed & Keyboards)
+Linear is famous for its blazing-fast, keyboard-first approach.
+- **Global Command Palette (`Ctrl+K` / `Cmd+K`):** I will build a sleek, floating command palette. Pressing `Cmd+K` anywhere will blur the screen and bring up a search bar to instantly jump to tasks, filter views, or execute actions without touching the mouse.
+- **Unique Issue IDs:** We will implement structured tags like `#NEO-102` for every task to give it a highly technical, developer-first feel.
+
+### 2. The Monday.com Paradigm (Visual Clarity & Grids)
+Monday.com excels at colorful, spreadsheet-like data visualization.
+- **Grid-Style List View:** Right now, our list view is a bit "loose." I will restructure it into a strict grid with aligned columns: `Task Name` | `Owner` | `Status` | `Priority` | `Due Date`. 
+- **High-Contrast Status Pills:** We will adopt Monday's color-coded methodology. Distinct, bold background colors for statuses (`In Progress` in vibrant blue, `Done` in neon green, `Stuck` in bright red) to make the board instantly readable.
+
+### 3. The Asana Paradigm (Deep Context & Hierarchy)
+Asana is known for its frictionless task details and infinite nesting.
+- **Interactive Subtasks:** I will upgrade the Context Flyout's subtask section so that it looks exactly like a mini-Asana project list. You will be able to check off subtasks natively within the flyout.
+- **Activity Timeline:** The bottom of the flyout will feature an Asana-style audit trail, tracking when priorities change or comments are added.
+
+---
+
+## 🏔️ First-Class Milestones & Cycles
+
+You are 100% correct—this engine is not just a "to-do list". In Phase 2, we built the `task_cycles` database table specifically to handle **Sprints and Milestones**.
+
+In this UI upgrade, we will elevate Cycles to be first-class citizens (similar to Linear's "Cycles" or Asana's "Portfolios"):
+1. **Cycle Dashboards:** When you click a Cycle in the sidebar (e.g., `Cycle 12: Holiday Prep`), the main canvas will pivot from a simple list into a **Milestone Dashboard**. 
+2. **Cycle Telemetry:** The header will show a massive progress bar (e.g., `65% Complete`) calculating the aggregate completion of all tasks bound to that Cycle.
+3. **Burn-Down Stats:** We will inject micro-stats at the top (`Tasks Remaining`, `Days Left in Cycle`) so you can track the Milestone's velocity at a glance.
+
+## 🛠️ Execution Strategy (Phase 3.5)
+
+To achieve this without bloated frameworks, I will:
+1. Update `index.html` to inject the Command Palette (`#neoCommandPalette`) DOM structure.
+2. Refactor the `.task-row` CSS to act as a strict `display: grid;` mimicking Monday.com's layout.
+3. Inject the HTML scaffold for the **Milestone/Cycle Dashboard Headings** so they are ready for the data pipeline.
 
 > [!IMPORTANT]
 > **User Review Required**
-> Please review the proposed HTML injection zones and architectural strategy. If approved, I will immediately execute the HTML, CSS, and JS wiring.
+> How does this synthesis sound? We get the speed of Linear, the visual grid of Monday, the context depth of Asana, and a dedicated view for Milestones and Cycles.
+> 
+> If approved, type **`proceed`** and I will execute these DOM and CSS upgrades right now.
 
 ## ❓ Open Questions
-
 > [!WARNING]
-> 1. Do you want the left-side Navigation Spine inside the Task Planner to be manually resizable using our standard `.h-resizer` logic, or strictly locked at a fixed width (e.g., 250px)?
-> 2. What specific shade/gradient do you want for the massive glassmorphism backdrop? I plan to use `rgba(10, 10, 10, 0.85)` with `backdrop-filter: blur(12px)`.
-
----
-
-## 🛠️ Proposed Changes
-
-### 1. `index.html` (DOM Injection)
-#### [MODIFY] `index.html`
-- **The Trigger:** Inject `<button id="taskPlannerBtn" class="top-action-btn" data-click="click_openTaskPlanner">🎯 Tasks <span class="badge-red-neon" style="display:none;"></span></button>` into the `.top-controls` block near the user badge.
-- **The Screen Takeover:** Inject the massive `<div id="taskPlannerModal" class="modal-overlay task-engine-overlay">` just before the closing `</body>` tag.
-- **The Split-Pane Canvas:** Inside the modal, structure a `<div class="bom-layout">` housing a 250px sidebar (`.task-sidebar`), an `.h-resizer`, and a massive flex canvas (`.task-canvas`).
-- **The Context Panel:** Inside the `.task-canvas` wrapper, add a right-anchored `<div id="taskContextFlyout" class="task-flyout hidden">` that slides in over the canvas when a task is clicked.
-- **The CSS Block:** Inject native CSS rules into the `<style>` block for `.task-engine-overlay`, `.task-sidebar`, `.task-canvas`, `.task-flyout`, and the `.badge-red-neon` micro-animations.
-
----
-
-### 2. `task-engine.js` (The New Core Module)
-#### [NEW] `task-engine.js`
-- Create a dedicated module to encapsulate Task Engine rendering logic to avoid bloating `ceo-module.js` or `app.js`.
-- Export initialization functions and attach them to the global `window` object for the Event Delegator.
-
----
-
-### 3. `system-event-delegator.js` (Interaction Wiring)
-#### [MODIFY] `system-event-delegator.js`
-- Add `click_openTaskPlanner` to cleanly display the modal and trigger an initial render cycle.
-- Add `click_closeTaskPlanner` to purge the DOM state and hide the modal.
-- Add `click_openTaskContext` to toggle the `.task-flyout` visibility.
-
----
-
-### 4. `app.js` (Keyboard Architecture)
-#### [MODIFY] `app.js`
-- Bind a global `document.addEventListener('keydown')` interceptor.
-- If the user presses `T` (and is not currently typing in an input field), trigger `click_openTaskPlanner`.
-- If the user presses `C` while the Task Planner is open, immediately focus the "New Task" input field to mimic Linear's keyboard-first architecture.
-
----
-
-## 🧪 Verification Plan
-
-### Automated Tests
-- Run `npx eslint .` to guarantee no syntax errors or unused variables.
-
-### Manual Verification
-- We will visually verify the glassmorphism styling in the browser.
-- We will trigger the modal using the `T` key to ensure the global keyboard listener functions natively.
-- We will trigger the Context Slide-out to ensure CSS transitions execute smoothly.
+> For the Command Palette shortcut, do you prefer `Cmd+K` (the standard dev shortcut) or `Cmd+P` (similar to VS Code file search)?
