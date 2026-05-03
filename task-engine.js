@@ -275,7 +275,7 @@ function teBuildTaskRowHTML(t, isChild) {
             <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);" title="${ownerTitle}">${ownerInitials}</div>
         </div>
         <div>
-            <span class="status-pill ${statusColorClass}" data-click="click_teCycleStatus" style="position: relative; z-index: 2;">${t.status}</span>
+            <span class="status-pill ${statusColorClass}" data-click="click_teOpenStatusDropdown" style="position: relative; z-index: 2; cursor: pointer;">${t.status}</span>
         </div>
         <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
             ${dueStr}
@@ -385,7 +385,7 @@ window.teRenderSubtasks = function(taskId) {
         let isDone = st.status === 'Done';
         html += `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div data-click="click_teCycleStatus" data-task-id="${st.id}" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-input); cursor: pointer; display: flex; align-items: center; justify-content: center; background: ${isDone ? 'var(--primary-color)' : 'transparent'};">
+            <div data-click="click_teToggleTaskDone" data-task-id="${st.id}" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-input); cursor: pointer; display: flex; align-items: center; justify-content: center; background: ${isDone ? 'var(--primary-color)' : 'transparent'};">
                 ${isDone ? '<span style="color:white; font-size:10px;">✓</span>' : ''}
             </div>
             <span data-click="click_teOpenTaskContext" data-task-id="${st.id}" style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; font-size: 13px; cursor: pointer; flex-grow: 1;">${st.title}</span>
@@ -436,36 +436,100 @@ window.teRenderActivityFeed = function(taskId) {
     container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 };
 
-window.teCycleStatus = async function(taskId) {
+window.teToggleTaskDone = async function(taskId) {
     if (!taskId) return;
     
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    const statusCycle = ['Todo', 'In Progress', 'Blocked', 'Done'];
-    let idx = statusCycle.indexOf(task.status);
-    let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
+    let nextStatus = task.status === 'Done' ? 'Todo' : 'Done';
+    await window.teSetStatus(nextStatus, taskId);
+};
+
+window.teOpenStatusDropdown = function(taskId, element) {
+    if (!taskId) return;
+    
+    let dropdown = document.getElementById('te-status-dropdown');
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = 'te-status-dropdown';
+        dropdown.style.cssText = 'display: none; position: absolute; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 9999; padding: 4px; flex-direction: column; gap: 4px; min-width: 120px;';
+        
+        const options = [
+            { status: 'Todo', class: 'status-todo' },
+            { status: 'In Progress', class: 'status-in-progress' },
+            { status: 'Blocked', class: 'status-blocked' },
+            { status: 'Done', class: 'status-done' }
+        ];
+        
+        let html = '';
+        options.forEach(opt => {
+            html += `
+            <div data-click="click_teSetStatus" data-status="${opt.status}" style="padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; color: var(--text-color); display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+                <span class="status-pill ${opt.class}" style="font-size: 10px; width: auto; display: inline-block;">${opt.status}</span>
+            </div>`;
+        });
+        
+        dropdown.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        document.body.appendChild(dropdown);
+        
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && !e.target.closest('[data-click="click_teOpenStatusDropdown"]')) {
+                dropdown.style.display = 'none';
+            }
+        });
+    }
+
+    if (dropdown.style.display === 'flex' && dropdown.getAttribute('data-task-id') === taskId) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    dropdown.setAttribute('data-task-id', taskId);
+    
+    const rect = element.getBoundingClientRect();
+    dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
+    dropdown.style.left = `${rect.left + window.scrollX}px`;
+    dropdown.style.display = 'flex';
+};
+
+window.teSetStatus = async function(status, directTaskId = null) {
+    let taskId = directTaskId;
+    
+    if (!taskId) {
+        const dropdown = document.getElementById('te-status-dropdown');
+        if (!dropdown) return;
+        taskId = dropdown.getAttribute('data-task-id');
+        dropdown.style.display = 'none';
+    }
+    
+    if (!taskId) return;
+    
+    let task = taskEngineDB.taskz.find(t => t.id === taskId);
+    if (!task) return;
+    
+    if (task.status === status) return;
     
     let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
     
-    task.status = nextStatus;
+    task.status = status;
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update({ status: nextStatus }).eq('id', taskId);
+        await supabaseClient.from('taskz').update({ status: status }).eq('id', taskId);
         
         const newAct = {
             task_id: taskId,
             actor_type: currentUser,
-            action_text: `Status changed to ${nextStatus}`,
+            action_text: `Status changed to ${status}`,
             timestamp: new Date().toISOString()
         };
         
         await supabaseClient.from('task_activity').insert([newAct]);
         taskEngineDB.activity.push(newAct);
         
-        if (window.currentOpenTaskId === taskId) {
-            teRenderActivityFeed(taskId);
+        if (window.currentOpenTaskId === taskId || task.parent_task_id === window.currentOpenTaskId) {
+            if (window.currentOpenTaskId) renderTaskContext(window.currentOpenTaskId);
         }
     } catch(e) {
         console.error('[TaskEngine] Status update failed:', e);

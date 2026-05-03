@@ -64,8 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teOpenTaskContext':
                     if (window.teOpenTaskContext) window.teOpenTaskContext(el.getAttribute('data-task-id'));
                     break;
-                case 'click_teCycleStatus':
-                    if (window.teCycleStatus) window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                case 'click_teOpenStatusDropdown':
+                    if (window.teOpenStatusDropdown) {
+                        const taskId = el.closest('[data-task-id]') ? el.closest('[data-task-id]').getAttribute('data-task-id') : el.getAttribute('data-task-id');
+                        window.teOpenStatusDropdown(taskId, el);
+                    }
+                    break;
+                case 'click_teSetStatus':
+                    if (window.teSetStatus) window.teSetStatus(el.getAttribute('data-status'));
                     break;
                 case 'click_teSwitchView_list':
                     if (window.teSwitchView) window.teSwitchView('list', el);
@@ -268,11 +274,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_teToggleTaskDone':
                     event.stopPropagation();
-                    if(typeof window.teCycleStatus==='function') window.teCycleStatus(el.closest('.task-row').getAttribute('data-task-id'));
+                    if(typeof window.teToggleTaskDone==='function') window.teToggleTaskDone(el.closest('.task-row').getAttribute('data-task-id'));
                     break;
                 case 'click_teToggleTaskDoneInFlyout':
-                    if(typeof window.teCycleStatus==='function' && window.currentOpenTaskId) {
-                        window.teCycleStatus(window.currentOpenTaskId);
+                    if(typeof window.teToggleTaskDone==='function' && window.currentOpenTaskId) {
+                        window.teToggleTaskDone(window.currentOpenTaskId);
                     }
                     break;
                 case 'click_teAddSubtask':
