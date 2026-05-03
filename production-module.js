@@ -1781,15 +1781,17 @@ function _renderArchiveCards(items) {
             let mTime = w.elapsed_production || 0;
             let totalT = pTime + mTime;
             let timeHtml = totalT > 0 ? `<div class="archive-card-detail-row"><span>Picking Time:</span><strong>${formatWOTime(pTime)}</strong></div><div class="archive-card-detail-row"><span>Production Time:</span><strong>${formatWOTime(mTime)}</strong></div><div class="archive-card-detail-row"><span>Total Build Time:</span><strong style="color:#10b981;">${formatWOTime(totalT)}</strong></div>` : '';
+            let headerTimes = totalT > 0 ? `<div style="display:flex; gap:8px; font-family:monospace; font-size:10px; color:var(--text-muted); margin-right:10px; white-space:nowrap;"><span>Pick: ${formatWOTime(pTime)}</span><span>Prod: ${formatWOTime(mTime)}</span></div>` : '';
 
             return `
             <div class="archive-card">
                 <div class="archive-card-header" data-click="toggleArchiveDetail" data-arc-id="${arcId}">
                     <div class="archive-card-status ${statusClass}">${statusLabel}</div>
                     <div class="archive-card-id">${wo.wo_id}</div>
-                    <div class="archive-card-title" style="flex-grow:1; margin-left:15px; overflow:hidden; text-overflow:ellipsis;">${wo.label ? `"${wo.label}" — ` : ''}${wo.product_name}</div>
-                    <div class="archive-card-meta">x${wo.qty} · ${fmtShort(wo.completed_at || wo.created_at)}</div>
-                    <button data-click="hardDeleteArchive" data-arc-type="batchez" data-arc-id="${wo.wo_id}" class="btn-red-neon">🗑️ DELETE</button>
+                    <div class="archive-card-title" style="flex-grow:1; margin-left:15px; overflow:hidden; text-overflow:ellipsis; min-width:50px;">${wo.label ? `"${wo.label}" — ` : ''}${wo.product_name}</div>
+                    <div class="archive-card-meta" style="white-space:nowrap; margin-right:10px;">x${wo.qty} · ${fmtShort(wo.completed_at || wo.created_at)}</div>
+                    ${headerTimes}
+                    <button data-click="hardDeleteArchive" data-arc-type="batchez" data-arc-id="${wo.wo_id}" class="btn-red-neon" style="width:auto; padding:4px 10px; font-size:10px; flex-shrink:0;">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
@@ -1816,9 +1818,9 @@ function _renderArchiveCards(items) {
                 <div class="archive-card-header" data-click="toggleArchiveDetail" data-arc-id="${arcId}">
                     <div class="archive-card-status print">🖨️ PRINTED</div>
                     <div class="archive-card-id">${displayID}</div>
-                    <div class="archive-card-title" style="flex-grow:1; margin-left:15px; overflow:hidden; text-overflow:ellipsis;">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
-                    <div class="archive-card-meta">x${job.qty} · ${fmtShort(job.completed_at || job.created_at)}</div>
-                    <button data-click="hardDeleteArchive" data-arc-type="layerz" data-arc-id="${job.id}" class="btn-red-neon">🗑️ DELETE</button>
+                    <div class="archive-card-title" style="flex-grow:1; margin-left:15px; overflow:hidden; text-overflow:ellipsis; min-width:50px;">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
+                    <div class="archive-card-meta" style="white-space:nowrap; margin-right:10px;">x${job.qty} · ${fmtShort(job.completed_at || job.created_at)}</div>
+                    <button data-click="hardDeleteArchive" data-arc-type="layerz" data-arc-id="${job.id}" class="btn-red-neon" style="width:auto; padding:4px 10px; font-size:10px; flex-shrink:0;">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
