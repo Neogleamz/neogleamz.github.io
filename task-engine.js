@@ -433,7 +433,6 @@ window.teUpdateTaskTitle = async function(taskId, newTitle) {
     
     task.title = newTitle;
     teRenderTaskGrid();
-    teRenderSubtasks(task.parent_task_id); // In case it's a subtask being edited
     
     try {
         await supabaseClient.from('taskz').update({ title: newTitle }).eq('id', taskId);
