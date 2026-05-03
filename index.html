@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.05.02.2107"></script>
+    <script src="system-version.js?v=v.2026.05.02.2117"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.02.2107"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.02.2117"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.02.2107"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.02.2117"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="system-event-delegator.js?v=v.2026.05.02.2107"></script>
+    <script src="system-event-delegator.js?v=v.2026.05.02.2117"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1396,14 +1396,26 @@
         color: #ef4444;
         font-weight: bold;
     }
+    .task-grid-header {
+        display: grid;
+        grid-template-columns: minmax(250px, 1fr) 50px 120px 100px 100px;
+        gap: 15px;
+        padding: 0 16px 10px 16px;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--text-muted);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 10px;
+    }
     .task-row {
         background: rgba(255,255,255,0.02);
         border: 1px solid rgba(255,255,255,0.05);
         border-radius: 8px;
         padding: 12px 16px;
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(250px, 1fr) 50px 120px 100px 100px;
         align-items: center;
-        gap: 12px;
+        gap: 15px;
         cursor: pointer;
         transition: all 0.2s ease;
     }
@@ -1412,6 +1424,95 @@
         border-color: rgba(255,255,255,0.1);
         box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         transform: translateY(-1px);
+    }
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+        color: white;
+        text-transform: uppercase;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .status-done { background: rgba(16, 185, 129, 0.8); }
+    .status-blocked { background: rgba(239, 68, 68, 0.8); }
+    .status-in-progress { background: rgba(59, 130, 246, 0.8); }
+    .status-todo { background: rgba(156, 163, 175, 0.5); }
+    
+    .task-timeline-container {
+        border-left: 2px solid rgba(255,255,255,0.1);
+        padding-left: 15px;
+        margin-left: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        position: relative;
+    }
+    .task-timeline-node {
+        position: absolute;
+        left: -20px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        top: 5px;
+    }
+    #neoCommandPalette {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        max-width: 90vw;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        z-index: 20000;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    #neoCommandPalette.hidden {
+        display: none;
+    }
+    .cmd-palette-input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding: 20px 24px;
+        color: white;
+        font-size: 18px;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .cmd-palette-results {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .cmd-palette-item {
+        padding: 12px 16px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .cmd-palette-item:hover, .cmd-palette-item.selected {
+        background: rgba(255,255,255,0.05);
+        color: white;
     }
     .task-checkbox {
         width: 18px;
@@ -4712,19 +4813,19 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.05.02.2107"></script>
-<script src="system-tools-module.js?v=v.2026.05.02.2107"></script>
-<script src="bom-module.js?v=v.2026.05.02.2107"></script>
-<script src="inventory-module.js?v=v.2026.05.02.2107"></script>
-<script src="packerz-module.js?v=v.2026.05.02.2107"></script>
-<script src="production-module.js?v=v.2026.05.02.2107"></script>
-<script src="sales-module.js?v=v.2026.05.02.2107"></script>
-<script src="analytics-module.js?v=v.2026.05.02.2107"></script>
-<script src="ceo-module.js?v=v.2026.05.02.2107"></script>
-<script src="task-engine.js?v=v.2026.05.02.2107"></script>
-<script src="print-module.js?v=v.2026.05.02.2107"></script>
-<script src="scraper-module.js?v=v.2026.05.02.2107"></script>
-<script src="socialz-module.js?v=v.2026.05.02.2107"></script>
+<script src="neogleamz-engine.js?v=v.2026.05.02.2117"></script>
+<script src="system-tools-module.js?v=v.2026.05.02.2117"></script>
+<script src="bom-module.js?v=v.2026.05.02.2117"></script>
+<script src="inventory-module.js?v=v.2026.05.02.2117"></script>
+<script src="packerz-module.js?v=v.2026.05.02.2117"></script>
+<script src="production-module.js?v=v.2026.05.02.2117"></script>
+<script src="sales-module.js?v=v.2026.05.02.2117"></script>
+<script src="analytics-module.js?v=v.2026.05.02.2117"></script>
+<script src="ceo-module.js?v=v.2026.05.02.2117"></script>
+<script src="task-engine.js?v=v.2026.05.02.2117"></script>
+<script src="print-module.js?v=v.2026.05.02.2117"></script>
+<script src="scraper-module.js?v=v.2026.05.02.2117"></script>
+<script src="socialz-module.js?v=v.2026.05.02.2117"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5182,18 +5283,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.02.2107"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.02.2117"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.02.2107"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.02.2117"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.02.2107"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.02.2117"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.02.2107"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.02.2107"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.02.2107"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.02.2117"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.02.2117"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.02.2117"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.05.02.2107"></script>
-    <script src="labelz-module.js?v=v.2026.05.02.2107"></script>
+    <script src="barcodz-module.js?v=v.2026.05.02.2117"></script>
+    <script src="labelz-module.js?v=v.2026.05.02.2117"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -5462,21 +5563,63 @@
                 </div>
                 
                 <div style="flex-grow: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Spreadsheet Grid Header -->
+                    <div class="task-grid-header">
+                        <div style="padding-left: 30px;">Task</div>
+                        <div>Owner</div>
+                        <div>Status</div>
+                        <div>Timeline</div>
+                        <div>Priority</div>
+                    </div>
+
                     <!-- Premium Task Row -->
                     <div class="task-row" data-click="click_openTaskContext">
-                        <div class="task-checkbox"></div>
-                        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;">
-                            <span style="color: white; font-weight: 500; font-size: 14px;">Finalize Phase 3 UI Takeover</span>
-                            <div style="display: flex; gap: 10px; font-size: 11px; color: var(--text-muted);">
-                                <span>#urgent</span>
-                                <span>💬 3</span>
-                                <span>🔗 2/5</span>
+                        <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                            <div class="task-checkbox" style="flex-shrink: 0;"></div>
+                            <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                <span style="color: white; font-weight: 500; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">Finalize Phase 3 UI Takeover</span>
+                                <div style="display: flex; gap: 10px; font-size: 11px; color: var(--text-muted);">
+                                    <span>💬 3</span>
+                                    <span>🔗 2/5</span>
+                                </div>
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span style="color: #ef4444; font-size: 11px; font-weight: bold;">Due Today</span>
-                            <span style="color: #3b82f6; font-size: 11px; font-weight: bold; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 4px;">In Progress</span>
+                        <div style="display: flex; align-items: center;">
                             <div style="width: 24px; height: 24px; border-radius: 50%; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);">CV</div>
+                        </div>
+                        <div>
+                            <span class="status-pill status-in-progress">In Progress</span>
+                        </div>
+                        <div style="font-size: 11px; color: white; font-weight: bold; display: flex; align-items: center;">
+                            Today
+                        </div>
+                        <div style="font-size: 11px; color: #ef4444; font-weight: bold; display: flex; align-items: center;">
+                            #urgent
+                        </div>
+                    </div>
+
+                    <!-- Second Task Row for contrast -->
+                    <div class="task-row" data-click="click_openTaskContext">
+                        <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                            <div class="task-checkbox" style="flex-shrink: 0;"></div>
+                            <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                <span style="color: white; font-weight: 500; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">Draft Cmd+K Palette</span>
+                                <div style="display: flex; gap: 10px; font-size: 11px; color: var(--text-muted);">
+                                    <span>💬 1</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);">AN</div>
+                        </div>
+                        <div>
+                            <span class="status-pill status-done">Done</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
+                            May 1
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
+                            #low
                         </div>
                     </div>
                 </div>
@@ -5510,16 +5653,76 @@
                         </div>
                         
                         <div>
-                            <div style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-bottom: 5px;">ACTIVITY</div>
-                            <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; flex-shrink: 0;">CV</div>
-                                    <div style="font-size: 12px; color: #ccc;"><span style="color: white; font-weight: bold;">Chriviper</span> changed priority to High <span style="color: var(--text-muted); font-size: 10px; margin-left: 4px;">2h ago</span></div>
+                            <div style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-bottom: 15px;">ACTIVITY</div>
+                            
+                            <div class="task-timeline-container">
+                                <!-- System Node -->
+                                <div style="position: relative;">
+                                    <div class="task-timeline-node"></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted);">
+                                        <div style="width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: bold; flex-shrink: 0;">CV</div>
+                                        <span><span style="color: white; font-weight: bold;">Chriviper</span> created task <span style="font-size: 10px; margin-left: 4px;">Yesterday</span></span>
+                                    </div>
                                 </div>
-                                <input type="text" placeholder="Write a comment..." style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 6px; color: white; font-size: 12px;">
+                                
+                                <!-- User Comment -->
+                                <div style="position: relative; margin-top: 5px;">
+                                    <div class="task-timeline-node" style="top: 15px;"></div>
+                                    <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                        <div style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
+                                            <div style="width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; flex-shrink: 0;">AN</div>
+                                            <div style="font-size: 12px; color: white; font-weight: bold;">Andy <span style="color: var(--text-muted); font-size: 10px; margin-left: 4px; font-weight: normal;">4h ago</span></div>
+                                        </div>
+                                        <div style="font-size: 12px; color: #ccc; line-height: 1.4;">
+                                            We need to make sure the glassmorphism doesn't lag on older devices. Has this been tested?
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- System Node -->
+                                <div style="position: relative; margin-top: 5px;">
+                                    <div class="task-timeline-node"></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted);">
+                                        <div style="width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: bold; flex-shrink: 0;">CV</div>
+                                        <span><span style="color: white; font-weight: bold;">Chriviper</span> changed status to <span style="color: #3b82f6;">In Progress</span> <span style="font-size: 10px; margin-left: 4px;">2h ago</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Comment Input (Outside Timeline) -->
+                            <div style="margin-top: 20px;">
+                                <input type="text" placeholder="Write a comment..." style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 10px 12px; border-radius: 6px; color: white; font-size: 13px; box-sizing: border-box;">
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Command Palette -->
+    <div id="neoCommandPalette" class="hidden">
+        <input type="text" id="neoCommandInput" class="cmd-palette-input" placeholder="Type a command or search...">
+        <div class="cmd-palette-results">
+            <div class="cmd-palette-item selected">
+                <span style="font-size: 16px;">📥</span>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 14px; font-weight: 500;">Go to Inbox</span>
+                    <span style="font-size: 11px; opacity: 0.7;">Navigation</span>
+                </div>
+            </div>
+            <div class="cmd-palette-item">
+                <span style="font-size: 16px;">✨</span>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 14px; font-weight: 500;">Create New Task</span>
+                    <span style="font-size: 11px; opacity: 0.7;">Action</span>
+                </div>
+            </div>
+            <div class="cmd-palette-item">
+                <span style="font-size: 16px;">📊</span>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 14px; font-weight: 500;">View Active Cycles</span>
+                    <span style="font-size: 11px; opacity: 0.7;">Navigation</span>
                 </div>
             </div>
         </div>
