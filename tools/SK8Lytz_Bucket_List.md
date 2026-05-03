@@ -47,6 +47,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [ ] `feat/task-status-dropdown` : **Status Selector Refactor** - Replace the click-to-cycle logic on task status pills with a native dropdown/selector menu for precise status assignments. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - [ ] `feat/task-mass-status-update` : **Mass Update Task Status** - Decouple row checkboxes from individual status toggling to enable mass selection and status updating for multiple tasks simultaneously. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
 - [ ] `feat/task-engine-sorting` : **Task Sorting & Prioritization** - Implement the ability to sort tasks globally and prioritize them (e.g., via drag-and-drop) within specific cycles. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.04]
+- [ ] `feat/task-engine-timelines` : **Task Timelines & Calendar Sync** - Implement date picking/timelines for individual tasks and map them to render dynamically on the Calendar view. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
 
 **Other Ideas**
 
