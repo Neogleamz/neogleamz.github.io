@@ -38,6 +38,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟢 P3 Backlog (Ideas & Sandbox)
 - [ ] `feat/task-engine` : Architect & Build Task Engine (Asana/Linear/Monday hybrid) with full-screen creation form and automation engine foundation. (See: `@/tools/SK8Lytz_Task_Engine_Blueprint.md`) [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] `feat/buildz-step-time-tracking` : Build capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics in the Work Orders archive. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
