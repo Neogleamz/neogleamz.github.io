@@ -4,6 +4,8 @@
 ### Features & Refactors
 - **Status Selector Refactor**: Replace the click-to-cycle logic on task status pills with a native dropdown/selector menu for precise status assignments, and replaced the obsolete Blocked view with an active In-Progress view.
 - **Task Engine Archive**: Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view.
+- **Task Sorting & Prioritization**: Implement the ability to sort tasks globally and prioritize them (e.g., via drag-and-drop) within specific cycles.
+- **List View Column Sorting**: Enable dynamic sorting by clicking on any column header within the List/Row view (Owner, Status, Timeline, Priority).
 ## [1.0.24] - 2026-05-02
 ### Features & Refactors
 - **Phase 7 (Communication & Inbox)**: Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
