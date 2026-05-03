@@ -36,9 +36,19 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ---
 
-## 🟢 P3 Backlog (Ideas & Sandbox)
-- [ ] `feat/task-engine` : Architect & Build Task Engine (Asana/Linear/Monday hybrid) with full-screen creation form and automation engine foundation. (See: `@/tools/SK8Lytz_Task_Engine_Blueprint.md`) [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
-- [ ] `feat/buildz-step-time-tracking` : Build capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics in the Work Orders archive. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
+### 🟢 P3 Backlog (Ideas & Sandbox)
+
+**Epic: The Task Engine (ERP Command Center)**
+*(See: `@/tools/SK8Lytz_Task_Engine_Blueprint.md` for full architectural specs)*
+- [ ] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrate Supabase Auth, create distinct accounts for Chris, Andy, and Tyson, and build the login gate.
+- [ ] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables.
+- [ ] `feat/task-engine-p3` : **Phase 3 (The UI Takeover)** - Build the fullscreen glassmorphism modal, the split-pane layout, and the slide-out Context Panel (Anti-Modal).
+- [ ] `feat/task-engine-p4` : **Phase 4 (The 3-Way Render Engine)** - Implement the Vanilla JS logic to swap between List, Kanban, and Calendar views seamlessly.
+- [ ] `feat/task-engine-p5` : **Phase 5 (Embedded UI Payloads)** - Wire up the cross-module hooks (embedding Cycle Counts and Low Stockz reports natively inside tasks).
+- [ ] `feat/task-engine-p6` : **Phase 6 (Automations & Templates)** - Build the logic that auto-spawns SOP tasks and dynamically generates children workflows.
+
+**Other Ideas**
+- [ ] `feat/buildz-step-time-tracking` : Build capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics in the Work Orders archive.
 
 ---
 

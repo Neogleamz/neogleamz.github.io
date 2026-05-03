@@ -22,6 +22,8 @@ To support dependencies, infinite nesting, and cross-module hooks, our database 
 - `linked_entity_id` (UUID, referencing specific rows in the target module)
 - `estimated_minutes` (Integer, for labor cost forecasting)
 - `actual_minutes` (Integer, updated by the Start Timer workflow)
+- `assigned_to_id` (UUID, Foreign Key -> `auth.users`)
+- `created_by_id` (UUID, Foreign Key -> `auth.users`)
 - `metadata` (JSONB, for Monday.com style dynamic custom fields)
 
 ### `task_dependencies` Table (Asana Blocker Engine)
@@ -129,6 +131,23 @@ In complex automated systems, users need to know exactly *why* a task changed st
 Tasks must deeply reference the physical world without clunky dropdowns.
 - **Workflow:** When typing a task description, typing `#` triggers a Vanilla JS autocomplete dropdown querying the live database. 
 - Typing `#BlackFil` generates a clickable blue pill for "Black Filament (SKU-123)". Clicking the pill from within the task instantly opens the Inventory EDITZ modal.
+
+---
+
+## 6. Multi-User Identity & Assignment Engine
+
+To support true task delegation and accountability, the application must transition from a "single global login" to distinct user identities leveraging **Supabase Auth**.
+
+### Supabase Authentication Integration
+- **The Core Roster:** We will initialize distinct Supabase Auth user accounts for the three owners (Chris, Andy, Tyson). 
+- **Session Caching:** Upon login, the user's UUID and Profile Data (Name, Color Hex, Avatar initial) will be cached securely in `localStorage` to avoid unnecessary DB reads on every render.
+- **The Login Gate:** The main `index.html` application will require a native Vanilla JS login screen (or blocking overlay) to authenticate the specific user before the primary Hubs unlock.
+
+### Task Assignment Mechanics
+- **Database Addition:** Add `assigned_to_id` (UUID, Foreign Key -> `auth.users` or custom `user_profiles` table) and `created_by_id` (UUID) to the `taskz` table.
+- **The UI Avatars:** Task rows and Kanban cards will display the Assignee's Avatar or Name Initial (e.g., a green circle with 'C' for Chris).
+- **Personalized Dashboards:** The "My Tasks" filter in the left sidebar will mathematically query only tasks where `assigned_to_id === currentUser.id`.
+- **The True Audit Trail:** The `task_activity` table will now accurately reflect *who* took the action (e.g., "Andy moved this to Done at 4:00 PM").
 
 ---
 
