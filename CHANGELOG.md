@@ -4,6 +4,7 @@
 ### Features & Refactors
 - **Legacy var → let/const Upgrade**: Systematically upgrade all legacy `var` declarations to block-scoped `let`/`const` across all 16 production modules, verifying no hoisting-dependent logic breaks.
 - **Event Listener Memory Leak Audit**: Add `removeEventListener` cleanup to the 10 modules missing it (task-engine, sales, scraper, orders, labelz, inventory, ceo, bom, barcodz, analytics) to prevent memory leaks on view re-renders.
+- **Absolute Position Purge**: Systematically purged legacy `position: absolute` styling across 7 core modules (Socialz, Production, Packerz, Scraper, Inventory, Task-Engine, System-Tools), migrating to standardized `grid-stack` and flex-based layout patterns.
 
 ## [1.0.26] - 2026-05-03
 ### Features & Refactors
