@@ -1,6 +1,6 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.26] - 2026-05-03
 ### Features & Refactors
 - **Purge Inline onclick Handlers (production-module.js)**: Migrate all ~40 inline `onclick=` handlers to `data-click` delegators registered in `system-event-delegator.js`.
 - **Purge Inline onclick Handlers (print-module.js)**: Migrate all ~15 inline `onclick=` handlers to `data-click` delegators.
@@ -8,6 +8,7 @@
 - **Purge Inline onclick Handlers (labelz-module.js)**: Migrate all ~10 inline `onclick=` handlers to `data-click` delegators.
 - **Purge Inline onclick Handlers (system-tools-module.js)**: Migrate all ~8 inline `onclick=` handlers to `data-click` delegators.
 - **Purge Inline onclick Handlers (sales, ceo, barcodz, analytics, task-engine)**: Migrate remaining ~17 inline `onclick=` handlers across 5 smaller modules.
+- **DOMPurify Coverage Expansion**: Wrap all unguarded `.innerHTML =` assignments through `window.safeHTML()` in the 10 unprotected modules (socialz, scraper, print, packerz, orders, labelz, ceo, bom, barcodz, analytics).
 
 ## [1.0.25] - 2026-05-03
 ### Features & Refactors

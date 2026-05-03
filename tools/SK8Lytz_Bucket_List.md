@@ -78,7 +78,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `refactor/inline-onclick-purge-labelz` : **Purge Inline onclick Handlers (labelz-module.js)** - Migrate all ~10 inline `onclick=` handlers to `data-click` delegators. [🤖 AI Model] [🧠 15k / 10k] [💸 $0.05 / $0.04]
 - [🚀] `refactor/inline-onclick-purge-system-tools` : **Purge Inline onclick Handlers (system-tools-module.js)** - Migrate all ~8 inline `onclick=` handlers to `data-click` delegators. [🤖 AI Model] [🧠 10k / 10k] [💸 $0.04 / $0.04]
 - [🚀] `refactor/inline-onclick-purge-remaining` : **Purge Inline onclick Handlers (sales, ceo, barcodz, analytics, task-engine)** - Migrate remaining ~17 inline `onclick=` handlers across 5 smaller modules. [🤖 AI Model] [🧠 15k / 15k] [💸 $0.05 / $0.05]
-- [x] `refactor/dompurify-coverage` : **DOMPurify Coverage Expansion** - Wrap all unguarded `.innerHTML =` assignments through `window.safeHTML()` in the 10 unprotected modules (socialz, scraper, print, packerz, orders, labelz, ceo, bom, barcodz, analytics). [🤖 Gemini 3.1 Pro] [🧠 20k / 15k] [💸 $0.06 / $0.05]
+- [🚀] `refactor/dompurify-coverage` : **DOMPurify Coverage Expansion** - Wrap all unguarded `.innerHTML =` assignments through `window.safeHTML()` in the 10 unprotected modules (socialz, scraper, print, packerz, orders, labelz, ceo, bom, barcodz, analytics). [🤖 Gemini 3.1 Pro] [🧠 20k / 15k] [💸 $0.06 / $0.05]
 
 **Epic: The Task Engine (ERP Command Center)**
 *(See: `@/tools/SK8Lytz_Task_Engine_Blueprint.md` for full architectural specs)*
