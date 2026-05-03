@@ -1,10 +1,11 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.27] - 2026-05-03
 ### Features & Refactors
 - **Legacy var → let/const Upgrade**: Systematically upgrade all legacy `var` declarations to block-scoped `let`/`const` across all 16 production modules, verifying no hoisting-dependent logic breaks.
 - **Event Listener Memory Leak Audit**: Add `removeEventListener` cleanup to the 10 modules missing it (task-engine, sales, scraper, orders, labelz, inventory, ceo, bom, barcodz, analytics) to prevent memory leaks on view re-renders.
 - **Absolute Position Purge**: Systematically purged legacy `position: absolute` styling across 7 core modules (Socialz, Production, Packerz, Scraper, Inventory, Task-Engine, System-Tools), migrating to standardized `grid-stack` and flex-based layout patterns.
+- **Orphan Script Relocation**: Relocated 6 loose utility scripts (`check_ids.js`, `check_openapi.js`, `check_schema.js`, `test-fetchall.js`, `test-supabase.js`, `test.js`) from the project root to the `scripts/` directory and refactored `test-supabase.js` to remove hardcoded API keys.
 
 ## [1.0.26] - 2026-05-03
 ### Features & Refactors
