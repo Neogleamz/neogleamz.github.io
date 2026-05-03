@@ -453,7 +453,7 @@ window.teOpenStatusDropdown = function(taskId, element) {
     if (!dropdown) {
         dropdown = document.createElement('div');
         dropdown.id = 'te-status-dropdown';
-        dropdown.style.cssText = 'display: none; position: absolute; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 9999; padding: 4px; flex-direction: column; gap: 4px; min-width: 120px;';
+        dropdown.style.cssText = 'display: none; position: absolute; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 100005; padding: 4px; flex-direction: column; gap: 4px; min-width: 120px;';
         
         const options = [
             { status: 'Todo', class: 'status-todo' },
