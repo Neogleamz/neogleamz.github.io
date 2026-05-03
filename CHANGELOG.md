@@ -1,7 +1,8 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.25] - 2026-05-03
 ### Features & Refactors
+- **Task Engine Board View Interactions**: Enable full interaction, opening, and working of individual tasks directly from within the Kanban Board view.
 - **Status Selector Refactor**: Replace the click-to-cycle logic on task status pills with a native dropdown/selector menu for precise status assignments, and replaced the obsolete Blocked view with an active In-Progress view.
 - **Task Engine Archive**: Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view.
 - **Task Sorting & Prioritization**: Implement the ability to sort tasks globally and prioritize them (e.g., via drag-and-drop) within specific cycles.
