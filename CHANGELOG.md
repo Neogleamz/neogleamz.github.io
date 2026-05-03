@@ -1,5 +1,8 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Features & Refactors
+- **Task Engine Archive**: Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view.
 ## [1.0.24] - 2026-05-02
 ### Features & Refactors
 - **Phase 7 (Communication & Inbox)**: Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
