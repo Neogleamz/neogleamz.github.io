@@ -255,6 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teBulkDelete':
                     if(typeof window.teBulkDelete==='function') window.teBulkDelete();
                     break;
+                case 'click_teSortColumn':
+                    if(typeof window.teSortColumn==='function') window.teSortColumn(el.getAttribute('data-col'));
+                    break;
                 case 'click_teToggleTeamMembers':
                     {
                         const teamId = el.getAttribute('data-team-id');
