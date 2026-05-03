@@ -228,9 +228,9 @@ function renderCeoTerminal() {
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="display:flex; gap:4px;">
-                    <span style="${toggleStyle(p.applyCac, '#ef4444')}" onclick="toggleCeoBtn(${index}, 'applyCac')">ADS</span>
-                    <span style="${toggleStyle(p.applyAff, '#facc15')}" onclick="toggleCeoBtn(${index}, 'applyAff')">AFF</span>
-                    <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" onclick="toggleCeoBtn(${index}, 'applyWarr')">WAR</span>
+                    <span style="${toggleStyle(p.applyCac, '#ef4444')}" data-click="click_toggleCeoBtn" data-index="${index}" data-field="applyCac">ADS</span>
+                    <span style="${toggleStyle(p.applyAff, '#facc15')}" data-click="click_toggleCeoBtn" data-index="${index}" data-field="applyAff">AFF</span>
+                    <span style="${toggleStyle(p.applyWarr, '#f59e0b')}" data-click="click_toggleCeoBtn" data-index="${index}" data-field="applyWarr">WAR</span>
                 </div>
                 <input type="number" id="ceo-vol-${index}-num" class="ceo-sync-input" value="${p.vol}" oninput="document.getElementById('ceo-vol-${index}').value=this.value; updateCeoEngine();" style="width: 50px; text-align:center; padding: 2px; font-size: 11px;">
             </div>

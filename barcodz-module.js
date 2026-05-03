@@ -148,8 +148,8 @@ function renderBarcodzGrid(forceRebuild = false) {
                                 <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${item.type}</span>
                             </div>
 
-                            <!-- Button Top Right -->
-                            <button class="btn-white" onclick="addBarcodzToSpool('${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}', '${item.slug}', '${item.icon}', '${item.type}')" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
+                            <!-- Spool Button Top Right -->
+                            <button class="btn-white" data-click="click_addBarcodzToSpool" data-name="${item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}" data-slug="${item.slug}" data-icon="${item.icon}" data-type="${item.type}" style="padding:4px 8px; font-size:10px;"><i style="margin-right:2px; font-style:normal;">➕</i> Spool</button>
                         </div>
 
                         <!-- Content -->
@@ -280,9 +280,9 @@ function renderBarcodzSpool() {
                     </div>
                     
                     <input type="number" min="0" value="${item.qty}" onchange="setSpoolItemQty('${item.slug}', this.value)" style="width:100%; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 2px;" />
-                    
-                    <button onclick="updateSpoolItem('${item.slug}', -999)" style="background:transparent; border:none; cursor:pointer; font-size:11px; opacity:0.6; padding:4px; display:flex; justify-content:center; align-items:center; width:100%; height:100%;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Remove from queue">❌</button>
-                    
+                <div style="flex:0 0 30px; display:flex; align-items:stretch;">
+                    <button data-click="click_updateSpoolItem" data-slug="${item.slug}" data-amt="-999" style="background:transparent; border:none; cursor:pointer; font-size:11px; opacity:0.6; padding:4px; display:flex; justify-content:center; align-items:center; width:100%; height:100%;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Remove from queue">❌</button>
+                </div>    
                 </div>
             `;
         });

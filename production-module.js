@@ -17,7 +17,7 @@
 // --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
 function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
 function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = window.safeHTML(
-    `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" onclick="closeMediaModal()">`
+    `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" data-click="click_closeMediaModal">`
 ); } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = window.safeHTML(
     `<video src="${url}" style="max-width:100%; max-height:100%; outline:none; box-shadow:0 0 40px rgba(0,0,0,0.5);" controls autoplay controlsList="nodownload"></video>`
 ); } else { container.style.background = '#ffffff'; container.innerHTML = window.safeHTML(
@@ -31,7 +31,7 @@ function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" 
 function generateEditableSOPRow(s, idx) {
     let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
     let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-    return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">✕</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+    return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">✕</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
 }
 
 let currentSopMode = 'production'; // 'production' or '3d'
@@ -249,7 +249,7 @@ function renderStagedBatchItems() {
         let f = fmtKey(item.p); let name = f.nn ? f.nn : f.in;
         h += `<li style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-panel); padding:10px 15px; border-radius:6px; border:1px solid var(--border-color);">
             <div style="font-weight:bold; color:var(--text-heading); font-size:14px;">${item.q}x <span style="color:#0ea5e9;">${name}</span></div>
-            <button class="btn-red-muted btn-xs" onclick="removeBatchItem(${index})">✕</button>
+            <button class="btn-red-muted btn-xs" data-click="click_removeBatchItem" data-index="${index}">✕</button>
         </li>`;
     });
     list.innerHTML = window.safeHTML(h);
@@ -316,7 +316,7 @@ function checkWORouting() {
         }
 
         let chevron = hasChildren ? `<span id="route_icon_${safeK}" style="display:inline-block; transition:transform 0.2s; transform:rotate(-90deg); margin-right:6px; font-size:10px; color:var(--text-muted);">▼</span>` : `<span style="display:inline-block; width:16px; margin-right:6px;"></span>`;
-        let clickAttr = hasChildren ? `onclick="let el = document.getElementById('route_children_${safeK}'); let ic = document.getElementById('route_icon_${safeK}'); if(el.style.display==='none'){el.style.display='flex';ic.style.transform='rotate(0deg)';}else{el.style.display='none';ic.style.transform='rotate(-90deg)';}" style="cursor:pointer; display:flex; flex-direction:column; flex:1; padding:4px 0;"` : `style="display:flex; flex-direction:column; flex:1; padding:4px 0;"`;
+        let clickAttr = hasChildren ? `data-click="click_toggleRouteChildren" data-route="${safeK}" style="cursor:pointer; display:flex; flex-direction:column; flex:1; padding:4px 0;"` : `style="display:flex; flex-direction:column; flex:1; padding:4px 0;"`;
 
         let rowHtml = `<div class="route-row" data-subname="${k}">
                 <div ${clickAttr}>
@@ -557,8 +557,8 @@ function generateMultiBatchOrderReport() {
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
                 <thead>
                     <tr style="border-bottom:2px solid rgba(239,68,68,0.3); text-align:left;">
-                        <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Material ↕</th>
-                        <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Quantity To Order ↕</th>
+                        <th style="padding:8px; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="0" data-desc="false">Material ↕</th>
+                        <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="1" data-desc="true">Quantity To Order ↕</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -577,10 +577,10 @@ function generateMultiBatchOrderReport() {
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
-                    <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Material ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Required ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 2, true)">In Stock ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 3, true)">Balance ↕</th>
+                    <th style="padding:8px; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="0" data-desc="false">Material ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="1" data-desc="true">Required ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="2" data-desc="true">In Stock ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="3" data-desc="true">Balance ↕</th>
                 </tr>
             </thead>
             <tbody>
@@ -617,10 +617,10 @@ function generateMultiBatchOrderReport() {
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
-                    <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Sub-Assembly ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Pull Qty ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 2, true)">In Stock ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 3, true)">Balance ↕</th>
+                    <th style="padding:8px; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="0" data-desc="false">Sub-Assembly ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="1" data-desc="true">Pull Qty ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="2" data-desc="true">In Stock ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="3" data-desc="true">Balance ↕</th>
                 </tr>
             </thead>
             <tbody>
@@ -656,10 +656,10 @@ function generateMultiBatchOrderReport() {
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:14px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
-                    <th style="padding:8px; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 0, false)">Sub-Assembly ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 1, true)">Target Qty ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 2, true)">Current Stock ↕</th>
-                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" onclick="sortReportTable(this, 3, true)">Estimated Total ↕</th>
+                    <th style="padding:8px; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="0" data-desc="false">Sub-Assembly ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="1" data-desc="true">Target Qty ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="2" data-desc="true">Current Stock ↕</th>
+                    <th style="padding:8px; text-align:right; cursor:pointer; user-select:none;" data-click="click_sortReportTable" data-col="3" data-desc="true">Estimated Total ↕</th>
                 </tr>
             </thead>
             <tbody>
@@ -833,7 +833,7 @@ function renderWOList() {
                 ondragover="woDragOver(event)"
                 ondrop="woDrop(event, ${index})"
                 ondragend="woDragEnd(event)"
-                onclick="selectWO('${wo.wo_id}')"
+                data-click="click_selectWO" data-id="${wo.wo_id}"
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
                     <span style="font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">☰ ${dot} ${wo.wo_id}: ${wo.product_name}</span>
@@ -966,7 +966,7 @@ function renderActiveWO(id) {
         let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
         document.getElementById('woMainArea').style.display = 'flex';
         let isEditableQty = !wo.materials_pulled && wo.status !== 'Completed';
-        let qtyDisplay = isEditableQty ? `<span onclick="editWOQty('${wo.wo_id}')" title="Edit WO Yield Target" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(14,165,233,0.15); border:1px dashed #0ea5e9; padding:2px 10px; border-radius:6px; color:#0ea5e9; transition:all 0.2s; position:relative; top:-2px;" onmouseover="this.style.background='rgba(14,165,233,0.3)'" onmouseout="this.style.background='rgba(14,165,233,0.15)'">${wo.qty} ✏️</span>` : wo.qty;
+        let qtyDisplay = isEditableQty ? `<span data-click="click_editWOQty" data-id="${wo.wo_id}" title="Edit WO Yield Target" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(14,165,233,0.15); border:1px dashed #0ea5e9; padding:2px 10px; border-radius:6px; color:#0ea5e9; transition:all 0.2s; position:relative; top:-2px;" onmouseover="this.style.background='rgba(14,165,233,0.3)'" onmouseout="this.style.background='rgba(14,165,233,0.15)'">${wo.qty} ✏️</span>` : wo.qty;
         document.getElementById('woTitle').innerHTML = window.safeHTML(
             (wo.label ? `[${wo.label}] ` : '') + `${wo.wo_id}: ${wo.product_name} - [ ${qtyDisplay} UNITS ]`
         );
@@ -1224,7 +1224,7 @@ function renderActiveWO(id) {
                         mappedSteps.forEach((s, idx) => {
                             let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
                             let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-                            stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPUp(this)">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="moveSOPDown(this)">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addSOPRow(this)">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removeSOPRow(this)">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+                            stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
                         });
 
                         htmlOut += `
@@ -1239,9 +1239,9 @@ function renderActiveWO(id) {
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                                             <div style="display:flex; gap:8px;">
-                                                <button onclick="openMediaManager('telemetry')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
-                                                <button onclick="openSOPTokenGuide()" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
-                                                <button onclick="if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('inlineLeftPane_${grp.id}', 'inlinePreviewContainer_${grp.id}', this);" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                                                <button data-click="click_openMediaManager" data-type="telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                                                <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
+                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                                             </div>
                                         </div>
                                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -1252,7 +1252,7 @@ function renderActiveWO(id) {
                                             <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
                                             <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
                                             <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
-                                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" onclick="if(typeof openSOPTokenGuide==='function') openSOPTokenGuide()">&#10067; Full Guide</span>
+                                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">&#10067; Full Guide</span>
                                         </div>
                                         <textarea id="inlineSopQA_${grp.id}" oninput="if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}')" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaText}</textarea>
                                     </div>
@@ -1275,15 +1275,15 @@ function renderActiveWO(id) {
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Rich Text Instructions</h3>
                                         </div>
                                         <div id="inlineSopSteps_${grp.id}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${stepsHtml}</div>
-                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" onclick="if(typeof addInlineSOPRow==='function') addInlineSOPRow('${grp.id}')">+ ADD PROCEDURE STEP</button>
+                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" data-click="click_addInlineSOPRow" data-grp="${grp.id}">+ ADD PROCEDURE STEP</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Save Actions -->
                             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
-                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" onclick="toggleInlineEditor('${grp.id}')">✕ Cancel Changes</button>
-                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" onclick="saveInlineSopBlock('${grp.id}', '${grp.rawName.replace(/'/g, "\\'")}')">💾 SAVE SOP MASTER BLUEPRINT</button>
+                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" data-click="click_toggleInlineEditor" data-grp="${grp.id}">✕ Cancel Changes</button>
+                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" data-click="click_saveInlineSopBlock" data-grp="${grp.id}" data-rawname="${grp.rawName.replace(/'/g, "\\'")}">💾 SAVE SOP MASTER BLUEPRINT</button>
                             </div>
                         </div>
                         <script>
@@ -1861,7 +1861,7 @@ async function deleteAllArchive() {
     sysLog(`Hard deleting ALL archives from ${currentArchiveTab}`);
     setMasterStatus("Deleting Archive...", "mod-working");
 
-    const btn = document.querySelector('.btn-red[onclick="deleteAllArchive()"]');
+    const btn = document.querySelector('.btn-red[data-click="click_window_deleteAllArchive"]');
     if (btn) { btn.innerText = "Deleting..."; btn.disabled = true; }
 
     try {
@@ -1965,13 +1965,13 @@ function parseProductionTelemetryLine(q, contextIdx) {
     function parseInputs(text) { return text.replace(/\[INPUT\]/gi, `<input type="text" placeholder="..." style="padding:4px 8px; border-radius:4px; background:rgba(255,255,255,0.1); border:1px solid #10b981; color:#fff; font-family:monospace; font-size:12px; width:120px; font-weight:bold; margin:0 6px;">`); }
 
     function parseImgs(text) {
-        text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" class="btn-slate-muted">📄 View PDF</button>`; });
-        text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" class="btn-blue-muted">🎥 Play Video</button>`; });
+        text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" data-click="click_openPdf" data-url="${safe}" class="btn-slate-muted">📄 View PDF</button>`; });
+        text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => { const safe = url.replace(/'/g, "\\'"); return `<button type="button" data-click="click_openVideo" data-url="${safe}" class="btn-blue-muted">🎥 Play Video</button>`; });
         text = text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
             const safe = url.replace(/'/g, "\\'");
-            if(url.toLowerCase().endsWith('.pdf')) { return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" class="btn-slate-muted">📄 View PDF</button>`; }
-            if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) { return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" class="btn-blue-muted">🎥 Play Video</button>`; }
-            return `<img src="${url}" loading="lazy" style="max-height:80px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
+            if(url.toLowerCase().endsWith('.pdf')) { return `<button type="button" data-click="click_openPdf" data-url="${safe}" class="btn-slate-muted">📄 View PDF</button>`; }
+            if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) { return `<button type="button" data-click="click_openVideo" data-url="${safe}" class="btn-blue-muted">🎥 Play Video</button>`; }
+            return `<img src="${url}" loading="lazy" style="max-height:80px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" data-click="click_openImage" data-url="${safe}">`;
         });
         return text;
     }
@@ -1987,7 +1987,7 @@ function parseProductionTelemetryLine(q, contextIdx) {
     if (/^\[IMG:(https?:\/\/[^\]]+)\]$/i.test(q)) {
         const url = q.match(/\[IMG:(https?:\/\/[^\]]+)\]/i)[1];
         const safe = url.replace(/'/g, "\\'");
-        html = `<div style="margin:4px 0;"><img src="${url}" loading="lazy" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safe}', 'img')"></div>`;
+        html = `<div style="margin:4px 0;"><img src="${url}" loading="lazy" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" data-click="click_openImage" data-url="${safe}"></div>`;
     } else if (/^\[BARCODE:([^\]]+)\]$/i.test(q)) {
         const val = q.match(/\[BARCODE:([^\]]+)\]/i)[1].trim();
         const id = `sop-bc-prod-${contextIdx}-${Math.random().toString(36).substring(7)}`;

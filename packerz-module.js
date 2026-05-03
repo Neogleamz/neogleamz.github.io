@@ -919,10 +919,10 @@ function generatePackerzEditableSOPRow(s, idx) {
 
     return `<div class="sop-step-row" style="display:flex; gap:15px; padding:20px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:12px;">
         <div class="sop-step-movers">
-            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="movePackerzSOPUp(this)">▲</button>
-            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" onclick="movePackerzSOPDown(this)">▼</button>
-            <button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" onclick="addPackerzSOPRow(this)">+</button>
-            <button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" onclick="removePackerzSOPRow(this)">✕</button>
+            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_movePackerzSOPUp">▲</button>
+            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_movePackerzSOPDown">▼</button>
+            <button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addPackerzSOPRow">+</button>
+            <button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removePackerzSOPRow">✕</button>
         </div>
         <div class="sop-text-container" style="flex-grow:1; display:flex; flex-direction:column;">
             <div class="sop-text-rich" contenteditable="true" placeholder="Type extremely detailed packing instructions securely here..." style="flex-grow:1; min-height:120px; outline:none; padding:15px; border:1px solid var(--border-input); border-radius:8px; background:var(--bg-input);">${safeText}</div>
@@ -1010,7 +1010,7 @@ function openPackerzAuditLog(sku, telemetryJsonString) {
             <div style="background:var(--bg-container); border:1px solid #10b981; border-radius:12px; width:clamp(320px, 90vw, 500px); max-height:90vh; padding:25px; box-shadow:0 10px 40px rgba(16,185,129,0.2); display:flex; flex-direction:column;">
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:10px; margin-bottom:15px;">
                     <h3 style="margin:0; font-size:16px; color:#10b981; font-weight:900;">QA AUDIT LOG</h3>
-                    <button class="icon-btn" onclick="document.getElementById('packerzAuditOverlay').remove()" style="color:var(--text-muted); font-size:16px; font-weight:bold; border:1px solid var(--border-color);">✕</button>
+                    <button class="icon-btn" data-click="click_closePackerzAuditOverlay" style="color:var(--text-muted); font-size:16px; font-weight:bold; border:1px solid var(--border-color);">✕</button>
                 </div>
                 <div style="font-size:11px; margin-bottom:15px; color:var(--text-muted); font-family:monospace;">Item ID: ${sku}</div>
                 <div style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:5px;">
@@ -1054,22 +1054,22 @@ function renderPackerzTelemetryPreview() {
     // Advanced universal media parser: intercepts accidental img tags pointing to pdf/mp4 and forces them into native buttons
     function parseImgs(text) {
         text = text.replace(/\[PDF:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
-            const safe = url.replace(/'/g, "\\'");
-            return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`;
+            const safe = url.replace(/"/g, '&quot;');
+            return `<button type="button" data-click="click_openPdf" data-url="${safe}" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`;
         });
         text = text.replace(/\[VID:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
-            const safe = url.replace(/'/g, "\\'");
-            return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`;
+            const safe = url.replace(/"/g, '&quot;');
+            return `<button type="button" data-click="click_openVideo" data-url="${safe}" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`;
         });
         text = text.replace(/\[IMG:(https?:\/\/[^\]]+)\]/gi, (_, url) => {
-            const safe = url.replace(/'/g, "\\'");
+            const safe = url.replace(/"/g, '&quot;');
             if(url.toLowerCase().endsWith('.pdf')) {
-               return `<button type="button" onclick="window.open('${safe}','_blank'); event.preventDefault(); event.stopPropagation();" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`;
+               return `<button type="button" data-click="click_openPdf" data-url="${safe}" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">📄 View PDF</button>`;
             }
             if(url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.webm')) {
-               return `<button type="button" onclick="openMediaModal('${safe}', 'vid'); event.preventDefault(); event.stopPropagation();" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`;
+               return `<button type="button" data-click="click_openVideo" data-url="${safe}" style="background:#0ea5e9; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer;">🎥 Play Video</button>`;
             }
-            return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" onclick="openMediaModal('${safe}', 'img'); event.preventDefault(); event.stopPropagation();">`;
+            return `<img src="${url}" loading="lazy" style="max-height:100px; max-width:100%; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; margin:4px 2px; display:inline-block; vertical-align:middle;" data-click="click_openImage" data-url="${safe}">`;
         });
         return text;
     }
@@ -1111,8 +1111,8 @@ function renderPackerzTelemetryPreview() {
         // Standalone [IMG:url] line — display as full-width image block
         if (/^\[IMG:(https?:\/\/[^\]]+)\]$/i.test(q)) {
             const url = q.match(/\[IMG:(https?:\/\/[^\]]+)\]/i)[1];
-            const safe = url.replace(/'/g, "\\'");
-            html += `<div style="margin:4px 0;"><img src="${url}" loading="lazy" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" onclick="openMediaModal('${safe}', 'img')"></div>`;
+            const safe = url.replace(/"/g, '&quot;');
+            html += `<div style="margin:4px 0;"><img src="${url}" loading="lazy" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" data-click="click_openImage" data-url="${safe}"></div>`;
             return;
         }
 
@@ -1419,9 +1419,9 @@ async function refreshSOPMediaGrid() {
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
 
             card.innerHTML = `
-                <div style="font-size:36px;" onclick="navigateSOPMediaFolder('${fullPath.replace(/'/g, "\\'")}')">📁</div>
-                <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" onclick="navigateSOPMediaFolder('${fullPath.replace(/'/g, "\\'")}')">${folder.name}</div>
-                <button onclick="deleteSOPMedia('${fullPath.replace(/'/g, "\\'")}', true)" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
+                <div style="font-size:36px;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">📁</div>
+                <div style="font-size:10px; color:var(--text-muted); text-align:center; word-break:break-word; font-weight:700;" data-click="click_navigateSOPMediaFolder" data-path="${fullPath.replace(/"/g, '&quot;')}">${folder.name}</div>
+                <button data-click="click_deleteSOPMedia" data-path="${fullPath.replace(/"/g, '&quot;')}" data-folder="true" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.15); border:none; color:#ef4444; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center;" title="Delete Folder">🗑️</button>
             `;
             grid.appendChild(card);
         });
@@ -1445,8 +1445,8 @@ async function refreshSOPMediaGrid() {
                 : `<div style="height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; pointer-events:none;">📄</div><div style="padding:6px 8px; font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;">${file.name}</div><div style="padding:0 8px 6px; font-size:10px; color:var(--text-muted); pointer-events:none;">${sizeKb} KB</div>`;
 
             card.innerHTML = `
-                <div style="flex-grow:1; display:flex; flex-direction:column;" onclick="insertSOPToken('[IMG:${url}]')">${contentHtml}</div>
-                <button onclick="deleteSOPMedia('${filePath.replace(/'/g, "\\'")}', false)" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
+                <div style="flex-grow:1; display:flex; flex-direction:column;" data-click="click_insertSOPToken" data-token="[IMG:${url.replace(/"/g, '&quot;')}]">${contentHtml}</div>
+                <button data-click="click_deleteSOPMedia" data-path="${filePath.replace(/"/g, '&quot;')}" data-folder="false" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.85); border:1px solid #ef4444; color:white; border-radius:4px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; justify-content:center; align-items:center; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Delete File">🗑️</button>
             `;
             grid.appendChild(card);
         });
@@ -1532,7 +1532,7 @@ function updateSOPMediaBreadcrumb() {
         return;
     }
     const parts = currentSOPMediaFolder.split('/');
-    let html = `<span style="color:#0ea5e9; font-weight:700; cursor:pointer;" onclick="navigateSOPMediaFolder('')">📁 Root</span>`;
+    let html = `<span style="color:#0ea5e9; font-weight:700; cursor:pointer;" data-click="click_navigateSOPMediaFolder" data-path="">📁 Root</span>`;
     let cum = '';
     parts.forEach((p, i) => {
         cum += (i === 0 ? '' : '/') + p;
@@ -1541,7 +1541,7 @@ function updateSOPMediaBreadcrumb() {
         html += ` <span style="color:var(--text-muted); margin:0 2px;">›</span> `;
         html += last
             ? `<span style="color:var(--text-heading); font-weight:900;">${p}</span>`
-            : `<span style="color:#0ea5e9; cursor:pointer;" onclick="navigateSOPMediaFolder('${cp}')">${p}</span>`;
+            : `<span style="color:#0ea5e9; cursor:pointer;" data-click="click_navigateSOPMediaFolder" data-path="${cp}">${p}</span>`;
     });
     el.innerHTML = html;
 }
@@ -1829,7 +1829,7 @@ function renderSOPAuditLogRows(rows) {
                         ${inputs.map(inp => `<div style="font-size:12px; padding:3px 0; color:var(--text-muted);">📝 ${inp.text}: <b style="color:var(--text-main); font-family:monospace;">${inp.value || '(blank)'}</b></div>`).join('')}` : ''}
                     </div>
                     <div>
-                        <button onclick="const el = this.nextElementSibling; if(el.style.display==='none'){el.style.display='block';this.innerText='Hide Original Blueprint';}else{el.style.display='none';this.innerText='View Original Blueprint';}" style="background:transparent; border:1px solid #0ea5e9; color:#0ea5e9; padding:6px 12px; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer;" onmouseover="this.style.background='rgba(14,165,233,0.1)'" onmouseout="this.style.background='transparent'">View Original Blueprint</button>
+                        <button data-click="click_toggleOriginalBlueprint" style="background:transparent; border:1px solid #0ea5e9; color:#0ea5e9; padding:6px 12px; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer;" onmouseover="this.style.background='rgba(14,165,233,0.1)'" onmouseout="this.style.background='transparent'">View Original Blueprint</button>
                         <div style="display:none; font-size:11px; color:var(--text-muted); background:rgba(0,0,0,0.15); padding:10px; border-radius:6px; max-height:150px; overflow-y:auto; font-family:monospace; line-height:1.6; margin-top:8px;">
                             <div style="font-size:10px; font-weight:900; color:#0ea5e9; letter-spacing:1px; margin-bottom:6px;">IMMUTABLE SNAPSHOT:</div>
                             ${formatSOPSnapshotPreview(item.sop_snapshot)}
@@ -1848,7 +1848,7 @@ function renderSOPAuditLogRows(rows) {
         <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:10px; overflow:hidden;">
             <!-- Row header —— always visible -->
             <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; transition:background 0.2s;"
-                 onclick="toggleSOPAuditDetail('sop-audit-detail-${i}')"
+                 data-click="click_toggleSOPAuditDetail" data-target="sop-audit-detail-${i}"
                  onmouseover="this.style.background='rgba(16,185,129,0.05)'" onmouseout="this.style.background=''">
                 <div style="background:#10b981; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; flex-shrink:0;">✓ QA PASSED</div>
                 <div style="font-weight:900; color:var(--text-heading); font-size:13px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:0;">${order.order_id || '—'}</div>
@@ -1861,7 +1861,7 @@ function renderSOPAuditLogRows(rows) {
                 </div>
 
                 <div style="font-size:11px; color:${totalPassed === totalChecks && totalChecks > 0 ? '#10b981' : '#f59e0b'}; font-weight:700; flex-shrink:0; margin-left:10px;">${totalPassed}/${totalChecks} checks</div>
-                <button onclick="event.stopPropagation(); unarchivePackerzOrder('${order.order_id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex: none; white-space: nowrap; width: max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">UNARCHIVE</button>
+                <button data-click="click_unarchivePackerzOrder" data-id="${order.order_id}" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); padding:4px 12px; border-radius:4px; font-size:10px; font-weight:900; cursor:pointer; flex: none; white-space: nowrap; width: max-content;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#ef4444'">UNARCHIVE</button>
                 <div style="color:var(--text-muted); font-size:12px; margin-left:8px;">▼</div>
             </div>
 
