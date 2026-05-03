@@ -879,6 +879,44 @@ async function toggleWIPCheckbox(chk, key) { try { if(!currentWO) return; let is
 async function checkAllInGroup(grpId) { try { if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {}; chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } }); if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: JSON.stringify(currentWO.wip_state) }).eq('wo_id', currentWO.wo_id); } } catch(e) { sysLog("Failed to save group check.", true); } }
 function toggleSOPLock() { isSOPLocked = !isSOPLocked; const btn = document.getElementById('sopLockBtn'); if(btn) btn.innerText = isSOPLocked ? '🔒' : '🔓'; if(currentWO) renderActiveWO(currentWO.wo_id); }
 
+function formatWOTime(ms) {
+    if (!ms || ms < 0) return "0m 0s";
+    let totalSec = Math.floor(ms / 1000);
+    let m = Math.floor(totalSec / 60);
+    let s = totalSec % 60;
+    let h = Math.floor(m / 60);
+    m = m % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    return `${m}m ${s}s`;
+}
+
+window.togglePipelinePause = async function() {
+    if (!currentWO || !currentWO.wip_state) return;
+    let w = currentWO.wip_state;
+    if (!w.active_stage) return;
+    
+    if (w.is_paused) {
+        // Resume
+        w.stage_start_time = Date.now();
+        w.is_paused = false;
+    } else {
+        // Pause
+        if (w.stage_start_time) {
+            let stageKey = w.active_stage === 'Picking' ? 'elapsed_picking' : 'elapsed_production';
+            w[stageKey] = (w[stageKey] || 0) + (Date.now() - w.stage_start_time);
+        }
+        w.stage_start_time = null;
+        w.is_paused = true;
+    }
+    
+    try {
+        await supabaseClient.from('work_orders').update({ wip_state: JSON.stringify(w) }).eq('wo_id', currentWO.wo_id);
+        renderActiveWO(currentWO.wo_id);
+    } catch(e) {
+        sysLog("Failed to pause/resume pipeline timer.", true);
+    }
+};
+
 async function editWOQty(id) {
     let wo = workOrdersDB.find(w => w.wo_id === id);
     if (!wo) return;
@@ -964,6 +1002,18 @@ function renderActiveWO(id) {
         let wip = wo.wip_state || {};
         const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
 
+        let timerUI = "";
+        if (wip.active_stage) {
+            let elapsedSoFar = (wip.active_stage === 'Picking' ? (wip.elapsed_picking||0) : (wip.elapsed_production||0));
+            if (wip.stage_start_time && !wip.is_paused) elapsedSoFar += (Date.now() - wip.stage_start_time);
+            let timeStr = formatWOTime(elapsedSoFar);
+            let btnAction = wip.is_paused ? '▶️ Resume' : '⏸️ Pause';
+            timerUI = `<div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:11px; font-family:monospace; color:${wip.is_paused ? 'var(--text-muted)' : '#10b981'};">${wip.is_paused ? 'Paused' : 'Running'} (${timeStr})</span>
+                <button onclick="event.stopPropagation(); togglePipelinePause();" class="btn-slate" style="padding:2px 8px; font-size:10px;">${btnAction}</button>
+            </div>`;
+        }
+
         if (wo.status === 'Picking' || wo.status === 'In Production' || wo.status === 'Completed') {
             document.getElementById('pipe-Queued').style.pointerEvents = 'none';
             document.getElementById('pipe-Queued').style.opacity = '0.6';
@@ -986,6 +1036,7 @@ function renderActiveWO(id) {
         if(wo.status === 'Queued') { document.getElementById('pipe-Queued').classList.add('active'); document.getElementById('sect-Queued').classList.add('active'); }
         else if(wo.status === 'Picking') {
             document.getElementById('pipe-Picking').classList.add('active'); document.getElementById('sect-Picking').classList.add('active');
+            if(timerUI) document.getElementById('pipe-Picking').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">2. Start Picking Parts ${timerUI}</div>`);
             let pList = document.getElementById('woPickList'); let html = `<div class="kitting-board">`; let chkIdx = 0; let grpCounter = 0;
             let directRaws = getDirectMaterials(wo.product_name, wo.qty);
             if(Object.keys(directRaws).length > 0) {
@@ -1066,6 +1117,7 @@ function renderActiveWO(id) {
         }
         else if(wo.status === 'In Production') {
             document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active');
+            if(timerUI) document.getElementById('pipe-Production').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">3. Send to Production ${timerUI}</div>`);
 
             let sList = document.getElementById('woSOPList'); sList.innerHTML = window.safeHTML(""); let saveContainer = document.getElementById('inlineSaveContainer');
 
@@ -1500,7 +1552,30 @@ async function advanceWO(newStatus, bypassModal = false) {
             if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
         }
 
-        const updateData = {status: newStatus};
+        if (!targetWO.wip_state) targetWO.wip_state = {};
+        
+        if (newStatus === 'Picking') {
+            targetWO.wip_state.stage_start_time = Date.now();
+            targetWO.wip_state.active_stage = 'Picking';
+            targetWO.wip_state.is_paused = false;
+        } else if (newStatus === 'In Production') {
+            if (targetWO.wip_state.active_stage === 'Picking' && targetWO.wip_state.stage_start_time && !targetWO.wip_state.is_paused) {
+                targetWO.wip_state.elapsed_picking = (targetWO.wip_state.elapsed_picking || 0) + (Date.now() - targetWO.wip_state.stage_start_time);
+            }
+            targetWO.wip_state.stage_start_time = Date.now();
+            targetWO.wip_state.active_stage = 'Production';
+            targetWO.wip_state.is_paused = false;
+        } else if (newStatus === 'Completed') {
+            if (targetWO.wip_state.stage_start_time && !targetWO.wip_state.is_paused) {
+                let stageKey = targetWO.wip_state.active_stage === 'Picking' ? 'elapsed_picking' : 'elapsed_production';
+                targetWO.wip_state[stageKey] = (targetWO.wip_state[stageKey] || 0) + (Date.now() - targetWO.wip_state.stage_start_time);
+            }
+            targetWO.wip_state.stage_start_time = null;
+            targetWO.wip_state.active_stage = null;
+            targetWO.wip_state.is_paused = false;
+        }
+
+        const updateData = {status: newStatus, wip_state: JSON.stringify(targetWO.wip_state)};
         if(newStatus !== 'Queued' && !targetWO.started_at) {
             targetWO.started_at = new Date().toISOString();
             updateData.started_at = targetWO.started_at;
@@ -1685,6 +1760,12 @@ function _renderArchiveCards(items) {
             const arcId = `arc-b-${i}`;
             const statusClass = wo.completed_at ? 'completed' : 'manual';
             const statusLabel = wo.completed_at ? '✓ COMPLETED' : '⚡ ARCHIVED';
+            let w = wo.wip_state || {};
+            let pTime = w.elapsed_picking || 0;
+            let mTime = w.elapsed_production || 0;
+            let totalT = pTime + mTime;
+            let timeHtml = totalT > 0 ? `<div class="archive-card-detail-row"><span>Picking Time:</span><strong>${formatWOTime(pTime)}</strong></div><div class="archive-card-detail-row"><span>Production Time:</span><strong>${formatWOTime(mTime)}</strong></div><div class="archive-card-detail-row"><span>Total Build Time:</span><strong style="color:#10b981;">${formatWOTime(totalT)}</strong></div>` : '';
+
             return `
             <div class="archive-card">
                 <div class="archive-card-header" onclick="toggleArchiveDetail('${arcId}')">
@@ -1701,6 +1782,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-detail-row"><span>Qty Target:</span><strong>${wo.qty} units</strong></div>
                     <div class="archive-card-detail-row"><span>Started:</span><strong>${dtC}</strong></div>
                     <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
+                    ${timeHtml}
                 </div>
             </div>`;
         }).join(''));
