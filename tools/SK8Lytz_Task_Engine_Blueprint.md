@@ -20,6 +20,8 @@ To support dependencies, infinite nesting, and cross-module hooks, our database 
 - `cycle_id` (UUID, Foreign Key -> `cyclez.id` - replacing Milestones with Linear-style timeboxed sprints)
 - `linked_module` (Enum: `inventory`, `sales`, `work_orders`, `cfo`, `general`)
 - `linked_entity_id` (UUID, referencing specific rows in the target module)
+- `estimated_minutes` (Integer, for labor cost forecasting)
+- `actual_minutes` (Integer, updated by the Start Timer workflow)
 - `metadata` (JSONB, for Monday.com style dynamic custom fields)
 
 ### `task_dependencies` Table (Asana Blocker Engine)
@@ -84,6 +86,33 @@ The true power of this system is that it physically hooks into the existing Neog
 - **Inventory (DATAZ/EDITZ):** If a product hits its `minimum_stock_level`, the system auto-spawns a High Priority task: *"Restock SKU-123"*. Clicking the task opens the EDITZ modal instantly.
 - **Production Manager:** Converting a Custom Order into a Work Order auto-generates a task timeline (Assembly -> QA -> Boxing).
 - **A.I. CFO:** The system schedules automated, recurring tasks on the 1st of every month to *"Review Previous Month True Profit Waterfall"*.
+
+---
+
+## 5. Advanced Enterprise Mechanics (The Superpowers)
+
+To elevate this from a simple tracker to a true Operations Engine, we will implement the following enterprise-grade features:
+
+### A. The SOP Template Engine (Process Street / Asana)
+Instead of creating tasks one by one, users can instantiate predefined "Templates".
+- **Database Addition:** `task_templates` table defining parent tasks, and a `template_subtasks` table.
+- **Workflow:** Clicking "Run Monthly Tax Prep" automatically spawns a Parent Task, generates the 15 required subtasks, and wires up the dependencies between them instantly.
+
+### B. Time Cost vs. Actuals (Harvest / Jira)
+Administrative tasks burn labor hours, which directly impacts Net Profit.
+- **Database Addition:** Add `estimated_minutes` and `actual_minutes` (Integers) to the `taskz` table. (This logic will also be applied to the Buildz module to track time per assembly step).
+- **Workflow:** A "Start Timer" button exists on the task UI. When clicked, it logs active time.
+- **CFO Integration:** The A.I. CFO terminal can mathematically calculate exactly how much labor cost is being burned on administrative tasks versus physical product assembly by querying `actual_minutes`.
+
+### C. The Immutable Audit Trail (Jira / Linear)
+In complex automated systems, users need to know exactly *why* a task changed state.
+- **Database Addition:** `task_activity` table (Columns: `task_id`, `actor_type` [System/User], `action_text`, `timestamp`).
+- **Workflow:** Every time a task goes from `In Progress` to `Blocked`, or an automation triggers, the system logs it. The task UI displays a chronological feed (e.g., "System Automation blocked this task at 2:00 PM because SKU-123 ran out of stock").
+
+### D. Dynamic Context Linking (Notion)
+Tasks must deeply reference the physical world without clunky dropdowns.
+- **Workflow:** When typing a task description, typing `#` triggers a Vanilla JS autocomplete dropdown querying the live database. 
+- Typing `#BlackFil` generates a clickable blue pill for "Black Filament (SKU-123)". Clicking the pill from within the task instantly opens the Inventory EDITZ modal.
 
 ---
 
