@@ -185,7 +185,7 @@ function teRenderTaskGrid(filter = null) {
         if (filter === 'blocked') return t.status === 'Blocked';
         if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
         if (filter === 'inbox') {
-            if (t.status === 'Completed' || t.status === 'Done' || t.parent_task_id) return false;
+            if (t.status === 'Completed' || t.status === 'Done') return false;
             let meta = t.metadata || {};
             let assignee = meta.spoofed_assignee || 'UNASSIGNED';
             
@@ -216,6 +216,18 @@ function teRenderTaskGrid(filter = null) {
         return t.status !== 'Completed' && t.status !== 'Done'; // Default 'list' view hides done
     });
     
+    // UI Hierarchy Safety: If a subtask passes a filter (e.g. My Tasks), its Parent MUST be in displayTasks to render the accordion.
+    let parentIdsToAdd = new Set();
+    displayTasks.forEach(t => {
+        if (t.parent_task_id && !displayTasks.some(p => p.id === t.parent_task_id)) {
+            parentIdsToAdd.add(t.parent_task_id);
+        }
+    });
+    parentIdsToAdd.forEach(pid => {
+        let parentTask = taskEngineDB.taskz.find(t => t.id === pid);
+        if (parentTask) displayTasks.push(parentTask);
+    });
+
     // Group by Cycle
     let cycleGroups = {
         'unassigned': { title: 'No Cycle', tasks: [] }
