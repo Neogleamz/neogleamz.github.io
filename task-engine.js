@@ -99,7 +99,7 @@ function teRenderSidebar() {
     
     if (cyclezList) {
         let cycleHTML = '';
-        taskEngineDB.cyclez.forEach(c => {
+        taskEngineDB.cyclez.filter(c => !c.is_archived).forEach(c => {
             cycleHTML += `
                 <div class="task-nav-link" style="flex-direction: column; align-items: flex-start; position: relative;" data-cycle-id="${c.id}">
                     <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 4px;">
@@ -117,7 +117,7 @@ function teRenderSidebar() {
     
     if (teamsList) {
         let teamsHTML = '';
-        taskEngineDB.teams.forEach(t => {
+        taskEngineDB.teams.filter(t => !t.is_archived).forEach(t => {
             let membersList = (t.members || []).map(m => `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
                     <div style="display: flex; align-items: center; gap: 4px;">
@@ -167,6 +167,7 @@ function teRenderTaskGrid(filter = 'list') {
     
     // Filter tasks based on view
     let displayTasks = taskList.filter(t => {
+        if (t.is_archived) return false;
         if (filter === 'blocked') return t.status === 'Blocked';
         if (filter === 'completed') return t.status === 'Done';
         if (filter === 'inbox') return t.status !== 'Done' && !t.parent_task_id;
@@ -187,7 +188,7 @@ function teRenderTaskGrid(filter = 'list') {
         'unassigned': { title: 'No Cycle', tasks: [] }
     };
     
-    taskEngineDB.cyclez.forEach(c => {
+    taskEngineDB.cyclez.filter(c => !c.is_archived).forEach(c => {
         cycleGroups[c.id] = { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [] };
     });
     
@@ -717,8 +718,25 @@ window.teSwitchView = function(view, btnEl) {
     }
     
     const wrapper = document.getElementById('te-task-rows-wrapper');
+    const archiveWrapper = document.getElementById('te-archive-view-wrapper');
     const header = document.querySelector('.task-grid-header');
     if (!wrapper || !header) return;
+
+    if (archiveWrapper) {
+        if (view === 'archive') {
+            wrapper.style.display = 'none';
+            header.style.display = 'none';
+            archiveWrapper.style.display = 'flex';
+            if (typeof window.teRenderArchiveView === 'function') window.teRenderArchiveView();
+            let title = document.getElementById('te-main-header-title');
+            if (title) title.textContent = 'Archive';
+            return;
+        } else {
+            archiveWrapper.style.display = 'none';
+            wrapper.style.display = 'flex';
+        }
+    }
+
     
     if (view === 'list') {
         header.style.display = 'grid';
@@ -1001,3 +1019,125 @@ document.addEventListener('keydown', (e) => {
         // FUTURE: document.getElementById('newTaskInput').focus();
     }
 });
+
+// --- ARCHIVE LOGIC ---
+
+window.teRenderArchiveView = function() {
+    const container = document.getElementById('te-archive-rows-container');
+    if (!container) return;
+    
+    let html = '';
+    
+    // Get all archived items
+    const archivedTasks = taskEngineDB.taskz.filter(t => t.is_archived);
+    const archivedCycles = taskEngineDB.cyclez.filter(c => c.is_archived);
+    const archivedTeams = taskEngineDB.teams.filter(t => t.is_archived);
+    
+    const countSpan = document.getElementById('te-archive-selected-count');
+    if (countSpan) countSpan.textContent = '0';
+    
+    const checkboxAll = document.getElementById('te-archive-select-all');
+    if (checkboxAll) checkboxAll.checked = false;
+
+    if (archivedTasks.length === 0 && archivedCycles.length === 0 && archivedTeams.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>';
+        return;
+    }
+    
+    const renderRow = (id, title, type) => `
+        <div class="task-row te-archive-row" style="display: flex; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 4px;">
+            <input type="checkbox" class="te-archive-checkbox" data-id="${id}" data-type="${type}" style="cursor: pointer; width:16px; height:16px; accent-color: var(--neon-green); margin-right: 15px;" data-change="change_teUpdateArchiveSelection">
+            <span style="font-weight: bold; color: var(--text-muted); width: 80px; text-transform: uppercase; font-size: 10px;">${type}</span>
+            <span style="flex-grow: 1; color: white;">${title}</span>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-slate" data-click="click_teRestoreEntity" data-id="${id}" data-type="${type}" style="padding: 4px 8px; font-size: 11px;">Restore</button>
+                <button class="btn-red" data-click="click_teHardDeleteEntity" data-id="${id}" data-type="${type}" style="padding: 4px 8px; font-size: 11px; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;">Delete</button>
+            </div>
+        </div>
+    `;
+    
+    archivedCycles.forEach(c => html += renderRow(c.id, c.title, 'cycle'));
+    archivedTeams.forEach(t => html += renderRow(t.id, t.name, 'team'));
+    archivedTasks.forEach(t => html += renderRow(t.id, t.title, 'task'));
+    
+    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+};
+
+window.teArchiveEntity = async function(type, id) {
+    try {
+        let table = type === 'task' ? 'taskz' : (type === 'cycle' ? 'cyclez' : 'teams');
+        const { error } = await supabaseClient.from(table).update({ is_archived: true }).eq('id', id);
+        if (error) throw error;
+        
+        let item = taskEngineDB[table].find(i => i.id === id);
+        if (item) item.is_archived = true;
+        
+        // Optimistic UI updates
+        teRenderSidebar();
+        if (typeof window.teSwitchView === 'function') {
+            let activeView = document.querySelector('.task-nav-link.active');
+            let viewName = 'list';
+            if (activeView) {
+                let txt = activeView.textContent.toLowerCase();
+                if (txt.includes('inbox')) viewName = 'inbox';
+                else if (txt.includes('my tasks')) viewName = 'my_tasks';
+                else if (txt.includes('blocked')) viewName = 'blocked';
+                else if (txt.includes('completed')) viewName = 'completed';
+                else if (txt.includes('archive')) viewName = 'archive';
+            }
+            window.teSwitchView(viewName, activeView);
+        }
+        
+        // Hide flyout if archiving a task
+        if (type === 'task') {
+            window.closeTaskContext();
+        }
+    } catch(e) { console.error('Failed to archive', e); }
+};
+
+window.teRestoreEntity = async function(type, id) {
+    try {
+        let table = type === 'task' ? 'taskz' : (type === 'cycle' ? 'cyclez' : 'teams');
+        const { error } = await supabaseClient.from(table).update({ is_archived: false }).eq('id', id);
+        if (error) throw error;
+        
+        let item = taskEngineDB[table].find(i => i.id === id);
+        if (item) item.is_archived = false;
+        
+        teRenderSidebar();
+        if (typeof window.teRenderArchiveView === 'function') window.teRenderArchiveView();
+    } catch(e) { console.error('Failed to restore', e); }
+};
+
+window.teHardDeleteEntity = async function(type, id) {
+    try {
+        let table = type === 'task' ? 'taskz' : (type === 'cycle' ? 'cyclez' : 'teams');
+        const { error } = await supabaseClient.from(table).delete().eq('id', id);
+        if (error) throw error;
+        
+        taskEngineDB[table] = taskEngineDB[table].filter(i => i.id !== id);
+        
+        teRenderSidebar();
+        if (typeof window.teRenderArchiveView === 'function') window.teRenderArchiveView();
+    } catch(e) { console.error('Failed to hard delete', e); }
+};
+
+window.teBulkRestore = async function() {
+    const checkboxes = document.querySelectorAll('.te-archive-checkbox:checked');
+    if (checkboxes.length === 0) return;
+    
+    for (const cb of checkboxes) {
+        await window.teRestoreEntity(cb.getAttribute('data-type'), cb.getAttribute('data-id'));
+    }
+};
+
+window.teBulkDelete = async function() {
+    const checkboxes = document.querySelectorAll('.te-archive-checkbox:checked');
+    if (checkboxes.length === 0) return;
+    if (!confirm(`Permanently delete ${checkboxes.length} items? This cannot be undone.`)) return;
+    
+    for (const cb of checkboxes) {
+        await window.teHardDeleteEntity(cb.getAttribute('data-type'), cb.getAttribute('data-id'));
+    }
+};
+

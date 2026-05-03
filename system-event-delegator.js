@@ -210,11 +210,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_teDeleteCycle':
                     event.stopPropagation();
-                    if(typeof window.teDeleteCycle==='function') window.teDeleteCycle(el.getAttribute('data-cycle-id'));
+                    if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('cycle', el.getAttribute('data-cycle-id'));
                     break;
                 case 'click_teDeleteTeam':
                     event.stopPropagation();
-                    if(typeof window.teDeleteTeam==='function') window.teDeleteTeam(el.getAttribute('data-team-id'));
+                    if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('team', el.getAttribute('data-team-id'));
+                    break;
+                case 'click_teSwitchView_archive':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('archive', el);
+                    break;
+                case 'click_teArchiveTaskFromFlyout':
+                    if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('task', window.currentOpenTaskId);
+                    break;
+                case 'click_teRestoreEntity':
+                    if(typeof window.teRestoreEntity==='function') window.teRestoreEntity(el.getAttribute('data-type'), el.getAttribute('data-id'));
+                    break;
+                case 'click_teHardDeleteEntity':
+                    if(typeof window.teHardDeleteEntity==='function') window.teHardDeleteEntity(el.getAttribute('data-type'), el.getAttribute('data-id'));
+                    break;
+                case 'click_teBulkRestore':
+                    if(typeof window.teBulkRestore==='function') window.teBulkRestore();
+                    break;
+                case 'click_teBulkDelete':
+                    if(typeof window.teBulkDelete==='function') window.teBulkDelete();
                     break;
                 case 'click_teToggleTeamMembers':
                     {
@@ -925,6 +943,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.teUpdateTaskCycle(window.currentOpenTaskId, el.value);
                     }
                     break;
+                case 'change_teToggleAllArchive': {
+                    const archiveCbs = document.querySelectorAll('.te-archive-checkbox');
+                    archiveCbs.forEach(cb => cb.checked = el.checked);
+                    const count1 = document.getElementById('te-archive-selected-count');
+                    if(count1) count1.textContent = document.querySelectorAll('.te-archive-checkbox:checked').length;
+                    break;
+                }
+                case 'change_teUpdateArchiveSelection': {
+                    const count2 = document.getElementById('te-archive-selected-count');
+                    if(count2) count2.textContent = document.querySelectorAll('.te-archive-checkbox:checked').length;
+                    
+                    const allCbs = document.querySelectorAll('.te-archive-checkbox');
+                    const allChecked = document.querySelectorAll('.te-archive-checkbox:checked');
+                    const selectAllCb = document.getElementById('te-archive-select-all');
+                    if (selectAllCb) {
+                        selectAllCb.checked = (allCbs.length > 0 && allChecked.length === allCbs.length);
+                    }
+                    break;
+                }
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);

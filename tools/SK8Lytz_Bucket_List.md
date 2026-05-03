@@ -43,12 +43,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `feat/task-engine-p5` : **Phase 5 (Embedded UI Payloads)** - Wire up the cross-module hooks (embedding Cycle Counts and Low Stockz reports natively inside tasks).
 - [🚀] `feat/task-engine-p6` : **Phase 6 (Automations & Templates)** - Build the logic that auto-spawns SOP tasks and dynamically generates children workflows. [🤖 Gemini 3.1 Pro] [🧠 15k / 20k] [💸 $0.05 / $0.06]
 - [🚀] `feat/task-engine-p7` : **Phase 7 (Communication & Inbox)** - Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
-- [ ] `feat/task-engine-archive` : **Task Engine Archive** - Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.04]
+- [x] `feat/task-engine-archive` : **Task Engine Archive** - Implement the ability to soft-delete/archive tasks, cycles, and teams, and build a dedicated Archive UI view. [🤖 AI Model] [🧠 40k / 10k] [💸 $0.15 / $0.04]
 - [ ] `feat/task-status-dropdown` : **Status Selector Refactor** - Replace the click-to-cycle logic on task status pills with a native dropdown/selector menu for precise status assignments. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - [ ] `feat/task-mass-status-update` : **Mass Update Task Status** - Decouple row checkboxes from individual status toggling to enable mass selection and status updating for multiple tasks simultaneously. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
 - [ ] `feat/task-engine-sorting` : **Task Sorting & Prioritization** - Implement the ability to sort tasks globally and prioritize them (e.g., via drag-and-drop) within specific cycles. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.04]
 - [ ] `feat/task-engine-column-sort` : **List View Column Sorting** - Enable dynamic sorting by clicking on any column header within the List/Row view (Owner, Status, Timeline, Priority). [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - [ ] `feat/task-engine-timelines` : **Task Timelines & Calendar Sync** - Implement date picking/timelines for individual tasks and map them to render dynamically on the Calendar view. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
+- [ ] `feat/task-engine-ui-colors` : **Task Engine UI Colorization** - Inject more vibrant colors into the left sidebar pane and the top navigation of the right pane (List/Board/Calendar) to create clearer visual distinction for active states. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] `feat/task-engine-board-interactions` : **Task Engine Board View Interactions** - Enable full interaction, opening, and working of individual tasks directly from within the Kanban Board view. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.04]
 
 **Other Ideas**
 
