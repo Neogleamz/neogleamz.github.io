@@ -817,6 +817,251 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.hardDeleteArchive(el.getAttribute('data-arc-type'), el.getAttribute('data-arc-id'));
                     }
                     break;
+                case 'click_openPdf':
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.open(el.getAttribute('data-url'), '_blank');
+                    break;
+                case 'click_openVideo':
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if(window.openMediaModal) window.openMediaModal(el.getAttribute('data-url'), 'vid');
+                    break;
+                case 'click_openImage':
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if(window.openMediaModal) window.openMediaModal(el.getAttribute('data-url'), 'img');
+                    break;
+                case 'click_moveSOPUp':
+                    if(window.moveSOPUp) window.moveSOPUp(el);
+                    break;
+                case 'click_moveSOPDown':
+                    if(window.moveSOPDown) window.moveSOPDown(el);
+                    break;
+                case 'click_addSOPRow':
+                    if(window.addSOPRow) window.addSOPRow(el);
+                    break;
+                case 'click_removeSOPRow':
+                    if(window.removeSOPRow) window.removeSOPRow(el);
+                    break;
+                case 'click_removeBatchItem':
+                    if(window.removeBatchItem) window.removeBatchItem(el.getAttribute('data-index'));
+                    break;
+                case 'click_toggleRouteChildren':
+                    {
+                        let safeK = el.getAttribute('data-route'); 
+                        let rc = document.getElementById('route_children_'+safeK); 
+                        let ic = document.getElementById('route_icon_'+safeK); 
+                        if(rc && ic){
+                            if(rc.style.display==='none'){
+                                rc.style.display='flex';
+                                ic.style.transform='rotate(0deg)';
+                            }else{
+                                rc.style.display='none';
+                                ic.style.transform='rotate(-90deg)';
+                            }
+                        }
+                    }
+                    break;
+                case 'click_sortReportTable':
+                    if(window.sortReportTable) window.sortReportTable(el, el.getAttribute('data-col'), el.getAttribute('data-desc') === 'true');
+                    break;
+                case 'click_selectWO':
+                    if(window.selectWO) window.selectWO(el.getAttribute('data-id'));
+                    break;
+                case 'click_editWOQty':
+                    if(window.editWOQty) window.editWOQty(el.getAttribute('data-id'));
+                    break;
+                case 'click_openMediaManager':
+                    if(window.openMediaManager) window.openMediaManager(el.getAttribute('data-type'));
+                    break;
+                case 'click_selectPrintJob':
+                    if(window.selectPrintJob) window.selectPrintJob(el.getAttribute('data-id'));
+                    break;
+                case 'click_stopPropagation':
+                    event.stopPropagation();
+                    break;
+                case 'click_toggleLayerzSopGroup':
+                    {
+                        let grpId = el.getAttribute('data-grp');
+                        let isEditing = window.activeInlineSopEditors && window.activeInlineSopEditors[grpId] === true;
+                        let isClickingIcon = el.getAttribute('data-icon') === 'true';
+                        if(isEditing && !isClickingIcon) break;
+                        
+                        let d = document.getElementById('sopgrp_body_'+grpId);
+                        let ic = document.getElementById('sopgrp_icon_'+grpId);
+                        if(d && ic) {
+                            if(d.style.display==='none'){
+                                d.style.display='block';
+                                ic.innerText='▼';
+                                localStorage.setItem('layerzSopExpanded_'+grpId,'true');
+                            } else {
+                                d.style.display='none';
+                                ic.innerText='▶';
+                                localStorage.setItem('layerzSopExpanded_'+grpId,'false');
+                            }
+                        }
+                    }
+                    break;
+                case 'click_openPrintSOP':
+                    if(window.openPrintSOP) window.openPrintSOP(el.getAttribute('data-name'));
+                    break;
+                case 'click_saveInlineSopBlock_print':
+                    if(window.saveInlineSopBlock) {
+                        window.saveInlineSopBlock(el.getAttribute('data-grp'), el.getAttribute('data-rawname'));
+                        if (window.currentPrintJob && window.renderActivePrintJob) {
+                            setTimeout(() => window.renderActivePrintJob(window.currentPrintJob.id), 500);
+                        }
+                    }
+                    break;
+
+                case 'click_movePackerzSOPUp':
+                    if(window.movePackerzSOPUp) window.movePackerzSOPUp(el);
+                    break;
+                case 'click_movePackerzSOPDown':
+                    if(window.movePackerzSOPDown) window.movePackerzSOPDown(el);
+                    break;
+                case 'click_addPackerzSOPRow':
+                    if(window.addPackerzSOPRow) window.addPackerzSOPRow(el);
+                    break;
+                case 'click_removePackerzSOPRow':
+                    if(window.removePackerzSOPRow) window.removePackerzSOPRow(el);
+                    break;
+                case 'click_closePackerzAuditOverlay':
+                    {
+                        let ol = document.getElementById('packerzAuditOverlay');
+                        if (ol) ol.remove();
+                    }
+                    break;
+                case 'click_navigateSOPMediaFolder':
+                    if(window.navigateSOPMediaFolder) window.navigateSOPMediaFolder(el.getAttribute('data-path'));
+                    break;
+                case 'click_deleteSOPMedia':
+                    if(window.deleteSOPMedia) window.deleteSOPMedia(el.getAttribute('data-path'), el.getAttribute('data-folder') === 'true');
+                    break;
+                case 'click_insertSOPToken':
+                    if(window.insertSOPToken) window.insertSOPToken(el.getAttribute('data-token'));
+                    break;
+                case 'click_toggleOriginalBlueprint':
+                    {
+                        let nextEl = el.nextElementSibling;
+                        if(nextEl) {
+                            if(nextEl.style.display==='none'){
+                                nextEl.style.display='block';
+                                el.innerText='Hide Original Blueprint';
+                            } else {
+                                nextEl.style.display='none';
+                                el.innerText='View Original Blueprint';
+                            }
+                        }
+                    }
+                    break;
+                case 'click_toggleSOPAuditDetail':
+                    if(window.toggleSOPAuditDetail) window.toggleSOPAuditDetail(el.getAttribute('data-target'));
+                    break;
+                case 'click_unarchivePackerzOrder':
+                    event.stopPropagation();
+                    if(window.unarchivePackerzOrder) window.unarchivePackerzOrder(el.getAttribute('data-id'));
+                    break;
+
+                case 'click_addLabelzToSpool':
+                    if(window.addLabelzToSpool) window.addLabelzToSpool(el.getAttribute('data-name'), el.getAttribute('data-emoji'));
+                    break;
+                case 'click_openEditLabelModal':
+                    if(window.openEditLabelModal) window.openEditLabelModal(el.getAttribute('data-name'));
+                    break;
+                case 'click_labelzBringForward':
+                    if(window.fCanvas && window.saveLabelzHistory) {
+                        window.fCanvas.bringForward(window.fCanvas.getActiveObject());
+                        window.saveLabelzHistory();
+                        window.fCanvas.renderAll();
+                    }
+                    break;
+                case 'click_labelzSendBackward':
+                    if(window.fCanvas && window.saveLabelzHistory) {
+                        window.fCanvas.sendBackwards(window.fCanvas.getActiveObject());
+                        window.saveLabelzHistory();
+                        window.fCanvas.renderAll();
+                    }
+                    break;
+                case 'click_lblzDuplicateSelected':
+                    if(window.lblzDuplicateSelected) window.lblzDuplicateSelected();
+                    break;
+                case 'click_lblzUpdObj':
+                    if(window.updObj) window.updObj(el.getAttribute('data-key'), el.getAttribute('data-val'));
+                    break;
+                case 'click_lblzToggleLock':
+                    if(window.updObj && window.fCanvas && window.onCanvasSelection) {
+                        const isLockedStr = el.getAttribute('data-locked');
+                        const isLocked = isLockedStr === 'true';
+                        window.updObj('lockMovementX', !isLocked);
+                        window.updObj('lockMovementY', !isLocked);
+                        window.updObj('lockScalingX', !isLocked);
+                        window.updObj('lockScalingY', !isLocked);
+                        window.onCanvasSelection({target: window.fCanvas.getActiveObject()});
+                    }
+                    break;
+                case 'click_lblzDeleteSelected':
+                    if(window.lblzDeleteSelected) window.lblzDeleteSelected();
+                    break;
+                case 'click_applyCatalogData':
+                    if(window.applyCatalogData) window.applyCatalogData(el.getAttribute('data-name'), el.getAttribute('data-val'), Number(el.getAttribute('data-cogs')));
+                    break;
+
+                case 'click_toggleCeoBtn':
+                    if(window.toggleCeoBtn) window.toggleCeoBtn(Number(el.getAttribute('data-index')), el.getAttribute('data-field'));
+                    break;
+                case 'click_addBarcodzToSpool':
+                    if(window.addBarcodzToSpool) window.addBarcodzToSpool(el.getAttribute('data-name'), el.getAttribute('data-slug'), el.getAttribute('data-icon'), el.getAttribute('data-type'));
+                    break;
+                case 'click_updateSpoolItem':
+                    if(window.updateSpoolItem) window.updateSpoolItem(el.getAttribute('data-slug'), Number(el.getAttribute('data-amt')));
+                    break;
+                case 'click_sortAnalytics':
+                    if(window.sortAnalytics) window.sortAnalytics(el.getAttribute('data-col'));
+                    break;
+
+                case 'click_openCeoAddModal':
+                    if(window.openCeoAddModal) window.openCeoAddModal();
+                    break;
+
+                case 'click_removeAliasMapping':
+                    if(window.removeAliasMapping) window.removeAliasMapping(el.getAttribute('data-sku'));
+                    break;
+                case 'click_toggleSimpleCol':
+                    if(window.toggleSimpleCol) window.toggleSimpleCol(el.getAttribute('data-key'));
+                    break;
+                case 'click_sortData':
+                    if(window.sortData) window.sortData(el.getAttribute('data-key'));
+                    break;
+                case 'click_stopProp':
+                    e.stopPropagation();
+                    break;
+                case 'click_setTipzPriority':
+                    if(window.setTipzPriority) window.setTipzPriority(Number(el.getAttribute('data-id')), el.getAttribute('data-label'));
+                    break;
+                case 'click_toggleTipzStatus':
+                    if(window.toggleTipzStatus) window.toggleTipzStatus(Number(el.getAttribute('data-id')), el.getAttribute('data-st'));
+                    break;
+                case 'click_deleteTipz':
+                    if(window.deleteTipz) window.deleteTipz(Number(el.getAttribute('data-id')));
+                    break;
+
+                case 'click_toggleHorizontalPreview':
+                    if(window.toggleHorizontalPreview) window.toggleHorizontalPreview(el.getAttribute('data-left'), el.getAttribute('data-preview'), el);
+                    break;
+                case 'click_addInlineSOPRow':
+                    if(window.addInlineSOPRow) window.addInlineSOPRow(el.getAttribute('data-grp'));
+                    break;
+                case 'click_toggleInlineEditor':
+                    if(window.toggleInlineEditor) window.toggleInlineEditor(el.getAttribute('data-grp'));
+                    break;
+                case 'click_saveInlineSopBlock':
+                    if(window.saveInlineSopBlock) window.saveInlineSopBlock(el.getAttribute('data-grp'), el.getAttribute('data-rawname'));
+                    break;
+                case 'click_deleteAllArchive':
+                    if(window.deleteAllArchive) window.deleteAllArchive();
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
