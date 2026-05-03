@@ -16,6 +16,17 @@ window.initTaskEngine = async function() {
     }
 };
 
+window.teGetStringColor = function(str) {
+    if (!str) return '#3b82f6';
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const colors = ['#f43f5e', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#0ea5e9', '#6366f1', '#a855f7', '#ec4899'];
+    let index = Math.abs(hash) % colors.length;
+    return colors[index];
+};
+
 /**
  * Asynchronously boots the Task Engine data cache by executing parallel
  * read operations against the Supabase `taskz`, `cyclez`, and `teams` tables.
@@ -107,10 +118,29 @@ function teRenderSidebar() {
     if (teamsList) {
         let teamsHTML = '';
         taskEngineDB.teams.forEach(t => {
+            let membersList = (t.members || []).map(m => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <div style="width: 14px; height: 14px; border-radius: 50%; background: ${window.teGetStringColor(m)}; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: white;">${m.substring(0,1).toUpperCase()}</div>
+                        <span style="font-size: 11px; color: #ccc;">${m}</span>
+                    </div>
+                    <span data-click="click_teRemoveTeamMember" data-team-id="${t.id}" data-member-name="${m}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
+                </div>
+            `).join('');
+
             teamsHTML += `
-                <div class="task-nav-link" style="display: flex; justify-content: space-between; align-items: center;" data-team-id="${t.id}">
-                    <span>${t.name}</span>
-                    <span data-click="click_teDeleteTeam" data-team-id="${t.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
+                <div style="display: flex; flex-direction: column;">
+                    <div class="task-nav-link" style="display: flex; justify-content: space-between; align-items: center;" data-click="click_teToggleTeamMembers" data-team-id="${t.id}">
+                        <span>${t.name}</span>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <span data-click="click_teAddTeamMember" data-team-id="${t.id}" style="color: var(--text-muted); font-size: 12px; cursor: pointer; padding: 2px;">+</span>
+                            <span data-click="click_teDeleteTeam" data-team-id="${t.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
+                        </div>
+                    </div>
+                    <div id="te-team-members-${t.id}" style="display: none; flex-direction: column; padding-left: 15px; margin-bottom: 5px;">
+                        ${membersList}
+                        ${(!t.members || t.members.length === 0) ? '<span style="font-size: 10px; color: var(--text-muted); padding: 2px 4px;">No members</span>' : ''}
+                    </div>
                 </div>
             `;
         });
@@ -141,7 +171,12 @@ function teRenderTaskGrid(filter = 'list') {
         if (filter === 'completed') return t.status === 'Done';
         if (filter === 'my_tasks') {
             let meta = t.metadata || {};
-            return meta.spoofed_assignee === currentUser;
+            if (meta.spoofed_assignee === currentUser) return true;
+            if (meta.assigned_team_id) {
+                let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
+                if (team && team.members && team.members.includes(currentUser)) return true;
+            }
+            return false;
         }
         return t.status !== 'Done'; // Default 'list' view hides done
     });
@@ -218,7 +253,7 @@ function teBuildTaskRowHTML(t, isChild) {
         }
     } else if (meta.spoofed_assignee) {
         ownerInitials = meta.spoofed_assignee.substring(0,2).toUpperCase();
-        ownerBg = '#10b981'; // Green for spoofed users
+        ownerBg = window.teGetStringColor(meta.spoofed_assignee);
         ownerTitle = meta.spoofed_assignee;
     }
 
@@ -591,6 +626,42 @@ window.teDeleteTeam = async function(teamId) {
             await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', task.id);
         }
         await supabaseClient.from('teams').delete().eq('id', teamId);
+    } catch(e) { console.error(e); }
+};
+
+window.teAddTeamMember = async function(teamId) {
+    let name = prompt("Enter member name (e.g. Chris):");
+    if (!name || !name.trim()) return;
+    name = name.trim();
+    
+    let team = taskEngineDB.teams.find(t => t.id === teamId);
+    if (!team) return;
+    
+    let members = team.members || [];
+    if (members.includes(name)) return;
+    
+    members.push(name);
+    team.members = members;
+    
+    teRenderSidebar();
+    
+    try {
+        await supabaseClient.from('teams').update({ members: members }).eq('id', teamId);
+    } catch(e) { console.error(e); }
+};
+
+window.teRemoveTeamMember = async function(teamId, memberName) {
+    let team = taskEngineDB.teams.find(t => t.id === teamId);
+    if (!team) return;
+    
+    let members = team.members || [];
+    members = members.filter(m => m !== memberName);
+    team.members = members;
+    
+    teRenderSidebar();
+    
+    try {
+        await supabaseClient.from('teams').update({ members: members }).eq('id', teamId);
     } catch(e) { console.error(e); }
 };
 

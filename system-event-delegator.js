@@ -225,6 +225,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.stopPropagation();
                     if(typeof window.teDeleteTeam==='function') window.teDeleteTeam(el.getAttribute('data-team-id'));
                     break;
+                case 'click_teToggleTeamMembers':
+                    {
+                        const teamId = el.getAttribute('data-team-id');
+                        const memDiv = document.getElementById('te-team-members-' + teamId);
+                        if (memDiv) {
+                            memDiv.style.display = memDiv.style.display === 'none' ? 'flex' : 'none';
+                        }
+                    }
+                    break;
+                case 'click_teAddTeamMember':
+                    event.stopPropagation();
+                    if(typeof window.teAddTeamMember==='function') window.teAddTeamMember(el.getAttribute('data-team-id'));
+                    break;
+                case 'click_teRemoveTeamMember':
+                    event.stopPropagation();
+                    if(typeof window.teRemoveTeamMember==='function') window.teRemoveTeamMember(el.getAttribute('data-team-id'), el.getAttribute('data-member-name'));
+                    break;
                 case 'click_teToggleCycleGroup':
                     {
                         const cycleId = el.getAttribute('data-cycle-id');
