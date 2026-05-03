@@ -553,9 +553,9 @@
                             </td>
                             <td class="trunc-col" style="padding:4px 12px; font-weight:bold; color:var(--text-heading); text-align:left;">
                                 <div style="display: flex; align-items: center; gap: 8px; min-width: 0; width: 100%;">
-                                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; position: relative; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-muted); flex-shrink: 0;">
-                                        <div style="position: absolute; inset:0; display: flex; align-items: center; justify-content: center; z-index: 0; font-size: 10px;">${s.name.charAt(0)}</div>
-                                        ${src ? `<img loading="lazy" src="${src}" style="position: relative; width: 100%; height: 100%; object-fit: cover; z-index: 10;" onerror="this.style.display='none'">` : ''}
+                                    <div class="grid-stack" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-muted); flex-shrink: 0;">
+                                        <div style="display: flex; align-items: center; justify-content: center; z-index: 0; font-size: 10px;">${s.name.charAt(0)}</div>
+                                        ${src ? `<img loading="lazy" src="${src}" style="width: 100%; height: 100%; object-fit: cover; z-index: 10;" onerror="this.style.display='none'">` : ''}
                                     </div>
                                     <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${s.name}</span>
                                 </div>
