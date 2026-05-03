@@ -155,7 +155,7 @@ function teRenderTaskGrid(filter = null) {
             let txt = activeNav.textContent.toLowerCase();
             if (txt.includes('inbox')) filter = 'inbox';
             else if (txt.includes('my tasks')) filter = 'my_tasks';
-            else if (txt.includes('blocked')) filter = 'blocked';
+            else if (txt.includes('in progress')) filter = 'in_progress';
             else if (txt.includes('completed')) filter = 'completed';
             else if (txt.includes('archive')) filter = 'archive';
             else filter = 'list';
@@ -182,7 +182,7 @@ function teRenderTaskGrid(filter = null) {
     // Filter tasks based on view
     let displayTasks = taskList.filter(t => {
         if (t.is_archived) return false;
-        if (filter === 'blocked') return t.status === 'Blocked';
+        if (filter === 'in_progress') return t.status === 'In Progress';
         if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
         if (filter === 'inbox') {
             if (t.status === 'Completed' || t.status === 'Done') return false;
@@ -296,7 +296,6 @@ function teBuildTaskRowHTML(t, isChild) {
     let statusColorClass = 'status-in-progress';
     if (t.status === 'Done' || t.status === 'Completed') statusColorClass = 'status-completed';
     if (t.status === 'Todo' || t.status === 'Backlog') statusColorClass = 'status-todo';
-    if (t.status === 'Blocked') statusColorClass = 'status-blocked';
     if (t.status === 'Archived') statusColorClass = 'status-archived';
     
     let meta = t.metadata || {};
@@ -547,7 +546,6 @@ window.teOpenStatusDropdown = function(taskId, element) {
         const options = [
             { status: 'Todo', class: 'status-todo' },
             { status: 'In Progress', class: 'status-in-progress' },
-            { status: 'Blocked', class: 'status-blocked' },
             { status: 'Completed', class: 'status-completed' },
             { status: 'Archived', class: 'status-archived' }
         ];
@@ -1070,11 +1068,11 @@ window.teSwitchView = function(view, btnEl) {
         teRenderTaskGrid('my_tasks');
         let title = document.getElementById('te-main-header-title');
         if (title) title.textContent = 'My Tasks';
-    } else if (view === 'blocked') {
+    } else if (view === 'in_progress') {
         header.style.display = 'grid';
-        teRenderTaskGrid('blocked');
+        teRenderTaskGrid('in_progress');
         let title = document.getElementById('te-main-header-title');
-        if (title) title.textContent = 'Blocked Tasks';
+        if (title) title.textContent = 'In Progress Tasks';
     } else if (view === 'completed') {
         header.style.display = 'grid';
         teRenderTaskGrid('completed');
@@ -1090,9 +1088,9 @@ window.teSwitchView = function(view, btnEl) {
         
         let boardHTML = `
             <div style="display: flex; gap: 20px; height: 100%; align-items: stretch; overflow-x: auto; padding-bottom: 20px;">
-                ${['Todo', 'In Progress', 'Blocked', 'Completed'].map(status => {
+                ${['Todo', 'In Progress', 'Completed'].map(status => {
                     let tasksHtml = taskEngineDB.taskz.filter(t => (status === 'Completed' ? (t.status === 'Completed' || t.status === 'Done') : t.status === status)).map(t => {
-                        let color = status === 'Completed' ? '#10b981' : (status === 'Blocked' ? '#ef4444' : (status === 'Todo' ? '#64748b' : '#3b82f6'));
+                        let color = status === 'Completed' ? '#10b981' : (status === 'Todo' ? '#64748b' : '#3b82f6');
                         return `
                         <div class="kanban-card" data-task-id="${t.id}" style="background: var(--bg-container); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-left: 3px solid ${color};">
                             <div style="font-weight: 500; font-size: 14px; margin-bottom: 8px; color: white;">${t.title}</div>
@@ -1477,7 +1475,7 @@ window.teArchiveEntity = async function(type, id) {
                 let txt = activeView.textContent.toLowerCase();
                 if (txt.includes('inbox')) viewName = 'inbox';
                 else if (txt.includes('my tasks')) viewName = 'my_tasks';
-                else if (txt.includes('blocked')) viewName = 'blocked';
+                else if (txt.includes('in progress')) viewName = 'in_progress';
                 else if (txt.includes('completed')) viewName = 'completed';
                 else if (txt.includes('archive')) viewName = 'archive';
             }

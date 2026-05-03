@@ -214,8 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSwitchView_my_tasks':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('my_tasks', el);
                     break;
-                case 'click_teSwitchView_blocked':
-                    if(typeof window.teSwitchView==='function') window.teSwitchView('blocked', el);
+                case 'click_teSwitchView_in_progress':
+                    if(typeof window.teSwitchView==='function') window.teSwitchView('in_progress', el);
                     break;
                 case 'click_teSwitchView_completed':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('completed', el);
