@@ -90,8 +90,11 @@ function teRenderSidebar() {
         let cycleHTML = '';
         taskEngineDB.cyclez.forEach(c => {
             cycleHTML += `
-                <div class="task-nav-link" style="flex-direction: column; align-items: flex-start;" data-cycle-id="${c.id}">
-                    <span style="margin-bottom: 4px;">${c.title}</span>
+                <div class="task-nav-link" style="flex-direction: column; align-items: flex-start; position: relative;" data-cycle-id="${c.id}">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 4px;">
+                        <span>${c.title}</span>
+                        <span data-click="click_teDeleteCycle" data-cycle-id="${c.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
+                    </div>
                     <div style="width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; overflow: hidden;">
                         <div style="width: 0%; background: ${c.color_hex || '#2dd4bf'}; height: 100%;"></div>
                     </div>
@@ -104,7 +107,12 @@ function teRenderSidebar() {
     if (teamsList) {
         let teamsHTML = '';
         taskEngineDB.teams.forEach(t => {
-            teamsHTML += `<div class="task-nav-link" data-team-id="${t.id}">${t.name}</div>`;
+            teamsHTML += `
+                <div class="task-nav-link" style="display: flex; justify-content: space-between; align-items: center;" data-team-id="${t.id}">
+                    <span>${t.name}</span>
+                    <span data-click="click_teDeleteTeam" data-team-id="${t.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
+                </div>
+            `;
         });
         teamsList.innerHTML = window.safeHTML ? window.safeHTML(teamsHTML) : teamsHTML;
     }
@@ -201,8 +209,8 @@ function teBuildTaskRowHTML(t, isChild) {
     let ownerBg = '#3b82f6';
     let ownerTitle = 'Unassigned';
     
-    if (t.assigned_team_id) {
-        let team = taskEngineDB.teams.find(tm => tm.id === t.assigned_team_id);
+    if (meta.assigned_team_id) {
+        let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
         if (team) {
             ownerInitials = team.name.substring(0,2).toUpperCase();
             ownerBg = team.color_hex || '#8b5cf6';
@@ -292,8 +300,8 @@ window.teOpenTaskContext = function(taskId) {
                 assigneeSelect.innerHTML = opts;
                 
                 let meta = task.metadata || {};
-                if (task.assigned_team_id) {
-                    assigneeSelect.value = 'team_' + task.assigned_team_id;
+                if (meta.assigned_team_id) {
+                    assigneeSelect.value = 'team_' + meta.assigned_team_id;
                 } else {
                     assigneeSelect.value = meta.spoofed_assignee || '';
                 }
@@ -483,24 +491,21 @@ window.teUpdateTaskAssignee = async function(taskId, assignee) {
     if (!task) return;
     
     let meta = task.metadata || {};
-    let updatePayload = {};
     
     if (assignee && assignee.startsWith('team_')) {
         let teamId = assignee.replace('team_', '');
-        task.assigned_team_id = teamId;
+        meta.assigned_team_id = teamId;
         delete meta.spoofed_assignee;
-        updatePayload = { assigned_team_id: teamId, metadata: meta };
     } else {
-        task.assigned_team_id = null;
+        delete meta.assigned_team_id;
         meta.spoofed_assignee = assignee;
-        updatePayload = { assigned_team_id: null, metadata: meta };
     }
     
     task.metadata = meta;
     teRenderTaskGrid();
     
     try {
-        await supabaseClient.from('taskz').update(updatePayload).eq('id', taskId);
+        await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', taskId);
     } catch(e) { console.error(e); }
 };
 
@@ -535,20 +540,57 @@ window.teCreateCycle = async function() {
 };
 
 window.teCreateTeam = async function() {
-    let name = prompt("Enter new team name:");
-    if (!name) return;
+    let title = prompt("Enter new team name:");
+    if (!title || !title.trim()) return;
     
+    const newTeam = { name: title.trim(), color_hex: '#8b5cf6' };
     try {
-        const { data, error } = await supabaseClient.from('teams').insert([{
-            name: name,
-            color_hex: '#8b5cf6'
-        }]).select();
-        
-        if (error) throw error;
+        const { data, error } = await supabaseClient.from('teams').insert([newTeam]).select();
         if (data && data.length > 0) {
             taskEngineDB.teams.push(data[0]);
             teRenderSidebar();
         }
+    } catch(e) { console.error(e); }
+};
+
+window.teDeleteCycle = async function(cycleId) {
+    if (!confirm("Delete this cycle? Tasks inside it will become Unassigned.")) return;
+    
+    taskEngineDB.cyclez = taskEngineDB.cyclez.filter(c => c.id !== cycleId);
+    taskEngineDB.taskz.forEach(t => {
+        if (t.cycle_id === cycleId) t.cycle_id = null;
+    });
+    teRenderSidebar();
+    teRenderTaskGrid();
+    
+    try {
+        await supabaseClient.from('taskz').update({ cycle_id: null }).eq('cycle_id', cycleId);
+        await supabaseClient.from('cyclez').delete().eq('id', cycleId);
+    } catch(e) { console.error(e); }
+};
+
+window.teDeleteTeam = async function(teamId) {
+    if (!confirm("Delete this team? Tasks assigned to it will become Unassigned.")) return;
+    
+    taskEngineDB.teams = taskEngineDB.teams.filter(t => t.id !== teamId);
+    taskEngineDB.taskz.forEach(t => {
+        let meta = t.metadata || {};
+        if (meta.assigned_team_id === teamId) {
+            delete meta.assigned_team_id;
+            t.metadata = meta;
+        }
+    });
+    teRenderSidebar();
+    teRenderTaskGrid();
+    
+    try {
+        let affectedTasks = taskEngineDB.taskz.filter(t => t.metadata && t.metadata.assigned_team_id === teamId);
+        for (let task of affectedTasks) {
+            let meta = task.metadata || {};
+            delete meta.assigned_team_id;
+            await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', task.id);
+        }
+        await supabaseClient.from('teams').delete().eq('id', teamId);
     } catch(e) { console.error(e); }
 };
 

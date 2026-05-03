@@ -217,6 +217,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teCreateTeam':
                     if(typeof window.teCreateTeam==='function') window.teCreateTeam();
                     break;
+                case 'click_teDeleteCycle':
+                    event.stopPropagation();
+                    if(typeof window.teDeleteCycle==='function') window.teDeleteCycle(el.getAttribute('data-cycle-id'));
+                    break;
+                case 'click_teDeleteTeam':
+                    event.stopPropagation();
+                    if(typeof window.teDeleteTeam==='function') window.teDeleteTeam(el.getAttribute('data-team-id'));
+                    break;
                 case 'click_teToggleCycleGroup':
                     {
                         const cycleId = el.getAttribute('data-cycle-id');
