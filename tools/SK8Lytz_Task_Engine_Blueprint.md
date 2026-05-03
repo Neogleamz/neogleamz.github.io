@@ -30,6 +30,13 @@ To support dependencies, infinite nesting, and cross-module hooks, our database 
 - `task_id` (UUID, Foreign Key -> `taskz.id`)
 - `blocked_by_id` (UUID, Foreign Key -> `taskz.id`)
 
+### `task_comments` Table (Jira/Asana Threading)
+- `id` (UUID, Primary Key)
+- `task_id` (UUID, Foreign Key -> `taskz.id`)
+- `author_id` (UUID, Foreign Key -> `auth.users`)
+- `content` (Text, Rich Markdown)
+- `created_at` (Timestampz)
+
 ### `cyclez` Table (Linear's "Milestones")
 - `id` (UUID, Primary Key)
 - `title` (Text, e.g., "Cycle 12: Holiday Prep")
@@ -148,6 +155,30 @@ To support true task delegation and accountability, the application must transit
 - **The UI Avatars:** Task rows and Kanban cards will display the Assignee's Avatar or Name Initial (e.g., a green circle with 'C' for Chris).
 - **Personalized Dashboards:** The "My Tasks" filter in the left sidebar will mathematically query only tasks where `assigned_to_id === currentUser.id`.
 - **The True Audit Trail:** The `task_activity` table will now accurately reflect *who* took the action (e.g., "Andy moved this to Done at 4:00 PM").
+
+---
+
+## 7. Deep Tracking & Communication Engine (The Industry Standards)
+
+To rival the deep functionality of Jira and Monday.com, we must implement these tracking and communication pillars:
+
+### The Universal Inbox (Linear/Asana)
+- **The Problem:** Tasks assigned to you get lost in massive backlogs.
+- **The Solution:** A dedicated "Inbox" tab. When Chris assigns Andy a task, or someone comments on a task Andy follows, it hits the Inbox. The Inbox serves as a triage center. Once Andy reads the comment or updates the task, he hits `E` to "Archive/Clear" the notification, keeping the Inbox strictly at Inbox Zero.
+
+### Infinite Subtask Nesting & Visual Rollups (Monday.com)
+- **The Problem:** A parent task like "Launch New Deck Graphic" has 15 steps. Tracking progress is binary (Done/Not Done), which is inaccurate.
+- **The Solution:** Because `taskz.parent_task_id` allows infinite nesting, we will dynamically calculate a parent's completion percentage. If 3 of 5 subtasks are completed, the UI renders a massive, Monday.com-style progress bar at `60%`. 
+- **Metrics Tracking:** As subtask actual_minutes are logged, the parent task dynamically aggregates the total labor hours spent on the entire Epic, visible at a glance.
+
+### Activity Feeds & Rich Text Comments (Jira)
+- **The Problem:** Team communication happens in Slack/Text, entirely disconnected from the actual work context.
+- **The Solution:** The `task_comments` table. The bottom of the Context Slide-out Panel will be a real-time chat thread specific to that task. 
+- **Rich Context:** The input field will support Markdown (bolding, lists, and code blocks like Notion). You can @mention other users to immediately trigger an Inbox notification for them.
+
+### Custom Saved Views (Jira JQL)
+- **The Problem:** Operations requires viewing the data differently (e.g., Andy only wants to see his tasks; Chris wants to see all High Priority blocked tasks).
+- **The Solution:** The sidebar will feature "Saved Views". We will serialize complex filter logic into `localStorage`. You can build a view for "Tasks > Due This Week > In Progress > Assigned to Tyson" and pin it to the navigation spine for instant 1-click access.
 
 ---
 
