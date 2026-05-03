@@ -1,7 +1,8 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.24] - 2026-05-02
 ### Features & Refactors
+- **Phase 7 (Communication & Inbox)**: Implement the Universal Inbox triage system, nested progress rollups, and rich-text activity feeds.
 - **Phase 6 (Automations & Kanban Ecosystem)**: Built a dynamic CSS Grid Calendar matrix, integrated `SortableJS` for buttery smooth Kanban drag-and-drop operations, and deployed the Deep Context Flyout Automations dropdown to instantly spawn cross-module work orders (Batchez, Layerz).
 - **Phase 5 (Embedded UI Payloads)**: Wired up the cross-module hooks and implemented the Supabase data pipeline for the Task Engine (dynamic sidebar, caching, `task_activity` logging, and status mutation logic).
 - **Phase 4 (Deep UX Synthesis & Command Palette)**: Implemented global Cmd+K palette and Asana/Monday-style grid architectures for the Task Engine Command Center.
