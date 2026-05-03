@@ -1002,15 +1002,31 @@ function renderActiveWO(id) {
         let wip = wo.wip_state || {};
         const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
 
+        if (!window._pipelineTimerInterval) {
+            window._pipelineTimerInterval = setInterval(() => {
+                let span = document.getElementById('pipelineTimerSpan');
+                if (span && span.getAttribute('data-running') === 'true') {
+                    let start = parseInt(span.getAttribute('data-start'));
+                    let baseline = parseInt(span.getAttribute('data-baseline'));
+                    if (!isNaN(start) && !isNaN(baseline)) {
+                        let elapsed = baseline + (Date.now() - start);
+                        span.innerText = `Running (${formatWOTime(elapsed)})`;
+                    }
+                }
+            }, 1000);
+        }
+
         let timerUI = "";
         if (wip.active_stage) {
-            let elapsedSoFar = (wip.active_stage === 'Picking' ? (wip.elapsed_picking||0) : (wip.elapsed_production||0));
-            if (wip.stage_start_time && !wip.is_paused) elapsedSoFar += (Date.now() - wip.stage_start_time);
+            let baseline = (wip.active_stage === 'Picking' ? (wip.elapsed_picking||0) : (wip.elapsed_production||0));
+            let isRunning = wip.stage_start_time && !wip.is_paused;
+            let elapsedSoFar = baseline;
+            if (isRunning) elapsedSoFar += (Date.now() - wip.stage_start_time);
             let timeStr = formatWOTime(elapsedSoFar);
             let btnAction = wip.is_paused ? '▶️ Resume' : '⏸️ Pause';
             timerUI = `<div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-                <span style="font-size:11px; font-family:monospace; color:${wip.is_paused ? 'var(--text-muted)' : '#10b981'};">${wip.is_paused ? 'Paused' : 'Running'} (${timeStr})</span>
-                <button onclick="event.stopPropagation(); togglePipelinePause();" class="btn-slate" style="padding:2px 8px; font-size:10px;">${btnAction}</button>
+                <span id="pipelineTimerSpan" data-running="${isRunning}" data-baseline="${baseline}" data-start="${wip.stage_start_time || ''}" style="font-size:11px; font-family:monospace; color:${wip.is_paused ? 'var(--text-muted)' : '#10b981'};">${wip.is_paused ? 'Paused' : 'Running'} (${timeStr})</span>
+                <button data-click="togglePipelinePause" class="btn-slate" style="padding:2px 8px; font-size:10px;">${btnAction}</button>
             </div>`;
         }
 
@@ -1768,12 +1784,12 @@ function _renderArchiveCards(items) {
 
             return `
             <div class="archive-card">
-                <div class="archive-card-header" onclick="toggleArchiveDetail('${arcId}')">
+                <div class="archive-card-header" data-click="toggleArchiveDetail" data-arc-id="${arcId}">
                     <div class="archive-card-status ${statusClass}">${statusLabel}</div>
                     <div class="archive-card-id">${wo.wo_id}</div>
-                    <div class="archive-card-title">${wo.label ? `"${wo.label}" — ` : ''}${wo.product_name}</div>
+                    <div class="archive-card-title" style="flex-grow:1; margin-left:15px; overflow:hidden; text-overflow:ellipsis;">${wo.label ? `"${wo.label}" — ` : ''}${wo.product_name}</div>
                     <div class="archive-card-meta">x${wo.qty} · ${fmtShort(wo.completed_at || wo.created_at)}</div>
-                    <button onclick="event.stopPropagation(); hardDeleteArchive('batchez', '${wo.wo_id}')" class="btn-red-neon">🗑️ DELETE</button>
+                    <button data-click="hardDeleteArchive" data-arc-type="batchez" data-arc-id="${wo.wo_id}" class="btn-red-neon">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">
@@ -1797,12 +1813,12 @@ function _renderArchiveCards(items) {
             const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + String(job.id || '').substring(0, 8).toUpperCase());
             return `
             <div class="archive-card">
-                <div class="archive-card-header" onclick="toggleArchiveDetail('${arcId}')">
+                <div class="archive-card-header" data-click="toggleArchiveDetail" data-arc-id="${arcId}">
                     <div class="archive-card-status print">🖨️ PRINTED</div>
                     <div class="archive-card-id">${displayID}</div>
-                    <div class="archive-card-title">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
+                    <div class="archive-card-title" style="flex-grow:1; margin-left:15px; overflow:hidden; text-overflow:ellipsis;">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
                     <div class="archive-card-meta">x${job.qty} · ${fmtShort(job.completed_at || job.created_at)}</div>
-                    <button onclick="event.stopPropagation(); hardDeleteArchive('layerz', '${job.id}')" class="btn-red-neon">🗑️ DELETE</button>
+                    <button data-click="hardDeleteArchive" data-arc-type="layerz" data-arc-id="${job.id}" class="btn-red-neon">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
                 <div class="archive-card-detail" id="${arcId}" style="display:none; flex-direction:column;">

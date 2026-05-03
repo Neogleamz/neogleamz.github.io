@@ -645,6 +645,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openScraperFoundry':
                     if (typeof openScraperFoundry === 'function') openScraperFoundry();
                     break;
+                case 'togglePipelinePause':
+                    if (typeof window.togglePipelinePause === 'function') window.togglePipelinePause();
+                    break;
+                case 'toggleArchiveDetail':
+                    if (typeof window.toggleArchiveDetail === 'function') window.toggleArchiveDetail(el.getAttribute('data-arc-id'));
+                    break;
+                case 'hardDeleteArchive':
+                    if (typeof window.hardDeleteArchive === 'function') {
+                        event.stopPropagation();
+                        window.hardDeleteArchive(el.getAttribute('data-arc-type'), el.getAttribute('data-arc-id'));
+                    }
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
