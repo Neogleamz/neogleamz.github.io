@@ -692,7 +692,7 @@ window.doNeoSidebarResize = function(e) {
     
     for (let layout of layouts) {
         if (layout.offsetParent !== null) { // is visible
-            const s = layout.querySelector('.bom-sidebar');
+            const s = layout.querySelector('.bom-sidebar, .task-sidebar');
             if (s) {
                 activeWrapper = layout;
                 sidebar = s;
