@@ -1,5 +1,12 @@
 # SK8Lytz Application Changelog
 
+## [1.0.28] - 2026-05-04
+### Features & Refactors
+- **Cycle Count Snapshots & Restoration**: Implement a system to capture "point-in-time" snapshots of cycle counts, enabling history tracking and the ability to restore inventory state to a previous snapshot.
+- **Work Order Pipeline Stabilization**: Resolved a persistent 400 Bad Request error by migrating the ghost 'materials_pulled' column into the `wip_state` JSONB object and standardizing native JSON transmission for `routing` and `wip_state`.
+- **Telemetry Parameter Correction**: Fixed a UI bug where passing color hex strings to `sysLog` caused the status bar to turn red (due to truthy boolean coercion); corrected the function signature to properly handle success/error states.
+
+
 ## [1.0.27] - 2026-05-03
 ### Features & Refactors
 - **Legacy var → let/const Upgrade**: Systematically upgrade all legacy `var` declarations to block-scoped `let`/`const` across all 16 production modules, verifying no hoisting-dependent logic breaks.

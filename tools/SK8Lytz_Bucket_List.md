@@ -29,7 +29,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🔴 P0 Critical (Blockers & Hotfixes)
 
 ### Target: `main`
-- [x] `feat/cycle-count-snapshots` : **Cycle Count Snapshots & Restoration** - Implement a system to capture "point-in-time" snapshots of cycle counts, enabling history tracking and the ability to restore inventory state to a previous snapshot. [🤖 AI Model] [🧠 45k / 15k] [💸 $0.15 / $0.05]
+- [🚀] `feat/cycle-count-snapshots` : **Cycle Count Snapshots & Restoration** - Implement a system to capture "point-in-time" snapshots of cycle counts, enabling history tracking and the ability to restore inventory state to a previous snapshot. [🤖 AI Model] [🧠 45k / 15k] [💸 $0.15 / $0.05]
 
 
 ## 🟡 P2 Medium Priority (Enhancements)
