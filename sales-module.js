@@ -691,28 +691,6 @@ function renderSalesTable() {
 
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
 
-    // Pre-calculate Engine stats for sorting and rendering
-    let a = salesDB.map(x => {
-        let type = x.transaction_type || 'Standard';
-        let qty = parseFloat(x.qty_sold) || 0;
-        let p = parseFloat(x.actual_sale_price) || 0;
-        let s = parseFloat(x.shipping) || 0;
-        let t = parseFloat(x.taxes) || 0;
-        let d = parseFloat(x.discount_amount) || 0;
-
-        let liveCogs = (x.cogs_at_sale != null ? parseFloat(x.cogs_at_sale) : getEngineTrueCogs(x.internal_recipe_name)) * qty;
-        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
-
-        if (isCostOnlyItem && x.cogs_at_sale == null) {
-            p = 0; s = 0; t = 0; d = 0;
-        }
-
-        let trueLineCaptured = isCostOnlyItem ? 0 : (p * qty) + s + t - d;
-        let stripeFee = x.transaction_fees != null ? parseFloat(x.transaction_fees) : (isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured, x['Source']));
-
-        let dbActualPayout = parseFloat(x.actual_payout) || 0;
-        let dbActualShipCost = parseFloat(x.actual_shipping_cost) || 0;
-
     // --- MASTER FORENSIC ACCOUNTING SWEEP ---
     // We group by order first, run the forensic engine on each group, then flatten back.
     let orderGroups = {};
@@ -726,32 +704,6 @@ function renderSalesTable() {
 
     let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0, burdenUnits: 0, burdenPct: 0 };
 
-
-    Object.keys(orderGroups).forEach(oid => {
-        let group = orderGroups[oid];
-        if(group.length > 1) {
-            let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
-            let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
-
-            // Fix: We only want to trigger Automated Exchange Logic if an item with $0 line-item price exists, OR it's been manually flagged
-            let hasTrueExchangeIndication = group.some(r => r.transaction_type !== 'Standard') || group.some(r => parseFloat(r.actual_sale_price || 0) === 0);
-
-            if(zeroTotal && nonZeroTotal && hasTrueExchangeIndication) {
-                // If it's an exchange, offset the visual total by whatever outstanding balance generated
-                let orderBalance = group.reduce((sum, r) => sum + (parseFloat(r["Outstanding Balance"]) || 0), 0);
-                if(orderBalance > 0) {
-                    zeroTotal.isExchanged = true;
-                    nonZeroTotal.isExchanged = true;
-
-                    if (zeroTotal.transaction_type === 'Standard' && nonZeroTotal.transaction_type === 'Standard') {
-                        nonZeroTotal.net += nonZeroTotal.liveCogs;
-                        nonZeroTotal.net += (SHIP_COST * parseFloat(nonZeroTotal.qty_sold || 0));
-                        nonZeroTotal.liveCogs = 0;
-                    }
-                }
-            }
-        }
-    });
 
     // Final Calculation Pass for Totals
     a.forEach(x => {
