@@ -330,15 +330,175 @@ async function runProductionBatch() {
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
 }
 
-async function resetInventoryConsumption() {
-    try { 
-        if(!confirm("⚠️ DANGER: Reset ALL consumption, adjustments, min stocks, scrap, built, and sold quantities to zero?")) return; 
-        sysLog("Resetting Inventory..."); setSysProgress(50, 'working'); 
-        const {error} = await supabaseClient.from('inventory_consumption').delete().neq('item_key', 'fake'); 
-        if(error) throw new Error(error.message); 
-        inventoryDB={}; window.renderInventoryTable(); window.updateCcMngrStock(); setSysProgress(100, 'success'); sysLog("Reset."); setTimeout(()=>setSysProgress(0,'working'),3000); 
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
 }
+
+/**
+ * Creates a global snapshot of the entire inventory_consumption table.
+ * @param {string} name - User-provided name for the snapshot.
+ */
+window.createInventorySnapshot = async function(name) {
+    try {
+        if (!name) name = "Manual Snapshot " + new Date().toLocaleString();
+        sysLog(`Creating Snapshot: ${name}...`);
+        setSysProgress(20, 'working');
+
+        // 1. Fetch current live state
+        const { data, error: fetchErr } = await supabaseClient
+            .from('inventory_consumption')
+            .select('*');
+        
+        if (fetchErr) throw fetchErr;
+        setSysProgress(50, 'working');
+
+        // 2. Insert into snapshots table
+        const { error: insertErr } = await supabaseClient
+            .from('inventory_snapshots')
+            .insert([{
+                name: name,
+                snapshot_data: data,
+                created_by: 'user' // Could be updated with auth context
+            }]);
+
+        if (insertErr) throw insertErr;
+
+        setSysProgress(100, 'success');
+        sysLog(`Snapshot "${name}" saved.`);
+        showToast(`Snapshot "${name}" saved successfully.`, 'success');
+        setTimeout(() => setSysProgress(0, 'working'), 3000);
+        
+        if (window.fetchInventorySnapshots) window.fetchInventorySnapshots(); // Refresh list
+    } catch (e) {
+        setSysProgress(100, 'error');
+        sysLog(`Snapshot Error: ${e.message}`, true);
+        showToast(`Snapshot Error: ${e.message}`, 'error');
+    }
+};
+
+/**
+ * Restores the entire inventory state from a specific snapshot.
+ * WARNING: This is destructive to current live data.
+ * @param {string} snapshotId - The UUID of the snapshot to restore.
+ */
+window.restoreInventorySnapshot = async function(snapshotId) {
+    try {
+        if (!confirm("🚨 WARNING: This will DELETE all current stock levels and REVERT to this snapshot. Proceed?")) return;
+        
+        sysLog("Restoring Inventory Snapshot...");
+        setSysProgress(10, 'working');
+
+        // 1. Fetch the snapshot data
+        const { data: snapshot, error: fetchErr } = await supabaseClient
+            .from('inventory_snapshots')
+            .select('snapshot_data, name')
+            .eq('id', snapshotId)
+            .single();
+        
+        if (fetchErr) throw fetchErr;
+        if (!snapshot || !snapshot.snapshot_data) throw new Error("Snapshot data missing.");
+        setSysProgress(30, 'working');
+
+        // 2. Delete current live state
+        const { error: delErr } = await supabaseClient
+            .from('inventory_consumption')
+            .delete()
+            .neq('item_key', 'system_lock_preventer'); // Standard "delete all" hack
+        
+        if (delErr) throw delErr;
+        setSysProgress(60, 'working');
+
+        // 3. Re-inject snapshot rows
+        // Note: inventory_consumption has item_key as PK, so we use upsert to be safe, 
+        // though we just deleted everything.
+        const { error: insertErr } = await supabaseClient
+            .from('inventory_consumption')
+            .insert(snapshot.snapshot_data);
+
+        if (insertErr) throw insertErr;
+        setSysProgress(90, 'working');
+
+        // 4. Update Local State & UI
+        // Refresh the global inventoryDB object from Supabase
+        if (window.resetInventoryConsumptionLocally) {
+            await window.resetInventoryConsumptionLocally(); 
+        } else {
+            // Fallback: manually fetch if local reset helper is missing
+            const { data: freshData } = await supabaseClient.from('inventory_consumption').select('*');
+            inventoryDB = {};
+            (freshData || []).forEach(row => { inventoryDB[row.item_key] = row; });
+        }
+
+        window.renderInventoryTable();
+        window.updateCcMngrStock();
+        
+        setSysProgress(100, 'success');
+        sysLog(`Restored to: ${snapshot.name}`);
+        showToast(`Successfully restored to "${snapshot.name}"`, 'success');
+        setTimeout(() => setSysProgress(0, 'working'), 3000);
+        
+        // Close modal if open
+        let modal = document.getElementById('snapshotManagerModal');
+        if (modal) modal.style.display = 'none';
+
+    } catch (e) {
+        setSysProgress(100, 'error');
+        sysLog(`Restore Error: ${e.message}`, true);
+        showToast(`Restore Error: ${e.message}`, 'error');
+    }
+};
+
+/**
+ * Fetches the list of available snapshots for the UI.
+ */
+window.fetchInventorySnapshots = async function() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('inventory_snapshots')
+            .select('id, created_at, name')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        const listWrap = document.getElementById('snapshotListItems');
+        if (!listWrap) return;
+
+        if (!data || data.length === 0) {
+            listWrap.innerHTML = '<div style="padding:20px; color:var(--text-muted); text-align:center;">No snapshots found.</div>';
+            return;
+        }
+
+        listWrap.innerHTML = data.map(s => `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; transition:0.2s hover; margin-bottom:8px;">
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <span style="font-weight:bold; color:var(--text-main); font-size:14px;">${s.name}</span>
+                    <span style="font-size:11px; color:var(--text-muted);">${new Date(s.created_at).toLocaleString()}</span>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-blue" style="padding:6px 12px; font-size:11px;" onclick="restoreInventorySnapshot('${s.id}')">🔄 REVERT</button>
+                    <button class="btn-red" style="padding:6px 12px; font-size:11px; background:rgba(239,68,68,0.2); border:1px solid #ef4444;" onclick="deleteInventorySnapshot('${s.id}')">✕</button>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        console.error("Snapshot Fetch Error:", e);
+    }
+};
+
+/**
+ * Deletes a specific snapshot.
+ */
+window.deleteInventorySnapshot = async function(id) {
+    try {
+        if (!confirm("Are you sure you want to permanently delete this snapshot?")) return;
+        const { error } = await supabaseClient.from('inventory_snapshots').delete().eq('id', id);
+        if (error) throw error;
+        showToast("Snapshot deleted.", 'success');
+        window.fetchInventorySnapshots();
+    } catch (e) {
+        showToast("Delete failed: " + e.message, 'error');
+    }
+};
 
 function printReorderReport() {
     try {
