@@ -421,8 +421,7 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         } else {
             // Fallback: manually fetch if local reset helper is missing
             const { data: freshData } = await supabaseClient.from('inventory_consumption').select('*');
-            inventoryDB = {};
-            (freshData || []).forEach(row => { inventoryDB[row.item_key] = row; });
+            inventoryDB = freshData.reduce((acc, row) => ({ ...acc, [row.item_key]: row }), {});
         }
 
         window.renderInventoryTable();
@@ -433,6 +432,12 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         showToast(`Successfully restored to "${snapshot.name}"`, 'success');
         setTimeout(() => setSysProgress(0, 'working'), 3000);
         
+        // Reset Preview Area
+        const previewArea = document.getElementById('snapshotPreviewArea');
+        const previewActions = document.getElementById('snapshotPreviewActions');
+        if (previewArea) previewArea.innerHTML = '<div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); opacity:0.5;"><span style="font-size:48px;">✅</span><p>Restore Complete.</p></div>';
+        if (previewActions) previewActions.style.display = 'none';
+
         // Close modal if open
         let modal = document.getElementById('snapshotManagerModal');
         if (modal) modal.style.display = 'none';
@@ -441,6 +446,118 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         setSysProgress(100, 'error');
         sysLog(`Restore Error: ${e.message}`, true);
         showToast(`Restore Error: ${e.message}`, 'error');
+    }
+};
+
+/**
+ * Calculates and displays a visual diff between a snapshot and the current live state.
+ * @param {string} snapshotId - UUID of the snapshot.
+ */
+window.previewInventorySnapshot = async function(snapshotId) {
+    const previewArea = document.getElementById('snapshotPreviewArea');
+    const previewActions = document.getElementById('snapshotPreviewActions');
+    if (!previewArea) return;
+
+    try {
+        previewArea.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">Analyzing stock impact...</div>';
+        previewActions.style.display = 'none';
+
+        // 1. Fetch Snapshot & Current Live Data in parallel
+        const [snapshotRes, currentRes] = await Promise.all([
+            supabaseClient.from('inventory_snapshots').select('id, snapshot_data, name').eq('id', snapshotId).single(),
+            supabaseClient.from('inventory_consumption').select('*')
+        ]);
+
+        if (snapshotRes.error) throw snapshotRes.error;
+        if (currentRes.error) throw currentRes.error;
+
+        const snapData = snapshotRes.data.snapshot_data || [];
+        const liveData = currentRes.data || [];
+        
+        // 2. Index live data for fast lookup
+        const liveMap = {};
+        liveData.forEach(row => { liveMap[row.item_key] = row; });
+
+        const calculateNet = (r) => {
+            if (!r) return 0;
+            const pos = (parseFloat(r.produced_qty) || 0) + (parseFloat(r.prototype_produced_qty) || 0) + (parseFloat(r.manual_adjustment) || 0);
+            const neg = (parseFloat(r.sold_qty) || 0) + (parseFloat(r.consumed_qty) || 0) + (parseFloat(r.scrap_qty) || 0) + (parseFloat(r.assembly_consumed_qty) || 0) + (parseFloat(r.production_consumed_qty) || 0) + (parseFloat(r.prototype_consumed_qty) || 0);
+            return pos - neg;
+        };
+
+        // 3. Compare and build delta list
+        const deltas = [];
+        const allKeys = new Set([...snapData.map(r => r.item_key), ...Object.keys(liveMap)]);
+
+        allKeys.forEach(key => {
+            const s = snapData.find(r => r.item_key === key);
+            const l = liveMap[key];
+
+            const sNet = calculateNet(s);
+            const lNet = calculateNet(l);
+
+            if (sNet !== lNet || !s || !l) {
+                deltas.push({
+                    key,
+                    name: s ? s.item_key : l.item_key,
+                    current: lNet,
+                    target: sNet,
+                    diff: sNet - lNet,
+                    status: !l ? 'NEW' : (!s ? 'REMOVED' : 'CHANGED')
+                });
+            }
+        });
+
+        // 4. Render Delta Table
+        if (deltas.length === 0) {
+            previewArea.innerHTML = `
+                <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#10b981; gap:10px;">
+                    <span style="font-size:32px;">🎯</span>
+                    <p>Current stock matches snapshot exactly. No changes required.</p>
+                </div>`;
+            return;
+        }
+
+        let html = `
+            <div style="padding-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:15px; display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:12px; font-weight:bold; color:#f59e0b;">📦 ${deltas.length} Items Impacted</span>
+                <span style="font-size:10px; color:var(--text-muted);">Visualizing Delta for: <strong>${snapshotRes.data.name}</strong></span>
+            </div>
+            <table style="width:100%; border-collapse:collapse; font-family:'JetBrains Mono', monospace; font-size:12px;">
+                <thead>
+                    <tr style="text-align:left; color:var(--text-muted); border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <th style="padding:10px;">ITEM IDENTITY</th>
+                        <th style="padding:10px; text-align:right;">LIVE STOCK</th>
+                        <th style="padding:10px; text-align:right;">SNAPSHOT</th>
+                        <th style="padding:10px; text-align:right;">IMPACT</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        deltas.forEach(d => {
+            const diffColor = d.diff > 0 ? '#10b981' : (d.diff < 0 ? '#ef4444' : 'var(--text-muted)');
+            const diffPrefix = d.diff > 0 ? '+' : '';
+            html += `
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.02); background:${d.status === 'CHANGED' ? 'transparent' : (d.status === 'NEW' ? 'rgba(16,185,129,0.05)' : 'rgba(239,68,68,0.05)')}">
+                    <td style="padding:12px 10px; color:var(--text-main); font-weight:bold;">${d.name}</td>
+                    <td style="padding:12px 10px; color:var(--text-muted); text-align:right;">${d.current}</td>
+                    <td style="padding:12px 10px; color:#f59e0b; font-weight:bold; text-align:right;">${d.target}</td>
+                    <td style="padding:12px 10px; color:${diffColor}; font-weight:bold; text-align:right;">${diffPrefix}${d.diff}</td>
+                </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        previewArea.innerHTML = html;
+
+        // 5. Setup Action Buttons
+        previewActions.style.display = 'flex';
+        const commitBtn = document.getElementById('snapshotConfirmRestoreBtn');
+        if (commitBtn) {
+            commitBtn.onclick = () => window.restoreInventorySnapshot(snapshotId);
+        }
+
+    } catch (e) {
+        previewArea.innerHTML = `<div style="padding:40px; text-align:center; color:#ef4444;">Preview Error: ${e.message}</div>`;
     }
 };
 
@@ -465,14 +582,14 @@ window.fetchInventorySnapshots = async function() {
         }
 
         listWrap.innerHTML = data.map(s => `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; transition:0.2s hover; margin-bottom:8px;">
-                <div style="display:flex; flex-direction:column; gap:2px;">
-                    <span style="font-weight:bold; color:var(--text-main); font-size:14px;">${s.name}</span>
-                    <span style="font-size:11px; color:var(--text-muted);">${new Date(s.created_at).toLocaleString()}</span>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; transition:0.2s hover; margin-bottom:8px; min-width: 0;">
+                <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width: 0; margin-right: 15px;">
+                    <span style="font-weight:bold; color:var(--text-main); font-size:13px; line-height:1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${s.name}">${s.name}</span>
+                    <span style="font-size:10px; color:var(--text-muted);">${new Date(s.created_at).toLocaleString()}</span>
                 </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-blue" style="padding:6px 12px; font-size:11px;" onclick="restoreInventorySnapshot('${s.id}')">🔄 REVERT</button>
-                    <button class="btn-red" style="padding:6px 12px; font-size:11px; background:rgba(239,68,68,0.2); border:1px solid #ef4444;" onclick="deleteInventorySnapshot('${s.id}')">✕</button>
+                <div style="display:flex; gap:6px; flex-shrink: 0;">
+                    <button class="btn-amber" style="padding:4px 10px; font-size:10px; height:28px; line-height:1; display:flex; align-items:center;" onclick="window.previewInventorySnapshot('${s.id}')">🔬 PREVIEW</button>
+                    <button class="btn-red" style="padding:4px 8px; font-size:10px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); height:28px;" onclick="window.deleteInventorySnapshot('${s.id}')">✕</button>
                 </div>
             </div>
         `).join('');
@@ -495,6 +612,69 @@ window.deleteInventorySnapshot = async function(id) {
     } catch (e) {
         showToast("Delete failed: " + e.message, 'error');
     }
+};
+
+window.openSnapshotManager = function() {
+    const modal = document.getElementById('snapshotManagerModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        const leftPane = document.getElementById('snapshotLeftPane');
+        const savedWidth = localStorage.getItem('neoSnapshotLeftWidth');
+        if (leftPane && savedWidth) leftPane.style.width = savedWidth;
+        window.fetchInventorySnapshots();
+    }
+};
+
+window.closeSnapshotManager = function() {
+    const modal = document.getElementById('snapshotManagerModal');
+    if (modal) modal.style.display = 'none';
+};
+
+/**
+ * Standard Neogleamz Resizer Logic for the Dashboard.
+ */
+window.initSnapshotDashboardResize = function(e) {
+    const resizer = document.getElementById('snapshotDashboardResizer');
+    const leftPane = document.getElementById('snapshotLeftPane');
+    if (!resizer || !leftPane) return;
+
+    let startX = e.clientX;
+    let startWidth = leftPane.getBoundingClientRect().width;
+    document.body.style.cursor = 'col-resize';
+    resizer.classList.add('dragging');
+
+    function onSnapshotMouseMove(e) {
+        const delta = e.clientX - startX;
+        let newWidth = startWidth + delta;
+        
+        // Boundaries
+        if (newWidth < 300) newWidth = 300;
+        if (newWidth > window.innerWidth - 400) newWidth = window.innerWidth - 400;
+
+        leftPane.style.width = newWidth + 'px';
+    }
+
+    function onSnapshotMouseUp() {
+        document.body.style.cursor = '';
+        resizer.classList.remove('dragging');
+        localStorage.setItem('neoSnapshotLeftWidth', leftPane.style.width);
+        document.removeEventListener('mousemove', onSnapshotMouseMove);
+        document.removeEventListener('mouseup', onSnapshotMouseUp);
+    }
+
+    document.addEventListener('mousemove', onSnapshotMouseMove);
+    document.addEventListener('mouseup', onSnapshotMouseUp);
+};
+
+window.handleCreateSnapshot = function() {
+    const input = document.getElementById('snapshotNameInput');
+    const name = input ? input.value.trim() : "";
+    if (!name) {
+        showToast("Please enter a name for the snapshot.", 'error');
+        return;
+    }
+    window.createInventorySnapshot(name);
+    if (input) input.value = "";
 };
 
 function printReorderReport() {
