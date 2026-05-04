@@ -36,12 +36,148 @@ async function hashPII(rawStr) {
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    } catch(e) {
-        // SubtleCrypto unavailable (non-HTTPS context) or encoding failure — degrade gracefully
-        sysLog('hashPII error: ' + e.message, true);
-        return null;
+// --- MASTER FORENSIC ACCOUNTING ENGINE ---
+// Unified Singleton for all revenue shifting, cost suppression, and line-item slicing.
+window.runForensicAccounting = function(rows) {
+    if (!rows || rows.length === 0) return [];
+    
+    // 1. Detect Order-Level Overrides (CSV Backfills)
+    let orderHasExactPayout = false;
+    let exactPayoutTotal = 0;
+    let orderHasExactShip = false;
+    let exactShipTotal = 0;
+    let orderRefundTotal = 0;
+
+    rows.forEach(r => {
+        if (parseFloat(r.dbActualPayout) > 0) { orderHasExactPayout = true; exactPayoutTotal += parseFloat(r.dbActualPayout); }
+        if (parseFloat(r.dbActualShipCost) > 0) { orderHasExactShip = true; exactShipTotal += parseFloat(r.dbActualShipCost); }
+        orderRefundTotal += (parseFloat(r.refunded_amount) || 0);
+    });
+
+    // 2. Initial Mapping & Per-Line Math
+    let processed = rows.map((r) => {
+        let type = r.transaction_type || 'Standard';
+        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
+        
+        let pr = parseFloat(r.actual_sale_price || 0);
+        let qty = parseFloat(r.qty_sold || 1);
+        let ship = parseFloat(r.shipping || 0);
+        let tax = parseFloat(r.taxes || 0);
+        let dsc = parseFloat(r.discount_amount || 0);
+        let outBal = parseFloat(r['Outstanding Balance']) || 0;
+
+        let rawGross = pr * qty;
+        let rawShipRev = ship;
+        let rawTaxRev = tax;
+        let rawDisc = dsc;
+
+        let gross = isCostOnlyItem ? 0 : rawGross;
+        let shipRev = isCostOnlyItem ? 0 : rawShipRev;
+        let taxRev = isCostOnlyItem ? 0 : rawTaxRev;
+        let disc = isCostOnlyItem ? 0 : rawDisc;
+
+        let cogs = window.getEngineTrueCogs(r.internal_recipe_name) || 0;
+        let actShipCost = parseFloat(r.actual_shipping_cost || r.actualShipCost || 0) || (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00);
+        
+        // PHYSICAL COST SUPPRESSION: Force $0 on non-physical or pending states
+        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION' || (r.fulfillment_status && r.fulfillment_status.toLowerCase() === 'pending')) { 
+            cogs = 0; 
+            actShipCost = 0; 
+        }
+        
+        let trueLineCaptured = isCostOnlyItem ? 0 : gross + shipRev + taxRev - disc;
+        let feeTarget = trueLineCaptured - outBal;
+        let src = r['Source'] || 'web';
+        let fee = isCostOnlyItem ? 0 : window.getEngineStripeFee(feeTarget, src);
+
+        return { 
+            ...r, 
+            cogs, fee, gross, shipRev, taxRev, disc, actShipCost, trueLineCaptured, outBal, src, 
+            ghostRev: 0, rawGross, rawShipRev, rawTaxRev, rawDisc,
+            liveCogs: cogs, stripeFee: fee, actualShipCost: actShipCost // Backward compatibility
+        };
+    });
+
+    // 3. Apply Order-Level Payout/Ship Overrides
+    if (orderHasExactPayout || orderHasExactShip) {
+        let appliedShip = false;
+        let appliedFee = false;
+        let orderCaptured = processed.reduce((sum, r) => sum + (parseFloat(r.exchAdj) || 0) + r.trueLineCaptured, 0) - orderRefundTotal;
+        let trueOrderFeeTotal = orderHasExactPayout ? Math.max(0, (orderCaptured - exactPayoutTotal)) : 0;
+
+        processed.forEach(r => {
+            if (orderHasExactShip) {
+                if (!appliedShip && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE') {
+                    r.actShipCost = exactShipTotal;
+                    r.actualShipCost = exactShipTotal;
+                    appliedShip = true;
+                } else {
+                    r.actShipCost = 0;
+                    r.actualShipCost = 0;
+                }
+            }
+            if (orderHasExactPayout) {
+                if (!appliedFee && !r.isCostOnlyItem && r.transaction_type !== 'Cancelled') {
+                    r.fee = trueOrderFeeTotal;
+                    r.stripeFee = trueOrderFeeTotal;
+                    appliedFee = true;
+                } else {
+                    if (!r.isCostOnlyItem) { r.fee = 0; r.stripeFee = 0; }
+                }
+            }
+        });
     }
-}
+
+    // 4. Calculate Net Profit Post-Overrides
+    processed.forEach(r => {
+        let type = r.transaction_type || 'Standard';
+        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
+        
+        let net = (r.trueLineCaptured + (parseFloat(r.exchAdj) || 0)) - r.taxRev - r.fee - r.actShipCost - r.cogs + r.outBal;
+        
+        if (type === 'IGNORE') net = 0;
+        if (type === 'Pre-Ship Exchange') net += window.getEngineTrueCogs(r.internal_recipe_name); 
+        if (isCostOnlyItem && type !== 'Cancelled') net = 0 - r.actShipCost - r.cogs;
+        if (type === 'Cancelled') net = 0;
+        
+        r.net = net;
+    });
+    
+    // 5. Cross-Line Revenue Shifting (Exchanges)
+    let primes = processed.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
+    let replacements = processed.filter(x => x.transaction_type === 'Exchange Replacement');
+    
+    if (primes.length > 0 && replacements.length > 0) {
+        let u = primes[0]; let rp = replacements[0];
+        if (u.transaction_type === 'Post-Ship Exchange') {
+            rp.net += rp.cogs; 
+        }
+        rp.net += u.net;
+        rp.net = Math.round(rp.net * 100) / 100;
+        let tempNet = u.net;
+        u.net = 0;
+        u.ghostRev = -tempNet;
+        rp.ghostRev = tempNet;
+    }
+
+    // 6. Apply Refund Deductions (Last Layer)
+    if (orderRefundTotal > 0) {
+        let refundApplied = false;
+        processed.forEach(r => {
+            if (!refundApplied && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE') {
+                // If there's cancelled revenue, the refund might already be partially covered by the cancelled item's "lost revenue"
+                let voidedRev = processed.filter(x => x.transaction_type === 'Cancelled').reduce((s, x) => s + x.rawGross, 0);
+                let actualDeductible = Math.max(0, orderRefundTotal - voidedRev);
+                r.net -= actualDeductible;
+                refundApplied = true;
+            }
+        });
+    }
+    
+    return processed;
+};
+
+
 
 // --- 9. SALES SYNC ENGINE ---
 async function addManualSale() {
@@ -577,188 +713,19 @@ function renderSalesTable() {
         let dbActualPayout = parseFloat(x.actual_payout) || 0;
         let dbActualShipCost = parseFloat(x.actual_shipping_cost) || 0;
 
-        let actualShipCost = x.actual_shipping_cost != null ? parseFloat(x.actual_shipping_cost) :
-                             type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' ? 0 :
-                             (s > 0 ? s : SHIP_COST);
-
-        let net = x.net_profit != null ? parseFloat(x.net_profit) : getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
-
-        // Only override null net calculations
-        if (x.net_profit == null) {
-            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
-                net = 0;
-            } else if (type === 'Pre-Ship Exchange') {
-                net += liveCogs; 
-            } else if (isCostOnlyItem) {
-                net = 0 - actualShipCost - liveCogs;
-            }
-        }
-
-        let carr = x.carrier_name || '';
-        let trk = x.tracking_number || '';
-
-        return { ...x, trueLineCapture: trueLineCaptured, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: (parseFloat(x.exchAdj) || 0), isExchanged: false, isCostOnlyItem, actualShipCost, dbActualPayout, dbActualShipCost, carrier_name: carr, tracking_number: trk };
-    });
-
-    // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
+    // --- MASTER FORENSIC ACCOUNTING SWEEP ---
+    // We group by order first, run the forensic engine on each group, then flatten back.
     let orderGroups = {};
-    a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
-
-    // --- OPERATIONAL FIDELITY TRUE-UP ---
-    Object.values(orderGroups).forEach(group => {
-        let orderHasExactPayout = false;
-        let exactPayout = 0;
-        let orderHasExactShip = false;
-        let exactShipCost = 0;
-        
-        group.forEach(r => {
-            if (parseFloat(r.dbActualPayout) > 0) { orderHasExactPayout = true; exactPayout += parseFloat(r.dbActualPayout); }
-            if (parseFloat(r.dbActualShipCost) > 0) { orderHasExactShip = true; exactShipCost += parseFloat(r.dbActualShipCost); }
-        });
-
-        if (orderHasExactShip || orderHasExactPayout) {
-            let appliedShip = false;
-            let appliedFee = false;
-            
-            let orderRefund = group.reduce((sum, r) => sum + (parseFloat(r.refunded_amount) || 0), 0);
-            let orderCaptured = group.reduce((sum, r) => sum + (parseFloat(r.exchAdj) || 0) + (r.isCostOnlyItem ? 0 : parseFloat(r.total||0)), 0) - orderRefund;
-            let trueOrderFee = orderHasExactPayout ? Math.max(0, (orderCaptured - exactPayout)) : 0;
-            
-            group.forEach(r => {
-                if (orderHasExactShip) {
-                    if (!appliedShip && r.transaction_type !== 'Cancelled') {
-                        r.actualShipCost = exactShipCost;
-                        appliedShip = true;
-                    } else {
-                        r.actualShipCost = 0;
-                    }
-                }
-                
-                if (orderHasExactPayout) {
-                    if (!appliedFee && !r.isCostOnlyItem && r.transaction_type !== 'Cancelled') {
-                        r.stripeFee = trueOrderFee;
-                        appliedFee = true;
-                    } else {
-                        if (!r.isCostOnlyItem) r.stripeFee = 0;
-                    }
-                }
-                
-                // Recalculate net if overriding default engine estimates
-                if (r.transaction_type === 'IGNORE' || r.transaction_type === 'NEEDS ATTENTION' || r.transaction_type === 'Cancelled') {
-                    r.net = 0;
-                } else if (r.transaction_type === 'Pre-Ship Exchange') {
-                    r.net = r.liveCogs;
-                } else if (r.isCostOnlyItem) {
-                    r.net = 0 - r.actualShipCost - r.liveCogs;
-                } else {
-                    r.net = parseFloat(r.trueLineCapture || 0) - parseFloat(r.taxes || 0) - r.stripeFee - r.actualShipCost - r.liveCogs + (parseFloat(r.exchAdj) || 0);
-                }
-            });
-        }
-    });
-
-    // CALCULATE GHOST REVENUE
-    let voidedRevenueByOrder = {};
-    Object.values(orderGroups).forEach(group => {
-        let voidRev = 0;
-        group.forEach(r => {
-            if (r.transaction_type === 'Cancelled') {
-                voidRev += parseFloat(r.subtotal || 0);
-            }
-        });
-        voidedRevenueByOrder[group[0].order_id] = voidRev;
-    });
-
-    // DEDUPLICATE OUTBOUND SHIPPING OVERHEAD FOR MULTI-ITEM ORDERS
-    Object.values(orderGroups).forEach(group => {
-        let refundDeducted = false;
-        group.forEach(r => {
-            let refAmt = parseFloat(r.refunded_amount) || 0;
-            let voidedRev = voidedRevenueByOrder[r.order_id] || 0;
-            let actualDeductibleRefund = Math.max(0, refAmt - voidedRev);
-
-            if (actualDeductibleRefund > 0 && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && !refundDeducted) {
-                r.net -= actualDeductibleRefund;
-                r.exchAdj = (r.exchAdj || 0) - actualDeductibleRefund;
-                refundDeducted = true;
-            }
-
-        });
-    });
-
-    // DECOUPLED LOGISTICS TRANSFER: Accurately map true financial footprints natively in UI
-    Object.values(orderGroups).forEach(group => {
-        let primes = group.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange' || x.transaction_type === 'Unshipped (Keep Rev)');
-        let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
-        if (primes.length > 0 && replacements.length > 0) {
-            let u = primes[0]; let r = replacements[0];
-
-
-            if (u.transaction_type === 'Post-Ship Exchange') {
-                // Physical Reality Decoupling
-                let uRawRev = parseFloat(u.trueLineCapture || 0) - parseFloat(u.taxes || 0);
-
-                // 1. Shift Customer Payment Revenue to Replacement
-                r.net += (parseFloat(uRawRev) || 0);
-                r.actual_sale_price = u.actual_sale_price;
-                r.discount_amount = u.discount_amount;
-                r.shipping = u.shipping;
-                r.taxes = u.taxes;
-                
-                // Shift Total Captured Visuals & Aggregation Flag
-                r.total = u.total;
-                r.subtotal = u.subtotal;
-                r.trueLineCapture = u.trueLineCapture;
-                r.exchAdj = u.exchAdj;
-                r.isCostOnlyItem = false;
-
-                // 2. Original Item is left isolated as a pure loss string (burns ship cost + stripe fee)
-                u.actual_sale_price = 0;
-                u.shipping = 0;
-                u.discount_amount = 0;
-                u.taxes = 0;
-                u.liveCogs = 0; // Restocked
-                u.total = 0;
-                u.subtotal = 0;
-                u.exchAdj = 0;
-                u.isCostOnlyItem = true;
-
-                let secureNetLoss = 0 - (parseFloat(u.actualShipCost) || 0) - (parseFloat(u.stripeFee) || 0);
-                u.net = isNaN(secureNetLoss) ? 0 : secureNetLoss;
-            } else {
-                // Ghost Transfer for Unshipped (Pre-Ship) and Unshipped (Keep Rev)
-                r.net += (parseFloat(u.net) || 0);
-                r.stripeFee += (parseFloat(u.stripeFee) || 0);
-                r.actual_sale_price = u.actual_sale_price;
-                r.discount_amount = u.discount_amount;
-                r.shipping = u.shipping;
-                
-                // Shift Total Captured Visuals & Aggregation Flag
-                r.total = u.total;
-                r.exchAdj = u.exchAdj;
-                r.isCostOnlyItem = false;
-
-                u.actual_sale_price = 0;
-                u.stripeFee = 0;
-                u.net = 0;
-                u.discount_amount = 0;
-                u.shipping = 0;
-                u.taxes = 0;
-                u.actualShipCost = 0;
-                u.liveCogs = 0;
-                u.total = 0;
-                u.exchAdj = 0;
-                u.isCostOnlyItem = true;
-            }
-
-            u.isExchanged = true;
-        }
-
-        // Failsafe Net Cast for All Unprocessed Rows
-        group.forEach(it => { if(isNaN(it.net)) it.net = 0; });
+    salesDB.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
+    
+    let a = [];
+    Object.keys(orderGroups).forEach(oid => {
+        let forensicLines = window.runForensicAccounting(orderGroups[oid]);
+        a.push(...forensicLines);
     });
 
     let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0, burdenUnits: 0, burdenPct: 0 };
+
 
     Object.keys(orderGroups).forEach(oid => {
         let group = orderGroups[oid];
@@ -901,29 +868,36 @@ window.updateSaleType = async function(sel, orderId, sku) {
         if(row) {
             let payload = { transaction_type: newVal };
 
-            // INJECT MASTER CALCULATION ENGINE
+            // --- POWERED BY MASTER FORENSIC ENGINE ---
             try {
-                if (typeof window.getEngineTrueCogs === 'function') {
-                    payload.cogs_at_sale = window.getEngineTrueCogs(row.internal_recipe_name, row.qty_sold);
-                }
-                if (typeof window.getEngineStripeFee === 'function') {
-                    payload.transaction_fees = window.getEngineStripeFee(
-                        row.total, row.shipping, row.taxes, newVal, row.exchAdj || 0
-                    );
-                }
+                // 1. Get all siblings
+                let orderLines = salesDB.filter(s => s.order_id == orderId);
                 
-                let rev = (parseFloat(row.total) + parseFloat(row.exchAdj || 0)) || 0;
-                let cost = payload.cogs_at_sale !== undefined ? payload.cogs_at_sale : (row.liveCogs || 0);
-                let ship = parseFloat(row.shipping) || 0;
-                let fee = payload.transaction_fees !== undefined ? payload.transaction_fees : (row.stripeFee || 0);
-                
-                // Pure Waterfall
-                let net = rev - cost - ship - fee;
-                
-                if (newVal === 'Cancelled' || newVal === 'Refund') net = -cost;
-                else if (newVal === 'Warranty' || newVal === 'Exchange Replacement') net = -(cost + ship);
+                // 2. Map the type change
+                let updatedLines = orderLines.map(line => {
+                    if (line.storefront_sku === sku) {
+                        return { ...line, transaction_type: newVal };
+                    }
+                    return { ...line };
+                });
 
-                payload.net_profit = net;
+                // 3. Run the Forensic Engine
+                let forensicResults = window.runForensicAccounting(updatedLines);
+                let sim = forensicResults.find(l => l.storefront_sku === sku);
+
+                payload.cogs_at_sale = sim.cogs;
+                payload.transaction_fees = sim.fee;
+                payload.net_profit = sim.net;
+
+                // 4. Update siblings in DB and memory
+                forensicResults.forEach(async (fLine) => {
+                    if (fLine.storefront_sku !== sku) {
+                        let sibPayload = { net_profit: fLine.net, transaction_fees: fLine.fee, cogs_at_sale: fLine.cogs };
+                        await supabaseClient.from('sales_ledger').update(sibPayload).eq('order_id', orderId).eq('storefront_sku', fLine.storefront_sku);
+                        let sibRow = salesDB.find(s => s.order_id == orderId && s.storefront_sku == fLine.storefront_sku);
+                        if(sibRow) Object.keys(sibPayload).forEach(k => { sibRow[k] = sibPayload[k]; });
+                    }
+                });
             } catch(e) {
                 console.error("Sales Engine Injection Failed:", e);
             }
@@ -961,51 +935,40 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
 
         let payload = { [col]: dbVal };
 
-        // --- POWERED BY MASTER ENGINE: Dynamic Recalculation ---
+        // --- POWERED BY MASTER FORENSIC ENGINE ---
         let mathCols = ['actual_sale_price', 'qty_sold', 'shipping', 'taxes', 'discount_amount', 'internal_recipe_name', 'Source', 'Outstanding Balance'];
         if (mathCols.includes(col)) {
-            // Create a simulated future row state
-            let sim = { ...row, [col]: dbVal };
-            let qty = parseFloat(sim.qty_sold) || 0;
-            let pr = parseFloat(sim.actual_sale_price) || 0;
-            let ship = parseFloat(sim.shipping) || 0;
-            let tax = parseFloat(sim.taxes) || 0;
-            let disc = parseFloat(sim.discount_amount) || 0;
-            let bal = parseFloat(sim['Outstanding Balance']) || 0;
-            let src = sim['Source'] || "web";
-            let rec = sim.internal_recipe_name;
-            let type = sim.transaction_type || 'Standard';
+            // 1. Get all siblings in the order to handle shifts
+            let orderLines = salesDB.filter(s => s.order_id == orderId);
+            
+            // 2. Map the change into the local line
+            let updatedLines = orderLines.map(line => {
+                if (line.storefront_sku === sku) {
+                    return { ...line, [col]: dbVal };
+                }
+                return { ...line };
+            });
 
-            sim.subtotal = qty * pr;
-            sim.total = sim.subtotal + ship + tax - disc;
-            
-            let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
-            sim.cogs_at_sale = (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') ? 0 : window.getEngineTrueCogs(rec);
-            
-            let trueLineCaptured = isCostOnlyItem ? 0 : sim.total;
-            let stripeCaptureTarget = trueLineCaptured - bal;
-            
-            sim.transaction_fees = (isCostOnlyItem || type === 'Cancelled') ? 0 : window.getEngineStripeFee(stripeCaptureTarget, src);
-            
-            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : parseFloat(sim.actual_shipping_cost || 0);
-            
-            let gross = isCostOnlyItem ? 0 : pr * qty;
-            let shipRev = isCostOnlyItem ? 0 : ship;
-            let taxRev = isCostOnlyItem ? 0 : tax;
-            let discRev = isCostOnlyItem ? 0 : disc;
-            
-            let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, discRev, actualShipCost, rec, qty, src);
-            sim.net_profit = rawNet;
-            
-            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') sim.net_profit = 0;
-            if (type === 'Pre-Ship Exchange') sim.net_profit += window.getEngineTrueCogs(rec);
-            if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') sim.net_profit = 0 - actualShipCost - sim.cogs_at_sale;
+            // 3. Run the Forensic Engine on the entire order group
+            let forensicResults = window.runForensicAccounting(updatedLines);
+            let sim = forensicResults.find(l => l.storefront_sku === sku);
 
-            payload.subtotal = isNaN(sim.subtotal) ? null : sim.subtotal;
-            payload.total = isNaN(sim.total) ? null : sim.total;
-            payload.cogs_at_sale = isNaN(sim.cogs_at_sale) ? null : sim.cogs_at_sale;
-            payload.transaction_fees = isNaN(sim.transaction_fees) ? null : sim.transaction_fees;
-            payload.net_profit = isNaN(sim.net_profit) ? null : sim.net_profit;
+            payload.subtotal = isNaN(sim.subtotal) ? (sim.qty_sold * sim.actual_sale_price) : sim.subtotal;
+            payload.total = isNaN(sim.total) ? (sim.subtotal + sim.shipping + sim.taxes - sim.discount_amount) : sim.total;
+            payload.cogs_at_sale = sim.cogs;
+            payload.transaction_fees = sim.fee;
+            payload.net_profit = sim.net;
+            
+            // Update the siblings in the database if they were impacted by shifting
+            forensicResults.forEach(async (fLine) => {
+                if (fLine.storefront_sku !== sku) {
+                    let sibPayload = { net_profit: fLine.net, transaction_fees: fLine.fee, cogs_at_sale: fLine.cogs };
+                    await supabaseClient.from('sales_ledger').update(sibPayload).eq('order_id', orderId).eq('storefront_sku', fLine.storefront_sku);
+                    // Update local memory for siblings too
+                    let sibRow = salesDB.find(s => s.order_id == orderId && s.storefront_sku == fLine.storefront_sku);
+                    if(sibRow) Object.keys(sibPayload).forEach(k => { sibRow[k] = sibPayload[k]; });
+                }
+            });
         }
         // --------------------------------------------------------
 
@@ -1221,72 +1184,21 @@ function recomputeSimulator() {
     let rows = window.currentSimPayload;
     if(!rows || rows.length === 0) return;
     
-    let salesPayload = rows.map((r, idx) => {
-        let type = r.transaction_type || 'Standard';
-        let cogs = window.getEngineTrueCogs(r.internal_recipe_name) || 0;
-        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
-        
-        let pr = parseFloat(r.actual_sale_price || 0);
-        let qty = parseFloat(r.qty_sold || 1);
-        let ship = parseFloat(r.shipping || 0);
-        let tax = parseFloat(r.taxes || 0);
-        let dsc = parseFloat(r.discount_amount || 0);
-        let outBal = parseFloat(r['Outstanding Balance']) || 0;
-
-        let rawGross = pr * qty;
-        let rawShipRev = ship;
-        let rawTaxRev = tax;
-        let rawDisc = dsc;
-
-        let gross = isCostOnlyItem ? 0 : rawGross;
-        let shipRev = isCostOnlyItem ? 0 : rawShipRev;
-        let taxRev = isCostOnlyItem ? 0 : rawTaxRev;
-        let disc = isCostOnlyItem ? 0 : rawDisc;
-
-        let actShipCost = parseFloat(r.actualShipCost) || (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00);
-        
-        // PHYSICAL COST SUPPRESSION: Force $0 on non-physical or pending states
-        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION' || (r.fulfillment_status && r.fulfillment_status.toLowerCase() === 'pending')) { 
-            cogs = 0; 
-            actShipCost = 0; 
-        }
-        
-        let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actShipCost, r.internal_recipe_name, r.qty_sold, r['Source'] || 'web');
-        
-        let net = rawNet + outBal;
-        if (type === 'IGNORE') net = 0;
-        if (type === 'Pre-Ship Exchange') net += window.getEngineTrueCogs(r.internal_recipe_name); 
-        if (isCostOnlyItem && type !== 'Cancelled') net = 0 - actShipCost - cogs;
-        if (type === 'Cancelled') net = 0;
-        
-        let trueLineCaptured = isCostOnlyItem ? 0 : gross + shipRev + taxRev - disc;
-        let feeTarget = trueLineCaptured - outBal;
-        let src = r['Source'] || 'web';
-        let fee = isCostOnlyItem ? 0 : window.getEngineStripeFee(feeTarget, src);
-
-        return { ...r, uiIdx: idx, cogs, fee, net, gross, shipRev, taxRev, disc, actShipCost, trueLineCaptured, outBal, src, ghostRev: 0, rawGross, rawShipRev, rawTaxRev, rawDisc };
-    });
+    // Unified Accounting Sweep
+    let salesPayload = window.runForensicAccounting(rows);
     
+    // Log Forensic Process to Console
     let primes = salesPayload.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
     let replacements = salesPayload.filter(x => x.transaction_type === 'Exchange Replacement');
     
     if (primes.length > 0 && replacements.length > 0) {
         let u = primes[0]; let rp = replacements[0];
         if (u.transaction_type === 'Post-Ship Exchange') {
-            rp.net += rp.cogs; 
             log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Post-Ship Exchange detected. Restocking physical unit (+$${rp.cogs.toFixed(2)} COGS back to Net).</span>`);
         } else if (u.transaction_type === 'Pre-Ship Exchange') {
             log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Pre-Ship Exchange detected. Original never shipped. Absorbing captured revenue.</span>`);
         }
-        rp.net += u.net;
-        rp.net = Math.round(rp.net * 100) / 100;
-        let tempNet = u.net;
-        u.net = 0;
-        
-        u.ghostRev = -tempNet;
-        rp.ghostRev = tempNet;
-        
-        log(`<span style="color:#10b981;">[MATH TRANSFER] Transferred $${tempNet.toFixed(2)} ghost-revenue to physical replacement line.</span>`);
+        log(`<span style="color:#10b981;">[MATH TRANSFER] Transferred $${rp.ghostRev.toFixed(2)} ghost-revenue to physical replacement line.</span>`);
     }
     
     salesPayload.forEach(row => {
