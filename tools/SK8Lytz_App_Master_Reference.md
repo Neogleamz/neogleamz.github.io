@@ -136,18 +136,19 @@ Known verified tables currently in active use across the JavaScript modules:
 
 ### Core Ledgers
 - `sales_ledger`: Tracks order hashes, COGS, and sales mapping.
-- `inventory_consumption`: Tracks recipe components deducted per sale (`item_key`, `consumed_qty`, `manual_adjustment`, `rop_lead_time_days`).
+- `inventory_consumption`: Tracks recipe components and stock levels. Fields: `item_key` (PK), `consumed_qty`, `produced_qty`, `sold_qty`, `scrap_qty`, `manual_adjustment`, `assembly_consumed_qty`, `production_consumed_qty`, `prototype_consumed_qty`, `prototype_produced_qty`, `rop_lead_time_days`, `min_stock`.
 
 ### Products & Costs
 - `full_landed_costs`: Calculates absolute profitability (`parcel_no`, `di_item_id`, `neogleamz_product`, `quantity`, `lot_multiplier`).
 - `storefront_aliases`: Maps external platform SKUs to internal recipe names.
 
 ### Manufacturing (Cofoundry)
-- `work_orders`: Production tracking (`wo_id`, `materials_pulled`, `wip_state`, JSON state tracking).
+- `work_orders`: Production tracking. Fields: `wo_id` (PK), `product_name`, `qty`, `status`, `started_at`, `completed_at`, `wip_state` (JSONB), `routing` (JSONB).
 - `production_sops`: Step-by-step instructions (`product_name`, `steps`).
 - `print_queue`: Tracking active label prints for Work Orders.
 
-### Utilities
+### Utilities & Backups
+- `inventory_snapshots`: Point-in-time recovery points. Fields: `id` (PK), `name`, `snapshot_data` (JSONB - full consumption array), `created_at`, `created_by`.
 - `app_settings`: Global configurations (e.g. `paper_profiles`).
 - `raw_orders`, `raw_parcel_summary`, `raw_parcel_items`: Webhook inbound raw data caches.
 - `socialz_audience`: Outreach CRM for skaters (`name`, `is_favorite`).
@@ -175,7 +176,7 @@ Known verified tables currently in active use across the JavaScript modules:
 
 ---
 
-## ?? 5. Module & Hub Architecture Reference
+## 🏗️ 5. Module & Hub Architecture Reference
 For a complete, canonical page-by-page and element-by-element breakdown of the A.I. Hub (NEXUZ, STOCKPILEZ, MAKERZ, FULFILLZ, REVENUEZ, SOCIALZ) and their underlying algorithms, please consult the dedicated architecture documentation at: docs/master_reference.md.
 
 ---

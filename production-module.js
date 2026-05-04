@@ -759,7 +759,7 @@ async function validateAndCreateWO() {
 
         const {error} = await supabaseClient.from('work_orders').insert({
             wo_id: wo.wo_id, product_name: wo.product_name, qty: wo.qty, label: wo.label, status: wo.status,
-            wip_state: JSON.stringify(wo.wip_state), routing: JSON.stringify(wo.routing)
+            wip_state: wo.wip_state, routing: wo.routing
         });
         if(error) throw new Error(error.message);
 
@@ -875,8 +875,8 @@ function woDrop(e, index) {
 }
 function selectWO(id) { try { currentWO = workOrdersDB.find(w => w.wo_id === id); isSOPLocked = true; renderWOList(); } catch(e) { sysLog(e.message, true); } }
 
-async function toggleWIPCheckbox(chk, key) { try { if(!currentWO) return; let isChecked = chk.checked; if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done'); if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked; await supabaseClient.from('work_orders').update({ wip_state: JSON.stringify(currentWO.wip_state) }).eq('wo_id', currentWO.wo_id); } catch(e) { sysLog("Failed to save checkbox state.", true); } }
-async function checkAllInGroup(grpId) { try { if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {}; chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } }); if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: JSON.stringify(currentWO.wip_state) }).eq('wo_id', currentWO.wo_id); } } catch(e) { sysLog("Failed to save group check.", true); } }
+async function toggleWIPCheckbox(chk, key) { try { if(!currentWO) return; let isChecked = chk.checked; if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done'); if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked; await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } catch(e) { sysLog("Failed to save checkbox state.", true); } }
+async function checkAllInGroup(grpId) { try { if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {}; chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } }); if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } } catch(e) { sysLog("Failed to save group check.", true); } }
 function toggleSOPLock() { isSOPLocked = !isSOPLocked; const btn = document.getElementById('sopLockBtn'); if(btn) btn.innerText = isSOPLocked ? '🔒' : '🔓'; if(currentWO) renderActiveWO(currentWO.wo_id); }
 
 function formatWOTime(ms) {
@@ -910,7 +910,7 @@ window.togglePipelinePause = async function() {
     }
     
     try {
-        await supabaseClient.from('work_orders').update({ wip_state: JSON.stringify(w) }).eq('wo_id', currentWO.wo_id);
+        await supabaseClient.from('work_orders').update({ wip_state: w }).eq('wo_id', currentWO.wo_id);
         renderActiveWO(currentWO.wo_id);
     } catch(e) {
         sysLog("Failed to pause/resume pipeline timer.", true);
@@ -920,7 +920,7 @@ window.togglePipelinePause = async function() {
 async function editWOQty(id) {
     let wo = workOrdersDB.find(w => w.wo_id === id);
     if (!wo) return;
-    if (wo.materials_pulled || wo.status === 'Completed') return alert("Cannot edit quantity after materials have been physically pulled from shelf stock!");
+    if ((wo.wip_state && wo.wip_state.materials_pulled) || wo.status === 'Completed') return alert("Cannot edit quantity after materials have been physically pulled from shelf stock!");
 
     let ans = prompt(`Current Target Quantity: ${wo.qty}\n\nEnter the new corrected quantity for this Work Order:`, wo.qty);
     if (ans === null) return;
@@ -965,7 +965,7 @@ function renderActiveWO(id) {
     try {
         let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
         document.getElementById('woMainArea').style.display = 'flex';
-        let isEditableQty = !wo.materials_pulled && wo.status !== 'Completed';
+        let isEditableQty = !(wo.wip_state && wo.wip_state.materials_pulled) && wo.status !== 'Completed';
         let qtyDisplay = isEditableQty ? `<span data-click="click_editWOQty" data-id="${wo.wo_id}" title="Edit WO Yield Target" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(14,165,233,0.15); border:1px dashed #0ea5e9; padding:2px 10px; border-radius:6px; color:#0ea5e9; transition:all 0.2s; position:relative; top:-2px;" onmouseover="this.style.background='rgba(14,165,233,0.3)'" onmouseout="this.style.background='rgba(14,165,233,0.15)'">${wo.qty} ✏️</span>` : wo.qty;
         document.getElementById('woTitle').innerHTML = window.safeHTML(
             (wo.label ? `[${wo.label}] ` : '') + `${wo.wo_id}: ${wo.product_name} - [ ${qtyDisplay} UNITS ]`
@@ -1035,7 +1035,7 @@ function renderActiveWO(id) {
             document.getElementById('pipe-Queued').style.opacity = '0.6';
             document.getElementById('pipe-Queued').innerHTML = window.safeHTML('🔒 1. Queued');
         }
-        if (wo.status === 'In Production' || wo.status === 'Completed' || wo.materials_pulled) {
+        if (wo.status === 'In Production' || wo.status === 'Completed' || (wo.wip_state && wo.wip_state.materials_pulled)) {
             document.getElementById('pipe-Picking').style.pointerEvents = 'none';
             document.getElementById('pipe-Picking').style.opacity = '0.6';
             document.getElementById('pipe-Picking').innerHTML = window.safeHTML('🔒 2. Parts Picked & Deducted');
@@ -1450,9 +1450,14 @@ async function advanceWO(newStatus, bypassModal = false) {
     try {
         if(!currentWO) return;
         const targetWO = currentWO;
-        if(targetWO.status === 'Completed') return showToast('This Work Order is already archived.', 'error');
+        
+        // Ensure data integrity before modification
+        if (typeof targetWO.wip_state === 'string') targetWO.wip_state = JSON.parse(targetWO.wip_state || '{}');
+        if (typeof targetWO.routing === 'string') targetWO.routing = JSON.parse(targetWO.routing || '{}');
 
-        if (targetWO.materials_pulled && (newStatus === 'Queued' || newStatus === 'Picking')) {
+        if(targetWO.status === 'Archived' || targetWO.status === 'Completed') return showToast('This Work Order is already finalized.', 'error');
+
+        if ((targetWO.wip_state && targetWO.wip_state.materials_pulled) && (newStatus === 'Queued' || newStatus === 'Picking')) {
             return alert("Materials have already been pulled for this Work Order. You cannot revert to previous planning stages.");
         }
 
@@ -1481,7 +1486,7 @@ async function advanceWO(newStatus, bypassModal = false) {
 
         sysLog(`WO ${targetWO.wo_id} -> ${newStatus}`); setMasterStatus("Updating...", "mod-working");
         if (newStatus === 'In Production' || newStatus === 'Completed') {
-            if (!targetWO.materials_pulled) {
+            if (!(targetWO.wip_state && targetWO.wip_state.materials_pulled)) {
                 if(!confirm(`Deduct raw materials for ${targetWO.wo_id}?`)) { setMasterStatus("Ready.", "status-idle"); return; }
                 let exactDeductions = calculateExactWODeductions(targetWO);
                 let upsKeys = new Set();
@@ -1522,8 +1527,9 @@ async function advanceWO(newStatus, bypassModal = false) {
                 let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
                 if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
 
-                targetWO.materials_pulled = true;
-                await supabaseClient.from('work_orders').update({ materials_pulled: true }).eq('wo_id', targetWO.wo_id);
+                if(!targetWO.wip_state) targetWO.wip_state = {};
+                targetWO.wip_state.materials_pulled = true;
+                await supabaseClient.from('work_orders').update({ wip_state: targetWO.wip_state }).eq('wo_id', targetWO.wo_id);
             }
         }
 
@@ -1591,7 +1597,7 @@ async function advanceWO(newStatus, bypassModal = false) {
             targetWO.wip_state.is_paused = false;
         }
 
-        const updateData = {status: newStatus, wip_state: JSON.stringify(targetWO.wip_state)};
+        const updateData = {status: newStatus, wip_state: targetWO.wip_state};
         if(newStatus !== 'Queued' && !targetWO.started_at) {
             targetWO.started_at = new Date().toISOString();
             updateData.started_at = targetWO.started_at;
@@ -1600,9 +1606,17 @@ async function advanceWO(newStatus, bypassModal = false) {
             targetWO.completed_at = new Date().toISOString();
             updateData.completed_at = targetWO.completed_at;
             updateData.status = 'Archived';
+            targetWO.status = 'Archived';
         }
 
-        const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', targetWO.wo_id); if(error) throw new Error(error.message);
+        sysLog(`PATCHing WO ${targetWO.wo_id} -> ${updateData.status}`);
+        const {error} = await supabaseClient.from('work_orders').update(updateData).eq('wo_id', targetWO.wo_id); 
+        if(error) {
+            sysLog(`PATCH ERROR: ${error.message} (${error.code})`, true);
+            if(error.details) sysLog(`DETAILS: ${error.details}`, true);
+            if(error.hint) sysLog(`HINT: ${error.hint}`, true);
+            throw new Error(error.message);
+        }
 
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
@@ -1661,7 +1675,7 @@ async function archiveCurrentWO() {
 async function deleteWorkOrder() {
     if (!currentWO) return;
     // Safety guard: block deletion if materials have already been pulled to prevent inventory corruption
-    if (currentWO.materials_pulled) {
+    if (currentWO.wip_state && currentWO.wip_state.materials_pulled) {
         return showToast('Cannot delete — materials have already been pulled for this Work Order. Archive it instead.', 'error');
     }
     if (!confirm(`⚠️ Permanently delete ${currentWO.wo_id}: ${currentWO.product_name}?\n\nThis cannot be undone.`)) return;
@@ -2552,7 +2566,7 @@ window.submitFinalizeWo = async function() {
                 const {error: scrapErr} = await supabaseClient.from('work_orders').insert(
                     spawnedScrapWOs.map(s => ({
                         wo_id: s.wo_id, product_name: s.product_name, qty: s.qty, label: s.label, status: s.status,
-                        wip_state: JSON.stringify(s.wip_state), routing: JSON.stringify(s.routing)
+                        wip_state: s.wip_state, routing: s.routing
                     }))
                 );
                 if (scrapErr) throw new Error("Scrap WO Deploy Error: " + scrapErr.message);
@@ -2590,7 +2604,7 @@ window.submitFinalizeWo = async function() {
         sysLog(`Batch verified. ${totalScrapEntries} scrap line(s) logged.`);
 
         // Push payload forward into actual completion
-        advanceWO('Completed', true);
+        await advanceWO('Completed', true);
         });
 
     } catch (e) {

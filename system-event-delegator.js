@@ -127,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_resetInventoryConsumpti':
                     window.resetInventoryConsumption();
                     break;
+                case 'click_window_openSnapshotManager':
+                    if (window.openSnapshotManager) window.openSnapshotManager();
+                    break;
+                case 'click_window_closeSnapshotManager':
+                    if (window.closeSnapshotManager) window.closeSnapshotManager();
+                    break;
+                case 'click_window_handleCreateSnapshot':
+                    if (window.handleCreateSnapshot) window.handleCreateSnapshot();
+                    break;
                 case 'click_window_openCycleCountManager':
                     window.openCycleCountManager();
                     break;
@@ -1035,7 +1044,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(window.sortData) window.sortData(el.getAttribute('data-key'));
                     break;
                 case 'click_stopProp':
-                    e.stopPropagation();
+                    event.stopPropagation();
                     break;
                 case 'click_setTipzPriority':
                     if(window.setTipzPriority) window.setTipzPriority(Number(el.getAttribute('data-id')), el.getAttribute('data-label'));
@@ -1392,7 +1401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, true);
 
