@@ -1141,7 +1141,10 @@ function renderSimulatorOrder(orderId) {
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:0.25rem;">
                 <!-- ROW 1: GOSPEL -->
                 <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
-                    <span style="color:#ffffff; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="color:#ffffff; font-weight:bold; font-size:9px; letter-spacing:0.5px;">[RAW DATABASE]</span>
+                        <span style="color:#4ade80; font-size:9px; font-weight:bold; text-transform:uppercase;">Status: ${row.fulfillment_status || 'unknown'}</span>
+                    </div>
                     <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
                         <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff; font-size:9px;">actual_sale_price:</span> <span style="color:#00e5ff;">$${rawPrice}</span></div>
                         <div style="display:flex; justify-content:space-between;"><span style="color:#00ff99; font-size:9px;">subtotal:</span> <span style="color:#00ff99;">$${rawSubtot}</span></div>
@@ -1311,7 +1314,7 @@ function recomputeSimulator() {
         let verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
         
         // Build Console Output
-        log(`&nbsp;&nbsp;> Row: <span style="color:#eee; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#94a3b8;">${row.transaction_type}</span>) ${verifiedBadge}`);
+        log(`&nbsp;&nbsp;> Row: <span style="color:#eee; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#94a3b8;">${row.transaction_type}</span>) <span style="color:#4ade80; font-size:10px;">[${row.fulfillment_status || 'N/A'}]</span> ${verifiedBadge}`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ffffff;">[FORENSIC RAW DB] actual_sale_price: <span style="color:#00e5ff;">'${row.actual_sale_price}'</span>, shipping: <span style="color:#007aff;">'${row.shipping}'</span>, taxes: <span style="color:#f0e68c;">'${row.taxes}'</span>, discount_amount: <span style="color:#ff7f50;">'${row.discount_amount}'</span>, Outstanding Balance: <span style="color:#8b5cf6;">'${row['Outstanding Balance']}'</span></span>`);
         
         if (parseFloat(row.total || 0) > 0 && Math.abs(parseFloat(row.total || 0) - row.trueLineCaptured) > 0.01) {
