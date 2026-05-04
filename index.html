@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.05.04.1722"></script>
+    <script src="system-version.js?v=v.2026.05.04.1723"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.04.1722"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.04.1723"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.04.1722"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.04.1723"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="system-event-delegator.js?v=v.2026.05.04.1722"></script>
+    <script src="system-event-delegator.js?v=v.2026.05.04.1723"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1741,7 +1741,8 @@
             <div class="pane-header-bar">
                 <span class="pane-header-title">STOCKZ</span>
                 <div class="pane-header-actions">
-                    <button class="btn-red-neon" data-click="click_window_resetInventoryConsumpti">⚠️ Reset Stock Levels</button>
+                    <button class="btn-amber" data-click="click_window_openSnapshotManager" style="box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);">📋 Snapshots</button>
+                    <button class="btn-red-neon" data-click="click_window_resetInventoryConsumpti" style="margin-left:5px;">⚠️ Reset Stock Levels</button>
                     <button class="btn-green-neon" data-click="click_window_openCycleCountManager" style="margin-left:5px;">📦 Cycle Counts</button>
                     <button class="btn-purple" data-click="click_window_openVelocityzModal">⏳ Velocityz</button>
                     <button class="btn-blue" data-click="click_window_editGlobalLeadTime" style="margin-left:5px;">⏱️ Edit Global Lead</button>
@@ -4861,19 +4862,35 @@
         </div>
     </div>
 </div>
-<script src="neogleamz-engine.js?v=v.2026.05.04.1722"></script>
-<script src="system-tools-module.js?v=v.2026.05.04.1722"></script>
-<script src="bom-module.js?v=v.2026.05.04.1722"></script>
-<script src="inventory-module.js?v=v.2026.05.04.1722"></script>
-<script src="packerz-module.js?v=v.2026.05.04.1722"></script>
-<script src="production-module.js?v=v.2026.05.04.1722"></script>
-<script src="sales-module.js?v=v.2026.05.04.1722"></script>
-<script src="analytics-module.js?v=v.2026.05.04.1722"></script>
-<script src="ceo-module.js?v=v.2026.05.04.1722"></script>
-<script src="task-engine.js?v=v.2026.05.04.1722"></script>
-<script src="print-module.js?v=v.2026.05.04.1722"></script>
-<script src="scraper-module.js?v=v.2026.05.04.1722"></script>
-<script src="socialz-module.js?v=v.2026.05.04.1722"></script>
+<script>
+    window.openSnapshotManager = function() {
+        document.getElementById('snapshotManagerModal').style.display = 'flex';
+        if (window.fetchInventorySnapshots) window.fetchInventorySnapshots();
+    };
+    window.closeSnapshotManager = function() {
+        document.getElementById('snapshotManagerModal').style.display = 'none';
+    };
+    window.handleCreateSnapshot = function() {
+        let name = document.getElementById('snapshotNameInput').value.trim();
+        if (window.createInventorySnapshot) {
+            window.createInventorySnapshot(name);
+            document.getElementById('snapshotNameInput').value = '';
+        }
+    };
+</script>
+<script src="neogleamz-engine.js?v=v.2026.05.04.1723"></script>
+<script src="system-tools-module.js?v=v.2026.05.04.1723"></script>
+<script src="bom-module.js?v=v.2026.05.04.1723"></script>
+<script src="inventory-module.js?v=v.2026.05.04.1723"></script>
+<script src="packerz-module.js?v=v.2026.05.04.1723"></script>
+<script src="production-module.js?v=v.2026.05.04.1723"></script>
+<script src="sales-module.js?v=v.2026.05.04.1723"></script>
+<script src="analytics-module.js?v=v.2026.05.04.1723"></script>
+<script src="ceo-module.js?v=v.2026.05.04.1723"></script>
+<script src="task-engine.js?v=v.2026.05.04.1723"></script>
+<script src="print-module.js?v=v.2026.05.04.1723"></script>
+<script src="scraper-module.js?v=v.2026.05.04.1723"></script>
+<script src="socialz-module.js?v=v.2026.05.04.1723"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5331,18 +5348,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.04.1722"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.04.1723"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.04.1722"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.04.1723"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.04.1722"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.04.1723"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.04.1722"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.04.1722"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.04.1722"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.04.1723"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.04.1723"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.04.1723"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.05.04.1722"></script>
-    <script src="labelz-module.js?v=v.2026.05.04.1722"></script>
+    <script src="barcodz-module.js?v=v.2026.05.04.1723"></script>
+    <script src="labelz-module.js?v=v.2026.05.04.1723"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -5885,6 +5902,31 @@
             });
         });
     </script>
+    <!-- Snapshot Manager Modal -->
+    <div id="snapshotManagerModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10006; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+        <div style="background:var(--bg-panel); border:1px solid #f59e0b; border-radius:12px; width:90%; max-width:500px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5); overflow:hidden;">
+            <div style="padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(245, 158, 11, 0.1); display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="margin:0; font-size:18px; color:#f59e0b; display:flex; align-items:center; gap:10px;">📋 Inventory Snapshots</h2>
+                <button class="modal-close-btn" data-click="click_window_closeSnapshotManager">✕ CLOSE</button>
+            </div>
+            <div style="padding:25px; display:flex; flex-direction:column; gap:20px;">
+                <div style="background:rgba(245, 158, 11, 0.05); border:1px solid rgba(245, 158, 11, 0.2); padding:15px; border-radius:8px; display:flex; flex-direction:column; gap:10px;">
+                    <label style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase;">Create New Restore Point</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="snapshotNameInput" placeholder="e.g. Pre-Work-Order-Test" style="flex:1; padding:10px; border-radius:6px; background:var(--bg-body); border:1px solid var(--border-input); color:var(--text-main);">
+                        <button class="btn-amber" style="padding:0 15px;" data-click="click_window_handleCreateSnapshot">SAVE</button>
+                    </div>
+                </div>
+                
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <label style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase;">Available Snapshots</label>
+                    <div id="snapshotListItems" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:5px;">
+                        <div style="padding:20px; text-align:center; color:var(--text-muted);">Loading snapshots...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

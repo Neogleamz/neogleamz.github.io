@@ -127,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_resetInventoryConsumpti':
                     window.resetInventoryConsumption();
                     break;
+                case 'click_window_openSnapshotManager':
+                    if (window.openSnapshotManager) window.openSnapshotManager();
+                    break;
+                case 'click_window_closeSnapshotManager':
+                    if (window.closeSnapshotManager) window.closeSnapshotManager();
+                    break;
+                case 'click_window_handleCreateSnapshot':
+                    if (window.handleCreateSnapshot) window.handleCreateSnapshot();
+                    break;
                 case 'click_window_openCycleCountManager':
                     window.openCycleCountManager();
                     break;
