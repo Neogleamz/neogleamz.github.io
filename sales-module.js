@@ -1245,7 +1245,11 @@ function recomputeSimulator() {
 
         let actShipCost = parseFloat(r.actualShipCost) || (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00);
         
-        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION') { cogs = 0; }
+        // PHYSICAL COST SUPPRESSION: Force $0 on non-physical or pending states
+        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION' || (r.fulfillment_status && r.fulfillment_status.toLowerCase() === 'pending')) { 
+            cogs = 0; 
+            actShipCost = 0; 
+        }
         
         let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actShipCost, r.internal_recipe_name, r.qty_sold, r['Source'] || 'web');
         
