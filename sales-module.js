@@ -1309,7 +1309,7 @@ function recomputeSimulator() {
         let verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
         
         // Build Console Output
-        log(`&nbsp;&nbsp;> Row: <span style="color:#eee; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#666;">${row.transaction_type}</span>) ${verifiedBadge}`);
+        log(`&nbsp;&nbsp;> Row: <span style="color:#eee; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#94a3b8;">${row.transaction_type}</span>) ${verifiedBadge}`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ffffff;">[FORENSIC RAW DB] Price: <span style="color:#00e5ff;">'${row.actual_sale_price}'</span>, ShipCol: <span style="color:#818cf8;">'${row.shipping}'</span>, TaxCol: <span style="color:#c084fc;">'${row.taxes}'</span>, Disc: <span style="color:#f472b6;">'${row.discount_amount}'</span>, OutBal: <span style="color:#e879f9;">'${row['Outstanding Balance']}'</span></span>`);
         
         if (parseFloat(row.total || 0) > 0 && Math.abs(parseFloat(row.total || 0) - row.trueLineCaptured) > 0.01) {
@@ -1317,7 +1317,7 @@ function recomputeSimulator() {
         }
 
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Capture Eq: [(<span style="color:#00e5ff;">$${row.rawGross.toFixed(2)} Price</span> + <span style="color:#818cf8;">$${row.rawShipRev.toFixed(2)} Ship Col.</span> + <span style="color:#c084fc;">$${row.rawTaxRev.toFixed(2)} Tax Col.</span> - <span style="color:#f472b6;">$${row.rawDisc.toFixed(2)} Disc</span>) = <span style="color:#fb7185; font-weight:bold;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Stripe Target: (<span style="color:#fb7185;">$${row.trueLineCaptured.toFixed(2)} Capture</span> - <span style="color:#e879f9;">$${row.outBal.toFixed(2)} Out. Bal.</span>) = <span style="color:#ffffff;">$${(row.trueLineCaptured - row.outBal).toFixed(2)}</span> via <span style="color:#2dd4bf; font-weight:bold;">${row.src}</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Stripe Target: (<span style="color:#fb7185;">$${row.trueLineCaptured.toFixed(2)} Capture</span> - <span style="color:#e879f9;">$${row.outBal.toFixed(2)} Out. Bal.</span>) = <span style="color:#fde047;">$${(row.trueLineCaptured - row.outBal).toFixed(2)}</span> via <span style="color:#2dd4bf; font-weight:bold;">${row.src}</span></span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Deductions: <span style="color:#ef4444;">-$${row.fee.toFixed(2)} Stripe Fee</span> - <span style="color:#ffd60a;">$${row.actShipCost.toFixed(2)} Ship Exp.</span> - <span style="color:#ff9500;">$${row.cogs.toFixed(2)} True COGS</span></span>`);
         if(row.ghostRev !== 0) {
             log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff00ff;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
