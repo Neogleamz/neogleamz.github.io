@@ -143,7 +143,7 @@ Known verified tables currently in active use across the JavaScript modules:
 - `storefront_aliases`: Maps external platform SKUs to internal recipe names.
 
 ### Manufacturing (Cofoundry)
-- `work_orders`: Production tracking. Fields: `wo_id` (PK), `product_name`, `qty`, `status`, `started_at`, `completed_at`, `wip_state` (JSONB), `routing` (JSONB).
+- `work_orders`: Production tracking. Fields: `wo_id` (PK), `product_name`, `qty`, `status`, `started_at`, `completed_at`, `wip_state` (JSONB), `routing` (JSONB). **Standard**: Always store native JSON objects; never stringify. `materials_pulled` state is stored within `wip_state`.
 - `production_sops`: Step-by-step instructions (`product_name`, `steps`).
 - `print_queue`: Tracking active label prints for Work Orders.
 

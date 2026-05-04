@@ -28,8 +28,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🔴 P0 Critical (Blockers & Hotfixes)
 
-### Target: `main`
-- [🚀] `feat/cycle-count-snapshots` : **Cycle Count Snapshots & Restoration** - Implement a system to capture "point-in-time" snapshots of cycle counts, enabling history tracking and the ability to restore inventory state to a previous snapshot. [🤖 AI Model] [🧠 45k / 15k] [💸 $0.15 / $0.05]
+- [ ] `TBD` : **Awaiting Priority** - The P0 queue is currently clear. Waiting for user input for the next high-priority target.
 
 
 ## 🟡 P2 Medium Priority (Enhancements)
@@ -49,10 +48,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🔴 Vulnerabilities (npm audit)
 *0 native system vulnerabilities globally found.* ✅
 
-### 🟡 Outdated Dependencies (npm outdated)
-- [🚀] `chore/dep-supabase-js` : **@supabase/supabase-js** `2.105.0` → `2.105.1` (patch). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
-- [🚀] `chore/dep-eslint` : **eslint** `10.2.1` → `10.3.0` (minor). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
-- [🚀] `chore/dep-supabase-cli` : **supabase** `2.95.5` → `2.98.0` (minor). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+- *0 outdated dependencies found.* ✅
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
 *0 new code-debt items found.* ✅
@@ -60,6 +56,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Inventory History & Stability (Tier 1)**
+*(Shipped v1.0.28 — 2026-05-04)*
+- [🚀] `feat/cycle-count-snapshots` : **Cycle Count Snapshots & Restoration** - Implement a system to capture "point-in-time" snapshots of cycle counts, enabling history tracking and the ability to restore inventory state to a previous snapshot. [🤖 AI Model] [🧠 45k / 15k] [💸 $0.15 / $0.05]
+- [🚀] `chore/dep-supabase-js` : **@supabase/supabase-js** `2.105.0` → `2.105.1` (patch). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+- [🚀] `chore/dep-eslint` : **eslint** `10.2.1` → `10.3.0` (minor). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+- [🚀] `chore/dep-supabase-cli` : **supabase** `2.95.5` → `2.98.0` (minor). [🤖 AI Model] [🧠 1k / 1k] [💸 $0.01 / $0.01]
 
 ### Target: `main`
 **Epic: Vanilla JS Code Modernization (Tier 2)**
