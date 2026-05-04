@@ -1044,7 +1044,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(window.sortData) window.sortData(el.getAttribute('data-key'));
                     break;
                 case 'click_stopProp':
-                    e.stopPropagation();
+                    event.stopPropagation();
                     break;
                 case 'click_setTipzPriority':
                     if(window.setTipzPriority) window.setTipzPriority(Number(el.getAttribute('data-id')), el.getAttribute('data-label'));
@@ -1401,7 +1401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on ${eventName}:`, error);
+            console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
         }
     }, true);
 
