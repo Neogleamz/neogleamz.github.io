@@ -1142,21 +1142,23 @@ function renderSimulatorOrder(orderId) {
                 <!-- ROW 1: GOSPEL -->
                 <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
                     <span style="color:#ffffff; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
-                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff;">Price:</span> <span style="color:#00e5ff;">$${rawPrice}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#00ff99;">Subtot:</span> <span style="color:#00ff99;">$${rawSubtot}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#007aff;">Ship Col:</span> <span style="color:#007aff;">$${rawShip}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#f0e68c;">Tax Col:</span> <span style="color:#f0e68c;">$${rawTax}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff7f50;">Discount:</span> <span style="color:#ff7f50;">-$${rawDisc}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#8b5cf6;">Out. Bal:</span> <span style="color:#8b5cf6;">-$${rawOutBal}</span></div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff; font-size:9px;">actual_sale_price:</span> <span style="color:#00e5ff;">$${rawPrice}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#00ff99; font-size:9px;">subtotal:</span> <span style="color:#00ff99;">$${rawSubtot}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#007aff; font-size:9px;">shipping:</span> <span style="color:#007aff;">$${rawShip}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#f0e68c; font-size:9px;">taxes:</span> <span style="color:#f0e68c;">$${rawTax}</span></div>
                     </div>
-                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-top:4px;">
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff3399;">Tot Cap:</span> <span style="color:#ff3399; font-weight:bold;">$${rawTotal}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff00ff;">Refunds:</span> <span style="color:#ff00ff;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff9500;">DB COGS:</span> <span style="color:#ff9500;">-$${rawCogs}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ffcc00;">DB Label:</span> <span style="color:#ffcc00;">-$${rawShipC}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff3b30;">DB Fee:</span> <span style="color:#ff3b30;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ccff00;">DB Net:</span> <span style="color:#ccff00; font-weight:bold;">$${rawNet}</span></div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff7f50; font-size:9px;">discount_amount:</span> <span style="color:#ff7f50;">-$${rawDisc}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#8b5cf6; font-size:9px;">Outstanding Balance:</span> <span style="color:#8b5cf6;">-$${rawOutBal}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff3399; font-size:9px;">Total Captured:</span> <span style="color:#ff3399; font-weight:bold;">$${rawTotal}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff00ff; font-size:9px;">refund_amount:</span> <span style="color:#ff00ff;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; padding-top:4px;">
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff9500; font-size:9px;">COGS (DB):</span> <span style="color:#ff9500;">-$${rawCogs}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ffcc00; font-size:9px;">Label (DB):</span> <span style="color:#ffcc00;">-$${rawShipC}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff3b30; font-size:9px;">Fees (DB):</span> <span style="color:#ff3b30;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ccff00; font-size:9px;">Net Profit (DB):</span> <span style="color:#ccff00; font-weight:bold;">$${rawNet}</span></div>
                     </div>
                 </div>
                 
@@ -1310,14 +1312,14 @@ function recomputeSimulator() {
         
         // Build Console Output
         log(`&nbsp;&nbsp;> Row: <span style="color:#eee; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#94a3b8;">${row.transaction_type}</span>) ${verifiedBadge}`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ffffff;">[FORENSIC RAW DB] Price: <span style="color:#00e5ff;">'${row.actual_sale_price}'</span>, ShipCol: <span style="color:#007aff;">'${row.shipping}'</span>, TaxCol: <span style="color:#f0e68c;">'${row.taxes}'</span>, Disc: <span style="color:#ff7f50;">'${row.discount_amount}'</span>, OutBal: <span style="color:#8b5cf6;">'${row['Outstanding Balance']}'</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ffffff;">[FORENSIC RAW DB] actual_sale_price: <span style="color:#00e5ff;">'${row.actual_sale_price}'</span>, shipping: <span style="color:#007aff;">'${row.shipping}'</span>, taxes: <span style="color:#f0e68c;">'${row.taxes}'</span>, discount_amount: <span style="color:#ff7f50;">'${row.discount_amount}'</span>, Outstanding Balance: <span style="color:#8b5cf6;">'${row['Outstanding Balance']}'</span></span>`);
         
         if (parseFloat(row.total || 0) > 0 && Math.abs(parseFloat(row.total || 0) - row.trueLineCaptured) > 0.01) {
-            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff3b30; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff3b30; font-size:10px;">[WARNING: RAW Total Captured $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
         }
 
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Capture Eq: [(<span style="color:#00e5ff;">$${row.rawGross.toFixed(2)} Price</span> + <span style="color:#007aff;">$${row.rawShipRev.toFixed(2)} Ship Col.</span> + <span style="color:#f0e68c;">$${row.rawTaxRev.toFixed(2)} Tax Col.</span> - <span style="color:#ff7f50;">$${row.rawDisc.toFixed(2)} Disc</span>) = <span style="color:#ff3399; font-weight:bold;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Stripe Target: (<span style="color:#ff3399;">$${row.trueLineCaptured.toFixed(2)} Capture</span> - <span style="color:#8b5cf6;">$${row.outBal.toFixed(2)} Out. Bal.</span>) = <span style="color:#fde047;">$${(row.trueLineCaptured - row.outBal).toFixed(2)}</span> via <span style="color:#2dd4bf; font-weight:bold;">${row.src}</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Capture Eq: [(<span style="color:#00e5ff;">$${row.rawGross.toFixed(2)} actual_sale_price</span> + <span style="color:#007aff;">$${row.rawShipRev.toFixed(2)} shipping</span> + <span style="color:#f0e68c;">$${row.rawTaxRev.toFixed(2)} taxes</span> - <span style="color:#ff7f50;">$${row.rawDisc.toFixed(2)} discount_amount</span>) = <span style="color:#ff3399; font-weight:bold;">$${row.trueLineCaptured.toFixed(2)} Total Captured</span>]</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Stripe Target: (<span style="color:#ff3399;">$${row.trueLineCaptured.toFixed(2)} Total Captured</span> - <span style="color:#8b5cf6;">$${row.outBal.toFixed(2)} Outstanding Balance</span>) = <span style="color:#fde047;">$${(row.trueLineCaptured - row.outBal).toFixed(2)}</span> via <span style="color:#2dd4bf; font-weight:bold;">${row.src}</span></span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Deductions: <span style="color:#ff3b30;">-$${row.fee.toFixed(2)} Stripe Fee</span> - <span style="color:#ffcc00;">$${row.actShipCost.toFixed(2)} Ship Exp.</span> - <span style="color:#ff9500;">$${row.cogs.toFixed(2)} True COGS</span></span>`);
         if(row.ghostRev !== 0) {
             log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff00ff;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
