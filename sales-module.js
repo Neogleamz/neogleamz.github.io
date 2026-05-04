@@ -36,7 +36,11 @@ async function hashPII(rawStr) {
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch(e) { return null; }
+}
+
 // --- MASTER FORENSIC ACCOUNTING ENGINE ---
+
 // Unified Singleton for all revenue shifting, cost suppression, and line-item slicing.
 window.runForensicAccounting = function(rows) {
     if (!rows || rows.length === 0) return [];
