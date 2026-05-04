@@ -37,8 +37,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-
-
+- [ ] `feat/cycle-count-snapshots` : **Cycle Count Snapshots & Restoration** - Implement a system to capture "point-in-time" snapshots of cycle counts, enabling history tracking and the ability to restore inventory state to a previous snapshot. [🤖 AI Model] [🧠 TBD / 15k] [💸 TBD / $0.05]
 
 **Other Ideas**
 
