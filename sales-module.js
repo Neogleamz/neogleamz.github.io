@@ -1129,9 +1129,9 @@ function renderSimulatorOrder(orderId) {
         html += `
         <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:0.5rem;">
-                <div style="color:#eee; font-weight:bold; font-size:14px;">${row.internal_recipe_name} <span style="color:#666; font-size:12px; font-weight:normal;">(QTY: <span style="color:#00e5ff;">${row.qty_sold}</span>)</span></div>
+                <div style="color:#eee; font-weight:bold; font-size:14px;">${row.internal_recipe_name} <span style="color:#666; font-size:12px; font-weight:normal;">(QTY: <span style="color:#ffffff;">${row.qty_sold}</span>)</span></div>
                 <div style="display:flex; gap:1rem; align-items:center;">
-                    <span style="color:#666; font-size:11px;">SOURCE: <span style="color:#00e5ff; font-weight:bold;">${src}</span></span>
+                    <span style="color:#666; font-size:11px;">SOURCE: <span style="color:#2dd4bf; font-weight:bold;">${src}</span></span>
                     <select class="sim-type-sel" data-idx="${i}" style="background:#000; color:#10b981; border:1px solid #333; padding:4px; border-radius:4px; font-size:12px; outline:none; cursor:pointer;">
                         ${typeHtml}
                     </select>
@@ -1141,46 +1141,46 @@ function renderSimulatorOrder(orderId) {
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:0.25rem;">
                 <!-- ROW 1: GOSPEL -->
                 <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
-                    <span style="color:#00e5ff; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
+                    <span style="color:#ffffff; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
                     <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
                         <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff;">Price:</span> <span style="color:#00e5ff;">$${rawPrice}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff;">Subtot:</span> <span style="color:#00e5ff;">$${rawSubtot}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff;">Ship Col:</span> <span style="color:#00e5ff;">$${rawShip}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff;">Tax Col:</span> <span style="color:#00e5ff;">$${rawTax}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#bf5af2;">Discount:</span> <span style="color:#bf5af2;">-$${rawDisc}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ffb300;">Out. Bal:</span> <span style="color:#ffb300;">-$${rawOutBal}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#38bdf8;">Subtot:</span> <span style="color:#38bdf8;">$${rawSubtot}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#818cf8;">Ship Col:</span> <span style="color:#818cf8;">$${rawShip}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#c084fc;">Tax Col:</span> <span style="color:#c084fc;">$${rawTax}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#f472b6;">Discount:</span> <span style="color:#f472b6;">-$${rawDisc}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#e879f9;">Out. Bal:</span> <span style="color:#e879f9;">-$${rawOutBal}</span></div>
                     </div>
                     <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-top:4px;">
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#00e5ff;">Tot Cap:</span> <span style="color:#00e5ff; font-weight:bold;">$${rawTotal}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#bf5af2;">Refunds:</span> <span style="color:#bf5af2;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff8c00;">DB COGS:</span> <span style="color:#ff8c00;">-$${rawCogs}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ffb300;">DB Label:</span> <span style="color:#ffb300;">-$${rawShipC}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff2d55;">DB Fee:</span> <span style="color:#ff2d55;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#fb7185;">Tot Cap:</span> <span style="color:#fb7185; font-weight:bold;">$${rawTotal}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff00ff;">Refunds:</span> <span style="color:#ff00ff;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ff9500;">DB COGS:</span> <span style="color:#ff9500;">-$${rawCogs}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ffd60a;">DB Label:</span> <span style="color:#ffd60a;">-$${rawShipC}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#ef4444;">DB Fee:</span> <span style="color:#ef4444;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
                         <div style="display:flex; justify-content:space-between;"><span style="color:#ccff00;">DB Net:</span> <span style="color:#ccff00; font-weight:bold;">$${rawNet}</span></div>
                     </div>
                 </div>
                 
                 <!-- ROW 2: LIVE ENGINE CALCS -->
-                <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; font-size:12px; color:#aaa; background:#1a1a1a; padding:10px 12px; border-radius:6px; border:1px solid #00e5ff;">
+                <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; font-size:12px; color:#aaa; background:#1a1a1a; padding:10px 12px; border-radius:6px; border:1px solid #fb7185;">
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#00e5ff; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Engine Capture</span>
-                        <span id="sim-capture-${i}" style="color:#00e5ff; font-weight:bold;">$0.00</span>
+                        <span style="color:#fb7185; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Engine Capture</span>
+                        <span id="sim-capture-${i}" style="color:#fb7185; font-weight:bold;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#ff2d55; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Stripe/eBay</span>
-                        <span id="sim-fee-${i}" style="color:#ff2d55;">-$0.00</span>
+                        <span style="color:#ef4444; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Stripe/eBay</span>
+                        <span id="sim-fee-${i}" style="color:#ef4444;">-$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#ffb300; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Label Cost</span>
-                        <span id="sim-shipexp-${i}" style="color:#ffb300;">-$0.00</span>
+                        <span style="color:#ffd60a; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Label Cost</span>
+                        <span id="sim-shipexp-${i}" style="color:#ffd60a;">-$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#ff8c00; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ True COGS</span>
-                        <span id="sim-cogs-${i}" style="color:#ff8c00;">-$0.00</span>
+                        <span style="color:#ff9500; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ True COGS</span>
+                        <span id="sim-cogs-${i}" style="color:#ff9500;">-$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#bf5af2; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;" title="Refunds or Transferred Adjustments">⚙️ Refunds/Adj.</span>
-                        <span id="sim-ghost-${i}" style="color:#bf5af2;">$0.00</span>
+                        <span style="color:#ff00ff; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;" title="Refunds or Transferred Adjustments">⚙️ Refunds/Adj.</span>
+                        <span id="sim-ghost-${i}" style="color:#ff00ff;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
                         <span style="color:#ccff00; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">Final Net Profit</span>
@@ -1291,38 +1291,38 @@ function recomputeSimulator() {
         let elGhost = document.getElementById(`sim-ghost-${i}`);
         let elNet = document.getElementById(`sim-net-${i}`);
         
-        if(elCapture) { elCapture.innerText = `$${row.trueLineCaptured.toFixed(2)}`; elCapture.style.color = "#00e5ff"; }
-        if(elFee) { elFee.innerText = `-$${row.fee.toFixed(2)}`; elFee.style.color = "#ff2d55"; }
-        if(elShipExp) { elShipExp.innerText = `-$${row.actShipCost.toFixed(2)}`; elShipExp.style.color = "#ffb300"; }
-        if(elCogs) { elCogs.innerText = `-$${row.cogs.toFixed(2)}`; elCogs.style.color = "#ff8c00"; }
+        if(elCapture) { elCapture.innerText = `$${row.trueLineCaptured.toFixed(2)}`; elCapture.style.color = "#fb7185"; }
+        if(elFee) { elFee.innerText = `-$${row.fee.toFixed(2)}`; elFee.style.color = "#ef4444"; }
+        if(elShipExp) { elShipExp.innerText = `-$${row.actShipCost.toFixed(2)}`; elShipExp.style.color = "#ffd60a"; }
+        if(elCogs) { elCogs.innerText = `-$${row.cogs.toFixed(2)}`; elCogs.style.color = "#ff9500"; }
         
         if(elGhost) {
             elGhost.innerText = row.ghostRev >= 0 ? `+$${row.ghostRev.toFixed(2)}` : `-$${Math.abs(row.ghostRev).toFixed(2)}`;
-            elGhost.style.color = row.ghostRev !== 0 ? '#bf5af2' : '#555';
+            elGhost.style.color = row.ghostRev !== 0 ? '#ff00ff' : '#555';
         }
         
         if(elNet) {
             elNet.innerText = `$${row.net.toFixed(2)}`;
-            elNet.style.color = row.net < 0 ? '#ff2d55' : '#ccff00';
+            elNet.style.color = row.net < 0 ? '#ef4444' : '#ccff00';
         }
         
         let verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
         
         // Build Console Output
         log(`&nbsp;&nbsp;> Row: <span style="color:#eee; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#666;">${row.transaction_type}</span>) ${verifiedBadge}`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#00e5ff;">[FORENSIC RAW DB] Price: <span style="color:#00e5ff;">'${row.actual_sale_price}'</span>, ShipCol: <span style="color:#00e5ff;">'${row.shipping}'</span>, TaxCol: <span style="color:#00e5ff;">'${row.taxes}'</span>, Disc: <span style="color:#bf5af2;">'${row.discount_amount}'</span>, OutBal: <span style="color:#ffb300;">'${row['Outstanding Balance']}'</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ffffff;">[FORENSIC RAW DB] Price: <span style="color:#00e5ff;">'${row.actual_sale_price}'</span>, ShipCol: <span style="color:#818cf8;">'${row.shipping}'</span>, TaxCol: <span style="color:#c084fc;">'${row.taxes}'</span>, Disc: <span style="color:#f472b6;">'${row.discount_amount}'</span>, OutBal: <span style="color:#e879f9;">'${row['Outstanding Balance']}'</span></span>`);
         
         if (parseFloat(row.total || 0) > 0 && Math.abs(parseFloat(row.total || 0) - row.trueLineCaptured) > 0.01) {
-            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff2d55; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ef4444; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
         }
 
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Capture Eq: [(<span style="color:#00e5ff;">$${row.rawGross.toFixed(2)} Price</span> + <span style="color:#00e5ff;">$${row.rawShipRev.toFixed(2)} Ship Col.</span> + <span style="color:#00e5ff;">$${row.rawTaxRev.toFixed(2)} Tax Col.</span> - <span style="color:#bf5af2;">$${row.rawDisc.toFixed(2)} Disc</span>) = <span style="color:#00e5ff; font-weight:bold;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Stripe Target: (<span style="color:#00e5ff;">$${row.trueLineCaptured.toFixed(2)} Capture</span> - <span style="color:#ffb300;">$${row.outBal.toFixed(2)} Out. Bal.</span>) = <span style="color:#00e5ff;">$${(row.trueLineCaptured - row.outBal).toFixed(2)}</span> via <span style="color:#00e5ff; font-weight:bold;">${row.src}</span></span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Deductions: <span style="color:#ff2d55;">-$${row.fee.toFixed(2)} Stripe Fee</span> - <span style="color:#ffb300;">$${row.actShipCost.toFixed(2)} Ship Exp.</span> - <span style="color:#ff8c00;">$${row.cogs.toFixed(2)} True COGS</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Capture Eq: [(<span style="color:#00e5ff;">$${row.rawGross.toFixed(2)} Price</span> + <span style="color:#818cf8;">$${row.rawShipRev.toFixed(2)} Ship Col.</span> + <span style="color:#c084fc;">$${row.rawTaxRev.toFixed(2)} Tax Col.</span> - <span style="color:#f472b6;">$${row.rawDisc.toFixed(2)} Disc</span>) = <span style="color:#fb7185; font-weight:bold;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Stripe Target: (<span style="color:#fb7185;">$${row.trueLineCaptured.toFixed(2)} Capture</span> - <span style="color:#e879f9;">$${row.outBal.toFixed(2)} Out. Bal.</span>) = <span style="color:#ffffff;">$${(row.trueLineCaptured - row.outBal).toFixed(2)}</span> via <span style="color:#2dd4bf; font-weight:bold;">${row.src}</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#555;">Deductions: <span style="color:#ef4444;">-$${row.fee.toFixed(2)} Stripe Fee</span> - <span style="color:#ffd60a;">$${row.actShipCost.toFixed(2)} Ship Exp.</span> - <span style="color:#ff9500;">$${row.cogs.toFixed(2)} True COGS</span></span>`);
         if(row.ghostRev !== 0) {
-            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#bf5af2;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff00ff;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
         }
-        let nc = row.net < 0 ? '#ff2d55' : '#ccff00';
+        let nc = row.net < 0 ? '#ef4444' : '#ccff00';
         log(`&nbsp;&nbsp;&nbsp;&nbsp;FINAL NET PROFIT: <span style="color:${nc}; font-weight:bold;">$${row.net.toFixed(2)}</span>`);
         log(`<br/>`);
     });
