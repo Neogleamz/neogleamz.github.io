@@ -28,7 +28,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🔴 P0 Critical (Blockers & Hotfixes)
 
-- [ ] `TBD` : **Awaiting Priority** - The P0 queue is currently clear. Waiting for user input for the next high-priority target.
+- [ ] `feat/sandbox-engine-immersive` : **Sandbox Engine Immersive Refactor** - Transform the "Net Profit Sandbox Engine" into a full-screen immersive terminal with strict metric color-coding (Capture: Sky, Fees: Rose, Shipping: Amber, COGS: Salmon, Adj: Purple, Net: Emerald) across UI and console logs. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 
 
 ## 🟡 P2 Medium Priority (Enhancements)
