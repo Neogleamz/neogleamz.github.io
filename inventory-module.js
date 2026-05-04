@@ -330,9 +330,6 @@ async function runProductionBatch() {
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
 }
 
-    } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); }
-}
-
 /**
  * Creates a global snapshot of the entire inventory_consumption table.
  * @param {string} name - User-provided name for the snapshot.
