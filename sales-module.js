@@ -1164,19 +1164,19 @@ function renderSimulatorOrder(orderId) {
                 <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; font-size:12px; color:#aaa; background:#1a1a1a; padding:10px 12px; border-radius:6px; border:1px solid #0ea5e9;">
                     <div style="display:flex; flex-direction:column;">
                         <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Engine Capture</span>
-                        <span id="sim-capture-${i}" style="color:#10b981; font-weight:bold;">$0.00</span>
+                        <span id="sim-capture-${i}" style="color:#0ea5e9; font-weight:bold;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Stripe/eBay</span>
-                        <span id="sim-fee-${i}" style="color:#ef4444;">-$0.00</span>
+                        <span style="color:#f43f5e; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Stripe/eBay</span>
+                        <span id="sim-fee-${i}" style="color:#f43f5e;">-$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Label Cost</span>
-                        <span id="sim-shipexp-${i}" style="color:#ef4444;">-$0.00</span>
+                        <span style="color:#f59e0b; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Label Cost</span>
+                        <span id="sim-shipexp-${i}" style="color:#f59e0b;">-$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ True COGS</span>
-                        <span id="sim-cogs-${i}" style="color:#ef4444;">-$0.00</span>
+                        <span style="color:#fb7185; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ True COGS</span>
+                        <span id="sim-cogs-${i}" style="color:#fb7185;">-$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
                         <span style="color:#8b5cf6; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;" title="Refunds or Transferred Adjustments">⚙️ Refunds/Adj.</span>
@@ -1291,10 +1291,10 @@ function recomputeSimulator() {
         let elGhost = document.getElementById(`sim-ghost-${i}`);
         let elNet = document.getElementById(`sim-net-${i}`);
         
-        if(elCapture) elCapture.innerText = `$${row.trueLineCaptured.toFixed(2)}`;
-        if(elFee) elFee.innerText = `-$${row.fee.toFixed(2)}`;
-        if(elShipExp) elShipExp.innerText = `-$${row.actShipCost.toFixed(2)}`;
-        if(elCogs) elCogs.innerText = `-$${row.cogs.toFixed(2)}`;
+        if(elCapture) { elCapture.innerText = `$${row.trueLineCaptured.toFixed(2)}`; elCapture.style.color = "#0ea5e9"; }
+        if(elFee) { elFee.innerText = `-$${row.fee.toFixed(2)}`; elFee.style.color = "#f43f5e"; }
+        if(elShipExp) { elShipExp.innerText = `-$${row.actShipCost.toFixed(2)}`; elShipExp.style.color = "#f59e0b"; }
+        if(elCogs) { elCogs.innerText = `-$${row.cogs.toFixed(2)}`; elCogs.style.color = "#fb7185"; }
         
         if(elGhost) {
             elGhost.innerText = row.ghostRev >= 0 ? `+$${row.ghostRev.toFixed(2)}` : `-$${Math.abs(row.ghostRev).toFixed(2)}`;
@@ -1316,9 +1316,9 @@ function recomputeSimulator() {
             log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ef4444; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
         }
 
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Capture Eq: [($${row.rawGross.toFixed(2)} Price + $${row.rawShipRev.toFixed(2)} Ship Col. + $${row.rawTaxRev.toFixed(2)} Tax Col. - $${row.rawDisc.toFixed(2)} Disc) = <span style="color:#10b981;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Capture Eq: [($${row.rawGross.toFixed(2)} Price + $${row.rawShipRev.toFixed(2)} Ship Col. + $${row.rawTaxRev.toFixed(2)} Tax Col. - $${row.rawDisc.toFixed(2)} Disc) = <span style="color:#0ea5e9;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Stripe Target: ($${row.trueLineCaptured.toFixed(2)} Capture - $${row.outBal.toFixed(2)} Out. Bal.) = $${(row.trueLineCaptured - row.outBal).toFixed(2)} via <span style="color:#0ea5e9">${row.src}</span></span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Deductions: -$${row.fee.toFixed(2)} Stripe Fee - $${row.actShipCost.toFixed(2)} Ship Exp. - $${row.cogs.toFixed(2)} True COGS</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Deductions: <span style="color:#f43f5e;">-$${row.fee.toFixed(2)} Stripe Fee</span> - <span style="color:#f59e0b;">$${row.actShipCost.toFixed(2)} Ship Exp.</span> - <span style="color:#fb7185;">$${row.cogs.toFixed(2)} True COGS</span></span>`);
         if(row.ghostRev !== 0) {
             log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b5cf6;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
         }
