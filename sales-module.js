@@ -1129,9 +1129,9 @@ function renderSimulatorOrder(orderId) {
         html += `
         <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:0.5rem;">
-                <div style="color:#fff; font-weight:bold; font-size:14px;">${row.internal_recipe_name} <span style="color:#888; font-size:12px; font-weight:normal;">(QTY: ${row.qty_sold})</span></div>
+                <div style="color:#0ea5e9; font-weight:bold; font-size:14px;">${row.internal_recipe_name} <span style="color:#888; font-size:12px; font-weight:normal;">(QTY: <span style="color:#0ea5e9;">${row.qty_sold}</span>)</span></div>
                 <div style="display:flex; gap:1rem; align-items:center;">
-                    <span style="color:#888; font-size:11px;">SOURCE: <span style="color:#0ea5e9;">${src}</span></span>
+                    <span style="color:#888; font-size:11px;">SOURCE: <span style="color:#0ea5e9; font-weight:bold;">${src}</span></span>
                     <select class="sim-type-sel" data-idx="${i}" style="background:#000; color:#10b981; border:1px solid #333; padding:4px; border-radius:4px; font-size:12px; outline:none; cursor:pointer;">
                         ${typeHtml}
                     </select>
@@ -1141,21 +1141,21 @@ function renderSimulatorOrder(orderId) {
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:0.25rem;">
                 <!-- ROW 1: GOSPEL -->
                 <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
-                    <span style="color:#f59e0b; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
+                    <span style="color:#0ea5e9; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
                     <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
-                        <div style="display:flex; justify-content:space-between;"><span>Price:</span> <span style="color:#fff;">$${rawPrice}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Subtot:</span> <span style="color:#fff;">$${rawSubtot}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Ship Col:</span> <span style="color:#fff;">$${rawShip}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Tax Col:</span> <span style="color:#fff;">$${rawTax}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Discount:</span> <span style="color:#ef4444;">-$${rawDisc}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#0ea5e9;">Price:</span> <span style="color:#0ea5e9;">$${rawPrice}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#0ea5e9;">Subtot:</span> <span style="color:#0ea5e9;">$${rawSubtot}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#0ea5e9;">Ship Col:</span> <span style="color:#0ea5e9;">$${rawShip}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#0ea5e9;">Tax Col:</span> <span style="color:#0ea5e9;">$${rawTax}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#8b5cf6;">Discount:</span> <span style="color:#8b5cf6;">-$${rawDisc}</span></div>
                         <div style="display:flex; justify-content:space-between;"><span style="color:#f59e0b;">Out. Bal:</span> <span style="color:#f59e0b;">-$${rawOutBal}</span></div>
                     </div>
                     <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-top:4px;">
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#10b981;">Tot Cap:</span> <span style="color:#10b981; font-weight:bold;">$${rawTotal}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Refunds:</span> <span style="color:#ef4444;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>DB COGS:</span> <span style="color:#ef4444;">-$${rawCogs}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>DB Label:</span> <span style="color:#f59e0b;">-$${rawShipC}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>DB Fee:</span> <span style="color:#ef4444;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#0ea5e9;">Tot Cap:</span> <span style="color:#0ea5e9; font-weight:bold;">$${rawTotal}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#8b5cf6;">Refunds:</span> <span style="color:#8b5cf6;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#fb7185;">DB COGS:</span> <span style="color:#fb7185;">-$${rawCogs}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#f59e0b;">DB Label:</span> <span style="color:#f59e0b;">-$${rawShipC}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="color:#f43f5e;">DB Fee:</span> <span style="color:#f43f5e;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
                         <div style="display:flex; justify-content:space-between;"><span style="color:#10b981;">DB Net:</span> <span style="color:#10b981; font-weight:bold;">$${rawNet}</span></div>
                     </div>
                 </div>
@@ -1309,20 +1309,20 @@ function recomputeSimulator() {
         let verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
         
         // Build Console Output
-        log(`&nbsp;&nbsp;> Row: <span style="color:#fff; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>) ${verifiedBadge}`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">[FORENSIC RAW DB] Price: '${row.actual_sale_price}', ShipCol: '${row.shipping}', TaxCol: '${row.taxes}', Disc: '${row.discount_amount}', OutBal: '${row['Outstanding Balance']}'</span>`);
+        log(`&nbsp;&nbsp;> Row: <span style="color:#0ea5e9; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>) ${verifiedBadge}`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#0ea5e9;">[FORENSIC RAW DB] Price: <span style="color:#0ea5e9;">'${row.actual_sale_price}'</span>, ShipCol: <span style="color:#0ea5e9;">'${row.shipping}'</span>, TaxCol: <span style="color:#0ea5e9;">'${row.taxes}'</span>, Disc: <span style="color:#8b5cf6;">'${row.discount_amount}'</span>, OutBal: <span style="color:#f59e0b;">'${row['Outstanding Balance']}'</span></span>`);
         
         if (parseFloat(row.total || 0) > 0 && Math.abs(parseFloat(row.total || 0) - row.trueLineCaptured) > 0.01) {
-            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ef4444; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
+            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f43f5e; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
         }
 
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Capture Eq: [($${row.rawGross.toFixed(2)} Price + $${row.rawShipRev.toFixed(2)} Ship Col. + $${row.rawTaxRev.toFixed(2)} Tax Col. - $${row.rawDisc.toFixed(2)} Disc) = <span style="color:#0ea5e9;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Stripe Target: ($${row.trueLineCaptured.toFixed(2)} Capture - $${row.outBal.toFixed(2)} Out. Bal.) = $${(row.trueLineCaptured - row.outBal).toFixed(2)} via <span style="color:#0ea5e9">${row.src}</span></span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Capture Eq: [(<span style="color:#0ea5e9;">$${row.rawGross.toFixed(2)} Price</span> + <span style="color:#0ea5e9;">$${row.rawShipRev.toFixed(2)} Ship Col.</span> + <span style="color:#0ea5e9;">$${row.rawTaxRev.toFixed(2)} Tax Col.</span> - <span style="color:#8b5cf6;">$${row.rawDisc.toFixed(2)} Disc</span>) = <span style="color:#0ea5e9; font-weight:bold;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Stripe Target: (<span style="color:#0ea5e9;">$${row.trueLineCaptured.toFixed(2)} Capture</span> - <span style="color:#f59e0b;">$${row.outBal.toFixed(2)} Out. Bal.</span>) = <span style="color:#0ea5e9;">$${(row.trueLineCaptured - row.outBal).toFixed(2)}</span> via <span style="color:#0ea5e9; font-weight:bold;">${row.src}</span></span>`);
         log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Deductions: <span style="color:#f43f5e;">-$${row.fee.toFixed(2)} Stripe Fee</span> - <span style="color:#f59e0b;">$${row.actShipCost.toFixed(2)} Ship Exp.</span> - <span style="color:#fb7185;">$${row.cogs.toFixed(2)} True COGS</span></span>`);
         if(row.ghostRev !== 0) {
             log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b5cf6;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
         }
-        let nc = row.net < 0 ? '#ef4444' : '#10b981';
+        let nc = row.net < 0 ? '#f43f5e' : '#10b981';
         log(`&nbsp;&nbsp;&nbsp;&nbsp;FINAL NET PROFIT: <span style="color:${nc}; font-weight:bold;">$${row.net.toFixed(2)}</span>`);
         log(`<br/>`);
     });
