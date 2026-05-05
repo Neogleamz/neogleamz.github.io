@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Try to parse .env.local automatically
 try {
@@ -26,6 +27,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let SHOPIFY_TOKEN = null;
 
+function hashPII(rawStr) {
+    if (rawStr === null || rawStr === undefined) return null;
+    const str = String(rawStr);
+    if (str.trim() === '') return null;
+    return crypto.createHash('sha256').update(str.trim().toLowerCase()).digest('hex');
+}
+
 async function getShopifyAccessToken() {
     console.log("🔐 Generating secure access token via Client Credentials...");
     const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/oauth/access_token`, {
@@ -48,16 +56,8 @@ async function getShopifyAccessToken() {
     }
 }
 
-async function fetchExtendedOrderData(orderId) {
-    // The Shopify orderId might be the numeric string or the gid
-    // Let's ensure it's a gid format for GraphQL
-    let gid = orderId.toString();
-    if (!gid.startsWith('gid://shopify/Order/')) {
-        // If order_id is just a numeric string or order name, we have to find it.
-        // Wait, the sales_ledger 'order_id' is actually the order name (e.g. #1007) or numeric ID.
-        // Let's assume it's the numeric ID if we just pull orders from Shopify.
-    }
-
+// Keep the GraphQL query for the exact fees and payouts which REST doesn't provide
+async function fetchGraphQLFinancials(shopifyId) {
     const query = `
     query getOrderDetails($id: ID!) {
       order(id: $id) {
@@ -92,7 +92,7 @@ async function fetchExtendedOrderData(orderId) {
                 'Content-Type': 'application/json',
                 'X-Shopify-Access-Token': SHOPIFY_TOKEN
             },
-            body: JSON.stringify({ query, variables: { id: `gid://shopify/Order/${orderId}` } })
+            body: JSON.stringify({ query, variables: { id: `gid://shopify/Order/${shopifyId}` } })
         });
 
         const json = await response.json();
@@ -119,15 +119,28 @@ async function fetchExtendedOrderData(orderId) {
                     payout = amount - totalFees;
                 }
             }
-        } else {
-             // Maybe search by name if numeric ID fails
-             console.log(`Order not found by ID: ${orderId}`);
         }
-        
         return { fee, payout, trackingNumber, carrierName };
     } catch (e) {
-        console.error('GraphQL Fetch Error:', e);
         return { fee: null, payout: null, trackingNumber: null, carrierName: null };
+    }
+}
+
+// Fetch the full standard payload just like the Webhook uses
+async function fetchOrderREST(shopifyId) {
+    try {
+        const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/orders/${shopifyId}.json`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Shopify-Access-Token': SHOPIFY_TOKEN
+            }
+        });
+        const json = await response.json();
+        return json?.order || null;
+    } catch (e) {
+        console.error('REST Fetch Error:', e);
+        return null;
     }
 }
 
@@ -157,15 +170,15 @@ async function getShopifyOrderMap() {
 }
 
 async function runBackfill() {
-    console.log("🚀 Starting Historical Backfill Engine...");
+    console.log("🚀 Starting Comprehensive Historical Backfill Engine...");
     await getShopifyAccessToken();
     
-    // 1. Fetch target orders from local Supabase
+    // 1. Fetch target orders from local Supabase (Pulling all API/Web orders)
     const { data: orders, error } = await supabase
         .from('sales_ledger')
         .select('id, order_id, Source')
-        .eq('Source', 'web')
-        .eq('actual_payout', 0);
+        // Removing filter to ensure EVERYTHING gets updated as requested
+        .neq('Source', 'manual');
         
     if (error) {
         console.error("Database fetch failed:", error);
@@ -173,11 +186,11 @@ async function runBackfill() {
     }
     
     if (!orders || orders.length === 0) {
-        console.log("✅ No matching 'web' orders found that need backfilling.");
+        console.log("✅ No matching orders found that need backfilling.");
         return;
     }
     
-    console.log(`📦 Found ${orders.length} orders requiring operational data true-up.`);
+    console.log(`📦 Found ${orders.length} total orders for synchronization.`);
     
     // 2. Build mapping
     const shopifyMap = await getShopifyOrderMap();
@@ -194,15 +207,56 @@ async function runBackfill() {
             continue;
         }
         
-        console.log(`▶ Fetching data for order ${orderNameOrId} (Shopify ID: ${shopifyId})...`);
-        const data = await fetchExtendedOrderData(shopifyId);
+        console.log(`▶ Fetching multi-API data for order ${orderNameOrId} (Shopify ID: ${shopifyId})...`);
+        const gqlData = await fetchGraphQLFinancials(shopifyId);
+        const restOrder = await fetchOrderREST(shopifyId);
         
         // 4. Update Supabase
         const updatePayload = {};
-        if (data.trackingNumber) updatePayload.tracking_number = data.trackingNumber;
-        if (data.carrierName) updatePayload.carrier_name = data.carrierName;
-        if (data.payout !== null) updatePayload.actual_payout = data.payout;
-        // if (data.fee !== null) // we don't have an actual_fee column, fee is calculated or ignored if we use payout
+        if (gqlData.trackingNumber) updatePayload.tracking_number = gqlData.trackingNumber;
+        if (gqlData.carrierName) updatePayload.carrier_name = gqlData.carrierName;
+        if (gqlData.payout !== null) updatePayload.actual_payout = gqlData.payout;
+
+        if (restOrder) {
+            updatePayload.financial_status = restOrder.financial_status || null;
+            updatePayload.fulfillment_status = restOrder.fulfillment_status || null;
+            updatePayload.cancelled_at = restOrder.cancelled_at || null;
+            updatePayload.cancel_reason = restOrder.cancel_reason || null;
+            updatePayload.tags = restOrder.tags || null;
+            updatePayload.currency = restOrder.currency || null;
+            
+            if (restOrder.shipping_lines && restOrder.shipping_lines.length > 0) {
+                updatePayload.shipping_method = restOrder.shipping_lines[0].title;
+            }
+            if (restOrder.shipping_address) {
+                updatePayload.shipping_city = restOrder.shipping_address.city;
+                updatePayload.shipping_province = restOrder.shipping_address.province;
+                updatePayload.shipping_zip = restOrder.shipping_address.zip;
+                updatePayload.shipping_country = restOrder.shipping_address.country;
+            }
+            if (restOrder.payment_gateway_names) {
+                updatePayload.payment_method = restOrder.payment_gateway_names.join(', ');
+            }
+
+            updatePayload.customer_email_hash = hashPII(restOrder.email);
+            updatePayload.customer_phone_hash = hashPII(restOrder.phone || restOrder.customer?.phone);
+            updatePayload.shipping_name_hash = hashPII(restOrder.shipping_address?.name);
+            updatePayload.shipping_address_hash = hashPII(restOrder.shipping_address?.address1);
+
+            let orderTotalRefunded = parseFloat(restOrder.total_refunded) || 0;
+            if (orderTotalRefunded === 0 && restOrder.refunds && restOrder.refunds.length > 0) {
+                restOrder.refunds.forEach((r) => {
+                    if (r.transactions) {
+                        r.transactions.forEach((t) => {
+                            if (t.kind === 'refund' && t.status === 'success') {
+                                orderTotalRefunded += parseFloat(t.amount || 0);
+                            }
+                        });
+                    }
+                });
+            }
+            updatePayload.refunded_amount = orderTotalRefunded;
+        }
         
         if (Object.keys(updatePayload).length > 0) {
             const { error: updateError } = await supabase
@@ -213,13 +267,14 @@ async function runBackfill() {
             if (updateError) {
                 console.error(`❌ Failed to update ${orderNameOrId}:`, updateError);
             } else {
-                console.log(`✅ Updated ${orderNameOrId}: ${JSON.stringify(updatePayload)}`);
+                console.log(`✅ Updated ${orderNameOrId} with fresh multi-API payload`);
                 successCount++;
             }
         }
     }
     
-    console.log(`\n🎉 Backfill Complete! Successfully updated ${successCount} out of ${orders.length} target orders.`);
+    console.log(`\n🎉 Comprehensive Backfill Complete! Successfully updated ${successCount} out of ${orders.length} orders.`);
 }
 
 runBackfill();
+
