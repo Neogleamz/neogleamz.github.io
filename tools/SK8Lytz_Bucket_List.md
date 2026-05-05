@@ -26,8 +26,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ---
 
-## 🔴 P0 Critical (Blockers & Hotfixes)
-- [ ] `fix/shopify-webhook-missing-data` : **Shopify Webhook Missing Data Integration** - Investigate and patch the Shopify webhook/app pipeline to capture missing payload data (hashed PII, `fulfillment_status`, `lineitem_fulfillment_status`, `financial_status`, `shipping_method`, etc.) that is failing to sync on new orders compared to the legacy CSV importer. [🤖 AI Model] [🧠 TBD / 15k] [💸 TBD / $0.05]
+### 🚨 P0 Critical (Immediate Blocker)
+- [x] `fix/shopify-webhook-missing-data` : The active Shopify App/Webhook pipeline is missing critical data columns compared to the legacy CSV importer. Missing data includes PII hashes (`customer_email_hash`, `shipping_name_hash`), `fulfillment_status`, and `financial_status`. Must audit the Edge Function deployment versus local code, deploy the fix, and establish a backfill mechanism for missing historical data. [🤖 AI Model] [🧠 30k / 15k] [💸 $0.10 / $0.05]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
