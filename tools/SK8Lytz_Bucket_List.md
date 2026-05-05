@@ -57,8 +57,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 **Epic: Sandbox Engine Immersive Refactor**
-*(Shipped v1.0.28 — 2026-05-04)*
-- [x] `feat/sandbox-engine-immersive` : **Sandbox Engine Immersive Refactor** - Transformed the "Net Profit Sandbox Engine" into a full-screen immersive terminal with strict metric color-coding, overhauled the mathematical inheritance for Exchange logic, and patched the cash-basis net profit calculations. [🤖 Gemini 3.1 Pro] [🧠 15k / 10k] [💸 $0.05 / $0.05]
+*(Shipped v1.0.29 — 2026-05-04)*
+- [🚀] `feat/sandbox-engine-immersive` : **Sandbox Engine Immersive Refactor** - Transformed the "Net Profit Sandbox Engine" into a full-screen immersive terminal with strict metric color-coding, overhauled the mathematical inheritance for Exchange logic, and patched the cash-basis net profit calculations. [🤖 Gemini 3.1 Pro] [🧠 15k / 10k] [💸 $0.05 / $0.05]
 
 ### Target: `main`
 **Epic: Inventory History & Stability (Tier 1)**

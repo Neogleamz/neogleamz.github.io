@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.29] - 2026-05-04
+### Features & Refactors
+- **Sandbox Engine Immersive Refactor**: Transformed the "Net Profit Sandbox Engine" into a full-screen immersive terminal with strict metric color-coding, overhauled the mathematical inheritance for Exchange logic, and patched the cash-basis net profit calculations.
+
 ## [1.0.28] - 2026-05-04
 ### Features & Refactors
 - **Cycle Count Snapshots & Restoration**: Implement a system to capture "point-in-time" snapshots of cycle counts, enabling history tracking and the ability to restore inventory state to a previous snapshot.
