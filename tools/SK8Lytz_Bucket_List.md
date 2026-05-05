@@ -38,6 +38,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 **Other Ideas**
 - [ ] `style/sandbox-typography-spacing` : **Sandbox UI Typography & Layout Refactor** - Apply a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, and shrink the vertical height of the main header to reclaim screen space. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] `feat/orderz-expandable-net-profit` : **Orderz Expandable Net Profit & Sandbox Routing** - Build expandable row functionality into the native Orderz page to view the whole order net vs. line item details (replacing the standalone Actual Net Breakdown modal). Retitle the "Actual Net" button to "Net Sandbox Engine" and route it directly to the Net Profit Sandbox Engine. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
 
 ---
 
