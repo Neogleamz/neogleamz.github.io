@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Features & Refactors
+- **Sandbox UI Typography & Layout Refactor**: Applied a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, shrank the vertical height of the main header, and applied inline flex formatting with explicit dataset headers.
+
 ## [1.0.29] - 2026-05-04
 ### Features & Refactors
 - **Sandbox Engine Immersive Refactor**: Transformed the "Net Profit Sandbox Engine" into a full-screen immersive terminal with strict metric color-coding, overhauled the mathematical inheritance for Exchange logic, and patched the cash-basis net profit calculations.
