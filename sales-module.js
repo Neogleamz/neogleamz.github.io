@@ -36,12 +36,179 @@ async function hashPII(rawStr) {
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    } catch(e) {
-        // SubtleCrypto unavailable (non-HTTPS context) or encoding failure — degrade gracefully
-        sysLog('hashPII error: ' + e.message, true);
-        return null;
-    }
+    } catch(e) { return null; }
 }
+
+// --- MASTER FORENSIC ACCOUNTING ENGINE ---
+
+/// Unified Singleton for all revenue shifting, cost suppression, and line-item slicing.
+window.runForensicAccounting = function(rows) {
+    // 1. RAW DATA HARVESTING (Start with CSV 'Total Captured')
+    let totalOrderCaptured = 0;
+    let exactPayoutTotal = 0;
+    let exactShipTotal = 0;
+    let orderRefundTotal = 0;
+    let totalOrderOutstanding = 0;
+    
+    rows.forEach(r => {
+        let t = parseFloat(r.total || 0);
+        if (t > totalOrderCaptured) totalOrderCaptured = t;
+        
+        if (parseFloat(r.dbActualPayout) > 0) exactPayoutTotal += parseFloat(r.dbActualPayout);
+        if (parseFloat(r.dbActualShipCost) > 0) exactShipTotal += parseFloat(r.dbActualShipCost);
+        
+        let refAmt = parseFloat(r.refunded_amount) || 0;
+        if (refAmt > orderRefundTotal) orderRefundTotal = refAmt;
+        
+        let outBal = parseFloat(r['Outstanding Balance']) || 0;
+        if (outBal > totalOrderOutstanding) totalOrderOutstanding = outBal;
+    });
+
+    // 2. Identify the "Inflation" (Replacement lines that artificially swell the CSV 'Total')
+    let totalLineNetPrice = 0;
+    rows.forEach(r => {
+        totalLineNetPrice += (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+    });
+
+    let trueOrderRevenue = totalOrderCaptured; 
+    if (totalOrderOutstanding > 0) trueOrderRevenue = totalOrderOutstanding;
+
+    // Find the first line item that will actually ship (used to attribute order-level flat fees)
+    let firstShippableIndex = rows.findIndex(r => {
+        let t = r.transaction_type || 'Standard';
+        let st = (r.fulfillment_status || '').toLowerCase();
+        let lst = (r.lineitem_fulfillment_status || '').toLowerCase();
+        return ((st === 'fulfilled' || lst === 'fulfilled') && (t !== 'Pre-Ship Exchange') && (t !== 'IGNORE') && (t !== 'Cancelled'));
+    });
+    if (firstShippableIndex === -1) firstShippableIndex = 0;
+
+    // 3. Process Lines with Column Inheritance
+    let processed = rows.map((r, i) => {
+        let type = r.transaction_type || 'Standard';
+        let status = (r.fulfillment_status || '').toLowerCase();
+        let lStatus = (r.lineitem_fulfillment_status || '').toLowerCase();
+        
+        // --- INHERITANCE LOGIC ---
+        // If I am a Replacement, I take the numbers from ANY Exchange row (Pre or Post).
+        let sourceRow = r;
+        if (type === 'Exchange Replacement') {
+            const donor = rows.find(d => d.transaction_type === 'Pre-Ship Exchange' || d.transaction_type === 'Post-Ship Exchange');
+            if (donor) {
+                sourceRow = donor; 
+            }
+        }
+        
+        let isFulfilled = (status === 'fulfilled' || lStatus === 'fulfilled') && (type !== 'Pre-Ship Exchange');
+        
+        // Physical Cost Suppression
+        let cogs = (window.getEngineTrueCogs(r.internal_recipe_name) || 0) * (parseFloat(r.qty_sold) || 1);
+        let actShipCost = parseFloat(sourceRow.actual_shipping_cost || sourceRow.actualShipCost || 0);
+        
+        // Only suppress COGS if this specific item was abandoned/refunded while the rest of the order shipped.
+        // A brand new order (entirely unfulfilled) should still deduct projected COGS to display projected Net Profit.
+        let isAbandonedPartial = (status !== 'pending' && status !== 'unfulfilled') && (lStatus === 'pending' || lStatus === 'unfulfilled');
+        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || isAbandonedPartial) { 
+            cogs = 0; actShipCost = 0; 
+        }
+        if (type === 'Post-Ship Exchange') {
+            cogs = 0; // Item returned to stock
+            // actShipCost remains (label was used)
+        }
+
+        // RAW ATTRIBUTION
+        let lineRevenue;
+        let work;
+        
+        let newSubtotal = r.subtotal;
+        let newDiscount = r.discount_amount;
+        let newShipping = r.shipping;
+        let newTaxes = r.taxes;
+        let newTotal = r.total;
+        let newSalePrice = r.actual_sale_price;
+        let newOutBal = r['Outstanding Balance'];
+        
+        const isExchangeDonor = type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange';
+        
+        if (isExchangeDonor || type === 'Cancelled' || type === 'IGNORE') {
+            lineRevenue = 0;
+            work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})` : `[Voided] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})`;
+            newSubtotal = 0; newDiscount = 0; newShipping = 0; newTaxes = 0; newTotal = 0; newSalePrice = 0; newOutBal = 0;
+        } else {
+            // Use the inherited (or own) columns
+            let ob = parseFloat(sourceRow['Outstanding Balance'] || 0);
+            let tot = parseFloat(sourceRow.total || 0);
+            lineRevenue = ob > 0 ? ob : tot;
+            work = ob > 0 ? `[Inherited Out. Bal: $${ob.toFixed(2)}]` : `[Inherited Total: $${tot.toFixed(2)}]`;
+            
+            if (type === 'Exchange Replacement' && sourceRow !== r) {
+                newSubtotal = Math.max(parseFloat(r.subtotal || 0), parseFloat(sourceRow.subtotal || 0));
+                newDiscount = Math.max(parseFloat(r.discount_amount || 0), parseFloat(sourceRow.discount_amount || 0));
+                newShipping = Math.max(parseFloat(r.shipping || 0), parseFloat(sourceRow.shipping || 0));
+                newTaxes = Math.max(parseFloat(r.taxes || 0), parseFloat(sourceRow.taxes || 0));
+                newTotal = Math.max(parseFloat(r.total || 0), parseFloat(sourceRow.total || 0));
+                newSalePrice = Math.max(parseFloat(r.actual_sale_price || 0), parseFloat(sourceRow.actual_sale_price || 0));
+                newOutBal = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
+            }
+        }
+
+        let src = r['Source'] || 'web';
+        let fee = (type === 'IGNORE' || type === 'Cancelled') ? 0 : window.getEngineStripeFee(lineRevenue, src);
+
+        if (exactShipTotal > 0) {
+            actShipCost = (i === firstShippableIndex) ? exactShipTotal : 0;
+        } else {
+            // Apply flat rate only to the first fulfilled item
+            actShipCost = (i === firstShippableIndex) ? actShipCost : 0;
+        }
+
+        if (exactPayoutTotal > 0) {
+            let orderStripeFee = Math.max(0, totalOrderCaptured - exactPayoutTotal);
+            fee = (i === firstShippableIndex) ? orderStripeFee : 0;
+        }
+
+        let net = lineRevenue - fee - actShipCost - cogs;
+        if (type === 'IGNORE' || type === 'Cancelled') net = 0;
+
+        return { 
+            ...r, 
+            subtotal: newSubtotal,
+            discount_amount: newDiscount,
+            shipping: newShipping,
+            taxes: newTaxes,
+            total: newTotal,
+            actual_sale_price: newSalePrice,
+            'Outstanding Balance': newOutBal,
+            uiIdx: i, 
+            cogs, fee, net, actShipCost,
+            trueLineCaptured: lineRevenue,
+            work: work,
+            rawOrderTotal: totalOrderCaptured,
+            rawItemRevenue: totalLineNetPrice,
+            liveCogs: cogs, stripeFee: fee, actualShipCost: actShipCost 
+        };
+    });
+
+
+
+
+
+    // 4. Apply Refund Deductions (Last Layer)
+    if (orderRefundTotal > 0) {
+        let refundApplied = false;
+        processed.forEach(r => {
+            if (!refundApplied && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE') {
+                // Deduct the refund from the first valid revenue-bearing line
+                r.net -= orderRefundTotal;
+                r.applied_order_refund = orderRefundTotal;
+                refundApplied = true;
+            }
+        });
+    }
+
+    return processed;
+};
+
+
 
 // --- 9. SALES SYNC ENGINE ---
 async function addManualSale() {
@@ -555,236 +722,19 @@ function renderSalesTable() {
 
     const SHIP_COST = typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00;
 
-    // Pre-calculate Engine stats for sorting and rendering
-    let a = salesDB.map(x => {
-        let type = x.transaction_type || 'Standard';
-        let qty = parseFloat(x.qty_sold) || 0;
-        let p = parseFloat(x.actual_sale_price) || 0;
-        let s = parseFloat(x.shipping) || 0;
-        let t = parseFloat(x.taxes) || 0;
-        let d = parseFloat(x.discount_amount) || 0;
-
-        let liveCogs = (x.cogs_at_sale != null ? parseFloat(x.cogs_at_sale) : getEngineTrueCogs(x.internal_recipe_name)) * qty;
-        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
-
-        if (isCostOnlyItem && x.cogs_at_sale == null) {
-            p = 0; s = 0; t = 0; d = 0;
-        }
-
-        let trueLineCaptured = isCostOnlyItem ? 0 : (p * qty) + s + t - d;
-        let stripeFee = x.transaction_fees != null ? parseFloat(x.transaction_fees) : (isCostOnlyItem ? 0 : getEngineStripeFee(trueLineCaptured, x['Source']));
-
-        let dbActualPayout = parseFloat(x.actual_payout) || 0;
-        let dbActualShipCost = parseFloat(x.actual_shipping_cost) || 0;
-
-        let actualShipCost = x.actual_shipping_cost != null ? parseFloat(x.actual_shipping_cost) :
-                             type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' ? 0 :
-                             (s > 0 ? s : SHIP_COST);
-
-        let net = x.net_profit != null ? parseFloat(x.net_profit) : getHistoricalNetProfit(p*qty, s, t, d, actualShipCost, x.internal_recipe_name, qty, x['Source']);
-
-        // Only override null net calculations
-        if (x.net_profit == null) {
-            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') {
-                net = 0;
-            } else if (type === 'Pre-Ship Exchange') {
-                net += liveCogs; 
-            } else if (isCostOnlyItem) {
-                net = 0 - actualShipCost - liveCogs;
-            }
-        }
-
-        let carr = x.carrier_name || '';
-        let trk = x.tracking_number || '';
-
-        return { ...x, trueLineCapture: trueLineCaptured, transaction_type: type, liveCogs, stripeFee, net: net, exchAdj: (parseFloat(x.exchAdj) || 0), isExchanged: false, isCostOnlyItem, actualShipCost, dbActualPayout, dbActualShipCost, carrier_name: carr, tracking_number: trk };
-    });
-
-    // --- AUTOMATED EXCHANGE LOGIC & AGGREGATION ---
+    // --- MASTER FORENSIC ACCOUNTING SWEEP ---
+    // We group by order first, run the forensic engine on each group, then flatten back.
     let orderGroups = {};
-    a.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
-
-    // --- OPERATIONAL FIDELITY TRUE-UP ---
-    Object.values(orderGroups).forEach(group => {
-        let orderHasExactPayout = false;
-        let exactPayout = 0;
-        let orderHasExactShip = false;
-        let exactShipCost = 0;
-        
-        group.forEach(r => {
-            if (parseFloat(r.dbActualPayout) > 0) { orderHasExactPayout = true; exactPayout += parseFloat(r.dbActualPayout); }
-            if (parseFloat(r.dbActualShipCost) > 0) { orderHasExactShip = true; exactShipCost += parseFloat(r.dbActualShipCost); }
-        });
-
-        if (orderHasExactShip || orderHasExactPayout) {
-            let appliedShip = false;
-            let appliedFee = false;
-            
-            let orderRefund = group.reduce((sum, r) => sum + (parseFloat(r.refunded_amount) || 0), 0);
-            let orderCaptured = group.reduce((sum, r) => sum + (parseFloat(r.exchAdj) || 0) + (r.isCostOnlyItem ? 0 : parseFloat(r.total||0)), 0) - orderRefund;
-            let trueOrderFee = orderHasExactPayout ? Math.max(0, (orderCaptured - exactPayout)) : 0;
-            
-            group.forEach(r => {
-                if (orderHasExactShip) {
-                    if (!appliedShip && r.transaction_type !== 'Cancelled') {
-                        r.actualShipCost = exactShipCost;
-                        appliedShip = true;
-                    } else {
-                        r.actualShipCost = 0;
-                    }
-                }
-                
-                if (orderHasExactPayout) {
-                    if (!appliedFee && !r.isCostOnlyItem && r.transaction_type !== 'Cancelled') {
-                        r.stripeFee = trueOrderFee;
-                        appliedFee = true;
-                    } else {
-                        if (!r.isCostOnlyItem) r.stripeFee = 0;
-                    }
-                }
-                
-                // Recalculate net if overriding default engine estimates
-                if (r.transaction_type === 'IGNORE' || r.transaction_type === 'NEEDS ATTENTION' || r.transaction_type === 'Cancelled') {
-                    r.net = 0;
-                } else if (r.transaction_type === 'Pre-Ship Exchange') {
-                    r.net = r.liveCogs;
-                } else if (r.isCostOnlyItem) {
-                    r.net = 0 - r.actualShipCost - r.liveCogs;
-                } else {
-                    r.net = parseFloat(r.trueLineCapture || 0) - parseFloat(r.taxes || 0) - r.stripeFee - r.actualShipCost - r.liveCogs + (parseFloat(r.exchAdj) || 0);
-                }
-            });
-        }
-    });
-
-    // CALCULATE GHOST REVENUE
-    let voidedRevenueByOrder = {};
-    Object.values(orderGroups).forEach(group => {
-        let voidRev = 0;
-        group.forEach(r => {
-            if (r.transaction_type === 'Cancelled') {
-                voidRev += parseFloat(r.subtotal || 0);
-            }
-        });
-        voidedRevenueByOrder[group[0].order_id] = voidRev;
-    });
-
-    // DEDUPLICATE OUTBOUND SHIPPING OVERHEAD FOR MULTI-ITEM ORDERS
-    Object.values(orderGroups).forEach(group => {
-        let refundDeducted = false;
-        group.forEach(r => {
-            let refAmt = parseFloat(r.refunded_amount) || 0;
-            let voidedRev = voidedRevenueByOrder[r.order_id] || 0;
-            let actualDeductibleRefund = Math.max(0, refAmt - voidedRev);
-
-            if (actualDeductibleRefund > 0 && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && !refundDeducted) {
-                r.net -= actualDeductibleRefund;
-                r.exchAdj = (r.exchAdj || 0) - actualDeductibleRefund;
-                refundDeducted = true;
-            }
-
-        });
-    });
-
-    // DECOUPLED LOGISTICS TRANSFER: Accurately map true financial footprints natively in UI
-    Object.values(orderGroups).forEach(group => {
-        let primes = group.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange' || x.transaction_type === 'Unshipped (Keep Rev)');
-        let replacements = group.filter(x => x.transaction_type === 'Exchange Replacement');
-        if (primes.length > 0 && replacements.length > 0) {
-            let u = primes[0]; let r = replacements[0];
-
-
-            if (u.transaction_type === 'Post-Ship Exchange') {
-                // Physical Reality Decoupling
-                let uRawRev = parseFloat(u.trueLineCapture || 0) - parseFloat(u.taxes || 0);
-
-                // 1. Shift Customer Payment Revenue to Replacement
-                r.net += (parseFloat(uRawRev) || 0);
-                r.actual_sale_price = u.actual_sale_price;
-                r.discount_amount = u.discount_amount;
-                r.shipping = u.shipping;
-                r.taxes = u.taxes;
-                
-                // Shift Total Captured Visuals & Aggregation Flag
-                r.total = u.total;
-                r.subtotal = u.subtotal;
-                r.trueLineCapture = u.trueLineCapture;
-                r.exchAdj = u.exchAdj;
-                r.isCostOnlyItem = false;
-
-                // 2. Original Item is left isolated as a pure loss string (burns ship cost + stripe fee)
-                u.actual_sale_price = 0;
-                u.shipping = 0;
-                u.discount_amount = 0;
-                u.taxes = 0;
-                u.liveCogs = 0; // Restocked
-                u.total = 0;
-                u.subtotal = 0;
-                u.exchAdj = 0;
-                u.isCostOnlyItem = true;
-
-                let secureNetLoss = 0 - (parseFloat(u.actualShipCost) || 0) - (parseFloat(u.stripeFee) || 0);
-                u.net = isNaN(secureNetLoss) ? 0 : secureNetLoss;
-            } else {
-                // Ghost Transfer for Unshipped (Pre-Ship) and Unshipped (Keep Rev)
-                r.net += (parseFloat(u.net) || 0);
-                r.stripeFee += (parseFloat(u.stripeFee) || 0);
-                r.actual_sale_price = u.actual_sale_price;
-                r.discount_amount = u.discount_amount;
-                r.shipping = u.shipping;
-                
-                // Shift Total Captured Visuals & Aggregation Flag
-                r.total = u.total;
-                r.exchAdj = u.exchAdj;
-                r.isCostOnlyItem = false;
-
-                u.actual_sale_price = 0;
-                u.stripeFee = 0;
-                u.net = 0;
-                u.discount_amount = 0;
-                u.shipping = 0;
-                u.taxes = 0;
-                u.actualShipCost = 0;
-                u.liveCogs = 0;
-                u.total = 0;
-                u.exchAdj = 0;
-                u.isCostOnlyItem = true;
-            }
-
-            u.isExchanged = true;
-        }
-
-        // Failsafe Net Cast for All Unprocessed Rows
-        group.forEach(it => { if(isNaN(it.net)) it.net = 0; });
+    salesDB.forEach(x => { if(!orderGroups[x.order_id]) orderGroups[x.order_id] = []; orderGroups[x.order_id].push(x); });
+    
+    let a = [];
+    Object.keys(orderGroups).forEach(oid => {
+        let forensicLines = window.runForensicAccounting(orderGroups[oid]);
+        a.push(...forensicLines);
     });
 
     let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0, burdenUnits: 0, burdenPct: 0 };
 
-    Object.keys(orderGroups).forEach(oid => {
-        let group = orderGroups[oid];
-        if(group.length > 1) {
-            let zeroTotal = group.find(r => (parseFloat(r.total) || 0) === 0);
-            let nonZeroTotal = group.find(r => (parseFloat(r.total) || 0) > 0);
-
-            // Fix: We only want to trigger Automated Exchange Logic if an item with $0 line-item price exists, OR it's been manually flagged
-            let hasTrueExchangeIndication = group.some(r => r.transaction_type !== 'Standard') || group.some(r => parseFloat(r.actual_sale_price || 0) === 0);
-
-            if(zeroTotal && nonZeroTotal && hasTrueExchangeIndication) {
-                // If it's an exchange, offset the visual total by whatever outstanding balance generated
-                let orderBalance = group.reduce((sum, r) => sum + (parseFloat(r["Outstanding Balance"]) || 0), 0);
-                if(orderBalance > 0) {
-                    zeroTotal.isExchanged = true;
-                    nonZeroTotal.isExchanged = true;
-
-                    if (zeroTotal.transaction_type === 'Standard' && nonZeroTotal.transaction_type === 'Standard') {
-                        nonZeroTotal.net += nonZeroTotal.liveCogs;
-                        nonZeroTotal.net += (SHIP_COST * parseFloat(nonZeroTotal.qty_sold || 0));
-                        nonZeroTotal.liveCogs = 0;
-                    }
-                }
-            }
-        }
-    });
 
     // Final Calculation Pass for Totals
     a.forEach(x => {
@@ -843,17 +793,15 @@ function renderSalesTable() {
             <td class="trunc-col">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
             <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')">
-                <option style="background:var(--bg-panel); color:var(--text-main); font-weight:bold; color:#ef4444;" value="NEEDS ATTENTION" ${x.transaction_type==='NEEDS ATTENTION'?'selected':''}>⚠️ NEEDS ATTENTION</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Refund" ${x.transaction_type==='Refund'?'selected':''}>Refund</option>
-                <option style="background:var(--bg-panel); color:var(--text-main); color:#8b5cf6;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled (Void)</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Partial Refund" ${x.transaction_type==='Partial Refund'?'selected':''}>Partial Refund</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${x.transaction_type==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${x.transaction_type==='IGNORE'?'selected':''}>IGNORE</option>
+                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled</option>
+                <option style="background:var(--bg-panel); color:#ef4444; font-weight:bold;" value="NEEDS ATTENTION" ${x.transaction_type==='NEEDS ATTENTION'?'selected':''}>NEEDS ATTENTION</option>
             </select></td>
 
             <td class="text-right" style="font-weight:bold;">${x.qty_sold}</td>
@@ -901,29 +849,36 @@ window.updateSaleType = async function(sel, orderId, sku) {
         if(row) {
             let payload = { transaction_type: newVal };
 
-            // INJECT MASTER CALCULATION ENGINE
+            // --- POWERED BY MASTER FORENSIC ENGINE ---
             try {
-                if (typeof window.getEngineTrueCogs === 'function') {
-                    payload.cogs_at_sale = window.getEngineTrueCogs(row.internal_recipe_name, row.qty_sold);
-                }
-                if (typeof window.getEngineStripeFee === 'function') {
-                    payload.transaction_fees = window.getEngineStripeFee(
-                        row.total, row.shipping, row.taxes, newVal, row.exchAdj || 0
-                    );
-                }
+                // 1. Get all siblings
+                let orderLines = salesDB.filter(s => s.order_id == orderId);
                 
-                let rev = (parseFloat(row.total) + parseFloat(row.exchAdj || 0)) || 0;
-                let cost = payload.cogs_at_sale !== undefined ? payload.cogs_at_sale : (row.liveCogs || 0);
-                let ship = parseFloat(row.shipping) || 0;
-                let fee = payload.transaction_fees !== undefined ? payload.transaction_fees : (row.stripeFee || 0);
-                
-                // Pure Waterfall
-                let net = rev - cost - ship - fee;
-                
-                if (newVal === 'Cancelled' || newVal === 'Refund') net = -cost;
-                else if (newVal === 'Warranty' || newVal === 'Exchange Replacement') net = -(cost + ship);
+                // 2. Map the type change
+                let updatedLines = orderLines.map(line => {
+                    if (line.storefront_sku === sku) {
+                        return { ...line, transaction_type: newVal };
+                    }
+                    return { ...line };
+                });
 
-                payload.net_profit = net;
+                // 3. Run the Forensic Engine
+                let forensicResults = window.runForensicAccounting(updatedLines);
+                let sim = forensicResults.find(l => l.storefront_sku === sku);
+
+                payload.cogs_at_sale = sim.cogs;
+                payload.transaction_fees = sim.fee;
+                payload.net_profit = sim.net;
+
+                // 4. Update siblings in DB and memory
+                forensicResults.forEach(async (fLine) => {
+                    if (fLine.storefront_sku !== sku) {
+                        let sibPayload = { net_profit: fLine.net, transaction_fees: fLine.fee, cogs_at_sale: fLine.cogs };
+                        await supabaseClient.from('sales_ledger').update(sibPayload).eq('order_id', orderId).eq('storefront_sku', fLine.storefront_sku);
+                        let sibRow = salesDB.find(s => s.order_id == orderId && s.storefront_sku == fLine.storefront_sku);
+                        if(sibRow) Object.keys(sibPayload).forEach(k => { sibRow[k] = sibPayload[k]; });
+                    }
+                });
             } catch(e) {
                 console.error("Sales Engine Injection Failed:", e);
             }
@@ -961,51 +916,40 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
 
         let payload = { [col]: dbVal };
 
-        // --- POWERED BY MASTER ENGINE: Dynamic Recalculation ---
+        // --- POWERED BY MASTER FORENSIC ENGINE ---
         let mathCols = ['actual_sale_price', 'qty_sold', 'shipping', 'taxes', 'discount_amount', 'internal_recipe_name', 'Source', 'Outstanding Balance'];
         if (mathCols.includes(col)) {
-            // Create a simulated future row state
-            let sim = { ...row, [col]: dbVal };
-            let qty = parseFloat(sim.qty_sold) || 0;
-            let pr = parseFloat(sim.actual_sale_price) || 0;
-            let ship = parseFloat(sim.shipping) || 0;
-            let tax = parseFloat(sim.taxes) || 0;
-            let disc = parseFloat(sim.discount_amount) || 0;
-            let bal = parseFloat(sim['Outstanding Balance']) || 0;
-            let src = sim['Source'] || "web";
-            let rec = sim.internal_recipe_name;
-            let type = sim.transaction_type || 'Standard';
+            // 1. Get all siblings in the order to handle shifts
+            let orderLines = salesDB.filter(s => s.order_id == orderId);
+            
+            // 2. Map the change into the local line
+            let updatedLines = orderLines.map(line => {
+                if (line.storefront_sku === sku) {
+                    return { ...line, [col]: dbVal };
+                }
+                return { ...line };
+            });
 
-            sim.subtotal = qty * pr;
-            sim.total = sim.subtotal + ship + tax - disc;
-            
-            let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled');
-            sim.cogs_at_sale = (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') ? 0 : window.getEngineTrueCogs(rec);
-            
-            let trueLineCaptured = isCostOnlyItem ? 0 : sim.total;
-            let stripeCaptureTarget = trueLineCaptured - bal;
-            
-            sim.transaction_fees = (isCostOnlyItem || type === 'Cancelled') ? 0 : window.getEngineStripeFee(stripeCaptureTarget, src);
-            
-            let actualShipCost = (type === 'Cancelled' || type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'NEEDS ATTENTION') ? 0 : parseFloat(sim.actual_shipping_cost || 0);
-            
-            let gross = isCostOnlyItem ? 0 : pr * qty;
-            let shipRev = isCostOnlyItem ? 0 : ship;
-            let taxRev = isCostOnlyItem ? 0 : tax;
-            let discRev = isCostOnlyItem ? 0 : disc;
-            
-            let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, discRev, actualShipCost, rec, qty, src);
-            sim.net_profit = rawNet;
-            
-            if (type === 'IGNORE' || type === 'NEEDS ATTENTION' || type === 'Cancelled') sim.net_profit = 0;
-            if (type === 'Pre-Ship Exchange') sim.net_profit += window.getEngineTrueCogs(rec);
-            if (isCostOnlyItem && type !== 'IGNORE' && type !== 'NEEDS ATTENTION' && type !== 'Cancelled') sim.net_profit = 0 - actualShipCost - sim.cogs_at_sale;
+            // 3. Run the Forensic Engine on the entire order group
+            let forensicResults = window.runForensicAccounting(updatedLines);
+            let sim = forensicResults.find(l => l.storefront_sku === sku);
 
-            payload.subtotal = isNaN(sim.subtotal) ? null : sim.subtotal;
-            payload.total = isNaN(sim.total) ? null : sim.total;
-            payload.cogs_at_sale = isNaN(sim.cogs_at_sale) ? null : sim.cogs_at_sale;
-            payload.transaction_fees = isNaN(sim.transaction_fees) ? null : sim.transaction_fees;
-            payload.net_profit = isNaN(sim.net_profit) ? null : sim.net_profit;
+            payload.subtotal = isNaN(sim.subtotal) ? (sim.qty_sold * sim.actual_sale_price) : sim.subtotal;
+            payload.total = isNaN(sim.total) ? (sim.subtotal + sim.shipping + sim.taxes - sim.discount_amount) : sim.total;
+            payload.cogs_at_sale = sim.cogs;
+            payload.transaction_fees = sim.fee;
+            payload.net_profit = sim.net;
+            
+            // Update the siblings in the database if they were impacted by shifting
+            forensicResults.forEach(async (fLine) => {
+                if (fLine.storefront_sku !== sku) {
+                    let sibPayload = { net_profit: fLine.net, transaction_fees: fLine.fee, cogs_at_sale: fLine.cogs };
+                    await supabaseClient.from('sales_ledger').update(sibPayload).eq('order_id', orderId).eq('storefront_sku', fLine.storefront_sku);
+                    // Update local memory for siblings too
+                    let sibRow = salesDB.find(s => s.order_id == orderId && s.storefront_sku == fLine.storefront_sku);
+                    if(sibRow) Object.keys(sibPayload).forEach(k => { sibRow[k] = sibPayload[k]; });
+                }
+            });
         }
         // --------------------------------------------------------
 
@@ -1086,6 +1030,9 @@ function initMathSimulator() {
     
     document.getElementById('math-simulator-sandbox').innerHTML = `<div style="color:#888; text-align:center; padding: 2rem; font-family: monospace;">Please load an order to begin simulation.</div>`;
     document.getElementById('math-simulator-console').innerHTML = "";
+
+    // Apply cached resizer heights
+    if (typeof restoreNeoSimulatorSizes === 'function') restoreNeoSimulatorSizes();
 }
 
 function renderSimulatorOrder(orderId) {
@@ -1123,68 +1070,97 @@ function renderSimulatorOrder(orderId) {
         let rawRef = parseFloat(row.refunded_amount || row.exchAdj || 0).toFixed(2);
         let rawFee = parseFloat(row.transaction_fees || row.stripeFee || 0).toFixed(2);
         let rawShipC = parseFloat(row.actual_shipping_cost || row.actualShipCost || 0).toFixed(2);
-        let rawCogs = parseFloat(row.cogs_at_sale || row.liveCogs || 0).toFixed(2);
+        let rawCogs = (parseFloat(row.cogs_at_sale || row.liveCogs || 0) * parseFloat(row.qty_sold || 1)).toFixed(2);
         let rawNet = parseFloat(row.net_profit || row.net || 0).toFixed(2);
 
         html += `
-        <div style="background: #1e1e1e; padding: 1rem; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:0.5rem;">
-                <div style="color:#fff; font-weight:bold; font-size:14px;">${row.internal_recipe_name} <span style="color:#888; font-size:12px; font-weight:normal;">(QTY: ${row.qty_sold})</span></div>
+        <div style="background: #1e1e1e; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:0.25rem;">
+                <div style="color:#eee; font-weight:bold; font-size:14px;">${row.internal_recipe_name} <span style="color:#666; font-size:12px; font-weight:normal;">(QTY: <span style="color:#ffffff;">${row.qty_sold}</span>)</span></div>
                 <div style="display:flex; gap:1rem; align-items:center;">
-                    <span style="color:#888; font-size:11px;">SOURCE: <span style="color:#0ea5e9;">${src}</span></span>
+                    <span style="color:#666; font-size:11px;">SOURCE: <span style="color:#2dd4bf; font-weight:bold;">${src}</span></span>
                     <select class="sim-type-sel" data-idx="${i}" style="background:#000; color:#10b981; border:1px solid #333; padding:4px; border-radius:4px; font-size:12px; outline:none; cursor:pointer;">
                         ${typeHtml}
                     </select>
                 </div>
             </div>
             
-            <div style="display:flex; flex-direction:column; gap:8px; margin-top:0.25rem;">
-                <!-- ROW 1: GOSPEL -->
-                <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; color:#aaa; background:#111; padding:8px 12px; border-radius:6px; border:1px dashed #444;">
-                    <span style="color:#f59e0b; font-weight:bold; font-size:9px; letter-spacing:0.5px; margin-bottom:4px;">[RAW DATABASE]</span>
-                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-bottom:4px; border-bottom:1px dotted #333;">
-                        <div style="display:flex; justify-content:space-between;"><span>Price:</span> <span style="color:#fff;">$${rawPrice}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Subtot:</span> <span style="color:#fff;">$${rawSubtot}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Ship Col:</span> <span style="color:#fff;">$${rawShip}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Tax Col:</span> <span style="color:#fff;">$${rawTax}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Discount:</span> <span style="color:#ef4444;">-$${rawDisc}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#f59e0b;">Out. Bal:</span> <span style="color:#f59e0b;">-$${rawOutBal}</span></div>
+            <div style="display:flex; flex-direction:column; gap:4px; margin-top:0.125rem;">
+                <!-- ROW 1: RAW DATABASE SNAPSHOT -->
+                <div style="background:#0f172a; padding:6px 8px; border-radius:4px; border:1px solid #334155; margin-bottom:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="color:#94a3b8; font-size:10px; font-weight:bold; text-transform:uppercase;">[RAW DATABASE SNAPSHOT]</span>
+                        <span style="color:#4ade80; font-size:9px; font-weight:bold; text-transform:uppercase;">Status: ${row.lineitem_fulfillment_status || row.fulfillment_status || 'unknown'}</span>
                     </div>
-                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; padding-top:4px;">
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#10b981;">Tot Cap:</span> <span style="color:#10b981; font-weight:bold;">$${rawTotal}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Refunds:</span> <span style="color:#ef4444;">-$${Math.abs(rawRef).toFixed(2)}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>DB COGS:</span> <span style="color:#ef4444;">-$${rawCogs}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>DB Label:</span> <span style="color:#f59e0b;">-$${rawShipC}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>DB Fee:</span> <span style="color:#ef4444;">-$${Math.abs(rawFee).toFixed(2)}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span style="color:#10b981;">DB Net:</span> <span style="color:#10b981; font-weight:bold;">$${rawNet}</span></div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem; font-family:monospace; font-size:10px;">
+                        <div><span style="color:#00e5ff;">Lineitem price:</span> <span style="color:#00e5ff; font-weight:bold;">$${rawPrice}</span></div>
+                        <div><span style="color:#007aff;">Shipping:</span> <span style="color:#007aff; font-weight:bold;">$${rawShip}</span></div>
+                        <div><span style="color:#f0e68c;">Taxes:</span> <span style="color:#f0e68c; font-weight:bold;">$${rawTax}</span></div>
+                        <div><span style="color:#ff7f50;">Discount Amount:</span> <span style="color:#ff7f50; font-weight:bold;">$${rawDisc}</span></div>
+                        <div><span style="color:#8b5cf6;">Outstanding Balance:</span> <span style="color:#8b5cf6; font-weight:bold;">$${rawOutBal}</span></div>
+                        <div><span style="color:#ff3399;">Total:</span> <span style="color:#ff3399; font-weight:bold;">$${rawTotal}</span></div>
+                        <div><span style="color:#ff3b30;">Fees (DB):</span> <span style="color:#ff3b30; font-weight:bold;">$${Math.abs(rawFee).toFixed(2)}</span></div>
+                        <div><span style="color:#ccff00;">Net Profit (DB):</span> <span style="color:#ccff00; font-weight:bold;">$${rawNet}</span></div>
+                    </div>
+                </div>
+                    <!-- ROW 2: RAW CSV DATA (LITERAL) -->
+                    <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; font-size:9px; color:#aaa; background:#1a1a1a; padding:6px 8px; border-radius:4px; border:1px solid #444; margin-top:2px;">
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="color:#ff3399 !important; font-weight:bold; text-transform:uppercase; font-size:9px;">Total (CSV L)</span>
+                            <span id="sim-total-raw-${i}" style="color:#ff3399 !important; font-family:monospace;">$${rawTotal}</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="color:#8b5cf6 !important; font-weight:bold; text-transform:uppercase; font-size:9px;">Out. Bal (CSV AY)</span>
+                            <span id="sim-outbal-raw-${i}" style="color:#8b5cf6 !important; font-family:monospace;">$${rawOutBal}</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="color:#00e5ff !important; font-weight:bold; text-transform:uppercase; font-size:9px;">Price (CSV R)</span>
+                            <span id="sim-price-raw-${i}" style="color:#00e5ff !important; font-family:monospace;">$${rawPrice}</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="color:#ff7f50 !important; font-weight:bold; text-transform:uppercase; font-size:9px;">Discount (CSV N)</span>
+                            <span id="sim-disc-raw-${i}" style="color:#ff7f50 !important; font-family:monospace;">$${rawDisc}</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="color:#007aff !important; font-weight:bold; text-transform:uppercase; font-size:9px;">Shipping (CSV J)</span>
+                            <span id="sim-ship-raw-${i}" style="color:#007aff !important; font-family:monospace;">$${rawShip}</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="color:#f0e68c !important; font-weight:bold; text-transform:uppercase; font-size:9px;">Taxes (CSV K)</span>
+                            <span id="sim-tax-raw-${i}" style="color:#f0e68c !important; font-family:monospace;">$${rawTax}</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="color:#eab308 !important; font-weight:bold; text-transform:uppercase; font-size:9px;">Refund (CSV M)</span>
+                            <span id="sim-refund-raw-${i}" style="color:#eab308 !important; font-family:monospace;">$${rawRef}</span>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- ROW 2: LIVE ENGINE CALCS -->
-                <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; font-size:12px; color:#aaa; background:#1a1a1a; padding:10px 12px; border-radius:6px; border:1px solid #0ea5e9;">
+                <!-- ROW 3: CALCULATED FORENSIC RESULTS -->
+                <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; font-size:11px; color:#aaa; background:#111; padding:6px 8px; border-radius:4px; border:1px solid #ff3399;">
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Engine Capture</span>
-                        <span id="sim-capture-${i}" style="color:#10b981; font-weight:bold;">$0.00</span>
+                        <span style="color:#ff3399 !important; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:2px;">⚙️ Net Revenue</span>
+                        <span id="sim-capture-${i}" style="color:#ff3399 !important; font-weight:bold;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Stripe/eBay</span>
-                        <span id="sim-fee-${i}" style="color:#ef4444;">-$0.00</span>
+                        <span style="color:#ff3b30 !important; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:2px;">⚙️ Fees</span>
+                        <span id="sim-fee-${i}" style="color:#ff3b30 !important; font-weight:bold;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ Label Cost</span>
-                        <span id="sim-shipexp-${i}" style="color:#ef4444;">-$0.00</span>
+                        <span style="color:#ffcc00 !important; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:2px;">⚙️ Ship Exp</span>
+                        <span id="sim-ship-exp-${i}" style="color:#ffcc00 !important; font-weight:bold;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#0ea5e9; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">⚙️ True COGS</span>
-                        <span id="sim-cogs-${i}" style="color:#ef4444;">-$0.00</span>
+                        <span style="color:#ff9500 !important; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:2px;">⚙️ COGS</span>
+                        <span id="sim-cogs-${i}" style="color:#ff9500 !important; font-weight:bold;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#8b5cf6; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;" title="Refunds or Transferred Adjustments">⚙️ Refunds/Adj.</span>
-                        <span id="sim-ghost-${i}" style="color:#8b5cf6;">$0.00</span>
+                        <span style="color:#eab308 !important; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:2px;">⚙️ Refunds</span>
+                        <span id="sim-refund-applied-${i}" style="color:#eab308 !important; font-weight:bold;">$0.00</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#fff; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:4px;">Final Net Profit</span>
-                        <span id="sim-net-${i}" style="color:#10b981; font-weight:bold; font-size:15px;">$0.00</span>
+                        <span style="color:#ccff00 !important; font-weight:bold; font-size:10px; text-transform:uppercase; margin-bottom:2px;">💰 Final Net Profit</span>
+                        <span id="sim-profit-${i}" style="color:#ccff00 !important; font-weight:bold;">$0.00</span>
                     </div>
                 </div>
             </div>
@@ -1216,71 +1192,43 @@ function recomputeSimulator() {
     let rows = window.currentSimPayload;
     if(!rows || rows.length === 0) return;
     
-    let salesPayload = rows.map((r, idx) => {
-        let type = r.transaction_type || 'Standard';
-        let cogs = window.getEngineTrueCogs(r.internal_recipe_name) || 0;
-        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE' || type === 'Cancelled');
-        
-        let pr = parseFloat(r.actual_sale_price || 0);
-        let qty = parseFloat(r.qty_sold || 1);
-        let ship = parseFloat(r.shipping || 0);
-        let tax = parseFloat(r.taxes || 0);
-        let dsc = parseFloat(r.discount_amount || 0);
-        let outBal = parseFloat(r['Outstanding Balance']) || 0;
-
-        let rawGross = pr * qty;
-        let rawShipRev = ship;
-        let rawTaxRev = tax;
-        let rawDisc = dsc;
-
-        let gross = isCostOnlyItem ? 0 : rawGross;
-        let shipRev = isCostOnlyItem ? 0 : rawShipRev;
-        let taxRev = isCostOnlyItem ? 0 : rawTaxRev;
-        let disc = isCostOnlyItem ? 0 : rawDisc;
-
-        let actShipCost = parseFloat(r.actualShipCost) || (typeof ENGINE_CONFIG !== 'undefined' ? ENGINE_CONFIG.flatShipping : 8.00);
-        
-        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || type === 'NEEDS ATTENTION') { cogs = 0; }
-        
-        let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actShipCost, r.internal_recipe_name, r.qty_sold, r['Source'] || 'web');
-        
-        let net = rawNet + outBal;
-        if (type === 'IGNORE') net = 0;
-        if (type === 'Pre-Ship Exchange') net += window.getEngineTrueCogs(r.internal_recipe_name); 
-        if (isCostOnlyItem && type !== 'Cancelled') net = 0 - actShipCost - cogs;
-        if (type === 'Cancelled') net = 0;
-        
-        let trueLineCaptured = isCostOnlyItem ? 0 : gross + shipRev + taxRev - disc;
-        let feeTarget = trueLineCaptured - outBal;
-        let src = r['Source'] || 'web';
-        let fee = isCostOnlyItem ? 0 : window.getEngineStripeFee(feeTarget, src);
-
-        return { ...r, uiIdx: idx, cogs, fee, net, gross, shipRev, taxRev, disc, actShipCost, trueLineCaptured, outBal, src, ghostRev: 0, rawGross, rawShipRev, rawTaxRev, rawDisc };
-    });
+    // 2. RUN FORENSIC ENGINE
+    const forensicResults = window.runForensicAccounting(window.currentSimPayload);
     
-    let primes = salesPayload.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
-    let replacements = salesPayload.filter(x => x.transaction_type === 'Exchange Replacement');
+    // --- TOP LEVEL ORDER RECONCILIATION (LITERAL MATH) ---
+    const mainRow = forensicResults[0];
+    const rawTotal = mainRow.rawOrderTotal;
     
-    if (primes.length > 0 && replacements.length > 0) {
-        let u = primes[0]; let rp = replacements[0];
-        if (u.transaction_type === 'Post-Ship Exchange') {
-            rp.net += rp.cogs; 
-            log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Post-Ship Exchange detected. Restocking physical unit (+$${rp.cogs.toFixed(2)} COGS back to Net).</span>`);
-        } else if (u.transaction_type === 'Pre-Ship Exchange') {
-            log(`<span style="color:#93c5fd;">[REVENUE SHIFT] Pre-Ship Exchange detected. Original never shipped. Absorbing captured revenue.</span>`);
-        }
-        rp.net += u.net;
-        rp.net = Math.round(rp.net * 100) / 100;
-        let tempNet = u.net;
-        u.net = 0;
-        
-        u.ghostRev = -tempNet;
-        rp.ghostRev = tempNet;
-        
-        log(`<span style="color:#10b981;">[MATH TRANSFER] Transferred $${tempNet.toFixed(2)} ghost-revenue to physical replacement line.</span>`);
+    // Literal Audit: Sum of (Price - Disc) for all items
+    const totalItemRevenue = window.currentSimPayload.reduce((acc, r) => acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0), 0);
+    const residual = rawTotal - totalItemRevenue;
+    
+    // Validate against literal Ship/Tax columns
+    const csvShipSum = forensicResults.reduce((acc, r) => acc + parseFloat(r.shipping || 0), 0);
+    const csvTaxSum = forensicResults.reduce((acc, r) => acc + parseFloat(r.taxes || 0), 0);
+    const expectedResidue = csvShipSum + csvTaxSum;
+    const diff = Math.abs(residual - expectedResidue);
+
+    log(`<span style="color:#ccff00; font-weight:bold;">[ORDER RECONCILIATION]</span>`);
+    log(`&nbsp;&nbsp;<span style="color:#ff3399;">START: Order Total (CSV L)</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff3399; font-weight:bold;">$${rawTotal.toFixed(2)}</span>`);
+    log(`&nbsp;&nbsp;<span style="color:#00e5ff;">SUB: All Line Items (Price-Disc)</span> <span style="color:#00e5ff; font-weight:bold;">-$${totalItemRevenue.toFixed(2)}</span>`);
+    log(`&nbsp;&nbsp;<span style="color:#444;">-----------------------------------------</span>`);
+    log(`&nbsp;&nbsp;<span style="color:#ccff00; font-weight:bold;">RESULT: Residual Residue</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ccff00; font-weight:bold;">$${residual.toFixed(2)}</span>`);
+    
+    if (diff > 0.01) {
+        log(`&nbsp;&nbsp;<span style="color:#ff3b30; font-weight:bold;">[🚨 RECONCILIATION FAILURE]</span>`);
+        log(`&nbsp;&nbsp;<span style="color:#ff3b30;">Expected $${expectedResidue.toFixed(2)} (Ship+Tax) but found $${residual.toFixed(2)}.</span>`);
+        log(`&nbsp;&nbsp;<span style="color:#ff3b30; font-weight:bold;">UNACCOUNTED REVENUE: $${(residual - expectedResidue).toFixed(2)} detected in CSV!</span>`);
+    } else {
+        log(`&nbsp;&nbsp;<span style="color:#4ade80; font-weight:bold;">[✅ RECONCILIATION SUCCESS]</span>`);
+        log(`&nbsp;&nbsp;<span style="color:#4ade80;">Residual matches exactly with Shipping ($${csvShipSum.toFixed(2)}) + Taxes ($${csvTaxSum.toFixed(2)}).</span>`);
     }
+    log(`<br/>`);
+    // ------------------------------------------------------
+
+    log(`<span style="color:#38bdf8;">[FORENSIC AUDIT] Order detected with ${forensicResults.length} items. Calculating True Revenue Bucket...</span>`);
     
-    salesPayload.forEach(row => {
+    forensicResults.forEach(row => {
         let i = row.uiIdx;
         
         // Update DOM live
@@ -1291,40 +1239,62 @@ function recomputeSimulator() {
         let elGhost = document.getElementById(`sim-ghost-${i}`);
         let elNet = document.getElementById(`sim-net-${i}`);
         
-        if(elCapture) elCapture.innerText = `$${row.trueLineCaptured.toFixed(2)}`;
-        if(elFee) elFee.innerText = `-$${row.fee.toFixed(2)}`;
-        if(elShipExp) elShipExp.innerText = `-$${row.actShipCost.toFixed(2)}`;
-        if(elCogs) elCogs.innerText = `-$${row.cogs.toFixed(2)}`;
+        const verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
+
+        // Build Console Output (FORENSIC TRUTH)
+        const isDonor = row.transaction_type === 'Pre-Ship Exchange' || row.transaction_type === 'Post-Ship Exchange';
+        const isRecipient = row.transaction_type === 'Exchange Replacement';
         
-        if(elGhost) {
-            elGhost.innerText = row.ghostRev >= 0 ? `+$${row.ghostRev.toFixed(2)}` : `-$${Math.abs(row.ghostRev).toFixed(2)}`;
-            elGhost.style.color = row.ghostRev !== 0 ? '#8b5cf6' : '#555';
+        let displayTotal = isDonor ? "0.00 (Moved)" : (isRecipient ? `${row.trueLineCaptured.toFixed(2)} (Inherited)` : row.total);
+        let displayOutBal = isDonor ? "0.00 (Moved)" : (isRecipient ? `${row.trueLineCaptured.toFixed(2)} (Inherited)` : row['Outstanding Balance']);
+        let displayShip = isDonor ? "0.00 (Moved)" : row.shipping;
+
+        log(`&nbsp;&nbsp;> Row: <span style="color:#eee; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#94a3b8;">${row.transaction_type}</span>) <span style="color:#4ade80; font-size:10px;">[${row.lineitem_fulfillment_status || row.fulfillment_status || 'N/A'}]</span> ${verifiedBadge}`);
+        log(`&nbsp;&nbsp;<span style="color:#00e5ff;">Price: $${row.actual_sale_price}</span> | <span style="color:#007aff;">Ship (J): $${displayShip}</span> | <span style="color:#8b5cf6;">Out. Bal (AY): $${displayOutBal}</span> | <span style="color:#ff3399;">Total (L): $${displayTotal}</span>`);
+        
+        let appliedRef = row.applied_order_refund || 0;
+        
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff3b30;">-$${row.fee.toFixed(2)} Fees</span> | <span style="color:#ffcc00;">$${row.actShipCost.toFixed(2)} Ship Exp</span> | <span style="color:#ff9500;">$${row.cogs.toFixed(2)} COGS</span> | <span style="color:#eab308;">-$${appliedRef.toFixed(2)} Refunds</span>`);
+        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ccff00; font-weight:bold;">[EQUATION]:</span> <span style="color:#ff3399;">$${row.trueLineCaptured.toFixed(2)} (Rev)</span> - <span style="color:#ff3b30;">$${row.fee.toFixed(2)} (Fees)</span> - <span style="color:#ffcc00;">$${row.actShipCost.toFixed(2)} (Ship)</span> - <span style="color:#ff9500;">$${row.cogs.toFixed(2)} (COGS)</span> - <span style="color:#eab308;">$${appliedRef.toFixed(2)} (Refunds)</span> = <span style="color:#ccff00; font-weight:bold;">$${row.net.toFixed(2)} (NET PROFIT)</span>`);
+        log(`<br/>`);
+
+        const captureEl = document.getElementById(`sim-capture-${i}`);
+        const feeEl = document.getElementById(`sim-fee-${i}`);
+        const shipExpEl = document.getElementById(`sim-ship-exp-${i}`);
+        const cogsEl = document.getElementById(`sim-cogs-${i}`);
+        const refEl = document.getElementById(`sim-refund-applied-${i}`);
+        const profitEl = document.getElementById(`sim-profit-${i}`);
+        
+        // Sync Middle Row (Raw CSV Reality)
+        const rawTotalEl = document.getElementById(`sim-total-raw-${i}`);
+        const rawOutBalEl = document.getElementById(`sim-outbal-raw-${i}`);
+        const rawShipEl = document.getElementById(`sim-ship-raw-${i}`);
+
+        if (rawTotalEl) {
+            let val = displayTotal;
+            let str = String(val);
+            rawTotalEl.textContent = str.includes('(') ? str : `$${parseFloat(val).toFixed(2)}`;
         }
-        
-        if(elNet) {
-            elNet.innerText = `$${row.net.toFixed(2)}`;
-            elNet.style.color = row.net < 0 ? '#ef4444' : '#10b981';
+        if (rawOutBalEl) {
+            let val = displayOutBal;
+            let str = String(val);
+            rawOutBalEl.textContent = str.includes('(') ? str : `$${parseFloat(val).toFixed(2)}`;
         }
-        
-        let verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
-        
-        // Build Console Output
-        log(`&nbsp;&nbsp;> Row: <span style="color:#fff; font-weight:bold;">${row.internal_recipe_name}</span> (<span style="color:#cbd5e1;">${row.transaction_type}</span>) ${verifiedBadge}`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">[FORENSIC RAW DB] Price: '${row.actual_sale_price}', ShipCol: '${row.shipping}', TaxCol: '${row.taxes}', Disc: '${row.discount_amount}', OutBal: '${row['Outstanding Balance']}'</span>`);
-        
-        if (parseFloat(row.total || 0) > 0 && Math.abs(parseFloat(row.total || 0) - row.trueLineCaptured) > 0.01) {
-            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ef4444; font-size:10px;">[WARNING: RAW Tot Cap $${parseFloat(row.total||0).toFixed(2)} is the Order-Level Total. Executing line-item slicing math...]</span>`);
+        if (rawShipEl) {
+            let val = displayShip;
+            let str = String(val);
+            rawShipEl.textContent = str.includes('(') ? str : `$${parseFloat(val).toFixed(2)}`;
         }
 
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Capture Eq: [($${row.rawGross.toFixed(2)} Price + $${row.rawShipRev.toFixed(2)} Ship Col. + $${row.rawTaxRev.toFixed(2)} Tax Col. - $${row.rawDisc.toFixed(2)} Disc) = <span style="color:#10b981;">$${row.trueLineCaptured.toFixed(2)} Capture</span>]</span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Stripe Target: ($${row.trueLineCaptured.toFixed(2)} Capture - $${row.outBal.toFixed(2)} Out. Bal.) = $${(row.trueLineCaptured - row.outBal).toFixed(2)} via <span style="color:#0ea5e9">${row.src}</span></span>`);
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">Deductions: -$${row.fee.toFixed(2)} Stripe Fee - $${row.actShipCost.toFixed(2)} Ship Exp. - $${row.cogs.toFixed(2)} True COGS</span>`);
-        if(row.ghostRev !== 0) {
-            log(`&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b5cf6;">Ghost Revenue Adj: ${row.ghostRev > 0 ? '+' : ''}$${row.ghostRev.toFixed(2)}</span>`);
+        if (captureEl) captureEl.textContent = `$${row.trueLineCaptured.toFixed(2)}`;
+        if (feeEl) feeEl.textContent = `-$${row.fee.toFixed(2)}`;
+        if (shipExpEl) shipExpEl.textContent = `-$${row.actShipCost.toFixed(2)}`;
+        if (cogsEl) cogsEl.textContent = `-$${row.cogs.toFixed(2)}`;
+        if (refEl) refEl.textContent = `-$${appliedRef.toFixed(2)}`;
+        if (profitEl) {
+            profitEl.textContent = `$${row.net.toFixed(2)}`;
+            profitEl.style.setProperty('color', row.net < 0 ? '#ff3b30' : '#ccff00', 'important');
         }
-        let nc = row.net < 0 ? '#ef4444' : '#10b981';
-        log(`&nbsp;&nbsp;&nbsp;&nbsp;FINAL NET PROFIT: <span style="color:${nc}; font-weight:bold;">$${row.net.toFixed(2)}</span>`);
-        log(`<br/>`);
     });
     
     consoleDiv.innerHTML += htmlLogs;
@@ -1358,51 +1328,42 @@ function renderActualNetList() {
             orderMap[oid] = {
                 order_id: oid,
                 date: r.sale_date,
-                price: 0,
-                qty: 0,
-                subtot: 0,
-                disc: 0,
-                shipCol: 0,
-                taxCol: 0,
-                outBal: 0,
-                totalCap: 0,
-                refunds: 0,
-                cogs: 0,
-                labelCost: 0,
-                fees: 0,
-                net: 0,
+                price: 0, qty: 0, subtot: 0, disc: 0,
+                shipCol: 0, taxCol: 0, outBal: 0, totalCap: 0,
+                refunds: 0, cogs: 0, labelCost: 0, fees: 0, net: 0,
                 lines: []
             };
         }
         orderMap[oid].lines.push(r);
-        
-        let p = parseFloat(r.actual_sale_price || 0);
-        let q = parseFloat(r.qty_sold || 0);
-        let subtot = parseFloat(r.subtotal || 0);
-        let s = parseFloat(r.shipping || 0);
-        let t = parseFloat(r.taxes || 0);
-        let d = parseFloat(r.discount_amount || 0);
-        let ob = parseFloat(r['Outstanding Balance'] || 0);
-        let tot = parseFloat(r.total || 0);
-        
-        orderMap[oid].price += p; // aggregate for visual but less meaningful at order level, qty is better
-        orderMap[oid].qty += q;
-        orderMap[oid].subtot = subtot;
-        orderMap[oid].disc = d;
-        orderMap[oid].shipCol = s;
-        orderMap[oid].taxCol = t;
-        orderMap[oid].outBal = ob;
-        
-        orderMap[oid].totalCap = tot;
-        orderMap[oid].refunds += parseFloat(r.refunded_amount || r.exchAdj || 0);
-        orderMap[oid].cogs += parseFloat(r.cogs_at_sale || r.liveCogs || 0);
-        orderMap[oid].labelCost += parseFloat(r.actual_shipping_cost || r.actualShipCost || 0);
-        orderMap[oid].fees += parseFloat(r.transaction_fees || r.stripeFee || 0);
-        orderMap[oid].net += parseFloat(r.net_profit || r.net || 0);
     });
 
     let grouped = Object.values(orderMap);
     
+    // POWERED BY FORENSIC ENGINE FOR ABSOLUTE PARITY
+    grouped.forEach(g => {
+        let forensicLines = window.runForensicAccounting(g.lines);
+        g.lines = forensicLines;
+        
+        forensicLines.forEach(r => {
+            g.price += parseFloat(r.actual_sale_price || 0);
+            g.qty += parseFloat(r.qty_sold || 0);
+            g.subtot += parseFloat(r.subtotal || 0);
+            g.disc += parseFloat(r.discount_amount || 0);
+            g.shipCol += parseFloat(r.shipping || 0);
+            g.taxCol += parseFloat(r.taxes || 0);
+            g.outBal += parseFloat(r['Outstanding Balance'] || 0);
+            g.totalCap += parseFloat(r.total || 0);
+            
+            g.refunds += parseFloat(r.applied_order_refund || 0);
+            
+            // Forensic Math Aggregations
+            g.cogs += parseFloat(r.cogs || 0);
+            g.labelCost += parseFloat(r.actShipCost || 0);
+            g.fees += parseFloat(r.fee || 0);
+            g.net += parseFloat(r.net || 0);
+        });
+    });
+
     if(searchTerm) {
         grouped = grouped.filter(g => g.order_id.toLowerCase().includes(searchTerm) || g.lines.some(l => l.storefront_sku.toLowerCase().includes(searchTerm)));
     }
@@ -1446,24 +1407,45 @@ function renderActualNetList() {
         
         let childHtml = "";
         g.lines.forEach(l => {
-            let adjStr = l.exchAdj ? `<span style='flex:1; text-align:right; color:${l.exchAdj < 0 ? '#ef4444' : '#10b981'};'>Adj: ${l.exchAdj > 0 ? '+' : ''}$${l.exchAdj.toFixed(2)}</span>` : `<span style='flex:1; text-align:right; color:#888;'>Adj: --</span>`;
-            let trueCapHtml = (l.trueLineCapture !== undefined) ? `<span style='color:#f59e0b;'>Sliced Line Cap: $${parseFloat(l.trueLineCapture).toFixed(2)}</span>` : '';
+            let trueCapHtml = (l.trueLineCapture !== undefined) ? `<br/><span style='color:#f59e0b; font-size:9px;'>Cap: $${parseFloat(l.trueLineCapture).toFixed(2)}</span>` : '';
             
-            childHtml += `<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted var(--border-input); font-size:10px;'>
-                <span style='flex:2; color:#0ea5e9;'>${l.storefront_sku} (Qty: ${l.qty_sold})</span>
-                <span style='flex:2; text-align:right;'>Raw Order Tot: $${parseFloat(l.total||0).toFixed(2)} <br/> ${trueCapHtml}</span>
-                ${adjStr}
-                <span style='flex:1; text-align:right;'>COGS: -$${(l.liveCogs||0).toFixed(2)}</span>
-                <span style='flex:1; text-align:right;'>Label: -$${(l.actualShipCost||0).toFixed(2)}</span>
-                <span style='flex:1; text-align:right;'>Stripe: ${l.stripeFee < 0 ? '+' : '-'} $${Math.abs(l.stripeFee||0).toFixed(2)}</span>
-                <span style='flex:1; text-align:right; font-weight:bold; color:${l.net < 0 ? '#ef4444' : '#10b981'};'>Net: $${(l.net||0).toFixed(2)}</span>
-            </div>`;
+            let p = parseFloat(l.actual_sale_price || 0);
+            let q = parseFloat(l.qty_sold || 0);
+            let sub = parseFloat(l.subtotal || 0);
+            let d = parseFloat(l.discount_amount || 0);
+            let s = parseFloat(l.shipping || 0);
+            let t = parseFloat(l.taxes || 0);
+            let ob = parseFloat(l['Outstanding Balance'] || 0);
+            let tot = parseFloat(l.total || 0);
+            
+            let ref = parseFloat(l.applied_order_refund || 0);
+            let c = parseFloat(l.cogs || 0);
+            let sc = parseFloat(l.actShipCost || 0);
+            let f = parseFloat(l.fee || 0);
+            let n = parseFloat(l.net || 0);
+            
+            let refColor = ref === 0 ? '#888' : (ref < 0 ? '#ef4444' : '#10b981');
+
+            childHtml += `<tr class='net-modal-child net-child-row' data-parent-oid='${g.order_id}' style='display:none; background:var(--bg-panel); font-size:10px; border-bottom:1px dotted var(--border-input);'>
+                <td style='border:none;'></td>
+                <td colspan='2' style='color:#0ea5e9; padding-left:16px; border:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;' title='${l.storefront_sku}'>↳ ${l.storefront_sku}</td>
+                <td class='text-right' style='color:#888; border:none;'>$${p.toFixed(2)}</td>
+                <td class='text-right' style='color:#888; border:none;'>${q}</td>
+                <td class='text-right' style='color:#888; border:none;'>$${sub.toFixed(2)}</td>
+                <td class='text-right' style='color:#ef4444; border:none;'>-$${d.toFixed(2)}</td>
+                <td class='text-right' style='color:#0ea5e9; border:none;'>$${s.toFixed(2)}</td>
+                <td class='text-right' style='color:#888; border:none;'>$${t.toFixed(2)}</td>
+                <td class='text-right' style='color:#f59e0b; border:none;'>$${ob.toFixed(2)}</td>
+                <td class='text-right' style='color:#10b981; border:none;'>$${tot.toFixed(2)} ${trueCapHtml}</td>
+                <td class='text-right' style='color:${refColor}; border:none;'>${ref === 0 ? '--' : (ref > 0 ? '+' : '') + '$' + ref.toFixed(2)}</td>
+                <td class='text-right' style='color:#ef4444; border:none;'>-$${c.toFixed(2)}</td>
+                <td class='text-right' style='color:#f59e0b; border:none;'>-$${sc.toFixed(2)}</td>
+                <td class='text-right' style='color:#ef4444; border:none;'>-$${f.toFixed(2)}</td>
+                <td class='text-right' style='color:${n < 0 ? '#ef4444' : '#10b981'}; font-weight:bold; border:none;'>$${n.toFixed(2)}</td>
+            </tr>`;
         });
         
-        html += `<tr class='net-modal-child' id='net-child-${g.order_id}' style='display:none; background:var(--bg-panel);'>
-            <td></td>
-            <td colspan='15' style='padding:10px;'>${childHtml}</td>
-        </tr>`;
+        html += childHtml;
     });
     
     if(grouped.length === 0) {
@@ -1475,15 +1457,14 @@ function renderActualNetList() {
     container.querySelectorAll('.net-modal-parent').forEach(tr => {
         tr.addEventListener('click', () => {
             let oid = tr.getAttribute('data-oid');
-            let child = document.getElementById(`net-child-${oid}`);
+            let children = container.querySelectorAll(`.net-child-row[data-parent-oid="${oid}"]`);
             let icon = tr.querySelector('.expander-icon');
-            if(child.style.display === 'none') {
-                child.style.display = 'table-row';
-                icon.innerHTML = '▼';
-            } else {
-                child.style.display = 'none';
-                icon.innerHTML = '▶';
-            }
+            let isHidden = children.length > 0 && children[0].style.display === 'none';
+            
+            children.forEach(child => {
+                child.style.display = isHidden ? 'table-row' : 'none';
+            });
+            icon.innerHTML = isHidden ? '▼' : '▶';
         }, { signal });
     });
 }
