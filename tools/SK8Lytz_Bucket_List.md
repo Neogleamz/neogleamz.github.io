@@ -27,7 +27,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🚨 P0 Critical (Immediate Blocker)
-- [x] `fix/shopify-webhook-missing-data` : The active Shopify App/Webhook pipeline is missing critical data columns compared to the legacy CSV importer. Missing data includes PII hashes (`customer_email_hash`, `shipping_name_hash`), `fulfillment_status`, and `financial_status`. Must audit the Edge Function deployment versus local code, deploy the fix, and establish a backfill mechanism for missing historical data. [🤖 AI Model] [🧠 30k / 15k] [💸 $0.10 / $0.05]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -289,6 +288,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `feat/historical-shopify-backfill` : Architect a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 - [🚀] `feat/billing-csv-importer` : Build a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 - [🚀] `feat/shopify-tag-parser` : Develop a forward-looking Webhook/Sync module to automatically extract "order type" and "shipping label cost" directly from Shopify Order Tags as they are generated, eliminating the need for future manual CSV imports. [🤖 Gemini 3.1 Pro] [🧠 15k / 25k] [💸 $0.05 / $0.08]
+- [🚀] `fix/shopify-webhook-missing-data` : The active Shopify App/Webhook pipeline is missing critical data columns compared to the legacy CSV importer. Missing data includes PII hashes (`customer_email_hash`, `shipping_name_hash`), `fulfillment_status`, and `financial_status`. Must audit the Edge Function deployment versus local code, deploy the fix, and establish a backfill mechanism for missing historical data. [🤖 AI Model] [🧠 30k / 15k] [💸 $0.10 / $0.05]
 
 ### Target: `main`
 *(Epic: UI Enhancements)*

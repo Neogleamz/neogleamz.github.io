@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Features & Refactors
 - **Sandbox UI Typography & Layout Refactor**: Applied a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, shrank the vertical height of the main header, and applied inline flex formatting with explicit dataset headers.
+- **Shopify Webhook Missing Data Integration**: Audited the Edge Function deployment versus local code, deployed the fix to the active Shopify App/Webhook pipeline to capture missing PII hashes and `fulfillment_status`, and established a full backfill mechanism for missing historical data.
 
 ## [1.0.29] - 2026-05-04
 ### Features & Refactors
