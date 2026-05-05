@@ -1120,6 +1120,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'mousedown_initNeoSidebarResizer_event':
                     initNeoSidebarResizer(event);
                     break;
+                case 'mousedown_initNeoSimulatorVResizer_event':
+                    if (typeof initNeoSimulatorVResizer === 'function') initNeoSimulatorVResizer(event);
+                    break;
                 case 'mousedown_initProductionSopResize_event':
                     initProductionSopResize(event);
                     break;

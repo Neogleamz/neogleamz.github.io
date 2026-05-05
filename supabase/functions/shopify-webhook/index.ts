@@ -289,6 +289,27 @@ serve(async (req: Request) => {
       }
     });
 
+    // Ghost Row Detection: Identify items physically removed from the order in Shopify
+    const existingToCancel = existingRecords?.filter((e: any) => 
+      !ledgerRows.some(r => String(r.order_id) === String(e.order_id) && String(r.storefront_sku) === String(e.storefront_sku))
+    );
+
+    if (existingToCancel && existingToCancel.length > 0) {
+      existingToCancel.forEach((ghost: any) => {
+        updatePromises.push(
+          supabase.from('sales_ledger')
+            .update({ 
+              transaction_type: 'Cancelled', 
+              net_profit: 0, 
+              actual_payout: 0,
+              cogs_at_sale: 0,
+              actual_shipping_cost: 0
+            })
+            .eq('id', ghost.id)
+        );
+      });
+    }
+
     if (insertRows.length > 0) {
       const { error: insertErr } = await supabase.from('sales_ledger').insert(insertRows);
       if (insertErr) {

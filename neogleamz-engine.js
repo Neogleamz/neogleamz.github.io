@@ -774,6 +774,63 @@ window.restoreNeoSidebarSizes = function() {
             }
         }
     }
+    
+    // Restore Simulator Vertical Height
+    const cachedHeight = localStorage.getItem('neoResizer_math-simulator-sandbox');
+    if (cachedHeight) {
+        const el = document.getElementById('math-simulator-sandbox');
+        if (el) {
+            el.style.height = cachedHeight;
+            el.style.minHeight = cachedHeight;
+            el.style.flex = `0 0 ${cachedHeight}`;
+        }
+    }
+};
+
+// ==========================================
+// SIMULATOR VERTICAL RESIZER LOGIC
+// ==========================================
+let isNeoSimulatorResizing = false;
+
+window.initNeoSimulatorVResizer = function(e) {
+    if(e) e.preventDefault();
+    isNeoSimulatorResizing = true;
+    document.body.style.cursor = 'ns-resize';
+    document.addEventListener('mousemove', window.doNeoSimulatorVResize);
+    document.addEventListener('mouseup', window.stopNeoSimulatorVResize);
+};
+
+window.doNeoSimulatorVResize = function(e) {
+    if(!isNeoSimulatorResizing) return;
+    
+    const sandbox = document.getElementById('math-simulator-sandbox');
+    const container = document.getElementById('math-simulator-split-container');
+    if (!sandbox || !container) return;
+    
+    const rect = container.getBoundingClientRect();
+    let newHeight = e.clientY - rect.top;
+    
+    // Constraints
+    if (newHeight < 200) newHeight = 200;
+    if (newHeight > rect.height - 150) newHeight = rect.height - 150;
+    
+    sandbox.style.height = newHeight + 'px';
+    sandbox.style.minHeight = newHeight + 'px';
+    sandbox.style.flex = `0 0 ${newHeight}px`;
+};
+
+window.stopNeoSimulatorVResize = function() {
+    if (isNeoSimulatorResizing) {
+        const sandbox = document.getElementById('math-simulator-sandbox');
+        if (sandbox) {
+            localStorage.setItem('neoResizer_math-simulator-sandbox', sandbox.style.height);
+        }
+    }
+    
+    isNeoSimulatorResizing = false;
+    document.body.style.cursor = '';
+    document.removeEventListener('mousemove', window.doNeoSimulatorVResize);
+    document.removeEventListener('mouseup', window.stopNeoSimulatorVResize);
 };
 
 // Fire on Engine Boot

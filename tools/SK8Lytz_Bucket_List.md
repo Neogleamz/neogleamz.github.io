@@ -28,8 +28,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🔴 P0 Critical (Blockers & Hotfixes)
 
-- [ ] `feat/sandbox-engine-immersive` : **Sandbox Engine Immersive Refactor** - Transform the "Net Profit Sandbox Engine" into a full-screen immersive terminal with strict metric color-coding (Capture: Sky, Fees: Rose, Shipping: Amber, COGS: Salmon, Adj: Purple, Net: Emerald) across UI and console logs. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
-
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -56,6 +54,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Sandbox Engine Immersive Refactor**
+*(Shipped v1.0.28 — 2026-05-04)*
+- [x] `feat/sandbox-engine-immersive` : **Sandbox Engine Immersive Refactor** - Transformed the "Net Profit Sandbox Engine" into a full-screen immersive terminal with strict metric color-coding, overhauled the mathematical inheritance for Exchange logic, and patched the cash-basis net profit calculations. [🤖 Gemini 3.1 Pro] [🧠 15k / 10k] [💸 $0.05 / $0.05]
 
 ### Target: `main`
 **Epic: Inventory History & Stability (Tier 1)**
