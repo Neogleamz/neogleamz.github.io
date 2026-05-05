@@ -37,6 +37,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
 **Other Ideas**
+- [ ] `style/sandbox-typography-spacing` : **Sandbox UI Typography & Layout Refactor** - Apply a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, and shrink the vertical height of the main header to reclaim screen space. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
