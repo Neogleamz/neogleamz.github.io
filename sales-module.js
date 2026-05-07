@@ -404,9 +404,6 @@ async function executeSalesSync(isTestMode = false) {
                     ...sim, 
                     actual_sale_price: sim.original_sale_price ?? sim.actual_sale_price,
                     discount_amount: sim.original_discount_amount ?? sim.discount_amount,
-                    cogs_at_sale: cS, 
-                    transaction_fees: fS, 
-                    net_profit: nS, 
                     transaction_type: sim.transaction_type || 'Standard',
                     trueLineCapture: sim.trueLineCaptured // Legacy tracking
                 });
@@ -424,7 +421,11 @@ async function executeSalesSync(isTestMode = false) {
             setSysProgress(100, 'success'); setMasterStatus("🧪 Test Parsed!", "mod-success");
 
             if (typeof window.openSandboxModal === 'function') {
-                window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS");
+                let testImportContext = {
+                    resObj: { table: 'sales_ledger', conflict: 'order_id, storefront_sku', count: salesPayload.length, data: salesPayload },
+                    isTestMode: true
+                };
+                window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS", null, "sales_ledger (Primary)", null, testImportContext);
             }
 
             let elFile = document.getElementById('salesCsvFileTest');
@@ -457,7 +458,13 @@ async function executeSalesSync(isTestMode = false) {
                     if (duplicatesIgnored > 0) syncTrace(`▶ Filtered ${duplicatesIgnored} duplicates safely. Verified ${cleanPayload.length} pure items. Pushing to Cloud Matrix...`, false);
                     else syncTrace(`▶ Verified ${cleanPayload.length} valid target entities. Pushing to Cloud Matrix...`, false);
 
-                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(cleanPayload);
+                    let sanitizedInsertPayload = cleanPayload.map(sp => {
+                        let clone = { ...sp };
+                        // Strip all internal forensic telemetry before database injection
+                        ['cogs', 'fee', 'net', 'actShipCost', 'trueLineCaptured', 'revenueDerivation', 'work', 'rawOrderTotal', 'rawItemRevenue', 'liveCogs', 'stripeFee', 'uiIdx', 'forensic_subtotal', 'forensic_discount_amount', 'forensic_shipping', 'forensic_taxes', 'forensic_total', 'forensic_sale_price', 'forensic_out_bal', 'trueLineCapture'].forEach(k => delete clone[k]);
+                        return clone;
+                    });
+                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(sanitizedInsertPayload);
                     if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
                     syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
@@ -523,11 +530,11 @@ function renderSalesTable() {
     // Final Calculation Pass for Totals
     a.forEach(x => {
         let isCostOnly = x.isCostOnlyItem;
-        let p = parseFloat(x.actual_sale_price || 0);
+        let p = parseFloat((x.forensic_sale_price ?? x.actual_sale_price) || 0);
         let q = parseFloat(x.qty_sold || 0);
-        let s = parseFloat(x.shipping || 0);
-        let t = parseFloat(x.taxes || 0);
-        let d = parseFloat(x.discount_amount || 0);
+        let s = parseFloat((x.forensic_shipping ?? x.shipping) || 0);
+        let t = parseFloat((x.forensic_taxes ?? x.taxes) || 0);
+        let d = parseFloat((x.forensic_discount_amount ?? x.discount_amount) || 0);
         let trueLineCaptured = (p * q) + s + t - d;
         x.localDerivedTotal = trueLineCaptured; // Store for the UI rendering below
 
@@ -584,18 +591,19 @@ function renderSalesTable() {
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${x.transaction_type==='IGNORE'?'selected':''}>IGNORE</option>
-                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled</option>
+                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Partial Refund" ${x.transaction_type==='Partial Refund'?'selected':''}>Partial Refund</option>
+                <option style="background:var(--bg-panel); color:#ef4444;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled</option>
                 <option style="background:var(--bg-panel); color:#ef4444; font-weight:bold;" value="NEEDS ATTENTION" ${x.transaction_type==='NEEDS ATTENTION'?'selected':''}>NEEDS ATTENTION</option>
             </select></td>
 
             <td class="text-right" style="font-weight:bold;">${x.qty_sold}</td>
-            <td class="text-right" style="color:#10b981;">$${parseFloat(x.actual_sale_price).toFixed(2)}</td>
-            <td class="text-right" style="color:#f59e0b;">$${parseFloat(x.discount_amount || 0).toFixed(2)}</td>
-            <td class="text-right" title="${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? 'Actual Ship Expense Override' : 'Shipping Revenue'}" style="color:${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.shipping || 0) > 0 ? '#ef4444' : 'var(--text-muted)'};">$${parseFloat(x.shipping || 0).toFixed(2)}</td>
-            <td class="text-right" style="color:var(--text-muted);">$${parseFloat(x.taxes || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:#10b981;">$${parseFloat((x.forensic_sale_price ?? x.actual_sale_price) || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:#f59e0b;">$${parseFloat((x.forensic_discount_amount ?? x.discount_amount) || 0).toFixed(2)}</td>
+            <td class="text-right" title="${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat((x.forensic_shipping ?? x.shipping) || 0) > 0 ? 'Actual Ship Expense Override' : 'Shipping Revenue'}" style="color:${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat((x.forensic_shipping ?? x.shipping) || 0) > 0 ? '#ef4444' : 'var(--text-muted)'};">$${parseFloat((x.forensic_shipping ?? x.shipping) || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:var(--text-muted);">$${parseFloat((x.forensic_taxes ?? x.taxes) || 0).toFixed(2)}</td>
             <td style="color:#0ea5e9;">${x.carrier_name || '--'}</td>
             <td>${x.tracking_number ? `<a href="https://www.google.com/search?q=${x.tracking_number}" target="_blank" style="color:#8b5cf6; text-decoration:none; font-family:monospace;">${x.tracking_number}</a>` : '<span style="color:var(--text-muted);">--</span>'}</td>
-            <td class="text-right" style="font-weight:bold;">$${(parseFloat(x.total || 0) + (x.exchAdj || 0)).toFixed(2)}</td>
+            <td class="text-right" style="font-weight:bold;">$${parseFloat((x.trueLineCaptured ?? x.total) || 0).toFixed(2)}</td>
             <td class="text-right" style="color:#ef4444; font-weight:bold;">$${x.liveCogs.toFixed(2)}</td>
             <td class="text-right" style="color:${x.actualShipCost > 15 ? '#ef4444' : '#f59e0b'}; font-weight:bold;">-$${parseFloat(x.actualShipCost || 0).toFixed(2)}</td>
             <td class="text-right" style="color:#888;" title="${x.dbActualPayout > 0 ? 'True Platform Payout Math' : 'Estimated Engine Fee'}">${x.stripeFee < 0 ? '+' : '-'} $${Math.abs(parseFloat(x.stripeFee || 0)).toFixed(2)}</td>
@@ -800,6 +808,8 @@ function closeActualNetModal() {
 function closeMathSimulator() {
     let m = document.getElementById('math-simulator-modal');
     if(m) m.style.display = 'none';
+    if(typeof renderSalesTable === 'function') renderSalesTable();
+    if(typeof filterSales === 'function') filterSales();
 }
 
 function initMathSimulator() {
@@ -869,7 +879,7 @@ function renderSimulatorOrder(orderId) {
     
     let html = '';
     window.currentSimPayload.forEach((row, i) => {
-        let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Cancelled', 'NEEDS ATTENTION'];
+        let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Partial Refund', 'Cancelled', 'NEEDS ATTENTION'];
         let typeHtml = typeOpts.map(t => `<option value="${t}" ${row.transaction_type === t ? 'selected' : ''}>${t}</option>`).join('');
         
         let src = row['Source'] || 'web';
@@ -1026,13 +1036,14 @@ function renderSimulatorOrder(orderId) {
 
 window.click_commitSimToLedger = async function() {
     let commitBtn = document.getElementById('sim-commit-btn');
-    if(!confirm("Are you sure you want to permanently overwrite the Sales Ledger with this exact forensic configuration?")) return;
     
     if(commitBtn) {
         commitBtn.textContent = "💾 SAVING...";
         commitBtn.style.opacity = "0.5";
         commitBtn.disabled = true;
     }
+    
+    if(typeof setMasterStatus === 'function') setMasterStatus("Saving Forensic Sandbox...", "mod-working");
 
     try {
         let forensicResults = window.runForensicAccounting(window.currentSimPayload);
@@ -1043,9 +1054,20 @@ window.click_commitSimToLedger = async function() {
                 transaction_fees: fLine.fee, 
                 cogs_at_sale: fLine.cogs 
             };
-            await window.supabaseClient.from('sales_ledger').update(payload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
+            
+            const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
+            if (error) throw error;
             
             // Update Memory
+            if (typeof salesDB !== 'undefined' && salesDB) {
+                let mainRow = salesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
+                if (mainRow) {
+                    mainRow.transaction_type = payload.transaction_type;
+                    mainRow.net_profit = payload.net_profit;
+                    mainRow.transaction_fees = payload.transaction_fees;
+                    mainRow.cogs_at_sale = payload.cogs_at_sale;
+                }
+            }
             if (window.processedSalesDB) {
                 let sibRow = window.processedSalesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
                 if (sibRow) {
@@ -1060,14 +1082,15 @@ window.click_commitSimToLedger = async function() {
             commitBtn.textContent = "✅ COMMITTED!";
             commitBtn.style.background = "#3b82f6";
         }
+        if(typeof setMasterStatus === 'function') setMasterStatus("Saved!", "mod-success");
+        
         setTimeout(() => {
-            if(typeof filterSales === 'function') filterSales();
-            let m = document.getElementById('math-simulator-modal');
-            if(m) m.style.display = 'none';
+            if(typeof setMasterStatus === 'function') setMasterStatus("Ready.", "status-idle");
         }, 1000);
     } catch (err) {
         console.error(err);
-        alert("Error committing forensic payload.");
+        if(typeof setMasterStatus === 'function') setMasterStatus("Error Saving", "mod-error");
+        if(typeof sysLog === 'function') sysLog("Error committing forensic payload: " + err.message, true);
         if(commitBtn) {
             commitBtn.textContent = "💾 COMMIT TO LEDGER";
             commitBtn.style.opacity = "1";
@@ -1108,14 +1131,19 @@ function recomputeSimulator() {
     let donorSurrenderSum = 0;
     forensicResults.forEach(r => {
         const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-        const p = parseFloat(r.actual_sale_price || 0);
+        const p = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
         const q = parseFloat(r.qty_sold || 1);
-        const d = parseFloat(r.discount_amount || 0);
+        const d = parseFloat(r.forensic_discount_amount !== undefined ? r.forensic_discount_amount : (r.discount_amount || 0));
         const sub = (p * q) - d;
         
         if (isDonor) {
-            log(`&nbsp;&nbsp;<span style="color:#94a3b8;">↳ [DONOR] ${r.internal_recipe_name}: ($${p.toFixed(2)} * ${q}) - $${d.toFixed(2)} = $${sub.toFixed(2)} -> <b style="color:#ff3399;">SURRENDERED</b></span>`);
-            donorSurrenderSum += sub;
+            // For donor surrender, we must use the ORIGINAL raw price, not the 0.00 forensic price
+            const rawP = parseFloat(r.original_sale_price ?? r.actual_sale_price ?? 0);
+            const rawD = parseFloat(r.original_discount_amount ?? r.discount_amount ?? 0);
+            const rawSub = (rawP * q) - rawD;
+            
+            log(`&nbsp;&nbsp;<span style="color:#94a3b8;">↳ [DONOR] ${r.internal_recipe_name}: ($${rawP.toFixed(2)} * ${q}) - $${rawD.toFixed(2)} = $${rawSub.toFixed(2)} -> <b style="color:#ff3399;">SURRENDERED</b></span>`);
+            donorSurrenderSum += rawSub;
         } else {
             log(`&nbsp;&nbsp;<span style="color:#00e5ff;">↳ [ITEM] ${r.internal_recipe_name}: ($${p.toFixed(2)} * ${q}) - $${d.toFixed(2)} = <b style="color:#fff;">$${sub.toFixed(2)}</b></span>`);
             totalItemRevenue += sub;
@@ -1131,11 +1159,11 @@ function recomputeSimulator() {
     
     // Validate against literal Ship/Tax columns natively across all rows
     const engineShipSum = forensicResults.reduce((acc, r) => {
-        return acc + parseFloat(r.shipping || 0);
+        return acc + parseFloat(r.forensic_shipping !== undefined ? r.forensic_shipping : (r.shipping || 0));
     }, 0);
     
     const engineTaxSum = forensicResults.reduce((acc, r) => {
-        return acc + parseFloat(r.taxes || 0);
+        return acc + parseFloat(r.forensic_taxes !== undefined ? r.forensic_taxes : (r.taxes || 0));
     }, 0);
     
     const engineExpectedResidue = engineShipSum + engineTaxSum;
@@ -1156,17 +1184,20 @@ function recomputeSimulator() {
         // If the "Unaccounted Revenue" matches exactly the price of a Donor row, we can issue a Conditional Pass.
         let replacementPriceSum = forensicResults.reduce((acc, r) => {
             if (r.transaction_type !== 'Exchange Replacement') return acc;
-            return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+            const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+            return acc + (fp * parseFloat(r.qty_sold || 1));
         }, 0);
 
-        // Check if the discrepancy matches the price of ANY line in the order (Common Shopify Inflation Pattern)
+        // Check if the discrepancy matches the RAW price of ANY line in the order (Common Shopify Inflation Pattern)
+        // We must check raw `actual_sale_price` because the inflation delta is caused by the physical CSV line price, not our forensic math.
         let matchedAnyLinePrice = forensicResults.some(r => {
-            let lp = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+            const rp = parseFloat(r.actual_sale_price || 0);
+            let lp = (rp * parseFloat(r.qty_sold || 1));
             return lp > 0 && Math.abs(unaccounted - lp) < 0.1;
         });
 
         let isExchangeBalanced = (Math.abs(unaccounted - donorSurrenderSum) < 0.1 && donorSurrenderSum > 0) || 
-                                 (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensicResults.some(rx => rx.transaction_type === 'Exchange Replacement')));
+                                 (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensicResults.some(rx => ['Exchange Replacement', 'Partial Refund', 'Cancelled'].includes(rx.transaction_type))));
 
         if (isExchangeBalanced) {
             log(`&nbsp;&nbsp;<span style="color:#10b981; font-weight:bold;">[✅ CONDITIONAL PASS]</span>`);
@@ -1212,9 +1243,13 @@ function recomputeSimulator() {
         // --- DERIVATION BLOCK ---
         const priceMath = `(Price: $${row.actual_sale_price} * Qty: ${row.qty_sold})`;
         const discMath = row.discount_amount > 0 ? ` - (Disc: $${row.discount_amount})` : "";
+        const shipMath = row.shipping > 0 ? ` + (Ship: $${row.shipping})` : "";
         const taxMath = row.taxes > 0 ? ` + (Tax: $${row.taxes})` : "";
         
-        log(`&nbsp;&nbsp;<span style="color:#00e5ff;">${priceMath}${discMath}${taxMath}</span> = <span style="color:#8b5cf6;">$${row.trueLineCaptured.toFixed(2)} (${row.revenueDerivation})</span>`);
+        let itemSum = (parseFloat(row.actual_sale_price || 0) * parseFloat(row.qty_sold || 1)) - parseFloat(row.discount_amount || 0) + parseFloat(row.shipping || 0) + parseFloat(row.taxes || 0);
+        
+        log(`&nbsp;&nbsp;<span style="color:#00e5ff;">${priceMath}${discMath}${shipMath}${taxMath} = $${itemSum.toFixed(2)} (Actual Contribution)</span>`);
+        log(`&nbsp;&nbsp;<span style="color:#8b5cf6;">=> Engine Allocated Revenue: $${row.trueLineCaptured.toFixed(2)} (${row.revenueDerivation})</span>`);
         
         let appliedRef = row.applied_order_refund || 0;
         
@@ -1284,6 +1319,10 @@ window.runGlobalReconciliationAudit = function() {
         let lines = orderGroups[oid];
         let forensic = window.runForensicAccounting(lines);
         
+        // Skip orders that are completely zeroed out (Ignore/Cancelled)
+        const allIgnored = forensic.every(r => r.transaction_type === 'IGNORE' || r.transaction_type === 'Cancelled');
+        if (allIgnored) return;
+        
         // Re-run the reconciliation math
         const mainRow = forensic[0];
         const rawTotal = parseFloat(mainRow.rawOrderTotal || 0);
@@ -1291,7 +1330,9 @@ window.runGlobalReconciliationAudit = function() {
         const totalItemRevenue = forensic.reduce((acc, r) => {
             const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
             if (isDonor) return acc;
-            return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+            const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+            const fd = parseFloat(r.forensic_discount_amount !== undefined ? r.forensic_discount_amount : (r.discount_amount || 0));
+            return acc + (fp * parseFloat(r.qty_sold || 1)) - fd;
         }, 0);
         
         const residual = rawTotal - totalItemRevenue;
@@ -1299,12 +1340,12 @@ window.runGlobalReconciliationAudit = function() {
         const csvShipSum = forensic.reduce((acc, r) => {
             const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
             if (isDonor) return acc;
-            return acc + parseFloat(r.shipping || 0);
+            return acc + parseFloat(r.forensic_shipping !== undefined ? r.forensic_shipping : (r.shipping || 0));
         }, 0);
         const csvTaxSum = forensic.reduce((acc, r) => {
             const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
             if (isDonor) return acc;
-            return acc + parseFloat(r.taxes || 0);
+            return acc + parseFloat(r.forensic_taxes !== undefined ? r.forensic_taxes : (r.taxes || 0));
         }, 0);
         
         const expectedResidue = csvShipSum + csvTaxSum;
@@ -1315,6 +1356,7 @@ window.runGlobalReconciliationAudit = function() {
              let donorSurrenderSum = forensic.reduce((acc, r) => {
                 const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
                 if (!isDonor) return acc;
+                // For donor surrender, we want the ORIGINAL price, not the 0.00 forensic price
                 const p = parseFloat(r.original_sale_price ?? r.actual_sale_price ?? 0);
                 const d = parseFloat(r.original_discount_amount ?? r.discount_amount ?? 0);
                 return acc + (p * parseFloat(r.qty_sold || 1)) - d;
@@ -1322,19 +1364,22 @@ window.runGlobalReconciliationAudit = function() {
 
              let replacementPriceSum = forensic.reduce((acc, r) => {
                 if (r.transaction_type !== 'Exchange Replacement') return acc;
-                return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+                const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+                return acc + (fp * parseFloat(r.qty_sold || 1));
              }, 0);
 
              let unaccounted = residual - expectedResidue;
              
-             // Check if the discrepancy matches the price of ANY line in the order (Common Shopify Inflation Pattern)
+             // Check if the discrepancy matches the RAW price of ANY line in the order (Common Shopify Inflation Pattern)
+             // We must check raw `actual_sale_price` because the inflation delta is caused by the physical CSV line price, not our forensic math.
              let matchedAnyLinePrice = forensic.some(r => {
-                 let lp = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+                 const rp = parseFloat(r.actual_sale_price || 0);
+                 let lp = (rp * parseFloat(r.qty_sold || 1));
                  return lp > 0 && Math.abs(unaccounted - lp) < 0.1;
              });
 
              let isExchangeBalanced = (Math.abs(unaccounted - donorSurrenderSum) < 0.1 && donorSurrenderSum > 0) || 
-                                      (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensic.some(rx => rx.transaction_type === 'Exchange Replacement')));
+                                      (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensic.some(rx => ['Exchange Replacement', 'Partial Refund', 'Cancelled'].includes(rx.transaction_type))));
              
              if (!isExchangeBalanced) {
                  failureCount++;

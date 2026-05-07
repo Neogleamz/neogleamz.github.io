@@ -265,9 +265,11 @@ window.runForensicAccounting = function(rows) {
         let newOutBal = r['Outstanding Balance'];
         
         const isExchangeDonor = type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange';
+        const isVoided = type === 'Cancelled' || type === 'IGNORE' || type === 'Partial Refund';
         
-        if (isExchangeDonor || type === 'Cancelled' || type === 'IGNORE') {
+        if (isExchangeDonor || isVoided) {
             lineRevenue = 0;
+            cogs = 0; // Item never left the warehouse or was returned, so we didn't lose the physical asset
             work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})` : `[Voided] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})`;
             revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${parseFloat(sourceRow.total).toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
             newSubtotal = 0; newDiscount = 0; newShipping = 0; newTaxes = 0; newTotal = 0; newSalePrice = 0; newOutBal = 0;
@@ -300,7 +302,7 @@ window.runForensicAccounting = function(rows) {
 
 
         let src = r['Source'] || 'web';
-        let fee = (type === 'IGNORE' || type === 'Cancelled') ? 0 : window.getEngineStripeFee(lineRevenue, src);
+        let fee = (isVoided) ? 0 : window.getEngineStripeFee(lineRevenue, src);
 
         if (exactShipTotal > 0) {
             actShipCost = (i === firstShippableIndex) ? exactShipTotal : 0;
@@ -314,7 +316,9 @@ window.runForensicAccounting = function(rows) {
         }
 
         let net = lineRevenue - fee - actShipCost - cogs;
-        if (type === 'IGNORE' || type === 'Cancelled') net = 0;
+        if (isVoided) net = 0;
+
+        let isCostOnlyItem = (type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund');
 
         return { 
             ...r, 
@@ -325,6 +329,7 @@ window.runForensicAccounting = function(rows) {
             forensic_total: newTotal,
             forensic_sale_price: newSalePrice,
             forensic_out_bal: newOutBal,
+            isCostOnlyItem,
             uiIdx: i, 
             cogs, fee, net, actShipCost,
             trueLineCaptured: lineRevenue,
@@ -340,7 +345,9 @@ window.runForensicAccounting = function(rows) {
     if (orderRefundTotal > 0) {
         let refundApplied = false;
         processed.forEach(r => {
-            if (!refundApplied && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE') {
+            let isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
+            let isVoided = r.transaction_type === 'Cancelled' || r.transaction_type === 'IGNORE' || r.transaction_type === 'Partial Refund';
+            if (!refundApplied && !isVoided && !isDonor) {
                 r.net -= orderRefundTotal;
                 r.applied_order_refund = orderRefundTotal;
                 refundApplied = true;
@@ -349,6 +356,115 @@ window.runForensicAccounting = function(rows) {
     }
 
     return processed;
+};
+
+// ==========================================
+// UNIVERSAL DIFFERENTIAL ENGINE (STRICT FORENSICS)
+// ==========================================
+/**
+ * Asynchronous Universal Differential Engine
+ * Cross-references a payload against live Supabase data to find mathematical or string discrepancies.
+ * Used exclusively by the Sandbox Modal.
+ * @param {Array} payload - The matrix of imported data to check.
+ * @param {string} table - The target database table.
+ * @param {string} conflictStr - Optional conflict keys.
+ * @returns {Promise<Array>} The payload with injected _diffs tracking.
+ */
+window.applyDifferentialHighlighting = async function(payload, table, conflictStr) {
+    if (!payload || payload.length === 0 || !table) return payload;
+    
+    let conflictKeys = conflictStr ? conflictStr.split(',').map(s=>s.trim()) : [];
+    if (table === 'sales_ledger' && conflictKeys.length === 0) conflictKeys = ['order_id', 'storefront_sku'];
+    if (table === 'raw_orders' && conflictKeys.length === 0) conflictKeys = ['di_item_id'];
+    if (table === 'raw_parcel_summary' && conflictKeys.length === 0) conflictKeys = ['parcel_no'];
+    if (table === 'raw_parcel_items' && conflictKeys.length === 0) conflictKeys = ['parcel_no', 'di_item_id'];
+    
+    if (conflictKeys.length === 0 || !conflictKeys[0]) return payload;
+
+    let primaryKey = conflictKeys[0];
+    let rawValues = [...new Set(payload.map(r => r[primaryKey]))].filter(v => v !== undefined && v !== null && v !== '');
+    if (rawValues.length === 0) return payload;
+    
+    // Normalize to handle `#1005` vs `1005` database inconsistencies
+    let fetchValuesSet = new Set();
+    rawValues.forEach(v => {
+        let strV = String(v).trim();
+        fetchValuesSet.add(strV);
+        if (strV.startsWith('#')) fetchValuesSet.add(strV.replace(/^#/, ''));
+        else fetchValuesSet.add('#' + strV);
+    });
+    let fetchValues = Array.from(fetchValuesSet);
+    
+    let existingData = [];
+    let dbErrorStr = "";
+    if (typeof supabaseClient !== 'undefined') {
+        try {
+            for (let i = 0; i < fetchValues.length; i += 100) {
+                let chunk = fetchValues.slice(i, i + 100);
+                let { data, error } = await supabaseClient.from(table).select('*').in(primaryKey, chunk);
+                if (error) dbErrorStr += error.message + " | ";
+                if (data) existingData = existingData.concat(data);
+            }
+        } catch(e) {
+            console.error("Diff Engine DB Fetch Error:", e);
+            dbErrorStr += String(e) + " | ";
+        }
+    }
+
+    if (existingData.length === 0) {
+        if (typeof syncTrace === 'function') syncTrace(`[DB ZERO | PK:${primaryKey} | Val0:${fetchValues[0] || 'none'} | Err: ${dbErrorStr}] Differential highlighting bypassed due to 0 matches.`, true);
+        return payload;
+    }
+
+    let foundCount = 0;
+    let diffCount = 0;
+
+    payload.forEach(sim => {
+        let existingRow = existingData.find(ex => {
+            return conflictKeys.every(k => {
+                let vEx = String(ex[k]).trim().toLowerCase().replace(/\s+/g, ' ');
+                let vSim = String(sim[k]).trim().toLowerCase().replace(/\s+/g, ' ');
+                if (k === 'order_id' || k === 'parcel_no') {
+                    vEx = vEx.replace(/^#/, '');
+                    vSim = vSim.replace(/^#/, '');
+                }
+                return vEx === vSim;
+            });
+        });
+        
+        if (existingRow) {
+            foundCount++;
+            let diffs = {};
+            Object.keys(sim).forEach(k => {
+                if (k.startsWith('_')) return; // Ignore internal tracking keys
+                let v1 = sim[k]; 
+                let v2 = existingRow[k];
+                if (v1 === undefined || v2 === undefined || v1 === null || v2 === null) return;
+                
+                // Pure Math Unification
+                if (typeof v1 === 'number' && typeof v2 === 'number') {
+                    if (Math.abs(v1 - v2) > 0.001) diffs[k] = v2;
+                } else if (String(v1) !== String(v2)) {
+                    let f1 = parseFloat(v1); let f2 = parseFloat(v2);
+                    if (!isNaN(f1) && !isNaN(f2) && String(v1).trim() !== "" && String(v2).trim() !== "") {
+                        if (Math.abs(f1 - f2) > 0.001) diffs[k] = v2;
+                    } else {
+                        // String mismatch
+                        diffs[k] = v2;
+                    }
+                }
+            });
+            if (Object.keys(diffs).length > 0) {
+                diffCount++;
+                sim._diffs = diffs;
+            }
+        }
+    });
+
+    if (typeof syncTrace === 'function') {
+        syncTrace(`[Diff Engine] DB Matches: ${foundCount} | Mismatches Found: ${diffCount} | Total DB Rows Scanned: ${existingData.length}`, diffCount > 0);
+    }
+    return payload;
 };
 
 // ==========================================

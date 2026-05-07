@@ -27,9 +27,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🚨 P0 Critical (Immediate Blocker)
-- [🚀] `fix/orderz-math-parity-audit` : **Orderz Mathematical Parity Audit** - Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
-- [🚀] `chore/unify-math-engine` : **Strict Mathematical Unification Mandate** - Eradicated local math engines in `sales-module.js` and `analytics-module.js`.
-- [🚀] `feat/sandbox-nomenclature-audit` : **Sandbox UI Transformation Audit** - Refactor the Sandbox UI into a strict 4-Tier matrix (`[RAW DATABASE SNAPSHOT]`, `[RAW CSV: SHOPIFY ORDERS]`, `[RAW CSV: SHOPIFY BILLING]`, `[CALCULATED FORENSIC RESULTS]`) exactly mapping literal DB schema columns to their CSV origin headers.
+- [x] `fix/orderz-math-parity-audit` : **Orderz Mathematical Parity Audit** - Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
+- [x] `chore/unify-math-engine` : **Strict Mathematical Unification Mandate** - Eradicated local math engines in `sales-module.js` and `analytics-module.js`.
+- [x] `feat/sandbox-nomenclature-audit` : **Sandbox UI Transformation Audit** - Refactor the Sandbox UI into a strict 4-Tier matrix (`[RAW DATABASE SNAPSHOT]`, `[RAW CSV: SHOPIFY ORDERS]`, `[RAW CSV: SHOPIFY BILLING]`, `[CALCULATED FORENSIC RESULTS]`) exactly mapping literal DB schema columns to their CSV origin headers.
 ## 🟡 P2 Medium Priority (Enhancements)
 
 
@@ -40,7 +40,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Other Ideas**
 - [🚀] `style/sandbox-typography-spacing` : **Sandbox UI Typography & Layout Refactor** - Apply a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, and shrink the vertical height of the main header to reclaim screen space. [🤖 AI Model] [🧠 TBD / 2k] [💸 TBD / $0.01]
 - [ ] `feat/orderz-expandable-net-profit` : **Orderz Expandable Net Profit & Sandbox Routing** - Build expandable row functionality into the native Orderz page to view the whole order net vs. line item details (replacing the standalone Actual Net Breakdown modal). Retitle the "Actual Net" button to "Net Sandbox Engine" and route it directly to the Net Profit Sandbox Engine. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
-- [ ] `feat/live-staging-diff-highlighting` : **Live Staging DB Diff Highlighting** - Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records (e.g. Order #1005 Total 121.53 vs 101.53). [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [x] `feat/live-staging-diff-highlighting` : **Live Staging DB Diff Highlighting** - Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records (e.g. Order #1005 Total 121.53 vs 101.53). [🤖 Gemini 3.1 Pro] [🧠 15k / 5k] [💸 $0.05 / $0.02]
+- [ ] `feat/global-math-engine-audit` : **Global Math Engine Audit** - Look through all the various .js files and ensure all math is done in the neogleamz-engine.js so we only have 1 source for all across the whole app, except direct test .js files. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
