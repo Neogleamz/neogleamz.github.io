@@ -254,7 +254,7 @@ window.runForensicAccounting = function(rows) {
         // RAW ATTRIBUTION
         let lineRevenue;
         let work;
-        let revenueDerivation = "";
+        let revenueDerivation;
         
         let newSubtotal = r.subtotal;
         let newDiscount = r.discount_amount;
@@ -281,9 +281,9 @@ window.runForensicAccounting = function(rows) {
             work = ob > 0 ? `[Resolved Out. Bal: $${ob.toFixed(2)}]` : `[Resolved Total: $${tot.toFixed(2)}]`;
             
             if (ob > 0) {
-                revenueDerivation = `Outstanding Balance (AY): $${ob.toFixed(2)}`;
+                revenueDerivation = `Outstanding Balance: $${ob.toFixed(2)}`;
             } else {
-                revenueDerivation = `Total (L): $${tot.toFixed(2)}`;
+                revenueDerivation = `total: $${tot.toFixed(2)}`;
             }
 
             if (type === 'Exchange Replacement' && sourceRow !== r) {
