@@ -1237,9 +1237,13 @@ function recomputeSimulator() {
         // --- DERIVATION BLOCK ---
         const priceMath = `(Price: $${row.actual_sale_price} * Qty: ${row.qty_sold})`;
         const discMath = row.discount_amount > 0 ? ` - (Disc: $${row.discount_amount})` : "";
+        const shipMath = row.shipping > 0 ? ` + (Ship: $${row.shipping})` : "";
         const taxMath = row.taxes > 0 ? ` + (Tax: $${row.taxes})` : "";
         
-        log(`&nbsp;&nbsp;<span style="color:#00e5ff;">${priceMath}${discMath}${taxMath}</span> = <span style="color:#8b5cf6;">$${row.trueLineCaptured.toFixed(2)} (${row.revenueDerivation})</span>`);
+        let itemSum = (parseFloat(row.actual_sale_price || 0) * parseFloat(row.qty_sold || 1)) - parseFloat(row.discount_amount || 0) + parseFloat(row.shipping || 0) + parseFloat(row.taxes || 0);
+        
+        log(`&nbsp;&nbsp;<span style="color:#00e5ff;">${priceMath}${discMath}${shipMath}${taxMath} = $${itemSum.toFixed(2)} (Actual Contribution)</span>`);
+        log(`&nbsp;&nbsp;<span style="color:#8b5cf6;">=> Engine Allocated Revenue: $${row.trueLineCaptured.toFixed(2)} (${row.revenueDerivation})</span>`);
         
         let appliedRef = row.applied_order_refund || 0;
         
