@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.31] - 2026-05-07
+### Features & Refactors
+- **Live Staging DB Diff Highlighting**: Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records.
+
 ## [1.0.30] - 2026-05-07
 ### Features & Refactors
 - **Orderz Mathematical Parity Audit**: Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
