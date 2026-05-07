@@ -822,6 +822,14 @@ function initMathSimulator() {
     document.getElementById('math-simulator-sandbox').innerHTML = `<div style="color:#888; text-align:center; padding: 2rem; font-family: monospace;">Please load an order to begin simulation.</div>`;
     document.getElementById('math-simulator-console').innerHTML = "";
 
+    let commitBtn = document.getElementById('sim-commit-btn');
+    if (commitBtn) {
+        commitBtn.style.opacity = '0.2';
+        commitBtn.style.pointerEvents = 'none';
+        commitBtn.textContent = "💾 COMMIT TO LEDGER";
+        commitBtn.style.background = "#10b981";
+    }
+
     // Apply cached resizer heights
     if (typeof restoreNeoSimulatorSizes === 'function') restoreNeoSimulatorSizes();
 }
@@ -838,14 +846,18 @@ function renderSimulatorOrder(orderId) {
     if(!orderId) {
         sandbox.innerHTML = `<div style="color:#888; text-align:center; padding: 2rem; font-family: monospace;">Please load an order to begin simulation.</div>`;
         consoleDiv.innerHTML = "";
-        if (commitBtn) commitBtn.style.display = 'none';
+        if (commitBtn) {
+            commitBtn.style.opacity = '0.2';
+            commitBtn.style.pointerEvents = 'none';
+            commitBtn.textContent = "💾 COMMIT TO LEDGER";
+        }
         return;
     }
     
     if (commitBtn) {
-        commitBtn.style.display = 'inline-block';
-        commitBtn.textContent = "💾 COMMIT TO LEDGER";
         commitBtn.style.opacity = "1";
+        commitBtn.style.pointerEvents = "auto";
+        commitBtn.textContent = "💾 COMMIT TO LEDGER";
         commitBtn.disabled = false;
         commitBtn.style.background = "#10b981";
     }
