@@ -925,10 +925,16 @@ window._renderSandboxModal = function() {
                     let diffTooltip = val.replace(/"/g, '&quot;');
                     
                     if (isDiff) {
-                        cellColor = "color:#ef4444; font-weight:800; background:rgba(239,68,68,0.1);";
+                        cellColor = "color:#ef4444; font-weight:800; background:rgba(239,68,68,0.1); vertical-align:top;";
                         diffStyles = "border: 1px dashed #ef4444; cursor: help;";
-                        prefix = `<span style="font-size:10px; margin-right:4px;" title="EXISTING DB: ${String(row._diffs[c]).replace(/"/g, '&quot;')}">⚠️</span>`;
-                        diffTooltip = `[EXISTING DB]: ${String(row._diffs[c]).replace(/"/g, '&quot;')} vs [IMPORTED CSV]: ${val.replace(/"/g, '&quot;')}`;
+                        let oldVal = String(row._diffs[c]).replace(/"/g, '&quot;');
+                        let newVal = val.replace(/"/g, '&quot;');
+                        prefix = ``;
+                        val = `<div style="display:flex; flex-direction:column; gap:4px; padding-top:2px;">
+                                 <div style="font-size:9px; color:#f87171; text-decoration:line-through; font-weight:normal; opacity:0.8;">[DB: ${oldVal}]</div>
+                                 <div style="color:#fecaca;">[NEW: ${newVal}]</div>
+                               </div>`;
+                        diffTooltip = `[EXISTING DB]: ${oldVal} vs [IMPORTED CSV]: ${newVal}`;
                     } else if (cLow === 'transaction_type' || cLow === 'unit_weight_g' || cLow === 'unit_china_landed_price' || cLow === 'net_profit' || cLow === 'transaction_fees' || cLow === 'cogs_at_sale') {
                         cellColor = "color:#e9d5ff; font-weight:800; background:rgba(168,85,247,0.05);";
                         prefix = `<span style="font-size:10px; margin-right:4px;">🧮</span>`;
