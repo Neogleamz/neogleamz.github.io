@@ -986,7 +986,12 @@ function renderSimulatorOrder(orderId) {
         `;
     });
     
-    sandbox.innerHTML = html;
+    let btnHtml = `
+    <div style="margin-top:1.5rem; display:flex; justify-content:flex-end;">
+        <button id="sim-commit-btn" style="background:#10b981; color:#000; font-weight:bold; font-size:14px; padding:8px 16px; border:none; border-radius:6px; cursor:pointer;">💾 COMMIT TO LEDGER</button>
+    </div>`;
+    
+    sandbox.innerHTML = html + btnHtml;
     
     document.querySelectorAll('.sim-type-sel').forEach(el => {
         el.addEventListener('change', (e) => {
@@ -995,6 +1000,54 @@ function renderSimulatorOrder(orderId) {
             recomputeSimulator();
         }, { signal });
     });
+
+    let commitBtn = document.getElementById('sim-commit-btn');
+    if (commitBtn) {
+        commitBtn.addEventListener('click', async () => {
+            if(!confirm("Are you sure you want to permanently overwrite the Sales Ledger with this exact forensic configuration?")) return;
+            
+            commitBtn.textContent = "💾 SAVING...";
+            commitBtn.style.opacity = "0.5";
+            commitBtn.disabled = true;
+
+            try {
+                let forensicResults = window.runForensicAccounting(window.currentSimPayload);
+                for (let fLine of forensicResults) {
+                    let payload = { 
+                        transaction_type: fLine.transaction_type, 
+                        net_profit: fLine.net, 
+                        transaction_fees: fLine.fee, 
+                        cogs_at_sale: fLine.cogs 
+                    };
+                    await window.supabaseClient.from('sales_ledger').update(payload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
+                    
+                    // Update Memory
+                    if (window.processedSalesDB) {
+                        let sibRow = window.processedSalesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
+                        if (sibRow) {
+                            sibRow.transaction_type = payload.transaction_type;
+                            sibRow.net_profit = payload.net_profit;
+                            sibRow.transaction_fees = payload.transaction_fees;
+                            sibRow.cogs_at_sale = payload.cogs_at_sale;
+                        }
+                    }
+                }
+                commitBtn.textContent = "✅ COMMITTED!";
+                commitBtn.style.background = "#3b82f6";
+                setTimeout(() => {
+                    if(typeof filterSales === 'function') filterSales();
+                    let m = document.getElementById('math-simulator-modal');
+                    if(m) m.style.display = 'none';
+                }, 1000);
+            } catch (err) {
+                console.error(err);
+                alert("Error committing forensic payload.");
+                commitBtn.textContent = "💾 COMMIT TO LEDGER";
+                commitBtn.style.opacity = "1";
+                commitBtn.disabled = false;
+            }
+        }, { signal });
+    }
     
     recomputeSimulator();
 }
