@@ -1167,10 +1167,11 @@ function recomputeSimulator() {
             return acc + (fp * parseFloat(r.qty_sold || 1));
         }, 0);
 
-        // Check if the discrepancy matches the price of ANY line in the order (Common Shopify Inflation Pattern)
+        // Check if the discrepancy matches the RAW price of ANY line in the order (Common Shopify Inflation Pattern)
+        // We must check raw `actual_sale_price` because the inflation delta is caused by the physical CSV line price, not our forensic math.
         let matchedAnyLinePrice = forensicResults.some(r => {
-            const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
-            let lp = (fp * parseFloat(r.qty_sold || 1));
+            const rp = parseFloat(r.actual_sale_price || 0);
+            let lp = (rp * parseFloat(r.qty_sold || 1));
             return lp > 0 && Math.abs(unaccounted - lp) < 0.1;
         });
 
