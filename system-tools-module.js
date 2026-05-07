@@ -846,7 +846,16 @@ window.sortSandboxModal = function(col, tableNum=1) {
 window._renderSandboxModal = function() {
     let payload = window.__sandboxData;
     let dictPayload = window.__sandboxDataDict;
-    document.getElementById('sandboxModalTitle').innerHTML = window.__sandboxTitle + `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#3b82f6;">■ ORIGINAL CSV HEADER</span> <span style="color:#f59e0b;">■ DATABASE COLUMN NAME</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
+    let isSuperbuy = window.__sandboxTitle.includes('PRODUCTION_FWD_SYNC') || window.__sandboxTitle.includes('PRODUCTION_ORDER_SYNC');
+    
+    let legendHTML = "";
+    if (isSuperbuy) {
+        legendHTML = `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#64748b;">■ RAW API DATA</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
+    } else {
+        legendHTML = `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#3b82f6;">■ ORIGINAL CSV HEADER</span> <span style="color:#f59e0b;">■ DATABASE COLUMN NAME</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
+    }
+    document.getElementById('sandboxModalTitle').innerHTML = window.__sandboxTitle + legendHTML;
+    
     let body = document.getElementById('sandboxModalBody');
     if ((!payload || payload.length === 0) && !dictPayload) {
         body.innerHTML = window.safeHTML(
@@ -883,9 +892,13 @@ window._renderSandboxModal = function() {
             h += `<thead><tr>`;
             cols.forEach(c => {
                 let indicator = sortCol === c ? (sortAsc ? " <span style='color:#fff;'>▲</span>" : " <span style='color:#fff;'>▼</span>") : "";
+                
+                let computedColumns = ['internal_recipe_name', 'transaction_type', 'total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price', 'net_profit', 'transaction_fees', 'cogs_at_sale', 'makeup_fee', 'order_total', '_is_distributed'];
+                let isComputed = computedColumns.includes(c.toLowerCase());
+                
                 let displayC = c;
                 let colorRule = "color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.5);"; 
-                if (['transaction_type', 'total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price', 'net_profit', 'transaction_fees', 'cogs_at_sale'].includes(c.toLowerCase())) {
+                if (isComputed) {
                     displayC = "🧮 " + c;
                     colorRule = "color:#c084fc; border-bottom:2px solid rgba(192,132,252,0.6);";
                 } else if (c.toLowerCase().endsWith("_hash")) {
@@ -893,15 +906,31 @@ window._renderSandboxModal = function() {
                     colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);";
                 }
                 
-                let csvLabel = csvHeaderMap[c];
-                let isComputed = !csvLabel;
-                if (!csvLabel) csvLabel = 'System Computed';
-                let csvColor = isComputed ? '#c084fc' : '#3b82f6';
-                
-                let dualHeaderHTML = `
-                    <div style="font-size:11px; color:${csvColor}; font-weight:800; margin-bottom:4px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; text-transform:uppercase; letter-spacing:1px;">[CSV] ${csvLabel}</div>
-                    <div style="color:${colorRule.includes('c084fc') ? '#c084fc' : '#f59e0b'}; font-size:10px;">${displayC}${indicator}</div>
-                `;
+                let dualHeaderHTML = '';
+                if (isSuperbuy) {
+                    if (isComputed) {
+                        dualHeaderHTML = `
+                            <div style="font-size:11px; color:#c084fc; font-weight:800; margin-bottom:4px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; text-transform:uppercase; letter-spacing:1px;">🧮 ENGINE MATH</div>
+                            <div style="color:#c084fc; font-size:10px;">${displayC}${indicator}</div>
+                        `;
+                    } else {
+                        dualHeaderHTML = `
+                            <div style="font-size:11px; color:#64748b; font-weight:800; margin-bottom:4px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; text-transform:uppercase; letter-spacing:1px;">[API] RAW DATA</div>
+                            <div style="color:#f59e0b; font-size:10px;">${displayC}${indicator}</div>
+                        `;
+                    }
+                } else {
+                    let csvLabel = csvHeaderMap[c];
+                    if (!csvLabel) csvLabel = isComputed ? '🧮 ENGINE MATH' : 'RAW DATA';
+                    let isCsvComputed = isComputed || csvLabel === '🧮 ENGINE MATH';
+                    let csvColor = isCsvComputed ? '#c084fc' : '#3b82f6';
+                    let prefixStr = isCsvComputed ? '' : '[CSV] ';
+                    
+                    dualHeaderHTML = `
+                        <div style="font-size:11px; color:${csvColor}; font-weight:800; margin-bottom:4px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; text-transform:uppercase; letter-spacing:1px;">${prefixStr}${csvLabel}</div>
+                        <div style="color:${colorRule.includes('c084fc') ? '#c084fc' : '#f59e0b'}; font-size:10px;">${displayC}${indicator}</div>
+                    `;
+                }
                 
                 if (isDict) {
                     h += `<th data-click="click_sortSandboxDict" data-sort-col="${c}" data-sheet-name="${dictName}" style="padding:10px 15px; position:sticky; top:0; background:rgba(0,0,0,0.8); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${dualHeaderHTML}</th>`;
