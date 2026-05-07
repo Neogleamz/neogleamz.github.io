@@ -598,7 +598,12 @@ function renderSalesTable() {
             <td class="text-right" style="color:${x.actualShipCost > 15 ? '#ef4444' : '#f59e0b'}; font-weight:bold;">-$${parseFloat(x.actualShipCost || 0).toFixed(2)}</td>
             <td class="text-right" style="color:#888;" title="${x.dbActualPayout > 0 ? 'True Platform Payout Math' : 'Estimated Engine Fee'}">${x.stripeFee < 0 ? '+' : '-'} $${Math.abs(parseFloat(x.stripeFee || 0)).toFixed(2)}</td>
             <td class="text-right" style="color:#10b981; font-weight:bold;">${x.dbActualPayout > 0 ? '$'+parseFloat(x.dbActualPayout).toFixed(2) : '--'}</td>
-            <td class="text-right" style="color:${netColor}; font-weight:900;">$${x.net.toFixed(2)}</td>
+            <td class="text-right" style="color:${netColor}; font-weight:900;">
+                <div style="display:flex; justify-content:flex-end; align-items:center; gap: 8px;">
+                    $${x.net.toFixed(2)}
+                    <button onclick="window.openSandboxForOrder('${x.order_id}')" style="background:#10b981; color:#000; border:none; padding:3px 6px; font-size:10px; font-weight:bold; border-radius:4px; cursor:pointer; text-transform:uppercase;">SANDBOX NET</button>
+                </div>
+            </td>
             </tr>`;
         });
     }
@@ -615,6 +620,15 @@ function renderSalesTable() {
         if(typeof applyTableInteractivity === 'function') applyTableInteractivity('salesTableWrap');
     } catch(e) { sysLog('Sales table render error: ' + e.message, true); }
 }
+
+window.openSandboxForOrder = function(orderId) {
+    if (typeof initMathSimulator === 'function') initMathSimulator();
+    let sel = document.getElementById('sim-order-select');
+    if (sel) {
+        sel.value = orderId;
+        if(typeof renderSimulatorOrder === 'function') renderSimulatorOrder(orderId);
+    }
+};
 
 window.updateSaleType = async function(sel, orderId, sku) {
     try {
