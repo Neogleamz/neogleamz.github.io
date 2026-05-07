@@ -908,8 +908,8 @@ window._renderSandboxModal = function() {
             cols.forEach(c => {
                 let indicator = sortCol === c ? (sortAsc ? " <span style='color:#fff;'>▲</span>" : " <span style='color:#fff;'>▼</span>") : "";
                 
-                let computedColumns = ['internal_recipe_name', 'transaction_type', 'total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price', 'net_profit', 'transaction_fees', 'cogs_at_sale', 'makeup_fee', 'order_total', '_is_distributed'];
-                let isComputed = computedColumns.includes(c.toLowerCase());
+                let computedColumns = ['internal_recipe_name', 'transaction_type', 'total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price', 'net_profit', 'transaction_fees', 'cogs_at_sale', 'makeup_fee', 'order_total', '_is_distributed', 'net', 'actShipCost', 'trueLineCaptured', 'revenueDerivation', 'work', 'rawOrderTotal', 'rawItemRevenue', 'liveCogs', 'stripeFee', 'actPayout', 'trueLineCapture'];
+                let isComputed = computedColumns.includes(c) || computedColumns.includes(c.toLowerCase());
                 
                 let displayC = c;
                 let colorRule = "color:#f59e0b; border-bottom:2px solid rgba(245,158,11,0.5);"; 
