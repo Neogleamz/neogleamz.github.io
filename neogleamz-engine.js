@@ -318,6 +318,8 @@ window.runForensicAccounting = function(rows) {
         let net = lineRevenue - fee - actShipCost - cogs;
         if (isVoided) net = 0;
 
+        let isCostOnlyItem = (type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund');
+
         return { 
             ...r, 
             forensic_subtotal: newSubtotal,
@@ -327,6 +329,7 @@ window.runForensicAccounting = function(rows) {
             forensic_total: newTotal,
             forensic_sale_price: newSalePrice,
             forensic_out_bal: newOutBal,
+            isCostOnlyItem,
             uiIdx: i, 
             cogs, fee, net, actShipCost,
             trueLineCaptured: lineRevenue,
