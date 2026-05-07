@@ -591,7 +591,8 @@ function renderSalesTable() {
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${x.transaction_type==='IGNORE'?'selected':''}>IGNORE</option>
-                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled</option>
+                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Partial Refund" ${x.transaction_type==='Partial Refund'?'selected':''}>Partial Refund</option>
+                <option style="background:var(--bg-panel); color:#ef4444;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled</option>
                 <option style="background:var(--bg-panel); color:#ef4444; font-weight:bold;" value="NEEDS ATTENTION" ${x.transaction_type==='NEEDS ATTENTION'?'selected':''}>NEEDS ATTENTION</option>
             </select></td>
 
@@ -1190,7 +1191,7 @@ function recomputeSimulator() {
         });
 
         let isExchangeBalanced = (Math.abs(unaccounted - donorSurrenderSum) < 0.1 && donorSurrenderSum > 0) || 
-                                 (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensicResults.some(rx => rx.transaction_type === 'Exchange Replacement')));
+                                 (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensicResults.some(rx => ['Exchange Replacement', 'Partial Refund', 'Cancelled'].includes(rx.transaction_type))));
 
         if (isExchangeBalanced) {
             log(`&nbsp;&nbsp;<span style="color:#10b981; font-weight:bold;">[✅ CONDITIONAL PASS]</span>`);
@@ -1368,7 +1369,7 @@ window.runGlobalReconciliationAudit = function() {
              });
 
              let isExchangeBalanced = (Math.abs(unaccounted - donorSurrenderSum) < 0.1 && donorSurrenderSum > 0) || 
-                                      (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensic.some(rx => rx.transaction_type === 'Exchange Replacement')));
+                                      (matchedAnyLinePrice && (donorSurrenderSum > 0 || forensic.some(rx => ['Exchange Replacement', 'Partial Refund', 'Cancelled'].includes(rx.transaction_type))));
              
              if (!isExchangeBalanced) {
                  failureCount++;

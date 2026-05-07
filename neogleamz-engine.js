@@ -265,8 +265,9 @@ window.runForensicAccounting = function(rows) {
         let newOutBal = r['Outstanding Balance'];
         
         const isExchangeDonor = type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange';
+        const isVoided = type === 'Cancelled' || type === 'IGNORE' || type === 'Partial Refund';
         
-        if (isExchangeDonor || type === 'Cancelled' || type === 'IGNORE') {
+        if (isExchangeDonor || isVoided) {
             lineRevenue = 0;
             work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})` : `[Voided] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})`;
             revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${parseFloat(sourceRow.total).toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
@@ -300,7 +301,7 @@ window.runForensicAccounting = function(rows) {
 
 
         let src = r['Source'] || 'web';
-        let fee = (type === 'IGNORE' || type === 'Cancelled') ? 0 : window.getEngineStripeFee(lineRevenue, src);
+        let fee = (isVoided) ? 0 : window.getEngineStripeFee(lineRevenue, src);
 
         if (exactShipTotal > 0) {
             actShipCost = (i === firstShippableIndex) ? exactShipTotal : 0;
@@ -314,7 +315,7 @@ window.runForensicAccounting = function(rows) {
         }
 
         let net = lineRevenue - fee - actShipCost - cogs;
-        if (type === 'IGNORE' || type === 'Cancelled') net = 0;
+        if (isVoided) net = 0;
 
         return { 
             ...r, 
@@ -340,7 +341,9 @@ window.runForensicAccounting = function(rows) {
     if (orderRefundTotal > 0) {
         let refundApplied = false;
         processed.forEach(r => {
-            if (!refundApplied && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE') {
+            let isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
+            let isVoided = r.transaction_type === 'Cancelled' || r.transaction_type === 'IGNORE' || r.transaction_type === 'Partial Refund';
+            if (!refundApplied && !isVoided && !isDonor) {
                 r.net -= orderRefundTotal;
                 r.applied_order_refund = orderRefundTotal;
                 refundApplied = true;
