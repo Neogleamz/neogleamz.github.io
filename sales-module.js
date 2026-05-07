@@ -404,9 +404,6 @@ async function executeSalesSync(isTestMode = false) {
                     ...sim, 
                     actual_sale_price: sim.original_sale_price ?? sim.actual_sale_price,
                     discount_amount: sim.original_discount_amount ?? sim.discount_amount,
-                    cogs_at_sale: cS, 
-                    transaction_fees: fS, 
-                    net_profit: nS, 
                     transaction_type: sim.transaction_type || 'Standard',
                     trueLineCapture: sim.trueLineCaptured // Legacy tracking
                 });
@@ -461,7 +458,13 @@ async function executeSalesSync(isTestMode = false) {
                     if (duplicatesIgnored > 0) syncTrace(`▶ Filtered ${duplicatesIgnored} duplicates safely. Verified ${cleanPayload.length} pure items. Pushing to Cloud Matrix...`, false);
                     else syncTrace(`▶ Verified ${cleanPayload.length} valid target entities. Pushing to Cloud Matrix...`, false);
 
-                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(cleanPayload);
+                    let sanitizedInsertPayload = cleanPayload.map(sp => {
+                        let clone = { ...sp };
+                        // Strip all internal forensic telemetry before database injection
+                        ['cogs', 'fee', 'net', 'actShipCost', 'trueLineCaptured', 'revenueDerivation', 'work', 'rawOrderTotal', 'rawItemRevenue', 'liveCogs', 'stripeFee', 'uiIdx', 'forensic_subtotal', 'forensic_discount_amount', 'forensic_shipping', 'forensic_taxes', 'forensic_total', 'forensic_sale_price', 'forensic_out_bal', 'trueLineCapture'].forEach(k => delete clone[k]);
+                        return clone;
+                    });
+                    const { error: e1 } = await supabaseClient.from('sales_ledger').insert(sanitizedInsertPayload);
                     if(e1) throw new Error("Sales Ledger Insert Error: " + e1.message);
 
                     syncTrace(`Inventory deduction deferred structurally to Packerz fulfillment completion.`);
@@ -1112,9 +1115,9 @@ function recomputeSimulator() {
     let donorSurrenderSum = 0;
     forensicResults.forEach(r => {
         const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-        const p = parseFloat(r.actual_sale_price || 0);
+        const p = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
         const q = parseFloat(r.qty_sold || 1);
-        const d = parseFloat(r.discount_amount || 0);
+        const d = parseFloat(r.forensic_discount_amount !== undefined ? r.forensic_discount_amount : (r.discount_amount || 0));
         const sub = (p * q) - d;
         
         if (isDonor) {
@@ -1135,11 +1138,11 @@ function recomputeSimulator() {
     
     // Validate against literal Ship/Tax columns natively across all rows
     const engineShipSum = forensicResults.reduce((acc, r) => {
-        return acc + parseFloat(r.shipping || 0);
+        return acc + parseFloat(r.forensic_shipping !== undefined ? r.forensic_shipping : (r.shipping || 0));
     }, 0);
     
     const engineTaxSum = forensicResults.reduce((acc, r) => {
-        return acc + parseFloat(r.taxes || 0);
+        return acc + parseFloat(r.forensic_taxes !== undefined ? r.forensic_taxes : (r.taxes || 0));
     }, 0);
     
     const engineExpectedResidue = engineShipSum + engineTaxSum;
@@ -1160,12 +1163,14 @@ function recomputeSimulator() {
         // If the "Unaccounted Revenue" matches exactly the price of a Donor row, we can issue a Conditional Pass.
         let replacementPriceSum = forensicResults.reduce((acc, r) => {
             if (r.transaction_type !== 'Exchange Replacement') return acc;
-            return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+            const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+            return acc + (fp * parseFloat(r.qty_sold || 1));
         }, 0);
 
         // Check if the discrepancy matches the price of ANY line in the order (Common Shopify Inflation Pattern)
         let matchedAnyLinePrice = forensicResults.some(r => {
-            let lp = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+            const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+            let lp = (fp * parseFloat(r.qty_sold || 1));
             return lp > 0 && Math.abs(unaccounted - lp) < 0.1;
         });
 
