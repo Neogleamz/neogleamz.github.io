@@ -862,26 +862,21 @@ window._renderSandboxModal = function() {
             if(title) h += `<h3 style="color:#10b981; margin: 15px 0 10px 0; font-size:14px;">${title} <span style="font-size:11px; color:#64748b; font-weight:normal;">(${data.length} records)</span></h3>`;
             
             let csvHeaderMap = {
-                'order_id': 'Name / Order ID',
-                'sale_date': 'Created at',
-                'storefront_sku': 'Lineitem name',
-                'qty_sold': 'Lineitem quantity',
-                'actual_sale_price': 'Lineitem price',
-                'internal_recipe_name': 'Recipe Match',
-                'subtotal': 'Subtotal',
-                'shipping': 'Shipping',
-                'taxes': 'Taxes',
-                'discount_code': 'Discount Code',
-                'discount_amount': 'Discount Amount',
-                'total': 'Total',
-                'customer_email_hash': 'Email (Hashed)',
-                'customer_phone_hash': 'Phone (Hashed)',
-                'shipping_name_hash': 'Shipping Name (Hashed)',
-                'shipping_address_hash': 'Shipping Address (Hashed)',
-                'tracking_number': 'Tracking Number',
-                'carrier_name': 'Carrier Name',
-                'actual_shipping_cost': 'Actual Shipping',
-                'actual_payout': 'Actual Payout'
+                'order_id': '[A] Name',
+                'sale_date': '[P] Created at',
+                'storefront_sku': '[R] Lineitem name',
+                'qty_sold': '[Q] Lineitem quantity',
+                'actual_sale_price': '[S] Lineitem price',
+                'subtotal': '[I] Subtotal',
+                'shipping': '[J] Shipping',
+                'taxes': '[K] Taxes',
+                'discount_code': '[M] Discount Code',
+                'discount_amount': '[N] Discount Amount',
+                'total': '[L] Total',
+                'customer_email_hash': '[B] Email',
+                'customer_phone_hash': '[BS] Phone',
+                'shipping_name_hash': '[AI] Shipping Name',
+                'shipping_address_hash': '[AK] Shipping Address1'
             };
 
             h += `<table style="width:100%; text-align:left; border-collapse:collapse; white-space:nowrap; margin-bottom: 20px;">`;
