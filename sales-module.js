@@ -1001,6 +1001,7 @@ function recomputeSimulator() {
     log(`&nbsp;&nbsp;<span style="color:#444;">-----------------------------------------</span>`);
     
     let totalItemRevenue = 0;
+    let donorSurrenderSum = 0;
     forensicResults.forEach(r => {
         const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
         const p = parseFloat(r.actual_sale_price || 0);
@@ -1009,7 +1010,8 @@ function recomputeSimulator() {
         const sub = (p * q) - d;
         
         if (isDonor) {
-            log(`&nbsp;&nbsp;<span style="color:#94a3b8;">↳ [DONOR] ${r.internal_recipe_name}: $${p.toFixed(2)} (Surrendered)</span>`);
+            log(`&nbsp;&nbsp;<span style="color:#94a3b8;">↳ [DONOR] ${r.internal_recipe_name}: ($${p.toFixed(2)} * ${q}) - $${d.toFixed(2)} = $${sub.toFixed(2)} -> <b style="color:#ff3399;">SURRENDERED</b></span>`);
+            donorSurrenderSum += sub;
         } else {
             log(`&nbsp;&nbsp;<span style="color:#00e5ff;">↳ [ITEM] ${r.internal_recipe_name}: ($${p.toFixed(2)} * ${q}) - $${d.toFixed(2)} = <b style="color:#fff;">$${sub.toFixed(2)}</b></span>`);
             totalItemRevenue += sub;
@@ -1042,22 +1044,20 @@ function recomputeSimulator() {
     log(`&nbsp;&nbsp;<span style="color:#0ea5e9;">COMP: CSV Ship (J) Sum: $${engineShipSum.toFixed(2)}</span>`);
     log(`&nbsp;&nbsp;<span style="color:#8b5cf6;">COMP: CSV Tax (K) Sum: &nbsp;$${engineTaxSum.toFixed(2)}</span>`);
     log(`&nbsp;&nbsp;<span style="color:#6366f1; font-weight:bold;">EXPECTED RESIDUE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$${engineExpectedResidue.toFixed(2)}</span>`);
+    
+    const unaccounted = residual - engineExpectedResidue;
+    log(`&nbsp;&nbsp;<span style="color:#444;">-----------------------------------------</span>`);
+    log(`&nbsp;&nbsp;<span style="color:#ccff00; font-weight:bold;">[MASTER RECONCILIATION EQUATION]:</span>`);
+    log(`&nbsp;&nbsp;<span style="color:#ccff00;">$${rawTotal.toFixed(2)} (Total L) - $${totalItemRevenue.toFixed(2)} (Net Items) - $${engineExpectedResidue.toFixed(2)} (Ship/Tax) = <b>$${unaccounted.toFixed(2)} (Surplus/Inflation)</b></span>`);
     log(`<br/>`);
+
     if (engineReconDiff > 0.01) {
         // Exchange-Aware Validation: In some CSV exports, the Total (L) column is the SUM of original + replacement.
         // If the "Unaccounted Revenue" matches exactly the price of a Donor row, we can issue a Conditional Pass.
-        let donorSurrenderSum = forensicResults.reduce((acc, r) => {
-            const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-            if (!isDonor) return acc;
-            return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
-        }, 0);
-
         let replacementPriceSum = forensicResults.reduce((acc, r) => {
             if (r.transaction_type !== 'Exchange Replacement') return acc;
             return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
         }, 0);
-
-        let unaccounted = residual - engineExpectedResidue;
 
         // Check if the discrepancy matches the price of ANY line in the order (Common Shopify Inflation Pattern)
         let matchedAnyLinePrice = forensicResults.some(r => {
