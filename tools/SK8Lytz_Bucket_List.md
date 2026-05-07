@@ -27,6 +27,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🚨 P0 Critical (Immediate Blocker)
+- [ ] `fix/orderz-math-parity-audit` : **Orderz Mathematical Parity Audit** - Investigate why Orders 1017 and 1019 are failing across pages and audit the "Type" math engine (Warranty, Gift, Exchanges) to ensure absolute sitewide parity using the single source of truth. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
+
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
