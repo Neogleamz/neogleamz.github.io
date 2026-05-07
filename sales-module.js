@@ -924,35 +924,35 @@ function renderSimulatorOrder(orderId) {
                 <div style="background:#1a1a1a; padding:10px 12px; border-radius:4px; border-left:4px solid #14b8a6; border-top:1px solid #333; border-right:1px solid #333; border-bottom:1px solid #333;">
                     <div style="display:grid; grid-template-columns: repeat(9, 1fr); gap: 0.5rem; align-items: start;">
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#00e5ff !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Lineitem price (R)">Lineitem price (R)</span>
+                            <span style="color:#00e5ff !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Lineitem price (S)">Lineitem price (S)</span>
                             <span style="color:#00e5ff !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawPrice}</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#f97316 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Discount Amt (U)">Discount Amt (U)</span>
+                            <span style="color:#f97316 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Discount Amt (N)">Discount Amt (N)</span>
                             <span id="sim-disc-raw-${i}" style="color:#f97316 !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawDisc}</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#14b8a6 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Subtotal (Q)">Subtotal (Q)</span>
+                            <span style="color:#14b8a6 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Subtotal (I)">Subtotal (I)</span>
                             <span id="sim-subtot-raw-${i}" style="color:#14b8a6 !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawSubtot}</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#3b82f6 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Shipping (W)">Shipping (W)</span>
+                            <span style="color:#3b82f6 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Shipping (J)">Shipping (J)</span>
                             <span id="sim-ship-raw-${i}" style="color:#3b82f6 !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawShip}</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#a855f7 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Taxes (Y)">Taxes (Y)</span>
+                            <span style="color:#a855f7 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Taxes (K)">Taxes (K)</span>
                             <span id="sim-tax-raw-${i}" style="color:#a855f7 !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawTax}</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#d946ef !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Total (Z)">Total (Z)</span>
+                            <span style="color:#d946ef !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Total (L)">Total (L)</span>
                             <span id="sim-total-raw-${i}" style="color:#d946ef !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawTotal}</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#8b5cf6 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Out Balance (AY)">Out Balance (AY)</span>
+                            <span style="color:#8b5cf6 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Out Balance (AZ)">Out Balance (AZ)</span>
                             <span id="sim-outbal-raw-${i}" style="color:#8b5cf6 !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawOutBal}</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-                            <span style="color:#eab308 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Refunded Amt (M)">Refunded Amt (M)</span>
+                            <span style="color:#eab308 !important; font-weight:bold; text-transform:uppercase; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Refunded Amt (AX)">Refunded Amt (AX)</span>
                             <span id="sim-refund-raw-${i}" style="color:#eab308 !important; font-family:monospace; font-size:13px; font-weight:bold;">$${rawRef}</span>
                         </div>
                         <div><!-- Empty block for col 9 alignment --></div>
