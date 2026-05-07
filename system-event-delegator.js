@@ -368,6 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_closeMathSimulator':
                     if (typeof closeMathSimulator === 'function') closeMathSimulator();
                     break;
+                case 'click_commitSimToLedger':
+                    if (typeof window.click_commitSimToLedger === 'function') window.click_commitSimToLedger();
+                    break;
                 case 'click_actualNetSort_o':
                     if (typeof actualNetSort === 'function') actualNetSort('o');
                     break;
