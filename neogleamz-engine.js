@@ -288,7 +288,6 @@ window.runForensicAccounting = function(rows) {
 
             if (type === 'Exchange Replacement' && sourceRow !== r) {
                 revenueDerivation = `Inherited from Donor: $${lineRevenue.toFixed(2)}`;
-            }
                 newSubtotal = Math.max(parseFloat(r.subtotal || 0), parseFloat(sourceRow.subtotal || 0));
                 newDiscount = Math.max(parseFloat(r.discount_amount || 0), parseFloat(sourceRow.discount_amount || 0));
                 newShipping = Math.max(parseFloat(r.shipping || 0), parseFloat(sourceRow.shipping || 0));
