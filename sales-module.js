@@ -1059,8 +1059,8 @@ window.click_commitSimToLedger = async function() {
             if (error) throw error;
             
             // Update Memory
-            if (window.salesDB) {
-                let mainRow = window.salesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
+            if (typeof salesDB !== 'undefined' && salesDB) {
+                let mainRow = salesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
                 if (mainRow) {
                     mainRow.transaction_type = payload.transaction_type;
                     mainRow.net_profit = payload.net_profit;
