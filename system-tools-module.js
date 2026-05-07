@@ -885,7 +885,29 @@ window._renderSandboxModal = function() {
                 'customer_email_hash': '[B] Email',
                 'customer_phone_hash': '[BS] Phone',
                 'shipping_name_hash': '[AI] Shipping Name',
-                'shipping_address_hash': '[AK] Shipping Address1'
+                'shipping_address_hash': '[AK] Shipping Address1',
+                'lineitem_fulfillment_status': '[X] Lineitem fulfillment status',
+                'tags': '[BE] Tags',
+                'currency': '[H] Currency',
+                'shipping_method': '[O] Shipping Method',
+                'shipping_city': '[AN] Shipping City',
+                'shipping_province': '[AP] Shipping Province',
+                'shipping_zip': '[AO] Shipping Zip',
+                'shipping_country': '[AQ] Shipping Country',
+                'payment_method': '[AV] Payment Method',
+                'financial_status': '[C] Financial Status',
+                'fulfillment_status': '[E] Fulfillment Status',
+                'paid_at': '[D] Paid at',
+                'fulfilled_at': '[F] Fulfilled at',
+                'accepts_marketing': '[G] Accepts Marketing',
+                'shipping_company': '[AM] Shipping Company',
+                'billing_name': '[Y] Billing Name',
+                'billing_city': '[AD] Billing City',
+                'billing_zip': '[AE] Billing Zip',
+                'billing_province': '[AF] Billing Province',
+                'billing_country': '[AG] Billing Country',
+                'vendor': '[AY] Vendor',
+                'source': '[BG] Source'
             };
 
             h += `<table style="width:100%; text-align:left; border-collapse:collapse; white-space:nowrap; margin-bottom: 20px;">`;
@@ -960,7 +982,7 @@ window._renderSandboxModal = function() {
                         let newVal = val.replace(/"/g, '&quot;');
                         prefix = ``;
                         val = `<div style="display:flex; flex-direction:column; gap:4px; padding-top:2px;">
-                                 <div style="font-size:9px; color:#f87171; text-decoration:line-through; font-weight:normal; opacity:0.8;">[DB: ${oldVal}]</div>
+                                 <div style="font-size:9px; color:#f87171; font-weight:bold;">[DB: ${oldVal}]</div>
                                  <div style="color:#fecaca;">[NEW: ${newVal}]</div>
                                </div>`;
                         diffTooltip = `[EXISTING DB]: ${oldVal} vs [IMPORTED CSV]: ${newVal}`;
