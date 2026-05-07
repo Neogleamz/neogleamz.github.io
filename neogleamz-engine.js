@@ -389,25 +389,34 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
     let fetchValues = Array.from(fetchValuesSet);
     
     let existingData = [];
-    if (window.supabaseClient) {
+    let dbErrorStr = "";
+    if (typeof supabaseClient !== 'undefined') {
         try {
             for (let i = 0; i < fetchValues.length; i += 100) {
                 let chunk = fetchValues.slice(i, i + 100);
-                let { data, error } = await window.supabaseClient.from(table).select('*').in(primaryKey, chunk);
+                let { data, error } = await supabaseClient.from(table).select('*').in(primaryKey, chunk);
+                if (error) dbErrorStr += error.message + " | ";
                 if (data) existingData = existingData.concat(data);
             }
         } catch(e) {
             console.error("Diff Engine DB Fetch Error:", e);
+            dbErrorStr += String(e) + " | ";
         }
     }
 
-    if (existingData.length === 0) return payload;
+    if (existingData.length === 0) {
+        window.__sandboxTitle = `[DB ZERO | PK:${primaryKey} | Val0:${fetchValues[0] || 'none'} | Err: ${dbErrorStr}] ` + window.__sandboxTitle;
+        return payload;
+    }
+
+    let foundCount = 0;
+    let diffCount = 0;
 
     payload.forEach(sim => {
         let existingRow = existingData.find(ex => {
             return conflictKeys.every(k => {
-                let vEx = String(ex[k]).trim();
-                let vSim = String(sim[k]).trim();
+                let vEx = String(ex[k]).trim().toLowerCase().replace(/\s+/g, ' ');
+                let vSim = String(sim[k]).trim().toLowerCase().replace(/\s+/g, ' ');
                 if (k === 'order_id' || k === 'parcel_no') {
                     vEx = vEx.replace(/^#/, '');
                     vSim = vSim.replace(/^#/, '');
@@ -417,6 +426,7 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
         });
         
         if (existingRow) {
+            foundCount++;
             let diffs = {};
             Object.keys(sim).forEach(k => {
                 if (k.startsWith('_')) return; // Ignore internal tracking keys
@@ -437,10 +447,14 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
                     }
                 }
             });
-            if (Object.keys(diffs).length > 0) sim._diffs = diffs;
+            if (Object.keys(diffs).length > 0) {
+                diffCount++;
+                sim._diffs = diffs;
+            }
         }
     });
-    
+
+    window.__sandboxTitle = `[DB:${existingData.length}|Match:${foundCount}|Diff:${diffCount}] ` + window.__sandboxTitle;
     return payload;
 };
 
