@@ -1,7 +1,10 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.30] - 2026-05-07
 ### Features & Refactors
+- **Orderz Mathematical Parity Audit**: Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
+- **Strict Mathematical Unification Mandate**: Eradicated local math engines in `sales-module.js` and `analytics-module.js`.
+- **Sandbox UI Transformation Audit**: Refactored the Sandbox UI into a strict 4-Tier matrix mapping literal DB schema columns to their CSV origin headers. Eliminated "ghost value" data stripping bugs to accurately map raw shipping metrics, successfully restoring exact conditional pass logic for complex exchanges.
 - **Sandbox UI Typography & Layout Refactor**: Applied a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, shrank the vertical height of the main header, and applied inline flex formatting with explicit dataset headers.
 - **Shopify Webhook Missing Data Integration**: Audited the Edge Function deployment versus local code, deployed the fix to the active Shopify App/Webhook pipeline to capture missing PII hashes and `fulfillment_status`, and established a full backfill mechanism for missing historical data.
 

@@ -27,9 +27,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🚨 P0 Critical (Immediate Blocker)
-- [x] `fix/orderz-math-parity-audit` : **Orderz Mathematical Parity Audit** - Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
-- [x] `chore/unify-math-engine` : **Strict Mathematical Unification Mandate** - Eradicated local math engines in `sales-module.js` and `analytics-module.js`.
-- [x] `feat/sandbox-nomenclature-audit` : **Sandbox UI Transformation Audit** - Refactor the Sandbox UI into a strict 4-Tier matrix (`[RAW DATABASE SNAPSHOT]`, `[RAW CSV: SHOPIFY ORDERS]`, `[RAW CSV: SHOPIFY BILLING]`, `[CALCULATED FORENSIC RESULTS]`) exactly mapping literal DB schema columns to their CSV origin headers.
+- [🚀] `fix/orderz-math-parity-audit` : **Orderz Mathematical Parity Audit** - Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
+- [🚀] `chore/unify-math-engine` : **Strict Mathematical Unification Mandate** - Eradicated local math engines in `sales-module.js` and `analytics-module.js`.
+- [🚀] `feat/sandbox-nomenclature-audit` : **Sandbox UI Transformation Audit** - Refactor the Sandbox UI into a strict 4-Tier matrix (`[RAW DATABASE SNAPSHOT]`, `[RAW CSV: SHOPIFY ORDERS]`, `[RAW CSV: SHOPIFY BILLING]`, `[CALCULATED FORENSIC RESULTS]`) exactly mapping literal DB schema columns to their CSV origin headers.
 ## 🟡 P2 Medium Priority (Enhancements)
 
 
