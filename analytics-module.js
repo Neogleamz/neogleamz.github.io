@@ -265,61 +265,65 @@ async function backfillFinancials(context = 'sales') {
     let terminalId = context === 'billing' ? 'billingProgressTerminal' : 'syncProgressTerminal';
     let tracer = context === 'billing' ? billingTrace : syncTrace;
 
-    let t = document.getElementById(terminalId); if(t) t.innerHTML = window.safeHTML ? window.safeHTML("") : "";
-    if (typeof tracer === 'function') tracer("INITIALIZING RAPID FINANCIAL BACKFILL...", false);
-    setMasterStatus("Backfilling Financials...", "mod-working");
-    setSysProgress(10, 'working');
-    sysLog("Starting financial backfill for all existing sales...");
-    if (typeof tracer === 'function') tracer(`Engaging Master Engine ruleset for ${salesDB.length} historical ledger rows...`);
+    let t = document.getElementById(terminalId); if(t) t.innerHTML = "";
+    if (typeof tracer === 'function') tracer("INITIALIZING RAPID FORENSIC BACKFILL...", false);
     
     try {
+        setMasterStatus("Grouping Ledger...", "mod-working");
+        setSysProgress(10, 'working');
+        sysLog("Starting forensic financial backfill for all existing sales...");
 
-        let count = 0;
-        
-        // Loop through local cache and push updates row-by-row
-        // Note: For very large datasets, a batch approach is better, but this is safest for now.
-        for(let s of salesDB) {
-            let qty = parseFloat(s.qty_sold) || 0;
-            let p = parseFloat(s.actual_sale_price || 0);
-            let d = parseFloat(s.discount_amount || 0);
+        // 1. Group by Order ID for Forensic Reconciliation
+        let backfillGroups = {};
+        salesDB.forEach(s => {
+            if(!backfillGroups[s.order_id]) backfillGroups[s.order_id] = [];
+            backfillGroups[s.order_id].push(s);
+        });
+
+        let orderIds = Object.keys(backfillGroups);
+        let totalOrders = orderIds.length;
+        let processedOrders = 0;
+        let totalRowsUpdated = 0;
+
+        if (typeof tracer === 'function') tracer(`Engaging Forensic Engine for ${totalOrders} order clusters (${salesDB.length} lines)...`);
+
+        for(let oid of orderIds) {
+            let forensicResults = window.runForensicAccounting(backfillGroups[oid]);
             
-            let trueLineCaptured = (p * qty) + parseFloat(s.shipping || 0) + parseFloat(s.taxes || 0) - d;
-            
-            let lineGross = p * qty;
-            let stripeFee = getEngineStripeFee(trueLineCaptured, s["Source"]);
-            let actualShipCost = parseFloat(s.actual_shipping_cost || 0);
-            let lineNet = getHistoricalNetProfit(lineGross, parseFloat(s.shipping || 0), parseFloat(s.taxes || 0), d, actualShipCost, s.internal_recipe_name, qty, s["Source"]);
-            
-            let roundedFee = Math.round(stripeFee * 100) / 100;
-            let roundedNet = Math.round(lineNet * 100) / 100;
-            
-            const { error } = await supabaseClient.from('sales_ledger')
-                .update({ transaction_fees: roundedFee, net_profit: roundedNet })
-                .eq('order_id', s.order_id)
-                .eq('internal_recipe_name', s.internal_recipe_name);
-            
-            if(error) {
-                // 🧹 Boy Scout: promoted console.error to sysLog for consistent error telemetry
-                sysLog(`Backfill row error [${s.order_id}]: ${error.message}`, true);
-            } else {
-                count++;
+            for(let sim of forensicResults) {
+                let roundedFee = Math.round(sim.fee * 100) / 100;
+                let roundedNet = Math.round(sim.net * 100) / 100;
+                let roundedCogs = Math.round(sim.cogs * 100) / 100;
+                
+                const { error } = await supabaseClient.from('sales_ledger')
+                    .update({ 
+                        transaction_fees: roundedFee, 
+                        net_profit: roundedNet,
+                        cogs_at_sale: roundedCogs 
+                    })
+                    .eq('order_id', oid)
+                    .eq('storefront_sku', sim.storefront_sku);
+                
+                if(error) {
+                    sysLog(`Backfill row error [${oid} | ${sim.storefront_sku}]: ${error.message}`, true);
+                } else {
+                    totalRowsUpdated++;
+                }
             }
+
+            processedOrders++;
             
-            // Trace every record to give granular feedback
-            if (typeof tracer === 'function') {
-                let cogs = getEngineTrueCogs(s.internal_recipe_name) * qty;
-                tracer(`Analyzed #${s.order_id} (${s.Source || 'Unknown'}): Base $${trueLineCaptured.toFixed(2)} | COGS: $${cogs.toFixed(2)} | Ship: $${actualShipCost.toFixed(2)} | Tax: $${parseFloat(s.taxes || 0).toFixed(2)} | Fee: $${roundedFee.toFixed(2)} | Net: $${roundedNet.toFixed(2)}`);
-            }
-            
-            // UI Status Update feedback
-            if(count % 5 === 0 || count === salesDB.length) {
-                setSysProgress(10 + (count / salesDB.length) * 85);
-                setMasterStatus(`Backfilling: ${count}/${salesDB.length}`, "mod-working");
+            // UI Status Update
+            if(processedOrders % 5 === 0 || processedOrders === totalOrders) {
+                let prog = 10 + (processedOrders / totalOrders) * 85;
+                setSysProgress(prog);
+                setMasterStatus(`Backfilling: ${processedOrders}/${totalOrders} orders`, "mod-working");
+                if (typeof tracer === 'function') tracer(`Processed ${oid} (${backfillGroups[oid].length} lines)`);
             }
         }
-        
-        sysLog(`Successfully backfilled ${count} sales records with updated financials.`);
-        if (typeof tracer === 'function') tracer(`PROCESS COMPLETE. ${count} transactions finalized under current Engine Parameters.`, false);
+
+        sysLog(`Successfully backfilled ${totalRowsUpdated} records across ${processedOrders} orders.`);
+        if (typeof tracer === 'function') tracer(`PROCESS COMPLETE. ${totalRowsUpdated} records finalized under Forensic Parity.`, false);
         setMasterStatus("Backfill Complete!", "mod-success");
         setSysProgress(100, 'success');
         
@@ -333,3 +337,5 @@ async function backfillFinancials(context = 'sales') {
         setMasterStatus("Backfill Failed", "mod-error");
     }
 }
+
+

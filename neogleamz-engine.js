@@ -176,8 +176,184 @@ window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, 
     return { net: net, stripe: fee, aff: aff, cac: cac, warr: warr, margin: margin, ship: sCol, oop: msrp + sCol, merchantShipMargin: sCol - aShip };
 };
 
+
+/**
+ * Unified Singleton for all revenue shifting, cost suppression, and line-item slicing.
+ * This is the Authoritative Forensic Engine for Neogleamz.
+ * @param {Array} rows - Group of rows sharing the same Order ID.
+ * @returns {Array} Processed rows with forensic net profit and inherited attributes.
+ */
+window.runForensicAccounting = function(rows) {
+    if (!rows || rows.length === 0) return [];
+    
+    // 1. RAW DATA HARVESTING (Start with CSV 'Total Captured')
+    let totalOrderCaptured = 0;
+    let exactPayoutTotal = 0;
+    let exactShipTotal = 0;
+    let orderRefundTotal = 0;
+    let totalOrderOutstanding = 0;
+    
+    rows.forEach(r => {
+        let t = parseFloat(r.total || 0);
+        if (t > totalOrderCaptured) totalOrderCaptured = t;
+        
+        if (parseFloat(r.dbActualPayout) > 0) exactPayoutTotal += parseFloat(r.dbActualPayout);
+        if (parseFloat(r.dbActualShipCost) > 0) exactShipTotal += parseFloat(r.dbActualShipCost);
+        
+        let refAmt = parseFloat(r.refunded_amount) || 0;
+        if (refAmt > orderRefundTotal) orderRefundTotal = refAmt;
+        
+        let outBal = parseFloat(r['Outstanding Balance']) || 0;
+        if (outBal > totalOrderOutstanding) totalOrderOutstanding = outBal;
+    });
+
+    // 2. Identify the "Inflation" (Replacement lines that artificially swell the CSV 'Total')
+    let totalLineNetPrice = 0;
+    rows.forEach(r => {
+        totalLineNetPrice += (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+    });
+
+    // Find the first line item that will actually ship (used to attribute order-level flat fees)
+    let firstShippableIndex = rows.findIndex(r => {
+        let t = r.transaction_type || 'Standard';
+        let st = (r.fulfillment_status || '').toLowerCase();
+        let lst = (r.lineitem_fulfillment_status || '').toLowerCase();
+        return ((st === 'fulfilled' || lst === 'fulfilled') && (t !== 'Pre-Ship Exchange') && (t !== 'IGNORE') && (t !== 'Cancelled'));
+    });
+    if (firstShippableIndex === -1) firstShippableIndex = 0;
+
+    // 3. Process Lines with Column Inheritance
+    let processed = rows.map((r, i) => {
+        let type = r.transaction_type || 'Standard';
+        let status = (r.fulfillment_status || '').toLowerCase();
+        let lStatus = (r.lineitem_fulfillment_status || '').toLowerCase();
+        
+        // --- INHERITANCE LOGIC ---
+        // If I am a Replacement, I take the numbers from ANY Exchange row (Pre or Post).
+        let sourceRow = r;
+        if (type === 'Exchange Replacement') {
+            const donor = rows.find(d => d.transaction_type === 'Pre-Ship Exchange' || d.transaction_type === 'Post-Ship Exchange');
+            if (donor) {
+                sourceRow = donor; 
+            }
+        }
+        
+        // Physical Cost Suppression
+        let cogs = (window.getEngineTrueCogs(r.internal_recipe_name) || 0) * (parseFloat(r.qty_sold) || 1);
+        let actShipCost = parseFloat(sourceRow.actual_shipping_cost || sourceRow.actualShipCost || 0);
+        
+        // Only suppress COGS if this specific item was abandoned/refunded while the rest of the order shipped.
+        let isAbandonedPartial = (status !== 'pending' && status !== 'unfulfilled') && (lStatus === 'pending' || lStatus === 'unfulfilled');
+        if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || isAbandonedPartial) { 
+            cogs = 0; actShipCost = 0; 
+        }
+        if (type === 'Post-Ship Exchange') {
+            cogs = 0; // Item returned to stock
+        }
+
+        // RAW ATTRIBUTION
+        let lineRevenue;
+        let work;
+        let revenueDerivation;
+        
+        let newSubtotal = r.subtotal;
+        let newDiscount = r.discount_amount;
+        let newShipping = r.shipping;
+        let newTaxes = r.taxes;
+        let newTotal = r.total;
+        let newSalePrice = r.actual_sale_price;
+        let newOutBal = r['Outstanding Balance'];
+        
+        const isExchangeDonor = type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange';
+        
+        if (isExchangeDonor || type === 'Cancelled' || type === 'IGNORE') {
+            lineRevenue = 0;
+            work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})` : `[Voided] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})`;
+            revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${parseFloat(sourceRow.total).toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
+            newSubtotal = 0; newDiscount = 0; newShipping = 0; newTaxes = 0; newTotal = 0; newSalePrice = 0; newOutBal = 0;
+        } else {
+            // AUTHORITATIVE REVENUE AGGREGATION
+            // If I am a replacement, I look at the donor first, but fall back to my own data if the donor is hollow
+            let ob = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
+            let tot = Math.max(parseFloat(r.total || 0), parseFloat(sourceRow.total || 0));
+            
+            lineRevenue = ob > 0 ? ob : tot;
+            work = ob > 0 ? `[Resolved Out. Bal: $${ob.toFixed(2)}]` : `[Resolved Total: $${tot.toFixed(2)}]`;
+            
+            if (ob > 0) {
+                revenueDerivation = `Outstanding Balance: $${ob.toFixed(2)}`;
+            } else {
+                revenueDerivation = `total: $${tot.toFixed(2)}`;
+            }
+
+            if (type === 'Exchange Replacement' && sourceRow !== r) {
+                revenueDerivation = `Inherited from Donor: $${lineRevenue.toFixed(2)}`;
+                newSubtotal = Math.max(parseFloat(r.subtotal || 0), parseFloat(sourceRow.subtotal || 0));
+                newDiscount = Math.max(parseFloat(r.discount_amount || 0), parseFloat(sourceRow.discount_amount || 0));
+                newShipping = Math.max(parseFloat(r.shipping || 0), parseFloat(sourceRow.shipping || 0));
+                newTaxes = Math.max(parseFloat(r.taxes || 0), parseFloat(sourceRow.taxes || 0));
+                newTotal = Math.max(parseFloat(r.total || 0), parseFloat(sourceRow.total || 0));
+                newSalePrice = Math.max(parseFloat(r.actual_sale_price || 0), parseFloat(sourceRow.actual_sale_price || 0));
+                newOutBal = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
+            }
+        }
+
+
+        let src = r['Source'] || 'web';
+        let fee = (type === 'IGNORE' || type === 'Cancelled') ? 0 : window.getEngineStripeFee(lineRevenue, src);
+
+        if (exactShipTotal > 0) {
+            actShipCost = (i === firstShippableIndex) ? exactShipTotal : 0;
+        } else {
+            actShipCost = (i === firstShippableIndex) ? actShipCost : 0;
+        }
+
+        if (exactPayoutTotal > 0) {
+            let orderStripeFee = Math.max(0, totalOrderCaptured - exactPayoutTotal);
+            fee = (i === firstShippableIndex) ? orderStripeFee : 0;
+        }
+
+        let net = lineRevenue - fee - actShipCost - cogs;
+        if (type === 'IGNORE' || type === 'Cancelled') net = 0;
+
+        return { 
+            ...r, 
+            forensic_subtotal: newSubtotal,
+            forensic_discount_amount: newDiscount,
+            forensic_shipping: newShipping,
+            forensic_taxes: newTaxes,
+            forensic_total: newTotal,
+            forensic_sale_price: newSalePrice,
+            forensic_out_bal: newOutBal,
+            uiIdx: i, 
+            cogs, fee, net, actShipCost,
+            trueLineCaptured: lineRevenue,
+            revenueDerivation: revenueDerivation,
+            work: work,
+            rawOrderTotal: totalOrderCaptured,
+            rawItemRevenue: totalLineNetPrice,
+            liveCogs: cogs, stripeFee: fee, actualShipCost: actShipCost 
+        };
+    });
+
+    // 4. Apply Refund Deductions (Last Layer)
+    if (orderRefundTotal > 0) {
+        let refundApplied = false;
+        processed.forEach(r => {
+            if (!refundApplied && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE') {
+                r.net -= orderRefundTotal;
+                r.applied_order_refund = orderRefundTotal;
+                refundApplied = true;
+            }
+        });
+    }
+
+    return processed;
+};
+
 // ==========================================
 // UNIVERSAL HELPERS
+
 // ==========================================
 window.getPrintTime = function(partName) {
     let cat = typeof catalogByName !== 'undefined' ? catalogByName[partName] : null;

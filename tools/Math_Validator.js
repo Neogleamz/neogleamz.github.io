@@ -33,51 +33,9 @@ console.log("====================================================\n");
 function executeSimulation(testName, payloadRows) {
     console.log(`[TESTING] ${testName}`);
     
-    // Simulate executeSalesSync `.map()` loop perfectly
-    let salesPayload = payloadRows.map(r => {
-        let type = r.transaction_type || 'Standard';
-        let cogs = window.getEngineTrueCogs(r.internal_recipe_name);
-        
-        let isCostOnlyItem = (type === 'Exchange Replacement' || type === 'Warranty' || type === 'Gift' || type === 'IGNORE');
-        if (type === 'Pre-Ship Exchange' || type === 'IGNORE') { cogs = 0; }
-        
-        let trueLineCaptured = isCostOnlyItem ? 0 : (r.actual_sale_price * r.qty_sold) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0) - parseFloat(r.discount_amount || 0);
-        let outBal = parseFloat(r['Outstanding Balance']) || 0;
-        let stripeCaptureTarget = trueLineCaptured - outBal;
-        
-        let fee = isCostOnlyItem ? 0 : window.getEngineStripeFee(stripeCaptureTarget, r["Source"] || "web");
-        
-        const SHIP_COST = 8.00;
-        let actualShipCost = (type === 'Pre-Ship Exchange' || type === 'IGNORE') ? 0 : (parseFloat(r.shipping || 0) > 0 ? parseFloat(r.shipping) : (SHIP_COST * r.qty_sold));
-        
-        let gross = isCostOnlyItem ? 0 : r.actual_sale_price * r.qty_sold;
-        let shipRev = isCostOnlyItem ? 0 : parseFloat(r.shipping || 0);
-        let taxRev = isCostOnlyItem ? 0 : parseFloat(r.taxes || 0);
-        let disc = isCostOnlyItem ? 0 : parseFloat(r.discount_amount || 0);
-        
-        let rawNet = window.getHistoricalNetProfit(gross, shipRev, taxRev, disc, actualShipCost, r.internal_recipe_name, r.qty_sold, r["Source"] || "web");
-        
-        let net = rawNet;
-        if (type === 'IGNORE') net = 0;
-        if (type === 'Pre-Ship Exchange') net += window.getEngineTrueCogs(r.internal_recipe_name);
-        if (isCostOnlyItem) net = 0 - actualShipCost - cogs;
-        
-        return { ...r, cogs, fee, net };
-    });
+    // EXECUTE AUTHORITATIVE ENGINE
+    let salesPayload = window.runForensicAccounting(payloadRows);
 
-    // REVENUE TRANSFER BATCH
-    let primes = salesPayload.filter(x => x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
-    let replacements = salesPayload.filter(x => x.transaction_type === 'Exchange Replacement');
-    if (primes.length > 0 && replacements.length > 0) {
-        let u = primes[0]; let r = replacements[0];
-        if (u.transaction_type === 'Post-Ship Exchange') {
-            r.net += r.cogs; // Refund the duplicate
-        }
-        r.net += u.net;
-        r.net = Math.round(r.net * 100) / 100;
-        u.net = 0;
-    }
-    
     // OUTPUT
     salesPayload.forEach(row => {
         console.log(` -> Row: ${row.internal_recipe_name} (${row.transaction_type})`);
@@ -88,28 +46,30 @@ function executeSimulation(testName, payloadRows) {
 }
 
 
+
 // ----------------------------------------------------
 // TEST MATRIX
 // ----------------------------------------------------
 
 executeSimulation("Test 1: Standard Domestic Order (Free Ship)", [
-    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, internal_recipe_name: 'Black', transaction_type: 'Standard' }
+    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, total: 129.99, internal_recipe_name: 'Black', transaction_type: 'Standard' }
 ]);
 
 executeSimulation("Test 2: Order 1028 (High Volume Multi-Item 3x SOULZ)", [
-    { qty_sold: 3, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 38.99, "Outstanding Balance": 0, internal_recipe_name: 'Black', transaction_type: 'Standard' }
+    { qty_sold: 3, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 38.99, "Outstanding Balance": 0, total: 351.00, internal_recipe_name: 'Black', transaction_type: 'Standard' }
 ]);
 
 executeSimulation("Test 3: Pre-Ship Exchange (Order 1019)", [
-    { qty_sold: 1, actual_sale_price: 129.99, shipping: 7.30, taxes: 0, discount_amount: 12.99, "Outstanding Balance": 117.00, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Pre-Ship Exchange' },
-    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement' }
+    { qty_sold: 1, actual_sale_price: 129.99, shipping: 7.30, taxes: 0, discount_amount: 12.99, "Outstanding Balance": 117.00, total: 124.30, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Pre-Ship Exchange' },
+    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, total: 129.99, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement' }
 ]);
 
 executeSimulation("Test 4: Post-Ship Exchange (Order 1017) (Restock physical return)", [
-    { qty_sold: 1, actual_sale_price: 139.99, shipping: 10.09, taxes: 0, discount_amount: 17.98, "Outstanding Balance": 126.00, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Post-Ship Exchange' },
-    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement' }
+    { qty_sold: 1, actual_sale_price: 139.99, shipping: 10.09, taxes: 0, discount_amount: 17.98, "Outstanding Balance": 126.00, total: 132.10, internal_recipe_name: 'White Dual-Stripe', transaction_type: 'Post-Ship Exchange' },
+    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, total: 129.99, internal_recipe_name: 'Black', transaction_type: 'Exchange Replacement' }
 ]);
 
 executeSimulation("Test 5: Standard Warranty Request (Free Zero Revenue Shipment)", [
-    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, internal_recipe_name: 'Black', transaction_type: 'Warranty' }
+    { qty_sold: 1, actual_sale_price: 129.99, shipping: 0, taxes: 0, discount_amount: 0, "Outstanding Balance": 0, total: 0.00, internal_recipe_name: 'Black', transaction_type: 'Warranty' }
 ]);
+
