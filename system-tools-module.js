@@ -697,7 +697,7 @@ window.__sandboxTitle2 = "";
 window.__sandboxTable1Title = "Table 1 (Primary)";
 window.__sandboxTable2Title = "Table 2 (Secondary)";
 
-window.openSandboxModal = function(payload, title, payload2=null, table1Title="Table 1 (Primary)", table2Title="Table 2 (Secondary)", liveImportMeta=null) {
+window.openSandboxModal = async function(payload, title, payload2=null, table1Title="Table 1 (Primary)", table2Title="Table 2 (Secondary)", liveImportMeta=null) {
     let isMultiSheet = typeof payload === 'object' && !Array.isArray(payload) && payload !== null;
     
     if (isMultiSheet) {
@@ -723,7 +723,7 @@ window.openSandboxModal = function(payload, title, payload2=null, table1Title="T
 
     if(actionFooter) actionFooter.style.display = "flex";
 
-    if (liveImportMeta) {
+    if (liveImportMeta && !liveImportMeta.isTestMode) {
         window.__sandboxTitle += " [⚠️ LIVE STAGING]";
         titleEl.style.color = "#ef4444"; 
         if(hdrBg) hdrBg.style.background = "rgba(239, 68, 68, 0.1)"; 
@@ -732,12 +732,32 @@ window.openSandboxModal = function(payload, title, payload2=null, table1Title="T
         if(btnSync) btnSync.style.display = "block";
         if(btnClose) btnClose.style.display = "none";
     } else {
+        if(liveImportMeta && liveImportMeta.isTestMode) window.__sandboxTitle += " [🛡️ SANDBOX STAGING]";
         titleEl.style.color = "#f59e0b"; 
         if(hdrBg) hdrBg.style.background = "rgba(245, 158, 11, 0.1)"; 
         if(modalWrapper) modalWrapper.style.border = "1px dashed #f59e0b";
         if(btnDiscard) btnDiscard.style.display = "none";
         if(btnSync) btnSync.style.display = "none";
         if(btnClose) btnClose.style.display = "block";
+    }
+
+    if (liveImportMeta && liveImportMeta.resObj) {
+        if(btnSync) {
+            btnSync.innerHTML = "⏳ CALCULATING DIFFS...";
+            btnSync.disabled = true;
+        }
+        if (typeof window.applyDifferentialHighlighting === 'function') {
+            if (window.__sandboxData) {
+                window.__sandboxData = await window.applyDifferentialHighlighting(window.__sandboxData, liveImportMeta.resObj.table, liveImportMeta.resObj.conflict);
+            }
+            if (window.__sandboxData2 && liveImportMeta.resObj.table2) {
+                window.__sandboxData2 = await window.applyDifferentialHighlighting(window.__sandboxData2, liveImportMeta.resObj.table2, liveImportMeta.resObj.conflict2);
+            }
+        }
+        if(btnSync) {
+            btnSync.innerHTML = "✅ UPLOAD & SYNC";
+            btnSync.disabled = false;
+        }
     }
 
     window.__sandboxTable1Title = table1Title;
@@ -872,7 +892,16 @@ window._renderSandboxModal = function() {
                     let prefix = "";
                     let cLow = c.toLowerCase();
                     
-                    if (cLow === 'transaction_type' || cLow === 'unit_weight_g' || cLow === 'unit_china_landed_price' || cLow === 'net_profit' || cLow === 'transaction_fees' || cLow === 'cogs_at_sale') {
+                    let isDiff = row._diffs && row._diffs.hasOwnProperty(c);
+                    let diffStyles = "";
+                    let diffTooltip = val.replace(/"/g, '&quot;');
+                    
+                    if (isDiff) {
+                        cellColor = "color:#ef4444; font-weight:800; background:rgba(239,68,68,0.1);";
+                        diffStyles = "border: 1px dashed #ef4444; cursor: help;";
+                        prefix = `<span style="font-size:10px; margin-right:4px;" title="EXISTING DB: ${String(row._diffs[c]).replace(/"/g, '&quot;')}">⚠️</span>`;
+                        diffTooltip = `[EXISTING DB]: ${String(row._diffs[c]).replace(/"/g, '&quot;')} vs [IMPORTED CSV]: ${val.replace(/"/g, '&quot;')}`;
+                    } else if (cLow === 'transaction_type' || cLow === 'unit_weight_g' || cLow === 'unit_china_landed_price' || cLow === 'net_profit' || cLow === 'transaction_fees' || cLow === 'cogs_at_sale') {
                         cellColor = "color:#e9d5ff; font-weight:800; background:rgba(168,85,247,0.05);";
                         prefix = `<span style="font-size:10px; margin-right:4px;">🧮</span>`;
                     } else if (cLow === 'total_dist_weight_g' && row._is_distributed) {
@@ -886,7 +915,7 @@ window._renderSandboxModal = function() {
                         prefix = `<span style="font-size:10px; margin-right:4px;">🔐</span>`;
                     }
                     
-                    h += `<td style="padding:8px 15px; border-bottom:1px solid rgba(255,255,255,0.05); font-family:monospace; max-width:250px; overflow:hidden; text-overflow:ellipsis; ${cellColor}" title="${val.replace(/"/g, '&quot;')}">${prefix}${val}</td>`
+                    h += `<td style="padding:8px 15px; border-bottom:1px solid rgba(255,255,255,0.05); font-family:monospace; max-width:250px; overflow:hidden; text-overflow:ellipsis; ${cellColor} ${diffStyles}" title="${diffTooltip}">${prefix}${val}</td>`
                 });
                 h += `</tr>`;
             });
@@ -998,11 +1027,13 @@ async function runFileImport(inputNode, type, isTestMode = false) {
                 importTrace(`🧪 SANDBOX INTERCEPT: Array diverted directly to visual inspector.`, true, termId);
                 setSysProgress(100, 'success'); setModuleStatus(statId, "🧪 Test Parsed!", "mod-success"); 
                 
+                let testImportContext = { resObj: resObj, isTestMode: true };
+                
                 if (typeof window.openSandboxModal === 'function') {
                     if (resObj.data2) {
-                        window.openSandboxModal(resObj.data, `SANDBOX_${type.toUpperCase()}_RESULTS`, resObj.data2, `${resObj.table} (Primary)`, `${resObj.table2} (Secondary)`);
+                        window.openSandboxModal(resObj.data, `SANDBOX_${type.toUpperCase()}_RESULTS`, resObj.data2, `${resObj.table} (Primary)`, `${resObj.table2} (Secondary)`, testImportContext);
                     } else {
-                        window.openSandboxModal(resObj.data, `SANDBOX_${type.toUpperCase()}_RESULTS`, null, `${resObj.table} (Primary)`);
+                        window.openSandboxModal(resObj.data, `SANDBOX_${type.toUpperCase()}_RESULTS`, null, `${resObj.table} (Primary)`, null, testImportContext);
                     }
                 }
                 
@@ -2137,9 +2168,12 @@ window.change_handleShopifyBillingUpload = async function(e) {
                 billingTrace(`🧪 SANDBOX INTERCEPT: Supabase connection physically bypassed.`, true);
                 billingTrace(`Payload matrix cleanly routed directly to Global Data Modal.`, false);
                 setSysProgress(100, 'success');
-                
+                let testImportContext = {
+                    resObj: { table: 'sales_ledger', conflict: 'order_id, storefront_sku', count: updatesToApply.length, data: updatesToApply },
+                    isTestMode: true
+                };
                 if (typeof window.openSandboxModal === 'function') {
-                    window.openSandboxModal(updatesToApply, "SANDBOX_BILLING_IMPORTS");
+                    window.openSandboxModal(updatesToApply, "SANDBOX_BILLING_IMPORTS", null, "sales_ledger (Primary)", null, testImportContext);
                 }
                 
                 e.target.value = '';

@@ -352,6 +352,81 @@ window.runForensicAccounting = function(rows) {
 };
 
 // ==========================================
+// UNIVERSAL DIFFERENTIAL ENGINE (STRICT FORENSICS)
+// ==========================================
+/**
+ * Asynchronous Universal Differential Engine
+ * Cross-references a payload against live Supabase data to find mathematical or string discrepancies.
+ * Used exclusively by the Sandbox Modal.
+ * @param {Array} payload - The matrix of imported data to check.
+ * @param {string} table - The target database table.
+ * @param {string} conflictStr - Optional conflict keys.
+ * @returns {Promise<Array>} The payload with injected _diffs tracking.
+ */
+window.applyDifferentialHighlighting = async function(payload, table, conflictStr) {
+    if (!payload || payload.length === 0 || !table) return payload;
+    
+    let conflictKeys = conflictStr ? conflictStr.split(',').map(s=>s.trim()) : [];
+    if (table === 'sales_ledger' && conflictKeys.length === 0) conflictKeys = ['order_id', 'storefront_sku'];
+    if (table === 'raw_orders' && conflictKeys.length === 0) conflictKeys = ['di_item_id'];
+    if (table === 'raw_parcel_summary' && conflictKeys.length === 0) conflictKeys = ['parcel_no'];
+    if (table === 'raw_parcel_items' && conflictKeys.length === 0) conflictKeys = ['parcel_no', 'di_item_id'];
+    
+    if (conflictKeys.length === 0 || !conflictKeys[0]) return payload;
+
+    let primaryKey = conflictKeys[0];
+    let values = [...new Set(payload.map(r => r[primaryKey]))].filter(v => v !== undefined && v !== null && v !== '');
+    if (values.length === 0) return payload;
+    
+    let existingData = [];
+    if (window.supabaseClient) {
+        try {
+            for (let i = 0; i < values.length; i += 100) {
+                let chunk = values.slice(i, i + 100);
+                let { data, error } = await window.supabaseClient.from(table).select('*').in(primaryKey, chunk);
+                if (data) existingData = existingData.concat(data);
+            }
+        } catch(e) {
+            console.error("Diff Engine DB Fetch Error:", e);
+        }
+    }
+
+    if (existingData.length === 0) return payload;
+
+    payload.forEach(sim => {
+        let existingRow = existingData.find(ex => {
+            return conflictKeys.every(k => String(ex[k]) === String(sim[k]));
+        });
+        
+        if (existingRow) {
+            let diffs = {};
+            Object.keys(sim).forEach(k => {
+                if (k.startsWith('_')) return; // Ignore internal tracking keys
+                let v1 = sim[k]; 
+                let v2 = existingRow[k];
+                if (v1 === undefined || v2 === undefined || v1 === null || v2 === null) return;
+                
+                // Pure Math Unification
+                if (typeof v1 === 'number' && typeof v2 === 'number') {
+                    if (Math.abs(v1 - v2) > 0.001) diffs[k] = v2;
+                } else if (String(v1) !== String(v2)) {
+                    let f1 = parseFloat(v1); let f2 = parseFloat(v2);
+                    if (!isNaN(f1) && !isNaN(f2) && String(v1).trim() !== "" && String(v2).trim() !== "") {
+                        if (Math.abs(f1 - f2) > 0.001) diffs[k] = v2;
+                    } else {
+                        // String mismatch
+                        diffs[k] = v2;
+                    }
+                }
+            });
+            if (Object.keys(diffs).length > 0) sim._diffs = diffs;
+        }
+    });
+    
+    return payload;
+};
+
+// ==========================================
 // UNIVERSAL HELPERS
 
 // ==========================================

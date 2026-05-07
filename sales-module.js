@@ -424,7 +424,11 @@ async function executeSalesSync(isTestMode = false) {
             setSysProgress(100, 'success'); setMasterStatus("🧪 Test Parsed!", "mod-success");
 
             if (typeof window.openSandboxModal === 'function') {
-                window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS");
+                let testImportContext = {
+                    resObj: { table: 'sales_ledger', conflict: 'order_id, storefront_sku', count: salesPayload.length, data: salesPayload },
+                    isTestMode: true
+                };
+                window.openSandboxModal(salesPayload, "SANDBOX_SALEZ_RESULTS", null, "sales_ledger (Primary)", null, testImportContext);
             }
 
             let elFile = document.getElementById('salesCsvFileTest');
