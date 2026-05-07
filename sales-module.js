@@ -808,6 +808,8 @@ function closeActualNetModal() {
 function closeMathSimulator() {
     let m = document.getElementById('math-simulator-modal');
     if(m) m.style.display = 'none';
+    if(typeof renderSalesTable === 'function') renderSalesTable();
+    if(typeof filterSales === 'function') filterSales();
 }
 
 function initMathSimulator() {
@@ -1083,10 +1085,6 @@ window.click_commitSimToLedger = async function() {
         if(typeof setMasterStatus === 'function') setMasterStatus("Saved!", "mod-success");
         
         setTimeout(() => {
-            if(typeof renderSalesTable === 'function') renderSalesTable();
-            if(typeof filterSales === 'function') filterSales();
-            let m = document.getElementById('math-simulator-modal');
-            if(m) m.style.display = 'none';
             if(typeof setMasterStatus === 'function') setMasterStatus("Ready.", "status-idle");
         }, 1000);
     } catch (err) {
