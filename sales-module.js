@@ -909,14 +909,14 @@ function renderSimulatorOrder(orderId) {
                     </div>
                     <div style="display:grid; grid-template-columns: repeat(9, 1fr); gap: 0.25rem;">
                         <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#00e5ff; font-weight:bold; font-size:11px; text-transform:uppercase;">actual_sale_price:</span> <span style="color:#00e5ff; font-weight:bold; font-size:12px; font-family:monospace;">$${rawPrice}</span></div>
-                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#007aff; font-weight:bold; font-size:11px; text-transform:uppercase;">shipping:</span> <span style="color:#007aff; font-weight:bold; font-size:12px; font-family:monospace;">$${rawShip}</span></div>
-                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#f0e68c; font-weight:bold; font-size:11px; text-transform:uppercase;">taxes:</span> <span style="color:#f0e68c; font-weight:bold; font-size:12px; font-family:monospace;">$${rawTax}</span></div>
-                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#ff7f50; font-weight:bold; font-size:11px; text-transform:uppercase;">discount_amount:</span> <span style="color:#ff7f50; font-weight:bold; font-size:12px; font-family:monospace;">$${rawDisc}</span></div>
+                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#3b82f6; font-weight:bold; font-size:11px; text-transform:uppercase;">shipping:</span> <span style="color:#3b82f6; font-weight:bold; font-size:12px; font-family:monospace;">$${rawShip}</span></div>
+                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#a855f7; font-weight:bold; font-size:11px; text-transform:uppercase;">taxes:</span> <span style="color:#a855f7; font-weight:bold; font-size:12px; font-family:monospace;">$${rawTax}</span></div>
+                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#f97316; font-weight:bold; font-size:11px; text-transform:uppercase;">discount_amount:</span> <span style="color:#f97316; font-weight:bold; font-size:12px; font-family:monospace;">$${rawDisc}</span></div>
                         <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#8b5cf6; font-weight:bold; font-size:11px; text-transform:uppercase;">Outstanding Balance:</span> <span style="color:#8b5cf6; font-weight:bold; font-size:12px; font-family:monospace;">$${rawOutBal}</span></div>
-                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#ff3399; font-weight:bold; font-size:11px; text-transform:uppercase;">total:</span> <span style="color:#ff3399; font-weight:bold; font-size:12px; font-family:monospace;">$${rawTotal}</span></div>
-                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#ff3b30; font-weight:bold; font-size:11px; text-transform:uppercase;">transaction_fees:</span> <span style="color:#ff3b30; font-weight:bold; font-size:12px; font-family:monospace;">$${Math.abs(rawFee).toFixed(2)}</span></div>
+                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#d946ef; font-weight:bold; font-size:11px; text-transform:uppercase;">total:</span> <span style="color:#d946ef; font-weight:bold; font-size:12px; font-family:monospace;">$${rawTotal}</span></div>
+                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#ef4444; font-weight:bold; font-size:11px; text-transform:uppercase;">transaction_fees:</span> <span style="color:#ef4444; font-weight:bold; font-size:12px; font-family:monospace;">$${Math.abs(rawFee).toFixed(2)}</span></div>
                         <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#eab308; font-weight:bold; font-size:11px; text-transform:uppercase;">refunded_amount:</span> <span style="color:#eab308; font-weight:bold; font-size:12px; font-family:monospace;">$${rawRef}</span></div>
-                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#ffcc00; font-weight:bold; font-size:11px; text-transform:uppercase;">actual_shipping_cost:</span> <span style="color:#ffcc00; font-weight:bold; font-size:12px; font-family:monospace;">$${rawShipC}</span></div>
+                        <div style="display:flex; align-items:baseline; gap:4px;"><span style="color:#fbbf24; font-weight:bold; font-size:11px; text-transform:uppercase;">actual_shipping_cost:</span> <span style="color:#fbbf24; font-weight:bold; font-size:12px; font-family:monospace;">$${rawShipC}</span></div>
                     </div>
                 </div>
                 
@@ -931,24 +931,24 @@ function renderSimulatorOrder(orderId) {
                             <span style="color:#00e5ff !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawPrice}</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#00e5ff !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Subtotal (Q):</span>
-                            <span id="sim-subtot-raw-${i}" style="color:#00e5ff !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawSubtot}</span>
+                            <span style="color:#14b8a6 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Subtotal (Q):</span>
+                            <span id="sim-subtot-raw-${i}" style="color:#14b8a6 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawSubtot}</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#ff7f50 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Discount Amount (U):</span>
-                            <span id="sim-disc-raw-${i}" style="color:#ff7f50 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawDisc}</span>
+                            <span style="color:#f97316 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Discount Amount (U):</span>
+                            <span id="sim-disc-raw-${i}" style="color:#f97316 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawDisc}</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#007aff !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Shipping (W):</span>
-                            <span id="sim-ship-raw-${i}" style="color:#007aff !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawShip}</span>
+                            <span style="color:#3b82f6 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Shipping (W):</span>
+                            <span id="sim-ship-raw-${i}" style="color:#3b82f6 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawShip}</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#f0e68c !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Taxes (Y):</span>
-                            <span id="sim-tax-raw-${i}" style="color:#f0e68c !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawTax}</span>
+                            <span style="color:#a855f7 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Taxes (Y):</span>
+                            <span id="sim-tax-raw-${i}" style="color:#a855f7 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawTax}</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#ff3399 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Total (Z):</span>
-                            <span id="sim-total-raw-${i}" style="color:#ff3399 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawTotal}</span>
+                            <span style="color:#d946ef !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Total (Z):</span>
+                            <span id="sim-total-raw-${i}" style="color:#d946ef !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawTotal}</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
                             <span style="color:#8b5cf6 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Outstanding Balance (AY):</span>
@@ -976,33 +976,33 @@ function renderSimulatorOrder(orderId) {
                             <span style="color:#9ca3af !important; font-family:monospace; font-size:12px; font-weight:bold;">${row.order_id}</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#ffcc00 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Amount (G):</span>
-                            <span style="color:#ffcc00 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawShipC}</span>
+                            <span style="color:#fbbf24 !important; font-weight:bold; text-transform:uppercase; font-size:11px;">Amount (G):</span>
+                            <span style="color:#fbbf24 !important; font-family:monospace; font-size:12px; font-weight:bold;">$${rawShipC}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- ROW 4: CALCULATED FORENSIC RESULTS -->
-                <div style="background:#111; padding:6px 8px; border-radius:4px; border:1px solid #ff3399; margin-top:2px;">
+                <div style="background:#111; padding:6px 8px; border-radius:4px; border:1px solid #d946ef; margin-top:2px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                         <span style="color:#94a3b8; font-size:10px; font-weight:bold; text-transform:uppercase;">[CALCULATED FORENSIC RESULTS]</span>
                     </div>
                     <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;">
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#ff3399 !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ Net Rev:</span>
-                            <span id="sim-capture-${i}" style="color:#ff3399 !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
+                            <span style="color:#d946ef !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ Net Rev:</span>
+                            <span id="sim-capture-${i}" style="color:#d946ef !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#ff3b30 !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ Allocated Fees:</span>
-                            <span id="sim-fee-${i}" style="color:#ff3b30 !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
+                            <span style="color:#ef4444 !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ Allocated Fees:</span>
+                            <span id="sim-fee-${i}" style="color:#ef4444 !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#ffcc00 !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ Allocated Ship:</span>
-                            <span id="sim-ship-exp-${i}" style="color:#ffcc00 !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
+                            <span style="color:#fbbf24 !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ Allocated Ship:</span>
+                            <span id="sim-ship-exp-${i}" style="color:#fbbf24 !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
-                            <span style="color:#ff9500 !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ COGS:</span>
-                            <span id="sim-cogs-${i}" style="color:#ff9500 !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
+                            <span style="color:#f59e0b !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ COGS:</span>
+                            <span id="sim-cogs-${i}" style="color:#f59e0b !important; font-weight:bold; font-size:12px; font-family:monospace;">$0.00</span>
                         </div>
                         <div style="display:flex; align-items:baseline; gap:4px;">
                             <span style="color:#eab308 !important; font-weight:bold; font-size:11px; text-transform:uppercase;">⚙️ Allocated Refunds:</span>
