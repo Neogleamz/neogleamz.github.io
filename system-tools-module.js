@@ -4,7 +4,7 @@
  * @property {any} setting_value
  * @property {string|null} description
  */
-/* global sysLog, prompt, loadParserConfig, setSysProgress, DOMParser, XLSX, FileReader, loadParcelConfig, executeWithButtonAction, setMasterStatus, loadData, openBackupModal, closeBackupModal, executeExport, handleFileSelect, executeRestore, loadPaperProfiles, addPaperProfile, showToast, loadSalesLedger */
+/* global sysLog, prompt, loadParserConfig, setSysProgress, DOMParser, XLSX, FileReader, loadParcelConfig, executeWithButtonAction, setMasterStatus, loadData, showToast, loadSalesLedger */
 /* eslint-disable no-unused-vars */
 // --- 12. PARSERS & FILE SYNC ---
 function setModuleStatus(id, m, t) { try{let e=document.getElementById(id); e.innerText=m; e.className=`mod-status ${t}`;}catch(x){ console.error(x); } }
@@ -848,12 +848,10 @@ window._renderSandboxModal = function() {
     let dictPayload = window.__sandboxDataDict;
     let isSuperbuy = window.__sandboxTitle.includes('PRODUCTION_FWD_SYNC') || window.__sandboxTitle.includes('PRODUCTION_ORDER_SYNC');
     
-    let legendHTML = "";
-    if (isSuperbuy) {
-        legendHTML = `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#64748b;">■ RAW API DATA</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
-    } else {
-        legendHTML = `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#3b82f6;">■ ORIGINAL CSV HEADER</span> <span style="color:#f59e0b;">■ DATABASE COLUMN NAME</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
-    }
+    let legendHTML = isSuperbuy 
+        ? `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#64748b;">■ RAW API DATA</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`
+        : `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#3b82f6;">■ ORIGINAL CSV HEADER</span> <span style="color:#f59e0b;">■ DATABASE COLUMN NAME</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
+
     document.getElementById('sandboxModalTitle').innerHTML = window.__sandboxTitle + legendHTML;
     
     let body = document.getElementById('sandboxModalBody');
@@ -908,7 +906,7 @@ window._renderSandboxModal = function() {
             cols.forEach(c => {
                 let indicator = sortCol === c ? (sortAsc ? " <span style='color:#fff;'>▲</span>" : " <span style='color:#fff;'>▼</span>") : "";
                 
-                let computedColumns = ['internal_recipe_name', 'transaction_type', 'total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price', 'net_profit', 'transaction_fees', 'cogs_at_sale', 'makeup_fee', 'order_total', '_is_distributed', 'net', 'actShipCost', 'trueLineCaptured', 'revenueDerivation', 'work', 'rawOrderTotal', 'rawItemRevenue', 'liveCogs', 'stripeFee', 'actPayout', 'trueLineCapture'];
+                let computedColumns = ['internal_recipe_name', 'transaction_type', 'total_dist_weight_g', 'unit_weight_g', 'unit_china_landed_price', 'net_profit', 'transaction_fees', 'cogs_at_sale', 'makeup_fee', 'order_total', '_is_distributed', 'net', 'actShipCost', 'trueLineCaptured', 'revenueDerivation', 'work', 'rawOrderTotal', 'rawItemRevenue', 'liveCogs', 'stripeFee', 'actPayout', 'trueLineCapture', 'forensic_subtotal', 'forensic_discount_amount', 'forensic_shipping', 'forensic_taxes', 'forensic_total', 'forensic_sale_price', 'forensic_out_bal', 'uiIdx', 'cogs', 'fee'];
                 let isComputed = computedColumns.includes(c) || computedColumns.includes(c.toLowerCase());
                 
                 let displayC = c;
@@ -921,7 +919,7 @@ window._renderSandboxModal = function() {
                     colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);";
                 }
                 
-                let dualHeaderHTML = '';
+                let dualHeaderHTML;
                 if (isSuperbuy) {
                     if (isComputed) {
                         dualHeaderHTML = `
@@ -964,7 +962,7 @@ window._renderSandboxModal = function() {
                     let prefix = "";
                     let cLow = c.toLowerCase();
                     
-                    let isDiff = row._diffs && row._diffs.hasOwnProperty(c);
+                    let isDiff = row._diffs && Object.prototype.hasOwnProperty.call(row._diffs, c);
                     let diffStyles = "";
                     let diffTooltip = val.replace(/"/g, '&quot;');
                     
@@ -1463,15 +1461,15 @@ async function syncAndCalculate() {
 }
 
 // --- 13. NEW BACKUP & RESTORE SYSTEM ---
-function openBackupModal() {
+window.openBackupModal = function() {
     document.getElementById('backupModal').style.display = 'flex';
     document.getElementById('restorePreview').style.display = 'none';
     document.getElementById('importBackupFile').value = '';
 }
 
-function closeBackupModal() { document.getElementById('backupModal').style.display = 'none'; }
+window.closeBackupModal = function() { document.getElementById('backupModal').style.display = 'none'; }
 
-async function executeExport() {
+window.executeExport = async function() {
     await executeWithButtonAction('btnExportBackup', '⏳ EXPORTING...', '✅ EXPORTED!', async () => {
         setMasterStatus("Exporting...", "mod-working"); sysLog("Exporting full system backup...");
         const wb = XLSX.utils.book_new();
@@ -1529,7 +1527,7 @@ window.cancelRestore = function() {
     pendingRestoreData = {};
 };
 
-function handleFileSelect(input, isTestMode = false) {
+window.handleFileSelect = function(input, isTestMode = false) {
     const file = input.files[0]; if (!file) return;
     
     let termId = 'backupProgressTerminal';
@@ -1583,7 +1581,7 @@ function handleFileSelect(input, isTestMode = false) {
     reader.readAsArrayBuffer(file);
 }
 
-async function executeRestore() {
+window.executeRestore = async function() {
     let termId = 'backupProgressTerminal';
     const checkboxes = document.querySelectorAll('.restore-chk:checked');
     if(checkboxes.length === 0) { 
@@ -1916,7 +1914,7 @@ window.activePaperProfiles = [
     { n: 'A4 Sheet List', w: 8.5, h: 11 }
 ];
 
-async function loadPaperProfiles() {
+window.loadPaperProfiles = async function() {
     try {
         const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'paper_profiles').single();
         if (data && data.setting_value) {
@@ -1999,7 +1997,7 @@ function saveInlineEditPaper(idx) {
     savePaperProfiles(false);
 }
 
-function addPaperProfile() {
+window.addPaperProfile = function() {
     const n = document.getElementById('newPaperName').value.trim();
     const w = parseFloat(document.getElementById('newPaperW').value);
     const h = parseFloat(document.getElementById('newPaperH').value);
