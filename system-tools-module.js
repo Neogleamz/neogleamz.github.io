@@ -897,17 +897,10 @@ window._renderSandboxModal = function() {
                 'payment_method': '[AV] Payment Method',
                 'financial_status': '[C] Financial Status',
                 'fulfillment_status': '[E] Fulfillment Status',
-                'paid_at': '[D] Paid at',
-                'fulfilled_at': '[F] Fulfilled at',
-                'accepts_marketing': '[G] Accepts Marketing',
-                'shipping_company': '[AM] Shipping Company',
-                'billing_name': '[Y] Billing Name',
-                'billing_city': '[AD] Billing City',
-                'billing_zip': '[AE] Billing Zip',
-                'billing_province': '[AF] Billing Province',
-                'billing_country': '[AG] Billing Country',
-                'vendor': '[AY] Vendor',
-                'source': '[BG] Source'
+                'Source': '[BG] Source',
+                'Outstanding Balance': '[AZ] Outstanding Balance',
+                'lineitem_compare_at_price': '[T] Lineitem compare at price',
+                'risk_level': '[BF] Risk Level'
             };
 
             h += `<table style="width:100%; text-align:left; border-collapse:collapse; white-space:nowrap; margin-bottom: 20px;">`;
