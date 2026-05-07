@@ -41,6 +41,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `style/sandbox-typography-spacing` : **Sandbox UI Typography & Layout Refactor** - Apply a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, and shrink the vertical height of the main header to reclaim screen space. [🤖 AI Model] [🧠 TBD / 2k] [💸 TBD / $0.01]
 - [ ] `feat/orderz-expandable-net-profit` : **Orderz Expandable Net Profit & Sandbox Routing** - Build expandable row functionality into the native Orderz page to view the whole order net vs. line item details (replacing the standalone Actual Net Breakdown modal). Retitle the "Actual Net" button to "Net Sandbox Engine" and route it directly to the Net Profit Sandbox Engine. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
 - [ ] `feat/live-staging-diff-highlighting` : **Live Staging DB Diff Highlighting** - Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records (e.g. Order #1005 Total 121.53 vs 101.53). [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] `feat/global-math-engine-audit` : **Global Math Engine Audit** - Look through all the various .js files and ensure all math is done in the neogleamz-engine.js so we only have 1 source for all across the whole app, except direct test .js files. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
