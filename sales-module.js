@@ -1053,6 +1053,15 @@ window.click_commitSimToLedger = async function() {
             await window.supabaseClient.from('sales_ledger').update(payload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
             
             // Update Memory
+            if (window.salesDB) {
+                let mainRow = window.salesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
+                if (mainRow) {
+                    mainRow.transaction_type = payload.transaction_type;
+                    mainRow.net_profit = payload.net_profit;
+                    mainRow.transaction_fees = payload.transaction_fees;
+                    mainRow.cogs_at_sale = payload.cogs_at_sale;
+                }
+            }
             if (window.processedSalesDB) {
                 let sibRow = window.processedSalesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
                 if (sibRow) {
@@ -1121,8 +1130,13 @@ function recomputeSimulator() {
         const sub = (p * q) - d;
         
         if (isDonor) {
-            log(`&nbsp;&nbsp;<span style="color:#94a3b8;">↳ [DONOR] ${r.internal_recipe_name}: ($${p.toFixed(2)} * ${q}) - $${d.toFixed(2)} = $${sub.toFixed(2)} -> <b style="color:#ff3399;">SURRENDERED</b></span>`);
-            donorSurrenderSum += sub;
+            // For donor surrender, we must use the ORIGINAL raw price, not the 0.00 forensic price
+            const rawP = parseFloat(r.original_sale_price ?? r.actual_sale_price ?? 0);
+            const rawD = parseFloat(r.original_discount_amount ?? r.discount_amount ?? 0);
+            const rawSub = (rawP * q) - rawD;
+            
+            log(`&nbsp;&nbsp;<span style="color:#94a3b8;">↳ [DONOR] ${r.internal_recipe_name}: ($${rawP.toFixed(2)} * ${q}) - $${rawD.toFixed(2)} = $${rawSub.toFixed(2)} -> <b style="color:#ff3399;">SURRENDERED</b></span>`);
+            donorSurrenderSum += rawSub;
         } else {
             log(`&nbsp;&nbsp;<span style="color:#00e5ff;">↳ [ITEM] ${r.internal_recipe_name}: ($${p.toFixed(2)} * ${q}) - $${d.toFixed(2)} = <b style="color:#fff;">$${sub.toFixed(2)}</b></span>`);
             totalItemRevenue += sub;
