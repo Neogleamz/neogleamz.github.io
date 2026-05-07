@@ -846,7 +846,7 @@ window.sortSandboxModal = function(col, tableNum=1) {
 window._renderSandboxModal = function() {
     let payload = window.__sandboxData;
     let dictPayload = window.__sandboxDataDict;
-    document.getElementById('sandboxModalTitle').innerText = window.__sandboxTitle;
+    document.getElementById('sandboxModalTitle').innerHTML = window.__sandboxTitle + `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#3b82f6;">■ ORIGINAL CSV HEADER</span> <span style="color:#f59e0b;">■ DATABASE COLUMN NAME</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
     let body = document.getElementById('sandboxModalBody');
     if ((!payload || payload.length === 0) && !dictPayload) {
         body.innerHTML = window.safeHTML(
@@ -861,6 +861,29 @@ window._renderSandboxModal = function() {
             let h = ``;
             if(title) h += `<h3 style="color:#10b981; margin: 15px 0 10px 0; font-size:14px;">${title} <span style="font-size:11px; color:#64748b; font-weight:normal;">(${data.length} records)</span></h3>`;
             
+            let csvHeaderMap = {
+                'order_id': 'Name / Order ID',
+                'sale_date': 'Created at',
+                'storefront_sku': 'Lineitem name',
+                'qty_sold': 'Lineitem quantity',
+                'actual_sale_price': 'Lineitem price',
+                'internal_recipe_name': 'Recipe Match',
+                'subtotal': 'Subtotal',
+                'shipping': 'Shipping',
+                'taxes': 'Taxes',
+                'discount_code': 'Discount Code',
+                'discount_amount': 'Discount Amount',
+                'total': 'Total',
+                'customer_email_hash': 'Email (Hashed)',
+                'customer_phone_hash': 'Phone (Hashed)',
+                'shipping_name_hash': 'Shipping Name (Hashed)',
+                'shipping_address_hash': 'Shipping Address (Hashed)',
+                'tracking_number': 'Tracking Number',
+                'carrier_name': 'Carrier Name',
+                'actual_shipping_cost': 'Actual Shipping',
+                'actual_payout': 'Actual Payout'
+            };
+
             h += `<table style="width:100%; text-align:left; border-collapse:collapse; white-space:nowrap; margin-bottom: 20px;">`;
             h += `<thead><tr>`;
             cols.forEach(c => {
@@ -875,10 +898,20 @@ window._renderSandboxModal = function() {
                     colorRule = "color:#fbbf24; border-bottom:2px solid rgba(251,191,36,0.6);";
                 }
                 
+                let csvLabel = csvHeaderMap[c];
+                let isComputed = !csvLabel;
+                if (!csvLabel) csvLabel = 'System Computed';
+                let csvColor = isComputed ? '#c084fc' : '#3b82f6';
+                
+                let dualHeaderHTML = `
+                    <div style="font-size:11px; color:${csvColor}; font-weight:800; margin-bottom:4px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; text-transform:uppercase; letter-spacing:1px;">[CSV] ${csvLabel}</div>
+                    <div style="color:${colorRule.includes('c084fc') ? '#c084fc' : '#f59e0b'}; font-size:10px;">${displayC}${indicator}</div>
+                `;
+                
                 if (isDict) {
-                    h += `<th data-click="click_sortSandboxDict" data-sort-col="${c}" data-sheet-name="${dictName}" style="padding:10px 15px; position:sticky; top:0; background:rgba(0,0,0,0.8); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
+                    h += `<th data-click="click_sortSandboxDict" data-sort-col="${c}" data-sheet-name="${dictName}" style="padding:10px 15px; position:sticky; top:0; background:rgba(0,0,0,0.8); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${dualHeaderHTML}</th>`;
                 } else {
-                    h += `<th data-click="click_sortSandboxModal" data-sort-col="${c}" data-table-num="${tableNum}" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${displayC}${indicator}</th>`;
+                    h += `<th data-click="click_sortSandboxModal" data-sort-col="${c}" data-table-num="${tableNum}" style="padding:10px 15px; position:sticky; top:0; background:var(--bg-panel); text-transform:uppercase; font-size:10px; letter-spacing:1px; cursor:pointer; z-index:10; ${colorRule}" title="Sort by ${c}">${dualHeaderHTML}</th>`;
                 }
             });
             h += `</tr></thead><tbody>`;

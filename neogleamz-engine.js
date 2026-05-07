@@ -405,7 +405,7 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
     }
 
     if (existingData.length === 0) {
-        window.__sandboxTitle = `[DB ZERO | PK:${primaryKey} | Val0:${fetchValues[0] || 'none'} | Err: ${dbErrorStr}] ` + window.__sandboxTitle;
+        if (typeof syncTrace === 'function') syncTrace(`[DB ZERO | PK:${primaryKey} | Val0:${fetchValues[0] || 'none'} | Err: ${dbErrorStr}] Differential highlighting bypassed due to 0 matches.`, true);
         return payload;
     }
 
@@ -454,7 +454,9 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
         }
     });
 
-    window.__sandboxTitle = `[DB:${existingData.length}|Match:${foundCount}|Diff:${diffCount}] ` + window.__sandboxTitle;
+    if (typeof syncTrace === 'function') {
+        syncTrace(`[Diff Engine] DB Matches: ${foundCount} | Mismatches Found: ${diffCount} | Total DB Rows Scanned: ${existingData.length}`, diffCount > 0);
+    }
     return payload;
 };
 
