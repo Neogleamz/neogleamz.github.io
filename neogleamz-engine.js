@@ -269,6 +269,7 @@ window.runForensicAccounting = function(rows) {
         
         if (isExchangeDonor || isVoided) {
             lineRevenue = 0;
+            cogs = 0; // Item never left the warehouse or was returned, so we didn't lose the physical asset
             work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})` : `[Voided] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})`;
             revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${parseFloat(sourceRow.total).toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
             newSubtotal = 0; newDiscount = 0; newShipping = 0; newTaxes = 0; newTotal = 0; newSalePrice = 0; newOutBal = 0;

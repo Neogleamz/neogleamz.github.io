@@ -877,7 +877,7 @@ function renderSimulatorOrder(orderId) {
     
     let html = '';
     window.currentSimPayload.forEach((row, i) => {
-        let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Cancelled', 'NEEDS ATTENTION'];
+        let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Partial Refund', 'Cancelled', 'NEEDS ATTENTION'];
         let typeHtml = typeOpts.map(t => `<option value="${t}" ${row.transaction_type === t ? 'selected' : ''}>${t}</option>`).join('');
         
         let src = row['Source'] || 'web';
