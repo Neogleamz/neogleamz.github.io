@@ -530,11 +530,11 @@ function renderSalesTable() {
     // Final Calculation Pass for Totals
     a.forEach(x => {
         let isCostOnly = x.isCostOnlyItem;
-        let p = parseFloat(x.forensic_sale_price ?? x.actual_sale_price || 0);
+        let p = parseFloat((x.forensic_sale_price ?? x.actual_sale_price) || 0);
         let q = parseFloat(x.qty_sold || 0);
-        let s = parseFloat(x.forensic_shipping ?? x.shipping || 0);
-        let t = parseFloat(x.forensic_taxes ?? x.taxes || 0);
-        let d = parseFloat(x.forensic_discount_amount ?? x.discount_amount || 0);
+        let s = parseFloat((x.forensic_shipping ?? x.shipping) || 0);
+        let t = parseFloat((x.forensic_taxes ?? x.taxes) || 0);
+        let d = parseFloat((x.forensic_discount_amount ?? x.discount_amount) || 0);
         let trueLineCaptured = (p * q) + s + t - d;
         x.localDerivedTotal = trueLineCaptured; // Store for the UI rendering below
 
@@ -597,13 +597,13 @@ function renderSalesTable() {
             </select></td>
 
             <td class="text-right" style="font-weight:bold;">${x.qty_sold}</td>
-            <td class="text-right" style="color:#10b981;">$${parseFloat(x.forensic_sale_price ?? x.actual_sale_price || 0).toFixed(2)}</td>
-            <td class="text-right" style="color:#f59e0b;">$${parseFloat(x.forensic_discount_amount ?? x.discount_amount || 0).toFixed(2)}</td>
-            <td class="text-right" title="${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.forensic_shipping ?? x.shipping || 0) > 0 ? 'Actual Ship Expense Override' : 'Shipping Revenue'}" style="color:${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat(x.forensic_shipping ?? x.shipping || 0) > 0 ? '#ef4444' : 'var(--text-muted)'};">$${parseFloat(x.forensic_shipping ?? x.shipping || 0).toFixed(2)}</td>
-            <td class="text-right" style="color:var(--text-muted);">$${parseFloat(x.forensic_taxes ?? x.taxes || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:#10b981;">$${parseFloat((x.forensic_sale_price ?? x.actual_sale_price) || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:#f59e0b;">$${parseFloat((x.forensic_discount_amount ?? x.discount_amount) || 0).toFixed(2)}</td>
+            <td class="text-right" title="${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat((x.forensic_shipping ?? x.shipping) || 0) > 0 ? 'Actual Ship Expense Override' : 'Shipping Revenue'}" style="color:${x.isCostOnlyItem && !x.isRevenueTransfer && parseFloat((x.forensic_shipping ?? x.shipping) || 0) > 0 ? '#ef4444' : 'var(--text-muted)'};">$${parseFloat((x.forensic_shipping ?? x.shipping) || 0).toFixed(2)}</td>
+            <td class="text-right" style="color:var(--text-muted);">$${parseFloat((x.forensic_taxes ?? x.taxes) || 0).toFixed(2)}</td>
             <td style="color:#0ea5e9;">${x.carrier_name || '--'}</td>
             <td>${x.tracking_number ? `<a href="https://www.google.com/search?q=${x.tracking_number}" target="_blank" style="color:#8b5cf6; text-decoration:none; font-family:monospace;">${x.tracking_number}</a>` : '<span style="color:var(--text-muted);">--</span>'}</td>
-            <td class="text-right" style="font-weight:bold;">$${parseFloat(x.trueLineCaptured ?? x.total || 0).toFixed(2)}</td>
+            <td class="text-right" style="font-weight:bold;">$${parseFloat((x.trueLineCaptured ?? x.total) || 0).toFixed(2)}</td>
             <td class="text-right" style="color:#ef4444; font-weight:bold;">$${x.liveCogs.toFixed(2)}</td>
             <td class="text-right" style="color:${x.actualShipCost > 15 ? '#ef4444' : '#f59e0b'}; font-weight:bold;">-$${parseFloat(x.actualShipCost || 0).toFixed(2)}</td>
             <td class="text-right" style="color:#888;" title="${x.dbActualPayout > 0 ? 'True Platform Payout Math' : 'Estimated Engine Fee'}">${x.stripeFee < 0 ? '+' : '-'} $${Math.abs(parseFloat(x.stripeFee || 0)).toFixed(2)}</td>
