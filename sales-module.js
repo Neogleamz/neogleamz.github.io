@@ -990,15 +990,32 @@ function recomputeSimulator() {
     const mainRow = forensicResults[0];
     const rawTotal = mainRow.rawOrderTotal;
     
-    // Literal Audit: Sum of (Price - Disc) for all items
-    const totalItemRevenue = window.currentSimPayload.reduce((acc, r) => acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0), 0);
+    // Forensic-Aware Literal Audit: Only sum items that are NOT donors (Pre/Post-Ship Exchange)
+    // Donors have already moved their revenue to the recipient.
+    const totalItemRevenue = forensicResults.reduce((acc, r) => {
+        const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
+        if (isDonor) return acc;
+        return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+    }, 0);
+    
     const residual = rawTotal - totalItemRevenue;
     
-    // Validate against literal Ship/Tax columns
-    const csvShipSum = forensicResults.reduce((acc, r) => acc + parseFloat(r.shipping || 0), 0);
-    const csvTaxSum = forensicResults.reduce((acc, r) => acc + parseFloat(r.taxes || 0), 0);
+    // Validate against literal Ship/Tax columns (Only for non-donors to avoid double counting ghost values)
+    const csvShipSum = forensicResults.reduce((acc, r) => {
+        const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
+        if (isDonor) return acc;
+        return acc + parseFloat(r.shipping || 0);
+    }, 0);
+    
+    const csvTaxSum = forensicResults.reduce((acc, r) => {
+        const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
+        if (isDonor) return acc;
+        return acc + parseFloat(r.taxes || 0);
+    }, 0);
+    
     const expectedResidue = csvShipSum + csvTaxSum;
     const diff = Math.abs(residual - expectedResidue);
+
 
     log(`<span style="color:#ccff00; font-weight:bold;">[ORDER RECONCILIATION]</span>`);
     log(`&nbsp;&nbsp;<span style="color:#ff3399;">START: Order Total (CSV L)</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff3399; font-weight:bold;">$${rawTotal.toFixed(2)}</span>`);
