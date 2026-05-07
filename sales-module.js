@@ -1129,16 +1129,12 @@ function recomputeSimulator() {
     log(`&nbsp;&nbsp;<span style="color:#ccff00; font-weight:bold;">RESULT: Residual Residue</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ccff00; font-weight:bold;">$${residual.toFixed(2)}</span>`);
     log(`<br/>`);
     
-    // Validate against literal Ship/Tax columns (Only for non-donors to avoid double counting ghost values)
+    // Validate against literal Ship/Tax columns natively across all rows
     const engineShipSum = forensicResults.reduce((acc, r) => {
-        const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-        if (isDonor) return acc;
         return acc + parseFloat(r.shipping || 0);
     }, 0);
     
     const engineTaxSum = forensicResults.reduce((acc, r) => {
-        const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-        if (isDonor) return acc;
         return acc + parseFloat(r.taxes || 0);
     }, 0);
     
