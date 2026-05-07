@@ -375,14 +375,24 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
     if (conflictKeys.length === 0 || !conflictKeys[0]) return payload;
 
     let primaryKey = conflictKeys[0];
-    let values = [...new Set(payload.map(r => r[primaryKey]))].filter(v => v !== undefined && v !== null && v !== '');
-    if (values.length === 0) return payload;
+    let rawValues = [...new Set(payload.map(r => r[primaryKey]))].filter(v => v !== undefined && v !== null && v !== '');
+    if (rawValues.length === 0) return payload;
+    
+    // Normalize to handle `#1005` vs `1005` database inconsistencies
+    let fetchValuesSet = new Set();
+    rawValues.forEach(v => {
+        let strV = String(v).trim();
+        fetchValuesSet.add(strV);
+        if (strV.startsWith('#')) fetchValuesSet.add(strV.replace(/^#/, ''));
+        else fetchValuesSet.add('#' + strV);
+    });
+    let fetchValues = Array.from(fetchValuesSet);
     
     let existingData = [];
     if (window.supabaseClient) {
         try {
-            for (let i = 0; i < values.length; i += 100) {
-                let chunk = values.slice(i, i + 100);
+            for (let i = 0; i < fetchValues.length; i += 100) {
+                let chunk = fetchValues.slice(i, i + 100);
                 let { data, error } = await window.supabaseClient.from(table).select('*').in(primaryKey, chunk);
                 if (data) existingData = existingData.concat(data);
             }
@@ -395,7 +405,15 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
 
     payload.forEach(sim => {
         let existingRow = existingData.find(ex => {
-            return conflictKeys.every(k => String(ex[k]) === String(sim[k]));
+            return conflictKeys.every(k => {
+                let vEx = String(ex[k]).trim();
+                let vSim = String(sim[k]).trim();
+                if (k === 'order_id' || k === 'parcel_no') {
+                    vEx = vEx.replace(/^#/, '');
+                    vSim = vSim.replace(/^#/, '');
+                }
+                return vEx === vSim;
+            });
         });
         
         if (existingRow) {
