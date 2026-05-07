@@ -402,6 +402,8 @@ async function executeSalesSync(isTestMode = false) {
                 
                 salesPayload.push({ 
                     ...sim, 
+                    actual_sale_price: sim.original_sale_price ?? sim.actual_sale_price,
+                    discount_amount: sim.original_discount_amount ?? sim.discount_amount,
                     cogs_at_sale: cS, 
                     transaction_fees: fS, 
                     net_profit: nS, 
@@ -872,12 +874,12 @@ function renderSimulatorOrder(orderId) {
         
         let src = row['Source'] || 'web';
         
-        let rawPrice = parseFloat(row.actual_sale_price || 0).toFixed(2);
+        let rawPrice = parseFloat(row.original_sale_price ?? row.actual_sale_price ?? 0).toFixed(2);
         let rawQty = parseFloat(row.qty_sold || 0).toFixed(2);
         let rawSubtot = parseFloat(row.subtotal || 0).toFixed(2);
         let rawShip = parseFloat(row.shipping || 0).toFixed(2);
         let rawTax = parseFloat(row.taxes || 0).toFixed(2);
-        let rawDisc = parseFloat(row.discount_amount || 0).toFixed(2);
+        let rawDisc = parseFloat(row.original_discount_amount ?? row.discount_amount ?? 0).toFixed(2);
         let rawOutBal = parseFloat(row['Outstanding Balance'] || 0).toFixed(2);
         let rawTotal = parseFloat(row.total || 0).toFixed(2);
         let rawRef = parseFloat(row.refunded_amount || row.exchAdj || 0).toFixed(2);
