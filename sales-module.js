@@ -1034,13 +1034,14 @@ function renderSimulatorOrder(orderId) {
 
 window.click_commitSimToLedger = async function() {
     let commitBtn = document.getElementById('sim-commit-btn');
-    if(!confirm("Are you sure you want to permanently overwrite the Sales Ledger with this exact forensic configuration?")) return;
     
     if(commitBtn) {
         commitBtn.textContent = "💾 SAVING...";
         commitBtn.style.opacity = "0.5";
         commitBtn.disabled = true;
     }
+    
+    if(typeof setMasterStatus === 'function') setMasterStatus("Saving Forensic Sandbox...", "mod-working");
 
     try {
         let forensicResults = window.runForensicAccounting(window.currentSimPayload);
@@ -1051,7 +1052,9 @@ window.click_commitSimToLedger = async function() {
                 transaction_fees: fLine.fee, 
                 cogs_at_sale: fLine.cogs 
             };
-            await window.supabaseClient.from('sales_ledger').update(payload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
+            
+            const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
+            if (error) throw error;
             
             // Update Memory
             if (window.salesDB) {
@@ -1077,14 +1080,19 @@ window.click_commitSimToLedger = async function() {
             commitBtn.textContent = "✅ COMMITTED!";
             commitBtn.style.background = "#3b82f6";
         }
+        if(typeof setMasterStatus === 'function') setMasterStatus("Saved!", "mod-success");
+        
         setTimeout(() => {
+            if(typeof renderSalesTable === 'function') renderSalesTable();
             if(typeof filterSales === 'function') filterSales();
             let m = document.getElementById('math-simulator-modal');
             if(m) m.style.display = 'none';
+            if(typeof setMasterStatus === 'function') setMasterStatus("Ready.", "status-idle");
         }, 1000);
     } catch (err) {
         console.error(err);
-        alert("Error committing forensic payload.");
+        if(typeof setMasterStatus === 'function') setMasterStatus("Error Saving", "mod-error");
+        if(typeof sysLog === 'function') sysLog("Error committing forensic payload: " + err.message, true);
         if(commitBtn) {
             commitBtn.textContent = "💾 COMMIT TO LEDGER";
             commitBtn.style.opacity = "1";
