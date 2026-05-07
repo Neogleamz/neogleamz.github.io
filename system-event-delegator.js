@@ -362,6 +362,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_runMathSimulator':
                     if (typeof initMathSimulator === 'function') initMathSimulator();
                     break;
+                case 'click_runGlobalReconciliationAudit':
+                    if (typeof window.runGlobalReconciliationAudit === 'function') window.runGlobalReconciliationAudit();
+                    break;
                 case 'click_closeMathSimulator':
                     if (typeof closeMathSimulator === 'function') closeMathSimulator();
                     break;
