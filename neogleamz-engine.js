@@ -273,13 +273,18 @@ window.runForensicAccounting = function(rows) {
             newSubtotal = 0; newDiscount = 0; newShipping = 0; newTaxes = 0; newTotal = 0; newSalePrice = 0; newOutBal = 0;
         } else {
             // AUTHORITATIVE REVENUE AGGREGATION
-            // Calculate the item's true mathematical contribution rather than borrowing the entire order's Total
-            let itemContrib = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0) + parseFloat(r.shipping || 0) + parseFloat(r.taxes || 0);
-            let sourceItemContrib = (parseFloat(sourceRow.actual_sale_price || 0) * parseFloat(sourceRow.qty_sold || 1)) - parseFloat(sourceRow.discount_amount || 0) + parseFloat(sourceRow.shipping || 0) + parseFloat(sourceRow.taxes || 0);
+            // If I am a replacement, I look at the donor first, but fall back to my own data if the donor is hollow
+            let ob = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
+            let tot = Math.max(parseFloat(r.total || 0), parseFloat(sourceRow.total || 0));
             
-            lineRevenue = Math.max(itemContrib, sourceItemContrib);
-            work = `[Line Contribution: $${lineRevenue.toFixed(2)}]`;
-            revenueDerivation = `SalePrice*Qty - Discount + Ship + Tax`;
+            lineRevenue = ob > 0 ? ob : tot;
+            work = ob > 0 ? `[Resolved Out. Bal: $${ob.toFixed(2)}]` : `[Resolved Total: $${tot.toFixed(2)}]`;
+            
+            if (ob > 0) {
+                revenueDerivation = `Outstanding Balance: $${ob.toFixed(2)}`;
+            } else {
+                revenueDerivation = `total: $${tot.toFixed(2)}`;
+            }
 
             if (type === 'Exchange Replacement' && sourceRow !== r) {
                 revenueDerivation = `Inherited from Donor: $${lineRevenue.toFixed(2)}`;
@@ -335,8 +340,7 @@ window.runForensicAccounting = function(rows) {
     if (orderRefundTotal > 0) {
         let refundApplied = false;
         processed.forEach(r => {
-            let isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-            if (!refundApplied && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE' && !isDonor) {
+            if (!refundApplied && r.transaction_type !== 'Cancelled' && r.transaction_type !== 'IGNORE') {
                 r.net -= orderRefundTotal;
                 r.applied_order_refund = orderRefundTotal;
                 refundApplied = true;
