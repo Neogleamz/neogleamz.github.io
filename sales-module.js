@@ -1114,9 +1114,9 @@ function recomputeSimulator() {
     let donorSurrenderSum = 0;
     forensicResults.forEach(r => {
         const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-        const p = parseFloat(r.actual_sale_price || 0);
+        const p = parseFloat(isDonor ? (r.original_sale_price ?? r.actual_sale_price ?? 0) : (r.actual_sale_price || 0));
         const q = parseFloat(r.qty_sold || 1);
-        const d = parseFloat(r.discount_amount || 0);
+        const d = parseFloat(isDonor ? (r.original_discount_amount ?? r.discount_amount ?? 0) : (r.discount_amount || 0));
         const sub = (p * q) - d;
         
         if (isDonor) {
@@ -1325,7 +1325,9 @@ window.runGlobalReconciliationAudit = function() {
              let donorSurrenderSum = forensic.reduce((acc, r) => {
                 const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
                 if (!isDonor) return acc;
-                return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+                const p = parseFloat(r.original_sale_price ?? r.actual_sale_price ?? 0);
+                const d = parseFloat(r.original_discount_amount ?? r.discount_amount ?? 0);
+                return acc + (p * parseFloat(r.qty_sold || 1)) - d;
              }, 0);
 
              let replacementPriceSum = forensic.reduce((acc, r) => {

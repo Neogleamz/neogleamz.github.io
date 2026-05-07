@@ -325,6 +325,8 @@ window.runForensicAccounting = function(rows) {
             total: newTotal,
             actual_sale_price: newSalePrice,
             'Outstanding Balance': newOutBal,
+            original_sale_price: r.actual_sale_price,
+            original_discount_amount: r.discount_amount,
             uiIdx: i, 
             cogs, fee, net, actShipCost,
             trueLineCaptured: lineRevenue,
