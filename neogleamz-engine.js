@@ -254,6 +254,7 @@ window.runForensicAccounting = function(rows) {
         // RAW ATTRIBUTION
         let lineRevenue;
         let work;
+        let revenueDerivation = "";
         
         let newSubtotal = r.subtotal;
         let newDiscount = r.discount_amount;
@@ -268,14 +269,26 @@ window.runForensicAccounting = function(rows) {
         if (isExchangeDonor || type === 'Cancelled' || type === 'IGNORE') {
             lineRevenue = 0;
             work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})` : `[Voided] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})`;
+            revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${parseFloat(sourceRow.total).toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
             newSubtotal = 0; newDiscount = 0; newShipping = 0; newTaxes = 0; newTotal = 0; newSalePrice = 0; newOutBal = 0;
         } else {
-            let ob = parseFloat(sourceRow['Outstanding Balance'] || 0);
-            let tot = parseFloat(sourceRow.total || 0);
-            lineRevenue = ob > 0 ? ob : tot;
-            work = ob > 0 ? `[Inherited Out. Bal: $${ob.toFixed(2)}]` : `[Inherited Total: $${tot.toFixed(2)}]`;
+            // AUTHORITATIVE REVENUE AGGREGATION
+            // If I am a replacement, I look at the donor first, but fall back to my own data if the donor is hollow
+            let ob = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
+            let tot = Math.max(parseFloat(r.total || 0), parseFloat(sourceRow.total || 0));
             
+            lineRevenue = ob > 0 ? ob : tot;
+            work = ob > 0 ? `[Resolved Out. Bal: $${ob.toFixed(2)}]` : `[Resolved Total: $${tot.toFixed(2)}]`;
+            
+            if (ob > 0) {
+                revenueDerivation = `Outstanding Balance (AY): $${ob.toFixed(2)}`;
+            } else {
+                revenueDerivation = `Total (L): $${tot.toFixed(2)}`;
+            }
+
             if (type === 'Exchange Replacement' && sourceRow !== r) {
+                revenueDerivation = `Inherited from Donor: $${lineRevenue.toFixed(2)}`;
+            }
                 newSubtotal = Math.max(parseFloat(r.subtotal || 0), parseFloat(sourceRow.subtotal || 0));
                 newDiscount = Math.max(parseFloat(r.discount_amount || 0), parseFloat(sourceRow.discount_amount || 0));
                 newShipping = Math.max(parseFloat(r.shipping || 0), parseFloat(sourceRow.shipping || 0));
@@ -285,6 +298,7 @@ window.runForensicAccounting = function(rows) {
                 newOutBal = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
             }
         }
+
 
         let src = r['Source'] || 'web';
         let fee = (type === 'IGNORE' || type === 'Cancelled') ? 0 : window.getEngineStripeFee(lineRevenue, src);
@@ -315,6 +329,7 @@ window.runForensicAccounting = function(rows) {
             uiIdx: i, 
             cogs, fee, net, actShipCost,
             trueLineCaptured: lineRevenue,
+            revenueDerivation: revenueDerivation,
             work: work,
             rawOrderTotal: totalOrderCaptured,
             rawItemRevenue: totalLineNetPrice,
