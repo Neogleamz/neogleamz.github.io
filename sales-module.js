@@ -1300,7 +1300,9 @@ window.runGlobalReconciliationAudit = function() {
         const totalItemRevenue = forensic.reduce((acc, r) => {
             const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
             if (isDonor) return acc;
-            return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+            const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+            const fd = parseFloat(r.forensic_discount_amount !== undefined ? r.forensic_discount_amount : (r.discount_amount || 0));
+            return acc + (fp * parseFloat(r.qty_sold || 1)) - fd;
         }, 0);
         
         const residual = rawTotal - totalItemRevenue;
@@ -1308,12 +1310,12 @@ window.runGlobalReconciliationAudit = function() {
         const csvShipSum = forensic.reduce((acc, r) => {
             const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
             if (isDonor) return acc;
-            return acc + parseFloat(r.shipping || 0);
+            return acc + parseFloat(r.forensic_shipping !== undefined ? r.forensic_shipping : (r.shipping || 0));
         }, 0);
         const csvTaxSum = forensic.reduce((acc, r) => {
             const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
             if (isDonor) return acc;
-            return acc + parseFloat(r.taxes || 0);
+            return acc + parseFloat(r.forensic_taxes !== undefined ? r.forensic_taxes : (r.taxes || 0));
         }, 0);
         
         const expectedResidue = csvShipSum + csvTaxSum;
@@ -1324,6 +1326,7 @@ window.runGlobalReconciliationAudit = function() {
              let donorSurrenderSum = forensic.reduce((acc, r) => {
                 const isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
                 if (!isDonor) return acc;
+                // For donor surrender, we want the ORIGINAL price, not the 0.00 forensic price
                 const p = parseFloat(r.original_sale_price ?? r.actual_sale_price ?? 0);
                 const d = parseFloat(r.original_discount_amount ?? r.discount_amount ?? 0);
                 return acc + (p * parseFloat(r.qty_sold || 1)) - d;
@@ -1331,14 +1334,16 @@ window.runGlobalReconciliationAudit = function() {
 
              let replacementPriceSum = forensic.reduce((acc, r) => {
                 if (r.transaction_type !== 'Exchange Replacement') return acc;
-                return acc + (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+                const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+                return acc + (fp * parseFloat(r.qty_sold || 1));
              }, 0);
 
              let unaccounted = residual - expectedResidue;
              
              // Check if the discrepancy matches the price of ANY line in the order (Common Shopify Inflation Pattern)
              let matchedAnyLinePrice = forensic.some(r => {
-                 let lp = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1));
+                 const fp = parseFloat(r.forensic_sale_price !== undefined ? r.forensic_sale_price : (r.actual_sale_price || 0));
+                 let lp = (fp * parseFloat(r.qty_sold || 1));
                  return lp > 0 && Math.abs(unaccounted - lp) < 0.1;
              });
 
