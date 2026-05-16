@@ -93,6 +93,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teOpenTagManager':
                     if (typeof window.teOpenTagManager === 'function') window.teOpenTagManager();
                     break;
+                case 'click_teCreateNewTag':
+                    if (typeof window.click_teCreateNewTag === 'function') window.click_teCreateNewTag(el);
+                    break;
+                case 'click_teAddTagToTask':
+                    if (typeof window.click_teAddTagToTask === 'function') window.click_teAddTagToTask(el);
+                    break;
+                case 'click_teRemoveTagFromTask':
+                    if (typeof window.click_teRemoveTagFromTask === 'function') window.click_teRemoveTagFromTask(el);
+                    break;
+                case 'click_teCloseTaskContext':
+                    if (typeof window.teCloseTaskContext === 'function') window.teCloseTaskContext();
+                    break;
                 case 'click_window_closeTagManager':
                     if (typeof window.teCloseTagManager === 'function') window.teCloseTagManager();
                     break;
