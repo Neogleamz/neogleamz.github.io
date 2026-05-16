@@ -148,7 +148,7 @@ function teRenderSidebar() {
                             ${p.title}
                         </span>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <i class="fa-solid fa-pen" data-click="click_teOpenEditProject" data-project-id="${p.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'"></i>
+                            <span data-click="click_teOpenEditProject" data-project-id="${p.id}" style="font-size: 10px; cursor: pointer; padding: 2px; filter: grayscale(100%); opacity: 0.7;" onmouseover="this.style.filter='grayscale(0%)'; this.style.opacity=1;" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity=0.7;">✏️</span>
                             <span data-click="click_teDeleteProject" data-project-id="${p.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
                         </div>
                     </div>
