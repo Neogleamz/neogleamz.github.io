@@ -1804,6 +1804,7 @@ window.teRenderArchiveView = function() {
     const archivedTasks = taskEngineDB.taskz.filter(t => t.is_archived);
     const archivedCycles = taskEngineDB.cyclez.filter(c => c.is_archived);
     const archivedTeams = taskEngineDB.teams.filter(t => t.is_archived);
+    const archivedProjects = taskEngineDB.projectz.filter(p => p.is_archived);
     
     const countSpan = document.getElementById('te-archive-selected-count');
     if (countSpan) countSpan.textContent = '0';
@@ -1811,7 +1812,7 @@ window.teRenderArchiveView = function() {
     const checkboxAll = document.getElementById('te-archive-select-all');
     if (checkboxAll) checkboxAll.checked = false;
 
-    if (archivedTasks.length === 0 && archivedCycles.length === 0 && archivedTeams.length === 0) {
+    if (archivedTasks.length === 0 && archivedCycles.length === 0 && archivedTeams.length === 0 && archivedProjects.length === 0) {
         container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>';
         return;
     }
@@ -1828,6 +1829,7 @@ window.teRenderArchiveView = function() {
         </div>
     `;
     
+    archivedProjects.forEach(p => html += renderRow(p.id, p.title, 'project'));
     archivedCycles.forEach(c => html += renderRow(c.id, c.title, 'cycle'));
     archivedTeams.forEach(t => html += renderRow(t.id, t.name, 'team'));
     archivedTasks.forEach(t => html += renderRow(t.id, t.title, 'task'));
