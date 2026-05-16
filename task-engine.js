@@ -2293,15 +2293,14 @@ window.click_teRemoveTagFromTask = async function(element) {
     }
 };
 
-
 window.tePopulateTagFilter = function() {
     const filterSelect = document.getElementById('te-tag-filter');
     if (!filterSelect) return;
     
-    let html = '<option value=\"\">All Tags</option>';
+    let html = '<option value="">All Tags</option>';
     let sortedTags = [...taskEngineDB.tagz].sort((a, b) => a.name.localeCompare(b.name));
     sortedTags.forEach(t => {
-        html += <option value=\"${t.id}\">${t.name}</option>;
+        html += `<option value="${t.id}">${t.name}</option>`;
     });
     filterSelect.innerHTML = html;
 };
@@ -2339,12 +2338,12 @@ window.teRenderTagManagerList = function() {
     }
     
     sortedTags.forEach(t => {
-        html += <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
             <div style="display:flex; align-items:center; gap:10px; color:white; font-size:13px; font-weight:bold;">
-                <span style="width:16px; height:16px; border-radius:50%; background:;"></span> 
+                <span style="width:16px; height:16px; border-radius:50%; background:${t.color_hex || '#64748b'};"></span> ${t.name}
             </div>
             <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 8px; font-size:10px;">🗑️ Delete</button>
-        </div>;
+        </div>`;
     });
     
     list.innerHTML = html;
@@ -2386,7 +2385,7 @@ window.teDeleteTag = async function(element) {
     const tag = taskEngineDB.tagz.find(t => t.id === tagId);
     if (!tag) return;
     
-    if (!confirm(Are you sure you want to delete the tag \"\"? This will remove it from all tasks.)) return;
+    if (!confirm(`Are you sure you want to delete the tag "${tag.name}"? This will remove it from all tasks.`)) return;
     
     try {
         const { error } = await supabaseClient.from('tagz').delete().eq('id', tagId);
@@ -2399,9 +2398,6 @@ window.teDeleteTag = async function(element) {
         taskEngineDB.taskz.forEach(t => {
             if (t.metadata && t.metadata.tag_ids && t.metadata.tag_ids.includes(tagId)) {
                 t.metadata.tag_ids = t.metadata.tag_ids.filter(id => id !== tagId);
-                // Note: we don't spam Supabase with updates here to save requests, 
-                // the tag is gone so it just won't render. 
-                // A better approach would be to bulk update or just let it naturally resolve.
             }
         });
         
