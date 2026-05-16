@@ -37,7 +37,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 **Other Ideas**
 
-- [x] `feat/global-column-truncation` : **Global Column Truncation Standard** - Ensure all columns in data grids (like the Source column in Orderz) properly truncate with ellipsis (...) when resized too small, preventing text from overlapping adjacent columns. Document this as a global UI standard in the Master Reference and apply across all pages. [🤖 Gemini 3.1 Pro] [🧠 5.2k / 5k] [💸 $0.02 / $0.02]
+
 
 
 - [ ] `feat/global-math-engine-audit` : **Global Math Engine Audit** - Look through all the various .js files and ensure all math is done in the neogleamz-engine.js so we only have 1 source for all across the whole app, except direct test .js files. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
@@ -108,6 +108,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `feat/task-engine-timelines` : **Task Timelines & Calendar Sync** - Implement date picking/timelines for individual tasks and map them to render dynamically on the Calendar view. [🤖 AI Model] [🧠 8k / 8k] [💸 $0.03 / $0.03]
 - [🚀] `feat/task-engine-ui-colors` : **Task Engine UI Colorization** - Inject more vibrant colors into the left sidebar pane and the top navigation of the right pane (List/Board/Calendar) to create clearer visual distinction for active states. [🤖 AI Model] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 - [🚀] `feat/task-engine-board-interactions` : **Task Engine Board View Interactions** - Enable full interaction, opening, and working of individual tasks directly from within the Kanban Board view. [🤖 AI Model] [🧠 5k / 10k] [💸 $0.02 / $0.04]
+- [🚀] `feat/global-column-truncation` : **Global Column Truncation Standard** - Ensure all columns in data grids (like the Source column in Orderz) properly truncate with ellipsis (...) when resized too small, preventing text from overlapping adjacent columns. Document this as a global UI standard in the Master Reference and apply across all pages. [🤖 Gemini 3.1 Pro] [🧠 5.2k / 5k] [💸 $0.02 / $0.02]
+
 ### Target: `main`
 - [🚀] `feat/buildz-step-time-tracking` : Build capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics in the Work Orders archive.
 *(Epic: Orderz Financial Visibility)*

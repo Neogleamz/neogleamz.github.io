@@ -6,6 +6,7 @@
 
 ### Features & Refactors
 - **EDITZ Bulk Edit Modal**: Created a "Bulk Edit" button in the EDITZ tab that opens a fullscreen modal, letting the user search and mass edit all items. It functions like the sandbox staging environments for imports in NEXUZ, allowing the user to view and verify all changes before committing and approving the final upload.
+- **Global Column Truncation Standard**: Ensured all columns in data grids properly truncate with ellipsis (...) when resized too small, preventing text from overlapping adjacent columns. Documented this as a global UI standard in the Master Reference and applied across all pages.
 
 
 ## [1.0.31] - 2026-05-07
