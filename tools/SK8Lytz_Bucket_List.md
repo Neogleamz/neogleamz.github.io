@@ -35,7 +35,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
-- [🚀] `feat/asana-inline-tasks` : **Asana-style Inline Task Creation** - Refactor the Task Engine UI to support creating tasks and sections directly inline via rapid-entry rows, similar to Asana, without requiring modals or top-level dropdowns. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 
 
 ---
@@ -54,6 +53,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Asana Task Engine Overhaul**
+*(Shipped v1.0.32 — 2026-05-16)*
+- [🚀] `feat/asana-inline-tasks` : **Asana-style Inline Task Creation** - Refactor the Task Engine UI to support creating tasks and sections directly inline via rapid-entry rows, similar to Asana, without requiring modals or top-level dropdowns. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 
 ### Target: `fix/ui-state-refresh`
 *(Epic: UI State Persistence & Form Submission Prevention)*
