@@ -37,7 +37,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 **Other Ideas**
 
-- [ ] `feat/editz-bulk-edit-modal` : **EDITZ Bulk Edit Modal** - Create a "Bulk Edit" button in the EDITZ tab that opens a fullscreen modal, letting the user search and mass edit all items. It should function like the sandbox staging environments for imports in NEXUZ, allowing the user to view and verify all changes before committing and approving the final upload. [🤖 AI Model] [🧠 TBD / 20k] [💸 TBD / $0.05]
+
 - [ ] `feat/orderz-expandable-net-profit` : **Orderz Expandable Net Profit & Sandbox Routing** - Build expandable row functionality into the native Orderz page to view the whole order net vs. line item details (replacing the standalone Actual Net Breakdown modal). Retitle the "Actual Net" button to "Net Sandbox Engine" and route it directly to the Net Profit Sandbox Engine. [🤖 AI Model] [🧠 TBD / 8k] [💸 TBD / $0.03]
 - [ ] `feat/global-math-engine-audit` : **Global Math Engine Audit** - Look through all the various .js files and ensure all math is done in the neogleamz-engine.js so we only have 1 source for all across the whole app, except direct test .js files. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - [ ] `test/gross-revenue-math-audit` : **Gross Revenue Math Audit** - Review all numbers and how we calculate gross revenue. Currently showing 3293.86 vs Shopify's 3766.14. Reconcile differences, including the ~400 from ignored orders (1001-1004). Compare numbers against the provided Shopify Total Sales XML to ensure 100% mathematical parity. [🤖 Gemini 3.1 Pro] [🧠 TBD / 10k] [💸 TBD / $0.05]
@@ -326,3 +326,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `feat/sandbox-nomenclature-audit` : **Sandbox UI Transformation Audit** - Refactored the Sandbox UI into a strict 4-Tier matrix mapping literal DB schema columns to their CSV origin headers. Eliminated "ghost value" data stripping bugs to accurately map raw shipping metrics, successfully restoring exact conditional pass logic for complex exchanges.
 - [🚀] `style/sandbox-typography-spacing` : **Sandbox UI Typography & Layout Refactor** - Applied a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, and shrank the vertical height of the main header to reclaim screen space.
 - [🚀] `feat/live-staging-diff-highlighting` : **Live Staging DB Diff Highlighting** - Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records.
+
+### Target: `feat/editz-bulk-edit-modal`
+*(Epic: EDITZ Bulk Edit System)*
+- [🚀] `feat/editz-bulk-edit-modal` : **EDITZ Bulk Edit Modal** - Create a "Bulk Edit" button in the EDITZ tab that opens a fullscreen modal, letting the user search and mass edit all items. It should function like the sandbox staging environments for imports in NEXUZ, allowing the user to view and verify all changes before committing and approving the final upload. [🤖 AI Model] [🧠 4k / 20k] [💸 $0.02 / $0.05]

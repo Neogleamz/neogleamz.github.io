@@ -4,6 +4,10 @@
 ### Bug Fixes
 - **UI State Refresh Prevention**: Fixed the bug where creating a new item in EDITZ caused a full page refresh and redirected to the Stockpilez hub. Prevented default form submission behaviors across the application to ensure the user stays on the current page during manual CRUD operations.
 
+### Features & Refactors
+- **EDITZ Bulk Edit Modal**: Created a "Bulk Edit" button in the EDITZ tab that opens a fullscreen modal, letting the user search and mass edit all items. It functions like the sandbox staging environments for imports in NEXUZ, allowing the user to view and verify all changes before committing and approving the final upload.
+
+
 ## [1.0.31] - 2026-05-07
 ### Features & Refactors
 - **Live Staging DB Diff Highlighting**: Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records.
