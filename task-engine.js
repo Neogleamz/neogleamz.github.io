@@ -1237,6 +1237,13 @@ window.click_teOpenEditProject = function(element) {
                         <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Color Accent</label>
                         <input type="color" id="te-edit-project-color" value="${project.color_hex || '#f97316'}" style="width: 100%; height: 40px; padding: 0; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
                     </div>
+                    <div style="flex: 2;">
+                        <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Privacy</label>
+                        <select id="te-edit-project-visibility" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 14px; outline: none; box-sizing: border-box; cursor: pointer;">
+                            <option value="Organization" ${project.visibility === 'Organization' ? 'selected' : ''} style="background: var(--bg-panel); color: white;">Organization (Public)</option>
+                            <option value="Private" ${project.visibility === 'Private' ? 'selected' : ''} style="background: var(--bg-panel); color: white;">Private (Invite Only)</option>
+                        </select>
+                    </div>
                 </div>
                 <button class="btn-green-neon" data-click="click_teSaveProjectEdit" data-project-id="${project.id}" style="margin-top: 10px; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 14px; width: 100%;">Save Changes</button>
             </div>
@@ -1255,10 +1262,12 @@ window.click_teSaveProjectEdit = async function(element) {
     const projectId = element.getAttribute('data-project-id');
     const titleInput = document.getElementById('te-edit-project-title');
     const colorInput = document.getElementById('te-edit-project-color');
+    const visibilityInput = document.getElementById('te-edit-project-visibility');
     if (!projectId || !titleInput || !colorInput) return;
     
     const newTitle = titleInput.value.trim();
     const newColor = colorInput.value;
+    const newVisibility = visibilityInput ? visibilityInput.value : 'Organization';
     
     if (!newTitle) {
         alert('Project name cannot be empty.');
@@ -1272,7 +1281,7 @@ window.click_teSaveProjectEdit = async function(element) {
     btn.style.opacity = '0.5';
     
     try {
-        const { error } = await supabaseClient.from('projectz').update({ title: newTitle, color_hex: newColor }).eq('id', projectId);
+        const { error } = await supabaseClient.from('projectz').update({ title: newTitle, color_hex: newColor, visibility: newVisibility }).eq('id', projectId);
         if (error) throw error;
         
         // Update local cache
@@ -1280,6 +1289,7 @@ window.click_teSaveProjectEdit = async function(element) {
         if (project) {
             project.title = newTitle;
             project.color_hex = newColor;
+            project.visibility = newVisibility;
         }
         
         window.click_window_closeEditProject();
