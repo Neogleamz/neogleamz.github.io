@@ -351,7 +351,7 @@ function teRenderTaskGrid(filter = null) {
     });
     
     sortedCyclez.forEach(c => {
-        cycleGroups.set(c.id, { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [] });
+        cycleGroups.set(c.id, { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [], project_id: c.project_id || null });
     });
     
     // Sort tasks into cycles (only top-level tasks)
@@ -402,7 +402,7 @@ function teRenderTaskGrid(filter = null) {
     for (const [cid, group] of cycleGroups) {
         if (group.tasks.length === 0) {
             if (cid === 'unassigned' && totalTasks > 0) continue;
-            if (cid !== 'unassigned' && !window.teActiveProjectId) continue;
+            if (cid !== 'unassigned' && !window.teActiveProjectId && group.project_id !== null) continue;
         }
         
         let headerColor = group.color || '#64748b';
