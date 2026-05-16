@@ -28,5 +28,4 @@ supabase/.branches/
 *.csv
 
 # Ignore AI tracking, temporary scratch files, & planning docs
-docs/plans/
 scratch/

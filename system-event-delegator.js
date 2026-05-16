@@ -25,6 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'click_window_openEditzBulkModal':
+                    window.click_window_openEditzBulkModal();
+                    break;
+                case 'click_window_closeEditzBulkModal':
+                    window.click_window_closeEditzBulkModal();
+                    break;
+                case 'click_window_applyBulkFindReplace':
+                    window.click_window_applyBulkFindReplace();
+                    break;
+                case 'click_window_commitEditzBulkChanges':
+                    window.click_window_commitEditzBulkChanges();
+                    break;
                 case 'click_switchTab_invhub':
                     switchTab('invhub');
                     break;
@@ -1095,6 +1107,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'keyup_window_renderEditzBulkTable':
+                    window.keyup_window_renderEditzBulkTable();
+                    break;
                 case 'keyup_window_renderActiveTable':
                     window.renderActiveTable();
                     break;

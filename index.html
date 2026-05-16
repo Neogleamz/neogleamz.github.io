@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.05.15.1931"></script>
+    <script src="system-version.js?v=v.2026.05.15.1948"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.15.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.15.1948"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.15.1931"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.15.1948"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="system-event-delegator.js?v=v.2026.05.15.1931"></script>
+    <script src="system-event-delegator.js?v=v.2026.05.15.1948"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1727,6 +1727,7 @@
                         <div style="flex: 0.5; min-width: 70px;"><label>Multiplier</label><input id="m_mult" type="number" step="any" min="1" value="1"></div>
                         <div style="flex: 0.5; min-width: 70px;"><label>Total Cost ($)</label><input id="m_cost" type="number" step="any" placeholder="0.00"></div>
                         <button class="btn-purple" style="padding: 8px 10px; font-size: 13px; font-weight: bold; width:auto; height:35px; margin-right:5px;" data-click="click_autofillNeoNames">🪄 Auto-Fill Ledger</button>
+                        <button class="btn-orange" style="padding: 8px 15px; font-size: 13px; font-weight: bold; width:auto; height:35px; margin-right:5px;" data-click="click_window_openEditzBulkModal">📦 Bulk Edit</button>
                         <button class="btn-green" style="padding: 8px 15px; font-size: 13px; font-weight: bold; width:auto; height:35px;" data-click="click_addManualItem">+ Add Row</button>
                     </div>
                     <div style="margin-bottom: 10px;">
@@ -4681,6 +4682,185 @@
     async function addManualItem() { try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = payload[dbCol] || ""; } else { if (payload[dbCol] === undefined) payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(true); setMasterStatus("Added!", "mod-success"); setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); } }
     async function autofillNeoNames() { if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); setSysProgress(20, 'working'); try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neogleamz Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neogleamz Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(true); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'), 3000; }); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); } }
 
+    // --- EDITZ BULK EDIT SYSTEM ---
+    let editzBulkStagingArray = [];
+    let editzBulkModifiedTracking = new Set();
+    
+    window.click_window_openEditzBulkModal = function() {
+        if(finalResults.length === 0) return alert("No data available to edit.");
+        // Deep clone finalResults
+        editzBulkStagingArray = JSON.parse(JSON.stringify(finalResults));
+        editzBulkModifiedTracking.clear();
+        document.getElementById('editzBulkSearch').value = '';
+        document.getElementById('editzBulkFind').value = '';
+        document.getElementById('editzBulkReplace').value = '';
+        document.getElementById('editzBulkCommitCount').innerText = 'COMMIT 0 MODIFIED ITEMS';
+        document.getElementById('editzBulkModal').style.display = 'flex';
+        renderEditzBulkTable();
+    };
+    
+    window.click_window_closeEditzBulkModal = function() {
+        if(editzBulkModifiedTracking.size > 0) {
+            if(!confirm("You have unsaved changes. Are you sure you want to discard them?")) return;
+        }
+        document.getElementById('editzBulkModal').style.display = 'none';
+        editzBulkStagingArray = [];
+        editzBulkModifiedTracking.clear();
+    };
+    
+    window.keyup_window_renderEditzBulkTable = function() {
+        renderEditzBulkTable();
+    };
+    
+    function renderEditzBulkTable() {
+        let qStr = document.getElementById('editzBulkSearch').value.toLowerCase().trim();
+        let displayResults = editzBulkStagingArray;
+        if(qStr !== "") displayResults = editzBulkStagingArray.filter(row => Object.values(row).some(v => String(v ?? "").toLowerCase().includes(qStr)));
+        
+        let container = document.getElementById('editzBulkModalBody');
+        if (displayResults.length === 0) { container.innerHTML = "<div style='color:var(--text-muted);'>No matching rows found.</div>"; return; }
+        
+        let keys = Object.keys(displayResults[0]).filter(k => k !== '_RowKey');
+        
+        let h = "<table><thead><tr>" + keys.map(k => `<th>${k}</th>`).join('') + "</tr></thead><tbody>";
+        
+        displayResults.forEach(r => {
+            let rowKey = r['_RowKey'];
+            let isModified = editzBulkModifiedTracking.has(rowKey);
+            let rowStyle = isModified ? "background: rgba(16, 185, 129, 0.15);" : "";
+            
+            h += `<tr style="${rowStyle}">` + keys.map(k => {
+                let v = r[k];
+                let isN = typeof v === 'number';
+                let dVal = v ?? "";
+                if (isN && (k.includes('Cost') || k.includes('Price') || k.includes('Surcharge') || k.includes('Paid'))) {
+                    dVal = Number(v).toFixed(4);
+                } else if (isN) {
+                    dVal = Number(v).toFixed(2);
+                }
+                
+                let isManualRow = String(r['Parcel No']) === 'MANUAL';
+                let isEngineOverride = ['Neogleamz Name', 'Neogleamz Product', 'Lot Multiplier'].includes(k);
+                let isMutable = isEngineOverride || (isManualRow && !['Order Date', 'Parcel No', 'DI Item ID', 'Alibaba Order', 'Order No', 'Final Landed Cost ($)', 'Order Unit Price'].includes(k));
+                
+                if (isMutable) {
+                    let textStyle = isEngineOverride ? 'color:#0ea5e9; font-weight:bold;' : 'color:var(--text-main); font-weight:bold;';
+                    return `<td class="editable"><input type="text" value="${String(dVal).replace(/"/g, '&quot;')}" style="width:100%; min-width:80px; background:transparent; border:none; ${textStyle} outline:none; font-family:monospace;" onchange="window.onEditzBulkChange(this, '${rowKey.replace(/'/g, "\\'")}', '${k.replace(/'/g, "\\'")}', ${isN})"></td>`;
+                } else {
+                    return `<td style="color:var(--text-muted);">${dVal}</td>`;
+                }
+            }).join('') + "</tr>";
+        });
+        
+        container.innerHTML = h + "</tbody></table>";
+        document.getElementById('editzBulkCommitCount').innerText = `COMMIT ${editzBulkModifiedTracking.size} MODIFIED ITEMS`;
+    }
+    
+    window.onEditzBulkChange = function(input, rowKey, colKey, isN) {
+        let r = editzBulkStagingArray.find(x => x['_RowKey'] === rowKey);
+        if(!r) return;
+        
+        let newVal = input.value.trim();
+        if(isN) {
+            let numVal = parseFloat(newVal);
+            if(isNaN(numVal)) {
+                alert("Valid number required.");
+                renderEditzBulkTable();
+                return;
+            }
+            r[colKey] = numVal;
+        } else {
+            r[colKey] = newVal;
+        }
+        
+        editzBulkModifiedTracking.add(rowKey);
+        renderEditzBulkTable();
+    };
+    
+    window.click_window_applyBulkFindReplace = function() {
+        let col = document.getElementById('editzBulkTargetCol').value;
+        let findStr = document.getElementById('editzBulkFind').value;
+        let replaceStr = document.getElementById('editzBulkReplace').value;
+        
+        if(!findStr) return alert("Please enter a 'Find' string.");
+        
+        // Only target visible rows based on search
+        let qStr = document.getElementById('editzBulkSearch').value.toLowerCase().trim();
+        let displayResults = editzBulkStagingArray;
+        if(qStr !== "") displayResults = editzBulkStagingArray.filter(row => Object.values(row).some(v => String(v ?? "").toLowerCase().includes(qStr)));
+        
+        let replacedCount = 0;
+        
+        displayResults.forEach(r => {
+            let currentVal = String(r[col] ?? "");
+            if(currentVal.includes(findStr)) {
+                r[col] = currentVal.split(findStr).join(replaceStr);
+                editzBulkModifiedTracking.add(r['_RowKey']);
+                replacedCount++;
+            }
+        });
+        
+        if(replacedCount > 0) {
+            alert(`Replaced ${replacedCount} instances!`);
+            renderEditzBulkTable();
+        } else {
+            alert("No matching instances found in the visible rows for that column.");
+        }
+    };
+    
+    window.click_window_commitEditzBulkChanges = async function() {
+        if(editzBulkModifiedTracking.size === 0) return alert("No changes to commit.");
+        if(!confirm(`Are you sure you want to commit ${editzBulkModifiedTracking.size} modified items to the database?`)) return;
+        
+        sysLog(`Batch committing ${editzBulkModifiedTracking.size} edits...`);
+        setMasterStatus("Batch Saving...", "mod-working");
+        let btn = document.querySelector('[data-click="click_window_commitEditzBulkChanges"]');
+        let oldText = btn.innerHTML;
+        btn.innerHTML = "⏳ SAVING...";
+        
+        try {
+            let ups = [];
+            for(let rowKey of editzBulkModifiedTracking) {
+                let r = editzBulkStagingArray.find(x => x['_RowKey'] === rowKey);
+                if(!r) continue;
+                
+                // Compare to finalResults to get ONLY the changed columns
+                let orig = finalResults.find(x => x['_RowKey'] === rowKey);
+                let payload = {};
+                Object.keys(r).forEach(k => {
+                    if(k !== '_RowKey' && r[k] !== orig[k]) {
+                        let dbCol = colMap[k];
+                        if(dbCol) payload[dbCol] = r[k];
+                    }
+                });
+                
+                if(Object.keys(payload).length > 0) {
+                    let [pNo, di] = rowKey.split(':::');
+                    ups.push({ p: pNo, d: di, pay: payload });
+                }
+            }
+            
+            if(ups.length > 0) {
+                // Bulk updates using Promise.all
+                await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d)));
+            }
+            
+            setMasterStatus(`Saved ${ups.length} items!`, "mod-success");
+            editzBulkModifiedTracking.clear();
+            document.getElementById('editzBulkModal').style.display = 'none';
+            btn.innerHTML = oldText;
+            await loadData(true);
+            setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
+            
+        } catch(err) {
+            sysLog(err.message, true);
+            setMasterStatus("Error in Batch Commit", "mod-error");
+            alert("Error during commit: " + err.message);
+            btn.innerHTML = oldText;
+        }
+    };
+    // --- END EDITZ BULK EDIT SYSTEM ---
+
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
     async function updateDBCheckbox(chk, rowKey, dbCol) {
         try {
@@ -4889,19 +5069,19 @@
         }
     };
 </script>
-<script src="neogleamz-engine.js?v=v.2026.05.15.1931"></script>
-<script src="system-tools-module.js?v=v.2026.05.15.1931"></script>
-<script src="bom-module.js?v=v.2026.05.15.1931"></script>
-<script src="inventory-module.js?v=v.2026.05.15.1931"></script>
-<script src="packerz-module.js?v=v.2026.05.15.1931"></script>
-<script src="production-module.js?v=v.2026.05.15.1931"></script>
-<script src="sales-module.js?v=v.2026.05.15.1931"></script>
-<script src="analytics-module.js?v=v.2026.05.15.1931"></script>
-<script src="ceo-module.js?v=v.2026.05.15.1931"></script>
-<script src="task-engine.js?v=v.2026.05.15.1931"></script>
-<script src="print-module.js?v=v.2026.05.15.1931"></script>
-<script src="scraper-module.js?v=v.2026.05.15.1931"></script>
-<script src="socialz-module.js?v=v.2026.05.15.1931"></script>
+<script src="neogleamz-engine.js?v=v.2026.05.15.1948"></script>
+<script src="system-tools-module.js?v=v.2026.05.15.1948"></script>
+<script src="bom-module.js?v=v.2026.05.15.1948"></script>
+<script src="inventory-module.js?v=v.2026.05.15.1948"></script>
+<script src="packerz-module.js?v=v.2026.05.15.1948"></script>
+<script src="production-module.js?v=v.2026.05.15.1948"></script>
+<script src="sales-module.js?v=v.2026.05.15.1948"></script>
+<script src="analytics-module.js?v=v.2026.05.15.1948"></script>
+<script src="ceo-module.js?v=v.2026.05.15.1948"></script>
+<script src="task-engine.js?v=v.2026.05.15.1948"></script>
+<script src="print-module.js?v=v.2026.05.15.1948"></script>
+<script src="scraper-module.js?v=v.2026.05.15.1948"></script>
+<script src="socialz-module.js?v=v.2026.05.15.1948"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5359,18 +5539,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.15.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.15.1948"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.15.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.15.1948"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.15.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.15.1948"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.15.1931"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.15.1931"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.15.1931"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.15.1948"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.15.1948"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.15.1948"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.05.15.1931"></script>
-    <script src="labelz-module.js?v=v.2026.05.15.1931"></script>
+    <script src="barcodz-module.js?v=v.2026.05.15.1948"></script>
+    <script src="labelz-module.js?v=v.2026.05.15.1948"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -5390,6 +5570,42 @@
                 
                 <!-- TEST MODE UI -->
                 <button id="btnSandboxClose" class="btn-red-muted" style="padding:10px 25px; font-weight:bold; font-size:12px; display:block;" data-click="click_if_window_cancelSandboxImport_13">Close Data Viewer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITZ Bulk Edit Sandbox Modal -->
+    <div id="editzBulkModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+        <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
+            <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; background:rgba(245, 158, 11, 0.1); position:relative;">
+                <div>
+                    <h2 style="margin:0; font-size:18px; color:#f59e0b; display:flex; align-items:center; gap:10px;">📦 EDITZ BULK STAGING</h2>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">Database physically bypassed until committed. Matrix exists in local memory.</p>
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <input type="text" id="editzBulkSearch" data-keyup="keyup_window_renderEditzBulkTable" placeholder="Filter staging..." style="width: 250px; border: 1px solid var(--border-input); border-radius: 4px; padding: 8px; background: var(--bg-input); color: var(--text-color);">
+                </div>
+            </div>
+            <div style="padding:10px 25px; border-bottom:1px solid rgba(255,255,255,0.1); background:var(--bg-panel); display:flex; gap:15px; align-items:center;">
+                <span style="font-size:12px; font-weight:bold; color:var(--text-color);">🪄 Bulk Action:</span>
+                <select id="editzBulkTargetCol" style="padding:6px; background:var(--bg-input); border:1px solid var(--border-input); color:var(--text-color); border-radius:4px; font-size:12px;">
+                    <option value="Neogleamz Name">Neogleamz Name</option>
+                    <option value="Neogleamz Product">Neogleamz Product</option>
+                    <option value="Item Name">Item Name (Raw)</option>
+                    <option value="Specification">Specification</option>
+                    <option value="Quantity">Order Qty</option>
+                    <option value="Total Landed Cost ($)">Total Cost</option>
+                </select>
+                <input type="text" id="editzBulkFind" placeholder="Find..." style="padding:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-color); border-radius:4px; font-size:12px; width:150px;">
+                <input type="text" id="editzBulkReplace" placeholder="Replace with..." style="padding:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-color); border-radius:4px; font-size:12px; width:150px;">
+                <button class="btn-purple" style="padding:6px 15px; font-size:12px; font-weight:bold;" data-click="click_window_applyBulkFindReplace">Apply to Visible Rows</button>
+            </div>
+            <div id="editzBulkModalBody" style="padding:20px; flex:1; overflow:auto; font-family:monospace; font-size:11px;">
+                <!-- DYNAMIC TABLE ARRAY GENERATES HERE -->
+            </div>
+            <div style="padding:15px 25px; border-top:1px solid rgba(255,255,255,0.1); background:var(--bg-panel); justify-content:flex-end; gap:15px; display:flex;">
+                <button class="btn-red-muted" style="padding:10px 20px; font-weight:bold; font-size:12px;" data-click="click_window_closeEditzBulkModal">🗑️ Discard Changes</button>
+                <button class="btn-green-neon" style="padding:10px 25px; font-weight:bold; font-size:13px;" data-click="click_window_commitEditzBulkChanges">✅ <span id="editzBulkCommitCount">COMMIT 0 MODIFIED ITEMS</span></button>
             </div>
         </div>
     </div>
