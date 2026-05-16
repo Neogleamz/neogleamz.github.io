@@ -257,7 +257,11 @@ function teRenderTaskGrid(filter = null) {
     let cycleGroups = new Map();
     cycleGroups.set('unassigned', { title: 'No Section', color: '#64748b', tasks: [] });
     
-    let sortedCyclez = taskEngineDB.cyclez.filter(c => !c.is_archived).sort((a,b) => {
+    let sortedCyclez = taskEngineDB.cyclez.filter(c => {
+        if (c.is_archived) return false;
+        if (window.teActiveProjectId) return c.project_id === window.teActiveProjectId;
+        return true;
+    }).sort((a,b) => {
         let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
         let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
         return aSort - bSort;
@@ -309,8 +313,14 @@ function teRenderTaskGrid(filter = null) {
     }
     // Render loop
     html += `<div id="te-sections-wrapper" class="te-sortable-sections-list">`;
+    let totalTasks = 0;
+    for (const [cid, group] of cycleGroups) totalTasks += group.tasks.length;
+
     for (const [cid, group] of cycleGroups) {
-        if (group.tasks.length === 0 && cid === 'unassigned' && cycleGroups.size > 1) continue;
+        if (group.tasks.length === 0) {
+            if (cid === 'unassigned' && totalTasks > 0) continue;
+            if (cid !== 'unassigned' && !window.teActiveProjectId) continue;
+        }
         
         let headerColor = group.color || '#64748b';
         html += `
@@ -1106,9 +1116,18 @@ window.teCreateProject = async function() {
                     <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Project Name</label>
                     <input type="text" id="te-new-project-title" placeholder="e.g. Q3 Marketing Launch" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 14px; outline: none; box-sizing: border-box;">
                 </div>
-                <div>
-                    <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Color Accent</label>
-                    <input type="color" id="te-new-project-color" value="#f97316" style="width: 40px; height: 40px; border: none; border-radius: 6px; background: transparent; cursor: pointer; padding: 0;">
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Color Accent</label>
+                        <input type="color" id="te-new-project-color" value="#f97316" style="width: 40px; height: 40px; border: none; border-radius: 6px; background: transparent; cursor: pointer; padding: 0;">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Privacy</label>
+                        <select id="te-new-project-visibility" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 14px; outline: none; box-sizing: border-box; cursor: pointer;">
+                            <option value="Organization" style="background: var(--bg-panel); color: white;">Organization (Public)</option>
+                            <option value="Private" style="background: var(--bg-panel); color: white;">Private (Invite Only)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); display: flex; justify-content: flex-end; gap: 10px;">
@@ -1123,6 +1142,7 @@ window.teCreateProject = async function() {
     
     let input = document.getElementById('te-new-project-title');
     let colorInput = document.getElementById('te-new-project-color');
+    let visibilityInput = document.getElementById('te-new-project-visibility');
     let submitBtn = document.getElementById('te-submit-project-btn');
     
     if (input) input.focus();
@@ -1139,6 +1159,7 @@ window.teCreateProject = async function() {
         let title = input.value.trim();
         if (!title) return;
         let color = colorInput ? colorInput.value : '#f97316';
+        let vis = visibilityInput ? visibilityInput.value : 'Organization';
         
         submitBtn.textContent = 'CREATING...';
         submitBtn.disabled = true;
@@ -1147,7 +1168,7 @@ window.teCreateProject = async function() {
             const { data, error } = await supabaseClient.from('projectz').insert([{
                 title: title,
                 color_hex: color,
-                visibility: 'Organization',
+                visibility: vis,
                 health_status: 'On Track'
             }]).select();
             
@@ -1816,7 +1837,7 @@ window.teRenderArchiveView = function() {
 
 window.teArchiveEntity = async function(type, id) {
     try {
-        let table = type === 'task' ? 'taskz' : (type === 'cycle' ? 'cyclez' : 'teams');
+        let table = type === 'task' ? 'taskz' : (type === 'project' ? 'projectz' : (type === 'cycle' ? 'cyclez' : 'teams'));
         const { error } = await supabaseClient.from(table).update({ is_archived: true }).eq('id', id);
         if (error) throw error;
         
@@ -1848,7 +1869,7 @@ window.teArchiveEntity = async function(type, id) {
 
 window.teRestoreEntity = async function(type, id) {
     try {
-        let table = type === 'task' ? 'taskz' : (type === 'cycle' ? 'cyclez' : 'teams');
+        let table = type === 'task' ? 'taskz' : (type === 'project' ? 'projectz' : (type === 'cycle' ? 'cyclez' : 'teams'));
         const { error } = await supabaseClient.from(table).update({ is_archived: false }).eq('id', id);
         if (error) throw error;
         
@@ -1862,7 +1883,7 @@ window.teRestoreEntity = async function(type, id) {
 
 window.teHardDeleteEntity = async function(type, id) {
     try {
-        let table = type === 'task' ? 'taskz' : (type === 'cycle' ? 'cyclez' : 'teams');
+        let table = type === 'task' ? 'taskz' : (type === 'project' ? 'projectz' : (type === 'cycle' ? 'cyclez' : 'teams'));
         const { error } = await supabaseClient.from(table).delete().eq('id', id);
         if (error) throw error;
         
