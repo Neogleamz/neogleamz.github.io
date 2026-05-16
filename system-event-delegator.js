@@ -90,6 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teCreateNewTask':
                     if (window.teCreateNewTask) window.teCreateNewTask();
                     break;
+                case 'click_teOpenTagManager':
+                    if (typeof window.teOpenTagManager === 'function') window.teOpenTagManager();
+                    break;
+                case 'click_window_closeTagManager':
+                    if (typeof window.teCloseTagManager === 'function') window.teCloseTagManager();
+                    break;
+                case 'click_teCreateTagFromManager':
+                    if (typeof window.teCreateTagFromManager === 'function') window.teCreateTagFromManager();
+                    break;
+                case 'click_teDeleteTag':
+                    if (typeof window.teDeleteTag === 'function') window.teDeleteTag(el);
+                    break;
                 case 'click_teOpenTaskContext':
                     if (window.teOpenTaskContext) window.teOpenTaskContext(el.getAttribute('data-task-id'));
                     break;
@@ -1155,6 +1167,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.sandboxSearchDict(el.getAttribute('data-sheet-name'), el.value);
                     }
                     break;
+                case 'keyup_teTagSuggest':
+                    if (window.keyup_teTagSuggest) window.keyup_teTagSuggest(event);
+                    break;
+                case 'keyup_teFilterTaskSearch':
+                    if (window.keyup_teFilterTaskSearch) window.keyup_teFilterTaskSearch(event);
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
@@ -1480,6 +1498,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_teUpdateDueDate':
                     if (typeof window.teUpdateDueDate === 'function' && window.currentOpenTaskId) window.teUpdateDueDate(window.currentOpenTaskId, el.value);
+                    break;
+                case 'change_teFilterTaskSearch':
+                    if (window.change_teFilterTaskSearch) window.change_teFilterTaskSearch(event);
                     break;
             }
         } catch (error) {
