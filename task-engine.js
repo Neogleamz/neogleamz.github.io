@@ -449,13 +449,11 @@ function teRenderTaskGrid(filter = null) {
     }
     html += `</div>`;
     
-    if (window.teActiveProjectId) {
-        html += `
-            <div style="margin-top: 20px; padding: 10px 15px; cursor: pointer; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; gap: 8px; border-radius: 8px; max-width: 200px;" data-click="click_teCreateCycle" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'">
-                <span style="font-size: 16px;">+</span> Add section
-            </div>
-        `;
-    }
+    html += `
+        <div style="margin-top: 20px; padding: 10px 15px; cursor: pointer; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; gap: 8px; border-radius: 8px; max-width: 200px;" data-click="click_teCreateCycle" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'">
+            <span style="font-size: 16px;">+</span> Add section
+        </div>
+    `;
     
     wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     
