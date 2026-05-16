@@ -36,8 +36,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
 **Other Ideas**
-
-
+- [ ] `feat/asana-inline-tasks` : **Asana-style Inline Task Creation** - Refactor the Task Engine UI to support creating tasks and sections directly inline via rapid-entry rows, similar to Asana, without requiring modals or top-level dropdowns. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 
 ---
