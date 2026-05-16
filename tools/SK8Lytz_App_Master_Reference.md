@@ -128,6 +128,11 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
   - `.overlay-center-flex`: Full centering overlay for media play buttons or status icons.
 * **Dropdown Anchoring**: Utility classes like `.task-dropdown-menu` are used to standardize absolute coordinate anchoring for menus while keeping logic clean of inline `style` tags.
 
+### M. Global Column Truncation Standard
+* **Fluid Grid Constraints**: To prevent data-heavy columns (like Storefront SKU, Recipe Name, Source, Location) from blowing out the bounds of Flexbox or CSS Grid layouts, you MUST wrap their native `<td>` or container elements with the `.trunc-col` class.
+* **Class Definition**: The `.trunc-col` class natively enforces `white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: clamp(100px, 15vw, 250px); cursor: pointer;`. 
+* **Interaction**: Hovering or clicking (focus) natively overrides the constraint to `max-width: none !important; position: relative; z-index: 100;` displaying the full string in an elevated pop-out.
+
 ---
 
 ## 🗄️ 3. Database Schemas (Supabase)

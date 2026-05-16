@@ -37,7 +37,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 **Other Ideas**
 
-- [ ] `feat/global-column-truncation` : **Global Column Truncation Standard** - Ensure all columns in data grids (like the Source column in Orderz) properly truncate with ellipsis (...) when resized too small, preventing text from overlapping adjacent columns. Document this as a global UI standard in the Master Reference and apply across all pages. [🤖 Gemini 3.1 Pro] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [x] `feat/global-column-truncation` : **Global Column Truncation Standard** - Ensure all columns in data grids (like the Source column in Orderz) properly truncate with ellipsis (...) when resized too small, preventing text from overlapping adjacent columns. Document this as a global UI standard in the Master Reference and apply across all pages. [🤖 Gemini 3.1 Pro] [🧠 5.2k / 5k] [💸 $0.02 / $0.02]
 
 
 - [ ] `feat/global-math-engine-audit` : **Global Math Engine Audit** - Look through all the various .js files and ensure all math is done in the neogleamz-engine.js so we only have 1 source for all across the whole app, except direct test .js files. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
