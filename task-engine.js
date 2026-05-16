@@ -2310,9 +2310,6 @@ window.teActivateInlineTask = function(containerElement) {
 
 window.teCreateInlineTask = async function(title, cycleId) {
     try {
-        let currentUser = localStorage.getItem('neogleamz_current_user');
-        let spoofAssignee = (currentUser && currentUser !== 'none') ? currentUser : '';
-        
         let payload = {
             title: title,
             status: 'Todo',
@@ -2320,10 +2317,6 @@ window.teCreateInlineTask = async function(title, cycleId) {
             cycle_id: cycleId
         };
         if (window.teActiveProjectId) payload.project_id = window.teActiveProjectId;
-        
-        if (spoofAssignee) {
-            payload.metadata = { spoofed_assignee: spoofAssignee };
-        }
         
         const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
         
@@ -2614,4 +2607,39 @@ window.teDeleteTag = async function(element) {
         console.error('[TaskEngine] Delete tag failed', e);
         alert('Failed to delete tag. Check console for details.');
     }
+};
+
+// --- Flyout Resizer ---
+let isFlyoutResizing = false;
+let startFlyoutX = 0;
+let startFlyoutWidth = 0;
+
+window.initFlyoutResizer = function(e) {
+    if(e) e.preventDefault();
+    isFlyoutResizing = true;
+    startFlyoutX = e.clientX;
+    const flyout = document.getElementById('taskContextFlyout');
+    startFlyoutWidth = flyout.offsetWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.addEventListener('mousemove', window.doFlyoutResize);
+    document.addEventListener('mouseup', window.stopFlyoutResize);
+};
+
+window.doFlyoutResize = function(e) {
+    if(!isFlyoutResizing) return;
+    const flyout = document.getElementById('taskContextFlyout');
+    if(flyout) {
+        const delta = startFlyoutX - e.clientX;
+        let newWidth = startFlyoutWidth + delta;
+        if(newWidth < 300) newWidth = 300;
+        if(newWidth > 800) newWidth = 800;
+        flyout.style.width = newWidth + 'px';
+    }
+};
+
+window.stopFlyoutResize = function(e) {
+    isFlyoutResizing = false;
+    document.body.style.cursor = '';
+    document.removeEventListener('mousemove', window.doFlyoutResize);
+    document.removeEventListener('mouseup', window.stopFlyoutResize);
 };

@@ -282,9 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teActivateInlineTask':
                     if(typeof window.teActivateInlineTask==='function') window.teActivateInlineTask(el);
                     break;
-                case 'click_teToggleGlobalCreateMenu':
-                    if (typeof window.teToggleGlobalCreateMenu === 'function') window.teToggleGlobalCreateMenu();
-                    break;
+
                 case 'click_teCreateCycle':
                     if(typeof window.teCreateCycle==='function') window.teCreateCycle();
                     break;
@@ -306,9 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSaveProjectEdit':
                     if(typeof window.click_teSaveProjectEdit==='function') window.click_teSaveProjectEdit(el);
                     break;
-                case 'click_teCreateTeam':
-                    if(typeof window.teCreateTeam==='function') window.teCreateTeam();
-                    break;
+
                 case 'click_teDeleteCycle':
                     event.stopPropagation();
                     if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('cycle', el.getAttribute('data-cycle-id'));
@@ -1227,6 +1223,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'mousedown_initPackerzLiveSopResize_event':
                     initPackerzLiveSopResize(event);
+                    break;
+                case 'mousedown_initFlyoutResizer_event':
+                    if (typeof initFlyoutResizer === 'function') initFlyoutResizer(event);
                     break;
             }
         } catch (error) {
