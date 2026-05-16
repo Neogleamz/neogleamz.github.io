@@ -282,11 +282,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teActivateInlineTask':
                     if(typeof window.teActivateInlineTask==='function') window.teActivateInlineTask(el);
                     break;
+                case 'click_teToggleGlobalCreateMenu':
+                    if (typeof window.teToggleGlobalCreateMenu === 'function') window.teToggleGlobalCreateMenu();
+                    break;
                 case 'click_teCreateCycle':
                     if(typeof window.teCreateCycle==='function') window.teCreateCycle();
                     break;
                 case 'click_teCreateProject':
                     if(typeof window.teCreateProject==='function') window.teCreateProject();
+                    break;
+                case 'click_teCreateTeam':
+                    if(typeof window.teCreateTeam==='function') window.teCreateTeam();
                     break;
                 case 'click_teSelectProject':
                     if(typeof window.teSelectProject==='function') window.teSelectProject(el.getAttribute('data-project-id'));

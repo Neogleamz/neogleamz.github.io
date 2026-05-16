@@ -1325,6 +1325,29 @@ window.click_teSaveProjectEdit = async function(element) {
     }
 };
 
+window.teToggleGlobalCreateMenu = function() {
+    let dropdown = document.getElementById('te-global-create-dropdown');
+    if (dropdown) {
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'flex';
+            
+            // Add a one-time click listener to close it when clicking outside
+            setTimeout(() => {
+                const closeHandler = function(e) {
+                    if (!e.target.closest('#te-global-create-dropdown') && !e.target.closest('[data-click="click_teToggleGlobalCreateMenu"]')) {
+                        dropdown.style.display = 'none';
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+                document.addEventListener('click', closeHandler);
+            }, 10);
+            
+        } else {
+            dropdown.style.display = 'none';
+        }
+    }
+};
+
 window.teCreateProject = async function() {
     if (document.getElementById('te-create-project-modal')) return;
     
