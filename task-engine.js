@@ -242,7 +242,7 @@ function teRenderTaskGrid(filter = null) {
         if (filter === 'in_progress') return t.status === 'In Progress';
         if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
         if (filter === 'inbox') {
-            if (t.status === 'Completed' || t.status === 'Done') return false;
+            if (t.status === 'Completed' || t.status === 'Done' || t.status === 'In Progress') return false;
             let meta = t.metadata || {};
             let assignee = meta.spoofed_assignee || 'UNASSIGNED';
             
