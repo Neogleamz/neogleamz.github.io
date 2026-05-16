@@ -147,7 +147,10 @@ function teRenderSidebar() {
                             <span style="display:inline-block; width:10px; height:10px; background:${p.color_hex || '#f97316'}; border-radius:3px;"></span>
                             ${p.title}
                         </span>
-                        <span data-click="click_teDeleteProject" data-project-id="${p.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <i class="fa-solid fa-pen" data-click="click_teOpenEditProject" data-project-id="${p.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'"></i>
+                            <span data-click="click_teDeleteProject" data-project-id="${p.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1206,6 +1209,97 @@ window.teSelectProject = function(projectId) {
         if (titleEl) titleEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`;
     }
     teSwitchView('list');
+};
+
+window.click_teOpenEditProject = function(element) {
+    if (document.getElementById('te-edit-project-modal')) return;
+    const projectId = element.getAttribute('data-project-id');
+    const project = taskEngineDB.projectz.find(p => p.id === projectId);
+    if (!project) return;
+    
+    let modalOverlay = document.createElement('div');
+    modalOverlay.id = 'te-edit-project-modal';
+    modalOverlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 999999; display: flex; align-items: center; justify-content: center; pointer-events: auto; margin: 0; padding: 0;';
+    
+    let html = `
+        <div style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 400px; max-width: 90vw; margin: auto; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <div class="pane-header-bar" style="position: relative; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
+                <div class="pane-header-title">Edit Project</div>
+                <div class="modal-close-btn te-proj-close" data-click="click_window_closeEditProject" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.1)'">✖ CLOSE</div>
+            </div>
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Project Name</label>
+                    <input type="text" id="te-edit-project-title" value="${project.title.replace(/"/g, '&quot;')}" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 14px; outline: none; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Color Accent</label>
+                        <input type="color" id="te-edit-project-color" value="${project.color_hex || '#f97316'}" style="width: 100%; height: 40px; padding: 0; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
+                    </div>
+                </div>
+                <button class="btn-green-neon" data-click="click_teSaveProjectEdit" data-project-id="${project.id}" style="margin-top: 10px; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 14px; width: 100%;">Save Changes</button>
+            </div>
+        </div>
+    `;
+    modalOverlay.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    document.body.appendChild(modalOverlay);
+};
+
+window.click_window_closeEditProject = function() {
+    let m = document.getElementById('te-edit-project-modal');
+    if (m) m.remove();
+};
+
+window.click_teSaveProjectEdit = async function(element) {
+    const projectId = element.getAttribute('data-project-id');
+    const titleInput = document.getElementById('te-edit-project-title');
+    const colorInput = document.getElementById('te-edit-project-color');
+    if (!projectId || !titleInput || !colorInput) return;
+    
+    const newTitle = titleInput.value.trim();
+    const newColor = colorInput.value;
+    
+    if (!newTitle) {
+        alert('Project name cannot be empty.');
+        return;
+    }
+    
+    let btn = element;
+    let oldText = btn.textContent;
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    
+    try {
+        const { error } = await supabaseClient.from('projectz').update({ title: newTitle, color_hex: newColor }).eq('id', projectId);
+        if (error) throw error;
+        
+        // Update local cache
+        let project = taskEngineDB.projectz.find(p => p.id === projectId);
+        if (project) {
+            project.title = newTitle;
+            project.color_hex = newColor;
+        }
+        
+        window.click_window_closeEditProject();
+        window.teRenderSidebar();
+        
+        // Update main header if this is the active project
+        if (window.teActiveProjectId === projectId) {
+            let titleEl = document.getElementById('te-main-header-title');
+            if (titleEl) {
+                titleEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`;
+            }
+        }
+        
+    } catch(e) {
+        console.error('[TaskEngine] Update Project failed', e);
+        alert('Failed to update project. Check console.');
+        btn.textContent = oldText;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
 };
 
 window.teCreateProject = async function() {
@@ -2366,7 +2460,8 @@ window.teRenderTagManagerList = function() {
     sortedTags.forEach(t => {
         html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
             <div style="display:flex; align-items:center; gap:10px; color:white; font-size:13px; font-weight:bold;">
-                <span style="width:16px; height:16px; border-radius:50%; background:${t.color_hex || '#64748b'};"></span> ${t.name}
+                <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:20px; height:20px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent;">
+                ${t.name}
             </div>
             <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 8px; font-size:10px;">🗑️ Delete</button>
         </div>`;
@@ -2402,6 +2497,24 @@ window.teCreateTagFromManager = async function() {
         console.error('[TaskEngine] Create tag failed', e);
         alert('Failed to create tag. Check console for details.');
     }
+};
+
+window.change_teUpdateTagColor = async function(element) {
+    const tagId = element.getAttribute('data-tag-id');
+    const newColor = element.value;
+    if (!tagId || !newColor) return;
+    
+    let tag = taskEngineDB.tagz.find(t => t.id === tagId);
+    if (tag) tag.color_hex = newColor;
+    
+    if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
+    if (window.currentOpenTaskId && typeof teRenderTagEditor === 'function') {
+        teRenderTagEditor(window.currentOpenTaskId);
+    }
+    
+    try {
+        await supabaseClient.from('tagz').update({ color_hex: newColor }).eq('id', tagId);
+    } catch(e) { console.error('[TaskEngine] Update Tag Color failed', e); }
 };
 
 window.teDeleteTag = async function(element) {

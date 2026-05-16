@@ -291,6 +291,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSelectProject':
                     if(typeof window.teSelectProject==='function') window.teSelectProject(el.getAttribute('data-project-id'));
                     break;
+                case 'click_teOpenEditProject':
+                    if(typeof window.click_teOpenEditProject==='function') window.click_teOpenEditProject(el);
+                    break;
+                case 'click_window_closeEditProject':
+                    if(typeof window.click_window_closeEditProject==='function') window.click_window_closeEditProject();
+                    break;
+                case 'click_teSaveProjectEdit':
+                    if(typeof window.click_teSaveProjectEdit==='function') window.click_teSaveProjectEdit(el);
+                    break;
                 case 'click_teCreateTeam':
                     if(typeof window.teCreateTeam==='function') window.teCreateTeam();
                     break;
@@ -1501,6 +1510,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleFileSelectTest_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
+                    break;
+                case 'change_teUpdateTagColor':
+                    if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
                     break;
                 case 'change_teChangeIdentity':
                     if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
