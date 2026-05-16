@@ -71,10 +71,26 @@ window.teChangeIdentity = function(userId) {
         localStorage.setItem('neogleamz_current_user', userId);
     }
     teUpdateInboxBadge();
-    // Refresh inbox if that's what we are viewing
+    
+    // Privacy kick logic
+    if (window.teActiveProjectId) {
+        let p = taskEngineDB.projectz.find(proj => proj.id === window.teActiveProjectId);
+        if (p && p.visibility === 'Private') {
+            let owner = (p.metadata && p.metadata.spoofed_owner) || null;
+            if (owner && owner !== userId) {
+                window.teSwitchView('inbox');
+                return;
+            }
+        }
+    }
+    
+    teRenderSidebar();
+    
     let title = document.getElementById('te-main-header-title');
     if (title && title.textContent === 'Inbox View') {
         window.teSwitchView('inbox');
+    } else {
+        if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
     }
 };
 
@@ -103,7 +119,15 @@ function teRenderSidebar() {
     
     if (projectzList) {
         let projectHTML = '';
-        taskEngineDB.projectz.filter(p => !p.is_archived).forEach(p => {
+        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
+        taskEngineDB.projectz.filter(p => {
+            if (p.is_archived) return false;
+            if (p.visibility === 'Private') {
+                let owner = (p.metadata && p.metadata.spoofed_owner) || null;
+                if (owner && owner !== currentUser) return false;
+            }
+            return true;
+        }).forEach(p => {
             let isActive = window.teActiveProjectId === p.id ? 'active' : '';
             projectHTML += `
                 <div class="task-nav-link ${isActive}" style="flex-direction: column; align-items: flex-start; position: relative;" data-click="click_teSelectProject" data-project-id="${p.id}">
@@ -179,7 +203,7 @@ function teRenderTaskGrid(filter = null) {
     let html = '';
     
     // Determine filters
-    let currentUser = localStorage.getItem('neogleamz_current_user');
+    let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
     let taskList = taskEngineDB.taskz;
     
     if (filter === 'my_tasks' && currentUser && currentUser !== 'none') {
@@ -192,6 +216,15 @@ function teRenderTaskGrid(filter = null) {
     // Filter tasks based on view
     let displayTasks = taskList.filter(t => {
         if (t.is_archived) return false;
+        
+        if (t.project_id) {
+            let p = taskEngineDB.projectz.find(proj => proj.id === t.project_id);
+            if (p && p.visibility === 'Private') {
+                let owner = (p.metadata && p.metadata.spoofed_owner) || null;
+                if (owner && owner !== currentUser) return false;
+            }
+        }
+        
         if (filter === 'in_progress') return t.status === 'In Progress';
         if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
         if (filter === 'inbox') {
@@ -1160,6 +1193,7 @@ window.teCreateProject = async function() {
         if (!title) return;
         let color = colorInput ? colorInput.value : '#f97316';
         let vis = visibilityInput ? visibilityInput.value : 'Organization';
+        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
         
         submitBtn.textContent = 'CREATING...';
         submitBtn.disabled = true;
@@ -1169,6 +1203,7 @@ window.teCreateProject = async function() {
                 title: title,
                 color_hex: color,
                 visibility: vis,
+                metadata: { spoofed_owner: currentUser },
                 health_status: 'On Track'
             }]).select();
             
