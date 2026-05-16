@@ -90,6 +90,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teCreateNewTask':
                     if (window.teCreateNewTask) window.teCreateNewTask();
                     break;
+                case 'click_teOpenTagManager':
+                    if (typeof window.teOpenTagManager === 'function') window.teOpenTagManager();
+                    break;
+                case 'click_teCreateNewTag':
+                    if (typeof window.click_teCreateNewTag === 'function') window.click_teCreateNewTag(el);
+                    break;
+                case 'click_teAddTagToTask':
+                    if (typeof window.click_teAddTagToTask === 'function') window.click_teAddTagToTask(el);
+                    break;
+                case 'click_teRemoveTagFromTask':
+                    if (typeof window.click_teRemoveTagFromTask === 'function') window.click_teRemoveTagFromTask(el);
+                    break;
+                case 'click_teCloseTaskContext':
+                    if (typeof window.teCloseTaskContext === 'function') window.teCloseTaskContext();
+                    break;
+                case 'click_window_closeTagManager':
+                    if (typeof window.teCloseTagManager === 'function') window.teCloseTagManager();
+                    break;
+                case 'click_teCreateTagFromManager':
+                    if (typeof window.teCreateTagFromManager === 'function') window.teCreateTagFromManager();
+                    break;
+                case 'click_teDeleteTag':
+                    if (typeof window.teDeleteTag === 'function') window.teDeleteTag(el);
+                    break;
                 case 'click_teOpenTaskContext':
                     if (window.teOpenTaskContext) window.teOpenTaskContext(el.getAttribute('data-task-id'));
                     break;
@@ -102,14 +126,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSetStatus':
                     if (window.teSetStatus) window.teSetStatus(el.getAttribute('data-status'));
                     break;
+                case 'click_teSwitchView_overview':
+                    if (window.teSwitchView) window.teSwitchView('overview', el);
+                    break;
                 case 'click_teSwitchView_list':
                     if (window.teSwitchView) window.teSwitchView('list', el);
                     break;
                 case 'click_teSwitchView_board':
                     if (window.teSwitchView) window.teSwitchView('board', el);
                     break;
-                case 'click_teSwitchView_calendar':
-                    if (window.teSwitchView) window.teSwitchView('calendar', el);
+                case 'click_teSwitchView_timeline':
+                    if (window.teSwitchView) window.teSwitchView('timeline', el);
+                    break;
+                case 'click_teSwitchView_dashboard':
+                    if (window.teSwitchView) window.teSwitchView('dashboard', el);
                     break;
                 case 'click_teToggleTemplateMenu':
                     if (window.teToggleTemplateMenu) window.teToggleTemplateMenu();
@@ -246,8 +276,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSwitchView_completed':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('completed', el);
                     break;
+                case 'click_teToggleGlobalCreateMenu':
+                    if(typeof window.teToggleGlobalCreateMenu==='function') window.teToggleGlobalCreateMenu();
+                    break;
+                case 'click_teActivateInlineTask':
+                    if(typeof window.teActivateInlineTask==='function') window.teActivateInlineTask(el);
+                    break;
                 case 'click_teCreateCycle':
                     if(typeof window.teCreateCycle==='function') window.teCreateCycle();
+                    break;
+                case 'click_teCreateProject':
+                    if(typeof window.teCreateProject==='function') window.teCreateProject();
+                    break;
+                case 'click_teSelectProject':
+                    if(typeof window.teSelectProject==='function') window.teSelectProject(el.getAttribute('data-project-id'));
+                    break;
+                case 'click_teOpenEditProject':
+                    if(typeof window.click_teOpenEditProject==='function') window.click_teOpenEditProject(el);
+                    break;
+                case 'click_window_closeEditProject':
+                    if(typeof window.click_window_closeEditProject==='function') window.click_window_closeEditProject();
+                    break;
+                case 'click_teSaveProjectEdit':
+                    if(typeof window.click_teSaveProjectEdit==='function') window.click_teSaveProjectEdit(el);
                     break;
                 case 'click_teCreateTeam':
                     if(typeof window.teCreateTeam==='function') window.teCreateTeam();
@@ -255,6 +306,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teDeleteCycle':
                     event.stopPropagation();
                     if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('cycle', el.getAttribute('data-cycle-id'));
+                    break;
+                case 'click_teDeleteProject':
+                    event.stopPropagation();
+                    if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('project', el.getAttribute('data-project-id'));
                     break;
                 case 'click_teDeleteTeam':
                     event.stopPropagation();
@@ -300,6 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teRemoveTeamMember':
                     event.stopPropagation();
                     if(typeof window.teRemoveTeamMember==='function') window.teRemoveTeamMember(el.getAttribute('data-team-id'), el.getAttribute('data-member-name'));
+                    break;
+                case 'click_teEditSectionTitle':
+                    if(typeof window.teEditSectionTitle==='function') window.teEditSectionTitle(el.getAttribute('data-cycle-id'), el);
                     break;
                 case 'click_teToggleCycleGroup':
                     {
@@ -1130,6 +1188,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.sandboxSearchDict(el.getAttribute('data-sheet-name'), el.value);
                     }
                     break;
+                case 'keyup_teTagSuggest':
+                    if (window.keyup_teTagSuggest) window.keyup_teTagSuggest(event);
+                    break;
+                case 'keyup_teFilterTaskSearch':
+                    if (window.keyup_teFilterTaskSearch) window.keyup_teFilterTaskSearch(event);
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
@@ -1447,6 +1511,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_handleFileSelectTest_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
                     break;
+                case 'change_teUpdateTagColor':
+                    if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
+                    break;
                 case 'change_teChangeIdentity':
                     if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
                     break;
@@ -1455,6 +1522,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_teUpdateDueDate':
                     if (typeof window.teUpdateDueDate === 'function' && window.currentOpenTaskId) window.teUpdateDueDate(window.currentOpenTaskId, el.value);
+                    break;
+                case 'change_teFilterTaskSearch':
+                    if (window.change_teFilterTaskSearch) window.change_teFilterTaskSearch(event);
                     break;
             }
         } catch (error) {
