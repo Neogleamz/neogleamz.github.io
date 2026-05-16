@@ -284,16 +284,25 @@ function teRenderTaskGrid(filter = null) {
 
     if (searchVal || tagVal) {
         displayTasks = displayTasks.filter(t => {
+            let meta = t.metadata || {};
+            let tags = meta.tag_ids || [];
+            
             let matchSearch = true;
             if (searchVal) {
-                matchSearch = t.title.toLowerCase().includes(searchVal);
+                let titleMatch = (t.title || '').toLowerCase().includes(searchVal);
+                let tagMatchSearch = false;
+                tags.forEach(tagId => {
+                    let tagObj = taskEngineDB.tagz.find(tg => tg.id == tagId);
+                    if (tagObj && tagObj.name.toLowerCase().includes(searchVal)) {
+                        tagMatchSearch = true;
+                    }
+                });
+                matchSearch = titleMatch || tagMatchSearch;
             }
             
             let matchTag = true;
             if (tagVal) {
-                let meta = t.metadata || {};
-                let tags = meta.tag_ids || [];
-                matchTag = tags.includes(tagVal);
+                matchTag = tags.some(tag => String(tag) === String(tagVal));
             }
             
             return matchSearch && matchTag;
