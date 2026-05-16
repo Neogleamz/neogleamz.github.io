@@ -298,7 +298,7 @@ function teRenderTaskGrid(filter = null) {
     
     // Render loop
     for (const [cid, group] of Object.entries(cycleGroups)) {
-        if (group.tasks.length === 0) continue;
+        if (group.tasks.length === 0 && cid === 'unassigned' && Object.keys(cycleGroups).length > 1) continue;
         
         let headerColor = group.color || '#64748b';
         html += `
@@ -330,7 +330,14 @@ function teRenderTaskGrid(filter = null) {
             html += `</div>`;
         });
         
-        html += `</div>`;
+        html += `
+            <div class="task-row te-inline-add-row" data-cycle-id="${cid === 'unassigned' ? '' : cid}" style="padding: 10px 15px; margin-top: 4px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; min-height: unset; background: transparent; border: none; box-shadow: none;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'" onmouseout="this.style.backgroundColor='transparent'">
+                <div style="width:16px; height:16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: bold; font-size: 16px;">+</div>
+                <div style="flex: 1; display: flex; align-items: flex-start;" class="te-inline-container" onclick="window.teActivateInlineTask(this)">
+                    <span class="te-inline-add-placeholder" style="color: var(--text-muted); font-size: 14px; padding-top: 0px;">Add task...</span>
+                </div>
+            </div>
+        </div>`;
     }
     
     wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
@@ -1735,5 +1742,93 @@ window.teBulkStatusDropdown = function(element) {
     dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
     dropdown.style.left = `${rect.left + window.scrollX}px`;
     dropdown.style.display = 'flex';
+};
+
+window.teActivateInlineTask = function(containerElement) {
+    if (containerElement.querySelector('textarea')) return;
+    
+    const placeholder = containerElement.querySelector('.te-inline-add-placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+    
+    const textarea = document.createElement('textarea');
+    textarea.className = 'te-inline-textarea';
+    textarea.placeholder = 'Write a task name';
+    textarea.rows = 1;
+    textarea.style.cssText = 'width: 100%; background: transparent; border: none; color: white; font-size: 14px; font-family: inherit; resize: none; overflow: hidden; outline: none; padding: 0; margin: 0; line-height: 1.2;';
+    
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+    
+    textarea.addEventListener('keydown', async function(e) {
+        if (e.key === 'Escape') {
+            textarea.remove();
+            if (placeholder) placeholder.style.display = 'block';
+        } else if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const val = this.value.trim();
+            if (val === '') {
+                textarea.remove();
+                if (placeholder) placeholder.style.display = 'block';
+                return;
+            }
+            
+            let cycleId = containerElement.closest('.te-inline-add-row').getAttribute('data-cycle-id') || null;
+            this.disabled = true;
+            this.style.opacity = '0.5';
+            await window.teCreateInlineTask(val, cycleId);
+            
+            this.value = '';
+            this.disabled = false;
+            this.style.opacity = '1';
+            this.style.height = 'auto';
+            this.focus();
+        }
+    });
+    
+    textarea.addEventListener('blur', async function() {
+        if (!this.disabled) {
+            const val = this.value.trim();
+            if (val !== '') {
+                let cycleId = containerElement.closest('.te-inline-add-row').getAttribute('data-cycle-id') || null;
+                await window.teCreateInlineTask(val, cycleId);
+            }
+            textarea.remove();
+            if (placeholder) placeholder.style.display = 'block';
+        }
+    });
+    
+    containerElement.appendChild(textarea);
+    textarea.focus();
+};
+
+window.teCreateInlineTask = async function(title, cycleId) {
+    try {
+        let currentUser = localStorage.getItem('neogleamz_current_user');
+        let spoofAssignee = (currentUser && currentUser !== 'none') ? currentUser : '';
+        
+        let payload = {
+            title: title,
+            status: 'Todo',
+            estimated_minutes: 30,
+            cycle_id: cycleId
+        };
+        
+        if (spoofAssignee) {
+            payload.metadata = { spoofed_assignee: spoofAssignee };
+        }
+        
+        const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            taskEngineDB.taskz.push(data[0]);
+            if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
+        }
+    } catch (e) {
+        console.error('[TaskEngine] Create Inline Task failed:', e);
+    }
 };
 
