@@ -242,7 +242,7 @@ function teRenderTaskGrid(filter = null) {
         if (filter === 'in_progress') return t.status === 'In Progress';
         if (filter === 'completed') return t.status === 'Completed' || t.status === 'Done';
         if (filter === 'inbox') {
-            if (t.status === 'Completed' || t.status === 'Done') return false;
+            if (t.status === 'Completed' || t.status === 'Done' || t.status === 'In Progress') return false;
             let meta = t.metadata || {};
             let assignee = meta.spoofed_assignee || 'UNASSIGNED';
             
@@ -351,7 +351,7 @@ function teRenderTaskGrid(filter = null) {
     });
     
     sortedCyclez.forEach(c => {
-        cycleGroups.set(c.id, { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [] });
+        cycleGroups.set(c.id, { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [], project_id: c.project_id || null });
     });
     
     // Sort tasks into cycles (only top-level tasks)
@@ -402,7 +402,7 @@ function teRenderTaskGrid(filter = null) {
     for (const [cid, group] of cycleGroups) {
         if (group.tasks.length === 0) {
             if (cid === 'unassigned' && totalTasks > 0) continue;
-            if (cid !== 'unassigned' && !window.teActiveProjectId) continue;
+            if (cid !== 'unassigned' && !window.teActiveProjectId && group.project_id !== null) continue;
         }
         
         let headerColor = group.color || '#64748b';
@@ -1322,6 +1322,29 @@ window.click_teSaveProjectEdit = async function(element) {
         btn.textContent = oldText;
         btn.disabled = false;
         btn.style.opacity = '1';
+    }
+};
+
+window.teToggleGlobalCreateMenu = function() {
+    let dropdown = document.getElementById('te-global-create-dropdown');
+    if (dropdown) {
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'flex';
+            
+            // Add a one-time click listener to close it when clicking outside
+            setTimeout(() => {
+                const closeHandler = function(e) {
+                    if (!e.target.closest('#te-global-create-dropdown') && !e.target.closest('[data-click="click_teToggleGlobalCreateMenu"]')) {
+                        dropdown.style.display = 'none';
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+                document.addEventListener('click', closeHandler);
+            }, 10);
+            
+        } else {
+            dropdown.style.display = 'none';
+        }
     }
 };
 
@@ -2287,9 +2310,6 @@ window.teActivateInlineTask = function(containerElement) {
 
 window.teCreateInlineTask = async function(title, cycleId) {
     try {
-        let currentUser = localStorage.getItem('neogleamz_current_user');
-        let spoofAssignee = (currentUser && currentUser !== 'none') ? currentUser : '';
-        
         let payload = {
             title: title,
             status: 'Todo',
@@ -2297,10 +2317,6 @@ window.teCreateInlineTask = async function(title, cycleId) {
             cycle_id: cycleId
         };
         if (window.teActiveProjectId) payload.project_id = window.teActiveProjectId;
-        
-        if (spoofAssignee) {
-            payload.metadata = { spoofed_assignee: spoofAssignee };
-        }
         
         const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
         
@@ -2481,12 +2497,12 @@ window.teRenderTagManagerList = function() {
     }
     
     sortedTags.forEach(t => {
-        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
-            <div style="display:flex; align-items:center; gap:10px; color:white; font-size:13px; font-weight:bold;">
-                <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:20px; height:20px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent;">
-                ${t.name}
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
+            <div style="display:flex; align-items:center; gap:10px; flex: 1;">
+                <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:24px; height:24px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent; flex-shrink:0;">
+                <input type="text" data-change="change_teUpdateTagName" data-tag-id="${t.id}" value="${t.name.replace(/"/g, '&quot;')}" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; font-size:13px; font-weight:bold; padding:4px 8px; border-radius:4px; width: 100%; outline:none;" onfocus="this.style.border='1px solid #3b82f6'; this.style.background='rgba(255,255,255,0.2)'" onblur="this.style.border='1px solid rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.1)'">
             </div>
-            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 8px; font-size:10px;">🗑️ Delete</button>
+            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 10px; font-size:10px; border-radius:4px; margin-left: 10px; flex-shrink:0; white-space:nowrap; width:max-content; min-width: 80px;">🗑️ Delete</button>
         </div>`;
     });
     
@@ -2540,6 +2556,25 @@ window.change_teUpdateTagColor = async function(element) {
     } catch(e) { console.error('[TaskEngine] Update Tag Color failed', e); }
 };
 
+window.change_teUpdateTagName = async function(element) {
+    const tagId = element.getAttribute('data-tag-id');
+    const newName = element.value.trim();
+    if (!tagId || !newName) return;
+    
+    let tag = taskEngineDB.tagz.find(t => t.id === tagId);
+    if (tag) tag.name = newName;
+    
+    if (typeof window.tePopulateTagFilter === 'function') window.tePopulateTagFilter();
+    if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
+    if (window.currentOpenTaskId && typeof teRenderTagEditor === 'function') {
+        teRenderTagEditor(window.currentOpenTaskId);
+    }
+    
+    try {
+        await supabaseClient.from('tagz').update({ name: newName }).eq('id', tagId);
+    } catch(e) { console.error('[TaskEngine] Update Tag Name failed', e); }
+};
+
 window.teDeleteTag = async function(element) {
     const tagId = element.getAttribute('data-tag-id');
     if (!tagId) return;
@@ -2572,4 +2607,39 @@ window.teDeleteTag = async function(element) {
         console.error('[TaskEngine] Delete tag failed', e);
         alert('Failed to delete tag. Check console for details.');
     }
+};
+
+// --- Flyout Resizer ---
+let isFlyoutResizing = false;
+let startFlyoutX = 0;
+let startFlyoutWidth = 0;
+
+window.initFlyoutResizer = function(e) {
+    if(e) e.preventDefault();
+    isFlyoutResizing = true;
+    startFlyoutX = e.clientX;
+    const flyout = document.getElementById('taskContextFlyout');
+    startFlyoutWidth = flyout.offsetWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.addEventListener('mousemove', window.doFlyoutResize);
+    document.addEventListener('mouseup', window.stopFlyoutResize);
+};
+
+window.doFlyoutResize = function(e) {
+    if(!isFlyoutResizing) return;
+    const flyout = document.getElementById('taskContextFlyout');
+    if(flyout) {
+        const delta = startFlyoutX - e.clientX;
+        let newWidth = startFlyoutWidth + delta;
+        if(newWidth < 300) newWidth = 300;
+        if(newWidth > 800) newWidth = 800;
+        flyout.style.width = newWidth + 'px';
+    }
+};
+
+window.stopFlyoutResize = function(e) {
+    isFlyoutResizing = false;
+    document.body.style.cursor = '';
+    document.removeEventListener('mousemove', window.doFlyoutResize);
+    document.removeEventListener('mouseup', window.stopFlyoutResize);
 };

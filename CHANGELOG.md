@@ -1,12 +1,13 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.32] - 2026-05-16
 ### Bug Fixes
 - **UI State Refresh Prevention**: Fixed the bug where creating a new item in EDITZ caused a full page refresh and redirected to the Stockpilez hub. Prevented default form submission behaviors across the application to ensure the user stays on the current page during manual CRUD operations.
 
 ### Features & Refactors
 - **EDITZ Bulk Edit Modal**: Created a "Bulk Edit" button in the EDITZ tab that opens a fullscreen modal, letting the user search and mass edit all items. It functions like the sandbox staging environments for imports in NEXUZ, allowing the user to view and verify all changes before committing and approving the final upload.
 - **Global Column Truncation Standard**: Ensured all columns in data grids properly truncate with ellipsis (...) when resized too small, preventing text from overlapping adjacent columns. Documented this as a global UI standard in the Master Reference and applied across all pages.
+- **Asana-style Inline Task Creation**: Refactored the Task Engine UI to support creating tasks and sections directly inline via rapid-entry rows, similar to Asana, without requiring modals or top-level dropdowns. Also removed auto-assignment logic and added a horizontal resizer to the right side task details flyout.
 
 
 ## [1.0.31] - 2026-05-07

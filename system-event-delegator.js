@@ -282,11 +282,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teActivateInlineTask':
                     if(typeof window.teActivateInlineTask==='function') window.teActivateInlineTask(el);
                     break;
+
                 case 'click_teCreateCycle':
                     if(typeof window.teCreateCycle==='function') window.teCreateCycle();
                     break;
                 case 'click_teCreateProject':
                     if(typeof window.teCreateProject==='function') window.teCreateProject();
+                    break;
+                case 'click_teCreateTeam':
+                    if(typeof window.teCreateTeam==='function') window.teCreateTeam();
                     break;
                 case 'click_teSelectProject':
                     if(typeof window.teSelectProject==='function') window.teSelectProject(el.getAttribute('data-project-id'));
@@ -300,9 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSaveProjectEdit':
                     if(typeof window.click_teSaveProjectEdit==='function') window.click_teSaveProjectEdit(el);
                     break;
-                case 'click_teCreateTeam':
-                    if(typeof window.teCreateTeam==='function') window.teCreateTeam();
-                    break;
+
                 case 'click_teDeleteCycle':
                     event.stopPropagation();
                     if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('cycle', el.getAttribute('data-cycle-id'));
@@ -1222,6 +1224,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'mousedown_initPackerzLiveSopResize_event':
                     initPackerzLiveSopResize(event);
                     break;
+                case 'mousedown_initFlyoutResizer_event':
+                    if (typeof initFlyoutResizer === 'function') initFlyoutResizer(event);
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
@@ -1513,6 +1518,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_teUpdateTagColor':
                     if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
+                    break;
+                case 'change_teUpdateTagName':
+                    if (typeof window.change_teUpdateTagName === 'function') window.change_teUpdateTagName(el);
                     break;
                 case 'change_teChangeIdentity':
                     if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
