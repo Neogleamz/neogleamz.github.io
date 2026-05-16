@@ -484,7 +484,7 @@ function teRenderTaskGrid(filter = null) {
                         if (!tId) continue;
                         let task = taskEngineDB.taskz.find(tk => tk.id === tId);
                         if (task) {
-                            let meta = task.metadata || {};
+                            let meta = JSON.parse(JSON.stringify(task.metadata || {}));
                             meta.sort_order = i;
                             task.metadata = meta;
                             let toCycleId = evt.to.id.replace('te-cycle-group-', '');
@@ -519,7 +519,7 @@ function teRenderTaskGrid(filter = null) {
                         if (!tId) continue;
                         let task = taskEngineDB.taskz.find(tk => tk.id === tId);
                         if (task) {
-                            let meta = task.metadata || {};
+                            let meta = JSON.parse(JSON.stringify(task.metadata || {}));
                             meta.sort_order = i;
                             task.metadata = meta;
                             updates.push({ id: tId, metadata: meta });
@@ -586,7 +586,7 @@ function teBuildTaskRowHTML(t, isChild) {
     let tagsHtml = '';
     if (meta.tag_ids && Array.isArray(meta.tag_ids)) {
         meta.tag_ids.forEach(tagId => {
-            let tagObj = taskEngineDB.tagz.find(tg => tg.id === tagId);
+            let tagObj = taskEngineDB.tagz.find(tg => tg.id == tagId);
             if (tagObj) {
                 tagsHtml += `<span style="background: ${tagObj.color_hex || '#64748b'}; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: bold; white-space: nowrap;">${tagObj.name}</span>`;
             }
@@ -671,7 +671,7 @@ window.teOpenTaskContext = function(taskId) {
                 }
                 assigneeSelect.innerHTML = opts;
                 
-                let meta = task.metadata || {};
+                let meta = JSON.parse(JSON.stringify(task.metadata || {}));
                 if (meta.assigned_team_id) {
                     assigneeSelect.value = 'team_' + meta.assigned_team_id;
                 } else {
@@ -692,7 +692,7 @@ window.teOpenTaskContext = function(taskId) {
             
             const startDateInput = document.getElementById('te-flyout-start-date');
             if (startDateInput) {
-                let meta = task.metadata || {};
+                let meta = JSON.parse(JSON.stringify(task.metadata || {}));
                 startDateInput.value = meta.start_date ? meta.start_date.substring(0, 10) : '';
             }
             
@@ -703,7 +703,7 @@ window.teOpenTaskContext = function(taskId) {
 
             const timerBtn = document.getElementById('te-flyout-timer-btn');
             if (timerBtn) {
-                let meta = task.metadata || {};
+                let meta = JSON.parse(JSON.stringify(task.metadata || {}));
                 if (meta.timer_start_time) {
                     timerBtn.textContent = 'Stop Timer';
                     timerBtn.className = 'btn-red';
@@ -736,10 +736,10 @@ window.teRenderTagEditor = function(taskId) {
     if (!task) return;
     
     let html = '';
-    let meta = task.metadata || {};
+    let meta = JSON.parse(JSON.stringify(task.metadata || {}));
     if (meta.tag_ids && Array.isArray(meta.tag_ids)) {
         meta.tag_ids.forEach(tagId => {
-            let tagObj = taskEngineDB.tagz.find(tg => tg.id === tagId);
+            let tagObj = taskEngineDB.tagz.find(tg => tg.id == tagId);
             if (tagObj) {
                 html += `
                 <div style="background: ${tagObj.color_hex || '#64748b'}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
@@ -937,7 +937,7 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
         task.status = status;
         task.is_archived = isArchived;
         
-        let meta = Object.assign({}, task.metadata || {});
+        let meta = JSON.parse(JSON.stringify(task.metadata || {}));
         let timerUpdate = false;
         if (status === 'In Progress' && !meta.timer_start_time) {
             meta.timer_start_time = Date.now().toString();
@@ -1057,7 +1057,7 @@ window.teUpdateStartDate = async function(taskId, dateValue) {
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    let meta = Object.assign({}, task.metadata || {});
+    let meta = JSON.parse(JSON.stringify(task.metadata || {}));
     meta.start_date = dateValue;
     task.metadata = meta;
     
@@ -1085,7 +1085,7 @@ window.teToggleTimer = async function(taskId, forceStop = false) {
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    let meta = Object.assign({}, task.metadata || {});
+    let meta = JSON.parse(JSON.stringify(task.metadata || {}));
     let isRunning = !!meta.timer_start_time;
     let updateNeeded = false;
     
@@ -1133,7 +1133,7 @@ window.teUpdateTaskAssignee = async function(taskId, assignee) {
         let task = taskEngineDB.taskz.find(t => t.id === id);
         if (!task) continue;
         
-        let meta = Object.assign({}, task.metadata || {});
+        let meta = JSON.parse(JSON.stringify(task.metadata || {}));
         
         if (assignee && assignee.startsWith('team_')) {
             let teamId = assignee.replace('team_', '');
@@ -1410,7 +1410,7 @@ window.teDeleteTeam = async function(teamId) {
     try {
         let affectedTasks = taskEngineDB.taskz.filter(t => t.metadata && t.metadata.assigned_team_id === teamId);
         for (let task of affectedTasks) {
-            let meta = task.metadata || {};
+            let meta = JSON.parse(JSON.stringify(task.metadata || {}));
             delete meta.assigned_team_id;
             await supabaseClient.from('taskz').update({ metadata: meta }).eq('id', task.id);
         }
@@ -2247,7 +2247,7 @@ window.click_teAddTagToTask = async function(element) {
     let task = taskEngineDB.taskz.find(t => t.id === window.currentOpenTaskId);
     if (!task) return;
     
-    let meta = task.metadata || {};
+    let meta = JSON.parse(JSON.stringify(task.metadata || {}));
     if (!meta.tag_ids) meta.tag_ids = [];
     
     if (!meta.tag_ids.includes(tagId)) {
@@ -2276,7 +2276,7 @@ window.click_teCreateNewTag = async function(element) {
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     
     try {
-        const { data, error } = await supabaseClient.from('tagz').insert([{ name: tagName, color_hex: randomColor }]).select();
+        const { data, error } = await supabaseClient.from('tagz').insert([{ id: generateUUID(), name: tagName, color_hex: randomColor }]).select();
         if (error) throw error;
         
         if (data && data.length > 0) {
@@ -2299,7 +2299,7 @@ window.click_teRemoveTagFromTask = async function(element) {
     let task = taskEngineDB.taskz.find(t => t.id === taskId);
     if (!task) return;
     
-    let meta = task.metadata || {};
+    let meta = JSON.parse(JSON.stringify(task.metadata || {}));
     if (meta.tag_ids) {
         meta.tag_ids = meta.tag_ids.filter(id => id !== tagId);
         task.metadata = meta;
@@ -2382,7 +2382,7 @@ window.teCreateTagFromManager = async function() {
     }
     
     try {
-        const { data, error } = await supabaseClient.from('tagz').insert([{ name: name, color_hex: color }]).select();
+        const { data, error } = await supabaseClient.from('tagz').insert([{ id: generateUUID(), name: name, color_hex: color }]).select();
         if (error) throw error;
         
         if (data && data.length > 0) {
