@@ -579,8 +579,8 @@ function renderSalesTable() {
 
             h += `<tr>
             <td style="color:var(--text-muted);">${x.sale_date}</td>
-            <td style="font-weight:bold;">${x.order_id}</td>
-            <td style="color:var(--text-muted);">${x["Source"] || ''}</td>
+            <td class="trunc-col" style="font-weight:bold;">${x.order_id}</td>
+            <td class="trunc-col" style="color:var(--text-muted);">${x["Source"] || ''}</td>
             <td class="trunc-col">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
             <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')">

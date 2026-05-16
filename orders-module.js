@@ -53,11 +53,11 @@ window.renderOrderzTable = function() {
 
             html += `
                 <tr style="border-bottom: 1px solid var(--border-color); font-size: 13px;">
-                    <td style="color: var(--text-heading); font-weight: bold;">${order.order_id || 'N/A'}</td>
+                    <td class="trunc-col" style="color: var(--text-heading); font-weight: bold;">${order.order_id || 'N/A'}</td>
                     <td style="color: var(--text-muted);">${order.sale_date || 'N/A'}</td>
-                    <td style="color: #0ea5e9;">${order.internal_recipe_name || order.storefront_sku || 'Item'}</td>
+                    <td class="trunc-col" style="color: #0ea5e9;">${order.internal_recipe_name || order.storefront_sku || 'Item'}</td>
                     <td class="text-right" style="font-weight: 900; color: #f97316;">${order.qty_sold || 0}</td>
-                    <td class="text-right" style="color: var(--text-muted);">${order.shipping_city || 'N/A'}, ${order.shipping_province || 'N/A'}</td>
+                    <td class="trunc-col text-right" style="color: var(--text-muted);">${order.shipping_city || 'N/A'}, ${order.shipping_province || 'N/A'}</td>
                     <td class="text-center">${fBadge}</td>
                     <td class="text-center">${pBadge}</td>
                 </tr>
