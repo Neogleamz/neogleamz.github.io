@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target.type === 'checkbox') return;
         const el = event.target.closest('[data-click]');
         if (!el) return;
+        
+        if (el.tagName === 'BUTTON' || el.tagName === 'A' || el.tagName === 'FORM') {
+            event.preventDefault();
+        }
+
         const action = el.getAttribute('data-click');
         
         try {

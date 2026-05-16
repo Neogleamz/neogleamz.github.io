@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="system-version.js?v=v.2026.05.07.0551"></script>
+    <script src="system-version.js?v=v.2026.05.15.1922"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.07.0551"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.15.1922"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.07.0551"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.15.1922"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="system-event-delegator.js?v=v.2026.05.07.0551"></script>
+    <script src="system-event-delegator.js?v=v.2026.05.15.1922"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -4658,7 +4658,7 @@
     }
     
     function storeOldVal(cell) { oldValTemp = cell.innerText.trim(); }
-    async function updateDBCell(cell, rowKey, uiCol, isN) { try { let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } } let dbCol = colMap[uiCol]; if(!dbCol) return; sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey); if (r && isN) { let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0; if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; } } let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000); if (isN) { await loadData(); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); } setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; } }
+    async function updateDBCell(cell, rowKey, uiCol, isN) { try { let newVal = cell.innerText.trim(); if (newVal === oldValTemp) return; let dbVal = newVal; if (isN) { dbVal = parseFloat(newVal.replace(/[^0-9.-]+/g,"")); if (isNaN(dbVal)) { cell.innerText = oldValTemp; return alert("Valid number required."); } } let dbCol = colMap[uiCol]; if(!dbCol) return; sysLog(`Edit: [${dbCol}] to [${dbVal}] on [${rowKey}]`); setMasterStatus("Saving...", "mod-working"); let p = { [dbCol]: dbVal }; let r = finalResults.find(x => x['_RowKey'] === rowKey); if (r && isN) { let cQty = parseFloat(r['Quantity']) || 1; let cTot = parseFloat(r['Total Landed Cost ($)']) || 0; if (dbCol === 'quantity') { let nc = dbVal > 0 ? cTot / dbVal : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (dbCol === 'total_cost_weight') { let nc = cQty > 0 ? dbVal / cQty : 0; p['final_cost_weight'] = nc; p['order_unit_price'] = nc; } else if (['final_cost_weight', 'unit_ship_weight', 'order_unit_price'].includes(dbCol)) { p['total_cost_weight'] = dbVal * cQty; if(dbCol === 'final_cost_weight') p['order_unit_price'] = dbVal; } } let [pNo, di] = rowKey.split(':::'); const { error } = await supabaseClient.from('full_landed_costs').update(p).eq('parcel_no', pNo).eq('di_item_id', di); if (error) throw new Error(error.message); setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(() => cell.classList.remove('edited-success'), 1000); if (isN) { await loadData(true); } else { r[uiCol] = dbVal; buildCatalogCache(); populateDropdowns(); if(currentProduct) renderProductBOM(); renderActiveTable(); } setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; } }
     
     function autofillNeoInfo() {
         let rawName = document.getElementById('m_name').value.trim().toLowerCase();
@@ -4678,8 +4678,8 @@
         }
         alert("No exact matching Item Name + Spec found in the ledger to map Neo data from.");
     }
-    async function addManualItem() { try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = payload[dbCol] || ""; } else { if (payload[dbCol] === undefined) payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(); setMasterStatus("Added!", "mod-success"); setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); } }
-    async function autofillNeoNames() { if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); setSysProgress(20, 'working'); try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neogleamz Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neogleamz Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'), 3000; }); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); } }
+    async function addManualItem() { try { const name = document.getElementById('m_name').value.trim(); const qty = parseFloat(document.getElementById('m_qty').value); const cost = parseFloat(document.getElementById('m_cost').value); const mult = parseFloat(document.getElementById('m_mult').value) || 1; if(!name || isNaN(cost) || isNaN(qty) || qty <= 0 || mult < 1) return alert("Valid Name, Qty, Cost & Multiplier required."); sysLog(`Adding Manual: ${name}`); setMasterStatus("Adding...", "mod-working"); let payload = {}; const stringCols = ['order_date', 'order_no', 'parcel_no', 'di_item_id', 'alibaba_order', 'item_name', 'neogleamz_name', 'neogleamz_product', 'specification']; Object.values(colMap).forEach(dbCol => { if (stringCols.includes(dbCol)) { payload[dbCol] = payload[dbCol] || ""; } else { if (payload[dbCol] === undefined) payload[dbCol] = 0; } }); payload.parcel_no = 'MANUAL'; payload.di_item_id = 'MANUAL-' + Date.now(); payload.order_no = 'MANUAL'; payload.alibaba_order = 'MANUAL'; payload.item_name = name; payload.neogleamz_name = document.getElementById('m_neo_name').value.trim(); payload.neogleamz_product = document.getElementById('m_neo_prod').value.trim(); payload.specification = document.getElementById('m_spec').value.trim(); payload.quantity = qty; payload.lot_multiplier = mult; payload.order_unit_price = cost/qty; payload.unit_china_landed_price = cost/qty; payload.final_cost_weight = cost/qty; payload.total_cost_weight = cost; payload.order_date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('full_landed_costs').insert(payload); if (error) throw new Error(error.message); ['m_name','m_neo_name','m_spec','m_neo_prod','m_cost'].forEach(id => document.getElementById(id).value = ''); document.getElementById('m_qty').value = '1'; document.getElementById('m_mult').value = '1'; await loadData(true); setMasterStatus("Added!", "mod-success"); setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000); } catch(err) { sysLog(err.message, true); setMasterStatus("Failed.", "mod-error"); } }
+    async function autofillNeoNames() { if (!confirm("Copy Neogleamz Names & Products to identical items missing them?")) return; sysLog("Auto-Fill start..."); setMasterStatus("Auto-filling...", "mod-working"); setSysProgress(20, 'working'); try { let dict = {}; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let nn = String(r['Neogleamz Name']).trim(); let np = String(r['Neogleamz Product']).trim(); if (!dict[k]) dict[k] = { n: "", p: "" }; if (nn && !dict[k].n) dict[k].n = nn; if (np && !dict[k].p) dict[k].p = np; }); let ups = []; finalResults.forEach(r => { let k = `${String(r['Item Name']).trim()}:::${String(r['Specification']).trim()}`; let p = {}; let b = dict[k]; if (b.n && !String(r['Neogleamz Name']).trim()) p.neogleamz_name = b.n; if (b.p && !String(r['Neogleamz Product']).trim()) p.neogleamz_product = b.p; if (Object.keys(p).length > 0) ups.push({ p: r['Parcel No'], d: r['DI Item ID'], pay: p }); }); if (ups.length === 0) { sysLog("Up to date."); setMasterStatus("Up to date!", "mod-success"); setSysProgress(100, 'success'); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'); }, 3000); return; } sysLog(`Updating ${ups.length} items...`); setSysProgress(50, 'working'); await Promise.all(ups.map(u => supabaseClient.from('full_landed_costs').update(u.pay).eq('parcel_no', u.p).eq('di_item_id', u.d))); sysLog(`Filled ${ups.length}!`); setMasterStatus("Complete!", "mod-success"); setSysProgress(100, 'success'); await loadData(true); setTimeout(() => { setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working'), 3000; }); } catch (err) { sysLog(err.message, true); setMasterStatus("Error Auto-Filling", "mod-error"); setSysProgress(100, 'error'); setTimeout(() => setSysProgress(0, 'working'), 3000); } }
 
     function fmtKey(key) { let p = key.split(":::"); return { nn: p[0]||"", np: p[1]||"", in: p[2]||"Unknown", sp: p[3]||"" }; }
     async function updateDBCheckbox(chk, rowKey, dbCol) {
@@ -4691,7 +4691,7 @@
             const { error } = await supabaseClient.from('full_landed_costs').update({ [dbCol]: val }).eq('parcel_no', pNo).eq('di_item_id', di);
             if (error) throw error;
             setMasterStatus("Saved!", "mod-success");
-            await loadData();
+            await loadData(true);
         } catch (err) {
             sysLog(err.message, true);
             setMasterStatus("Error", "mod-error");
@@ -4889,19 +4889,19 @@
         }
     };
 </script>
-<script src="neogleamz-engine.js?v=v.2026.05.07.0551"></script>
-<script src="system-tools-module.js?v=v.2026.05.07.0551"></script>
-<script src="bom-module.js?v=v.2026.05.07.0551"></script>
-<script src="inventory-module.js?v=v.2026.05.07.0551"></script>
-<script src="packerz-module.js?v=v.2026.05.07.0551"></script>
-<script src="production-module.js?v=v.2026.05.07.0551"></script>
-<script src="sales-module.js?v=v.2026.05.07.0551"></script>
-<script src="analytics-module.js?v=v.2026.05.07.0551"></script>
-<script src="ceo-module.js?v=v.2026.05.07.0551"></script>
-<script src="task-engine.js?v=v.2026.05.07.0551"></script>
-<script src="print-module.js?v=v.2026.05.07.0551"></script>
-<script src="scraper-module.js?v=v.2026.05.07.0551"></script>
-<script src="socialz-module.js?v=v.2026.05.07.0551"></script>
+<script src="neogleamz-engine.js?v=v.2026.05.15.1922"></script>
+<script src="system-tools-module.js?v=v.2026.05.15.1922"></script>
+<script src="bom-module.js?v=v.2026.05.15.1922"></script>
+<script src="inventory-module.js?v=v.2026.05.15.1922"></script>
+<script src="packerz-module.js?v=v.2026.05.15.1922"></script>
+<script src="production-module.js?v=v.2026.05.15.1922"></script>
+<script src="sales-module.js?v=v.2026.05.15.1922"></script>
+<script src="analytics-module.js?v=v.2026.05.15.1922"></script>
+<script src="ceo-module.js?v=v.2026.05.15.1922"></script>
+<script src="task-engine.js?v=v.2026.05.15.1922"></script>
+<script src="print-module.js?v=v.2026.05.15.1922"></script>
+<script src="scraper-module.js?v=v.2026.05.15.1922"></script>
+<script src="socialz-module.js?v=v.2026.05.15.1922"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5359,18 +5359,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.07.0551"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.15.1922"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.07.0551"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.15.1922"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.07.0551"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.15.1922"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.07.0551"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.07.0551"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.07.0551"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.15.1922"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.15.1922"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.15.1922"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="barcodz-module.js?v=v.2026.05.07.0551"></script>
-    <script src="labelz-module.js?v=v.2026.05.07.0551"></script>
+    <script src="barcodz-module.js?v=v.2026.05.15.1922"></script>
+    <script src="labelz-module.js?v=v.2026.05.15.1922"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
