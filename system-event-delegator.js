@@ -1514,6 +1514,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_teUpdateTagColor':
                     if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
                     break;
+                case 'change_teUpdateTagName':
+                    if (typeof window.change_teUpdateTagName === 'function') window.change_teUpdateTagName(el);
+                    break;
                 case 'change_teChangeIdentity':
                     if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
                     break;

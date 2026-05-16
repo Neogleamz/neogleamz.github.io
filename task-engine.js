@@ -449,11 +449,13 @@ function teRenderTaskGrid(filter = null) {
     }
     html += `</div>`;
     
-    html += `
-        <div style="margin-top: 20px; padding: 10px 15px; cursor: pointer; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; gap: 8px; border-radius: 8px; max-width: 200px;" data-click="click_teCreateCycle" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'">
-            <span style="font-size: 16px;">+</span> Add section
-        </div>
-    `;
+    if (window.teActiveProjectId) {
+        html += `
+            <div style="margin-top: 20px; padding: 10px 15px; cursor: pointer; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; gap: 8px; border-radius: 8px; max-width: 200px;" data-click="click_teCreateCycle" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'">
+                <span style="font-size: 16px;">+</span> Add section
+            </div>
+        `;
+    }
     
     wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     
@@ -2481,12 +2483,12 @@ window.teRenderTagManagerList = function() {
     }
     
     sortedTags.forEach(t => {
-        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
-            <div style="display:flex; align-items:center; gap:10px; color:white; font-size:13px; font-weight:bold;">
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
+            <div style="display:flex; align-items:center; gap:8px; flex: 1;">
                 <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:20px; height:20px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent;">
-                ${t.name}
+                <input type="text" data-change="change_teUpdateTagName" data-tag-id="${t.id}" value="${t.name.replace(/"/g, '&quot;')}" style="background:transparent; border:1px solid transparent; color:white; font-size:13px; font-weight:bold; padding:2px 6px; border-radius:4px; flex: 1; outline:none;" onfocus="this.style.border='1px solid rgba(255,255,255,0.2)'; this.style.background='rgba(0,0,0,0.3)'" onblur="this.style.border='1px solid transparent'; this.style.background='transparent'">
             </div>
-            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 8px; font-size:10px;">🗑️ Delete</button>
+            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 10px; font-size:10px; border-radius:4px; margin-left: 10px;">🗑️ Delete</button>
         </div>`;
     });
     
@@ -2538,6 +2540,25 @@ window.change_teUpdateTagColor = async function(element) {
     try {
         await supabaseClient.from('tagz').update({ color_hex: newColor }).eq('id', tagId);
     } catch(e) { console.error('[TaskEngine] Update Tag Color failed', e); }
+};
+
+window.change_teUpdateTagName = async function(element) {
+    const tagId = element.getAttribute('data-tag-id');
+    const newName = element.value.trim();
+    if (!tagId || !newName) return;
+    
+    let tag = taskEngineDB.tagz.find(t => t.id === tagId);
+    if (tag) tag.name = newName;
+    
+    if (typeof window.tePopulateTagFilter === 'function') window.tePopulateTagFilter();
+    if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
+    if (window.currentOpenTaskId && typeof teRenderTagEditor === 'function') {
+        teRenderTagEditor(window.currentOpenTaskId);
+    }
+    
+    try {
+        await supabaseClient.from('tagz').update({ name: newName }).eq('id', tagId);
+    } catch(e) { console.error('[TaskEngine] Update Tag Name failed', e); }
 };
 
 window.teDeleteTag = async function(element) {
