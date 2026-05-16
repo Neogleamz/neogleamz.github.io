@@ -40,9 +40,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 
-- [ ] `feat/global-math-engine-audit` : **Global Math Engine Audit** - Look through all the various .js files and ensure all math is done in the neogleamz-engine.js so we only have 1 source for all across the whole app, except direct test .js files. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
-- [ ] `test/gross-revenue-math-audit` : **Gross Revenue Math Audit** - Review all numbers and how we calculate gross revenue. Currently showing 3293.86 vs Shopify's 3766.14. Reconcile differences, including the ~400 from ignored orders (1001-1004). Compare numbers against the provided Shopify Total Sales XML to ensure 100% mathematical parity. [🤖 Gemini 3.1 Pro] [🧠 TBD / 10k] [💸 TBD / $0.05]
-
 ---
 
 ## 🧹 Technical Debt
