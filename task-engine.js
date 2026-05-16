@@ -277,6 +277,21 @@ function teRenderTaskGrid(filter = null) {
         displayTasks = displayTasks.filter(t => t.project_id === window.teActiveProjectId);
     }
 
+    // 1. Initial UI Hierarchy Safety: Build the COMPLETE list of tasks that belong in this view regardless of search/tag filters.
+    // This ensures that if a parent is in the Inbox, we pull its children into the view BEFORE filtering.
+    let fullViewTasks = new Set(displayTasks);
+    displayTasks.forEach(t => {
+        if (!t.parent_task_id) {
+            let children = taskEngineDB.taskz.filter(child => child.parent_task_id === t.id && child.status !== 'Archived');
+            children.forEach(c => fullViewTasks.add(c));
+        }
+        if (t.parent_task_id) {
+            let p = taskEngineDB.taskz.find(pt => pt.id === t.parent_task_id);
+            if (p && !p.is_archived) fullViewTasks.add(p);
+        }
+    });
+    displayTasks = Array.from(fullViewTasks);
+
     const searchInput = document.getElementById('te-task-search');
     const tagSelect = document.getElementById('te-tag-filter');
     const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
@@ -307,30 +322,19 @@ function teRenderTaskGrid(filter = null) {
             
             return matchSearch && matchTag;
         });
+
+        // 2. Post-Filter Hierarchy Safety: Ensure parents of matching tasks are visible so accordions don't break.
+        let extraIdsToAdd = new Set();
+        displayTasks.forEach(t => {
+            if (t.parent_task_id && !displayTasks.some(p => p.id === t.parent_task_id)) {
+                extraIdsToAdd.add(t.parent_task_id);
+            }
+        });
+        extraIdsToAdd.forEach(id => {
+            let task = taskEngineDB.taskz.find(t => t.id === id);
+            if (task) displayTasks.push(task);
+        });
     }
-    
-    // UI Hierarchy Safety: Ensure full atomic rendering of parent-child relationships
-    // 1. If a subtask is visible, ensure its Parent is visible so the accordion functions.
-    // 2. If a Parent is visible, ensure ALL its Subtasks are visible so the team sees the breakdown.
-    let extraIdsToAdd = new Set();
-    displayTasks.forEach(t => {
-        if (t.parent_task_id && !displayTasks.some(p => p.id === t.parent_task_id)) {
-            extraIdsToAdd.add(t.parent_task_id);
-        }
-        if (!t.parent_task_id) {
-            let children = taskEngineDB.taskz.filter(child => child.parent_task_id === t.id && child.status !== 'Archived');
-            children.forEach(c => {
-                if (!displayTasks.some(dt => dt.id === c.id)) {
-                    extraIdsToAdd.add(c.id);
-                }
-            });
-        }
-    });
-    
-    extraIdsToAdd.forEach(id => {
-        let task = taskEngineDB.taskz.find(t => t.id === id);
-        if (task) displayTasks.push(task);
-    });
 
     // Group by Cycle (Sections)
     let cycleGroups = new Map();
