@@ -2488,7 +2488,7 @@ window.teRenderTagManagerList = function() {
                 <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:24px; height:24px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent; flex-shrink:0;">
                 <input type="text" data-change="change_teUpdateTagName" data-tag-id="${t.id}" value="${t.name.replace(/"/g, '&quot;')}" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; font-size:13px; font-weight:bold; padding:4px 8px; border-radius:4px; width: 100%; outline:none;" onfocus="this.style.border='1px solid #3b82f6'; this.style.background='rgba(255,255,255,0.2)'" onblur="this.style.border='1px solid rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.1)'">
             </div>
-            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 10px; font-size:10px; border-radius:4px; margin-left: 10px; flex-shrink:0; white-space:nowrap;">🗑️ Delete</button>
+            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 10px; font-size:10px; border-radius:4px; margin-left: 10px; flex-shrink:0; white-space:nowrap; width:max-content; min-width: 80px;">🗑️ Delete</button>
         </div>`;
     });
     
