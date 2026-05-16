@@ -58,6 +58,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🗄️ Completed & Archived Epics
 
+### Target: `fix/ui-state-refresh`
+*(Epic: UI State Persistence & Form Submission Prevention)*
+- [🚀] `fix/ui-state-refresh` : **UI State Refresh Prevention** - Fix the bug where creating a new item in EDITZ (and potentially other manual entry forms) causes a full page refresh and redirects to the Stockpilez hub. Prevent default form submission behaviors across the application to ensure the user stays on the current page during manual CRUD operations. [🤖 Gemini 3.1 Pro] [🧠 4.5k / 5k] [💸 $0.02 / $0.02]
+
 ### Target: `main`
 **Epic: Sandbox Engine Immersive Refactor**
 *(Shipped v1.0.29 — 2026-05-04)*

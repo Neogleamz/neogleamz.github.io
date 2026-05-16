@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Bug Fixes
+- **UI State Refresh Prevention**: Fixed the bug where creating a new item in EDITZ caused a full page refresh and redirected to the Stockpilez hub. Prevented default form submission behaviors across the application to ensure the user stays on the current page during manual CRUD operations.
+
 ## [1.0.31] - 2026-05-07
 ### Features & Refactors
 - **Live Staging DB Diff Highlighting**: Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records.
