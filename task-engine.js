@@ -347,7 +347,7 @@ function teRenderTaskGrid(filter = null) {
         html += `
             <div class="task-row te-inline-add-row" data-cycle-id="${cid === 'unassigned' ? '' : cid}" style="padding: 10px 15px; margin-top: 4px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; min-height: unset; background: transparent; border: none; box-shadow: none;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'" onmouseout="this.style.backgroundColor='transparent'">
                 <div style="width:16px; height:16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: bold; font-size: 16px;">+</div>
-                <div style="flex: 1; display: flex; align-items: flex-start;" class="te-inline-container" onclick="window.teActivateInlineTask(this)">
+                <div style="flex: 1; display: flex; align-items: flex-start;" class="te-inline-container" data-click="click_teActivateInlineTask">
                     <span class="te-inline-add-placeholder" style="color: var(--text-muted); font-size: 14px; padding-top: 0px;">Add task...</span>
                 </div>
             </div>
@@ -1089,24 +1089,91 @@ window.teSelectProject = function(projectId) {
 };
 
 window.teCreateProject = async function() {
-    let title = prompt("Enter new project name:");
-    if (!title) return;
+    if (document.getElementById('te-create-project-modal')) return;
     
-    try {
-        const { data, error } = await supabaseClient.from('projectz').insert([{
-            title: title,
-            color_hex: '#f97316',
-            visibility: 'org',
-            health_status: 'On Track'
-        }]).select();
+    let modalOverlay = document.createElement('div');
+    modalOverlay.id = 'te-create-project-modal';
+    modalOverlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 999999; display: flex; align-items: center; justify-content: center; pointer-events: auto; margin: 0; padding: 0;';
+    
+    let html = `
+        <div style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 400px; max-width: 90vw; margin: auto; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <div class="pane-header-bar" style="position: relative; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
+                <div class="pane-header-title">Create New Project</div>
+                <div class="modal-close-btn te-proj-close" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.1)'">✕ CLOSE</div>
+            </div>
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Project Name</label>
+                    <input type="text" id="te-new-project-title" placeholder="e.g. Q3 Marketing Launch" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 14px; outline: none; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Color Accent</label>
+                    <input type="color" id="te-new-project-color" value="#f97316" style="width: 40px; height: 40px; border: none; border-radius: 6px; background: transparent; cursor: pointer; padding: 0;">
+                </div>
+            </div>
+            <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn-slate-muted te-proj-close" style="padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px;">Cancel</button>
+                <button id="te-submit-project-btn" class="btn-green-neon" style="padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px;">Create Project</button>
+            </div>
+        </div>
+    `;
+    
+    modalOverlay.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    document.body.appendChild(modalOverlay);
+    
+    let input = document.getElementById('te-new-project-title');
+    let colorInput = document.getElementById('te-new-project-color');
+    let submitBtn = document.getElementById('te-submit-project-btn');
+    
+    if (input) input.focus();
+    
+    const closeModal = () => {
+        if (modalOverlay.parentNode) modalOverlay.parentNode.removeChild(modalOverlay);
+    };
+    
+    modalOverlay.querySelectorAll('.te-proj-close').forEach(btn => {
+        btn.addEventListener('click', closeModal);
+    });
+    
+    const submitProject = async () => {
+        let title = input.value.trim();
+        if (!title) return;
+        let color = colorInput ? colorInput.value : '#f97316';
         
-        if (error) throw error;
-        if (data && data.length > 0) {
-            taskEngineDB.projectz.unshift(data[0]);
-            teRenderSidebar();
-            window.teSelectProject(data[0].id);
+        submitBtn.textContent = 'CREATING...';
+        submitBtn.disabled = true;
+        
+        try {
+            const { data, error } = await supabaseClient.from('projectz').insert([{
+                title: title,
+                color_hex: color,
+                visibility: 'Organization',
+                health_status: 'On Track'
+            }]).select();
+            
+            if (error) throw error;
+            if (data && data.length > 0) {
+                taskEngineDB.projectz.unshift(data[0]);
+                teRenderSidebar();
+                window.teSelectProject(data[0].id);
+                closeModal();
+            }
+        } catch(e) { 
+            console.error(e); 
+            submitBtn.textContent = 'ERROR';
+            setTimeout(() => { submitBtn.textContent = 'Create Project'; submitBtn.disabled = false; }, 2000);
         }
-    } catch(e) { console.error(e); }
+    };
+    
+    if (submitBtn) {
+        submitBtn.addEventListener('click', submitProject);
+    }
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitProject();
+            if (e.key === 'Escape') closeModal();
+        });
+    }
 };
 
 window.teEditSectionTitle = function(cycleId, el) {
@@ -1150,19 +1217,20 @@ window.teEditSectionTitle = function(cycleId, el) {
 };
 
 window.teCreateCycle = async function() {
-    let title = prompt("Enter new cycle name:");
+    let title = prompt("Enter new section name:");
     if (!title) return;
     
     try {
         const { data, error } = await supabaseClient.from('cyclez').insert([{
             title: title,
-            color_hex: '#10b981'
+            color_hex: '#10b981',
+            project_id: window.teActiveProjectId || null
         }]).select();
         
         if (error) throw error;
         if (data && data.length > 0) {
             taskEngineDB.cyclez.push(data[0]);
-            teRenderSidebar();
+            if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
         }
     } catch(e) { console.error(e); }
 };

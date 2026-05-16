@@ -255,6 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teToggleGlobalCreateMenu':
                     if(typeof window.teToggleGlobalCreateMenu==='function') window.teToggleGlobalCreateMenu();
                     break;
+                case 'click_teActivateInlineTask':
+                    if(typeof window.teActivateInlineTask==='function') window.teActivateInlineTask(el);
+                    break;
                 case 'click_teCreateCycle':
                     if(typeof window.teCreateCycle==='function') window.teCreateCycle();
                     break;
