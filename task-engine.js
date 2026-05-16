@@ -82,7 +82,7 @@ window.teChangeIdentity = function(userId) {
         if (p && p.visibility === 'Private') {
             let owner = (p.metadata && p.metadata.spoofed_owner) || null;
             if (!owner || owner !== userId) {
-                window.teSwitchView('inbox');
+                window.teSwitchView('inbox'); setTimeout(() => teRenderSidebar(), 50);
                 return;
             }
         }
@@ -92,7 +92,7 @@ window.teChangeIdentity = function(userId) {
     
     let title = document.getElementById('te-main-header-title');
     if (title && title.textContent === 'Inbox View') {
-        window.teSwitchView('inbox');
+        window.teSwitchView('inbox'); setTimeout(() => teRenderSidebar(), 50);
     } else {
         if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
     }
@@ -621,6 +621,7 @@ function teBuildTaskRowHTML(t, isChild) {
 window.teCreateNewTask = async function() {
     try {
         let payload = {
+            id: generateUUID(),
             title: 'Untitled Task',
             status: 'Todo',
             estimated_minutes: 30
@@ -713,6 +714,11 @@ window.teOpenTaskContext = function(taskId) {
                     timerBtn.style.animation = 'none';
                 }
             }
+            
+            const tagInput = document.getElementById('te-flyout-tag-input');
+            if (tagInput) tagInput.value = '';
+            const suggestBox = document.getElementById('te-flyout-tag-suggest');
+            if (suggestBox) suggestBox.style.display = 'none';
             
             window.teRenderTagEditor(taskId);
             teRenderSubtasks(taskId);
@@ -998,6 +1004,7 @@ window.teAddSubtask = async function() {
     
     try {
         const { data, error } = await supabaseClient.from('taskz').insert([{
+            id: generateUUID(),
             title: title,
             status: 'Todo',
             parent_task_id: window.currentOpenTaskId
@@ -1263,6 +1270,7 @@ window.teCreateProject = async function() {
         
         try {
             const { data, error } = await supabaseClient.from('projectz').insert([{
+                id: generateUUID(),
                 title: title,
                 color_hex: color,
                 visibility: vis,
@@ -1341,6 +1349,7 @@ window.teCreateCycle = async function() {
     
     try {
         const { data, error } = await supabaseClient.from('cyclez').insert([{
+            id: generateUUID(),
             title: title,
             color_hex: '#10b981',
             project_id: window.teActiveProjectId || null
@@ -1358,7 +1367,7 @@ window.teCreateTeam = async function() {
     let title = prompt("Enter new team name:");
     if (!title || !title.trim()) return;
     
-    const newTeam = { name: title.trim(), color_hex: '#8b5cf6' };
+    const newTeam = { id: generateUUID(), name: title.trim(), color_hex: '#8b5cf6' };
     try {
         const { data, error } = await supabaseClient.from('teams').insert([newTeam]).select();
         if (data && data.length > 0) {
@@ -1938,6 +1947,16 @@ window.teRenderArchiveView = function() {
 window.teArchiveEntity = async function(type, id) {
     try {
         let table = type === 'task' ? 'taskz' : (type === 'project' ? 'projectz' : (type === 'cycle' ? 'cyclez' : 'teams'));
+        if (type === 'project') {
+            const { error } = await supabaseClient.from(table).delete().eq('id', id);
+            if (error) throw error;
+            taskEngineDB.projectz = taskEngineDB.projectz.filter(p => p.id !== id);
+            window.teActiveProjectId = null;
+            teRenderSidebar();
+            if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid('inbox');
+            return;
+        }
+
         const { error } = await supabaseClient.from(table).update({ is_archived: true }).eq('id', id);
         if (error) throw error;
         
