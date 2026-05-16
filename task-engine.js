@@ -77,7 +77,7 @@ window.teChangeIdentity = function(userId) {
         let p = taskEngineDB.projectz.find(proj => proj.id === window.teActiveProjectId);
         if (p && p.visibility === 'Private') {
             let owner = (p.metadata && p.metadata.spoofed_owner) || null;
-            if (owner && owner !== userId) {
+            if (!owner || owner !== userId) {
                 window.teSwitchView('inbox');
                 return;
             }
@@ -124,7 +124,7 @@ function teRenderSidebar() {
             if (p.is_archived) return false;
             if (p.visibility === 'Private') {
                 let owner = (p.metadata && p.metadata.spoofed_owner) || null;
-                if (owner && owner !== currentUser) return false;
+                if (!owner || owner !== currentUser) return false;
             }
             return true;
         }).forEach(p => {
@@ -221,7 +221,7 @@ function teRenderTaskGrid(filter = null) {
             let p = taskEngineDB.projectz.find(proj => proj.id === t.project_id);
             if (p && p.visibility === 'Private') {
                 let owner = (p.metadata && p.metadata.spoofed_owner) || null;
-                if (owner && owner !== currentUser) return false;
+                if (!owner || owner !== currentUser) return false;
             }
         }
         
