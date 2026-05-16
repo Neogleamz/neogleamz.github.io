@@ -159,9 +159,10 @@ Known verified tables currently in active use across the JavaScript modules:
 - `socialz_audience`: Outreach CRM for skaters (`name`, `is_favorite`).
 
 ### Task Engine (ERP Command Center)
+- `projectz`: Top-level Asana-style hierarchical container for tracking initiatives. Fields: `title`, `color_hex`, `visibility`, `health_status`, `is_archived`.
 - `teams`, `team_members`: Identity architecture grouping users for assignments. (`is_archived` flags soft-deleted states).
-- `cyclez`: Linear-style timeboxing and sprint milestones (`start_date`, `end_date`, `assigned_team_id`, `is_archived`).
-- `taskz`: Core dependency matrix linking tasks to physical modules (`linked_module`, `estimated_minutes`, `is_archived`).
+- `cyclez` (Sections): Repurposed as Asana-style "Sections" to vertically group tasks within a project or list. (`start_date`, `end_date`, `assigned_team_id`, `is_archived`).
+- `taskz`: Core dependency matrix linking tasks to physical modules (`project_id`, `linked_module`, `estimated_minutes`, `is_archived`).
 - `task_dependencies`, `task_comments`, `task_activity`: Relational hooks for blocking, rich text threading, and immutable state-change audits.
 - `task_templates`, `template_subtasks`: Process Street scaffolding for generating dynamic SOPs.
 

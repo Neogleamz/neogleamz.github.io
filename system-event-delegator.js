@@ -102,14 +102,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSetStatus':
                     if (window.teSetStatus) window.teSetStatus(el.getAttribute('data-status'));
                     break;
+                case 'click_teSwitchView_overview':
+                    if (window.teSwitchView) window.teSwitchView('overview', el);
+                    break;
                 case 'click_teSwitchView_list':
                     if (window.teSwitchView) window.teSwitchView('list', el);
                     break;
                 case 'click_teSwitchView_board':
                     if (window.teSwitchView) window.teSwitchView('board', el);
                     break;
-                case 'click_teSwitchView_calendar':
-                    if (window.teSwitchView) window.teSwitchView('calendar', el);
+                case 'click_teSwitchView_timeline':
+                    if (window.teSwitchView) window.teSwitchView('timeline', el);
+                    break;
+                case 'click_teSwitchView_dashboard':
+                    if (window.teSwitchView) window.teSwitchView('dashboard', el);
                     break;
                 case 'click_teToggleTemplateMenu':
                     if (window.teToggleTemplateMenu) window.teToggleTemplateMenu();
@@ -246,8 +252,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teSwitchView_completed':
                     if(typeof window.teSwitchView==='function') window.teSwitchView('completed', el);
                     break;
+                case 'click_teToggleGlobalCreateMenu':
+                    if(typeof window.teToggleGlobalCreateMenu==='function') window.teToggleGlobalCreateMenu();
+                    break;
                 case 'click_teCreateCycle':
                     if(typeof window.teCreateCycle==='function') window.teCreateCycle();
+                    break;
+                case 'click_teCreateProject':
+                    if(typeof window.teCreateProject==='function') window.teCreateProject();
+                    break;
+                case 'click_teSelectProject':
+                    if(typeof window.teSelectProject==='function') window.teSelectProject(el.getAttribute('data-project-id'));
                     break;
                 case 'click_teCreateTeam':
                     if(typeof window.teCreateTeam==='function') window.teCreateTeam();
@@ -255,6 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teDeleteCycle':
                     event.stopPropagation();
                     if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('cycle', el.getAttribute('data-cycle-id'));
+                    break;
+                case 'click_teDeleteProject':
+                    event.stopPropagation();
+                    if(typeof window.teArchiveEntity==='function') window.teArchiveEntity('project', el.getAttribute('data-project-id'));
                     break;
                 case 'click_teDeleteTeam':
                     event.stopPropagation();
@@ -300,6 +319,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teRemoveTeamMember':
                     event.stopPropagation();
                     if(typeof window.teRemoveTeamMember==='function') window.teRemoveTeamMember(el.getAttribute('data-team-id'), el.getAttribute('data-member-name'));
+                    break;
+                case 'click_teEditSectionTitle':
+                    if(typeof window.teEditSectionTitle==='function') window.teEditSectionTitle(el.getAttribute('data-cycle-id'), el);
                     break;
                 case 'click_teToggleCycleGroup':
                     {

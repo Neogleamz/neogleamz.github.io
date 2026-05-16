@@ -5,8 +5,9 @@
 
 let isTaskPlannerOpen = false;
 
-let taskEngineDB = { taskz: [], cyclez: [], teams: [], comments: [], activity: [] };
+let taskEngineDB = { taskz: [], cyclez: [], projectz: [], teams: [], comments: [], activity: [] };
 window.teCurrentSort = { col: null, dir: 'asc' };
+window.teActiveProjectId = null;
 
 window.initTaskEngine = async function() {
     console.log('[TaskEngine] Initialization check complete.');
@@ -35,15 +36,17 @@ window.teGetStringColor = function(str) {
  */
 async function teFetchAllData() {
     try {
-        const [taskzRes, cyclezRes, teamsRes, commentsRes, activityRes] = await Promise.all([
+        const [taskzRes, cyclezRes, projectzRes, teamsRes, commentsRes, activityRes] = await Promise.all([
             supabaseClient.from('taskz').select('*').order('created_at', { ascending: false }),
             supabaseClient.from('cyclez').select('*').order('start_date', { ascending: false }),
+            supabaseClient.from('projectz').select('*').order('created_at', { ascending: false }),
             supabaseClient.from('teams').select('*').order('name', { ascending: true }),
             supabaseClient.from('task_comments').select('*').order('created_at', { ascending: false }),
             supabaseClient.from('task_activity').select('*').order('timestamp', { ascending: false })
         ]);
         if (taskzRes.data) taskEngineDB.taskz = taskzRes.data;
         if (cyclezRes.data) taskEngineDB.cyclez = cyclezRes.data;
+        if (projectzRes.data) taskEngineDB.projectz = projectzRes.data;
         if (teamsRes.data) taskEngineDB.teams = teamsRes.data;
         if (commentsRes.data) taskEngineDB.comments = commentsRes.data;
         if (activityRes.data) taskEngineDB.activity = activityRes.data;
@@ -95,25 +98,26 @@ function teUpdateInboxBadge() {
 }
 
 function teRenderSidebar() {
-    const cyclezList = document.getElementById('te-cyclez-list');
+    const projectzList = document.getElementById('te-projectz-list');
     const teamsList = document.getElementById('te-teams-list');
     
-    if (cyclezList) {
-        let cycleHTML = '';
-        taskEngineDB.cyclez.filter(c => !c.is_archived).forEach(c => {
-            cycleHTML += `
-                <div class="task-nav-link" style="flex-direction: column; align-items: flex-start; position: relative;" data-cycle-id="${c.id}">
-                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 4px;">
-                        <span>${c.title}</span>
-                        <span data-click="click_teDeleteCycle" data-cycle-id="${c.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
-                    </div>
-                    <div style="width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; overflow: hidden;">
-                        <div style="width: 0%; background: ${c.color_hex || '#2dd4bf'}; height: 100%;"></div>
+    if (projectzList) {
+        let projectHTML = '';
+        taskEngineDB.projectz.filter(p => !p.is_archived).forEach(p => {
+            let isActive = window.teActiveProjectId === p.id ? 'active' : '';
+            projectHTML += `
+                <div class="task-nav-link ${isActive}" style="flex-direction: column; align-items: flex-start; position: relative;" data-click="click_teSelectProject" data-project-id="${p.id}">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <span style="font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                            <span style="display:inline-block; width:10px; height:10px; background:${p.color_hex || '#f97316'}; border-radius:3px;"></span>
+                            ${p.title}
+                        </span>
+                        <span data-click="click_teDeleteProject" data-project-id="${p.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
                     </div>
                 </div>
             `;
         });
-        cyclezList.innerHTML = window.safeHTML ? window.safeHTML(cycleHTML) : cycleHTML;
+        projectzList.innerHTML = window.safeHTML ? window.safeHTML(projectHTML) : projectHTML;
     }
     
     if (teamsList) {
@@ -222,6 +226,9 @@ function teRenderTaskGrid(filter = null) {
         }
         return t.status !== 'Completed' && t.status !== 'Done'; // Default 'list' view hides done
     });
+    if (window.teActiveProjectId) {
+        displayTasks = displayTasks.filter(t => t.project_id === window.teActiveProjectId);
+    }
     
     // UI Hierarchy Safety: Ensure full atomic rendering of parent-child relationships
     // 1. If a subtask is visible, ensure its Parent is visible so the accordion functions.
@@ -246,27 +253,32 @@ function teRenderTaskGrid(filter = null) {
         if (task) displayTasks.push(task);
     });
 
-    // Group by Cycle
-    let cycleGroups = {
-        'unassigned': { title: 'No Cycle', tasks: [] }
-    };
+    // Group by Cycle (Sections)
+    let cycleGroups = new Map();
+    cycleGroups.set('unassigned', { title: 'No Section', color: '#64748b', tasks: [] });
     
-    taskEngineDB.cyclez.filter(c => !c.is_archived).forEach(c => {
-        cycleGroups[c.id] = { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [] };
+    let sortedCyclez = taskEngineDB.cyclez.filter(c => !c.is_archived).sort((a,b) => {
+        let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
+        let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
+        return aSort - bSort;
+    });
+    
+    sortedCyclez.forEach(c => {
+        cycleGroups.set(c.id, { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [] });
     });
     
     // Sort tasks into cycles (only top-level tasks)
     displayTasks.filter(t => !t.parent_task_id).forEach(t => {
         let cid = t.cycle_id;
-        if (cid && cycleGroups[cid]) {
-            cycleGroups[cid].tasks.push(t);
+        if (cid && cycleGroups.has(cid)) {
+            cycleGroups.get(cid).tasks.push(t);
         } else {
-            cycleGroups['unassigned'].tasks.push(t);
+            cycleGroups.get('unassigned').tasks.push(t);
         }
     });
     
     // Apply sorting to cycleGroups
-    for (const [cid, group] of Object.entries(cycleGroups)) {
+    for (const [cid, group] of cycleGroups) {
         group.tasks.sort((a, b) => {
             if (window.teCurrentSort && window.teCurrentSort.col) {
                 let dir = window.teCurrentSort.dir === 'asc' ? 1 : -1;
@@ -295,19 +307,21 @@ function teRenderTaskGrid(filter = null) {
             }
         });
     }
-    
     // Render loop
-    for (const [cid, group] of Object.entries(cycleGroups)) {
-        if (group.tasks.length === 0 && cid === 'unassigned' && Object.keys(cycleGroups).length > 1) continue;
+    html += `<div id="te-sections-wrapper" class="te-sortable-sections-list">`;
+    for (const [cid, group] of cycleGroups) {
+        if (group.tasks.length === 0 && cid === 'unassigned' && cycleGroups.size > 1) continue;
         
         let headerColor = group.color || '#64748b';
         html += `
-        <div style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">
-            <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">▼</div>
-            <div style="font-size: 14px; font-weight: bold; color: white;">${group.title}</div>
-            <div style="flex-grow: 1; height: 1px; background: rgba(255,255,255,0.1); margin-left: 10px;"></div>
-        </div>
-        <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: flex; flex-direction: column; gap: 4px;">
+        <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 20px;">
+            <div class="te-section-header" style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; cursor: grab;">
+                <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">▼</div>
+                <div class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="font-size: 14px; font-weight: bold; color: white; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">${group.title}</div>
+                <div style="flex-grow: 1; height: 1px; background: rgba(255,255,255,0.1); margin-left: 10px;"></div>
+                <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'" onmouseout="this.style.background='transparent'">✖</div>
+            </div>
+            <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: flex; flex-direction: column; gap: 4px;">
         `;
         
         group.tasks.forEach(t => {
@@ -337,13 +351,53 @@ function teRenderTaskGrid(filter = null) {
                     <span class="te-inline-add-placeholder" style="color: var(--text-muted); font-size: 14px; padding-top: 0px;">Add task...</span>
                 </div>
             </div>
+            </div>
         </div>`;
     }
+    html += `</div>`;
+    
+    html += `
+        <div style="margin-top: 20px; padding: 10px 15px; cursor: pointer; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; gap: 8px; border-radius: 8px; max-width: 200px;" data-click="click_teCreateCycle" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'">
+            <span style="font-size: 16px;">+</span> Add section
+        </div>
+    `;
     
     wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     
     // Initialize SortableJS
     if (typeof Sortable !== 'undefined' && (!window.teCurrentSort || !window.teCurrentSort.col)) {
+        let sectionsWrapper = document.getElementById('te-sections-wrapper');
+        if (sectionsWrapper) {
+            new Sortable(sectionsWrapper, {
+                group: 'list-view-sections',
+                animation: 150,
+                handle: '.te-section-header',
+                ghostClass: 'sortable-ghost',
+                onEnd: async function(evt) {
+                    if (evt.oldIndex === evt.newIndex) return;
+                    let sectionDivs = Array.from(evt.to.children);
+                    let updates = [];
+                    for (let i = 0; i < sectionDivs.length; i++) {
+                        let cid = sectionDivs[i].getAttribute('data-cycle-id');
+                        if (!cid || cid === 'unassigned') continue;
+                        let cycle = taskEngineDB.cyclez.find(c => c.id === cid);
+                        if (cycle) {
+                            let meta = cycle.metadata || {};
+                            meta.sort_order = i;
+                            cycle.metadata = meta;
+                            updates.push({ id: cid, metadata: meta });
+                        }
+                    }
+                    if (updates.length > 0) {
+                        try {
+                            const promises = updates.map(u => supabaseClient.from('cyclez').update({ metadata: u.metadata }).eq('id', u.id));
+                            await Promise.all(promises);
+                        } catch(e) { console.error('[TaskEngine] Section sort failed', e); }
+                    }
+                }
+            });
+        }
+        
         document.querySelectorAll('.te-sortable-cycle-list').forEach(listEl => {
             new Sortable(listEl, {
                 group: 'list-view-tasks',
@@ -485,11 +539,14 @@ function teBuildTaskRowHTML(t, isChild) {
 
 window.teCreateNewTask = async function() {
     try {
-        const { data, error } = await supabaseClient.from('taskz').insert([{
+        let payload = {
             title: 'Untitled Task',
             status: 'Todo',
             estimated_minutes: 30
-        }]).select();
+        };
+        if (window.teActiveProjectId) payload.project_id = window.teActiveProjectId;
+        
+        const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
         
         if (error) throw error;
         
@@ -1017,6 +1074,81 @@ window.teUpdateTaskCycle = async function(taskId, cycleId) {
     } catch(e) { console.error(e); }
 };
 
+window.teSelectProject = function(projectId) {
+    window.teActiveProjectId = projectId;
+    document.querySelectorAll('.task-nav-link').forEach(l => l.classList.remove('active'));
+    let activeLink = document.querySelector(`.task-nav-link[data-project-id="${projectId}"]`);
+    if (activeLink) activeLink.classList.add('active');
+    
+    let p = taskEngineDB.projectz.find(x => x.id === projectId);
+    if (p) {
+        let titleEl = document.getElementById('te-main-header-title');
+        if (titleEl) titleEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`;
+    }
+    teSwitchView('list');
+};
+
+window.teCreateProject = async function() {
+    let title = prompt("Enter new project name:");
+    if (!title) return;
+    
+    try {
+        const { data, error } = await supabaseClient.from('projectz').insert([{
+            title: title,
+            color_hex: '#f97316',
+            visibility: 'org',
+            health_status: 'On Track'
+        }]).select();
+        
+        if (error) throw error;
+        if (data && data.length > 0) {
+            taskEngineDB.projectz.unshift(data[0]);
+            teRenderSidebar();
+            window.teSelectProject(data[0].id);
+        }
+    } catch(e) { console.error(e); }
+};
+
+window.teEditSectionTitle = function(cycleId, el) {
+    if (!cycleId || cycleId === 'unassigned') return;
+    let cycle = taskEngineDB.cyclez.find(c => c.id === cycleId);
+    if (!cycle) return;
+    
+    let currentTitle = cycle.title;
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentTitle;
+    input.style.cssText = "font-size: 14px; font-weight: bold; color: white; background: rgba(0,0,0,0.5); border: 1px solid var(--neon-green); padding: 4px 8px; border-radius: 4px; outline: none; width: 250px;";
+    
+    el.innerHTML = '';
+    el.appendChild(input);
+    input.focus();
+    input.select();
+    
+    const saveTitle = async () => {
+        let newTitle = input.value.trim();
+        if (newTitle && newTitle !== currentTitle) {
+            el.innerHTML = newTitle;
+            cycle.title = newTitle;
+            try {
+                await supabaseClient.from('cyclez').update({ title: newTitle }).eq('id', cycleId);
+            } catch(e) { console.error('Failed to update section title', e); }
+        } else {
+            el.innerHTML = currentTitle;
+        }
+    };
+    
+    input.addEventListener('blur', saveTitle);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            input.blur();
+        } else if (e.key === 'Escape') {
+            input.value = currentTitle;
+            input.blur();
+        }
+    });
+};
+
 window.teCreateCycle = async function() {
     let title = prompt("Enter new cycle name:");
     if (!title) return;
@@ -1160,6 +1292,9 @@ window.tePostComment = async function() {
 };
 
 window.teSwitchView = function(view, btnEl) {
+    if (['inbox', 'my_tasks', 'in_progress', 'completed', 'archive'].includes(view)) {
+        window.teActiveProjectId = null;
+    }
     // Update UI buttons based on what was clicked
     if (btnEl) {
         if (btnEl.classList.contains('task-nav-link')) {
@@ -1288,7 +1423,7 @@ window.teSwitchView = function(view, btnEl) {
                 });
             });
         }
-    } else if (view === 'calendar') {
+    } else if (view === 'timeline' || view === 'calendar') {
         header.style.display = 'none';
         
         if (typeof window.teCalendarMonth === 'undefined') window.teCalendarMonth = new Date().getMonth();
@@ -1386,6 +1521,18 @@ window.teSwitchView = function(view, btnEl) {
         
         calendarHtml += `</div>`;
         wrapper.innerHTML = window.safeHTML ? window.safeHTML(calendarHtml) : calendarHtml;
+    } else if (view === 'overview') {
+        header.style.display = 'none';
+        wrapper.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+            <h2 style="color: white; font-weight: 300;">Project Overview</h2>
+            <p>Welcome to the project overview. High-level summaries and briefs will appear here.</p>
+        </div>`;
+    } else if (view === 'dashboard') {
+        header.style.display = 'none';
+        wrapper.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+            <h2 style="color: white; font-weight: 300;">Dashboard</h2>
+            <p>Real-time analytics and charts for this project will render here.</p>
+        </div>`;
     }
 };
 
@@ -1427,11 +1574,14 @@ window.teSpawnSOP = async function(type) {
     }
     
     try {
-        const { data, error } = await supabaseClient.from('taskz').insert([{
+        let payload = {
             title: title,
             status: 'Todo',
             estimated_minutes: est
-        }]).select();
+        };
+        if (window.teActiveProjectId) payload.project_id = window.teActiveProjectId;
+        
+        const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
         
         if (!error && data && data.length > 0) {
             taskEngineDB.taskz.unshift(data[0]);
@@ -1814,6 +1964,7 @@ window.teCreateInlineTask = async function(title, cycleId) {
             estimated_minutes: 30,
             cycle_id: cycleId
         };
+        if (window.teActiveProjectId) payload.project_id = window.teActiveProjectId;
         
         if (spoofAssignee) {
             payload.metadata = { spoofed_assignee: spoofAssignee };
