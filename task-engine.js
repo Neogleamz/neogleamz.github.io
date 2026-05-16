@@ -402,6 +402,7 @@ function teRenderTaskGrid(filter = null) {
     for (const [cid, group] of cycleGroups) {
         if (group.tasks.length === 0) {
             if (cid === 'unassigned' && totalTasks > 0) continue;
+            if (filter === 'in_progress' || filter === 'completed') continue;
             if (cid !== 'unassigned' && !window.teActiveProjectId && group.project_id !== null) continue;
         }
         
