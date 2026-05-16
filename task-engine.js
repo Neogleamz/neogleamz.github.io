@@ -2484,11 +2484,11 @@ window.teRenderTagManagerList = function() {
     
     sortedTags.forEach(t => {
         html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
-            <div style="display:flex; align-items:center; gap:8px; flex: 1;">
-                <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:20px; height:20px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent;">
-                <input type="text" data-change="change_teUpdateTagName" data-tag-id="${t.id}" value="${t.name.replace(/"/g, '&quot;')}" style="background:transparent; border:1px solid transparent; color:white; font-size:13px; font-weight:bold; padding:2px 6px; border-radius:4px; flex: 1; outline:none;" onfocus="this.style.border='1px solid rgba(255,255,255,0.2)'; this.style.background='rgba(0,0,0,0.3)'" onblur="this.style.border='1px solid transparent'; this.style.background='transparent'">
+            <div style="display:flex; align-items:center; gap:10px; flex: 1;">
+                <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:24px; height:24px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent; flex-shrink:0;">
+                <input type="text" data-change="change_teUpdateTagName" data-tag-id="${t.id}" value="${t.name.replace(/"/g, '&quot;')}" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; font-size:13px; font-weight:bold; padding:4px 8px; border-radius:4px; width: 100%; outline:none;" onfocus="this.style.border='1px solid #3b82f6'; this.style.background='rgba(255,255,255,0.2)'" onblur="this.style.border='1px solid rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.1)'">
             </div>
-            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 10px; font-size:10px; border-radius:4px; margin-left: 10px;">🗑️ Delete</button>
+            <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 10px; font-size:10px; border-radius:4px; margin-left: 10px; flex-shrink:0; white-space:nowrap;">🗑️ Delete</button>
         </div>`;
     });
     
