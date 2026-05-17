@@ -979,18 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.stopPropagation();
                     if(window.openMediaModal) window.openMediaModal(el.getAttribute('data-url'), 'img');
                     break;
-                case 'click_moveSOPUp':
-                    if(window.moveSOPUp) window.moveSOPUp(el);
-                    break;
-                case 'click_moveSOPDown':
-                    if(window.moveSOPDown) window.moveSOPDown(el);
-                    break;
-                case 'click_addSOPRow':
-                    if(window.addSOPRow) window.addSOPRow(el);
-                    break;
-                case 'click_removeSOPRow':
-                    if(window.removeSOPRow) window.removeSOPRow(el);
-                    break;
+
                 case 'click_removeBatchItem':
                     if(window.removeBatchItem) window.removeBatchItem(el.getAttribute('data-index'));
                     break;
