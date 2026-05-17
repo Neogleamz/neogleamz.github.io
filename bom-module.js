@@ -562,7 +562,7 @@ window.renderRecipeManager = function() {
                     }
                     let sStr = changedSuggTokens.join(', ');
                     let oStr = changedOrigTokens.join(', ');
-                    let changeStr = "";
+                    let changeStr;
                     if (oStr && sStr) changeStr = `<span style="color:#fca5a5;">${oStr}</span> ➔ <span style="color:#6ee7b7;">${sStr}</span>`;
                     else if (sStr) changeStr = `<span style="color:#6ee7b7;">${sStr}</span>`;
                     else changeStr = "Apply Match";

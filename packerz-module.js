@@ -2297,7 +2297,7 @@ window.click_captureSOPSnapshot = function() {
             beep.currentTime = 0;
             beep.play().catch(()=>{});
         }
-    } catch(e) {}
+    } catch(e) { console.warn('Beep playback failed:', e); }
     
     statusEl.innerText = "📸 Capturing and preparing upload...";
     captureBtn.style.opacity = '0.5';
