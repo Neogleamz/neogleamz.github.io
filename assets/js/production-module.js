@@ -26,7 +26,7 @@ function openMediaModal(url, renderType) { try { const container = document.getE
 function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = window.safeHTML(''); } catch(e) { sysLog(e.message, true); } }
 
 function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
-function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;"><select onchange="execRT('fontSize', this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main); margin-right:4px;"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
+function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent; flex-shrink:0;"><select onchange="execRT('fontSize', this.value)" style="max-width:100px; min-width:0; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main); margin-right:4px;"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
 
 window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = 'batches') {
     let safeText = s.text || ''; 
@@ -77,13 +77,20 @@ window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = '
             </div>
             <div class="sop-controls-container">
                 ${getRTToolbar()}
-                <div style="display:flex; justify-content:flex-end; margin-top:8px; margin-bottom:4px; padding:4px 8px; border-radius:6px;">
-                    <div style="display:flex; gap:4px;">
-                        <button type="button" data-mousedown="mousedown_smartPhotoPaste" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer;" title="Smart Photo Paste">📸 PHOTO</button>
-                        <button type="button" data-mousedown="mousedown_sopDirectUpload" data-prodid="${prodId}" data-soptype="${sopType}" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #3b82f6; background:rgba(59,130,246,0.15); color:#3b82f6; cursor:pointer;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
-                        <button type="button" data-mousedown="mousedown_smartAttachmentUrl" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer;">+ NEW URL</button>
+                <div style="display:flex; justify-content:flex-start; flex-wrap:wrap; margin-top:8px; margin-bottom:4px; padding:4px 8px; border-radius:6px;">
+
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+
+                        <button type="button" data-mousedown="mousedown_smartPhotoPaste" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer; white-space:nowrap;" title="Smart Photo Paste">📸 PHOTO</button>
+
+                        <button type="button" data-mousedown="mousedown_sopDirectUpload" data-prodid="${prodId}" data-soptype="${sopType}" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #3b82f6; background:rgba(59,130,246,0.15); color:#3b82f6; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
+
+                        <button type="button" data-mousedown="mousedown_smartAttachmentUrl" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer; white-space:nowrap;">+ NEW URL</button>
+
                     </div>
+
                 </div>
+
                 <div class="attachments-container" style="display:flex; flex-direction:column;">
                     ${attachmentHtml}
                 </div>
@@ -1415,13 +1422,20 @@ function renderActiveWO(id) {
                                     <div id="inlineInputCol_${grp.id}" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
-                                            <div style="display:flex; gap:5px; flex-wrap:nowrap; align-items:center;">
-                                                <button class="sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, '\'')}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
-                                                <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, '\'')}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ Upload</button>
-                                                <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
-                                                <button data-click="click_openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
-                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
-                                            </div>
+                                            <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+
+                                                <button class="sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, '\'')}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
+
+                                                <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, '\'')}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ Upload</button>
+
+                                                <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
+
+                                                <button data-click="click_openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
+
+                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
+
+                                            </div>
+
                                         </div>
                                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
                                             <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;&middot;&nbsp;

@@ -457,7 +457,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
-                            <div style="display:flex; gap:5px; flex-wrap:nowrap; align-items:center;">
+                            <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
                                 <button onclick="window.openSopPrintModal('packerz')" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
                                 <button data-app-click="openSOPMediaInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">☁️ Upload</button>
                                 <button data-app-click="openSOPSnapshotCameraInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
