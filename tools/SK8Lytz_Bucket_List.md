@@ -1,4 +1,9 @@
-# 🦅 Neogleamz Master Bucket List
+# 🦅 Neogleamz Master Bucket List### Target: main
+**Epic: Webhook Idempotency & Race Condition Fix**
+*(Shipped v1.0.40 — 2026-05-17)*
+- [🚀] ix/webhook-idempotency : **Webhook Idempotency Race Condition Fix** - Refactored the Shopify orders/create Edge Function to aggregate identical line items organically, and implemented a strict UNIQUE(order_id, storefront_sku) constraint to the PostgreSQL sales_ledger to guarantee mathematical parity during simultaneous webhook triggers. [🤖 Gemini 3.1 Pro] [🧠 20k / 20k] [💸 .05 / .05]
+
+
 
 This document acts as the permanent, living task tracker integrated directly with your autonomous AI development agents. 
 

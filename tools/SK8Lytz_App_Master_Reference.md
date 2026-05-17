@@ -393,3 +393,11 @@ To prevent
 o-duplicate-case ESLint errors in system-event-delegator.js, case label strings must be globally unique. Historical violations and their canonical resolutions:
 * click_window_openPrintSOP_currentPri was ambiguous — the 3D Layerz print handler is now **click_window_openLayerzPrintSOP_currentPri** (calls window.openPrintSOP(currentPrintJob.part_name)).
 * click_printPackerzSOP existed at L275 (new openSopPrintModal routing) and L897 (legacy printPackerzSOP()). The legacy handler is now **click_printPackerzSOP_legacy**. New DOM elements must only ever reference the L275 case.
+
+
+## Serverless & Edge Functions
+
+### Webhook Idempotency & Database Constraints
+To prevent race conditions during simultaneous webhook transmissions (e.g. orders/create and orders/updated arriving on the same millisecond), the architecture employs a two-tier lock:
+1. **Payload Aggregation**: Edge functions pre-aggregate duplicate line items (by storefront_sku) natively before pushing to the DB. This prevents false-flags of legitimate multiple cart additions.
+2. **Database Constraints**: The sales_ledger table enforces a UNIQUE(order_id, storefront_sku) constraint. Simultaneous requests will trigger a Postgres constraint violation on the secondary payload, which causes the Edge Function to fail safely (HTTP 500). Shopifyâ€™s native retry algorithm then automatically delays and retries the webhook, which subsequently succeeds via an .update() bypass.
