@@ -19,3 +19,32 @@ When my prompt contains a raw stack trace, an error message, or starts with "Fix
 3. **Execution**: 
    - Once approved, apply the fix.
    - Add a comment above the fixed code explaining what was patched.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+When presenting the Root Cause Analysis (Step 1), you MUST render the following structured output. Do NOT output a plain text paragraph. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🐛 Bug Hunter Diagnosis
+
+#### Crash Summary Card
+Render a compact metadata table:
+```
+| Field | Value |
+|---|---|
+| 🔴 Error Type | `TypeError` / `ReferenceError` / `SyntaxError` / etc. |
+| 📁 Source File | `path/to/file.js` |
+| 📍 Line Number | L123 |
+| 🔗 Stack Depth | N frames deep |
+| 🌿 Active Branch | `feat/xxx` |
+```
+
+#### Root Cause Analysis
+Render a `> [!WARNING]` block explaining exactly WHY the crash occurred, citing specific variable names, function calls, and line numbers from the source code.
+
+#### Proposed Fix
+Render the corrected code inside a fenced code block with the language specified. Above the code block, render a `> [!NOTE]` block explaining what the fix changes and why.
+
+#### 🎯 Approval Gate
+Render a `> [!IMPORTANT]` block: "Type **'apply fix'** to authorize the patch, or describe an alternative approach."

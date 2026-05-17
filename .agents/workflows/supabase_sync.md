@@ -18,3 +18,35 @@ Whenever you are instructed to alter a Supabase Database table, modify RLS (Row 
    - Use your native code editing tools (like `replace_file_content`) to inject or update the schema dictionary. 
    - **CRITICAL:** Do NOT overwrite the entire file. You must strictly edit only the relevant schema section.
 4. **Autonomous Action**: Do not wait for the user to request this documentation sync. It must be an automatic, mandatory reaction to any schema modification to ensure the vanilla JavaScript frontend developers can accurately reference the current API.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+After completing the schema sync, you MUST render the following structured output. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🗄️ Schema Sync Confirmation
+
+#### Migration Applied
+Render a compact table:
+```
+| Field | Value |
+|---|---|
+| 📁 Migration File | `supabase/migrations/xxx.sql` |
+| 🗄️ Table(s) Modified | `table_name` |
+| 🔒 RLS Updated | ✅ Yes / ⏭️ No changes |
+| 📚 Master Reference | ✅ Synced to `## Database Schemas` |
+| 💾 Push Status | ✅ `npx supabase db push` executed |
+```
+
+#### Schema Changes
+Render a Markdown table showing the exact columns/types added or modified:
+```
+| Column | Type | Nullable | Default | Change |
+|---|---|---|---|---|
+| `new_column` | `text` | ✅ | `null` | ➕ Added |
+| `old_column` | `integer` | ❌ | — | ✏️ Modified |
+```
+
+#### 🎯 Next Steps
+Render a `> [!TIP]` block suggesting verification steps (e.g., "Run `/schema_diff` to confirm remote parity").

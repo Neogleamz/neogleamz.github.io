@@ -19,5 +19,21 @@ When the user requests to log an idea or task for later, you must execute the fo
    - Execute `git commit -m "chore(ledger): [/idea_intake] log new task"`
    - This safely tracks the new idea within their active branch history.
 4. **Hard Stop (Passive Mode)**:
-   - Provide a brief confirmation message to the user that the idea was securely saved.
+   - Provide a brief confirmation using the mandatory output format below.
    - **CRITICAL RULE**: You are strictly forbidden from executing `git checkout`, `git stash`, generating an implementation plan, or changing the current working context. Let the user continue working uninterrupted.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+You MUST render the confirmation as a compact card. Do NOT output a plain text paragraph. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+Render a `> [!NOTE]` block:
+```
+> [!NOTE]
+> 📥 **Idea Logged** — `<branch-slug>`
+> - **Task:** <1-sentence description>
+> - **Assigned To:** `### Target: <section>`
+> - **Commit:** `abc1234` — `chore(ledger): [/idea_intake] log new task`
+> - **Context Preserved:** ✅ No branch changes made
+```

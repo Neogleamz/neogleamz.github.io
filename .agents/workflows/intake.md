@@ -21,3 +21,25 @@ When the user requests to actively pivot their session and drop everything to fi
    - Execute `git pull origin main` (if remote exists)
    - Execute `git checkout -b <slug>` to create the new hotfix workspace.
    - Present a highly-detailed Implementation Plan for the bug fix/feature, and await their approval to begin coding.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+After completing the context stash and environment reset (Steps 1-4), you MUST render the following structured output before presenting the Implementation Plan. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🚨 Zero-Bypass Pivot Confirmation
+
+Render a Gate Results Table:
+```
+| Gate | Result | Detail |
+|---|---|---|
+| 💾 WIP Stash | ✅ | Committed `abc1234` on `feat/xxx` |
+| 📋 P0 Injection | ✅ | `fix/auth-crash` added to P0 queue |
+| 🔀 Branch Reset | ✅ | Checked out `main`, pulled latest |
+| 🌿 Hotfix Branch | ✅ | Created `fix/auth-crash` |
+```
+
+Render a `> [!WARNING]` block: "Previous work on `feat/xxx` has been frozen at commit `abc1234`. Resume with `git checkout feat/xxx` after this hotfix is shipped."
+
+Then present the Implementation Plan as usual.

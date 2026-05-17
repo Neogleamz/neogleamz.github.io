@@ -13,7 +13,7 @@ When the user invokes `/audit [filename/directory]` (or says "clean up legacy", 
    - Silently cross-reference the code against our established Vanilla JS rules (specifically *Vanilla DOM Mastery*, *Web Native Exclusivity*, and *UI Architecture*).
 
 2. **The Audit Report (Halt & Report)**:
-   - Output a bulleted "Audit Report" detailing exactly how the legacy code violates our current standards. 
+   - Output the Audit Report using the mandatory output format below. 
    - Highlight specific offenses (e.g., React/Node remnants, hardcoded pixel values, missing `try/catch` blocks, inline HTML events, or monolithic functions).
 
 3. **Safe Isolation**:
@@ -33,3 +33,45 @@ When the user invokes `/audit [filename/directory]` (or says "clean up legacy", 
    - Stage ONLY the targeted files (e.g., `git add <target-file-path>`).
    - Execute the commit: `git commit -m "refactor(<target-name>): bring codebase up to current SK8Lytz vanilla standards"`
    - Notify the user that the cleanup is complete and the branch is ready for testing.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+When presenting the Audit Report (Step 2), you MUST render the following structured output. Do NOT output a plain text bullet list. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🔍 Legacy Audit Report — `<filename>`
+
+#### File Metadata
+```
+| Field | Value |
+|---|---|
+| 📁 File | `path/to/file.js` |
+| 📏 Total Lines | N |
+| 📦 Total Bytes | N |
+| 🏗️ Architecture | Monolithic / Modular / Mixed |
+```
+
+#### Violation Matrix
+Render a Markdown table of every standards violation found:
+```
+| # | Category | Line(s) | Violation | Severity | Rule Violated |
+|---|---|---|---|---|---|
+| 1 | 🔒 Security | L45 | Unguarded `innerHTML` | 🔴 Critical | Vanilla DOM Mastery §4 |
+| 2 | 🏗️ Architecture | L100-250 | Monolithic function (150 lines) | 🟠 Medium | Clean Code §1 |
+| 3 | 🎨 UI/CSS | L30 | `position: absolute` on structural element | 🟡 Low | Responsive UI §2 |
+| 4 | ⚡ Performance | L78 | Missing `removeEventListener` on view re-render | 🟠 Medium | Vanilla DOM Mastery §3 |
+```
+
+#### Summary Stats
+```
+| Severity | Count |
+|---|---|
+| 🔴 Critical | N |
+| 🟠 Medium | N |
+| 🟡 Low | N |
+| **Total Violations** | **N** |
+```
+
+#### 🎯 Refactoring Plan Preview
+Render a `> [!NOTE]` block with a 2-3 sentence summary of the refactoring strategy, then ask for approval using a `> [!IMPORTANT]` block: "Type **'proceed'** to execute the cleanup."

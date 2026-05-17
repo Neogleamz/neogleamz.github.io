@@ -16,3 +16,29 @@ When the user's prompt includes "Are you following", "Do you understand", "Make 
 6. **The Knowledge Gap**: If any part of the explanation was vague, contradictory, or missing specific technical details, explicitly point it out here. If everything is crystal clear, state: *"Context is 100% clear."*
 7. **The Alignment Check**: Ask the user: *"Is this alignment correct? Tell me where I am off, or type 'aligned' to lock this into my context."*
 8. **Misalignment Recovery Loop**: If the user replies that your alignment is incorrect, you must NOT guess again or write any code. You must ask highly targeted, specific clarifying questions (offering A/B choices if possible) until perfect alignment is achieved.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+You MUST render the Echo Protocol using the following exact Markdown structure. Do NOT output a plain text paragraph summary. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🔊 Echo Protocol — Context Verification
+
+#### 🧠 My Understanding
+Render a `> [!NOTE]` block containing your 2-3 sentence synthesis of the user's intent and mechanics.
+
+#### 🏗️ Assumptions I'm Holding
+Render a numbered list inside a `> [!WARNING]` block. Each assumption should be a single, specific technical statement.
+
+#### 🚫 Scope Exclusions (Out of Bounds)
+Render a bulleted list of what you will NOT do on this pass. Use strikethrough formatting (e.g., ~~Refactor the entire module~~) to make exclusions visually stark.
+
+#### ✅ Definition of Done
+Render a `> [!TIP]` block with the exact success criteria in 1-2 sentences.
+
+#### ❓ Knowledge Gaps
+If gaps exist, render each as a separate `> [!IMPORTANT]` block with a targeted question. If no gaps exist, render: `> [!NOTE]` "Context is 100% clear."
+
+#### 🎯 Alignment Gate
+Render a `> [!IMPORTANT]` block: "Is this alignment correct? Tell me where I'm off, or type **'aligned'** to lock this into my context."

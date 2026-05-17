@@ -21,19 +21,44 @@ When the user invokes `/status` (or asks "whats up", "status update", "where are
    - Identify the most recently checked-off item (`- [x]`).
    - Identify the very next pending items (`- [ ]`).
 
-3. **Generate the Dashboard**: Synthesize the data into a clean Markdown status report formatted exactly like this:
-
-   ### 📊 Project Status Report
-
-   **Current Branch:** `<result from git branch>`
-   **Working Tree:** `<Clean OR 'Uncommitted Changes Detected'>`
-   **Active Epic/Target:** `<the nearest ### Target header>`
-   📈 **Epic Progress:** `<X> / <Y> Tasks Completed (<Z>%)`
-
-   ✅ **Last Completed Action:** `<the last commit message OR the last checked-off bucket list item>`
-
-   ⏳ **Currently Pending (Next Up):**
-   1. `<the very next - [ ] task>`
-   2. `<the following - [ ] task>`
+3. **Generate the Dashboard**: Synthesize the data using the mandatory output format below.
 
 4. **Halt**: Output the dashboard to the chat and wait for my next command. Do not take any further action.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+You MUST render the dashboard using the following exact Markdown structure. Do NOT output a plain text summary or rearrange the sections. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 📊 Project Status Report
+
+Render a **Status Card Table** with the following rows:
+
+```
+| Field | Value |
+|---|---|
+| 🌿 **Current Branch** | `<result from git branch>` |
+| 🌳 **Working Tree** | `Clean` OR `⚠️ Uncommitted Changes Detected` |
+| 🎯 **Active Epic/Target** | `<the nearest ### Target header>` |
+| 📈 **Epic Progress** | `X / Y Tasks Completed (Z%)` |
+| 🏷️ **Latest Version** | `vX.Y.Z` (from package.json) |
+```
+
+### ✅ Last Completed Action
+Render a `> [!NOTE]` block containing the last commit message AND the last checked-off bucket list item (if different).
+
+### ⏳ Next Up (Pending Queue)
+Render a **numbered list** of the next 3 pending `- [ ]` tasks from the Bucket List. Each item should include its branch slug in backtick formatting.
+
+### 🪤 Active Traps & Blockers
+Scan the workspace for any active issues. Render `> [!WARNING]` blocks for:
+- Uncommitted changes in the working tree
+- Orphaned `[x]` tasks not yet archived with `[🚀]`
+- Active feature branches that haven't been merged
+- Any P0 Critical items in the Bucket List
+
+If none found, render a single `> [!TIP]` block: "No active traps. Clear runway."
+
+### 🎯 Suggested Workflow
+Render a `> [!TIP]` block suggesting the most logical next workflow to execute based on the current context (e.g., `/bucketlist` to start next task, `/ship_it` to merge current work, `/wind_down` to end session).

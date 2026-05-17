@@ -22,8 +22,39 @@ When the user invokes `/ux-pass` (or says "simulate user", "run a UX pass"), you
    - Is the table data too cramped or misaligned for a desktop view?
    - Does this require reading a manual to understand, or is the interface self-documenting?
 
-4. **The UX Critique & Redesign**: 
-   - Output a blunt, user-centric critique of the interface. 
-   - Propose a streamlined, low-friction HTML/CSS Vanilla JS alternative (e.g., *"Instead of a hidden dropdown menu, put the main actions as obvious, permanent buttons at the top of the grid."*).
+4. **The UX Critique & Redesign**: Present the findings using the mandatory output format below.
 
 5. **Wait**: Ask the user: *"Shall I draft these UX changes into the Bucket List for implementation?"*
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+You MUST render the UX critique using the following exact Markdown structure. Do NOT output a plain text critique. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🧑‍🔧 Simulated UX Report — `<Feature Name>`
+
+#### Friction Matrix
+Render a Markdown table of every friction point found:
+```
+| # | Issue | Location | Severity | Novice Impact |
+|---|---|---|---|---|
+| 1 | No confirmation before delete | Delete button in EDITZ | 🔴 Critical | User could wipe data accidentally |
+| 2 | Primary action not obvious | Top toolbar | 🟠 Medium | User would scan for 10+ seconds |
+| 3 | Text too small in data grid | DATAZ table | 🟡 Low | Squinting in warehouse lighting |
+```
+
+#### 🔴 Critical Failures
+For each 🔴 Critical item, render a `> [!CAUTION]` block with:
+- What the novice user would experience
+- Why it's dangerous in a warehouse/production context
+- The proposed fix (in plain English, no code)
+
+#### ✅ What Works Well
+Render a `> [!NOTE]` block listing 1-3 things the current UI does correctly from a novice perspective. Never skip this section — always find something positive.
+
+#### 🎨 Proposed Redesign Summary
+Render a `> [!TIP]` block with a 2-4 sentence summary of the recommended UX changes.
+
+#### 🎯 Next Steps
+Render a `> [!IMPORTANT]` block: "Shall I draft these UX changes into the Bucket List for implementation?"

@@ -30,6 +30,29 @@ To be used immediately after running `/ship_it` on an Epic merging to `main`, wh
    - Stage the changes: `git add tools/SK8Lytz_Bucket_List.md CHANGELOG.md`
    - Execute the silent commit: `git commit -m "chore(ledger): silent agentic tag transition to [🚀] and unreleased log"`
    - If a remote tracking branch is upstream, push it: `git push`
-4. **Halt and Confirm**:
-   - Output a success message confirming the Ledger and repository are fully synced locally and remote without triggering a public Semantic Release.
-   - You may now prompt the user to use `/wind_down`.
+5. **Halt and Confirm**: Present the results using the mandatory output format below.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+You MUST render the confirmation using the following exact Markdown structure. Do NOT output a plain text confirmation. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🔇 Silent Release Confirmation
+
+Render a **Gate Results Table**:
+```
+| Gate | Result | Detail |
+|---|---|---|
+| 📋 Ledger Scan | ✅ | N task(s) found with `[x]` |
+| 🚀 Archival Tags | ✅ | N task(s) transitioned to `[🚀]` |
+| 📝 Changelog Update | ✅ | Appended to `## [Unreleased]` block |
+| 💾 Ghost Commit | ✅ | `abc1234` — silent sync |
+| 📡 Remote Push | ✅ | `origin/main` updated |
+```
+
+### 📋 Tasks Archived
+Render a bulleted list of every task that was transitioned from `[x]` to `[🚀]`, including its branch slug.
+
+### 🎯 Next Steps
+Render a `> [!TIP]` block suggesting `/wind_down` to end the session or `/status_update` to check the queue.

@@ -28,6 +28,50 @@ When the user invokes `/red_team` (or explicitly requests a penetration test or 
    - **CRITICAL**: You must autonomously open `@/tools/SK8Lytz_Bucket_List.md` and log this exploit as a **P0 Critical Vulnerability** under the active Epic queue, documenting the exact file and line number.
 
 4. **Debriefing Halt**:
-   - Present your Vulnerability Report clearly, listing each discovered vector and its executable payload.
-   - If no vulnerabilities are found, formally declare: *"Surface scan complete. No obvious DOM/XSS injection vectors detected."*
+   - Present your Vulnerability Report using the mandatory output format below.
    - Once the scan is presented, your persona shift is complete. Drop the Red Team restrictions, return to your standard architecture-compliant AI state, and ask the user if they would like to authorize patches for the discovered vectors.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+After completing the attack surface scan, you MUST render the following structured output. Do NOT output a plain text list of findings. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🔴 Red Team Vulnerability Report
+
+#### Attack Surface Summary
+Render a compact metadata table:
+```
+| Metric | Value |
+|---|---|
+| 🎯 Modules Scanned | N |
+| 🔍 Vectors Tested | innerHTML, insertAdjacentHTML, document.write, hardcoded endpoints, form inputs |
+| 🔴 Critical Exploits Found | N |
+| 🟡 Warnings Found | N |
+| ✅ Clean Modules | N |
+```
+
+#### Vulnerability Matrix
+For each discovered vulnerability, render a row in this table:
+```
+| # | Severity | File | Line | Vector | Exploit Payload |
+|---|---|---|---|---|---|
+| 1 | 🔴 Critical | `module.js` | L123 | Unguarded `innerHTML` | `"><img src=x onerror=alert('XSS')>` |
+| 2 | 🟡 Warning | `utils.js` | L45 | Hardcoded endpoint | `https://api.example.com/v1` |
+```
+
+#### Exploit Proof-of-Concept
+For each 🔴 Critical finding, render a `> [!CAUTION]` block containing:
+- The exact file path and line number
+- The vulnerable code snippet
+- The precise injectable payload string
+- What the attacker could achieve (e.g., session hijacking, DOM clobbering)
+
+#### ✅ Clean Bill of Health (If No Vulnerabilities Found)
+If no vulnerabilities are discovered, render a `> [!NOTE]` block: "Surface scan complete. No obvious DOM/XSS injection vectors detected. All dynamic content is properly sanitized via `window.safeHTML()` or `DOMPurify.sanitize()`."
+
+#### 🎯 Recommended Next Actions
+Render `> [!TIP]` blocks suggesting:
+- Which vulnerabilities to patch first (by severity)
+- Whether to execute `/ship_it` or continue scanning
+- Any modules that should be added to the next `/health_check` sweep

@@ -33,8 +33,7 @@ When the user invokes `/ui_xray` (or says "debug this layout", "show boundaries"
 3. **Analysis & Diagnosis**:
    - Analyze the X-Ray macro outlines shown in the screenshot.
    - Identify the exact flexbox logic conflict (e.g., rigid absolute margins fighting `justify-content`, or missing `min-content` clamps squeezing a title bar).
-   - Draw a short Mermaid `graph TD` diagram illustrating the current nested DOM structure versus what it SHOULD be formatted as natively.
-   - Present your theory on the exact CSS bug. wait for user approval.
+   - Present the diagnosis using the mandatory output format below.
 
 4. **The Tear-Down**:
    - Once the user agrees with the diagnosis, immediately use your tools to **remove the X-Ray Macro** from `index.html`.
@@ -42,3 +41,37 @@ When the user invokes `/ui_xray` (or says "debug this layout", "show boundaries"
 
 5. **Re-Scan and Confirm**:
    - Confirm the macro tag is deleted and the CSS is patched. Wait for the user to confirm the visual fix on their end.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+When presenting the Analysis & Diagnosis (Step 3), you MUST render the following structured output. Do NOT output a plain text paragraph. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🔬 UI X-Ray Diagnosis
+
+#### Color Legend
+Render a compact reference:
+```
+| Color | Element Type |
+|---|---|
+| 🔴 Red | All elements (`*`) |
+| 🔵 Blue | `<div>` containers |
+| 🟠 Orange | `<span>` inline elements |
+| 🟡 Yellow | `<button>` and `<svg>` |
+```
+
+#### 🐛 Layout Conflict Identified
+Render a `> [!WARNING]` block explaining:
+- **What's broken:** The exact visual symptom (e.g., "Button bar overflows container at <600px width")
+- **Root Cause:** The exact CSS property conflict (e.g., "`flex-wrap: nowrap` on `.sop-controls` prevents button reflow")
+- **Affected Elements:** List the specific DOM IDs or class names
+
+#### 🏗️ DOM Structure Map
+Render a Mermaid `graph TD` diagram showing the current nested DOM structure and where the conflict occurs.
+
+#### 🔧 Proposed Fix
+Render a `> [!TIP]` block with the exact CSS changes needed, using fenced code blocks.
+
+#### 🎯 Approval Gate
+Render a `> [!IMPORTANT]` block: "Approve this diagnosis to proceed with the fix and X-Ray teardown."

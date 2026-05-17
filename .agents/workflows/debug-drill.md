@@ -22,3 +22,34 @@ When the user invokes "debug this:", "critical bug:", or "let's debug", you must
 6. **Micro-Commit Diagnostic Trace**:
    - Once the user authorizes a fix attempt, you must implement the change and **instantly commit it locally** using the `fix():` Semantic Commit format (e.g., `git commit -m "fix(module): attempt X to resolve Y"`).
    - If the fix fails and we try a new approach, **do not amend**. Make the new change and commit it as a new micro-commit. This ensures every attempted fix is permanently recorded in the local version control history to aid in further diagnostic tracing.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+When presenting the Theory Formulation (Step 4), you MUST render the following structured output. Do NOT output theories as a simple numbered list. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 🔬 Debug Drill — Theory Matrix
+
+#### Instrumentation Summary
+Render a compact table showing what was instrumented:
+```
+| sysLog Injection | File | Line | Payload Tracked |
+|---|---|---|---|
+| `sysLog('Cart Check', ...)` | `module.js` | L45 | `{ cartArray }` |
+| `sysLog('Auth State', ...)` | `auth.js` | L12 | `{ session, user }` |
+```
+
+#### Theory Cards
+For EACH of the 3 theories, render a separate `> [!WARNING]` block structured as:
+```
+> [!WARNING]
+> **Theory 1: [Descriptive Title]**
+> - **Root Cause:** [Exact technical explanation citing variable names and line numbers]
+> - **Evidence:** [What in the sysLog output supports this theory]
+> - **Fix Approach:** [1-sentence description of the surgical fix]
+> - **Confidence:** 🔴 High / 🟡 Medium / 🟢 Low
+```
+
+#### 🎯 Approval Gate
+Render a `> [!IMPORTANT]` block: "Select a theory (1, 2, or 3) to authorize the fix attempt, or describe your own theory."
