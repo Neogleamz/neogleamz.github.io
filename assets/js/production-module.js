@@ -205,10 +205,10 @@ window.triggerSopDirectUpload = function(btn) {
                 let cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
                 let path = `sops/${sopType}/${prodId}/${Date.now()}_${cleanName}`;
                 
-                const { data, error } = await supabaseClient.storage.from('neogleamz').upload(path, file);
+                const { data, error } = await supabaseClient.storage.from('sop-media').upload(path, file);
                 if (error) throw error;
                 
-                const { data: urlData } = supabaseClient.storage.from('neogleamz').getPublicUrl(path);
+                const { data: urlData } = supabaseClient.storage.from('sop-media').getPublicUrl(path);
                 if (!urlData || !urlData.publicUrl) throw new Error("Could not retrieve public URL");
                 
                 let publicUrl = urlData.publicUrl;
