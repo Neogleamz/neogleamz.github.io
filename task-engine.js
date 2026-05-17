@@ -60,11 +60,6 @@ async function teFetchAllData() {
         if (activityRes.data) taskEngineDB.activity = activityRes.data;
         if (tagzRes.data) taskEngineDB.tagz = tagzRes.data;
         
-        // Ensure dropdown matches local storage identity
-        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
-        let spoofer = document.getElementById('te-identity-spoofer');
-        if (spoofer) spoofer.value = currentUser;
-        
         if (typeof window.tePopulateTagFilter === 'function') window.tePopulateTagFilter();
         
         teRenderSidebar();
@@ -76,46 +71,22 @@ async function teFetchAllData() {
 }
 
 window.teChangeIdentity = function(userId) {
-    if (!userId || userId === 'none') {
-        localStorage.removeItem('neogleamz_current_user');
-    } else {
-        localStorage.setItem('neogleamz_current_user', userId);
-    }
-    teUpdateInboxBadge();
-    
-    // Privacy kick logic
-    if (window.teActiveProjectId) {
-        let p = taskEngineDB.projectz.find(proj => proj.id === window.teActiveProjectId);
-        if (p && p.visibility === 'Private') {
-            let owner = (p.metadata && p.metadata.spoofed_owner) || null;
-            if (!owner || owner !== userId) {
-                window.teSwitchView('inbox'); setTimeout(() => teRenderSidebar(), 50);
-                return;
-            }
-        }
-    }
-    
-    teRenderSidebar();
-    
-    let title = document.getElementById('te-main-header-title');
-    if (title && title.textContent === 'Inbox View') {
-        window.teSwitchView('inbox'); setTimeout(() => teRenderSidebar(), 50);
-    } else {
-        if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
-    }
+    // Deprecated: Identity is now strictly tied to Supabase Auth session via window.currentUser
+    console.warn("teChangeIdentity is deprecated.");
 };
 
 function teUpdateInboxBadge() {
     const badge = document.getElementById('te-inbox-badge');
     if (!badge) return;
-    let currentUser = localStorage.getItem('neogleamz_current_user');
-    if (!currentUser || currentUser === 'none') {
+    let currentUser = window.currentUser ? window.currentUser.id : null;
+    let currentAlias = window.currentUser ? window.currentUser.email.split('@')[0] : null;
+    if (!currentUser) {
         badge.style.display = 'none';
         return;
     }
     // Count unread or relevant items (e.g. mentions in comments or activity on tasks they own)
-    // For now, let's just count comments containing "@" + currentUser
-    let count = taskEngineDB.comments.filter(c => c.content && c.content.includes('@' + currentUser)).length;
+    // For now, let's just count comments containing "@" + currentAlias
+    let count = taskEngineDB.comments.filter(c => c.content && currentAlias && c.content.includes('@' + currentAlias)).length;
     if (count > 0) {
         badge.textContent = count;
         badge.style.display = 'inline-block';
@@ -130,12 +101,11 @@ function teRenderSidebar() {
     
     if (projectzList) {
         let projectHTML = '';
-        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
+        let currentUser = window.currentUser ? window.currentUser.id : null;
         taskEngineDB.projectz.filter(p => {
             if (p.is_archived) return false;
             if (p.visibility === 'Private') {
-                let owner = (p.metadata && p.metadata.spoofed_owner) || null;
-                if (!owner || owner !== currentUser) return false;
+                if (!p.created_by || p.created_by !== currentUser) return false;
             }
             return true;
         }).forEach(p => {
@@ -217,7 +187,7 @@ function teRenderTaskGrid(filter = null) {
     let html = '';
     
     // Determine filters
-    let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
+    let currentUser = window.currentUser ? window.currentUser.id : null;
     let taskList = taskEngineDB.taskz;
     
     if (filter === 'my_tasks' && currentUser && currentUser !== 'none') {
@@ -234,7 +204,7 @@ function teRenderTaskGrid(filter = null) {
         if (t.project_id) {
             let p = taskEngineDB.projectz.find(proj => proj.id === t.project_id);
             if (p && p.visibility === 'Private') {
-                let owner = (p.metadata && p.metadata.spoofed_owner) || null;
+                let owner = p.owner_id;
                 if (!owner || owner !== currentUser) return false;
             }
         }
@@ -244,7 +214,7 @@ function teRenderTaskGrid(filter = null) {
         if (filter === 'inbox') {
             if (t.status === 'Completed' || t.status === 'Done' || t.status === 'In Progress') return false;
             let meta = t.metadata || {};
-            let assignee = meta.spoofed_assignee || 'UNASSIGNED';
+            let assignee = t.assigned_to_id || 'UNASSIGNED';
             
             if (assignee === 'UNASSIGNED' || assignee.trim() === '') {
                 if (meta.assigned_team_id) {
@@ -260,7 +230,7 @@ function teRenderTaskGrid(filter = null) {
         }
         if (filter === 'my_tasks') {
             let meta = t.metadata || {};
-            let assignee = meta.spoofed_assignee || 'UNASSIGNED';
+            let assignee = t.assigned_to_id || 'UNASSIGNED';
             
             if (assignee === currentUser) return true;
             
@@ -340,10 +310,16 @@ function teRenderTaskGrid(filter = null) {
     let cycleGroups = new Map();
     cycleGroups.set('unassigned', { title: 'No Section', color: '#64748b', tasks: [] });
     
+    let isPersonalView = !window.teActiveProjectId;
+    let currentUserId = window.currentUser ? window.currentUser.id : null;
+
     let sortedCyclez = taskEngineDB.cyclez.filter(c => {
         if (c.is_archived) return false;
-        if (window.teActiveProjectId) return c.project_id === window.teActiveProjectId;
-        return true;
+        if (!isPersonalView) {
+            return c.project_id === window.teActiveProjectId;
+        } else {
+            return !c.project_id && c.assigned_to_id === currentUserId;
+        }
     }).sort((a,b) => {
         let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
         let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
@@ -356,7 +332,7 @@ function teRenderTaskGrid(filter = null) {
     
     // Sort tasks into cycles (only top-level tasks)
     displayTasks.filter(t => !t.parent_task_id).forEach(t => {
-        let cid = t.cycle_id;
+        let cid = isPersonalView ? t.personal_cycle_id : t.cycle_id;
         if (cid && cycleGroups.has(cid)) {
             cycleGroups.get(cid).tasks.push(t);
         } else {
@@ -399,6 +375,11 @@ function teRenderTaskGrid(filter = null) {
     let totalTasks = 0;
     for (const [cid, group] of cycleGroups) totalTasks += group.tasks.length;
 
+    let collapsedCache = {};
+    try {
+        collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}');
+    } catch(e) { collapsedCache = {}; }
+
     for (const [cid, group] of cycleGroups) {
         if (group.tasks.length === 0) {
             if (cid === 'unassigned' && totalTasks > 0) continue;
@@ -406,24 +387,28 @@ function teRenderTaskGrid(filter = null) {
         }
         
         let headerColor = group.color || '#64748b';
+        let isCollapsed = collapsedCache[cid] === true;
+        let displayState = isCollapsed ? 'none' : 'flex';
+        let toggleIcon = isCollapsed ? '▶' : '▼';
+        
         html += `
         <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 20px;">
             <div class="te-section-header" style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; cursor: grab;">
-                <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">▼</div>
+                <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">${toggleIcon}</div>
                 <div class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="font-size: 14px; font-weight: bold; color: white; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">${group.title}</div>
                 <div style="flex-grow: 1; height: 1px; background: rgba(255,255,255,0.1); margin-left: 10px;"></div>
                 <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'" onmouseout="this.style.background='transparent'">✖</div>
             </div>
-            <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: flex; flex-direction: column; gap: 4px;">
+            <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: 20px; padding-bottom: 10px;">
         `;
         
         group.tasks.forEach(t => {
             html += `<div class="te-list-sortable-item" data-id="${t.id}" style="display: flex; flex-direction: column;">`;
             html += teBuildTaskRowHTML(t, false);
-            // Render children
+            // Render children wrapper always to provide a drop zone
             let children = displayTasks.filter(child => child.parent_task_id === t.id);
+            html += `<div id="te-subtasks-wrapper-${t.id}" class="te-sortable-subtask-list" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px; min-height: ${children.length > 0 ? 'auto' : '10px'}; padding-bottom: 5px;">`;
             if (children.length > 0) {
-                html += `<div id="te-subtasks-wrapper-${t.id}" class="te-sortable-subtask-list" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px;">`;
                 children.sort((a,b) => {
                     let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
                     let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
@@ -432,18 +417,18 @@ function teRenderTaskGrid(filter = null) {
                 children.forEach(child => {
                     html += `<div class="te-list-sortable-child" data-id="${child.id}">` + teBuildTaskRowHTML(child, true) + `</div>`;
                 });
-                html += `</div>`;
             }
+            html += `</div>`;
             html += `</div>`;
         });
         
         html += `
+            </div>
             <div class="task-row te-inline-add-row" data-cycle-id="${cid === 'unassigned' ? '' : cid}" style="padding: 10px 15px; margin-top: 4px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; min-height: unset; background: transparent; border: none; box-shadow: none;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'" onmouseout="this.style.backgroundColor='transparent'">
                 <div style="width:16px; height:16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: bold; font-size: 16px;">+</div>
                 <div style="flex: 1; display: flex; align-items: flex-start;" class="te-inline-container" data-click="click_teActivateInlineTask">
                     <span class="te-inline-add-placeholder" style="color: var(--text-muted); font-size: 14px; padding-top: 0px;">Add task...</span>
                 </div>
-            </div>
             </div>
         </div>`;
     }
@@ -491,71 +476,95 @@ function teRenderTaskGrid(filter = null) {
             });
         }
         
-        document.querySelectorAll('.te-sortable-cycle-list').forEach(listEl => {
-            new Sortable(listEl, {
-                group: 'list-view-tasks',
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                handle: '.task-row',
-                onEnd: async function(evt) {
-                    if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
-                    let childDivs = Array.from(evt.to.children);
-                    let updates = [];
-                    for (let i = 0; i < childDivs.length; i++) {
-                        let div = childDivs[i];
-                        let tId = div.getAttribute('data-id');
-                        if (!tId) continue;
-                        let task = taskEngineDB.taskz.find(tk => tk.id === tId);
-                        if (task) {
-                            let meta = JSON.parse(JSON.stringify(task.metadata || {}));
-                            meta.sort_order = i;
-                            task.metadata = meta;
-                            let toCycleId = evt.to.id.replace('te-cycle-group-', '');
-                            if (toCycleId === 'unassigned') toCycleId = null;
-                            if (task.cycle_id !== toCycleId) task.cycle_id = toCycleId;
-                            updates.push({ id: tId, metadata: meta, cycle_id: toCycleId });
+        let taskSortableOptions = {
+            group: 'list-view-tasks',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            handle: '.task-row',
+            onEnd: async function(evt) {
+                if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
+                let childDivs = Array.from(evt.to.children);
+                let updates = [];
+                
+                let isPersonalView = !window.teActiveProjectId;
+                let isToCycle = evt.to.id.startsWith('te-cycle-group-');
+                let isToSubtask = evt.to.id.startsWith('te-subtasks-wrapper-');
+                
+                let toCycleId = null;
+                let toParentId = null;
+                
+                if (isToCycle) {
+                    toCycleId = evt.to.id.replace('te-cycle-group-', '');
+                    if (toCycleId === 'unassigned') toCycleId = null;
+                } else if (isToSubtask) {
+                    toParentId = evt.to.id.replace('te-subtasks-wrapper-', '');
+                }
+
+                for (let i = 0; i < childDivs.length; i++) {
+                    let div = childDivs[i];
+                    let tId = div.getAttribute('data-id');
+                    if (!tId) continue;
+                    let task = taskEngineDB.taskz.find(tk => tk.id === tId);
+                    if (task) {
+                        let meta = JSON.parse(JSON.stringify(task.metadata || {}));
+                        meta.sort_order = i;
+                        task.metadata = meta;
+                        
+                        task.parent_task_id = toParentId;
+                        
+                        if (isToCycle) {
+                            if (isPersonalView) {
+                                task.personal_cycle_id = toCycleId;
+                                let uid = window.currentUser ? window.currentUser.id : null;
+                                task.assigned_to_id = uid;
+                                task.project_id = null;
+                                updates.push({ id: tId, metadata: meta, personal_cycle_id: toCycleId, parent_task_id: null, assigned_to_id: uid, project_id: null });
+                            } else {
+                                task.cycle_id = toCycleId;
+                                task.project_id = window.teActiveProjectId;
+                                updates.push({ id: tId, metadata: meta, cycle_id: toCycleId, parent_task_id: null, project_id: window.teActiveProjectId });
+                            }
+                        } else {
+                            // is subtask
+                            let uPayload = { id: tId, metadata: meta, parent_task_id: toParentId };
+                            let parentTask = taskEngineDB.taskz.find(pt => pt.id === toParentId);
+                            if (parentTask) {
+                                if (parentTask.project_id) {
+                                    task.project_id = parentTask.project_id;
+                                    uPayload.project_id = parentTask.project_id;
+                                } else if (parentTask.assigned_to_id) {
+                                    task.assigned_to_id = parentTask.assigned_to_id;
+                                    uPayload.assigned_to_id = parentTask.assigned_to_id;
+                                    task.project_id = null;
+                                    uPayload.project_id = null;
+                                }
+                            }
+                            updates.push(uPayload);
                         }
                     }
-                    if (updates.length > 0) {
-                        try {
-                            const promises = updates.map(u => supabaseClient.from('taskz').update({ metadata: u.metadata, cycle_id: u.cycle_id }).eq('id', u.id));
-                            await Promise.all(promises);
-                        } catch(e) { console.error('[TaskEngine] Sortable update failed', e); }
-                    }
                 }
-            });
+                if (updates.length > 0) {
+                    try {
+                        const promises = updates.map(u => {
+                            let payload = { metadata: u.metadata, parent_task_id: u.parent_task_id };
+                            if (u.cycle_id !== undefined) payload.cycle_id = u.cycle_id;
+                            if (u.personal_cycle_id !== undefined) payload.personal_cycle_id = u.personal_cycle_id;
+                            if (u.project_id !== undefined) payload.project_id = u.project_id;
+                            if (u.assigned_to_id !== undefined) payload.assigned_to_id = u.assigned_to_id;
+                            return supabaseClient.from('taskz').update(payload).eq('id', u.id);
+                        });
+                        await Promise.all(promises);
+                    } catch(e) { console.error('[TaskEngine] Sortable update failed', e); }
+                }
+            }
+        };
+
+        document.querySelectorAll('.te-sortable-cycle-list').forEach(listEl => {
+            new Sortable(listEl, taskSortableOptions);
         });
         
         document.querySelectorAll('.te-sortable-subtask-list').forEach(listEl => {
-            new Sortable(listEl, {
-                group: 'list-view-subtasks',
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                handle: '.task-row',
-                onEnd: async function(evt) {
-                    if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
-                    let childDivs = Array.from(evt.to.children);
-                    let updates = [];
-                    for (let i = 0; i < childDivs.length; i++) {
-                        let div = childDivs[i];
-                        let tId = div.getAttribute('data-id');
-                        if (!tId) continue;
-                        let task = taskEngineDB.taskz.find(tk => tk.id === tId);
-                        if (task) {
-                            let meta = JSON.parse(JSON.stringify(task.metadata || {}));
-                            meta.sort_order = i;
-                            task.metadata = meta;
-                            updates.push({ id: tId, metadata: meta });
-                        }
-                    }
-                    if (updates.length > 0) {
-                        try {
-                            const promises = updates.map(u => supabaseClient.from('taskz').update({ metadata: u.metadata }).eq('id', u.id));
-                            await Promise.all(promises);
-                        } catch(e) { console.error('[TaskEngine] Sortable subtask update failed', e); }
-                    }
-                }
-            });
+            new Sortable(listEl, taskSortableOptions);
         });
     }
 }
@@ -616,26 +625,35 @@ function teBuildTaskRowHTML(t, isChild) {
         });
     }
 
+    let projectBadgeHtml = '';
+    if (!window.teActiveProjectId && t.project_id) {
+        let p = taskEngineDB.projectz.find(proj => proj.id === t.project_id);
+        if (p) {
+            projectBadgeHtml = `<span style="background: ${p.color_hex || '#3b82f6'}20; color: ${p.color_hex || '#3b82f6'}; padding: 2px 6px; border-radius: 4px; border: 1px solid ${p.color_hex || '#3b82f6'}40; font-size: 10px; font-weight: bold; margin-bottom: 2px; display: inline-block;">${p.title}</span>`;
+        }
+    }
+
     return `
     <div class="task-row" data-task-id="${t.id}" data-click="click_teOpenTaskContext" style="padding: ${rowPadding}; min-height: unset;">
         <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
             <input type="checkbox" class="te-task-checkbox" data-id="${t.id}" style="cursor: pointer; width:16px; height:16px; accent-color: var(--primary-color); flex-shrink: 0;" data-change="change_teUpdateMainSelection">
             <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                ${projectBadgeHtml}
                 <span style="color: white; font-weight: ${titleWeight}; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">${t.title}</span>
                 ${tagsHtml ? `<div style="display: flex; gap: 4px; overflow: hidden; white-space: nowrap;">${tagsHtml}</div>` : ''}
             </div>
         </div>
-        <div style="display: flex; align-items: center;">
+        <div style="display: flex; align-items: center; justify-content: center;">
             <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);" title="${ownerTitle}">${ownerInitials}</div>
         </div>
-        <div>
+        <div style="display: flex; justify-content: center;">
             <span class="status-pill ${statusColorClass}" data-click="click_teOpenStatusDropdown" style="position: relative; z-index: 2; cursor: pointer;">${t.status}</span>
         </div>
-        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; justify-content: center;">
             ${timelineStr}
         </div>
-        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center;">
-            #normal
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+            #${(meta.priority || 'normal').toLowerCase()}
         </div>
     </div>
     `;
@@ -649,7 +667,12 @@ window.teCreateNewTask = async function() {
             status: 'Todo',
             estimated_minutes: 30
         };
-        if (window.teActiveProjectId) payload.project_id = window.teActiveProjectId;
+        if (window.teActiveProjectId) {
+            payload.project_id = window.teActiveProjectId;
+        } else {
+            let currentUserId = window.currentUser ? window.currentUser.id : null;
+            if (currentUserId) payload.assigned_to_id = currentUserId;
+        }
         
         const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
         
@@ -705,8 +728,18 @@ window.teOpenTaskContext = function(taskId) {
             const cycleSelect = document.getElementById('te-flyout-cycle');
             if (cycleSelect) {
                 // Populate options first
-                let opts = '<option value="">No Cycle</option>';
-                taskEngineDB.cyclez.forEach(c => {
+                let opts = '<option value="">No Section</option>';
+                let currentUserId = window.currentUser ? window.currentUser.id : null;
+                
+                let relevantCycles = taskEngineDB.cyclez.filter(c => {
+                    if (window.teActiveProjectId) {
+                        return c.project_id === window.teActiveProjectId;
+                    } else {
+                        return !c.project_id && c.assigned_to_id === currentUserId;
+                    }
+                });
+                
+                relevantCycles.forEach(c => {
                     opts += `<option value="${c.id}">${c.title}</option>`;
                 });
                 cycleSelect.innerHTML = opts;
@@ -951,7 +984,7 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
     
     if (taskIds.length === 0) return;
     
-    let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
+    let currentUser = window.currentUser ? window.currentUser.id : 'System';
     
     for (let id of taskIds) {
         let task = taskEngineDB.taskz.find(t => t.id === id);
@@ -994,7 +1027,10 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
     
     try {
         const updatePromises = updatedTasks.map(tData => {
-            let payload = { status: status, is_archived: isArchived };
+            let payload = { is_archived: isArchived };
+            if (status !== 'Archived') {
+                payload.status = status;
+            }
             if (tData.timerUpdate) {
                 payload.metadata = tData.meta;
                 payload.actual_minutes = tData.actual;
@@ -1026,22 +1062,31 @@ window.teAddSubtask = async function() {
     input.value = '';
     
     try {
-        const { data, error } = await supabaseClient.from('taskz').insert([{
+        let parentTask = taskEngineDB.taskz.find(t => t.id === window.currentOpenTaskId);
+        let payload = {
             id: generateUUID(),
             title: title,
             status: 'Todo',
             parent_task_id: window.currentOpenTaskId
-        }]).select();
+        };
+        
+        if (parentTask) {
+            if (parentTask.project_id) {
+                payload.project_id = parentTask.project_id;
+            } else if (parentTask.assigned_to_id) {
+                payload.assigned_to_id = parentTask.assigned_to_id;
+            }
+        }
+        
+        const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
         
         if (error) throw error;
         
         if (data && data.length > 0) {
             taskEngineDB.taskz.push(data[0]);
             teRenderSubtasks(window.currentOpenTaskId);
-            
-            // Re-render list to show the new subtask
-            let titleEl = document.getElementById('te-main-header-title');
-            if (titleEl && titleEl.textContent === 'All Tasks') {
+            // Re-render list to show the new subtask in the main UI immediately
+            if (typeof teRenderTaskGrid === 'function') {
                 teRenderTaskGrid();
             }
         }
@@ -1410,7 +1455,7 @@ window.teCreateProject = async function() {
         if (!title) return;
         let color = colorInput ? colorInput.value : '#f97316';
         let vis = visibilityInput ? visibilityInput.value : 'Organization';
-        let currentUser = localStorage.getItem('neogleamz_current_user') || 'none';
+        let currentUser = window.currentUser ? window.currentUser.id : null;
         
         submitBtn.textContent = 'CREATING...';
         submitBtn.disabled = true;
@@ -1421,7 +1466,7 @@ window.teCreateProject = async function() {
                 title: title,
                 color_hex: color,
                 visibility: vis,
-                metadata: { spoofed_owner: currentUser },
+                owner_id: currentUser,
                 health_status: 'On Track'
             }]).select();
             
@@ -1495,12 +1540,20 @@ window.teCreateCycle = async function() {
     if (!title) return;
     
     try {
-        const { data, error } = await supabaseClient.from('cyclez').insert([{
+        let payload = {
             id: generateUUID(),
             title: title,
             color_hex: '#10b981',
-            project_id: window.teActiveProjectId || null
-        }]).select();
+        };
+        
+        if (window.teActiveProjectId) {
+            payload.project_id = window.teActiveProjectId;
+        } else {
+            payload.project_id = null;
+            payload.assigned_to_id = window.currentUser ? window.currentUser.id : null;
+        }
+        
+        const { data, error } = await supabaseClient.from('cyclez').insert([payload]).select();
         
         if (error) throw error;
         if (data && data.length > 0) {
@@ -1606,7 +1659,7 @@ window.tePostComment = async function() {
     let input = document.getElementById('te-flyout-comment-input');
     if (!input || !input.value.trim()) return;
     
-    let currentUser = localStorage.getItem('neogleamz_current_user') || 'System';
+    let currentUser = window.currentUser ? window.currentUser.id : 'System';
     let text = input.value.trim();
     
     let newComment = {
@@ -2314,9 +2367,15 @@ window.teCreateInlineTask = async function(title, cycleId) {
             title: title,
             status: 'Todo',
             estimated_minutes: 30,
-            cycle_id: cycleId
         };
-        if (window.teActiveProjectId) payload.project_id = window.teActiveProjectId;
+        if (window.teActiveProjectId) {
+            payload.project_id = window.teActiveProjectId;
+            payload.cycle_id = cycleId;
+        } else {
+            let currentUserId = window.currentUser ? window.currentUser.id : null;
+            if (currentUserId) payload.assigned_to_id = currentUserId;
+            payload.personal_cycle_id = cycleId;
+        }
         
         const { data, error } = await supabaseClient.from('taskz').insert([payload]).select();
         
