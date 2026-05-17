@@ -349,7 +349,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 **Epic: Maintenance & Debt Sweep (May 17)**
-*(Pending Release)*
+*(Shipped v1.0.39 — 2026-05-17)*
 - [🚀] `debt/orphan-scripts` : Clean up orphaned utility scripts and tests (Python scripts in `tools/`, `test-dompurify.js` in root, `test_supabase.js` and `Whydidthishappen.md` in `tools/`). Relocate or purge them to maintain project hygiene. [🤖 Gemini 3.1 Pro] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 - [🚀] `debt/npm-update` : Execute `npm update` to safely bump `dompurify`, `eslint`, `jest`, and `supabase` to their latest patch/minor versions. [🤖 Gemini 3.1 Pro] [🧠 3k / 3k] [💸 $0.01 / $0.01]
 

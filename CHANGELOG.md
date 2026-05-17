@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.39] - 2026-05-17
+### Chores & Maintenance
+- **Orphan Script Cleanup**: Cleaned up orphaned utility scripts and tests (Python scripts in `tools/`, `test-dompurify.js` in root, `test_supabase.js` and `Whydidthishappen.md` in `tools/`). Relocated or purged them to maintain project hygiene.
+- **Dependency Hardening**: Executed `npm update` to safely bump `dompurify`, `eslint`, `jest`, and `supabase` to their latest patch/minor versions.
 ## [1.0.38] - 2026-05-17
 ### Features & Bug Fixes
 - **SOP Print Formatting Options**: Replaced the static "Print SOP" button with a 3-mode print modal allowing users to choose between Checklist, Rich Text, or Full SOP output. Applied proper print styling to checklists (`#Headers` → formatted section headings, `> Subtexts` → styled callout blocks). Standardized all 4 SOP button bars (Master Production, Master Packerz, Inline Packerz, Inline Batchez) into compact, responsive single-row pill layouts. Fixed Rich Text toolbar flex overflow — `rt-toolbar` now wraps gracefully at narrow widths, the font-size select is clamped to `max-width:100px`, and the PHOTO/UPLOAD/NEW URL action row uses `flex-wrap:wrap` with `white-space:nowrap` per button.
