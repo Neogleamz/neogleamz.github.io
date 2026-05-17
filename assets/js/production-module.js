@@ -2160,7 +2160,8 @@ window.executeSopPrint = function(printType) {
         if(currentWO && currentWO.routing) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
-                    let subSteps = sopsDB[sub] || [];
+                    let subPayload = sopsDB[sub];
+                    let subSteps = (subPayload && typeof subPayload === 'object' && !Array.isArray(subPayload)) ? (subPayload.steps || []) : (subPayload || []);
                     if(subSteps.length > 0) {
                         let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
                         let emo = is3D ? '🖨️' : '⚙️';
@@ -2173,7 +2174,8 @@ window.executeSopPrint = function(printType) {
         }
 
         // Main steps
-        let mainSteps = sopsDB[targetProductName] || [];
+        let mainPayload = sopsDB[targetProductName];
+        let mainSteps = (mainPayload && typeof mainPayload === 'object' && !Array.isArray(mainPayload)) ? (mainPayload.steps || []) : (mainPayload || []);
         if(mainSteps.length > 0 || stepsToRender.length > 0) {
             if(mainSteps.length > 0) { 
                 stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${targetProductName}` }); 
