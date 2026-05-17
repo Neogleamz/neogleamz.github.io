@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.34] - 2026-05-16
+### Features & Refactors
+- **Implement Sitewide Supabase Websockets**: Expanded real-time synchronization globally across the entire application. Wired up `supabaseClient.channel` to listen to all core tables for `postgres_changes`. Updated local DB caches in real-time and injected UI redraws. Handled project-level section logic across personal task views.
+
 ## [1.0.33] - 2026-05-16
 ### Features & Refactors
 - **Personalized Task Sections & Drag-and-Drop Re-parenting**: Make task sections unique per user in personal views (Inbox, My Tasks, In Progress, Completed) while keeping them uniform in organization-wide projects. Unassigned tasks (with proper section/project context) must remain visible in the Inbox. Assigned tasks and completed assigned tasks must be visible in My Tasks. Enable creating tasks under a "non assigned" section, and allow drag-and-drop to reorder tasks across sections or dynamically re-parent tasks as subtasks.
