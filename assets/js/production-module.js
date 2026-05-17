@@ -190,8 +190,19 @@ window.triggerSopDirectUpload = function(btn) {
             input.accept = 'image/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt';
             document.body.appendChild(input);
         }
-        let prodId = btn.getAttribute('data-prodid') || 'unknown';
+        let prodId = btn.getAttribute('data-prodid') || '';
         let sopType = btn.getAttribute('data-soptype') || 'batches';
+        
+        if (!prodId) {
+            if (sopType === 'batches') {
+                let sel = document.getElementById('sopMasterProductSelect');
+                if (sel) prodId = sel.value;
+            } else if (sopType === 'packerz') {
+                let sel = document.getElementById('packerzAdminRecipeSelect');
+                if (sel) prodId = sel.value;
+            }
+        }
+        if (!prodId) prodId = 'unknown';
         
         input.onchange = async function(e) {
             let file = e.target.files[0];
@@ -217,24 +228,37 @@ window.triggerSopDirectUpload = function(btn) {
                 if (file.type.startsWith('image/')) fileType = 'img';
                 else if (file.type.startsWith('video/')) fileType = 'vid';
                 
-                let row = btn.closest('.sop-step-row');
-                let urlInputs = Array.from(row.querySelectorAll('.m-url'));
-                let emptyInput = urlInputs.find(inp => !inp.value.trim());
-                
-                if (!emptyInput) {
-                    if (typeof window.click_addAttachmentRow === 'function') {
-                        window.click_addAttachmentRow(btn);
-                        urlInputs = Array.from(row.querySelectorAll('.m-url'));
-                        emptyInput = urlInputs[urlInputs.length - 1];
+                let targetTextareaId = btn.getAttribute('data-target-textarea');
+                if (targetTextareaId) {
+                    let ta = document.getElementById(targetTextareaId);
+                    if (ta) {
+                        let token = fileType === 'img' ? `[IMG:${publicUrl}]` : `[MEDIA:${publicUrl}]`;
+                        ta.value = ta.value + (ta.value.endsWith('\n') || ta.value === '' ? '' : '\n') + token;
+                        // trigger input event to update preview
+                        ta.dispatchEvent(new Event('input', { bubbles: true }));
                     }
-                }
-                
-                if (emptyInput) {
-                    emptyInput.value = publicUrl;
-                    let mRow = emptyInput.closest('.media-row');
-                    if (mRow) {
-                        let typeSel = mRow.querySelector('.m-type');
-                        if (typeSel) typeSel.value = fileType;
+                } else {
+                    let row = btn.closest('.sop-step-row');
+                    if (row) {
+                        let urlInputs = Array.from(row.querySelectorAll('.m-url'));
+                        let emptyInput = urlInputs.find(inp => !inp.value.trim());
+                        
+                        if (!emptyInput) {
+                            if (typeof window.click_addAttachmentRow === 'function') {
+                                window.click_addAttachmentRow(btn);
+                                urlInputs = Array.from(row.querySelectorAll('.m-url'));
+                                emptyInput = urlInputs[urlInputs.length - 1];
+                            }
+                        }
+                        
+                        if (emptyInput) {
+                            emptyInput.value = publicUrl;
+                            let mRow = emptyInput.closest('.media-row');
+                            if (mRow) {
+                                let typeSel = mRow.querySelector('.m-type');
+                                if (typeSel) typeSel.value = fileType;
+                            }
+                        }
                     }
                 }
             } catch (err) {
@@ -1393,7 +1417,7 @@ function renderActiveWO(id) {
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                                             <div style="display:flex; gap:8px;">
                                                 <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
-                                                <button data-click="click_openMediaManager" data-type="telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                                                <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, \"\\\\'\")}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
                                                 <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
                                                 <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                                             </div>
