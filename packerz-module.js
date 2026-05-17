@@ -454,6 +454,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
                             <div style="display:flex; gap:8px;">
+                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
                                 <button data-app-click="openSOPMediaInline" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖼️ MEDIA</button>
                                 <button data-app-click="openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">⚡ GUIDE</button>
                                 <button data-app-click="togglePackerzSOPPreview" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
@@ -2168,6 +2169,8 @@ document.addEventListener('click', (e) => {
         if(typeof openSOPMediaPicker === 'function') openSOPMediaPicker('packerzLiveInlineQA');
     } else if (action === 'openSOPTokenGuide') {
         if(typeof openSOPTokenGuide === 'function') openSOPTokenGuide();
+    } else if (action === 'openSOPSnapshotCameraInline') {
+        if(typeof click_openSOPSnapshotCameraInline === 'function') click_openSOPSnapshotCameraInline();
     } else if (action === 'togglePackerzSOPPreview') {
         if(typeof toggleHorizontalPreview === 'function') toggleHorizontalPreview('packerzInlineSopLeftPane', 'packerzLiveInlinePreviewCol', btn);
     } else if (action === 'saveInlineSOP') {
@@ -2215,3 +2218,119 @@ document.addEventListener('mousedown', (e) => {
         if(typeof initPackerzLiveSopResize === 'function') initPackerzLiveSopResize(e);
     }
 });
+
+// ============================================================
+// SOP WEBRTC CAMERA SNAPSHOT (AUTHORING)
+// ============================================================
+
+let sopSnapshotStream = null;
+
+window.click_openSOPSnapshotCameraInline = function(e) {
+    window.activeSOPTextAreaId = 'packerzLiveInlineQA';
+    openSOPSnapshotCamera();
+};
+
+window.click_openSOPSnapshotCamera = function(e) {
+    if(window.activeSOPTextAreaId) {
+        openSOPSnapshotCamera();
+    } else {
+        alert("Please click this from within an active SOP editor text area.");
+    }
+};
+
+window.openSOPSnapshotCamera = async function() {
+    const modal = document.getElementById('sopSnapshotModal');
+    const video = document.getElementById('sopSnapshotVideo');
+    const statusEl = document.getElementById('sopSnapshotStatus');
+    const captureBtn = document.getElementById('btnSOPSnapshotCapture');
+    
+    if(!modal || !video) return;
+    
+    modal.style.display = 'flex';
+    statusEl.innerText = "Requesting camera access...";
+    captureBtn.style.opacity = '0.5';
+    captureBtn.style.cursor = 'not-allowed';
+    
+    try {
+        sopSnapshotStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+        });
+        video.srcObject = sopSnapshotStream;
+        video.onloadedmetadata = () => {
+            video.play();
+            statusEl.innerText = "Live Stream Active. Ready to Capture.";
+            captureBtn.style.opacity = '1';
+            captureBtn.style.cursor = 'pointer';
+        };
+    } catch(e) {
+        statusEl.innerText = "Camera Access Denied or Unavailable: " + e.message;
+        statusEl.style.color = '#ef4444';
+        console.error(e);
+    }
+};
+
+window.click_closeSOPSnapshotCamera = function() {
+    const modal = document.getElementById('sopSnapshotModal');
+    const video = document.getElementById('sopSnapshotVideo');
+    
+    if(sopSnapshotStream) {
+        sopSnapshotStream.getTracks().forEach(track => track.stop());
+        sopSnapshotStream = null;
+    }
+    if(video) video.srcObject = null;
+    if(modal) modal.style.display = 'none';
+};
+
+window.click_captureSOPSnapshot = function() {
+    const video = document.getElementById('sopSnapshotVideo');
+    const canvas = document.getElementById('sopSnapshotCanvas');
+    const statusEl = document.getElementById('sopSnapshotStatus');
+    const captureBtn = document.getElementById('btnSOPSnapshotCapture');
+    
+    if(!video || !canvas || !sopSnapshotStream) return;
+    if(captureBtn.style.cursor === 'not-allowed') return;
+    
+    // Play a brief shutter sound if possible
+    try {
+        let beep = document.getElementById('scanner-beep');
+        if(beep) {
+            beep.currentTime = 0;
+            beep.play().catch(()=>{});
+        }
+    } catch(e) { console.warn('Beep playback failed:', e); }
+    
+    statusEl.innerText = "📸 Capturing and preparing upload...";
+    captureBtn.style.opacity = '0.5';
+    captureBtn.style.cursor = 'not-allowed';
+    
+    // Draw current video frame to canvas
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Convert to Blob and then File
+    canvas.toBlob((blob) => {
+        if(!blob) {
+            statusEl.innerText = "❌ Capture failed. Please try again.";
+            captureBtn.style.opacity = '1';
+            captureBtn.style.cursor = 'pointer';
+            return;
+        }
+        
+        // Generate a valid File object for the existing upload logic
+        const timestamp = Date.now();
+        const file = new File([blob], `sop-snapshot-${timestamp}.jpg`, { type: 'image/jpeg' });
+        
+        // Stop stream and close modal instantly for snappy UX
+        click_closeSOPSnapshotCamera();
+        
+        // Use the existing uploadSOPMedia function
+        if(typeof uploadSOPMedia === 'function') {
+            uploadSOPMedia(file);
+        } else {
+            console.error("uploadSOPMedia function not found.");
+            alert("Upload failed. Media uploader missing.");
+        }
+    }, 'image/jpeg', 0.85); // 85% quality JPEG
+};

@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'click_window_openRecipeManager':
+                    if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
+                    break;
+                case 'click_window_commitRecipeManager':
+                    if (typeof window.commitRecipeManager === 'function') window.commitRecipeManager();
+                    break;
                 case 'click_window_openEditzBulkModal':
                     window.click_window_openEditzBulkModal();
                     break;
@@ -781,7 +787,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     createSOPMediaFolder();
                     break;
                 case 'click_closeSOPMediaPicker':
-                    closeSOPMediaPicker();
+                    if (typeof closeSOPMediaPicker === 'function') closeSOPMediaPicker();
+                    break;
+                case 'click_openSOPSnapshotCamera':
+                    if (typeof window.click_openSOPSnapshotCamera === 'function') window.click_openSOPSnapshotCamera();
+                    break;
+                case 'click_closeSOPSnapshotCamera':
+                    if (typeof window.click_closeSOPSnapshotCamera === 'function') window.click_closeSOPSnapshotCamera();
+                    break;
+                case 'click_captureSOPSnapshot':
+                    if (typeof window.click_captureSOPSnapshot === 'function') window.click_captureSOPSnapshot();
                     break;
                 case 'click_if_event_target_this_closeSOPA':
                     if(event.target===this)closeSOPAuditLog();
@@ -1248,6 +1263,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'change_window_renderRecipeManager':
+                    if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
+                    break;
+                case 'change_window_updateRecipeManagerStaging':
+                    if (typeof window.updateRecipeManagerStaging === 'function') window.updateRecipeManagerStaging(el);
+                    break;
                 case 'change_updateLaborCosts':
                     updateLaborCosts();
                     break;
@@ -1396,6 +1417,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'input_actualNetSearch':
                     if (typeof renderActualNetList === 'function') renderActualNetList();
+                    break;
+                case 'input_window_updateRecipeManagerStaging':
+                    if (typeof window.updateRecipeManagerStaging === 'function') {
+                        window.updateRecipeManagerStaging(el);
+                    }
                     break;
             }
         } catch (error) {
