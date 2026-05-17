@@ -335,16 +335,21 @@ function teRenderTaskGrid(filter = null) {
     sortedCyclez.forEach(c => {
         let title = c.title;
         let cColor = c.color_hex;
+        let badgeHtml = '';
         // Prefix project cycles with the project name for clarity in personal views
         if (isPersonalView && c.project_id) {
             let p = taskEngineDB.projectz.find(proj => proj.id === c.project_id);
             if (p) {
                 title = `${p.title} ➔ ${c.title}`;
-                if (!cColor) cColor = p.color_hex;
+                if (!cColor || cColor === '#10b981') cColor = p.color_hex;
             }
+        } else if (isPersonalView && !c.project_id) {
+            badgeHtml = `<span style="background: #a855f720; color: #a855f7; padding: 2px 6px; border-radius: 4px; border: 1px solid #a855f740; font-size: 10px; font-weight: bold; margin-bottom: 0px; display: inline-block;">PRIVATE</span>`;
+            if (!cColor || cColor === '#10b981') cColor = '#a855f7';
         }
+        
         if (!cColor) cColor = c.project_id ? '#3b82f6' : '#a855f7';
-        cycleGroups.set(c.id, { title: title, color: cColor, tasks: [], project_id: c.project_id || null });
+        cycleGroups.set(c.id, { title: title, color: cColor, badgeHtml: badgeHtml, tasks: [], project_id: c.project_id || null });
     });
     
     // Sort tasks into cycles (only top-level tasks)
@@ -413,6 +418,7 @@ function teRenderTaskGrid(filter = null) {
             <div class="te-section-header" style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; cursor: grab;">
                 <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">${toggleIcon}</div>
                 <div class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="font-size: 14px; font-weight: bold; color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='${headerColor}20'" onmouseout="this.style.background='transparent'">${group.title}</div>
+                ${group.badgeHtml ? group.badgeHtml : ''}
                 <div style="flex-grow: 1; height: 1px; background: ${headerColor}40; margin-left: 10px;"></div>
                 <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'" onmouseout="this.style.background='transparent'">✖</div>
             </div>
