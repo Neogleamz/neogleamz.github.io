@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'click_window_openRecipeManager':
+                    if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
+                    break;
+                case 'click_window_commitRecipeManager':
+                    if (typeof window.commitRecipeManager === 'function') window.commitRecipeManager();
+                    break;
                 case 'click_window_openEditzBulkModal':
                     window.click_window_openEditzBulkModal();
                     break;
@@ -1257,6 +1263,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'change_window_renderRecipeManager':
+                    if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
+                    break;
+                case 'change_window_updateRecipeManagerStaging':
+                    if (typeof window.updateRecipeManagerStaging === 'function') window.updateRecipeManagerStaging(el);
+                    break;
                 case 'change_updateLaborCosts':
                     updateLaborCosts();
                     break;
@@ -1405,6 +1417,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'input_actualNetSearch':
                     if (typeof renderActualNetList === 'function') renderActualNetList();
+                    break;
+                case 'input_window_updateRecipeManagerStaging':
+                    if (typeof window.updateRecipeManagerStaging === 'function') {
+                        window.updateRecipeManagerStaging(el);
+                    }
                     break;
             }
         } catch (error) {

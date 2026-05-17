@@ -445,6 +445,325 @@ window.executeCreateNewProduct = async function(n) { try { if(!n || !n.trim() ||
 window.executeDeleteCurrentProduct = async function() { try { if(!currentProduct) return; sysLog(`Deleting ${currentProduct}`); const {error} = await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct);
             if(error) throw new Error(error.message); delete productsDB[currentProduct]; delete laborDB[currentProduct]; delete pricingDB[currentProduct]; delete isSubassemblyDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let arr = productsDB[n]; let oL = arr.length; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { arr.splice(i, 1); } } if(arr.length !== oL) ups.push(supabaseClient.from('product_recipes').update({components: arr}).eq('product_name', n)); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); window.renderProductList(); } catch(e) { sysLog(e.message, true); } }
 
+// ==========================================
+// RECIPE MANAGER (STAGING SANDBOX)
+// ==========================================
+window.recipeManagerStaging = [];
+window.openRecipeManager = function() {
+    let mode = document.getElementById('recipeManagerFilter') ? document.getElementById('recipeManagerFilter').value : 'orphans';
+    window.recipeManagerStaging = [];
+    
+    if (typeof productsDB !== 'undefined' && typeof catalogCache !== 'undefined') {
+        Object.keys(productsDB).forEach(pName => {
+            let comps = productsDB[pName] || [];
+            comps.forEach(x => {
+                let k = String(x.item_key||x.di_item_id||x.name);
+                let isRecipe = k.startsWith('RECIPE:::');
+                let isOrphan = !isRecipe && !catalogCache[k];
+                
+                if (mode === 'orphans' && !isOrphan) return;
+                
+                window.recipeManagerStaging.push({
+                    recipeName: pName,
+                    originalKey: k,
+                    newKey: k,
+                    isOrphan: isOrphan,
+                    isRecipe: isRecipe,
+                    qty: x.quantity || x.qty || 1
+                });
+            });
+        });
+    }
+    
+    window.renderRecipeManager();
+    document.getElementById('recipeManagerModal').style.display = 'flex';
+};
+
+window.renderRecipeManager = function() {
+    let filterEl = document.getElementById('recipeManagerFilter');
+    if(filterEl && filterEl.dataset.skipRender) return; // prevent loop
+    
+    const tbody = document.getElementById('recipeManagerModalBody');
+    if (!tbody) return;
+    
+    let html = `<table style="width:100%; text-align:left; border-collapse:collapse;">
+        <thead>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted);">
+                <th style="padding:8px; width:20%;">Recipe Name</th>
+                <th style="padding:8px; width:30%;">Component Key (Dissected)</th>
+                <th style="padding:8px; width:10%;">Status</th>
+                <th style="padding:8px; width:40%;">New Assigned Key (Edit or Search)</th>
+            </tr>
+        </thead>
+        <tbody>`;
+        
+    if (window.recipeManagerStaging.length === 0) {
+        html += `<tr><td colspan="4" style="text-align:center; padding:20px; color:#10b981;">No components match the current filter. 🚀</td></tr>`;
+    } else {
+        let datalistHtml = `<datalist id="rmCatalogDatalist">`;
+        if (typeof catalogCache !== 'undefined') {
+            Object.keys(catalogCache).forEach(k => {
+                let prod = catalogCache[k].neoProduct || 'Unknown';
+                let item = catalogCache[k].neoName || catalogCache[k].itemName || 'Unknown';
+                let spec = (catalogCache[k].specification && catalogCache[k].specification !== 'null' && catalogCache[k].specification !== '(Mixed Specs)') ? ` - ${catalogCache[k].specification}` : '';
+                let nameStr = `[${prod}] ${item}${spec}`;
+                datalistHtml += `<option value="${k.replace(/"/g, '&quot;')}">${nameStr}</option>`;
+            });
+        }
+        if (typeof productsDB !== 'undefined') {
+            Object.keys(productsDB).forEach(p => {
+                datalistHtml += `<option value="RECIPE:::${p.replace(/"/g, '&quot;')}">[Sub-Assembly] ${p}</option>`;
+            });
+        }
+        datalistHtml += `</datalist>`;
+        html += datalistHtml;
+
+        window.recipeManagerStaging.forEach((r, idx) => {
+            let isFixed = !r.isOrphan || (r.newKey && r.newKey !== r.originalKey && typeof catalogCache !== 'undefined' && catalogCache[r.newKey]);
+            let statusBadge = isFixed ? `<span style="background:#10b981; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Valid</span>` : `<span style="background:#ef4444; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Orphaned</span>`;
+            
+            let suggestionHtml = '';
+            let bestMatch = null;
+            
+            if (!isFixed && typeof catalogCache !== 'undefined') {
+                let bLower = r.originalKey.toLowerCase();
+                let bParts = r.originalKey.split(':::');
+                let match = Object.keys(catalogCache).find(k => k.toLowerCase() === bLower);
+                if (match) bestMatch = match;
+                else if (bParts.length >= 3) {
+                    let bPLower = bParts.map(s => s.toLowerCase().trim());
+                    let bestScore = 0;
+                    for (let k in catalogCache) {
+                        let kParts = k.split(':::').map(s => s.toLowerCase().trim());
+                        if (kParts.length >= 3) {
+                            let score = 0;
+                            for (let i=0; i<Math.max(bPLower.length, kParts.length); i++) {
+                                if (bPLower[i] === kParts[i]) score++;
+                            }
+                            if (score > bestScore && score >= 2) { bestScore = score; bestMatch = k; }
+                        }
+                    }
+                }
+                
+                if (bestMatch) {
+                    let escapedSugg = bestMatch.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                    
+                    let sParts = bestMatch.split(':::');
+                    let oParts = r.originalKey.split(':::');
+                    let changedSuggTokens = [];
+                    let changedOrigTokens = [];
+                    for(let i=0; i<Math.max(sParts.length, oParts.length); i++) {
+                        if (sParts[i] !== oParts[i]) {
+                            let oTokens = (oParts[i]||'').split(',').map(s=>s.trim());
+                            let sTokens = (sParts[i]||'').split(',').map(s=>s.trim());
+                            sTokens.forEach(st => { if (!oTokens.includes(st)) changedSuggTokens.push(st); });
+                            oTokens.forEach(ot => { if (!sTokens.includes(ot)) changedOrigTokens.push(ot); });
+                        }
+                    }
+                    let sStr = changedSuggTokens.join(', ');
+                    let oStr = changedOrigTokens.join(', ');
+                    let changeStr = "";
+                    if (oStr && sStr) changeStr = `<span style="color:#fca5a5;">${oStr}</span> ➔ <span style="color:#6ee7b7;">${sStr}</span>`;
+                    else if (sStr) changeStr = `<span style="color:#6ee7b7;">${sStr}</span>`;
+                    else changeStr = "Apply Match";
+                    
+                    suggestionHtml = `<button onclick="applyRecipeSuggestion(${idx}, '${escapedSugg}')" style="background:rgba(14, 165, 233, 0.2); color:#e0f2fe; border:1px solid rgba(14, 165, 233, 0.4); padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; flex-shrink:0; transition:all 0.2s; white-space:nowrap; font-weight:bold; text-transform:none !important;" onmouseover="this.style.background='rgba(14, 165, 233, 0.4)'" onmouseout="this.style.background='rgba(14, 165, 233, 0.2)'">💡 Fix: ${changeStr}</button>`;
+                }
+            }
+            
+            let diffTarget = null;
+            if (r.newKey && r.newKey !== r.originalKey) {
+                diffTarget = r.newKey;
+            } else if (!isFixed && bestMatch) {
+                diffTarget = bestMatch;
+            }
+            
+            let origKeyHTML = `<span style="font-family:monospace; font-size:10px;">${r.originalKey}</span>`;
+            if (r.originalKey.includes(':::')) {
+                let p = r.originalKey.split(':::');
+                let bp = diffTarget ? diffTarget.split(':::') : null;
+                
+                let diffSegment = (origStr, suggStr) => {
+                    if (!origStr) return 'N/A';
+                    if (!suggStr || origStr === suggStr) return `<span style="color:var(--text-main);">${origStr}</span>`;
+                    let oParts = origStr.split(',').map(s => s.trim());
+                    let sParts = suggStr.split(',').map(s => s.trim());
+                    return oParts.map(op => {
+                        let isBroken = !sParts.includes(op);
+                        if (isBroken) {
+                            let newTokens = sParts.filter(sp => !oParts.includes(sp));
+                            let replaceHtml = newTokens.length > 0 ? ` ➔ <span style="color:#10b981;">${newTokens.join(', ')}</span>` : '';
+                            return `<span style="color:#ef4444; font-weight:bold;">${op}</span>${replaceHtml}`;
+                        } else {
+                            return `<span style="color:var(--text-main);">${op}</span>`;
+                        }
+                    }).join('<span style="color:var(--text-muted);">, </span>');
+                };
+
+                origKeyHTML = `<div style="font-family:monospace; font-size:11px; background:rgba(0,0,0,0.2); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                    <div style="margin-bottom:2px;"><span style="color:var(--text-muted); display:inline-block; width:60px;">Name:</span> ${diffSegment(p[0], bp ? bp[0] : null)}</div>
+                    <div style="margin-bottom:2px;"><span style="color:var(--text-muted); display:inline-block; width:60px;">Product:</span> ${diffSegment(p[1], bp ? bp[1] : null)}</div>
+                    <div style="margin-bottom:2px;"><span style="color:var(--text-muted); display:inline-block; width:60px;">Raw:</span> ${diffSegment(p[2], bp ? bp[2] : null)}</div>
+                    <div><span style="color:var(--text-muted); display:inline-block; width:60px;">Spec:</span> ${diffSegment(p[3], bp ? bp[3] : null)}</div>
+                </div>`;
+            }
+
+            let getFormattedNewKey = (r, bMatch, isFxd) => {
+                let keyParts = (r.newKey||'').split(':::');
+                let refStr = isFxd ? r.originalKey : bMatch;
+                if (!refStr) return r.newKey || '';
+                
+                let refParts = refStr.split(':::');
+                let resParts = keyParts.map((kp, i) => {
+                    let rp = refParts[i] || '';
+                    let kTokens = kp.split(',').map(s=>s.trim());
+                    let rTokens = rp.split(',').map(s=>s.trim());
+                    let out = kTokens.map(kt => {
+                        if (isFxd) {
+                            if (!rTokens.includes(kt)) return `<span style="color:#10b981; font-weight:bold;">${kt}</span>`;
+                        } else {
+                            if (!rTokens.includes(kt)) return `<span style="color:#ef4444; font-weight:bold;">${kt}</span>`;
+                        }
+                        return kt;
+                    });
+                    return out.join(', ');
+                });
+                return resParts.join(':::');
+            };
+
+            let formattedNewKey = getFormattedNewKey(r, bestMatch, isFixed);
+            let escapedVal = (r.newKey||'').replace(/"/g, '&quot;');
+            let displayDiv = `<div onclick="this.style.display='none'; document.getElementById('rmInput_${idx}').style.display='block'; document.getElementById('rmInput_${idx}').focus();" style="flex-grow:1; max-width:400px; padding:8px; background:var(--bg-input); border:1px solid ${isFixed ? '#10b981' : 'var(--border-input)'}; border-radius:4px; font-family:monospace; font-size:11px; cursor:text; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-color);" title="Click to Edit">${formattedNewKey}</div>`;
+
+            let rowInput = `<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%;">
+                ${displayDiv}
+                <input type="text" id="rmInput_${idx}" list="rmCatalogDatalist" data-idx="${idx}" data-input="input_window_updateRecipeManagerStaging" data-change="change_window_updateRecipeManagerStaging" onblur="if(typeof window.renderRecipeManager==='function') window.renderRecipeManager()" value="${escapedVal}" style="display:none; flex-grow:1; max-width:400px; padding:8px; background:var(--bg-input); border:1px solid ${isFixed ? '#10b981' : 'var(--border-input)'}; color:var(--text-color); border-radius:4px; font-family:monospace; font-size:11px; transition:all 0.2s ease;" placeholder="Search or paste exact key...">
+                ${suggestionHtml}
+            </div>`;
+            
+            html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                <td style="padding:12px 8px; font-weight:bold; color:var(--text-heading);">${r.recipeName}</td>
+                <td style="padding:12px 8px;">${origKeyHTML}</td>
+                <td class="rm-status-badge" style="padding:12px 8px; text-align:center;">${statusBadge}</td>
+                <td style="padding:12px 8px;">${rowInput}</td>
+            </tr>`;
+        });
+    }
+    
+    html += `</tbody></table>`;
+    tbody.innerHTML = html;
+};
+
+window.updateRecipeManagerStaging = function(el) {
+    let idx = parseInt(el.getAttribute('data-idx'));
+    let newVal = el.value.trim();
+    if (idx >= 0 && idx < window.recipeManagerStaging.length) {
+        let r = window.recipeManagerStaging[idx];
+        r.newKey = newVal;
+
+        // Update DOM inline without re-rendering to prevent datalist collapse
+        let isFixed = !r.isOrphan || (r.newKey && r.newKey !== r.originalKey && typeof catalogCache !== 'undefined' && catalogCache[r.newKey]);
+        el.style.borderColor = isFixed ? '#10b981' : 'var(--border-input)';
+        
+        let tr = el.closest('tr');
+        if (tr) {
+            let statusTd = tr.querySelector('.rm-status-badge');
+            if (statusTd) {
+                statusTd.innerHTML = isFixed ? `<span style="background:#10b981; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Valid</span>` : `<span style="background:#ef4444; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Orphaned</span>`;
+            }
+        }
+    }
+};
+
+window.applyRecipeSuggestion = function(idx, suggestion) {
+    if (idx >= 0 && idx < window.recipeManagerStaging.length) {
+        window.recipeManagerStaging[idx].newKey = suggestion;
+        if (typeof window.renderRecipeManager === 'function') {
+            window.renderRecipeManager();
+        }
+    }
+};
+
+window.applyAllRecipeSuggestions = function() {
+    let anyFixed = false;
+    window.recipeManagerStaging.forEach(r => {
+        let isFixed = !r.isOrphan || (r.newKey && r.newKey !== r.originalKey && typeof catalogCache !== 'undefined' && catalogCache[r.newKey]);
+        if (!isFixed && typeof catalogCache !== 'undefined' && r.originalKey.includes(':::')) {
+            let p = r.originalKey.split(':::');
+            let suggestions = Object.keys(catalogCache);
+            let bestMatch = null;
+            let bestScore = 0;
+            
+            suggestions.forEach(s => {
+                let sParts = s.split(':::');
+                if (sParts.length >= 4) {
+                    let matches = 0;
+                    if(sParts[0] === p[0]) matches += 2;
+                    if(sParts[1] === p[1]) matches += 2;
+                    if(sParts[2] === p[2]) matches += 1;
+                    if(sParts[3] === p[3]) matches += 1;
+                    if(matches > bestScore) {
+                        bestScore = matches;
+                        bestMatch = s;
+                    }
+                }
+            });
+            
+            if (bestMatch && bestScore > 0) {
+                r.newKey = bestMatch;
+                anyFixed = true;
+            }
+        }
+    });
+
+    if (anyFixed && typeof window.renderRecipeManager === 'function') {
+        window.renderRecipeManager();
+    }
+};
+
+window.commitRecipeManager = async function() {
+    await executeWithButtonAction('btnRecipeManagerSync', 'COMMITTING...', '✅ DONE!', async () => {
+        let updatesByRecipe = {};
+        window.recipeManagerStaging.forEach(r => {
+            if (r.originalKey !== r.newKey && r.newKey !== "") {
+                if (!updatesByRecipe[r.recipeName]) updatesByRecipe[r.recipeName] = [];
+                updatesByRecipe[r.recipeName].push(r);
+            }
+        });
+        
+        let pNamesToSync = Object.keys(updatesByRecipe);
+        if (pNamesToSync.length === 0) {
+            document.getElementById('recipeManagerModal').style.display = 'none';
+            return;
+        }
+        
+        // Mutate local memory
+        pNamesToSync.forEach(pName => {
+            let comps = productsDB[pName] || [];
+            updatesByRecipe[pName].forEach(update => {
+                let target = comps.find(c => String(c.item_key||c.di_item_id||c.name) === update.originalKey);
+                if (target) {
+                    target.item_key = update.newKey;
+                    target.di_item_id = undefined;
+                    target.name = undefined;
+                }
+            });
+        });
+        
+        // Push sequentially to avoid hammering Supabase
+        for (let i = 0; i < pNamesToSync.length; i++) {
+            await window.syncRecipe(pNamesToSync[i]);
+        }
+        
+        if(typeof sysLog === 'function') sysLog(`Committed bulk fixes for ${pNamesToSync.length} recipes.`);
+        document.getElementById('recipeManagerModal').style.display = 'none';
+        
+        window.hasRecipeOrphans = false;
+        window.renderProductList();
+        if (currentProduct) window.renderProductBOM();
+    });
+};
+
 // --- BOM EVENT DELEGATION ---
 document.addEventListener('focusin', (e) => {
     if (e.target.dataset.appFocus === 'bomStoreOldVal') { if(typeof storeOldVal === 'function') storeOldVal(e.target); }
