@@ -375,9 +375,9 @@ function teRenderTaskGrid(filter = null) {
     let totalTasks = 0;
     for (const [cid, group] of cycleGroups) totalTasks += group.tasks.length;
 
-    let collapsedCache = {};
+    let collapsedCache;
     try {
-        collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}');
+        collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}') || {};
     } catch(e) { collapsedCache = {}; }
 
     for (const [cid, group] of cycleGroups) {

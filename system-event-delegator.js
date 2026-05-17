@@ -366,9 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         const cycleId = el.getAttribute('data-cycle-id');
                         const groupEl = document.getElementById('te-cycle-group-' + cycleId);
                         if (groupEl) {
-                            let collapsedCache = {};
+                            let collapsedCache;
                             try {
-                                collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}');
+                                collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}') || {};
                             } catch(e) { collapsedCache = {}; }
                             
                             if (groupEl.style.display === 'none') {
