@@ -1446,11 +1446,21 @@ function renderActiveWO(id) {
                                     stepAttachments.forEach(m => {
                                         if(m && m.url) {
                                             let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\\\'").replace(/"/g, '"');
-                                            if (m.type === 'img') {
+                                            
+                                            // Auto-recover corrupted types caused by DOMPurify stripping 'selected'
+                                            let derivedType = m.type;
+                                            if (derivedType === 'img') {
+                                                let lowUrl = safeUrl.toLowerCase();
+                                                if (lowUrl.includes('.mp4') || lowUrl.includes('.webm') || lowUrl.includes('.avi')) derivedType = 'vid';
+                                                else if (lowUrl.includes('.pdf') || lowUrl.includes('.docx') || lowUrl.includes('.xlsx') || lowUrl.includes('.txt') || lowUrl.includes('sharepoint.com')) derivedType = 'doc';
+                                                else if (dId && lowUrl.includes('/file/d/')) derivedType = 'doc'; // Drive preview iframe
+                                            }
+
+                                            if (derivedType === 'img') {
                                                 let imgThumbUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w800` : safeUrl;
                                                 attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb sop-media-img" data-url="${imgThumbUrl}" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;">`;
                                             } else {
-                                                let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
+                                                let isNativeVid = !dId && derivedType === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
                                                 if (isNativeVid) {
                                                     attachmentHtml += `<div class="media-thumb sop-media-vid grid-stack" data-url="${safeUrl}" style="max-height:100px; background:#1e293b; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div class="overlay-center-flex" style="flex-direction:column; gap:8px; z-index:1;"><i class="fa-solid fa-play" style="font-size:24px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:10px; font-weight:bold;">VIDEO</span></div></div>`;
                                                 } else {
