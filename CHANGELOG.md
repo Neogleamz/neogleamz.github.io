@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Chores
+- **Project Structure Cleanup & Organization**: Cleaned up and organized the whole project structure. Ensured that leftover/test files in the root were either deleted or moved to proper directories, and established a clear folder structure for everything to prevent random files accumulating in the root.
+
 ## [1.0.35] - 2026-05-17
 ### Features & Bug Fixes
 - **Intelligent Recipe Repair Suite**: Finalized the "Auto-Repair" workbench for the Recipe Integrity Manager. Implemented a seamless global "Fix All" bulk-repair command to easily reconcile orphaned component keys. Optimized the UI for improved responsiveness with precise Red-to-Green visual feedback during recipe association corrections, and stabilized all staging and commitment workflows.
