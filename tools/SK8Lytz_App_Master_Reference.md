@@ -231,6 +231,7 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 #### 3. MAKERZ (Production Ecosystem)
 - **`paneProdBuilder` (RECIPEZ)**:
   - Contains `recipeActionModal` triggers to actively map Raw Goods arrays against Final SKUs.
+  - Integrates the `Recipe Integrity Manager` (`recipeManagerModal`) which utilizes an intelligent "Fix All" bulk-predictions loop (`window.applyAllRecipeSuggestions`) to iteratively fuzzy-match and auto-repair orphaned Component Keys dynamically before committing changes back to the Supabase layer.
 - **`paneProdControl` (BATCHEZ)**:
   - Controls work order states (Pending, Core Processing).
 - **`paneProdPrint` (LAYERZ)**:
