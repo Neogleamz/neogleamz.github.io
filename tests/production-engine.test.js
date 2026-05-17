@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const prodCode = fs.readFileSync(path.resolve(__dirname, '../production-module.js'), 'utf8');
+const prodCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/production-module.js'), 'utf8');
 
 beforeAll(() => {
     // Provide global variables needed for production-module logic

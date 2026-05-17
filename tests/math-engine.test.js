@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // 1. We load the vanilla code as a string
-const engineCode = fs.readFileSync(path.resolve(__dirname, '../neogleamz-engine.js'), 'utf8');
+const engineCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/neogleamz-engine.js'), 'utf8');
 
 beforeAll(() => {
     // Evaluate the code safely into the JSDOM `window` execution context

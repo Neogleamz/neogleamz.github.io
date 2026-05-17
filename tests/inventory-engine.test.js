@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const engineCode = fs.readFileSync(path.resolve(__dirname, '../neogleamz-engine.js'), 'utf8');
-const invCode = fs.readFileSync(path.resolve(__dirname, '../inventory-module.js'), 'utf8');
+const engineCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/neogleamz-engine.js'), 'utf8');
+const invCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/inventory-module.js'), 'utf8');
 
 beforeAll(() => {
     // Provide a basic DOM for inventory-module since it creates <style> tags

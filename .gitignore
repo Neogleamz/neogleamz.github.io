@@ -29,3 +29,5 @@ supabase/.branches/
 
 # Ignore AI tracking, temporary scratch files, & planning docs
 scratch/
+data/exports/
+supabase/dumps/
