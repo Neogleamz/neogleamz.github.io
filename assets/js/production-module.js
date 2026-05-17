@@ -164,7 +164,6 @@ function renderMasterSOP() {
         let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, attachments: []} : s);
         if(mappedSteps.length === 0) mappedSteps = [{}];
         let h = "";
-        const p = document.getElementById('sopMasterProductSelect')?.value || 'unknown';
         mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx, p, 'batches'); });
         area.innerHTML = window.safeHTML(h);
     } catch(e) { sysLog(e.message, true); }
