@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.35] - 2026-05-17
+### Features & Bug Fixes
+- **Intelligent Recipe Repair Suite**: Finalized the "Auto-Repair" workbench for the Recipe Integrity Manager. Implemented a seamless global "Fix All" bulk-repair command to easily reconcile orphaned component keys. Optimized the UI for improved responsiveness with precise Red-to-Green visual feedback during recipe association corrections, and stabilized all staging and commitment workflows.
+
 ## [1.0.34] - 2026-05-16
 ### Features & Refactors
 - **Implement Sitewide Supabase Websockets**: Expanded real-time synchronization globally across the entire application. Wired up `supabaseClient.channel` to listen to all core tables for `postgres_changes`. Updated local DB caches in real-time and injected UI redraws. Handled project-level section logic across personal task views.
