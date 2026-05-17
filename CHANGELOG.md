@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.40] - 2026-05-17
+### Features & Bug Fixes
+- **Webhook Idempotency Race Condition Fix**: Refactored the Shopify `orders/create` Edge Function to aggregate identical line items organically, and implemented a strict `UNIQUE(order_id, storefront_sku)` constraint to the PostgreSQL `sales_ledger`. This guarantees mathematical parity during millisecond-simultaneous webhook triggers and totally eliminates duplicate record generation inside the financial trace pipeline.
+
 ## [1.0.39] - 2026-05-17
 ### Chores & Maintenance
 - **Orphan Script Cleanup**: Cleaned up orphaned utility scripts and tests (Python scripts in `tools/`, `test-dompurify.js` in root, `test_supabase.js` and `Whydidthishappen.md` in `tools/`). Relocated or purged them to maintain project hygiene.
