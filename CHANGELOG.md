@@ -1,6 +1,9 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.36] - 2026-05-17
+### Features & Bug Fixes
+- **WebRTC Camera Integration for SOPs**: Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step.
+
 ### Chores
 - **Project Structure Cleanup & Organization**: Cleaned up and organized the whole project structure. Ensured that leftover/test files in the root were either deleted or moved to proper directories, and established a clear folder structure for everything to prevent random files accumulating in the root.
 

@@ -35,7 +35,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 ### Target: `main`
 - [🚀] `chore/root-structure-cleanup` : **Project Structure Cleanup & Organization** - Clean up and organize the whole project structure. Ensure that leftover/test files in the root are either deleted or moved to proper directories, and establish a clear folder structure for everything to prevent random files accumulating in the root. [🤖 AI Model] [🧠 5k / 5k] [💸 $0.02 / $0.02]
-- [x] `feat/sop-camera-integration` : **WebRTC Camera Integration for SOPs** - Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [🚀] `feat/sop-camera-integration` : **WebRTC Camera Integration for SOPs** - Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 
 ---
 
