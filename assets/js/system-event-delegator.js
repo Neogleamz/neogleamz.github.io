@@ -1290,6 +1290,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.preventDefault();
                     if (typeof window.click_addAttachmentRow === 'function') window.click_addAttachmentRow(el);
                     break;
+                case 'mousedown_sopDirectUpload':
+                    event.preventDefault();
+                    if (typeof window.triggerSopDirectUpload === 'function') window.triggerSopDirectUpload(el);
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
