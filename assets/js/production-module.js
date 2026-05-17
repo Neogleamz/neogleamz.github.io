@@ -2125,11 +2125,39 @@ function printPickList() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function printSOP() {
+window.openSopPrintModal = function() {
+    let el = document.getElementById('sopPrintOptionsModal');
+    if (el) el.style.display = 'flex';
+};
+
+window.closeSopPrintModal = function() {
+    let el = document.getElementById('sopPrintOptionsModal');
+    if (el) el.style.display = 'none';
+};
+
+window.executeSopPrint = function(printType) {
+    window.closeSopPrintModal();
     try {
-        if(!currentWO) return;
+        if(!currentWO && typeof currentWO === 'undefined') {
+            sysLog("Cannot print SOP without a valid target context.", true);
+            return;
+        }
+
+        // 1. GATHER STEPS
         let stepsToRender = [];
-        if(currentWO.routing) {
+        let hasRichText = false;
+        let richTextHTML = '';
+        let headerTitle = currentWO ? currentWO.wo_id : 'SOP Document';
+        let targetProductName = currentWO ? currentWO.product_name : '';
+
+        // Check if we are inside the active SOP Master Modal
+        if(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none') {
+            targetProductName = currentProductSOP || targetProductName;
+            headerTitle = "SOP: " + targetProductName;
+        }
+
+        // Sub-assemblies routing if present
+        if(currentWO && currentWO.routing) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
                     let subSteps = sopsDB[sub] || [];
@@ -2143,23 +2171,93 @@ function printSOP() {
                 }
             });
         }
-        let mainSteps = sopsDB[currentWO.product_name] || [];
+
+        // Main steps
+        let mainSteps = sopsDB[targetProductName] || [];
         if(mainSteps.length > 0 || stepsToRender.length > 0) {
-            if(mainSteps.length > 0) { stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${currentWO.product_name}` }); stepsToRender = stepsToRender.concat(mainSteps); }
+            if(mainSteps.length > 0) { 
+                stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${targetProductName}` }); 
+                stepsToRender = stepsToRender.concat(mainSteps); 
+            }
         }
+
+        // Fetch Rich Text if requested
+        if(printType === 'richtext' || printType === 'full') {
+            let pData = productsDB[targetProductName];
+            if(pData && pData.sop_richtext) {
+                richTextHTML = pData.sop_richtext;
+                hasRichText = true;
+            }
+        }
+
         let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
-        let html = `<html><head><title>SOP - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #0ea5e9;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#0ea5e9; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`;
-        html += `<h2>Compiled SOP</h2><h3>Work Order: ${currentWO.wo_id}</h3><hr>`;
-        if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
-        else {
-            let stepCounter = 1;
-            mappedSteps.forEach((s) => {
-                if(s.isHeader) { html += `<div class="header">${s.text}</div>`; }
-                else { html += `<div class="step"><strong style="color:#0ea5e9; font-size:14px;">Step ${stepCounter++}:</strong><br> ${s.text}</div>`; }
-            });
+
+        // 2. BUILD HTML HEAD & CSS
+        let html = `<html><head><title>SOP - ${headerTitle}</title>
+<style>
+body { font-family: sans-serif; padding: 20px; font-size: 13px; max-width: 800px; margin: 0 auto; color: #333; }
+hr { border: 0; border-top: 2px solid #0ea5e9; margin: 20px 0; }
+.header { background: #f1f5f9; padding: 10px; font-weight: bold; font-size: 16px; margin: 25px 0 15px 0; border-left: 5px solid #0ea5e9; border-radius: 4px; }
+.step { margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; font-size: 14px; line-height: 1.5; }
+.step-checkbox { width: 16px; height: 16px; border: 2px solid #ccc; border-radius: 3px; margin-top: 2px; flex-shrink: 0; }
+.step-content { flex: 1; }
+.telemetry-header { font-weight: bold; font-size: 18px; color: #0ea5e9; margin-top: 15px; margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
+.telemetry-subtext { font-size: 12px; color: #666; font-style: italic; margin-left: 5px; }
+img { max-width: 100%; max-height: 350px; display: block; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+a { color: #0ea5e9; font-weight: bold; margin-right: 15px; text-decoration: none; }
+h2 { margin: 0 0 5px 0; font-size: 24px; color: #111; }
+h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
+.richtext-container { margin-top: 30px; padding-top: 20px; border-top: 3px solid #f59e0b; }
+.richtext-container img { max-width: 100%; height: auto; }
+</style></head><body>`;
+        
+        html += `<h2>Compiled SOP Document</h2><h3>${headerTitle}</h3><hr>`;
+
+        // 3. RENDER CHECKLIST
+        if(printType === 'checklist' || printType === 'full') {
+            if(mappedSteps.length === 0) {
+                html += `<p>No checklist steps defined.</p>`;
+            } else {
+                mappedSteps.forEach((s) => {
+                    if(s.isHeader) { 
+                        html += `<div class="header">${s.text}</div>`; 
+                    } else { 
+                        // Parse standard text through telemetry engine logic to convert markdown-like syntax
+                        let parsedHTML = parseProductionTelemetryLine(s.text, -1);
+                        // Make links safe for print (remove target_blank issues, though print ignores it)
+                        html += `<div class="step">
+                                    <div class="step-checkbox"></div>
+                                    <div class="step-content">${parsedHTML}</div>
+                                 </div>`; 
+                    }
+                });
+            }
         }
-        html += `</body></html>`; let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500);
-    } catch(e) { sysLog(e.message, true); }
+
+        // 4. RENDER RICH TEXT
+        if(printType === 'richtext' || printType === 'full') {
+            if(hasRichText) {
+                html += `<div class="richtext-container">
+                            <h2 style="color:#f59e0b;">SOP Documentation</h2>
+                            ${richTextHTML}
+                         </div>`;
+            } else if (printType === 'richtext') {
+                html += `<p>No Rich Text Documentation exists for this SOP.</p>`;
+            }
+        }
+
+        html += `</body></html>`; 
+        
+        let win = window.open('', '', 'width=800,height=800'); 
+        win.document.write(html); 
+        win.document.close(); 
+        
+        // Slight delay to allow image loading before triggering print dialog
+        setTimeout(() => win.print(), 700);
+        
+    } catch(e) { 
+        sysLog("Print Engine Error: " + e.message, true); 
+    }
 }
 
 function parseProductionTelemetryLine(q, contextIdx) {

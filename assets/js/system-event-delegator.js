@@ -259,7 +259,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.openDraftScrapModal();
                     break;
                 case 'click_window_printSOP':
-                    window.printSOP();
+                case 'click_window_openPrintSOP_currentPri':
+                case 'click_printPackerzSOP':
+                    if (typeof window.openSopPrintModal === 'function') {
+                        window.openSopPrintModal();
+                    } else {
+                        window.printSOP(); // Fallback if module isn't loaded
+                    }
+                    break;
+                case 'click_window_closeSopPrintModal':
+                    if (typeof window.closeSopPrintModal === 'function') window.closeSopPrintModal();
+                    break;
+                case 'click_executeSopPrint_checklist':
+                    if (typeof window.executeSopPrint === 'function') window.executeSopPrint('checklist');
+                    break;
+                case 'click_executeSopPrint_richtext':
+                    if (typeof window.executeSopPrint === 'function') window.executeSopPrint('richtext');
+                    break;
+                case 'click_executeSopPrint_full':
+                    if (typeof window.executeSopPrint === 'function') window.executeSopPrint('full');
                     break;
                 case 'click_saveInlineSOP':
                     saveInlineSOP();
