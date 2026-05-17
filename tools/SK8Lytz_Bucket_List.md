@@ -33,6 +33,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
+### Target: `main`
+- [ ] `feat/sop-camera-integration` : **WebRTC Camera Integration for SOPs** - Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 
 ---
 
