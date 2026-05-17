@@ -119,6 +119,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 - [🚀] `feat/buildz-step-time-tracking` : Build capability to track time spent on individual Buildz steps, log durations to Supabase, and display metrics in the Work Orders archive.
 *(Epic: Orderz Financial Visibility)*
+*(Shipped v1.0.22 — 2026-04-29)*
 - [🚀] `test/actual-net-matrix-verification` : Build a test modal or verification script to validate Actual Net math across complex order combinations (e.g., unshipped items keeping revenue vs. post-ship exchanges vs. replacement exchanges without returning the original, ref: Orders 1017, 1019). [🤖 Gemini 3.1 Pro] [🧠 60k / 10k] [💸 $0.20 / $0.05]
 
 ### Target: `epic/hub-card-math-validation`
@@ -301,6 +302,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `epic/historical-data-sync`
 *(Epic: Shopify Historical Backfill Engine)*
+*(Shipped v1.0.30 — 2026-05-07)*
 - [🚀] `feat/historical-shopify-backfill` : Architect a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 - [🚀] `feat/billing-csv-importer` : Build a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 - [🚀] `feat/shopify-tag-parser` : Develop a forward-looking Webhook/Sync module to automatically extract "order type" and "shipping label cost" directly from Shopify Order Tags as they are generated, eliminating the need for future manual CSV imports. [🤖 Gemini 3.1 Pro] [🧠 15k / 25k] [💸 $0.05 / $0.08]
@@ -308,6 +310,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: UI Enhancements)*
+*(Shipped v1.0.21 — 2026-04-29)*
 - [🚀] `feat/salez-card-30d-metrics` : Change the SALEZ hub card to remove 'Unmapped Etsy' and 'Unmapped Shopify', replacing them with 'Orders (30D)' and 'Actual Net (30D)'. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### Target: `main`
@@ -316,10 +319,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Shopify Flow Automation)*
+*(Shipped v1.0.22 — 2026-04-29)*
 - [🚀] `research/shopify-flow-auto-tag` : Investigate building a Shopify Flow that automatically tags orders with the `Label: <price>` format when a shipping label is purchased or printed, feeding natively into the webhook parser. (Finding: Impossible, relying on CSV) [🤖 Gemini 3.1 Pro] [🧠 10k / 5k] [💸 $0.03 / $0.02]
 
 ### Target: `main`
 *(Epic: The Task Engine)*
+*(Shipped v1.0.24 — 2026-05-02)*
 - [🚀] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrated Supabase Auth for Chris, Andy, and Tyson, and natively built the identity capture logic and UI header rendering. *(Shipped in v.2026.05.02.2013)*
 - [🚀] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables. [🤖 Gemini 3.1 Pro] [🧠 20k / 10k] [💸 $0.05 / $0.02]
 
@@ -330,6 +335,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Orderz Sandbox & Financial Logic Verification)*
+*(Shipped v1.0.30 - 1.0.31 — 2026-05-07)*
 - [🚀] `fix/orderz-math-parity-audit` : **Orderz Mathematical Parity Audit** - Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
 - [🚀] `chore/unify-math-engine` : **Strict Mathematical Unification Mandate** - Eradicated local math engines in `sales-module.js` and `analytics-module.js`.
 - [🚀] `feat/sandbox-nomenclature-audit` : **Sandbox UI Transformation Audit** - Refactored the Sandbox UI into a strict 4-Tier matrix mapping literal DB schema columns to their CSV origin headers. Eliminated "ghost value" data stripping bugs to accurately map raw shipping metrics, successfully restoring exact conditional pass logic for complex exchanges.
@@ -338,16 +344,19 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `feat/editz-bulk-edit-modal`
 *(Epic: EDITZ Bulk Edit System)*
+*(Shipped v1.0.32 — 2026-05-16)*
 - [🚀] `feat/editz-bulk-edit-modal` : **EDITZ Bulk Edit Modal** - Create a "Bulk Edit" button in the EDITZ tab that opens a fullscreen modal, letting the user search and mass edit all items. It should function like the sandbox staging environments for imports in NEXUZ, allowing the user to view and verify all changes before committing and approving the final upload. [🤖 AI Model] [🧠 4k / 20k] [💸 $0.02 / $0.05]
 
 ### Target: `main`
-**(Epic: Maintenance & Debt Sweep (May 17))**
+**Epic: Maintenance & Debt Sweep (May 17)**
+*(Pending Release)*
 - [🚀] `debt/orphan-scripts` : Clean up orphaned utility scripts and tests (Python scripts in `tools/`, `test-dompurify.js` in root, `test_supabase.js` and `Whydidthishappen.md` in `tools/`). Relocate or purge them to maintain project hygiene. [🤖 Gemini 3.1 Pro] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 - [🚀] `debt/npm-update` : Execute `npm update` to safely bump `dompurify`, `eslint`, `jest`, and `supabase` to their latest patch/minor versions. [🤖 Gemini 3.1 Pro] [🧠 3k / 3k] [💸 $0.01 / $0.01]
 
 
 
-**(Epic: SOP Media & Print Enhancements)**
+**Epic: SOP Media & Print Enhancements**
+*(Shipped v1.0.36 - 1.0.38 — 2026-05-17)*
 - [🚀] `chore/root-structure-cleanup` : **Project Structure Cleanup & Organization** - Clean up and organize the whole project structure. Ensure that leftover/test files in the root are either deleted or moved to proper directories, and establish a clear folder structure for everything to prevent random files accumulating in the root. [🤖 AI Model] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 - [🚀] `feat/sop-camera-integration` : **WebRTC Camera Integration for SOPs** - Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 - [🚀] `fix/sop-legacy-media-regression` : **SOP Legacy Media Regression** - Only the new photo functionality works; old documents, images, and videos in SOPs are broken. [🤖 AI Model] [🧠 10k / 10k] [💸 $0.05 / $0.05]
