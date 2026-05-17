@@ -1447,7 +1447,7 @@ function renderActiveWO(id) {
                                         if(m && m.url) {
                                             let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\\\'").replace(/"/g, '"');
                                             if (m.type === 'img') {
-                                                let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl;
+                                                let imgThumbUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w800` : safeUrl;
                                                 attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb sop-media-img" data-url="${imgThumbUrl}" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;">`;
                                             } else {
                                                 let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
