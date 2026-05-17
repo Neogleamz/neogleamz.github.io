@@ -31,8 +31,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ### Target: `main`
-*(Epic: Task Engine Real-Time Sync)*
-- [ ] `feat/task-engine-realtime` : **Implement Supabase Websockets for Task Engine** - Wire up `supabaseClient.channel` in `task-engine.js` to listen to `taskz`, `cyclez`, and `projectz` for `INSERT`, `UPDATE`, and `DELETE` events. Update the local `taskEngineDB` cache in real-time and call `teRenderTaskGrid()` automatically so users see immediate UI updates without needing to refresh the page. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+*(Epic: Sitewide Real-Time Sync)*
+- [ ] `feat/sitewide-realtime-sync` : **Implement Sitewide Supabase Websockets** - Expand real-time synchronization globally across the entire application (Task Engine, Orderz, Inventory, etc.). Wire up `supabaseClient.channel` to listen to all core tables for `INSERT`, `UPDATE`, and `DELETE` events. Update local database caches in real-time and trigger autonomous UI re-renders so all connected users see immediate state changes without ever needing a manual page refresh. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 
 ---
 
