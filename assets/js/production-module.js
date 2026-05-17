@@ -26,13 +26,73 @@ function openMediaModal(url, renderType) { try { const container = document.getE
 function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = window.safeHTML(''); } catch(e) { sysLog(e.message, true); } }
 
 function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
-function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;"><select onchange="execRT('fontSize', this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main);"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
+function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;"><select onchange="execRT('fontSize', this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main); margin-right:4px;"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
 
-function generateEditableSOPRow(s, idx) {
-    let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
-    let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-    return `<div class="sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">✕</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
-}
+window.generateEditableSOPRow = function(s, idx) {
+    let safeText = s.text || ''; 
+    let attachments = [];
+    
+    // Legacy support
+    if (s.m1 && s.m1.url) attachments.push(s.m1);
+    if (s.m2 && s.m2.url) attachments.push(s.m2);
+    if (s.m3 && s.m3.url) attachments.push(s.m3);
+    
+    // New format support
+    if (s.attachments && s.attachments.length > 0) {
+        attachments = s.attachments;
+    }
+
+    // Always ensure at least 1 empty row is rendered if there are no attachments
+    if (attachments.length === 0) {
+        attachments.push({type: 'img', url: ''});
+    }
+
+    let attachmentHtml = '';
+    attachments.forEach((m, i) => {
+        let n = i + 1;
+        let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); 
+        attachmentHtml += `
+            <div class="media-row media-row-dynamic" style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
+                <select class="m-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); padding:4px; border-radius:4px;">
+                    <option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option>
+                    <option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option>
+                    <option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option>
+                </select>
+                <input type="text" class="m-url" value="${u}" placeholder="URL" style="flex-grow:1; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); padding:4px; border-radius:4px; min-width:0;">
+                <button type="button" class="btn-red-muted icon-btn btn-icon-sq" style="padding:4px 8px; border-radius:4px;" data-click="click_removeAttachmentRow">✕</button>
+            </div>
+        `;
+    });
+
+    return `
+        <div class="sop-step-row">
+            <div class="sop-step-movers">
+                <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button>
+                <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button>
+                <button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button>
+                <button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">✕</button>
+            </div>
+            <div class="sop-text-container">
+                <div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div>
+            </div>
+            <div class="sop-controls-container">
+                ${getRTToolbar()}
+                <div style="display:flex; justify-content:flex-end; margin-top:8px; margin-bottom:4px; padding:4px 8px; border-radius:6px;">
+                    <div style="display:flex; gap:4px;">
+                        <button type="button" data-mousedown="mousedown_smartPhotoPaste" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer;" title="Smart Photo Paste">📸 PHOTO</button>
+                        <button type="button" data-mousedown="mousedown_smartAttachmentUrl" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer;">+ NEW URL</button>
+                    </div>
+                </div>
+                <div class="attachments-container" style="display:flex; flex-direction:column;">
+                    ${attachmentHtml}
+                </div>
+            </div>
+        </div>
+    `;
+};
+
+// Map old local function name to global function just in case
+function generateEditableSOPRow(s, idx) { return window.generateEditableSOPRow(s, idx); }
 
 let currentSopMode = 'production'; // 'production' or '3d'
 
@@ -100,7 +160,7 @@ function renderMasterSOP() {
             qaArea.value = qaChecks.join('\n');
             if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
         }
-        let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, m1: {url:"", type:"img"}, m2: {url:"", type:"img"}, m3: {url:"", type:"img"}} : s);
+        let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, attachments: []} : s);
         if(mappedSteps.length === 0) mappedSteps = [{}];
         let h = "";
         mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); });
@@ -114,7 +174,21 @@ function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.p
 function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) { sysLog("UI Error moving SOP down: " + e.message, true); } }
 
 function extractSOPDataFromUI(containerId) {
-    let steps = []; document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { let t = row.querySelector('.sop-text-rich'); let m1t = row.querySelector('.m1-type').value; let m1u = row.querySelector('.m1-url').value; let m2t = row.querySelector('.m2-type').value; let m2u = row.querySelector('.m2-url').value; let m3t = row.querySelector('.m3-type').value; let m3u = row.querySelector('.m3-url').value; if(t && t.innerHTML.trim()) { steps.push({ text: t.innerHTML.trim(), m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u} }); } }); return steps;
+    let steps = []; document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { 
+        let t = row.querySelector('.sop-text-rich'); 
+        let attachments = [];
+        row.querySelectorAll('.media-row').forEach(mr => {
+            let typeSel = mr.querySelector('.m-type');
+            let urlInp = mr.querySelector('.m-url');
+            if (typeSel && urlInp) {
+                attachments.push({type: typeSel.value, url: urlInp.value});
+            }
+        });
+        if(t && t.innerHTML.trim()) { 
+            steps.push({ text: t.innerHTML.trim(), attachments: attachments }); 
+        } 
+    }); 
+    return steps;
 }
 
 async function saveMasterSOP() {
@@ -1218,13 +1292,11 @@ function renderActiveWO(id) {
 
                     if(isEditing) {
                         let qaText = grp.qa.join('\\n');
-                        let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
+                        let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, attachments: []});
                         if(mappedSteps.length === 0) mappedSteps = [{}];
                         let stepsHtml = '';
                         mappedSteps.forEach((s, idx) => {
-                            let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
-                            let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-                            stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${getRTToolbar()}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+                            stepsHtml += window.generateEditableSOPRow(s, idx);
                         });
 
                         htmlOut += `
@@ -1239,6 +1311,7 @@ function renderActiveWO(id) {
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                                             <div style="display:flex; gap:8px;">
+                                                <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
                                                 <button data-click="click_openMediaManager" data-type="telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
                                                 <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
                                                 <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
@@ -1251,7 +1324,8 @@ function renderActiveWO(id) {
                                             <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;&middot;&nbsp;
                                             <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
                                             <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
-                                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
+                                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;&middot;&nbsp;
+                                            <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
                                             &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">&#10067; Full Guide</span>
                                         </div>
                                         <textarea id="inlineSopQA_${grp.id}" oninput="if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}')" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaText}</textarea>
@@ -1358,12 +1432,13 @@ function renderActiveWO(id) {
                             }
 
                             if (grp.steps.length > 0) {
-                                let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
+                                let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, attachments: []});
                                 let stepCounter = 1;
                                 mappedSteps.forEach((s, sIdx) => {
                                     let chkKey = `sop_step_${grp.id}_${sIdx}`; let isDone = wip[chkKey] ? 'checked' : ''; let doneCls = wip[chkKey] ? 'done' : '';
                                     let attachmentHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">`;
-                                    [s.m1, s.m2, s.m3].forEach(m => {
+                                    let stepAttachments = s.attachments && s.attachments.length > 0 ? s.attachments : [s.m1, s.m2, s.m3];
+                                    stepAttachments.forEach(m => {
                                         if(m && m.url) {
                                             let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\\\'").replace(/"/g, '"');
                                             if (m.type === 'img') {
@@ -1958,7 +2033,7 @@ function printSOP() {
         if(mainSteps.length > 0 || stepsToRender.length > 0) {
             if(mainSteps.length > 0) { stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${currentWO.product_name}` }); stepsToRender = stepsToRender.concat(mainSteps); }
         }
-        let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, m1:{url: "", type: "img"}, m2:{url: "", type: "img"}, m3:{url: "", type: "img"}});
+        let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
         let html = `<html><head><title>SOP - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #0ea5e9;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#0ea5e9; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`;
         html += `<h2>Compiled SOP</h2><h3>Work Order: ${currentWO.wo_id}</h3><hr>`;
         if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
@@ -2013,6 +2088,10 @@ function parseProductionTelemetryLine(q, contextIdx) {
     } else if (q.startsWith('[INPUT]') && q.match(/\[INPUT\]/gi).length === 1 && q.indexOf('[INPUT]') === 0) {
         let label = q.replace(/\[INPUT\]/ig, '').trim();
         html = `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:2px; margin-bottom:2px; padding:6px 10px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; width:100%;"><label style="font-size:12px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${label}</label><input type="text" placeholder="..." style="flex:1; padding:6px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:13px; font-weight:bold;"></div>`;
+    } else if (q.startsWith('[CAMERA]') && q.match(/\[CAMERA\]/gi).length === 1 && q.indexOf('[CAMERA]') === 0) {
+        let label = q.replace(/\[CAMERA\]/ig, '').trim();
+        if(!label) label = "Camera Log";
+        html = `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:2px; margin-bottom:2px; padding:6px 10px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; width:100%;"><label style="font-size:12px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${label}</label><div style="flex:1; display:flex; flex-direction:column; align-items:flex-end;"><button type="button" class="btn-orange-muted worker-photo-btn" data-click="click_workerTakePhoto" data-ctx="${contextIdx}" data-label="${label}" style="padding:6px 12px; font-size:12px; border-radius:6px; display:flex; align-items:center; gap:5px; width:100%; max-width:200px; justify-content:center;">📸 TAKE PHOTO</button><div id="worker-photo-res-${contextIdx}" style="display:none; margin-top:8px; width:100%; text-align:right;"></div></div></div>`;
     } else if (q.startsWith('# ')) {
         let content = parseAll(q.substring(2).trim());
         html = `<div style="font-size:14px; font-weight:900; color:#10b981; margin-top:8px; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:4px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; width:100%; line-height:1.4;">${content}</div>`;
@@ -2026,6 +2105,70 @@ function parseProductionTelemetryLine(q, contextIdx) {
     }
     return html;
 }
+
+window.click_openSOPSnapshotCamera_production = function(e) {
+    if(typeof e !== 'undefined' && e) e.preventDefault();
+    window.activeSOPTextAreaId = 'productionAdminQA';
+    if(typeof openSOPSnapshotCamera === 'function') openSOPSnapshotCamera();
+};
+
+window.click_openSOPSnapshotCamera_inlineProduction = function(btn) {
+    if (btn && btn.dataset && btn.dataset.textid) {
+        window.activeSOPTextAreaId = btn.dataset.textid;
+    }
+    if(typeof openSOPSnapshotCamera === 'function') openSOPSnapshotCamera();
+};
+
+window.click_openSOPSnapshotCamera_smart = function(btn) {
+    let container = btn.closest('.sop-controls-container').querySelector('.attachments-container');
+    if (!container) return;
+    
+    // Find first empty URL input
+    let inputs = Array.from(container.querySelectorAll('.m-url'));
+    let targetInput = inputs.find(i => i.value.trim() === '');
+    
+    // If all are full, create a new row
+    if (!targetInput) {
+        window.click_addAttachmentRow(btn);
+        inputs = Array.from(container.querySelectorAll('.m-url'));
+        targetInput = inputs[inputs.length - 1];
+    }
+    
+    window.activeSOPTextAreaId = 'attachment';
+    window.activeAttachmentInput = targetInput;
+    if(typeof openSOPSnapshotCamera === 'function') openSOPSnapshotCamera();
+};
+
+window.click_addAttachmentRow = function(btn) {
+    let container = btn.closest('.sop-controls-container').querySelector('.attachments-container');
+    if (!container) return;
+    
+    let newRow = document.createElement('div');
+    newRow.className = 'media-row media-row-dynamic';
+    newRow.style.cssText = 'display:flex; gap:4px; align-items:center; margin-bottom:4px;';
+    newRow.innerHTML = `
+        <select class="m-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); padding:4px; border-radius:4px;">
+            <option value="img" selected>🖼️ Image</option>
+            <option value="doc">📄 Doc</option>
+            <option value="vid">🎬 Vid</option>
+        </select>
+        <input type="text" class="m-url" value="" placeholder="URL" style="flex-grow:1; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); padding:4px; border-radius:4px; min-width:0;">
+        <button type="button" class="btn-red-muted icon-btn btn-icon-sq" style="padding:4px 8px; border-radius:4px;" data-click="click_removeAttachmentRow">✕</button>
+    `;
+    container.appendChild(newRow);
+};
+
+window.click_openSOPSnapshotCamera_richText = function(btn) {
+    window.activeSOPTextAreaId = 'richText';
+    let sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+        window.activeRichTextRange = sel.getRangeAt(0);
+    } else {
+        window.activeRichTextRange = null;
+    }
+    window.activeRichTextContainer = btn.closest('.sop-step-row').querySelector('.sop-text-rich');
+    if(typeof openSOPSnapshotCamera === 'function') openSOPSnapshotCamera();
+};
 
 function processTelemetryCanvasRendering(container) {
     if (typeof JsBarcode !== 'undefined') {
@@ -2077,44 +2220,6 @@ function renderProductionTelemetryPreview() {
     processTelemetryCanvasRendering(previewContainer);
     } catch(e) { sysLog(e.message, true); }
 }
-
-let isProductionResizing = false;
-function initProductionSopResize(e) {
-    isProductionResizing = true;
-    document.body.style.cursor = 'ew-resize';
-    document.addEventListener('mousemove', doProductionSopResize);
-    document.addEventListener('mouseup', stopProductionSopResize);
-}
-
-function doProductionSopResize(e) {
-    if(!isProductionResizing) return;
-    const wrapper = document.getElementById('productionSopSplitWrapper');
-    const leftPane = document.getElementById('productionSopLeftPane');
-    const previewCol = document.getElementById('productionAdminQAPreviewCol');
-    if(!wrapper || !leftPane) return;
-
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 20;
-
-    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
-    let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
-
-    if(newWidth < 300) newWidth = 300;
-    if(newWidth > maxBound) newWidth = maxBound;
-
-    leftPane.style.flex = '0 0 ' + newWidth + 'px';
-    leftPane.style.width = newWidth + 'px';
-}
-
-function stopProductionSopResize() {
-    if(isProductionResizing) {
-        isProductionResizing = false;
-        document.body.style.cursor = 'default';
-        document.removeEventListener('mousemove', doProductionSopResize);
-        document.removeEventListener('mouseup', stopProductionSopResize);
-    }
-}
-
 
 
 let batchezDraggedGrpId = null;
@@ -2269,45 +2374,6 @@ window.toggleHorizontalPreview = function(paneId, colId, btnEl) {
 window.isInlineResizing = false;
 window.currentInlineResizeGrp = null;
 
-window.initInlineResize = function(e, grpId) {
-    if(e) e.preventDefault();
-    window.isInlineResizing = true;
-    window.currentInlineResizeGrp = grpId;
-    document.body.style.cursor = 'col-resize';
-    document.addEventListener('mousemove', window.doInlineResize);
-    document.addEventListener('mouseup', window.stopInlineResize);
-};
-
-window.doInlineResize = function(e) {
-    if(!window.isInlineResizing) return;
-    let grpId = window.currentInlineResizeGrp;
-    const wrapper = document.getElementById('inlineContainer_' + grpId);
-    const leftPane = document.getElementById('inlineLeftPane_' + grpId);
-    if(!wrapper || !leftPane) return;
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 15;
-    const previewCol = document.getElementById('inlinePreviewContainer_' + grpId);
-    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
-
-    let minBound = isPreviewOpen ? 640 : 320;
-    let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
-
-    if(newWidth < minBound) newWidth = minBound;
-    if(newWidth > maxBound) newWidth = maxBound;
-
-    leftPane.style.flex = '0 0 ' + newWidth + 'px';
-    leftPane.style.width = newWidth + 'px';
-};
-
-window.stopInlineResize = function() {
-    if(window.isInlineResizing) {
-        window.isInlineResizing = false;
-        window.currentInlineResizeGrp = null;
-        document.body.style.cursor = 'default';
-        document.removeEventListener('mousemove', window.doInlineResize);
-        document.removeEventListener('mouseup', window.stopInlineResize);
-    }
-};
 
 window.inlineRenderTelemetryPreview = function(grpId) {
     try {

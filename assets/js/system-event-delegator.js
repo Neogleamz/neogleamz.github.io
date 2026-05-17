@@ -798,6 +798,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_captureSOPSnapshot':
                     if (typeof window.click_captureSOPSnapshot === 'function') window.click_captureSOPSnapshot();
                     break;
+                case 'click_workerTakePhoto':
+                    if (typeof window.click_workerTakePhoto === 'function') window.click_workerTakePhoto(event);
+                    break;
+                case 'click_openSOPSnapshotCamera_production':
+                    if (typeof window.click_openSOPSnapshotCamera_production === 'function') window.click_openSOPSnapshotCamera_production(event);
+                    break;
+                case 'click_openSOPSnapshotCamera_packerz':
+                    if (typeof window.click_openSOPSnapshotCamera_packerz === 'function') window.click_openSOPSnapshotCamera_packerz(event);
+                    break;
+                case 'click_openSOPSnapshotCamera_smart':
+                    if (typeof window.click_openSOPSnapshotCamera_smart === 'function') window.click_openSOPSnapshotCamera_smart(el);
+                    break;
+                case 'click_removeAttachmentRow': {
+                    let row = event.target.closest('.media-row');
+                    if (row) row.remove();
+                    break;
+                }
+                case 'click_openSOPSnapshotCamera_inlineProduction':
+                    if (typeof window.click_openSOPSnapshotCamera_inlineProduction === 'function') window.click_openSOPSnapshotCamera_inlineProduction(event.target.closest('[data-click="click_openSOPSnapshotCamera_inlineProduction"]'));
+                    break;
                 case 'click_if_event_target_this_closeSOPA':
                     if(event.target===this)closeSOPAuditLog();
                     break;
@@ -1239,16 +1259,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof initNeoSimulatorVResizer === 'function') initNeoSimulatorVResizer(event);
                     break;
                 case 'mousedown_initProductionSopResize_event':
-                    initProductionSopResize(event);
+                    if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'productionSopLeftPane', 'productionSopSplitWrapper', 'masterSopPreviewCol', false);
                     break;
                 case 'mousedown_initPackerzSopResize_event':
-                    initPackerzSopResize(event);
+                    if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzSopLeftPane', 'packerzSopSplitWrapper', 'packerzSopPreviewCol', false);
                     break;
                 case 'mousedown_initPackerzLiveSopResize_event':
-                    initPackerzLiveSopResize(event);
+                    if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzLiveSopLeftPane', 'packerzLiveSopSplitWrapper', null, true);
                     break;
                 case 'mousedown_initFlyoutResizer_event':
                     if (typeof initFlyoutResizer === 'function') initFlyoutResizer(event);
+                    break;
+                case 'mousedown_smartPhotoPaste':
+                    event.preventDefault();
+                    if (typeof window.click_openSOPSnapshotCamera_smart === 'function') window.click_openSOPSnapshotCamera_smart(el);
+                    break;
+                case 'mousedown_smartAttachmentUrl':
+                    event.preventDefault();
+                    if (typeof window.click_addAttachmentRow === 'function') window.click_addAttachmentRow(el);
                     break;
             }
         } catch (error) {

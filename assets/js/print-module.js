@@ -255,9 +255,7 @@ function renderActivePrintJob(id) {
             if(mappedSteps.length === 0) mappedSteps = [{}];
             let stepsHtml = '';
             mappedSteps.forEach((s, idx) => {
-                let safeText = s.text || ''; let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''}; let m2 = s.m2 || {type: 'img', url: ''}; let m3 = s.m3 || {type: 'img', url: ''};
-                let rowGen = (m, n) => { let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); return `<div class="media-row"><select class="m${n}-type" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"><option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option><option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option><option value="vid" ${m.type==='vid'?'selected':''}>🎥 Vid</option></select><input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}" style="border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main);"></div>`; };
-                stepsHtml += `<div class="sop-step-row inline-sop-step-row"><div class="sop-step-movers"><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button><button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button><button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button><button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">🗑</button></div><div class="sop-text-container"><div class="sop-text-rich" contenteditable="true" placeholder="Type instructions here...">${safeText}</div></div><div class="sop-controls-container">${typeof getRTToolbar === 'function' ? getRTToolbar() : ''}<div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}</div></div>`;
+                stepsHtml += window.generateEditableSOPRow(s, idx);
             });
             
             htmlOut += `
@@ -330,43 +328,6 @@ function renderActivePrintJob(id) {
                                     c.insertBefore(z, l);
                                 }
                             } 
-                                
-                                let rz = document.getElementById('inlineResizer_${grpId}');
-                                let lp = document.getElementById('inlineLeftPane_${grpId}');
-                                let rp = document.getElementById('inlineRightPane_${grpId}');
-                                let isDragging = false;
-                                
-                                if(rz && lp && rp) {
-                                    rz.addEventListener('mousedown', (e) => {
-                                        isDragging = true;
-                                        document.body.style.cursor = 'col-resize';
-                                        e.preventDefault();
-                                    });
-
-                                    // Named functions so removeEventListener can correctly clean them up
-                                    function doPrintSopResize(e) {
-                                        if(!isDragging) return;
-                                        let container = rz.parentElement;
-                                        let totalW = container.getBoundingClientRect().width;
-                                        let rect = container.getBoundingClientRect();
-                                        let newLeftW = e.clientX - rect.left;
-                                        if(newLeftW < 100) newLeftW = 100;
-                                        if(totalW - newLeftW < 100) newLeftW = totalW - 100;
-                                        lp.style.flex = \`0 0 \${newLeftW}px\`;
-                                        rp.style.flex = \`1 1 0\`;
-                                    }
-                                    function stopPrintSopResize() {
-                                        if(isDragging) {
-                                            isDragging = false;
-                                            document.body.style.cursor = '';
-                                            // Clean up both listeners to prevent accumulation
-                                            document.removeEventListener('mousemove', doPrintSopResize);
-                                            document.removeEventListener('mouseup', stopPrintSopResize);
-                                        }
-                                    }
-                                    document.addEventListener('mousemove', doPrintSopResize);
-                                    document.addEventListener('mouseup', stopPrintSopResize);
-                                }
                             }, 20);
                             </script>
             `;

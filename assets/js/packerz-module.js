@@ -284,13 +284,17 @@ window.savePackerzLiveInlineSOP = async function() {
         let stepsArray = [];
         rows.forEach(r => {
             let richText = r.querySelector('.sop-text-rich').innerHTML;
-            let m1t = r.querySelector('.m1-type').value; let m1u = r.querySelector('.m1-url').value;
-            let m2t = r.querySelector('.m2-type').value; let m2u = r.querySelector('.m2-url').value;
-            let m3t = r.querySelector('.m3-type').value; let m3u = r.querySelector('.m3-url').value;
-
+            let attachments = [];
+            r.querySelectorAll('.media-row').forEach(mr => {
+                let typeSel = mr.querySelector('.m-type');
+                let urlInp = mr.querySelector('.m-url');
+                if (typeSel && urlInp) {
+                    attachments.push({type: typeSel.value, url: urlInp.value});
+                }
+            });
             stepsArray.push({
                 text: richText,
-                m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u}
+                attachments: attachments
             });
         });
 
@@ -442,7 +446,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         if(window.isPackerzLiveEditing) {
             let qaText = (qaChecks || []).join('\n');
             let rowsHtml = '';
-            steps.forEach((s, idx) => { rowsHtml += generatePackerzEditableSOPRow(s, idx); });
+            steps.forEach((s, idx) => { rowsHtml += window.generateEditableSOPRow(s, idx); });
 
             let editHtml = `
             <div style="display:flex; flex-direction:row; gap:15px; width:100%; height:100%; padding:20px; background:var(--bg-body); overflow:hidden;">
@@ -467,7 +471,8 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                             <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;&middot;&nbsp;
                             <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
                             <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
-                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
+                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;&middot;&nbsp;
+                            <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
                             &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-app-click="openSOPTokenGuide">&#10067; Full Guide</span>
                         </div>
                         <textarea id="packerzLiveInlineQA" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;" data-app-input="renderSOPPreview">${qaText}</textarea>
@@ -508,7 +513,8 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
 
           steps.forEach((s, idx) => {
               let mediaHtml = '';
-              [s.m1, s.m2, s.m3].forEach(m => {
+              let stepAttachments = s.attachments && s.attachments.length > 0 ? s.attachments : [s.m1, s.m2, s.m3];
+              stepAttachments.forEach(m => {
                   if(m && m.url) {
                       let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
                       let dId = getDId(m.url);
@@ -961,69 +967,13 @@ async function unarchivePackerzOrder(orderId) {
 // PACKERZ: BLUEPRINT ADMIN SOP EDITOR
 // ==========================================
 
-// This physically generates the visual BATCHEZ-legacy Rich-Text row arrays
-function generatePackerzEditableSOPRow(s, idx) {
-    let safeText = s.text || '';
-    let m1 = s.m1 || {type: s.type || 'img', url: s.url || ''};
-    let m2 = s.m2 || {type: 'img', url: ''};
-    let m3 = s.m3 || {type: 'img', url: ''};
-
-    let rowGen = (m, n) => {
-        let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'");
-        return `<div class="media-row">
-            <select class="m${n}-type">
-                <option value="img" ${m.type==='img'?'selected':''}>🖼️ Image</option>
-                <option value="doc" ${m.type==='doc'?'selected':''}>📄 Doc</option>
-                <option value="vid" ${m.type==='vid'?'selected':''}>🎬 Vid</option>
-            </select>
-            <input type="text" class="m${n}-url" value="${u}" placeholder="URL ${n}">
-        </div>`;
-    };
-
-    return `<div class="sop-step-row" style="display:flex; gap:15px; padding:20px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:12px;">
-        <div class="sop-step-movers">
-            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_movePackerzSOPUp">▲</button>
-            <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_movePackerzSOPDown">▼</button>
-            <button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addPackerzSOPRow">+</button>
-            <button class="btn-red icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removePackerzSOPRow">✕</button>
-        </div>
-        <div class="sop-text-container" style="flex-grow:1; display:flex; flex-direction:column;">
-            <div class="sop-text-rich" contenteditable="true" placeholder="Type extremely detailed packing instructions securely here..." style="flex-grow:1; min-height:120px; outline:none; padding:15px; border:1px solid var(--border-input); border-radius:8px; background:var(--bg-input);">${safeText}</div>
-        </div>
-        <div class="sop-controls-container">
-            <div class="rt-toolbar">
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('bold',false,null)" title="Bold"><b>B</b></button>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('italic',false,null)" title="Italic"><i>I</i></button>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('underline',false,null)" title="Underline"><u>U</u></button>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('strikeThrough',false,null)" title="Strikethrough"><s>S</s></button>
-                <span style="color:var(--border-input); margin:0 4px;">|</span>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('justifyLeft',false,null)" title="Align Left">⬅</button>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('justifyCenter',false,null)" title="Align Center">↔</button>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('justifyRight',false,null)" title="Align Right">➡</button>
-                <span style="color:var(--border-input); margin:0 4px;">|</span>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('insertUnorderedList',false,null)" title="Bulleted List">●</button>
-                <button type="button" class="rt-btn" onmousedown="event.preventDefault(); document.execCommand('insertOrderedList',false,null)" title="Numbered List">1.</button>
-                <span style="color:var(--border-input); margin:0 4px;">|</span>
-                <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;">
-                <select onchange="document.execCommand('fontSize', false, this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main);">
-                    <option value="3">Normal Font</option>
-                    <option value="4">Large Font</option>
-                    <option value="5">Huge Font</option>
-                </select>
-            </div>
-            <div style="font-size:11px; font-weight:bold; color:var(--text-muted); margin-top:4px;">ATTACHMENTS (Optional)</div>
-            ${rowGen(m1, 1)} ${rowGen(m2, 2)} ${rowGen(m3, 3)}
-        </div>
-    </div>`;
-}
-
 // BATCHEZ-Legacy Logic Movers
 function movePackerzSOPUp(btn) { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling); }
 function movePackerzSOPDown(btn) { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row); }
 function removePackerzSOPRow(btn) { btn.closest('.sop-step-row').remove(); }
 function addPackerzSOPRow(btn) {
     let newRow = document.createElement('div');
-    newRow.innerHTML = window.safeHTML ? window.safeHTML(generatePackerzEditableSOPRow({text:""}, 999)) : generatePackerzEditableSOPRow({text:""}, 999);
+    newRow.innerHTML = window.safeHTML ? window.safeHTML(window.generateEditableSOPRow({text:""}, 999)) : window.generateEditableSOPRow({text:""}, 999);
     let rowNode = newRow.firstChild;
     if(btn) {
         let currentRow = btn.closest('.sop-step-row');
@@ -1290,7 +1240,7 @@ async function loadPackerzSopFromDB() {
         }
 
         let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">`;
-        steps.forEach((s, idx) => { h += generatePackerzEditableSOPRow(s, idx); });
+        steps.forEach((s, idx) => { h += window.generateEditableSOPRow(s, idx); });
         h += `</div>`;
 
         area.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
@@ -1302,7 +1252,7 @@ async function loadPackerzSopFromDB() {
             // Null record perfectly fine (new SOP)
 
             document.getElementById('packerzAdminQA').value = '';
-            let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">` + generatePackerzEditableSOPRow({}, 0) + `</div>`;
+            let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">` + window.generateEditableSOPRow({}, 0) + `</div>`;
             area.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
         } else {
             area.innerHTML = window.safeHTML ? window.safeHTML(
@@ -1321,13 +1271,17 @@ async function savePackerzSOPToDB() {
         let stepsArray = [];
         rows.forEach(r => {
             let richText = r.querySelector('.sop-text-rich').innerHTML;
-            let m1t = r.querySelector('.m1-type').value; let m1u = r.querySelector('.m1-url').value;
-            let m2t = r.querySelector('.m2-type').value; let m2u = r.querySelector('.m2-url').value;
-            let m3t = r.querySelector('.m3-type').value; let m3u = r.querySelector('.m3-url').value;
-
+            let attachments = [];
+            r.querySelectorAll('.media-row').forEach(mr => {
+                let typeSel = mr.querySelector('.m-type');
+                let urlInp = mr.querySelector('.m-url');
+                if (typeSel && urlInp) {
+                    attachments.push({type: typeSel.value, url: urlInp.value});
+                }
+            });
             stepsArray.push({
                 text: richText,
-                m1: {type: m1t, url: m1u}, m2: {type: m2t, url: m2u}, m3: {type: m3t, url: m3u}
+                attachments: attachments
             });
         });
 
@@ -1350,79 +1304,7 @@ async function savePackerzSOPToDB() {
 }
 
 // --- PACKERZ ADMIN: UI Split Pane Resizer ---
-let isPackerzResizing = false;
 
-function initPackerzSopResize(e) {
-    isPackerzResizing = true;
-    document.body.style.cursor = 'ew-resize';
-    document.addEventListener('mousemove', doPackerzSopResize);
-    document.addEventListener('mouseup', stopPackerzSopResize);
-}
-
-function doPackerzSopResize(e) {
-    if(!isPackerzResizing) return;
-    const wrapper = document.getElementById('packerzSopSplitWrapper');
-    const leftPane = document.getElementById('packerzSopLeftPane');
-    const previewCol = document.getElementById('packerzSopPreviewCol');
-    if(!wrapper || !leftPane) return;
-
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 20;
-
-    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
-    let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
-
-    let minWidth = 300;
-    if(newWidth < minWidth) newWidth = minWidth;
-    if(newWidth > maxBound) newWidth = maxBound;
-
-    leftPane.style.flex = `0 0 ${newWidth}px`;
-    leftPane.style.width = newWidth + 'px';
-}
-
-function stopPackerzSopResize() {
-    isPackerzResizing = false;
-    document.body.style.cursor = '';
-    document.removeEventListener('mousemove', doPackerzSopResize);
-    document.removeEventListener('mouseup', stopPackerzSopResize);
-}
-
-// --- PACKERZ LIVE: SOP Viewer Split Pane Resizer ---
-let isPackerzLiveResizing = false;
-
-function initPackerzLiveSopResize(e) {
-    isPackerzLiveResizing = true;
-    document.body.style.cursor = 'ew-resize';
-    document.addEventListener('mousemove', doPackerzLiveSopResize);
-    document.addEventListener('mouseup', stopPackerzLiveSopResize);
-}
-
-function doPackerzLiveSopResize(e) {
-    if(!isPackerzLiveResizing) return;
-    const wrapper = document.getElementById('packerzLiveSopSplitWrapper');
-    const leftPane = document.getElementById('packerzLiveSopLeftPane') || document.getElementById('packerzInlineSopLeftPane');
-    if(!wrapper || !leftPane) return;
-
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 20;
-    let minWidth = 300;
-
-    let isInline = !!document.getElementById('packerzInlineSopLeftPane');
-    let maxBound = isInline ? (rect.width * 0.70) : (rect.width - 300);
-
-    if(newWidth < minWidth) newWidth = minWidth;
-    if(newWidth > maxBound) newWidth = maxBound;
-
-    leftPane.style.flex = `0 0 ${newWidth}px`;
-    leftPane.style.width = newWidth + 'px';
-}
-
-function stopPackerzLiveSopResize() {
-    isPackerzLiveResizing = false;
-    document.body.style.cursor = '';
-    document.removeEventListener('mousemove', doPackerzLiveSopResize);
-    document.removeEventListener('mouseup', stopPackerzLiveSopResize);
-}
 
 // ============================================================
 // SOP MEDIA PICKER — Supabase Storage 'sop-media' bucket
@@ -1430,10 +1312,10 @@ function stopPackerzLiveSopResize() {
 
 const SOP_MEDIA_BUCKET = 'sop-media';
 let currentSOPMediaFolder = '';   // '' = bucket root
-let activeSOPTextAreaId = 'packerzAdminQA'; // Memory for multi-module targeting
+window.activeSOPTextAreaId = window.activeSOPTextAreaId || 'packerzAdminQA'; // Memory for multi-module targeting
 
 async function openSOPMediaPicker(taId = 'packerzAdminQA') {
-    activeSOPTextAreaId = taId;
+    window.activeSOPTextAreaId = taId;
     currentSOPMediaFolder = '';
     const modal = document.getElementById('sopMediaPickerModal');
     modal.style.display = 'flex';
@@ -1596,7 +1478,67 @@ async function uploadSOPMedia(file) {
 
 // Inserts a token at the cursor position in the QA textarea
 function insertSOPToken(token) {
-    const ta = document.getElementById(activeSOPTextAreaId);
+    if (window.activeWorkerPhotoTarget) {
+        const urlMatch = token.match(/\[IMG:(https?:\/\/[^\]]+)\]/i);
+        if (urlMatch) {
+            const url = urlMatch[1];
+            const targetDiv = document.getElementById(`worker-photo-res-${window.activeWorkerPhotoTarget}`);
+            if (targetDiv) {
+                targetDiv.style.display = 'block';
+                const label = window.activeWorkerPhotoLabel || 'Camera Log';
+                targetDiv.innerHTML = window.safeHTML ? window.safeHTML(`
+                    <img src="${url}" loading="lazy" style="max-height:100px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; display:inline-block;" data-click="click_openImage" data-url="${url}">
+                    <input type="hidden" class="packerz-qa-input" data-label="${label}" value="${url}">
+                `) : `
+                    <img src="${url}" loading="lazy" style="max-height:100px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; display:inline-block;" data-click="click_openImage" data-url="${url}">
+                    <input type="hidden" class="packerz-qa-input" data-label="${label}" value="${url}">
+                `;
+            }
+        }
+        window.activeWorkerPhotoTarget = null;
+        window.activeWorkerPhotoLabel = null;
+        closeSOPMediaPicker();
+        return;
+    }
+
+    if (window.activeSOPTextAreaId === 'richText') {
+        const urlMatch = token.match(/\[IMG:(https?:\/\/[^\]]+)\]/i);
+        if (urlMatch) {
+            const url = urlMatch[1];
+            if (window.activeRichTextContainer) {
+                window.activeRichTextContainer.focus();
+                if (window.activeRichTextRange) {
+                    let sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(window.activeRichTextRange);
+                }
+                document.execCommand('insertHTML', false, `<img src="${url}" style="max-height:100px; border-radius:6px; vertical-align:middle; cursor:zoom-in; margin:2px;" data-click="click_openImage" data-url="${url}">&nbsp;`);
+            }
+        }
+        window.activeSOPTextAreaId = null;
+        window.activeRichTextRange = null;
+        window.activeRichTextContainer = null;
+        closeSOPMediaPicker();
+        return;
+    }
+
+    if (window.activeSOPTextAreaId === 'attachment') {
+        const urlMatch = token.match(/\[IMG:(https?:\/\/[^\]]+)\]/i);
+        if (urlMatch) {
+            const url = urlMatch[1];
+            if (window.activeAttachmentInput) {
+                window.activeAttachmentInput.value = url;
+                // Dispatch input event to trigger any unsaved changes state if needed
+                window.activeAttachmentInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+        window.activeSOPTextAreaId = null;
+        window.activeAttachmentInput = null;
+        closeSOPMediaPicker();
+        return;
+    }
+
+    const ta = document.getElementById(window.activeSOPTextAreaId);
     if (!ta) return;
     const start = ta.selectionStart;
     const end = ta.selectionEnd;
@@ -1608,14 +1550,30 @@ function insertSOPToken(token) {
     ta.value = before + (needsNewlineBefore ? '\n' : '') + token + (needsNewlineAfter ? '\n' : '') + after;
     ta.focus();
 
-    if (activeSOPTextAreaId === 'packerzAdminQA' && typeof renderPackerzTelemetryPreview === 'function') {
+    if (window.activeSOPTextAreaId === 'packerzAdminQA' && typeof renderPackerzTelemetryPreview === 'function') {
         renderPackerzTelemetryPreview();
-    } else if (activeSOPTextAreaId === 'productionAdminQA' && typeof renderProductionTelemetryPreview === 'function') {
+    } else if (window.activeSOPTextAreaId === 'productionAdminQA' && typeof renderProductionTelemetryPreview === 'function') {
         renderProductionTelemetryPreview();
+    } else if (window.activeSOPTextAreaId === 'packerzLiveInlineQA' && typeof renderPackerzLiveInlineTelemetryPreview === 'function') {
+        renderPackerzLiveInlineTelemetryPreview();
+    } else if (window.activeSOPTextAreaId && window.activeSOPTextAreaId.startsWith('inlineSopQA_') && typeof inlineRenderTelemetryPreview === 'function') {
+        inlineRenderTelemetryPreview(window.activeSOPTextAreaId.replace('inlineSopQA_', ''));
     }
 
     closeSOPMediaPicker();
 }
+
+window.click_workerTakePhoto = function(e) {
+    if(typeof e !== 'undefined' && e) e.preventDefault();
+    let ctx = e.target.dataset.ctx || e.target.closest('.worker-photo-btn')?.dataset.ctx;
+    let label = e.target.dataset.label || e.target.closest('.worker-photo-btn')?.dataset.label || 'Camera Log';
+    if(ctx) {
+        window.activeWorkerPhotoTarget = ctx;
+        window.activeWorkerPhotoLabel = label;
+        window.activeSOPTextAreaId = null; // Clear out the editor context
+        if(typeof openSOPSnapshotCamera === 'function') openSOPSnapshotCamera();
+    }
+};
 
 // ============================================================
 // SOP MEDIA BROWSER — Folder Navigation & Guide
@@ -2215,7 +2173,9 @@ document.addEventListener('keyup', (e) => {
 document.addEventListener('mousedown', (e) => {
     const el = e.target;
     if (el.dataset.appMousedown === 'initPackerzResize') {
-        if(typeof initPackerzLiveSopResize === 'function') initPackerzLiveSopResize(e);
+        if(typeof window.initUnifiedSopResizer === 'function') {
+            window.initUnifiedSopResizer(e, 'packerzLiveSopLeftPane', 'packerzLiveSopSplitWrapper', null, true);
+        }
     }
 });
 
@@ -2227,6 +2187,12 @@ let sopSnapshotStream = null;
 
 window.click_openSOPSnapshotCameraInline = function(e) {
     window.activeSOPTextAreaId = 'packerzLiveInlineQA';
+    openSOPSnapshotCamera();
+};
+
+window.click_openSOPSnapshotCamera_packerz = function(e) {
+    if (typeof e !== 'undefined' && e) e.preventDefault();
+    window.activeSOPTextAreaId = 'packerzAdminQA';
     openSOPSnapshotCamera();
 };
 
