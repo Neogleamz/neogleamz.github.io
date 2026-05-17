@@ -194,7 +194,25 @@ serve(async (req: Request) => {
           // Net Profit deducts Refunds naturally if they occurred.
           const net = subtotal + rowShip + rowTax - lineDiscount - rowFee - rowActualShippingCost - rowRefundedAmount;
 
-            ledgerRows.push({
+          // AGGREGATOR: Prevent false-flagging of legitimate identical line items in Draft Orders
+          const existingRow = ledgerRows.find((r: any) => String(r.storefront_sku) === String(skuName));
+          if (existingRow) {
+              console.log(` -> Aggregating duplicate line item: [${skuName}] (+${qty})`);
+              existingRow.qty_sold += qty;
+              existingRow.subtotal += subtotal;
+              existingRow.discount_amount += lineDiscount;
+              existingRow.net_profit += (subtotal - lineDiscount); // rowShip, rowFee, etc are mapped to the first index.
+              
+              const existingInv = invUpdates.find((i: any) => i.item_key === `RECIPE:::${internalName}`);
+              if (existingInv) {
+                  existingInv.sold_qty_increment += qty;
+              } else {
+                  invUpdates.push({ item_key: `RECIPE:::${internalName}`, sold_qty_increment: qty });
+              }
+              return;
+          }
+
+          ledgerRows.push({
             order_id: orderIdStr,
             sale_date: dateStr,
             storefront_sku: skuName,
