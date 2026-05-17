@@ -1416,6 +1416,7 @@ function renderActiveWO(id) {
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                                             <div style="display:flex; gap:8px;">
+                                                <button class="sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖨️ PRINT SOP</button>
                                                 <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
                                                 <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, "\\'")}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
                                                 <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
@@ -1599,7 +1600,7 @@ function renderActiveWO(id) {
                 });
                 sList.querySelectorAll('.sop-print-btn').forEach(btn => {
                     let rawName = btn.getAttribute('data-raw-name');
-                    btn.addEventListener('click', (e) => { e.stopPropagation(); openPrintSOP(rawName); });
+                    btn.addEventListener('click', (e) => { e.stopPropagation(); window.openSopPrintModal('production', rawName); });
                 });
                 sList.querySelectorAll('.sop-edit-btn').forEach(btn => {
                     let grpId = btn.getAttribute('data-grp-id');
@@ -2125,7 +2126,12 @@ function printPickList() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-window.openSopPrintModal = function() {
+window.activePrintContext = 'production';
+window.activePrintTargetOverride = null;
+
+window.openSopPrintModal = function(context = 'production', targetOverride = null) {
+    window.activePrintContext = context;
+    window.activePrintTargetOverride = targetOverride;
     let el = document.getElementById('sopPrintOptionsModal');
     if (el) el.style.display = 'flex';
 };
@@ -2137,8 +2143,18 @@ window.closeSopPrintModal = function() {
 
 window.executeSopPrint = function(printType) {
     window.closeSopPrintModal();
+    
+    if(window.activePrintContext === 'packerz') {
+        if(typeof window.executePackerzSopPrint === 'function') {
+            window.executePackerzSopPrint(printType);
+        } else {
+            sysLog("Packerz SOP printing logic not loaded.", true);
+        }
+        return;
+    }
+
     try {
-        if(!currentWO && typeof currentWO === 'undefined') {
+        if(!currentWO && typeof currentWO === 'undefined' && !window.activePrintTargetOverride && (!document.getElementById('sopModalWrapper') || document.getElementById('sopModalWrapper').style.display === 'none')) {
             sysLog("Cannot print SOP without a valid target context.", true);
             return;
         }
@@ -2150,14 +2166,16 @@ window.executeSopPrint = function(printType) {
         let headerTitle = currentWO ? currentWO.wo_id : 'SOP Document';
         let targetProductName = currentWO ? currentWO.product_name : '';
 
-        // Check if we are inside the active SOP Master Modal
-        if(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none') {
+        if (window.activePrintTargetOverride) {
+            targetProductName = window.activePrintTargetOverride;
+            headerTitle = "SOP: " + targetProductName;
+        } else if(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none') {
             targetProductName = currentProductSOP || targetProductName;
             headerTitle = "SOP: " + targetProductName;
         }
 
-        // Sub-assemblies routing if present
-        if(currentWO && currentWO.routing) {
+        // Sub-assemblies routing if present and NO TARGET OVERRIDE
+        if(currentWO && currentWO.routing && !window.activePrintTargetOverride && !(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none')) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
                     let subPayload = sopsDB[sub];
@@ -2178,7 +2196,15 @@ window.executeSopPrint = function(printType) {
         let mainSteps = (mainPayload && typeof mainPayload === 'object' && !Array.isArray(mainPayload)) ? (mainPayload.steps || []) : (mainPayload || []);
         if(mainSteps.length > 0 || stepsToRender.length > 0) {
             if(mainSteps.length > 0) { 
-                stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${targetProductName}` }); 
+                if(!window.activePrintTargetOverride) {
+                    stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${targetProductName}` }); 
+                } else {
+                    let is3D = typeof productsDB !== 'undefined' && productsDB[targetProductName] && productsDB[targetProductName].is_3d_print;
+                    let emo = is3D ? '🖨️' : '⚙️';
+                    let tp = is3D ? '3D Print' : 'Sub-Assembly';
+                    stepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${targetProductName}` });
+                }
+
                 stepsToRender = stepsToRender.concat(mainSteps); 
             }
         }

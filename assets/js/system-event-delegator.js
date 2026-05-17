@@ -260,11 +260,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_window_printSOP':
                 case 'click_window_openPrintSOP_currentPri':
+                case 'click_window_openSopPrintModal_prod':
+                    if (typeof window.openSopPrintModal === 'function') {
+                        window.openSopPrintModal('production');
+                    } else {
+                        window.printSOP(); // Fallback
+                    }
+                    break;
                 case 'click_printPackerzSOP':
                     if (typeof window.openSopPrintModal === 'function') {
-                        window.openSopPrintModal();
-                    } else {
-                        window.printSOP(); // Fallback if module isn't loaded
+                        window.openSopPrintModal('packerz');
                     }
                     break;
                 case 'click_window_closeSopPrintModal':
