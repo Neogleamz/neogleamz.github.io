@@ -638,10 +638,14 @@ function teBuildTaskRowHTML(t, isChild) {
     }
 
     let projectBadgeHtml = '';
-    if (!window.teActiveProjectId && t.project_id) {
-        let p = taskEngineDB.projectz.find(proj => proj.id === t.project_id);
-        if (p) {
-            projectBadgeHtml = `<span style="background: ${p.color_hex || '#3b82f6'}20; color: ${p.color_hex || '#3b82f6'}; padding: 2px 6px; border-radius: 4px; border: 1px solid ${p.color_hex || '#3b82f6'}40; font-size: 10px; font-weight: bold; margin-bottom: 2px; display: inline-block;">${p.title}</span>`;
+    if (!window.teActiveProjectId) {
+        if (t.project_id) {
+            let p = taskEngineDB.projectz.find(proj => proj.id === t.project_id);
+            if (p) {
+                projectBadgeHtml = `<span style="background: ${p.color_hex || '#3b82f6'}20; color: ${p.color_hex || '#3b82f6'}; padding: 2px 6px; border-radius: 4px; border: 1px solid ${p.color_hex || '#3b82f6'}40; font-size: 10px; font-weight: bold; margin-bottom: 2px; display: inline-block;">${p.title}</span>`;
+            }
+        } else {
+            projectBadgeHtml = `<span style="background: #a855f720; color: #a855f7; padding: 2px 6px; border-radius: 4px; border: 1px solid #a855f740; font-size: 10px; font-weight: bold; margin-bottom: 2px; display: inline-block;">PRIVATE</span>`;
         }
     }
 
