@@ -3,7 +3,7 @@ const { execSync } = require('child_process');
 
 try {
   execSync('npm run version:bump', { stdio: 'inherit' });
-  execSync('git add system-version.js index.html', { stdio: 'inherit' });
+  execSync('git add assets/js/system-version.js index.html', { stdio: 'inherit' });
 } catch (err) {
   console.error('Automatic version bump failed. Commit aborted.');
   process.exit(1);

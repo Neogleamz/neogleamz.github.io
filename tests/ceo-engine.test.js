@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const engineCode = fs.readFileSync(path.resolve(__dirname, '../neogleamz-engine.js'), 'utf8');
-const ceoCode = fs.readFileSync(path.resolve(__dirname, '../ceo-module.js'), 'utf8');
+const engineCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/neogleamz-engine.js'), 'utf8');
+const ceoCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/ceo-module.js'), 'utf8');
 
 beforeAll(() => {
     // Provide a basic DOM for ceo-module

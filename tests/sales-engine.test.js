@@ -16,7 +16,7 @@ window.sysLog = jest.fn();
 // Import Engine
 const fs = require('fs');
 const path = require('path');
-const engineCode = fs.readFileSync(path.resolve(__dirname, '../neogleamz-engine.js'), 'utf-8');
+const engineCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/neogleamz-engine.js'), 'utf-8');
 eval(engineCode);
 
 // Mock COGS
