@@ -26,7 +26,7 @@ function openMediaModal(url, renderType) { try { const container = document.getE
 function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = window.safeHTML(''); } catch(e) { sysLog(e.message, true); } }
 
 function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
-function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;"><select onchange="execRT('fontSize', this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main); margin-right:4px;"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
+function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent; flex-shrink:0;"><select onchange="execRT('fontSize', this.value)" style="max-width:100px; min-width:0; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main); margin-right:4px;"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
 
 window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = 'batches') {
     let safeText = s.text || ''; 
@@ -77,13 +77,20 @@ window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = '
             </div>
             <div class="sop-controls-container">
                 ${getRTToolbar()}
-                <div style="display:flex; justify-content:flex-end; margin-top:8px; margin-bottom:4px; padding:4px 8px; border-radius:6px;">
-                    <div style="display:flex; gap:4px;">
-                        <button type="button" data-mousedown="mousedown_smartPhotoPaste" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer;" title="Smart Photo Paste">📸 PHOTO</button>
-                        <button type="button" data-mousedown="mousedown_sopDirectUpload" data-prodid="${prodId}" data-soptype="${sopType}" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #3b82f6; background:rgba(59,130,246,0.15); color:#3b82f6; cursor:pointer;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
-                        <button type="button" data-mousedown="mousedown_smartAttachmentUrl" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer;">+ NEW URL</button>
+                <div style="display:flex; justify-content:flex-start; flex-wrap:wrap; margin-top:8px; margin-bottom:4px; padding:4px 8px; border-radius:6px;">
+
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+
+                        <button type="button" data-mousedown="mousedown_smartPhotoPaste" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer; white-space:nowrap;" title="Smart Photo Paste">📸 PHOTO</button>
+
+                        <button type="button" data-mousedown="mousedown_sopDirectUpload" data-prodid="${prodId}" data-soptype="${sopType}" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #3b82f6; background:rgba(59,130,246,0.15); color:#3b82f6; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
+
+                        <button type="button" data-mousedown="mousedown_smartAttachmentUrl" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer; white-space:nowrap;">+ NEW URL</button>
+
                     </div>
+
                 </div>
+
                 <div class="attachments-container" style="display:flex; flex-direction:column;">
                     ${attachmentHtml}
                 </div>
@@ -1387,7 +1394,7 @@ function renderActiveWO(id) {
                                 ${grp.title} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <button class="btn-slate sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="font-size:10px; padding:2px 8px;">🖨️ PRINT</button>
+                                <button class="btn-slate sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="font-size:10px; padding:2px 8px;">🖨️ PRINT SOP</button>
                                 <button class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'} sop-edit-btn" data-grp-id="${grp.id}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
                                 <div class="sop-chev-btn" data-grp-id="${grp.id}" style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" id="sopgrp_icon_${grp.id}">${chev}</div>
                             </div>
@@ -1415,12 +1422,20 @@ function renderActiveWO(id) {
                                     <div id="inlineInputCol_${grp.id}" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
-                                            <div style="display:flex; gap:8px;">
-                                                <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
-                                                <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, "\\'")}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
-                                                <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
-                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                                            <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+
+                                                <button class="sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, '\'')}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
+
+                                                <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, '\'')}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ Upload</button>
+
+                                                <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
+
+                                                <button data-click="click_openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
+
+                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
+
                                             </div>
+
                                         </div>
                                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
                                             <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;&middot;&nbsp;
@@ -1599,7 +1614,7 @@ function renderActiveWO(id) {
                 });
                 sList.querySelectorAll('.sop-print-btn').forEach(btn => {
                     let rawName = btn.getAttribute('data-raw-name');
-                    btn.addEventListener('click', (e) => { e.stopPropagation(); openPrintSOP(rawName); });
+                    btn.addEventListener('click', (e) => { e.stopPropagation(); window.openSopPrintModal('production', rawName); });
                 });
                 sList.querySelectorAll('.sop-edit-btn').forEach(btn => {
                     let grpId = btn.getAttribute('data-grp-id');
@@ -2125,41 +2140,212 @@ function printPickList() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function printSOP() {
+window.activePrintContext = 'production';
+window.activePrintTargetOverride = null;
+
+window.openSopPrintModal = function(context = 'production', targetOverride = null) {
+    window.activePrintContext = context;
+    window.activePrintTargetOverride = targetOverride;
+    let el = document.getElementById('sopPrintOptionsModal');
+    if (el) el.style.display = 'flex';
+};
+
+window.closeSopPrintModal = function() {
+    let el = document.getElementById('sopPrintOptionsModal');
+    if (el) el.style.display = 'none';
+};
+
+window.executeSopPrint = function(printType) {
+    window.closeSopPrintModal();
+    
+    if(window.activePrintContext === 'packerz') {
+        if(typeof window.executePackerzSopPrint === 'function') {
+            window.executePackerzSopPrint(printType);
+        } else {
+            sysLog("Packerz SOP printing logic not loaded.", true);
+        }
+        return;
+    }
+
     try {
-        if(!currentWO) return;
-        let stepsToRender = [];
-        if(currentWO.routing) {
+        if(!currentWO && typeof currentWO === 'undefined' && !window.activePrintTargetOverride && (!document.getElementById('sopModalWrapper') || document.getElementById('sopModalWrapper').style.display === 'none')) {
+            sysLog("Cannot print SOP without a valid target context.", true);
+            return;
+        }
+
+        // 1. GATHER DATA
+        let checklistsToRender = [];
+        let richtextStepsToRender = [];
+        let hasRichText = false;
+        let globalRichTextHTML = '';
+        let headerTitle = currentWO ? currentWO.wo_id : 'SOP Document';
+        let targetProductName = currentWO ? currentWO.product_name : '';
+
+        if (window.activePrintTargetOverride) {
+            targetProductName = window.activePrintTargetOverride;
+            headerTitle = "SOP: " + targetProductName;
+        } else if(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none') {
+            targetProductName = currentProductSOP || targetProductName;
+            headerTitle = "SOP: " + targetProductName;
+        }
+
+        // Helper to extract qaChecks and steps correctly
+        function extractPayload(payload) {
+            if(!payload) return { qa: [], steps: [] };
+            if(Array.isArray(payload)) return { qa: payload, steps: [] }; // Legacy format
+            return {
+                qa: Array.isArray(payload.qaChecks) ? payload.qaChecks : (payload.qaChecks ? Object.keys(payload.qaChecks).map(k=>payload.qaChecks[k]) : []),
+                steps: Array.isArray(payload.steps) ? payload.steps : (payload.steps ? Object.keys(payload.steps).map(k=>payload.steps[k]) : [])
+            };
+        }
+
+        // Sub-assemblies routing if present and NO TARGET OVERRIDE
+        if(currentWO && currentWO.routing && !window.activePrintTargetOverride && !(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none')) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
-                    let subSteps = sopsDB[sub] || [];
-                    if(subSteps.length > 0) {
+                    let subPayload = extractPayload(sopsDB[sub]);
+                    if(subPayload.qa.length > 0 || subPayload.steps.length > 0) {
                         let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
                         let emo = is3D ? '🖨️' : '⚙️';
                         let tp = is3D ? '3D Print' : 'Build Sub-Assembly';
-                        stepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` });
-                        stepsToRender = stepsToRender.concat(subSteps);
+                        
+                        if(subPayload.qa.length > 0) {
+                            checklistsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` });
+                            checklistsToRender = checklistsToRender.concat(subPayload.qa);
+                        }
+                        if(subPayload.steps.length > 0) {
+                            richtextStepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` });
+                            richtextStepsToRender = richtextStepsToRender.concat(subPayload.steps);
+                        }
                     }
                 }
             });
         }
-        let mainSteps = sopsDB[currentWO.product_name] || [];
-        if(mainSteps.length > 0 || stepsToRender.length > 0) {
-            if(mainSteps.length > 0) { stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${currentWO.product_name}` }); stepsToRender = stepsToRender.concat(mainSteps); }
+
+        // Main steps
+        let mainPayload = extractPayload(sopsDB[targetProductName]);
+        if(mainPayload.qa.length > 0 || mainPayload.steps.length > 0 || checklistsToRender.length > 0 || richtextStepsToRender.length > 0) {
+            let is3D = typeof productsDB !== 'undefined' && productsDB[targetProductName] && productsDB[targetProductName].is_3d_print;
+            let emo = is3D ? '🖨️' : '⚙️';
+            let tp = is3D ? '3D Print' : (window.activePrintTargetOverride ? 'Sub-Assembly' : 'Final Assembly');
+            let mainHeader = window.activePrintTargetOverride ? `${emo} ${tp}: ${targetProductName}` : `📦 Final Assembly: ${targetProductName}`;
+
+            if(mainPayload.qa.length > 0) {
+                checklistsToRender.push({ isHeader: true, text: mainHeader }); 
+                checklistsToRender = checklistsToRender.concat(mainPayload.qa); 
+            }
+            if(mainPayload.steps.length > 0) {
+                richtextStepsToRender.push({ isHeader: true, text: mainHeader });
+                richtextStepsToRender = richtextStepsToRender.concat(mainPayload.steps);
+            }
         }
-        let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
-        let html = `<html><head><title>SOP - ${currentWO.wo_id}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #0ea5e9;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#0ea5e9; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px;}</style></head><body>`;
-        html += `<h2>Compiled SOP</h2><h3>Work Order: ${currentWO.wo_id}</h3><hr>`;
-        if(mappedSteps.length === 0) html += `<p>No SOPs defined.</p>`;
-        else {
-            let stepCounter = 1;
-            mappedSteps.forEach((s) => {
-                if(s.isHeader) { html += `<div class="header">${s.text}</div>`; }
-                else { html += `<div class="step"><strong style="color:#0ea5e9; font-size:14px;">Step ${stepCounter++}:</strong><br> ${s.text}</div>`; }
-            });
+
+        // Fetch Global Rich Text if requested
+        if(printType === 'richtext' || printType === 'full') {
+            let pData = productsDB[targetProductName];
+            if(pData && pData.sop_richtext) {
+                globalRichTextHTML = pData.sop_richtext;
+                hasRichText = true;
+            }
+            if(richtextStepsToRender.length > 0) {
+                hasRichText = true;
+            }
         }
-        html += `</body></html>`; let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500);
-    } catch(e) { sysLog(e.message, true); }
+
+        let mappedChecklist = checklistsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
+        let mappedRichText = richtextStepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
+
+        // 2. BUILD HTML HEAD & CSS
+        let html = `<html><head><title>SOP - ${headerTitle}</title>
+<style>
+body { font-family: sans-serif; padding: 20px; font-size: 13px; max-width: 800px; margin: 0 auto; color: #333; }
+hr { border: 0; border-top: 2px solid #0ea5e9; margin: 20px 0; }
+.header { background: #f1f5f9; padding: 10px; font-weight: bold; font-size: 16px; margin: 25px 0 15px 0; border-left: 5px solid #0ea5e9; border-radius: 4px; }
+.step { margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; font-size: 14px; line-height: 1.5; }
+.step-checkbox { width: 16px; height: 16px; border: 2px solid #ccc; border-radius: 3px; margin-top: 2px; flex-shrink: 0; }
+.step-content { flex: 1; }
+.telemetry-header { font-weight: bold; font-size: 18px; color: #0ea5e9; margin-top: 15px; margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
+.telemetry-subtext { font-size: 12px; color: #666; font-style: italic; margin-left: 5px; }
+img { max-width: 100%; max-height: 350px; display: block; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+a { color: #0ea5e9; font-weight: bold; margin-right: 15px; text-decoration: none; }
+h2 { margin: 0 0 5px 0; font-size: 24px; color: #111; }
+h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
+.richtext-container { margin-top: 30px; padding-top: 20px; border-top: 3px solid #f59e0b; }
+.richtext-container img { max-width: 100%; height: auto; }
+</style></head><body>`;
+        
+        html += `<h2>Compiled SOP Document</h2><h3>${headerTitle}</h3><hr>`;
+
+        // 3. RENDER CHECKLIST
+        if(printType === 'checklist' || printType === 'full') {
+            if(mappedChecklist.length === 0) {
+                html += `<p style="color:#666; font-style:italic;">No checklist steps defined.</p>`;
+            } else {
+                mappedChecklist.forEach((s) => {
+                    if(s.isHeader) { 
+                        html += `<div class="header">${s.text}</div>`; 
+                    } else { 
+                        // Parse standard text through telemetry engine logic to convert markdown-like syntax
+                        let parsedHTML = parseProductionTelemetryLine(s.text, -1);
+                        
+                        // Prevent checkboxes from appearing next to headers and subtexts
+                        if (s.text.startsWith('# ') || s.text.startsWith('> ') || s.text.startsWith('[INPUT]') || s.text.startsWith('[CAMERA]')) {
+                            html += `<div class="step-content" style="margin-top:10px; margin-bottom:6px;">${parsedHTML}</div>`;
+                        } else {
+                            html += `<div class="step">
+                                        <div class="step-checkbox"></div>
+                                        <div class="step-content">${parsedHTML}</div>
+                                     </div>`; 
+                        }
+                    }
+                });
+            }
+        }
+
+        // 4. RENDER RICH TEXT
+        if(printType === 'richtext' || printType === 'full') {
+            if(hasRichText) {
+                html += `<div class="richtext-container">
+                            <h2 style="color:#f59e0b; margin-bottom:20px;">SOP Documentation</h2>`;
+                
+                if (globalRichTextHTML) {
+                    html += `<div style="margin-bottom:30px;">${globalRichTextHTML}</div>`;
+                }
+
+                if (mappedRichText.length > 0) {
+                    let stepCounter = 1;
+                    mappedRichText.forEach((s) => {
+                        if (s.isHeader) {
+                            html += `<div class="header" style="background:rgba(245,158,11,0.05); border-left-color:#F59E0B;">${s.text}</div>`;
+                            stepCounter = 1; // Reset steps per assembly
+                        } else {
+                            let content = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(s.text || '', -1) : s.text || '';
+                            html += `<div style="margin-bottom:25px; padding-bottom:15px; border-bottom:1px dashed #ccc;">
+                                        <strong style="color:#F59E0B; font-size:16px; display:block; margin-bottom:10px;">Step ${stepCounter++}</strong>
+                                        <div style="font-size:15px; line-height:1.6; white-space:pre-wrap;">${content}</div>
+                                     </div>`;
+                        }
+                    });
+                }
+
+                html += `</div>`;
+            } else if (printType === 'richtext') {
+                html += `<p style="color:#666; font-style:italic;">No Rich Text Documentation exists for this SOP.</p>`;
+            }
+        }
+
+        html += `</body></html>`; 
+        
+        let win = window.open('', '', 'width=800,height=800'); 
+        win.document.write(html); 
+        win.document.close(); 
+        
+        // Slight delay to allow image loading before triggering print dialog
+        setTimeout(() => win.print(), 700);
+        
+    } catch(e) { 
+        sysLog("Print Engine Error: " + e.message, true); 
+    }
 }
 
 function parseProductionTelemetryLine(q, contextIdx) {

@@ -455,13 +455,14 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
 
                     <!-- Column 1: Config & Input -->
                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
-                            <div style="display:flex; gap:8px;">
-                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
-                                <button data-app-click="openSOPMediaInline" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖼️ MEDIA</button>
-                                <button data-app-click="openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">⚡ GUIDE</button>
-                                <button data-app-click="togglePackerzSOPPreview" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                            <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+                                <button onclick="window.openSopPrintModal('packerz')" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
+                                <button data-app-click="openSOPMediaInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">☁️ Upload</button>
+                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
+                                <button data-app-click="openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
+                                <button data-app-click="togglePackerzSOPPreview" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -713,7 +714,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     }
 }
 
-function printPackerzSOP() {
+window.executePackerzSopPrint = function(printType) {
     try {
         if(!currentPackerzQaRecipe || !currentPackerzSopData) {
             sysLog("No active Packerz SOP data available to print.", true);
@@ -728,31 +729,77 @@ function printPackerzSOP() {
         if(!Array.isArray(steps)) steps = Object.keys(steps).map(k => steps[k]);
         if(!Array.isArray(qaChecks)) qaChecks = Object.keys(qaChecks).map(k => qaChecks[k]);
 
-        let html = `<html><head><title>Packing SOP - ${pName}</title><style>body{font-family:sans-serif; padding:10px; font-size:11px;} .step{margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px; font-size:12px;} .header{background:#f1f5f9; padding:6px; font-weight:bold; font-size:14px; margin:15px 0 8px 0; border-left:4px solid #F59E0B;} img{max-width:100%; max-height:250px; display:block; margin-top:8px;} a {color:#F59E0B; font-weight:bold; margin-right:15px;} h2{margin:0 0 5px 0; font-size:16px;} h3{margin:0 0 10px 0; font-size:14px; color:#10b981;} .qa-item{font-weight:bold; font-size:13px; color:#10b981; margin-bottom:5px;} </style></head><body>`;
-        html += `<h2>Fulfillment & Packing SOP</h2><h3>Master Recipe: ${pName}</h3><hr>`;
+        let hasRichText = steps.length > 0;
+        let hasChecklist = qaChecks.length > 0;
 
-        if(qaChecks.length > 0) {
-            html += `<h3 style="color:#F59E0B;">MANDATORY QA CHECKS:</h3>`;
-            qaChecks.forEach((qa) => {
-                html += `<div class="qa-item">[ ] ${qa}</div>`;
-            });
-            html += `<br><hr>`;
+        let html = `<html><head><title>Packing SOP - ${pName}</title>
+<style>
+body { font-family: sans-serif; padding: 20px; font-size: 13px; max-width: 800px; margin: 0 auto; color: #333; }
+hr { border: 0; border-top: 2px solid #10b981; margin: 20px 0; }
+.header { background: rgba(16,185,129,0.05); padding: 10px; font-weight: bold; font-size: 16px; margin: 25px 0 15px 0; border-left: 5px solid #10b981; border-radius: 4px; }
+.step { margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; font-size: 14px; line-height: 1.5; }
+.step-checkbox { width: 16px; height: 16px; border: 2px solid #ccc; border-radius: 3px; margin-top: 2px; flex-shrink: 0; }
+.step-content { flex: 1; }
+.telemetry-header { font-weight: bold; font-size: 18px; color: #10b981; margin-top: 15px; margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
+.telemetry-subtext { font-size: 12px; color: #666; font-style: italic; margin-left: 5px; }
+img { max-width: 100%; max-height: 350px; display: block; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+a { color: #10b981; font-weight: bold; margin-right: 15px; text-decoration: none; }
+h2 { margin: 0 0 5px 0; font-size: 24px; color: #111; }
+h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
+.richtext-container { margin-top: 30px; padding-top: 20px; border-top: 3px solid #F59E0B; }
+.richtext-container img { max-width: 100%; height: auto; }
+</style></head><body>`;
+        
+        html += `<h2>Fulfillment & Packing SOP</h2><h3 style="color:#10b981;">Master Recipe: ${pName}</h3><hr>`;
+
+        // CHECKLIST RENDERING (QA Checks)
+        if(printType === 'checklist' || printType === 'full') {
+            if(!hasChecklist) {
+                html += `<p style="color:#666; font-style:italic;">No mandatory QA checklist defined for this pack.</p>`;
+            } else {
+                html += `<div class="header" style="color:#F59E0B; border-left-color:#F59E0B;">MANDATORY QA CHECKS</div>`;
+                qaChecks.forEach((qa, idx) => {
+                    let parsedHTML = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(qa, idx) : qa;
+                    // Inject empty checkbox if it's not a header
+                    if (qa.startsWith('# ')) {
+                        html += `<div class="step-content" style="margin-top:15px; margin-bottom:10px;">${parsedHTML}</div>`;
+                    } else {
+                        html += `<div class="step">
+                                    <div class="step-checkbox"></div>
+                                    <div class="step-content">${parsedHTML}</div>
+                                 </div>`;
+                    }
+                });
+            }
         }
 
-        if(steps.length === 0) {
-            html += `<p>No visual steps configured. Proceed strictly to QA Checks.</p>`;
-        } else {
-            let stepCounter = 1;
-            steps.forEach((s) => {
-                html += `<div class="step"><strong style="color:#F59E0B; font-size:14px;">Pack Step ${stepCounter++}:</strong><br> ${s.text || ''}</div>`;
-            });
+        // RICH TEXT RENDERING (Visual Steps)
+        if(printType === 'richtext' || printType === 'full') {
+            if(!hasRichText) {
+                if(printType === 'richtext') html += `<p style="color:#666; font-style:italic;">No visual packing steps configured.</p>`;
+            } else {
+                html += `<div class="richtext-container">
+                            <h2 style="color:#F59E0B; margin-bottom:20px;">Packing Instructions</h2>`;
+                
+                let stepCounter = 1;
+                steps.forEach((s) => {
+                    html += `<div style="margin-bottom:25px; padding-bottom:15px; border-bottom:1px dashed #ccc;">
+                                <strong style="color:#F59E0B; font-size:16px; display:block; margin-bottom:10px;">Pack Step ${stepCounter++}</strong>
+                                <div style="font-size:15px; line-height:1.6; white-space:pre-wrap;">${typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(s.text || '', -1) : s.text || ''}</div>
+                             </div>`;
+                });
+                
+                html += `</div>`;
+            }
         }
 
         html += `</body></html>`;
-        let win = window.open('', '', 'width=800,height=600');
+        
+        let win = window.open('', '', 'width=800,height=800');
         win.document.write(html);
         win.document.close();
-        setTimeout(() => win.print(), 500);
+        setTimeout(() => win.print(), 700);
+        
     } catch(e) {
         sysLog(`Print Packerz SOP Error: ${e.message}`, true);
     }

@@ -259,7 +259,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.openDraftScrapModal();
                     break;
                 case 'click_window_printSOP':
-                    window.printSOP();
+                case 'click_window_openPrintSOP_currentPri':
+                case 'click_window_openSopPrintModal_prod':
+                    if (typeof window.openSopPrintModal === 'function') {
+                        window.openSopPrintModal('production');
+                    } else {
+                        window.printSOP(); // Fallback
+                    }
+                    break;
+                case 'click_window_openSopPrintModal_pack':
+                    if (typeof window.openSopPrintModal === 'function') {
+                        window.openSopPrintModal('packerz');
+                    }
+                    break;
+                case 'click_printPackerzSOP':
+                    if (typeof window.openSopPrintModal === 'function') {
+                        window.openSopPrintModal('packerz');
+                    }
+                    break;
+                case 'click_window_closeSopPrintModal':
+                    if (typeof window.closeSopPrintModal === 'function') window.closeSopPrintModal();
+                    break;
+                case 'click_executeSopPrint_checklist':
+                    if (typeof window.executeSopPrint === 'function') window.executeSopPrint('checklist');
+                    break;
+                case 'click_executeSopPrint_richtext':
+                    if (typeof window.executeSopPrint === 'function') window.executeSopPrint('richtext');
+                    break;
+                case 'click_executeSopPrint_full':
+                    if (typeof window.executeSopPrint === 'function') window.executeSopPrint('full');
                     break;
                 case 'click_saveInlineSOP':
                     saveInlineSOP();
@@ -432,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_advancePrintStatus_Completed':
                     advancePrintStatus('Completed');
                     break;
-                case 'click_window_openPrintSOP_currentPri':
+                case 'click_window_openLayerzPrintSOP_currentPri':
                     window.openPrintSOP(currentPrintJob.part_name);
                     break;
                 case 'click_showSalezPane_bridge':
@@ -866,7 +894,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_document_getElementById_packer':
                     document.getElementById('packerzArchiveModal').style.display='none';
                     break;
-                case 'click_printPackerzSOP':
+                case 'click_printPackerzSOP_legacy':
                     printPackerzSOP();
                     break;
                 case 'click_if_typeof_togglePackerzLiveInl':
