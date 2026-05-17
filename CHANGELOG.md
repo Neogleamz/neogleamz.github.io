@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.33] - 2026-05-16
+### Features & Refactors
+- **Personalized Task Sections & Drag-and-Drop Re-parenting**: Make task sections unique per user in personal views (Inbox, My Tasks, In Progress, Completed) while keeping them uniform in organization-wide projects. Unassigned tasks (with proper section/project context) must remain visible in the Inbox. Assigned tasks and completed assigned tasks must be visible in My Tasks. Enable creating tasks under a "non assigned" section, and allow drag-and-drop to reorder tasks across sections or dynamically re-parent tasks as subtasks.
+
 ## [1.0.32] - 2026-05-16
 ### Bug Fixes
 - **UI State Refresh Prevention**: Fixed the bug where creating a new item in EDITZ caused a full page refresh and redirected to the Stockpilez hub. Prevented default form submission behaviors across the application to ensure the user stays on the current page during manual CRUD operations.
