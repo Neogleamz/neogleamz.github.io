@@ -79,8 +79,8 @@ window.generateEditableSOPRow = function(s, idx) {
                 ${getRTToolbar()}
                 <div style="display:flex; justify-content:flex-end; margin-top:8px; margin-bottom:4px; padding:4px 8px; border-radius:6px;">
                     <div style="display:flex; gap:4px;">
-                        <button type="button" onmousedown="event.preventDefault(); window.click_openSOPSnapshotCamera_smart(this);" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer;" title="Smart Photo Paste">📸 PHOTO</button>
-                        <button type="button" onmousedown="event.preventDefault(); window.click_addAttachmentRow(this);" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer;">+ NEW URL</button>
+                        <button type="button" data-mousedown="mousedown_smartPhotoPaste" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer;" title="Smart Photo Paste">📸 PHOTO</button>
+                        <button type="button" data-mousedown="mousedown_smartAttachmentUrl" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer;">+ NEW URL</button>
                     </div>
                 </div>
                 <div class="attachments-container" style="display:flex; flex-direction:column;">

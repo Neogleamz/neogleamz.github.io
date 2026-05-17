@@ -1269,6 +1269,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'mousedown_initFlyoutResizer_event':
                     if (typeof initFlyoutResizer === 'function') initFlyoutResizer(event);
                     break;
+                case 'mousedown_smartPhotoPaste':
+                    event.preventDefault();
+                    if (typeof window.click_openSOPSnapshotCamera_smart === 'function') window.click_openSOPSnapshotCamera_smart(el);
+                    break;
+                case 'mousedown_smartAttachmentUrl':
+                    event.preventDefault();
+                    if (typeof window.click_addAttachmentRow === 'function') window.click_addAttachmentRow(el);
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
