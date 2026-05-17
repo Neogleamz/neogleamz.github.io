@@ -334,12 +334,17 @@ function teRenderTaskGrid(filter = null) {
     
     sortedCyclez.forEach(c => {
         let title = c.title;
+        let cColor = c.color_hex;
         // Prefix project cycles with the project name for clarity in personal views
         if (isPersonalView && c.project_id) {
             let p = taskEngineDB.projectz.find(proj => proj.id === c.project_id);
-            if (p) title = `${p.title} ➔ ${c.title}`;
+            if (p) {
+                title = `${p.title} ➔ ${c.title}`;
+                if (!cColor) cColor = p.color_hex;
+            }
         }
-        cycleGroups.set(c.id, { title: title, color: c.color_hex || '#2dd4bf', tasks: [], project_id: c.project_id || null });
+        if (!cColor) cColor = c.project_id ? '#3b82f6' : '#a855f7';
+        cycleGroups.set(c.id, { title: title, color: cColor, tasks: [], project_id: c.project_id || null });
     });
     
     // Sort tasks into cycles (only top-level tasks)
@@ -407,8 +412,8 @@ function teRenderTaskGrid(filter = null) {
         <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 20px;">
             <div class="te-section-header" style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; cursor: grab;">
                 <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">${toggleIcon}</div>
-                <div class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="font-size: 14px; font-weight: bold; color: white; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">${group.title}</div>
-                <div style="flex-grow: 1; height: 1px; background: rgba(255,255,255,0.1); margin-left: 10px;"></div>
+                <div class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="font-size: 14px; font-weight: bold; color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='${headerColor}20'" onmouseout="this.style.background='transparent'">${group.title}</div>
+                <div style="flex-grow: 1; height: 1px; background: ${headerColor}40; margin-left: 10px;"></div>
                 <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'" onmouseout="this.style.background='transparent'">✖</div>
             </div>
             <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: 20px; padding-bottom: 10px;">
@@ -637,24 +642,11 @@ function teBuildTaskRowHTML(t, isChild) {
         });
     }
 
-    let projectBadgeHtml = '';
-    if (!window.teActiveProjectId) {
-        if (t.project_id) {
-            let p = taskEngineDB.projectz.find(proj => proj.id === t.project_id);
-            if (p) {
-                projectBadgeHtml = `<span style="background: ${p.color_hex || '#3b82f6'}20; color: ${p.color_hex || '#3b82f6'}; padding: 2px 6px; border-radius: 4px; border: 1px solid ${p.color_hex || '#3b82f6'}40; font-size: 10px; font-weight: bold; margin-bottom: 2px; display: inline-block;">${p.title}</span>`;
-            }
-        } else {
-            projectBadgeHtml = `<span style="background: #a855f720; color: #a855f7; padding: 2px 6px; border-radius: 4px; border: 1px solid #a855f740; font-size: 10px; font-weight: bold; margin-bottom: 2px; display: inline-block;">PRIVATE</span>`;
-        }
-    }
-
     return `
     <div class="task-row" data-task-id="${t.id}" data-click="click_teOpenTaskContext" style="padding: ${rowPadding}; min-height: unset;">
         <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
             <input type="checkbox" class="te-task-checkbox" data-id="${t.id}" style="cursor: pointer; width:16px; height:16px; accent-color: var(--primary-color); flex-shrink: 0;" data-change="change_teUpdateMainSelection">
             <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                ${projectBadgeHtml}
                 <span style="color: white; font-weight: ${titleWeight}; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">${t.title}</span>
                 ${tagsHtml ? `<div style="display: flex; gap: 4px; overflow: hidden; white-space: nowrap;">${tagsHtml}</div>` : ''}
             </div>
