@@ -150,40 +150,49 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `epic/disaster-recovery`
 *(Epic: Safe Database Defibrillation)*
+*(Shipped v1.0.16 — 2026-04-14)*
 - [🚀] `feat/schema-diff-defibrillator` : Develop the `[/schema_diff]` workflow. To eliminate database mutation anxiety, the workflow must be rigidly scoped to *Strict Read-Only Mode* to diff local `/supabase/migrations` against remote instances. Any state-mutating execution (e.g. `supabase migration repair`) must be completely isolated behind a secondary, mandatory user-authorization gate. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 
 ### Target: `epic/workflow-architecture`
 *(Epic: Agentic Orchestration Overhaul)*
+*(Shipped v1.0.16 — 2026-04-14)*
 - [🚀] `feat/orchestration-overhaul` : Architect and implement the unifying `[/finalize_epic]` deploy script to mitigate 3-step merge collision loops. Restructure `[/bucketlist]` branch mapping logic to prevent Phantom Ledger Divergences, and enact the global `active_context_lock.md` algorithm enforcing single-threaded AI cognitive bounds with hotfix overrides. [🤖 AI Model] [🧠 6k / 8k] [💸 $0.02 / $0.03]
 
 ### Target: `epic/agentic-evolution-ui`
 *(Epic: UI & Security Hardening Automation)*
+*(Shipped v1.0.16 — 2026-04-14)*
 - [🚀] `feat/ui-xray-debugger` : Build the `[/ui_xray]` workflow allowing the AI to autonomously inject neon CSS borders over all flex containers to visually scan, report, and verify structural DOM overlaps without requiring human visual intervention. [🤖 AI Model] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 - [🚀] `feat/red-team-protocol` : Build the `[/red_team]` workflow to enforce a strict persona shift where the AI acts as a malicious Penetration Tester to proactively scan Vanilla JS modules for DOM clobbering, injection vectors, and XSS exploits prior to release. [🤖 AI Model] [🧠 TBD] [💸 TBD]
 ### Target: `epic/security-hardening`
 *(Epic: Security Architecture Audit & Hardening)*
+*(Shipped v1.0.16 — 2026-04-14)*
 - [🚀] `security/infrastructure` : Executed a comprehensive repository-wide security audit utilizing `xss-risk-map.js`. Discovered and systematically remediated 230 injection vectors by wrapping them dynamically with a strict `window.safeHTML()` protocol that preserves vanilla JS UI functionality. Deployed a system-wide Content-Security-Policy (CSP) across the infrastructure locking down DOM mutations directly natively. [🤖 Gemini 3.1 Pro] [🧠 42k / 50k] [💸 $0.12 / $0.15]
 
 
 ### Target: `main`
 *(Epic: Agentic Framework Telemetry)*
+*(Shipped v1.0.14 — 2026-04-14)*
 - [🚀] `feat/bucket-list-token-tracking` : Establish a visible tracking convention for LLM API token spend vs. expected spend budget directly on the Bucket List tasks and epics to monitor AI operational costs. [🤖 Gemini 3.1 Pro] [🧠 25k / 50k] [💸 $0.08 / $0.15]
 
 ### Target: `main`
 *(Epic: Code Debt Hunt)*
+*(Shipped v1.0.15 — 2026-04-14)*
 - [🚀] `debt/css-flex-hack` : `index.html` (L327) - Review explicit CSS layout note tracked as `HACK` utilizing auto-margins for flexbox container squish centering. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `main`
 *(Epic: UI Enhancements & Fixes)*
+*(Shipped v1.0.13 — 2026-04-14)*
 - [🚀] `fix/cohort-intel-modal-ui` : Rebuild the Cohort Intel modal to standard ledge behavior (drag sorting), update columns (Order ID, Date, Item, Total, Net), and replace the top-right 'X' with a standard solid 'Close' rectangle button.
 
 ### Target: `main`
 *(Epic: Cohort Simulator Formatting)*
+*(Shipped v1.0.11 — 2026-04-13)*
 - [🚀] `feat/cohort-sim-formatting` : Condensed top 6 KPIs to a single row to save vertical space. Relocated "View Cohort Intelligence" button to top right header. Fixed order-count logic to use unique Order IDs instead of line items. Expanded LTV modal to include 'Total Buyers' stat, enlarged it, and applied drag-to-sort logic to the table. Documented the new modal standards in the Master Reference.
 - [🚀] `fix/header-responsive-wrap` : Fixed header `.top-controls` overlapping with `.tabs` on resize, enforcing mathematically perfect flex symmetry and min-content boundaries.
 
 ### Target: `main`
 *(Epic: Automated Testing Suite)*
+*(Shipped v1.0.13 — 2026-04-14)*
 - [🚀] `feat/automated-test-suite` : Implemented robust Jest and JSDOM integration for zero-build vanilla JS compliance.
 - [🚀] `test/math-engine` : Validated recursive BOM extraction via `calculateProductBreakdown`, Stripe fee mappings, 3D print durations, and `getHistoricalNetProfit`.
 - [🚀] `test/inventory-engine` : Tested `calculateTrailingVelocity` forecasting, reconstructed the missing `getRawMaterials` function to fix a live crash, and added bounds logic for `calculateDynamicROP`.
@@ -191,28 +200,34 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Widescreen Header Consolidation)*
+*(Shipped v1.0.10 — 2026-04-13)*
 - [🚀] `feat/widescreen-top-bar-scroll` : Restructure the top header into a single horizontal row on widescreen displays (>1200px), with the Logo on the left, Utility Panel on the right, and the Hub Tabs (`.tabs`) freely scrolling in between using the new swiper arrows. Collapse back to the 3-row stacked view only on smaller screens (<1200px) when the hubs start to shrink too much.
 - [🚀] `feat/pure-flexbox-gui-migration` : Completely rebuilt the global layout engine to utilize 100% fluid flexbox arrays safely mitigating element overlap bugs without absolute CSS overrides.
 
 ### Target: `main`
 *(Epic: Tailwind Modal Migration)*
+*(Shipped v1.0.6 — 2026-04-12)*
 - [🚀] `chore/socialz-tailwind-purge` : Migrate the SOCIALZ Add/Edit Skater modal, LTV Metrics Modal, and Analytics Dashboard Modal from Tailwind utility classes to native Vanilla CSS / var(--*) tokens to enforce consistency with the rest of the terminal.
 
 ### Target: `main`
 *(Epic: Sitewide Button State Feedback)*
+*(Shipped v1.0.4 — 2026-04-12)*
 - [🚀] `feat/button-progress-states` : Ensure that all save, sync, and upload buttons across the app visually reflect a progress or loading status (e.g. changing text to "Saving...", "Synced!", showing spinners) so users know an operation is processing/completed.
   - [dYs?] **Specific Hit Target**: Ensure the "EXPORT BACKUP" button in Brainz shows progress again.
 
 ### Target: `main`
 *(Epic: Inventory Data Grid & ROP Management)*
+*(Shipped v1.0.3 — 2026-04-12)*
 - [🚀] `feat/inventory-grid-search` : Add a live search/filtering feature and column filters in the DATAZ/EDITZ ledgers (similar to the bulk edit search in Recipez).
 - [🚀] `feat/raw-goods-rop-lead-times` : Create the ability to define and add ROP (Reorder Point) lead times for all individually tracked Raw Goods.
 
 ### Target: `epic/webrtc-cycle-scanner`
+*(Shipped v1.0.2 — 2026-04-11)*
 - [🚀] `feat/webrtc-cycle-counts` : A scanner using your iPhone camera connected natively to STOCKZ to do warehouse cycle counts rapidly.
 - [🚀] `chore/cycle-count-scanner-refactor` : Migrate the Cycle Count camera scanner to use the same implementation pattern as the SOP editor scanner (which reliably launches phone camera). Ensure the WebRTC constraint logic fully supports cross-platform execution specifically for iPhone iOS Safari, native Android, and PC webcams. Ensure consistent behavior across all scanning entry points.
 
 ### Target: `epic/tech-debt-clearance`
+*(Shipped Pre-v1.0.21)*
 - [🚀] `debt/security` : **[HIGH] RESOLVED ✅** `xlsx` (SheetJS) CVEs Prototype Pollution + ReDoS. Audited the repo to verify it wasn't required for compilation, and effectively eradicated the NPM ghost package via `npm uninstall xlsx`. `npm audit` returned 0 vulnerabilities.
 - [🚀] `debt/deps` : **RESOLVED ✅** `@supabase/supabase-js` bumped to `2.103.0`.
 - [🚀] `debt/deps` : **RESOLVED ✅** `supabase` CLI bumped to `2.89.1`.
@@ -221,32 +236,38 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `debt/deps` : **RESOLVED ✅** Bump outdated dependencies: @supabase/supabase-js to 2.105.0, supabase CLI to 2.95.5, eslint to 10.2.1, prettier to 3.8.3. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `epic/ltv-cac-metrics`
+*(Shipped Pre-v1.0.21)*
 - [🚀] `feat/historical-ltv-analysis` : Pull historical Shopify orders to find out how many people buy twice.
 - [🚀] `feat/repeat-customer-engine` : Implement backend logic to digest the historical Shopify dataset and track repeat customers using anonymized metrics.
 - [🚀] `feat/ltv-metrics-modal` : Design and build a new UI modal (or integrate into the CEO Terminal) to visualize Repeat Customer Rates and Lifetime Value insights.
 
 ### Target: `epic/shopify-sync-v2`
+*(Shipped Pre-v1.0.21)*
 - [🚀] `feat/auth-app-security` : Auth & App Security
 - [🚀] `feat/orders-create-hook` : `orders/create` Inbound Edge Function
 - [🚀] `feat/payload-normalization` : Payload Normalization
 - [🚀] `feat/idempotent-db-insert` : Idempotent Database Insert
 
 ### Target: `epic/stockz-rop-alerts`
+*(Shipped Pre-v1.0.21)*
 - [🚀] `feat/inventory-velocity` : In `inventory-module.js`, calculate daily velocity of filament usage.
 - [🚀] `feat/supplier-lead-time` : Hardcode a "Supplier Lead Time" (e.g., 5 days for Amazon Prime).
 - [🚀] `feat/rop-warning-banner` : Build a red warning banner that flashes when stock hits `(Velocity * Lead Time) + 10% Safety`.
 
 ### Target: `epic/stockz-velocity-dashboard`
+*(Shipped Pre-v1.0.21)*
 - [🚀] `feat/velocityz-button` : Create a "Velocityz" button next to the Low Stockz Report.
 - [🚀] `feat/velocity-forecasting-modal` : Build a forecasting modal that visualizes mathematical reorder constraints based on current raw sales velocity.
 - [🚀] `feat/velocity-filters` : Add filters to slice and analyze velocity by day, week, and month.
 - [🚀] `feat/sandbox-manipulation` : Enable "sandbox" manipulation where users can overwrite sold amounts to forecast hypothetical demand spikes, while strictly retaining the raw real sold velocity data unharmed.
 
 ### Target: `epic/cfo-waterfall`
+*(Shipped Pre-v1.0.21)*
 - [🚀] `feat/cfo-waterfall-chart` : In `ceo-module.js` (Chart.js block), build a Waterfall Chart.
 - [🚀] `feat/cfo-waterfall-mapping` : Map Gross Sales → minus COGS → minus Gateway Fees (Shopify takes 2.9% + 30c) → minus Shipping Costs → minus Social Ads.
 
 ### Target: `epic/agentic-skills-evaluation`
+*(Shipped Pre-v1.0.21)*
 - [🚀] `chore/audit-to-skills` : Go back through all .md files and decide if any need to be migrated to `.agents/skills/`.
 - [🚀] `feat/frontend-skills` : Investigate and create new .md skill files specifically tailored to a desktop-first browser-based HTML/JS application environment.
 
