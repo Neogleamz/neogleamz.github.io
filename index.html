@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.05.17.0158"></script>
+    <script src="assets/js/system-version.js?v=v.2026.05.17.0214"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.17.0158"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.17.0214"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.17.0158"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.17.0214"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.05.17.0158"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.05.17.0214"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -3519,6 +3519,7 @@
                         <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                         <div style="display:flex; gap:8px;">
                             <button data-click="click_openMediaManager_telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                            <button data-click="click_openSOPSnapshotCamera_production" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
                             <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
                             <button data-click="click_if_typeof_toggleHorizontalPrev" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                         </div>
@@ -3530,7 +3531,8 @@
                         <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;·&nbsp;
                         <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
                         <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
-                        <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code
+                        <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;·&nbsp;
+                        <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
                         &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">❓ Full Guide</span>
                     </div>
                     <textarea id="productionAdminQA" data-input="input_renderProductionTelemetryPrevi" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;"></textarea>
@@ -5132,20 +5134,20 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/bom-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/production-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/sales-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/task-engine.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/print-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.05.17.0158"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.05.17.0158"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/bom-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/production-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/sales-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/task-engine.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/print-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.05.17.0214"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.05.17.0214"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5357,6 +5359,14 @@
                         <div><span style="color:#0ea5e9; font-weight:900;">Spaces</span> → hyphens, always uppercase</div>
                         <div><span style="color:#0ea5e9; font-weight:900;">Ex:</span> <code>[SCAN:SK8Lytz Unit]</code> validates bin labelled <code>NGZ-SK8LYTZ-UNIT</code></div>
                     </div>
+                </div>
+            </div>
+            <!-- [CAMERA] -->
+            <div style="display:grid; grid-template-columns:185px 1fr; gap:16px; align-items:start;">
+                <div style="background:rgba(16,185,129,0.1); border:1px solid #10b981; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:#10b981; font-weight:900;">[CAMERA]</div>
+                <div>
+                    <div style="font-weight:800; color:var(--text-heading); margin-bottom:4px;">Live Photo Capture <span style="background:#10b981; color:white; font-size:9px; padding:2px 7px; border-radius:12px; font-family:sans-serif; font-weight:800; vertical-align:middle;">NEW</span></div>
+                    <div style="font-size:12px; color:var(--text-muted); line-height:1.7;">Renders a prominent "TAKE PHOTO" button. The worker must capture a live photo to satisfy this QA step. The resulting image URL will be injected into the Telemetry Ledger alongside other form inputs.</div>
                 </div>
             </div>
             <div style="font-size:10px; font-weight:900; color:#a78bfa; letter-spacing:2.5px; border-bottom:1px solid rgba(167,139,250,0.2); padding-bottom:6px; margin-top:4px;">MEDIA TOKENS</div>
@@ -5603,18 +5613,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.17.0158"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.17.0214"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.17.0158"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.17.0214"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.17.0158"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.17.0214"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.17.0158"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.17.0158"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.17.0158"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.17.0214"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.17.0214"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.17.0214"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.05.17.0158"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.05.17.0158"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.05.17.0214"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.05.17.0214"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">

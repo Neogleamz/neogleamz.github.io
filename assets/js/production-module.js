@@ -2013,6 +2013,10 @@ function parseProductionTelemetryLine(q, contextIdx) {
     } else if (q.startsWith('[INPUT]') && q.match(/\[INPUT\]/gi).length === 1 && q.indexOf('[INPUT]') === 0) {
         let label = q.replace(/\[INPUT\]/ig, '').trim();
         html = `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:2px; margin-bottom:2px; padding:6px 10px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; width:100%;"><label style="font-size:12px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${label}</label><input type="text" placeholder="..." style="flex:1; padding:6px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:13px; font-weight:bold;"></div>`;
+    } else if (q.startsWith('[CAMERA]') && q.match(/\[CAMERA\]/gi).length === 1 && q.indexOf('[CAMERA]') === 0) {
+        let label = q.replace(/\[CAMERA\]/ig, '').trim();
+        if(!label) label = "Camera Log";
+        html = `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:2px; margin-bottom:2px; padding:6px 10px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; width:100%;"><label style="font-size:12px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${label}</label><div style="flex:1; display:flex; flex-direction:column; align-items:flex-end;"><button type="button" class="btn-orange-muted worker-photo-btn" data-click="click_workerTakePhoto" data-ctx="${contextIdx}" data-label="${label}" style="padding:6px 12px; font-size:12px; border-radius:6px; display:flex; align-items:center; gap:5px; width:100%; max-width:200px; justify-content:center;">📸 TAKE PHOTO</button><div id="worker-photo-res-${contextIdx}" style="display:none; margin-top:8px; width:100%; text-align:right;"></div></div></div>`;
     } else if (q.startsWith('# ')) {
         let content = parseAll(q.substring(2).trim());
         html = `<div style="font-size:14px; font-weight:900; color:#10b981; margin-top:8px; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:4px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; width:100%; line-height:1.4;">${content}</div>`;
@@ -2026,6 +2030,12 @@ function parseProductionTelemetryLine(q, contextIdx) {
     }
     return html;
 }
+
+window.click_openSOPSnapshotCamera_production = function(e) {
+    if(typeof e !== 'undefined' && e) e.preventDefault();
+    window.activeSOPTextAreaId = 'productionAdminQA';
+    if(typeof openSOPSnapshotCamera === 'function') openSOPSnapshotCamera();
+};
 
 function processTelemetryCanvasRendering(container) {
     if (typeof JsBarcode !== 'undefined') {

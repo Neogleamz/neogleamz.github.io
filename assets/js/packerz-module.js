@@ -1596,6 +1596,29 @@ async function uploadSOPMedia(file) {
 
 // Inserts a token at the cursor position in the QA textarea
 function insertSOPToken(token) {
+    if (window.activeWorkerPhotoTarget) {
+        const urlMatch = token.match(/\[IMG:(https?:\/\/[^\]]+)\]/i);
+        if (urlMatch) {
+            const url = urlMatch[1];
+            const targetDiv = document.getElementById(`worker-photo-res-${window.activeWorkerPhotoTarget}`);
+            if (targetDiv) {
+                targetDiv.style.display = 'block';
+                const label = window.activeWorkerPhotoLabel || 'Camera Log';
+                targetDiv.innerHTML = window.safeHTML ? window.safeHTML(`
+                    <img src="${url}" loading="lazy" style="max-height:100px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; display:inline-block;" data-click="click_openImage" data-url="${url}">
+                    <input type="hidden" class="packerz-qa-input" data-label="${label}" value="${url}">
+                `) : `
+                    <img src="${url}" loading="lazy" style="max-height:100px; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in; display:inline-block;" data-click="click_openImage" data-url="${url}">
+                    <input type="hidden" class="packerz-qa-input" data-label="${label}" value="${url}">
+                `;
+            }
+        }
+        window.activeWorkerPhotoTarget = null;
+        window.activeWorkerPhotoLabel = null;
+        closeSOPMediaPicker();
+        return;
+    }
+
     const ta = document.getElementById(activeSOPTextAreaId);
     if (!ta) return;
     const start = ta.selectionStart;
@@ -1612,10 +1635,24 @@ function insertSOPToken(token) {
         renderPackerzTelemetryPreview();
     } else if (activeSOPTextAreaId === 'productionAdminQA' && typeof renderProductionTelemetryPreview === 'function') {
         renderProductionTelemetryPreview();
+    } else if (activeSOPTextAreaId === 'packerzLiveInlineQA' && typeof renderPackerzLiveInlineTelemetryPreview === 'function') {
+        renderPackerzLiveInlineTelemetryPreview();
     }
 
     closeSOPMediaPicker();
 }
+
+window.click_workerTakePhoto = function(e) {
+    if(typeof e !== 'undefined' && e) e.preventDefault();
+    let ctx = e.target.dataset.ctx || e.target.closest('.worker-photo-btn')?.dataset.ctx;
+    let label = e.target.dataset.label || e.target.closest('.worker-photo-btn')?.dataset.label || 'Camera Log';
+    if(ctx) {
+        window.activeWorkerPhotoTarget = ctx;
+        window.activeWorkerPhotoLabel = label;
+        window.activeSOPTextAreaId = null; // Clear out the editor context
+        if(typeof openSOPSnapshotCamera === 'function') openSOPSnapshotCamera();
+    }
+};
 
 // ============================================================
 // SOP MEDIA BROWSER — Folder Navigation & Guide

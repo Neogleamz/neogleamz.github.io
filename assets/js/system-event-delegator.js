@@ -798,6 +798,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_captureSOPSnapshot':
                     if (typeof window.click_captureSOPSnapshot === 'function') window.click_captureSOPSnapshot();
                     break;
+                case 'click_workerTakePhoto':
+                    if (typeof window.click_workerTakePhoto === 'function') window.click_workerTakePhoto(event);
+                    break;
+                case 'click_openSOPSnapshotCamera_production':
+                    if (typeof window.click_openSOPSnapshotCamera_production === 'function') window.click_openSOPSnapshotCamera_production(event);
+                    break;
                 case 'click_if_event_target_this_closeSOPA':
                     if(event.target===this)closeSOPAuditLog();
                     break;
