@@ -34,3 +34,63 @@ When the user invokes `/wind-down` (or strongly implies they are ending the sess
 5. **Hard Freeze**: 
    - Identify and terminate any active local development servers (e.g., processes running on standard web ports like 3000, 5173, 8080).
    - Output a final, thematic SK8Lytz-style sign-off (e.g., *"Skates docked. Lights dimmed. See you on the next session."*).
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+After completing all 5 steps above, you MUST render the following structured sections. Do NOT output a plain text summary. Do NOT skip any section. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 1. Session Gate Checklist
+Render a Markdown table showing the status of each wind-down step:
+
+```
+| Gate | Result | Detail |
+|---|---|---|
+| 📚 Master Reference Sync | ✅ | Added Section N — [topic] |
+| 📋 Bucket List Grooming | ✅ | N task(s) marked, 0 orphans found |
+| 🧹 Stray Task Sweep | ✅ | 0 phantom `[x]` tasks remaining |
+| 💾 Workspace Sync | ✅ | N file(s) committed and pushed |
+| 🔌 Hard Freeze | ✅ | No active dev servers found |
+```
+
+### 2. Achievements Table
+Render a Markdown table summarizing all major items accomplished this session:
+
+```
+| Epic / Task | Status | Files Touched |
+|---|---|---|
+| `feat/example-feature` | 🚀 Shipped | `module.js`, `index.html` |
+| Boy Scout cleanup | ✅ | `delegator.js` |
+```
+
+### 3. 🪤 Traps & Landmines
+You MUST proactively scan for and report the following items using `> [!WARNING]` alert blocks. Do NOT skip this section even if you think nothing is noteworthy. Actively hunt for:
+- **Orphaned utility scripts** in `tools/` or the project root that were committed as one-shot patches
+- **`test-*.js` files** in the root that should be in `scripts/`
+- **Pre-existing ESLint warnings/errors** that weren't addressed
+- **Cross-browser rendering risks** (especially Mobile Safari)
+- **Half-finished refactors** or TODO comments introduced during the session
+- **Uncommitted ledger updates** (Master Reference, Bucket List)
+
+If after scanning you genuinely find zero issues, render a single `> [!TIP]` block stating: "Clean session — no traps detected."
+
+### 4. 📡 Final State Card
+Render a compact Markdown table with the session's final metadata:
+
+```
+| Field | Value |
+|---|---|
+| 🌿 Branch | `main` |
+| 🏷️ Tag | `vX.Y.Z` (if released) |
+| 🔖 Last Commit | `abc1234` — `commit message` |
+| 🕰️ System Version | `v.YYYY.MM.DD.HHMM` |
+| 🧪 Test Suite | N/N ✅ |
+| 🔒 Workspace | Clean / Dirty |
+```
+
+### 5. 🎯 Next Session Prompt
+Render a `> [!IMPORTANT]` block asking the user for their next session priority. Suggest 2-3 candidates from the active Bucket List queue.
+
+### 6. 🛹 Sign-Off
+End with a thematic SK8Lytz sign-off line in *italics*.

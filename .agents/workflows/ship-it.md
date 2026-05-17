@@ -24,6 +24,35 @@ When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize 
    - Run `git checkout <base-branch>`.
    - Run `git merge --no-ff <feature-branch> -m "chore(merge): integrate <feature-branch>"`.
    - **CRITICAL:** Run `git status`. If there are merge conflicts, you must **HALT**, output the conflicted files to the chat, and wait for the user to resolve them. Do NOT proceed to step 8.
-6. **Push to Remote**: If the merge was clean, run `git push origin <base-branch>` (if a remote is configured).
-7. **Clean Local**: Run `git branch -d <feature-branch>`.
-8. **Halt and Confirm**: State that the merge was successful and the local feature branch was cleaned up. Ask the user what the next priority is.
+8. **Push to Remote**: If the merge was clean, run `git push origin <base-branch>` (if a remote is configured).
+9. **Clean Local**: Run `git branch -d <feature-branch>`.
+10. **Halt and Confirm**: Present the final SITREP using the mandatory output format below, then ask the user what the next priority is.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+After the merge is complete, you MUST render a structured **Gate Results Table** and a **Boy Scout Audit** block. Do NOT output a plain text summary. The exact template is:
+
+### Gate Results Table
+Render a Markdown table with every gate from above, its result (✅ PASS, ❌ FAIL, ⏭️ SKIPPED), and a brief detail:
+
+```
+| Gate | Result | Detail |
+|---|---|---|
+| 🌿 Branch Verified | ✅ | `feat/xxx` → `main` |
+| 🧪 Tests (`npm test`) | ✅ | 27/27 PASS |
+| 🔎 ESLint (`npx eslint`) | ✅ | 0 errors (N warnings) |
+| 📋 Ledger Reconciliation | ✅ | N task(s) marked `[x]` |
+| 💾 Database Sync Gate | ⏭️ | No `.sql` migrations found |
+| 📚 Knowledge Audit Gate | ⏭️ | No new protocols documented |
+| 🔀 Merge | ✅ | Clean, no conflicts |
+| 🚀 Push | ✅ | `origin/main` updated |
+| 🧹 Cleanup | ✅ | Feature branch deleted locally |
+```
+
+### Boy Scout Audit
+If a Boy Scout cleanup was performed during the pre-flight, render a `> [!NOTE]` block describing exactly what was fixed. If none was applicable, state why using a `> [!TIP]` block.
+
+### Workflow Suggestions
+After the table, render a `> [!TIP]` block suggesting the next most logical workflow (e.g., `/release`, `/wind_down`, `/status_update`). Briefly explain why.

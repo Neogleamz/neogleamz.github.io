@@ -25,4 +25,23 @@ When the user invokes `/release` (or instructs you to "cut a release", "prepare 
    - Stage ONLY the release files by executing: `git add package.json CHANGELOG.md tools/SK8Lytz_Bucket_List.md`
    - Execute the release commit: `git commit -m "chore(release): bump to v<new-version-number>"`
    - Execute the tag: `git tag v<new-version-number>` to officially stamp the timeline.
-5. **Halt**: Output a success message, confirm the tag was created, and print the newly generated release notes to the chat.
+5. **Halt**: Present the final release summary using the mandatory output format below.
+
+---
+
+## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
+
+After the tag is created, you MUST render the following structured output. Do NOT output a plain text summary. Every model (Claude, Gemini, GPT) must produce this exact structure:
+
+### 1. Release Confirmation Block
+Render a `> [!NOTE]` block confirming the tag was created, including the tag name, commit hash, and system version:
+```
+> [!NOTE]
+> 🏷️ **Tag `vX.Y.Z` confirmed** on `origin/main` at commit `abc1234` — `v.YYYY.MM.DD.HHMM`
+```
+
+### 2. Release Notes
+Render a formatted Markdown release notes block with the version number as a header (`## 📋 Release Notes — vX.Y.Z (YYYY-MM-DD)`), followed by subsections for each changelog category (`### ✨ Features & Bug Fixes`, `### 🧹 Chores & Cleanup`, etc.). Each item should be a bold-titled bullet.
+
+### 3. Next Steps Prompt
+Render a `> [!TIP]` block suggesting logical next actions (e.g., `/wind_down`, `/status_update`, or picking the next Bucket List item). Briefly explain the state of the active task queue.
