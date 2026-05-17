@@ -318,7 +318,13 @@ function teRenderTaskGrid(filter = null) {
         if (!isPersonalView) {
             return c.project_id === window.teActiveProjectId;
         } else {
-            return !c.project_id && c.assigned_to_id === currentUserId;
+            // Include personal cycles
+            if (!c.project_id && c.assigned_to_id === currentUserId) return true;
+            // Include project cycles ONLY if they contain tasks in the current personal view
+            if (c.project_id) {
+                return displayTasks.some(t => !t.parent_task_id && !t.personal_cycle_id && t.cycle_id === c.id);
+            }
+            return false;
         }
     }).sort((a,b) => {
         let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
@@ -327,12 +333,18 @@ function teRenderTaskGrid(filter = null) {
     });
     
     sortedCyclez.forEach(c => {
-        cycleGroups.set(c.id, { title: c.title, color: c.color_hex || '#2dd4bf', tasks: [], project_id: c.project_id || null });
+        let title = c.title;
+        // Prefix project cycles with the project name for clarity in personal views
+        if (isPersonalView && c.project_id) {
+            let p = taskEngineDB.projectz.find(proj => proj.id === c.project_id);
+            if (p) title = `${p.title} ➔ ${c.title}`;
+        }
+        cycleGroups.set(c.id, { title: title, color: c.color_hex || '#2dd4bf', tasks: [], project_id: c.project_id || null });
     });
     
     // Sort tasks into cycles (only top-level tasks)
     displayTasks.filter(t => !t.parent_task_id).forEach(t => {
-        let cid = isPersonalView ? t.personal_cycle_id : t.cycle_id;
+        let cid = isPersonalView ? (t.personal_cycle_id || t.cycle_id) : t.cycle_id;
         if (cid && cycleGroups.has(cid)) {
             cycleGroups.get(cid).tasks.push(t);
         } else {
