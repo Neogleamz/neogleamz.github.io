@@ -1,5 +1,12 @@
 # SK8Lytz Application Changelog
 
+## [1.0.38] - 2026-05-17
+### Features & Bug Fixes
+- **SOP Print Formatting Options**: Replaced the static "Print SOP" button with a 3-mode print modal allowing users to choose between Checklist, Rich Text, or Full SOP output. Applied proper print styling to checklists (`#Headers` → formatted section headings, `> Subtexts` → styled callout blocks). Standardized all 4 SOP button bars (Master Production, Master Packerz, Inline Packerz, Inline Batchez) into compact, responsive single-row pill layouts. Fixed Rich Text toolbar flex overflow — `rt-toolbar` now wraps gracefully at narrow widths, the font-size select is clamped to `max-width:100px`, and the PHOTO/UPLOAD/NEW URL action row uses `flex-wrap:wrap` with `white-space:nowrap` per button.
+
+### Chores & Cleanup (Boy Scout)
+- **Duplicate Case Label Elimination**: Removed 2 dead duplicate `no-duplicate-case` ESLint errors in `system-event-delegator.js`. Renamed `click_window_openPrintSOP_currentPri` → `click_window_openLayerzPrintSOP_currentPri` (3D Layerz-specific SOP handler) and `click_printPackerzSOP` → `click_printPackerzSOP_legacy` (legacy pre-modal handler) to restore correct event routing and eliminate unreachable dead code.
+
 ## [1.0.37] - 2026-05-17
 ### Features & Bug Fixes
 - **SOP Direct File Upload**: Implemented direct file uploading to Supabase Storage for both checklist items and rich text attachments. Replaced the non-functional "MEDIA" button in the checklist to utilize this new upload flow.
