@@ -2324,3 +2324,105 @@ window.change_handleShopifyBillingUpload = async function(e) {
     };
     reader.readAsArrayBuffer(file);
 };
+
+// ============================================================
+// UNIVERSAL SOP RESIZER ENGINE
+// ============================================================
+
+window.unifiedSopResizing = false;
+window.unifiedSopLeftPaneId = null;
+window.unifiedSopWrapperId = null;
+window.unifiedSopPreviewColId = null;
+window.unifiedSopIsInline = false;
+
+window.initUnifiedSopResizer = function(e, leftPaneId, wrapperId, previewColId, isInline) {
+    if(e) e.preventDefault();
+    window.unifiedSopResizing = true;
+    window.unifiedSopLeftPaneId = leftPaneId;
+    window.unifiedSopWrapperId = wrapperId;
+    window.unifiedSopPreviewColId = previewColId;
+    window.unifiedSopIsInline = isInline;
+    
+    document.body.style.cursor = 'col-resize';
+    document.addEventListener('mousemove', window.doUnifiedSopResize);
+    document.addEventListener('mouseup', window.stopUnifiedSopResize);
+};
+
+window.doUnifiedSopResize = function(e) {
+    if(!window.unifiedSopResizing) return;
+    const wrapper = document.getElementById(window.unifiedSopWrapperId);
+    const leftPane = document.getElementById(window.unifiedSopLeftPaneId);
+    if(!wrapper || !leftPane) return;
+
+    const rect = wrapper.getBoundingClientRect();
+    let newWidth = e.clientX - rect.left - 20;
+    let minWidth = 300;
+
+    let maxBound;
+    if (window.unifiedSopIsInline) {
+        maxBound = rect.width - 350;
+    } else {
+        const previewCol = window.unifiedSopPreviewColId ? document.getElementById(window.unifiedSopPreviewColId) : null;
+        let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
+        maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
+    }
+
+    if(newWidth < minWidth) newWidth = minWidth;
+    if(newWidth > maxBound) newWidth = maxBound;
+
+    leftPane.style.flex = `0 0 ${newWidth}px`;
+    leftPane.style.width = newWidth + 'px';
+};
+
+window.stopUnifiedSopResize = function() {
+    if(window.unifiedSopResizing) {
+        window.unifiedSopResizing = false;
+        document.body.style.cursor = 'default';
+        document.removeEventListener('mousemove', window.doUnifiedSopResize);
+        document.removeEventListener('mouseup', window.stopUnifiedSopResize);
+    }
+};
+
+window.initInlineResize = function(e, grpId) {
+    if(e) e.preventDefault();
+    window.isInlineResizing = true;
+    window.currentInlineResizeGrp = grpId;
+    document.body.style.cursor = 'col-resize';
+    document.addEventListener('mousemove', window.doInlineResize);
+    document.addEventListener('mouseup', window.stopInlineResize);
+};
+
+window.doInlineResize = function(e) {
+    if(!window.isInlineResizing) return;
+    let grpId = window.currentInlineResizeGrp;
+    const wrapper = document.getElementById('inlineContainer_' + grpId);
+    const leftPane = document.getElementById('inlineLeftPane_' + grpId);
+    const rightPane = document.getElementById('inlineRightPane_' + grpId);
+    if(!wrapper || !leftPane) return;
+    
+    const rect = wrapper.getBoundingClientRect();
+    let newWidth = e.clientX - rect.left - 15;
+    
+    const previewCol = document.getElementById('inlinePreviewContainer_' + grpId);
+    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
+
+    let minBound = isPreviewOpen ? 640 : 320;
+    let maxBound = rect.width - 350;
+
+    if(newWidth < minBound) newWidth = minBound;
+    if(newWidth > maxBound) newWidth = maxBound;
+
+    leftPane.style.flex = '0 0 ' + newWidth + 'px';
+    leftPane.style.width = newWidth + 'px';
+    if(rightPane) rightPane.style.flex = '1 1 0';
+};
+
+window.stopInlineResize = function() {
+    if(window.isInlineResizing) {
+        window.isInlineResizing = false;
+        window.currentInlineResizeGrp = null;
+        document.body.style.cursor = 'default';
+        document.removeEventListener('mousemove', window.doInlineResize);
+        document.removeEventListener('mouseup', window.stopInlineResize);
+    }
+};
