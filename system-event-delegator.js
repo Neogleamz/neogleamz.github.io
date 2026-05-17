@@ -366,13 +366,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         const cycleId = el.getAttribute('data-cycle-id');
                         const groupEl = document.getElementById('te-cycle-group-' + cycleId);
                         if (groupEl) {
+                            let collapsedCache;
+                            try {
+                                collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}') || {};
+                            } catch(e) { collapsedCache = {}; }
+                            
                             if (groupEl.style.display === 'none') {
                                 groupEl.style.display = 'flex';
                                 el.textContent = '▼';
+                                collapsedCache[cycleId] = false;
                             } else {
                                 groupEl.style.display = 'none';
                                 el.textContent = '▶';
+                                collapsedCache[cycleId] = true;
                             }
+                            localStorage.setItem('neogleamz_task_sections_collapsed', JSON.stringify(collapsedCache));
                         }
                     }
                     break;
