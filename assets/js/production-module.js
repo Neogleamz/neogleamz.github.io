@@ -1387,7 +1387,7 @@ function renderActiveWO(id) {
                                 ${grp.title} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <button class="btn-slate sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="font-size:10px; padding:2px 8px;">🖨️ PRINT</button>
+                                <button class="btn-slate sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="font-size:10px; padding:2px 8px;">🖨️ PRINT SOP</button>
                                 <button class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'} sop-edit-btn" data-grp-id="${grp.id}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
                                 <div class="sop-chev-btn" data-grp-id="${grp.id}" style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" id="sopgrp_icon_${grp.id}">${chev}</div>
                             </div>
@@ -2159,10 +2159,11 @@ window.executeSopPrint = function(printType) {
             return;
         }
 
-        // 1. GATHER STEPS
-        let stepsToRender = [];
+        // 1. GATHER DATA
+        let checklistsToRender = [];
+        let richtextStepsToRender = [];
         let hasRichText = false;
-        let richTextHTML = '';
+        let globalRichTextHTML = '';
         let headerTitle = currentWO ? currentWO.wo_id : 'SOP Document';
         let targetProductName = currentWO ? currentWO.product_name : '';
 
@@ -2174,51 +2175,71 @@ window.executeSopPrint = function(printType) {
             headerTitle = "SOP: " + targetProductName;
         }
 
+        // Helper to extract qaChecks and steps correctly
+        function extractPayload(payload) {
+            if(!payload) return { qa: [], steps: [] };
+            if(Array.isArray(payload)) return { qa: payload, steps: [] }; // Legacy format
+            return {
+                qa: Array.isArray(payload.qaChecks) ? payload.qaChecks : (payload.qaChecks ? Object.keys(payload.qaChecks).map(k=>payload.qaChecks[k]) : []),
+                steps: Array.isArray(payload.steps) ? payload.steps : (payload.steps ? Object.keys(payload.steps).map(k=>payload.steps[k]) : [])
+            };
+        }
+
         // Sub-assemblies routing if present and NO TARGET OVERRIDE
         if(currentWO && currentWO.routing && !window.activePrintTargetOverride && !(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none')) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
-                    let subPayload = sopsDB[sub];
-                    let subSteps = (subPayload && typeof subPayload === 'object' && !Array.isArray(subPayload)) ? (subPayload.steps || []) : (subPayload || []);
-                    if(subSteps.length > 0) {
+                    let subPayload = extractPayload(sopsDB[sub]);
+                    if(subPayload.qa.length > 0 || subPayload.steps.length > 0) {
                         let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
                         let emo = is3D ? '🖨️' : '⚙️';
                         let tp = is3D ? '3D Print' : 'Build Sub-Assembly';
-                        stepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` });
-                        stepsToRender = stepsToRender.concat(subSteps);
+                        
+                        if(subPayload.qa.length > 0) {
+                            checklistsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` });
+                            checklistsToRender = checklistsToRender.concat(subPayload.qa);
+                        }
+                        if(subPayload.steps.length > 0) {
+                            richtextStepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${sub}` });
+                            richtextStepsToRender = richtextStepsToRender.concat(subPayload.steps);
+                        }
                     }
                 }
             });
         }
 
         // Main steps
-        let mainPayload = sopsDB[targetProductName];
-        let mainSteps = (mainPayload && typeof mainPayload === 'object' && !Array.isArray(mainPayload)) ? (mainPayload.steps || []) : (mainPayload || []);
-        if(mainSteps.length > 0 || stepsToRender.length > 0) {
-            if(mainSteps.length > 0) { 
-                if(!window.activePrintTargetOverride) {
-                    stepsToRender.push({ isHeader: true, text: `📦 Final Assembly: ${targetProductName}` }); 
-                } else {
-                    let is3D = typeof productsDB !== 'undefined' && productsDB[targetProductName] && productsDB[targetProductName].is_3d_print;
-                    let emo = is3D ? '🖨️' : '⚙️';
-                    let tp = is3D ? '3D Print' : 'Sub-Assembly';
-                    stepsToRender.push({ isHeader: true, text: `${emo} ${tp}: ${targetProductName}` });
-                }
+        let mainPayload = extractPayload(sopsDB[targetProductName]);
+        if(mainPayload.qa.length > 0 || mainPayload.steps.length > 0 || checklistsToRender.length > 0 || richtextStepsToRender.length > 0) {
+            let is3D = typeof productsDB !== 'undefined' && productsDB[targetProductName] && productsDB[targetProductName].is_3d_print;
+            let emo = is3D ? '🖨️' : '⚙️';
+            let tp = is3D ? '3D Print' : (window.activePrintTargetOverride ? 'Sub-Assembly' : 'Final Assembly');
+            let mainHeader = window.activePrintTargetOverride ? `${emo} ${tp}: ${targetProductName}` : `📦 Final Assembly: ${targetProductName}`;
 
-                stepsToRender = stepsToRender.concat(mainSteps); 
+            if(mainPayload.qa.length > 0) {
+                checklistsToRender.push({ isHeader: true, text: mainHeader }); 
+                checklistsToRender = checklistsToRender.concat(mainPayload.qa); 
+            }
+            if(mainPayload.steps.length > 0) {
+                richtextStepsToRender.push({ isHeader: true, text: mainHeader });
+                richtextStepsToRender = richtextStepsToRender.concat(mainPayload.steps);
             }
         }
 
-        // Fetch Rich Text if requested
+        // Fetch Global Rich Text if requested
         if(printType === 'richtext' || printType === 'full') {
             let pData = productsDB[targetProductName];
             if(pData && pData.sop_richtext) {
-                richTextHTML = pData.sop_richtext;
+                globalRichTextHTML = pData.sop_richtext;
+                hasRichText = true;
+            }
+            if(richtextStepsToRender.length > 0) {
                 hasRichText = true;
             }
         }
 
-        let mappedSteps = stepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
+        let mappedChecklist = checklistsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
+        let mappedRichText = richtextStepsToRender.map(s => (s.isHeader || typeof s !== 'string') ? s : {text: s, attachments: []});
 
         // 2. BUILD HTML HEAD & CSS
         let html = `<html><head><title>SOP - ${headerTitle}</title>
@@ -2243,20 +2264,25 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
 
         // 3. RENDER CHECKLIST
         if(printType === 'checklist' || printType === 'full') {
-            if(mappedSteps.length === 0) {
-                html += `<p>No checklist steps defined.</p>`;
+            if(mappedChecklist.length === 0) {
+                html += `<p style="color:#666; font-style:italic;">No checklist steps defined.</p>`;
             } else {
-                mappedSteps.forEach((s) => {
+                mappedChecklist.forEach((s) => {
                     if(s.isHeader) { 
                         html += `<div class="header">${s.text}</div>`; 
                     } else { 
                         // Parse standard text through telemetry engine logic to convert markdown-like syntax
                         let parsedHTML = parseProductionTelemetryLine(s.text, -1);
-                        // Make links safe for print (remove target_blank issues, though print ignores it)
-                        html += `<div class="step">
-                                    <div class="step-checkbox"></div>
-                                    <div class="step-content">${parsedHTML}</div>
-                                 </div>`; 
+                        
+                        // Prevent checkboxes from appearing next to headers and subtexts
+                        if (s.text.startsWith('# ') || s.text.startsWith('> ') || s.text.startsWith('[INPUT]') || s.text.startsWith('[CAMERA]')) {
+                            html += `<div class="step-content" style="margin-top:10px; margin-bottom:6px;">${parsedHTML}</div>`;
+                        } else {
+                            html += `<div class="step">
+                                        <div class="step-checkbox"></div>
+                                        <div class="step-content">${parsedHTML}</div>
+                                     </div>`; 
+                        }
                     }
                 });
             }
@@ -2266,11 +2292,31 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
         if(printType === 'richtext' || printType === 'full') {
             if(hasRichText) {
                 html += `<div class="richtext-container">
-                            <h2 style="color:#f59e0b;">SOP Documentation</h2>
-                            ${richTextHTML}
-                         </div>`;
+                            <h2 style="color:#f59e0b; margin-bottom:20px;">SOP Documentation</h2>`;
+                
+                if (globalRichTextHTML) {
+                    html += `<div style="margin-bottom:30px;">${globalRichTextHTML}</div>`;
+                }
+
+                if (mappedRichText.length > 0) {
+                    let stepCounter = 1;
+                    mappedRichText.forEach((s) => {
+                        if (s.isHeader) {
+                            html += `<div class="header" style="background:rgba(245,158,11,0.05); border-left-color:#F59E0B;">${s.text}</div>`;
+                            stepCounter = 1; // Reset steps per assembly
+                        } else {
+                            let content = s.text || '';
+                            html += `<div style="margin-bottom:25px; padding-bottom:15px; border-bottom:1px dashed #ccc;">
+                                        <strong style="color:#F59E0B; font-size:16px; display:block; margin-bottom:10px;">Step ${stepCounter++}</strong>
+                                        <div style="font-size:15px; line-height:1.6;">${content}</div>
+                                     </div>`;
+                        }
+                    });
+                }
+
+                html += `</div>`;
             } else if (printType === 'richtext') {
-                html += `<p>No Rich Text Documentation exists for this SOP.</p>`;
+                html += `<p style="color:#666; font-style:italic;">No Rich Text Documentation exists for this SOP.</p>`;
             }
         }
 
