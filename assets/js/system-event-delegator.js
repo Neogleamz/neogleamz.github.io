@@ -810,10 +810,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openSOPSnapshotCamera_smart':
                     if (typeof window.click_openSOPSnapshotCamera_smart === 'function') window.click_openSOPSnapshotCamera_smart(el);
                     break;
-                case 'click_removeAttachmentRow':
+                case 'click_removeAttachmentRow': {
                     let row = event.target.closest('.media-row');
                     if (row) row.remove();
                     break;
+                }
                 case 'click_openSOPSnapshotCamera_inlineProduction':
                     if (typeof window.click_openSOPSnapshotCamera_inlineProduction === 'function') window.click_openSOPSnapshotCamera_inlineProduction(event.target.closest('[data-click="click_openSOPSnapshotCamera_inlineProduction"]'));
                     break;
