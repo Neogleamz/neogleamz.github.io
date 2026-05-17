@@ -173,6 +173,11 @@ function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catc
 function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) { sysLog("UI Error moving SOP up: " + e.message, true); } }
 function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) { sysLog("UI Error moving SOP down: " + e.message, true); } }
 
+window.addSOPRow = addSOPRow;
+window.removeSOPRow = removeSOPRow;
+window.moveSOPUp = moveSOPUp;
+window.moveSOPDown = moveSOPDown;
+
 function extractSOPDataFromUI(containerId) {
     let steps = []; document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { 
         let t = row.querySelector('.sop-text-rich'); 
