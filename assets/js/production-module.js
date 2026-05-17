@@ -2433,7 +2433,7 @@ window.doInlineResize = function(e) {
     let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
 
     let minBound = isPreviewOpen ? 640 : 320;
-    let maxBound = isPreviewOpen ? (rect.width * 0.70) : (rect.width * 0.35);
+    let maxBound = rect.width - 350;
 
     if(newWidth < minBound) newWidth = minBound;
     if(newWidth > maxBound) newWidth = maxBound;
