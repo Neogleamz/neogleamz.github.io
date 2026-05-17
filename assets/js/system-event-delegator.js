@@ -810,6 +810,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openSOPSnapshotCamera_smart':
                     if (typeof window.click_openSOPSnapshotCamera_smart === 'function') window.click_openSOPSnapshotCamera_smart(el);
                     break;
+                case 'click_moveSOPUp':
+                    if (typeof window.moveSOPUp === 'function') window.moveSOPUp(el);
+                    break;
+                case 'click_moveSOPDown':
+                    if (typeof window.moveSOPDown === 'function') window.moveSOPDown(el);
+                    break;
+                case 'click_addSOPRow':
+                    if (typeof window.addSOPRow === 'function') window.addSOPRow(el);
+                    break;
+                case 'click_removeSOPRow':
+                    if (typeof window.removeSOPRow === 'function') window.removeSOPRow(el);
+                    break;
                 case 'click_removeAttachmentRow': {
                     let row = event.target.closest('.media-row');
                     if (row) row.remove();
@@ -967,18 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.stopPropagation();
                     if(window.openMediaModal) window.openMediaModal(el.getAttribute('data-url'), 'img');
                     break;
-                case 'click_moveSOPUp':
-                    if(window.moveSOPUp) window.moveSOPUp(el);
-                    break;
-                case 'click_moveSOPDown':
-                    if(window.moveSOPDown) window.moveSOPDown(el);
-                    break;
-                case 'click_addSOPRow':
-                    if(window.addSOPRow) window.addSOPRow(el);
-                    break;
-                case 'click_removeSOPRow':
-                    if(window.removeSOPRow) window.removeSOPRow(el);
-                    break;
+
                 case 'click_removeBatchItem':
                     if(window.removeBatchItem) window.removeBatchItem(el.getAttribute('data-index'));
                     break;
@@ -1277,6 +1278,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'mousedown_smartAttachmentUrl':
                     event.preventDefault();
                     if (typeof window.click_addAttachmentRow === 'function') window.click_addAttachmentRow(el);
+                    break;
+                case 'mousedown_sopDirectUpload':
+                    event.preventDefault();
+                    if (typeof window.triggerSopDirectUpload === 'function') window.triggerSopDirectUpload(el);
                     break;
             }
         } catch (error) {

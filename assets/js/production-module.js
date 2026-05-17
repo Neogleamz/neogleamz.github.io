@@ -28,7 +28,7 @@ function closeMediaModal() { try { document.getElementById('mediaModal').style.d
 function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
 function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent;"><select onchange="execRT('fontSize', this.value)" style="width:auto; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main); margin-right:4px;"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
 
-window.generateEditableSOPRow = function(s, idx) {
+window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = 'batches') {
     let safeText = s.text || ''; 
     let attachments = [];
     
@@ -69,7 +69,7 @@ window.generateEditableSOPRow = function(s, idx) {
             <div class="sop-step-movers">
                 <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPUp">▲</button>
                 <button class="icon-btn btn-icon-sq" style="border:none; background:var(--bg-input);" data-click="click_moveSOPDown">▼</button>
-                <button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow">+</button>
+                <button class="icon-btn btn-icon-sq" style="font-size:16px; font-weight:900; border:none; background:#3b82f6; color:white; margin-top:auto;" data-click="click_addSOPRow" data-prodid="${prodId}" data-soptype="${sopType}">+</button>
                 <button class="btn-red-muted icon-btn btn-icon-sq" style="margin-top:5px;" data-click="click_removeSOPRow">✕</button>
             </div>
             <div class="sop-text-container">
@@ -80,6 +80,7 @@ window.generateEditableSOPRow = function(s, idx) {
                 <div style="display:flex; justify-content:flex-end; margin-top:8px; margin-bottom:4px; padding:4px 8px; border-radius:6px;">
                     <div style="display:flex; gap:4px;">
                         <button type="button" data-mousedown="mousedown_smartPhotoPaste" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #F59E0B; background:rgba(245,158,11,0.15); color:#F59E0B; cursor:pointer;" title="Smart Photo Paste">📸 PHOTO</button>
+                        <button type="button" data-mousedown="mousedown_sopDirectUpload" data-prodid="${prodId}" data-soptype="${sopType}" style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; border:1px solid #3b82f6; background:rgba(59,130,246,0.15); color:#3b82f6; cursor:pointer;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
                         <button type="button" data-mousedown="mousedown_smartAttachmentUrl" style="font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; border:1px solid #10b981; background:rgba(16,185,129,0.15); color:#10b981; cursor:pointer;">+ NEW URL</button>
                     </div>
                 </div>
@@ -92,7 +93,7 @@ window.generateEditableSOPRow = function(s, idx) {
 };
 
 // Map old local function name to global function just in case
-function generateEditableSOPRow(s, idx) { return window.generateEditableSOPRow(s, idx); }
+function generateEditableSOPRow(s, idx, prodId = 'unknown', sopType = 'batches') { return window.generateEditableSOPRow(s, idx, prodId, sopType); }
 
 let currentSopMode = 'production'; // 'production' or '3d'
 
@@ -163,15 +164,119 @@ function renderMasterSOP() {
         let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, attachments: []} : s);
         if(mappedSteps.length === 0) mappedSteps = [{}];
         let h = "";
-        mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx); });
+        mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx, p, 'batches'); });
         area.innerHTML = window.safeHTML(h);
     } catch(e) { sysLog(e.message, true); }
 }
 
-function addSOPRow(btn) { try { let newRow = document.createElement('div'); newRow.innerHTML = window.safeHTML(generateEditableSOPRow({}, 999)); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
+function addSOPRow(btn) { try { let pId = btn ? btn.getAttribute('data-prodid') : 'unknown'; let sType = btn ? btn.getAttribute('data-soptype') : 'batches'; let newRow = document.createElement('div'); newRow.innerHTML = window.safeHTML(generateEditableSOPRow({}, 999, pId, sType)); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
 function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) { sysLog("UI Error removing SOP step: " + e.message, true); } }
 function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) { sysLog("UI Error moving SOP up: " + e.message, true); } }
 function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) { sysLog("UI Error moving SOP down: " + e.message, true); } }
+
+window.addSOPRow = addSOPRow;
+window.removeSOPRow = removeSOPRow;
+window.moveSOPUp = moveSOPUp;
+window.moveSOPDown = moveSOPDown;
+
+window.triggerSopDirectUpload = function(btn) {
+    try {
+        let input = document.getElementById('sopDirectUploadInput');
+        if (!input) {
+            input = document.createElement('input');
+            input.type = 'file';
+            input.id = 'sopDirectUploadInput';
+            input.style.display = 'none';
+            input.accept = 'image/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt';
+            document.body.appendChild(input);
+        }
+        let prodId = btn.getAttribute('data-prodid') || '';
+        let sopType = btn.getAttribute('data-soptype') || 'batches';
+        
+        if (!prodId) {
+            if (sopType === 'batches') {
+                let sel = document.getElementById('sopMasterProductSelect');
+                if (sel) prodId = sel.value;
+            } else if (sopType === 'packerz') {
+                let sel = document.getElementById('packerzAdminRecipeSelect');
+                if (sel) prodId = sel.value;
+            }
+        }
+        if (!prodId) prodId = 'unknown';
+        
+        input.onchange = async function(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            
+            let originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ UPLOADING...';
+            btn.style.pointerEvents = 'none';
+            
+            try {
+                let cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                let path = `sops/${sopType}/${prodId}/${Date.now()}_${cleanName}`;
+                
+                const { data, error } = await supabaseClient.storage.from('sop-media').upload(path, file);
+                if (error) throw error;
+                
+                const { data: urlData } = supabaseClient.storage.from('sop-media').getPublicUrl(path);
+                if (!urlData || !urlData.publicUrl) throw new Error("Could not retrieve public URL");
+                
+                let publicUrl = urlData.publicUrl;
+                
+                let fileType = 'doc';
+                if (file.type.startsWith('image/')) fileType = 'img';
+                else if (file.type.startsWith('video/')) fileType = 'vid';
+                
+                let targetTextareaId = btn.getAttribute('data-target-textarea');
+                if (targetTextareaId) {
+                    let ta = document.getElementById(targetTextareaId);
+                    if (ta) {
+                        let token = fileType === 'img' ? `[IMG:${publicUrl}]` : `[MEDIA:${publicUrl}]`;
+                        ta.value = ta.value + (ta.value.endsWith('\n') || ta.value === '' ? '' : '\n') + token;
+                        // trigger input event to update preview
+                        ta.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                } else {
+                    let row = btn.closest('.sop-step-row');
+                    if (row) {
+                        let urlInputs = Array.from(row.querySelectorAll('.m-url'));
+                        let emptyInput = urlInputs.find(inp => !inp.value.trim());
+                        
+                        if (!emptyInput) {
+                            if (typeof window.click_addAttachmentRow === 'function') {
+                                window.click_addAttachmentRow(btn);
+                                urlInputs = Array.from(row.querySelectorAll('.m-url'));
+                                emptyInput = urlInputs[urlInputs.length - 1];
+                            }
+                        }
+                        
+                        if (emptyInput) {
+                            emptyInput.value = publicUrl;
+                            let mRow = emptyInput.closest('.media-row');
+                            if (mRow) {
+                                let typeSel = mRow.querySelector('.m-type');
+                                if (typeSel) typeSel.value = fileType;
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                sysLog("SOP Upload Error: " + err.message, true);
+                alert("Upload failed: " + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.style.pointerEvents = 'auto';
+                input.value = ''; 
+            }
+        };
+        
+        input.click();
+    } catch (e) {
+        sysLog("UI Error triggering direct upload: " + e.message, true);
+    }
+};
+
 
 function extractSOPDataFromUI(containerId) {
     let steps = []; document.getElementById(containerId).querySelectorAll('.sop-step-row').forEach(row => { 
@@ -1296,7 +1401,7 @@ function renderActiveWO(id) {
                         if(mappedSteps.length === 0) mappedSteps = [{}];
                         let stepsHtml = '';
                         mappedSteps.forEach((s, idx) => {
-                            stepsHtml += window.generateEditableSOPRow(s, idx);
+                            stepsHtml += window.generateEditableSOPRow(s, idx, wo.product_name, 'batches');
                         });
 
                         htmlOut += `
@@ -1312,7 +1417,7 @@ function renderActiveWO(id) {
                                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
                                             <div style="display:flex; gap:8px;">
                                                 <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
-                                                <button data-click="click_openMediaManager" data-type="telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
+                                                <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, "\\'")}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;" title="Upload File to Supabase">☁️ UPLOAD MEDIA</button>
                                                 <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
                                                 <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
                                             </div>
@@ -1441,8 +1546,17 @@ function renderActiveWO(id) {
                                     stepAttachments.forEach(m => {
                                         if(m && m.url) {
                                             let dId = parseMediaUrl(m.url); let safeUrl = m.url.replace(/'/g, "\\\\'").replace(/"/g, '"');
-                                            if (m.type === 'img') {
-                                                let imgThumbUrl = dId ? `https://googleusercontent.com/profile/picture/0` : safeUrl;
+                                            
+                                            // Safe Auto-recover for definitively non-image types
+                                            let derivedType = m.type;
+                                            if (derivedType === 'img') {
+                                                let lowUrl = safeUrl.toLowerCase();
+                                                if (lowUrl.includes('.mp4') || lowUrl.includes('.webm') || lowUrl.includes('.avi')) derivedType = 'vid';
+                                                else if (lowUrl.includes('.pdf') || lowUrl.includes('.docx') || lowUrl.includes('.xlsx') || lowUrl.includes('.txt')) derivedType = 'doc';
+                                            }
+
+                                            if (derivedType === 'img') {
+                                                let imgThumbUrl = dId ? `https://drive.google.com/thumbnail?id=${dId}&sz=w800` : safeUrl;
                                                 attachmentHtml += `<img loading="lazy" src="${imgThumbUrl}" class="media-thumb sop-media-img" data-url="${imgThumbUrl}" style="max-height:100px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); cursor:zoom-in;">`;
                                             } else {
                                                 let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
