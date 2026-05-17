@@ -267,6 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.printSOP(); // Fallback
                     }
                     break;
+                case 'click_window_openSopPrintModal_pack':
+                    if (typeof window.openSopPrintModal === 'function') {
+                        window.openSopPrintModal('packerz');
+                    }
+                    break;
                 case 'click_printPackerzSOP':
                     if (typeof window.openSopPrintModal === 'function') {
                         window.openSopPrintModal('packerz');

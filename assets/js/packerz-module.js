@@ -455,14 +455,14 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
 
                     <!-- Column 1: Config & Input -->
                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
-                            <div style="display:flex; gap:8px;">
-                                <button onclick="window.openSopPrintModal('packerz')" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖨️ PRINT SOP</button>
-                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">📸 PHOTO</button>
-                                <button data-app-click="openSOPMediaInline" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">🖼️ MEDIA</button>
-                                <button data-app-click="openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">⚡ GUIDE</button>
-                                <button data-app-click="togglePackerzSOPPreview" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
+                            <div style="display:flex; gap:5px; flex-wrap:nowrap; align-items:center;">
+                                <button onclick="window.openSopPrintModal('packerz')" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
+                                <button data-app-click="openSOPMediaInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">☁️ Upload</button>
+                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
+                                <button data-app-click="openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
+                                <button data-app-click="togglePackerzSOPPreview" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -785,7 +785,7 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
                 steps.forEach((s) => {
                     html += `<div style="margin-bottom:25px; padding-bottom:15px; border-bottom:1px dashed #ccc;">
                                 <strong style="color:#F59E0B; font-size:16px; display:block; margin-bottom:10px;">Pack Step ${stepCounter++}</strong>
-                                <div style="font-size:15px; line-height:1.6;">${s.text || ''}</div>
+                                <div style="font-size:15px; line-height:1.6; white-space:pre-wrap;">${typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(s.text || '', -1) : s.text || ''}</div>
                              </div>`;
                 });
                 
