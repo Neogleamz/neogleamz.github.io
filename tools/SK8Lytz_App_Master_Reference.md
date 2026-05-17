@@ -14,6 +14,11 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 * **Action Tokens**: All interactive elements MUST be tagged with native data attributes like `data-click`, `data-change`, or `data-input` containing specific string tokens (e.g., `data-click="closeModal"`).
 * **The Intercept**: The delegator bounds to `document.body` and natively catches all bubbled interactions. It maps the `data-*` tokens directly to legacy functions within standard `switch()` matrices, providing maximum DOM performance and mitigating memory leaks.
 
+### Sitewide Real-Time Synchronization (Zero-Cache Protocol)
+* **Global Websocket Channel**: `system-realtime-sync.js` initializes a global Supabase Realtime channel (`neogleamz-global-sync`) listening to all exposed PostgreSQL tables for `INSERT`, `UPDATE`, and `DELETE` payloads.
+* **Active Focus Guard**: To prevent the UI from aggressively re-rendering while the user is actively typing, the sync module monitors standard DOM focus events (`input`, `textarea`, `[contenteditable]`). If focused, updates are buffered; once blurred, the accumulated payload is processed and the DOM is repainted.
+* **In-Memory Caches**: Rather than triggering massive `fetch()` sweeps, real-time broadcasts inject or modify the targeted object directly inside the global state arrays (e.g., `taskEngineDB`, `productionDB`) before calling the contextual `render()` function.
+
 ### DOM Security & Injection (safeHTML)
 * **The safeHTML Protocol**: All dynamically generated HTML strings MUST be injected using `window.safeHTML(string)`. This relies on DOMPurify to strip away XSS vectors.
 * **Inline Handlers Scrubbed**: `DOMPurify` will violently scrub all inline JavaScript execution attributes (`onclick`, `onchange`, `ondragstart`, etc.) from HTML strings.

@@ -30,10 +30,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
-### Target: `main`
-*(Epic: Sitewide Real-Time Sync)*
-- [ ] `feat/sitewide-realtime-sync` : **Implement Sitewide Supabase Websockets** - Expand real-time synchronization globally across the entire application (Task Engine, Orderz, Inventory, etc.). Wire up `supabaseClient.channel` to listen to all core tables for `INSERT`, `UPDATE`, and `DELETE` events. Update local database caches in real-time and trigger autonomous UI re-renders so all connected users see immediate state changes without ever needing a manual page refresh. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
-
 ---
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
@@ -54,6 +50,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Sitewide Real-Time Sync**
+*(Shipped v1.0.34 — 2026-05-16)*
+- [🚀] `feat/sitewide-realtime-sync` : **Implement Sitewide Supabase Websockets** - Expand real-time synchronization globally across the entire application. Wired up `supabaseClient.channel` to listen to all core tables for `postgres_changes`. Updated local DB caches in real-time and injected UI redraws. Handled project-level section logic across personal task views. [🤖 AI Model] [🧠 22k / 25k] [💸 $0.07 / $0.08]
 
 ### Target: `main`
 **Epic: Task Engine Flexibility**
