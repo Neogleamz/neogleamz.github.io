@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.37] - 2026-05-17
+### Features & Bug Fixes
+- **SOP Direct File Upload**: Implemented direct file uploading to Supabase Storage for both checklist items and rich text attachments. Replaced the non-functional "MEDIA" button in the checklist to utilize this new upload flow.
+
 ## [1.0.36] - 2026-05-17
 ### Features & Bug Fixes
 - **WebRTC Camera Integration for SOPs**: Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step.

@@ -94,6 +94,7 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **Button Anchoring:** All command buttons ("SAVE", "EDIT", "PRINT") must anchor exclusively to the **top-right** of the header `.pane-header-actions`. Left-side is reserved strictly for breadcrumbs.
 * **Unified Telemetry Parsing:** ALL checklist previews MUST utilize `parseProductionTelemetryLine` logic to process `# Headers`, `> Subtext`, `[INPUT]`, `[SCAN]`, `[IMG]`, `[BARCODE]`, and `[QR]`.
 * **Multi-Select Panels:** Never use raw `<select multiple>`. Use absolute-positioned custom `.ms-panel` wrappers with checkboxes to maintain aesthetic continuity.
+* **Direct File Uploads:** All file attachments natively route through `triggerSopDirectUpload()`. Files are safely uploaded to the Supabase `sop-media` bucket utilizing dynamic context paths (`sops/{sop_type}/{product_id}/{timestamp}_{filename}`) and their resulting public URLs are injected back into the checklist natively via `[IMG:url]` or `[MEDIA:url]` tokens.
 
 ### F. Explorer Memory & Immutability
 * **Source-Aware Accounting:** Financial webhook data (Shopify, Parcels) is fundamentally Read-Only. Users cannot manually "type over" original ingested strings. Corrections must be derived algorithmically via engine transaction tags.
