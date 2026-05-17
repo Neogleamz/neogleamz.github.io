@@ -781,7 +781,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     createSOPMediaFolder();
                     break;
                 case 'click_closeSOPMediaPicker':
-                    closeSOPMediaPicker();
+                    if (typeof closeSOPMediaPicker === 'function') closeSOPMediaPicker();
+                    break;
+                case 'click_openSOPSnapshotCamera':
+                    if (typeof window.click_openSOPSnapshotCamera === 'function') window.click_openSOPSnapshotCamera();
+                    break;
+                case 'click_closeSOPSnapshotCamera':
+                    if (typeof window.click_closeSOPSnapshotCamera === 'function') window.click_closeSOPSnapshotCamera();
+                    break;
+                case 'click_captureSOPSnapshot':
+                    if (typeof window.click_captureSOPSnapshot === 'function') window.click_captureSOPSnapshot();
                     break;
                 case 'click_if_event_target_this_closeSOPA':
                     if(event.target===this)closeSOPAuditLog();
