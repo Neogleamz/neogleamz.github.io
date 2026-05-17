@@ -2221,44 +2221,6 @@ function renderProductionTelemetryPreview() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-let isProductionResizing = false;
-function initProductionSopResize(e) {
-    isProductionResizing = true;
-    document.body.style.cursor = 'ew-resize';
-    document.addEventListener('mousemove', doProductionSopResize);
-    document.addEventListener('mouseup', stopProductionSopResize);
-}
-
-function doProductionSopResize(e) {
-    if(!isProductionResizing) return;
-    const wrapper = document.getElementById('productionSopSplitWrapper');
-    const leftPane = document.getElementById('productionSopLeftPane');
-    const previewCol = document.getElementById('productionAdminQAPreviewCol');
-    if(!wrapper || !leftPane) return;
-
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 20;
-
-    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
-    let maxBound = rect.width - 350;
-
-    if(newWidth < 300) newWidth = 300;
-    if(newWidth > maxBound) newWidth = maxBound;
-
-    leftPane.style.flex = '0 0 ' + newWidth + 'px';
-    leftPane.style.width = newWidth + 'px';
-}
-
-function stopProductionSopResize() {
-    if(isProductionResizing) {
-        isProductionResizing = false;
-        document.body.style.cursor = 'default';
-        document.removeEventListener('mousemove', doProductionSopResize);
-        document.removeEventListener('mouseup', stopProductionSopResize);
-    }
-}
-
-
 
 let batchezDraggedGrpId = null;
 
@@ -2412,45 +2374,6 @@ window.toggleHorizontalPreview = function(paneId, colId, btnEl) {
 window.isInlineResizing = false;
 window.currentInlineResizeGrp = null;
 
-window.initInlineResize = function(e, grpId) {
-    if(e) e.preventDefault();
-    window.isInlineResizing = true;
-    window.currentInlineResizeGrp = grpId;
-    document.body.style.cursor = 'col-resize';
-    document.addEventListener('mousemove', window.doInlineResize);
-    document.addEventListener('mouseup', window.stopInlineResize);
-};
-
-window.doInlineResize = function(e) {
-    if(!window.isInlineResizing) return;
-    let grpId = window.currentInlineResizeGrp;
-    const wrapper = document.getElementById('inlineContainer_' + grpId);
-    const leftPane = document.getElementById('inlineLeftPane_' + grpId);
-    if(!wrapper || !leftPane) return;
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 15;
-    const previewCol = document.getElementById('inlinePreviewContainer_' + grpId);
-    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
-
-    let minBound = isPreviewOpen ? 640 : 320;
-    let maxBound = rect.width - 350;
-
-    if(newWidth < minBound) newWidth = minBound;
-    if(newWidth > maxBound) newWidth = maxBound;
-
-    leftPane.style.flex = '0 0 ' + newWidth + 'px';
-    leftPane.style.width = newWidth + 'px';
-};
-
-window.stopInlineResize = function() {
-    if(window.isInlineResizing) {
-        window.isInlineResizing = false;
-        window.currentInlineResizeGrp = null;
-        document.body.style.cursor = 'default';
-        document.removeEventListener('mousemove', window.doInlineResize);
-        document.removeEventListener('mouseup', window.stopInlineResize);
-    }
-};
 
 window.inlineRenderTelemetryPreview = function(grpId) {
     try {
