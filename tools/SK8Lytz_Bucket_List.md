@@ -37,7 +37,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 *(Epic: Task Engine Flexibility)*
-- [ ] `feat/task-engine-user-sections` : **Personalized Task Sections & Drag-and-Drop Re-parenting** - Make task sections unique per user in personal views (Inbox, My Tasks, In Progress, Completed) while keeping them uniform in organization-wide projects. Enable creating tasks under a "non assigned" section, and allow drag-and-drop to reorder tasks across sections or dynamically re-parent tasks as subtasks. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] `feat/task-engine-user-sections` : **Personalized Task Sections & Drag-and-Drop Re-parenting** - Make task sections unique per user in personal views (Inbox, My Tasks, In Progress, Completed) while keeping them uniform in organization-wide projects. Unassigned tasks (with proper section/project context) must remain visible in the Inbox. Assigned tasks and completed assigned tasks must be visible in My Tasks. Enable creating tasks under a "non assigned" section, and allow drag-and-drop to reorder tasks across sections or dynamically re-parent tasks as subtasks. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ---
 
