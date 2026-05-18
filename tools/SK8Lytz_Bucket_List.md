@@ -19,6 +19,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🚨 P0 Critical (Immediate Blocker)
 
+### 🟠 P1 High Priority (Core Features & Bugs)
+### Target: `main`
+**Epic: Task Engine Routing Bugs**
+- [ ] `fix/task-modal-routing` : **Fix Task Modal Inbox Routing** - When using CTRL+K to open the global task modal, clicking the "go to inbox and create new task" button fails to route the user, while the "manage tags" button routes correctly. Needs DOM routing repair. [🤖 TBD] [🧠 TBD / 5k] [💸 TBD / $0.02]
+
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ---
