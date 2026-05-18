@@ -313,8 +313,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teToggleGlobalCreateMenu':
                     if(typeof window.teToggleGlobalCreateMenu==='function') window.teToggleGlobalCreateMenu();
                     break;
-                case 'click_teOpenTaskPlanner':
-                    if(typeof window.openTaskPlanner==='function') window.openTaskPlanner();
+                case 'click_teCmdPalette_GoToInbox':
+                    {
+                        const p = document.getElementById('neoCommandPalette');
+                        if (p) p.classList.add('hidden');
+                        if (typeof window.openTaskPlanner === 'function') window.openTaskPlanner();
+                        if (typeof window.teSwitchView === 'function') window.teSwitchView('inbox', el);
+                    }
+                    break;
+                case 'click_teCmdPalette_CreateTask':
+                    {
+                        const p2 = document.getElementById('neoCommandPalette');
+                        if (p2) p2.classList.add('hidden');
+                        if (typeof window.openTaskPlanner === 'function') window.openTaskPlanner();
+                        if (typeof window.teToggleGlobalCreateMenu === 'function') {
+                            const dropdown = document.getElementById('te-global-create-dropdown');
+                            if (!dropdown || dropdown.style.display !== 'flex') {
+                                window.teToggleGlobalCreateMenu();
+                            }
+                        }
+                    }
                     break;
                 case 'click_teActivateInlineTask':
                     if(typeof window.teActivateInlineTask==='function') window.teActivateInlineTask(el);
