@@ -1,10 +1,4 @@
 # 🦅 Neogleamz Master Bucket List
-### Target: main
-**Epic: Webhook Idempotency & Race Condition Fix**
-*(Shipped v1.0.40 — 2026-05-17)*
-- [🚀] ix/webhook-idempotency : **Webhook Idempotency Race Condition Fix** - Refactored the Shopify orders/create Edge Function to aggregate identical line items organically, and implemented a strict UNIQUE(order_id, storefront_sku) constraint to the PostgreSQL sales_ledger to guarantee mathematical parity during simultaneous webhook triggers. [🤖 Gemini 3.1 Pro] [🧠 20k / 20k] [💸 .05 / .05]
-
-
 
 This document acts as the permanent, living task tracker integrated directly with your autonomous AI development agents. 
 
@@ -394,3 +388,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Global ESLint Hardening**
 *(Shipped v1.0.42 — 2026-05-17)*
 - [🚀] `debt/eslint-sweep` : **Resolve Legacy no-undef Warnings** - Systematically audited and resolved the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping. [🤖 Gemini 3.1 Pro] [🧠 25k / 25k] [💸 $0.05 / $0.05]
+
+### Target: `main`
+**Epic: Webhook Idempotency & Race Condition Fix**
+*(Shipped v1.0.40 — 2026-05-17)*
+- [🚀] `fix/webhook-idempotency` : **Webhook Idempotency Race Condition Fix** - Refactored the Shopify orders/create Edge Function to aggregate identical line items organically, and implemented a strict UNIQUE(order_id, storefront_sku) constraint to the PostgreSQL sales_ledger to guarantee mathematical parity during simultaneous webhook triggers. [🤖 Gemini 3.1 Pro] [🧠 20k / 20k] [💸 .05 / .05]
