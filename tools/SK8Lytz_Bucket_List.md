@@ -40,12 +40,13 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
 *0 new code-debt items found.* ✅
 
-### Target: `main`
-- [x] `debt/eslint-warnings-sweep` : **ESLint Warnings Sweep** - Perform a comprehensive tech debt sweep to resolve the 158 persistent `no-unused-vars` and related ESLint warnings to harden the application and clean up CI output. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
-
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: ESLint Persistent Warnings Sweep**
+- [🚀] `debt/eslint-warnings-sweep` : **ESLint Warnings Sweep** - Perform a comprehensive tech debt sweep to resolve the 158 persistent `no-unused-vars` and related ESLint warnings to harden the application and clean up CI output. [🤖 AI Model] [🧠 25k / 25k] [💸 $0.08 / $0.08]
 
 ### Target: `main`
 **Epic: Legacy Codebase Security Hardening (Tier 1)**
