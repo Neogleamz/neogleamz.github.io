@@ -393,4 +393,4 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Global ESLint Hardening**
 *(Shipped v1.0.42 — 2026-05-17)*
-- [x] `debt/eslint-sweep` : **Resolve Legacy no-undef Warnings** - Systematically audited and resolved the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping. [🤖 Gemini 3.1 Pro] [🧠 25k / 25k] [💸 $0.05 / $0.05]
+- [🚀] `debt/eslint-sweep` : **Resolve Legacy no-undef Warnings** - Systematically audited and resolved the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping. [🤖 Gemini 3.1 Pro] [🧠 25k / 25k] [💸 $0.05 / $0.05]

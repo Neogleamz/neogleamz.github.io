@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Chores & Maintenance
+- **Resolve Legacy no-undef Warnings**: Systematically audited and resolved the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping.
+
 ## [1.0.42] - 2026-05-17
 ### Security & Hotfixes
 - **Unguarded innerHTML Assignments**: Wrapped all dynamic `error.message` injections in `index.html` with the `window.safeHTML()` protocol to strictly prevent Cross-Site Scripting (XSS) payloads.
