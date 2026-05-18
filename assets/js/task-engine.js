@@ -349,6 +349,14 @@ function teRenderTaskGrid(filter = null) {
         }
         
         if (!cColor) cColor = c.project_id ? '#3b82f6' : '#a855f7';
+        
+        if (!isPersonalView && window.teActiveProjectId) {
+            let p = taskEngineDB.projectz.find(proj => proj.id === window.teActiveProjectId);
+            if (p && p.color_hex) {
+                cColor = p.color_hex;
+            }
+        }
+        
         cycleGroups.set(c.id, { title: title, color: cColor, badgeHtml: badgeHtml, tasks: [], project_id: c.project_id || null });
     });
     
