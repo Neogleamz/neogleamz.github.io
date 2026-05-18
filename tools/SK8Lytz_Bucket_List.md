@@ -36,8 +36,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ---
-### Target: main
-- [🚀] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button & Tasks UI** - Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red. [🤖 Gemini 3.1 Pro (High)] [🧠 6k / 5k] [💸 0.02 / $0.02]
+
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 ---
@@ -51,7 +50,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - *0 outdated breaking dependencies found. (Only minor/patch bumps pending)* ✅
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
-*0 new code-debt items found.* ✅
+- [ ] `debt/xss-vulnerabilities` : **Unguarded innerHTML Assignments** - Found instances in `index.html` where `error.message` is injected directly into the DOM via `.innerHTML` without `window.safeHTML()` protection. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 
 ---
@@ -389,4 +388,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `feat/sop-camera-integration` : **WebRTC Camera Integration for SOPs** - Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
 - [🚀] `fix/sop-legacy-media-regression` : **SOP Legacy Media Regression** - Only the new photo functionality works; old documents, images, and videos in SOPs are broken. [🤖 AI Model] [🧠 10k / 10k] [💸 $0.05 / $0.05]
 - [🚀] `feat/sop-direct-file-upload` : **SOP Direct File Upload** - Implement direct file uploading to Supabase Storage for both checklist items and rich text attachments. Also repair/replace the non-functional "MEDIA" button in the checklist to utilize this new upload flow. [🤖 AI Model] [🧠 15k / 15k] [💸 $0.06 / $0.06]
-- [🚀] `feat/sop-print-formatting-options` : **SOP Print Formatting Options** - Replaced the static "Print SOP" button with a 3-mode print modal (Checklist / Rich Text / Full SOP). Applied proper print styling to checklists (`#Headers` → section headings, `> Subtexts` → styled callouts). Standardized all 4 SOP button bars (Master Production, Master Packerz, Inline Packerz, Inline Batchez) into compact responsive pill rows. Fixed Rich Text toolbar flex overflow — `rt-toolbar` now wraps gracefully, font-size select is clamped, PHOTO/UPLOAD/NEW URL row uses `flex-wrap:wrap`. Eliminated 2 duplicate `no-duplicate-case` ESLint errors in `system-event-delegator.js` via Boy Scout protocol. [🤖 Gemini 2.5 Pro] [🧠 ~180k / 15k] [💸 ~$0.54 / $0.05]
+- [🚀] `feat/sop-print-formatting-options` : **SOP Print Formatting Options** - Replaced the static "Print SOP" button with a 3-mode print modal (Checklist / Rich Text / Full SOP). Applied proper print styling to checklists (`#Headers` → section headings, `> Subtexts` → styled callouts). Standardized all 4 SOP button bars (Master Production, Master Packerz, Inline Packerz, Inline Batchez) into compact responsive pill rows. Fixed Rich Text toolbar flex overflow — `rt-toolbar` now wraps gracefully, font-size select is clamped, PHOTO/UPLOAD/NEW URL row uses `flex-wrap:wrap`. Eliminated 2 duplicate `no-duplicate-case` ESLint errors in `system-event-delegator.js` via Boy Scout protocol. [🤖 Gemini 2.5 Pro] [🧠 ~180k / 15k] [💸 ~$0.54 / $0.05]
+
+### Target: `main`
+**Epic: Theme Engine Polish (May 17)**
+*(Shipped v1.0.41 — 2026-05-17)*
+- [🚀] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button & Tasks UI** - Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red. [🤖 Gemini 3.1 Pro (High)] [🧠 6k / 5k] [💸 0.02 / $0.02]
