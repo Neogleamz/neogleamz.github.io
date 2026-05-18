@@ -20,9 +20,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🚨 P0 Critical (Immediate Blocker)
 
 ### 🟠 P1 High Priority (Core Features & Bugs)
-### Target: `main`
-**Epic: Task Engine Routing Bugs**
-- [ ] `fix/task-modal-routing` : **Fix Task Modal Inbox Routing** - When using CTRL+K to open the global task modal, clicking the "go to inbox and create new task" button fails to route the user, while the "manage tags" button routes correctly. Needs DOM routing repair. [🤖 TBD] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -398,3 +395,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Webhook Idempotency & Race Condition Fix**
 *(Shipped v1.0.40 — 2026-05-17)*
 - [🚀] `fix/webhook-idempotency` : **Webhook Idempotency Race Condition Fix** - Refactored the Shopify orders/create Edge Function to aggregate identical line items organically, and implemented a strict UNIQUE(order_id, storefront_sku) constraint to the PostgreSQL sales_ledger to guarantee mathematical parity during simultaneous webhook triggers. [🤖 Gemini 3.1 Pro] [🧠 20k / 20k] [💸 .05 / .05]
+
+### Target: `main`
+**Epic: Task Engine Routing Bugs**
+*(Shipped v.2026.05.17.2248 — 2026-05-17)*
+- [🚀] `fix/task-modal-routing` : **Fix Task Modal Inbox Routing** - When using CTRL+K to open the global task modal, clicking the "go to inbox and create new task" button fails to route the user, while the "manage tags" button routes correctly. Needs DOM routing repair. [🤖 Gemini] [🧠 4.5k / 5k] [💸 $0.01 / $0.02]
