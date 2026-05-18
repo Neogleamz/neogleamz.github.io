@@ -16,6 +16,9 @@ When the user invokes `/health-check` (or uses phrases like "run health check" o
 2. **The Code Quality & Security Hunt**: 
    - Use the `grep_search` tool to scan the codebase for explicitly marked debt: `TODO:`, `FIXME:`, and `HACK:`.
    - **CRITICAL ZERO-TRUST SCAN:** Use `grep_search` to actively hunt for `.innerHTML` and `.insertAdjacentHTML`. If the target node is receiving dynamic data that is NOT explicitly wrapped in `window.safeHTML()` or `DOMPurify.sanitize()`, you must instantly flag it.
+   - **LINTER AUDIT:** Run `npx eslint .` in the terminal. Parse the output to count warnings and errors (especially `no-undef`, `no-unused-vars`). If the output is massive, just aggregate the totals by rule.
+   - **HARDCODED SECRETS SCAN:** Use `grep_search` to scan `.js` files for risky patterns like `sk_live_`, `Bearer `, `password =`, or hardcoded MAC addresses.
+   - **LEGACY SCOPE SCAN:** Use `grep_search` to find instances of `var ` declarations, flagging them for upgrade to `let/const`.
    - **ORPHAN SCRIPT SCAN:** Use `list_dir` to check the project root for any misplaced `test-*.js`, `check-*.js`, or one-shot utility scripts that should be in `scripts/` or `tools/`.
    - **DEAD CODE SCAN:** Use `grep_search` to find unreferenced `function` declarations and unused `const`/`let` exports across modules.
    - Extract the file path, line number, and a brief snippet of context for each discovery.
@@ -53,7 +56,10 @@ Render a Markdown table for each category of findings:
 | Type | File | Line | Snippet | Severity |
 |---|---|---|---|---|
 | 🔒 Unguarded innerHTML | `module.js` | L123 | `.innerHTML = dynamicVar` | 🔴 Critical |
+| 🔑 Hardcoded Secret | `api.js` | L12 | `const key = 'sk_live_...'` | 🔴 Critical |
+| ⚠️ ESLint Warning | `Global` | — | `2131 no-undef warnings` | 🟠 Medium |
 | 📝 TODO | `utils.js` | L45 | `// TODO: refactor this` | 🟡 Low |
+| 🕰️ Legacy Scope | `ui.js` | L88 | `var count = 0;` | 🟡 Low |
 | 🗑️ Orphan Script | `root/test-x.js` | — | Misplaced in project root | 🟠 Medium |
 ```
 
