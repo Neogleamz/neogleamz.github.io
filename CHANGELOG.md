@@ -1,5 +1,12 @@
 # SK8Lytz Application Changelog
 
+## [1.0.42] - 2026-05-17
+### Security & Hotfixes
+- **Unguarded innerHTML Assignments**: Wrapped all dynamic `error.message` injections in `index.html` with the `window.safeHTML()` protocol to strictly prevent Cross-Site Scripting (XSS) payloads.
+
+### Chores & Maintenance
+- **Workflow Orchestration Refinement**: Updated the `bucketlist` workflow rules to explicitly differentiate between Single-Task Epics and Multi-Part Epics, correctly suggesting `[/ship_it]` and `[/release]` for single-tasks rather than trapping the user in a `[/finalize_epic]` conflict loop.
+
 ## [1.0.41] - 2026-05-17
 ### Features & Bug Fixes
 - **Fix Light/Dark Mode Button & Tasks UI**: Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red.
