@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Features & Bug Fixes
+- **Purge Inline onclick Handlers (bom-module.js)** (`refactor/audit-bom-module`): Migrated all inline `onclick`, `onmouseover`, and `onmouseout` handlers in the Recipe Manager UI to `data-app-click` delegators registered in `system-event-delegator.js`. Replaced inline hover styles with standard Vanilla DOM classes to enforce Vanilla DOM Mastery standards and resolve XSS risk vectors.
 - **Fix Task Modal Inbox Routing** (`fix/task-modal-routing`): When using CTRL+K to open the global task modal, clicking the "go to inbox" and "create new task" buttons failed to route the user. Refactored `system-event-delegator.js` logic to chain visibility states, hiding the Command Palette and explicitly forcing the Task Planner to open and switch views correctly.
 
 ### Chores & Maintenance
