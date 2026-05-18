@@ -1,4 +1,5 @@
-# 🦅 Neogleamz Master Bucket List### Target: main
+# 🦅 Neogleamz Master Bucket List
+### Target: main
 **Epic: Webhook Idempotency & Race Condition Fix**
 *(Shipped v1.0.40 — 2026-05-17)*
 - [🚀] ix/webhook-idempotency : **Webhook Idempotency Race Condition Fix** - Refactored the Shopify orders/create Edge Function to aggregate identical line items organically, and implemented a strict UNIQUE(order_id, storefront_sku) constraint to the PostgreSQL sales_ledger to guarantee mathematical parity during simultaneous webhook triggers. [🤖 Gemini 3.1 Pro] [🧠 20k / 20k] [💸 .05 / .05]
@@ -7,14 +8,6 @@
 
 This document acts as the permanent, living task tracker integrated directly with your autonomous AI development agents. 
 
-> [!NOTE]
-> **Global Odometer (Gemini 3.1 Pro Ultra)**
-> - **Lifetime Burned:** `30,000 Tokens` (`$0.10` equivalent)
-> - **Active Tasks Expected Burn:** `50,000 Tokens`
-
-> [!TIP]
-> **Token Telemetry Syntax:** Appended strictly to the end of all actionable tasks.
-> `[🤖 AI Model] [🧠 ActualTokens / ExpectedTokens] [💸 ActualCost / ExpectedCost]`
 
 > [!CAUTION]
 > **THE IMMUTABLE LEDGER DIRECTIVE:** You are STRICTLY FORBIDDEN from deleting history in this file. Even if this file becomes extremely long, do NOT "clean up" the history or truncate the `🗄️ Completed & Archived Epics` section. Completed items must remain exactly as they are until the `/release` workflow tags them with `[🚀]`.
@@ -50,7 +43,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - *0 outdated breaking dependencies found. (Only minor/patch bumps pending)* ✅
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
-- [ ] `debt/xss-vulnerabilities` : **Unguarded innerHTML Assignments** - Found instances in `index.html` where `error.message` is injected directly into the DOM via `.innerHTML` without `window.safeHTML()` protection. [🤖 Gemini 3.1 Pro] [🧠 5k / 5k] [💸 $0.02 / $0.02]
+*0 new code-debt items found.* ✅
 
 
 ---
