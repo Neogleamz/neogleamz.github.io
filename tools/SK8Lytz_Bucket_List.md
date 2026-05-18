@@ -393,4 +393,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Theme Engine Polish (May 17)**
 *(Shipped v1.0.41 — 2026-05-17)*
-- [🚀] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button & Tasks UI** - Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red. [🤖 Gemini 3.1 Pro (High)] [🧠 6k / 5k] [💸 0.02 / $0.02]
+- [🚀] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button & Tasks UI** - Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red. [🤖 Gemini 3.1 Pro (High)] [🧠 6k / 5k] [💸 0.02 / $0.02]
+### Target: main
+**Epic: XSS Security Audit (May 17)**
+- [x] debt/xss-vulnerabilities : **Unguarded innerHTML Assignments** - Wrapped all dynamic error.message injections in index.html with window.safeHTML() protocol to prevent XSS payloads. [🤖 Gemini 3.1 Pro] [🧠 8k / 5k] [💸 .03 / .02]
