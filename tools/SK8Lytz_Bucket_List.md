@@ -42,10 +42,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - *0 outdated breaking dependencies found. (Only minor/patch bumps pending)* ✅
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
-### Target: `main`
-**Epic: Global ESLint Hardening**
-- [ ] `debt/eslint-sweep` : **Resolve Legacy no-undef Warnings** - Systematically audit and resolve the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping. [🤖 TBD] [🧠 TBD / 25k] [💸 TBD / $0.05]
-
+*0 new code-debt items found.* ✅
 
 ---
 
@@ -392,3 +389,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: XSS Security Audit (May 17)**
 *(Shipped v1.0.42 — 2026-05-17)*
 - [🚀] `debt/xss-vulnerabilities` : **Unguarded innerHTML Assignments** - Wrapped all dynamic `error.message` injections in `index.html` with `window.safeHTML()` protocol to prevent XSS payloads. [🤖 Gemini 3.1 Pro] [🧠 8k / 5k] [💸 $0.03 / $0.02]
+
+### Target: `main`
+**Epic: Global ESLint Hardening**
+*(Shipped v1.0.42 — 2026-05-17)*
+- [x] `debt/eslint-sweep` : **Resolve Legacy no-undef Warnings** - Systematically audited and resolved the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping. [🤖 Gemini 3.1 Pro] [🧠 25k / 25k] [💸 $0.05 / $0.05]
