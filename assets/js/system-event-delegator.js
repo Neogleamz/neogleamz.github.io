@@ -313,6 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teToggleGlobalCreateMenu':
                     if(typeof window.teToggleGlobalCreateMenu==='function') window.teToggleGlobalCreateMenu();
                     break;
+                case 'click_teOpenTaskPlanner':
+                    if(typeof window.openTaskPlanner==='function') window.openTaskPlanner();
+                    break;
                 case 'click_teActivateInlineTask':
                     if(typeof window.teActivateInlineTask==='function') window.teActivateInlineTask(el);
                     break;
