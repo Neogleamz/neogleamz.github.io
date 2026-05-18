@@ -28,7 +28,7 @@
  */
 // --- Global Helpers ---
         function handleAvatarError(img) {
-            const tt = img.getAttribute('data-tt'), yt = img.getAttribute('data-yt'), fb = img.getAttribute('data-fb'), p = img.getAttribute('data-provider');
+            const _tt = img.getAttribute('data-tt'), yt = img.getAttribute('data-yt'), fb = img.getAttribute('data-fb'), p = img.getAttribute('data-provider');
             if (p === 'tiktok') { 
                 if (yt) { img.setAttribute('data-provider', 'youtube'); img.src = `https://unavatar.io/youtube/${yt}?fallback=false`; } 
                 else if (fb) { img.setAttribute('data-provider', 'facebook'); img.src = `https://unavatar.io/facebook/${fb}?fallback=false`; } 
@@ -47,7 +47,7 @@
             }
         }, true);
 
-        function showToast(msg, type='success') {
+        window.showToast = function showToast(msg, type='success') {
             const c = document.getElementById('toast-container'); 
             const t = document.createElement('div');
             t.className = `${type==='success'?'bg-green-500':'bg-red-500'} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 toast-enter pointer-events-auto min-w-[280px] transition-opacity duration-500`;
@@ -188,13 +188,13 @@
         }
 
         // --- Analytics Dashboard ---
-        function openAnalyticsDashboard() {
+        window.openAnalyticsDashboard = function openAnalyticsDashboard() {
             if (socialzSkaters.length === 0) { sysLog("No data to analyze."); return; }
             document.getElementById('analytics-modal').style.display = 'flex';
             renderDashboardCharts();
         }
-        function closeAnalyticsDashboard() { document.getElementById('analytics-modal').style.display = 'none'; }
-        function updateChart(id, config) { if (dashboardCharts[id]) dashboardCharts[id].destroy(); const socialzCtx = document.getElementById(id).getContext('2d'); dashboardCharts[id] = new Chart(ctx, config); }
+        window.closeAnalyticsDashboard = function closeAnalyticsDashboard() { document.getElementById('analytics-modal').style.display = 'none'; }
+        function updateChart(id, config) { if (dashboardCharts[id]) dashboardCharts[id].destroy(); const _socialzCtx = document.getElementById(id).getContext('2d'); dashboardCharts[id] = new Chart(ctx, config); }
 
         function renderDashboardCharts() {
             const isDark = document.documentElement.classList.contains('dark'), tc = isDark ? '#94a3b8' : '#64748b', gc = isDark ? '#334155' : '#e2e8f0';
@@ -256,7 +256,7 @@
             if (sortedTypes.includes(currentType)) typeSelect.value = currentType;
         }
 
-        function toggleMultiSelect(type) {
+        window.toggleMultiSelect = function toggleMultiSelect(type) {
             const panel = document.getElementById(`${type}-options-panel`);
             const isHidden = panel.style.display === 'none' || panel.style.display === '';
             panel.style.display = isHidden ? 'block' : 'none';
@@ -270,10 +270,10 @@
         }
         if (!_socialzStylePanelListenerRegistered) {
             window.addEventListener('click', closeSocialzStylePanel);
-            // eslint-disable-next-line no-useless-assignment
+
         }
 
-        function handleStyleToggle(style) {
+        window.handleStyleToggle = function handleStyleToggle(style) {
             if (selectedStyles.includes(style)) { selectedStyles = selectedStyles.filter(s => s !== style); } 
             else { selectedStyles.push(style); }
             updateStyleBtnText();
@@ -309,7 +309,7 @@
             renderSkaters();
         };
 
-        function toggleSortDirection() {
+        window.toggleSortDirection = function toggleSortDirection() {
             socialzSortDirection = socialzSortDirection === 'asc' ? 'desc' : 'asc';
             if (window.saveSort) window.saveSort('socialzSortDirection', socialzSortDirection);
             const icon = document.getElementById('sort-dir-icon');
@@ -437,7 +437,8 @@
                 </div></div>
                <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
-                </div>               </div>
+                </div>
+               </div>
                
                <!-- Overlay Action Layer -->
                <div class="top-right-action-flex" style="padding: 16px; pointer-events: none; z-index: 20;">
@@ -505,7 +506,8 @@
                 </div></div>
                <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
-                </div>               </div>
+                </div>
+               </div>
                
                <!-- Overlay Action Layer -->
                <div class="top-right-action-flex" style="padding: 16px; pointer-events: none; z-index: 20;">
@@ -545,12 +547,12 @@
                         const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
                         const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
 
-                        let src = ''; let prov = '';
-                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; prov = 'tiktok'; }
-                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; prov = 'youtube'; }
-                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; prov = 'facebook'; }
+                        let src = ''; let _prov = '';
+                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; _prov = 'tiktok'; }
+                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; _prov = 'youtube'; }
+                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; _prov = 'facebook'; }
                         
-                        const typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
+                        const _typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
                             'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
                             ((s.type || '').toLowerCase() === 'indoor' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300');
 
@@ -591,7 +593,7 @@
         }
 
         // --- Export CSV ---
-        function exportCSV() {
+        window.exportCSV = function exportCSV() {
             if (socialzSkaters.length === 0) { sysLog("Nothing to export"); return; }
             const headers = ["Name", "Region", "Location", "Type", "Favorite", "Styles", "Summary", "Viral URL", "Contact Info", "Collaboration Tier", "Collaboration Status", "IG Handle", "IG Link", "IG Followers", "TikTok Handle", "TikTok Link", "TikTok Followers", "YouTube Handle", "YouTube Link", "YouTube Subs", "FB Handle", "FB Link", "FB Followers"];
             const rows = socialzSkaters.map(s => [
@@ -611,7 +613,7 @@
         }
 
         // --- CSV Engine ---
-        function handleCSVImport(input) {
+        window.handleCSVImport = function handleCSVImport(input) {
             const f = input.files[0]; if (!f) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -687,7 +689,7 @@
         }
 
         // --- CRUD Modals ---
-        function openModal() { document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('skater-form').reset(); document.getElementById('edit-index').value = "-1"; document.getElementById('modal-title').innerText = "Add New Skater"; }
+        window.openModal = function openModal() { document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('skater-form').reset(); document.getElementById('edit-index').value = "-1"; document.getElementById('modal-title').innerText = "Add New Skater"; }
         function closeModal() { document.getElementById('skater-modal').style.display = 'none'; }
         window.editSkater = function editSkater(index) {
             const s = socialzSkaters[index]; document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('edit-index').value = index; document.getElementById('modal-title').innerText = "Edit Skater";
@@ -699,7 +701,7 @@
             document.getElementById('input-fb').value = s.handles.fb; document.getElementById('input-fb-link').value = s.links.fb; document.getElementById('input-fb-followers').value = s.followers.fb;
         }
 
-        async function deleteSkaterFromModal() { 
+        window.deleteSkaterFromModal = async function deleteSkaterFromModal() { 
             const i = parseInt(document.getElementById('edit-index').value); 
             if (i > -1 && confirm("Delete?")) { 
                 try {
@@ -713,7 +715,7 @@
             } 
         }
         
-        async function handleFormSubmit(e) {
+        window.handleFormSubmit = async function handleFormSubmit(e) {
             e.preventDefault(); const i = parseInt(document.getElementById('edit-index').value);
             const igf = document.getElementById('input-ig-followers').value, ttf = document.getElementById('input-tt-followers').value, ytf = document.getElementById('input-yt-followers').value, fbf = document.getElementById('input-fb-followers').value;
             
@@ -737,7 +739,7 @@
             
             try {
                 if(i !== -1 && typeof socialzSkaters[i].id === 'string') { dbRow.id = socialzSkaters[i].id; }
-                const { data, error } = await supabaseClient.from('socialz_audience').upsert(dbRow, { onConflict: 'name' }).select();
+                const { _data, error } = await supabaseClient.from('socialz_audience').upsert(dbRow, { onConflict: 'name' }).select();
                 if(error) throw new Error(error.message);
                 
                 // Fetch full remote state again just to ensure everything is perfect
@@ -761,7 +763,7 @@
         originalRenderSkaters(); 
     };
     
-    window.showSocialzPane = function(paneId) {
+    window.showSocialzPane = function(_paneId) {
         if(document.getElementById('paneSocialzRoster')) document.getElementById('paneSocialzRoster').style.setProperty('display', 'flex', 'important');
     };
     

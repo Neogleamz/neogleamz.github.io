@@ -70,7 +70,7 @@ async function teFetchAllData() {
     }
 }
 
-window.teChangeIdentity = function(userId) {
+window.teChangeIdentity = function(_userId) {
     // Deprecated: Identity is now strictly tied to Supabase Auth session via window.currentUser
     console.warn("teChangeIdentity is deprecated.");
 };
@@ -363,7 +363,7 @@ function teRenderTaskGrid(filter = null) {
     });
     
     // Apply sorting to cycleGroups
-    for (const [cid, group] of cycleGroups) {
+    for (const [_cid, group] of cycleGroups) {
         group.tasks.sort((a, b) => {
             if (window.teCurrentSort && window.teCurrentSort.col) {
                 let dir = window.teCurrentSort.dir === 'asc' ? 1 : -1;
@@ -395,12 +395,12 @@ function teRenderTaskGrid(filter = null) {
     // Render loop
     html += `<div id="te-sections-wrapper" class="te-sortable-sections-list">`;
     let totalTasks = 0;
-    for (const [cid, group] of cycleGroups) totalTasks += group.tasks.length;
+    for (const [_cid, group] of cycleGroups) totalTasks += group.tasks.length;
 
     let collapsedCache;
     try {
         collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}') || {};
-    } catch(e) { collapsedCache = {}; }
+    } catch(_e) { collapsedCache = {}; }
 
     for (const [cid, group] of cycleGroups) {
         if (group.tasks.length === 0) {
@@ -1583,7 +1583,7 @@ window.teCreateTeam = async function() {
     
     const newTeam = { id: generateUUID(), name: title.trim(), color_hex: '#8b5cf6' };
     try {
-        const { data, error } = await supabaseClient.from('teams').insert([newTeam]).select();
+        const { data, _error } = await supabaseClient.from('teams').insert([newTeam]).select();
         if (data && data.length > 0) {
             taskEngineDB.teams.push(data[0]);
             teRenderSidebar();
@@ -2710,7 +2710,7 @@ window.doFlyoutResize = function(e) {
     }
 };
 
-window.stopFlyoutResize = function(e) {
+window.stopFlyoutResize = function(_e) {
     isFlyoutResizing = false;
     document.body.style.cursor = '';
     document.removeEventListener('mousemove', window.doFlyoutResize);

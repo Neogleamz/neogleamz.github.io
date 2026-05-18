@@ -55,7 +55,7 @@ function get30DayVolume(productName) {
             }
         });
         return vol;
-    } catch (e) { return 0; }
+    } catch (_e) { return 0; }
 }
 
 /**
@@ -214,7 +214,7 @@ function renderCeoTerminal() {
     sysLog("Booting CEO Terminal...");
     autoPopulateCeoBoard();
 
-    let availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
+    let _availableRetail = Object.keys(productsDB).filter(k => !isSubassemblyDB[k]);
 
     let slidersHtml = '';
     ceoActiveProducts.forEach((p, index) => {
@@ -403,7 +403,7 @@ window._syncCeoKPIs = function({ totals }) {
 
         salesDB.forEach(s => {
             let qty = parseFloat(s.qty_sold) || 1;
-            let rev = parseFloat(s.total) || ((parseFloat(s.actual_sale_price) || 0) * qty);
+            let _rev = parseFloat(s.total) || ((parseFloat(s.actual_sale_price) || 0) * qty);
             let net = parseFloat(s.net_profit) || 0;
             ltvNetSum += net;
 
@@ -551,7 +551,7 @@ function renderUnifiedBuilderTable() {
         <tbody>`;
 
     // 1. Session Test Items (Highest priority)
-    window.ceoSessionTestItems.forEach((p, idx) => {
+    window.ceoSessionTestItems.forEach((p, _idx) => {
         html += `<tr class="u-builder-row" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05);">
             <td style="padding:8px;"><input type="number" class="u-qty" data-name="${p.name}" data-cogs="${p.cogs}" data-msrp="${p.msrp}" min="0" step="1" value="0" style="width:50px; padding:4px;"></td>
             <td class="u-name" style="padding:8px; color:#a78bfa; font-weight:bold;">${p.name}</td>
@@ -575,7 +575,7 @@ function renderUnifiedBuilderTable() {
     document.getElementById('ceoUnifiedTableWrap').innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 }
 
-function addCeoSessionTestItem() {
+window.addCeoSessionTestItem = function() {
     let raw = document.getElementById('ceo-u-custom-name').value.trim();
     if(!raw) return alert("Enter item name.");
     let iName = "🧪 " + raw;
@@ -593,7 +593,7 @@ function addCeoSessionTestItem() {
     document.getElementById('ceo-u-custom-msrp').value = '';
 }
 
-function filterUnifiedBuilderList() {
+window.filterUnifiedBuilderList = function() {
     let f = document.getElementById('ceo-u-search').value.toLowerCase();
     document.querySelectorAll('.u-builder-row').forEach(r => {
         let n = r.querySelector('.u-name').innerText.toLowerCase();
@@ -601,7 +601,7 @@ function filterUnifiedBuilderList() {
     });
 }
 
-function addCeoUnifiedSelection() {
+window.addCeoUnifiedSelection = function() {
     let selections = [];
     document.querySelectorAll('.u-qty').forEach(btn => {
         let q = parseInt(btn.value) || 0;
@@ -688,7 +688,7 @@ function renderLtvWhalesTable() {
     tBody.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 }
 
-function openLtvModal() {
+window.openLtvModal = function() {
     let map = window._ltvCustomerMap || {};
     let hashes = Object.keys(map);
 
@@ -734,7 +734,7 @@ function openLtvModal() {
     if (modal) modal.style.display = 'flex';
 }
 
-function closeLtvModal() {
+window.closeLtvModal = function() {
     let modal = document.getElementById('ltv-metrics-modal');
     if (modal) modal.style.display = 'none';
 }

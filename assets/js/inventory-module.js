@@ -24,7 +24,7 @@ invStyles.innerHTML = window.safeHTML(`
 document.head.appendChild(invStyles);
 
 let savedFgiState = null;
-try { savedFgiState = JSON.parse(localStorage.getItem('fgiCategoryState')); } catch(e) { console.warn('Invalid FGI State cache cleared.'); localStorage.removeItem('fgiCategoryState'); }
+try { savedFgiState = JSON.parse(localStorage.getItem('fgiCategoryState')); } catch(_e) { console.warn('Invalid FGI State cache cleared.'); localStorage.removeItem('fgiCategoryState'); }
 window.fgiCategoryState = savedFgiState || { 'cat-retail': true, 'cat-sub': true, 'cat-print': true, 'cat-label': true };
 window.toggleFgiCategory = function(cat) { 
     window.fgiCategoryState[cat] = !window.fgiCategoryState[cat]; 
@@ -218,7 +218,7 @@ function renderInventoryTable() {
     renderFgiTable();
     let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" data-app-click="sortInv" data-col="nn">Neogleamz Name</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" data-app-click="sortInv" data-col="n">Item Name</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="p">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="c" style="border-bottom:2px solid #ef4444;">CONS</th> <th class="${currentInvSort.column==='pc'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="pc" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentInvSort.column==='prc'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="prc" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentInvSort.column==='sq'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="sq" style="border-bottom:2px solid #b91c1c;">SCRAP</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="a" style="border-bottom:2px solid #0ea5e9;">ADJMT</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="ms" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentInvSort.column==='ld'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="ld" style="border-bottom:2px solid #14b8a6;">LEAD</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="s" style="border-bottom:2px solid #f59e0b;">STOCK</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="tp">ASSETS</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
-    let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5}; let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, n:c.itemName, p:c.totalQty, c:i.consumed_qty, sq:i.scrap_qty, a:i.manual_adjustment, ms:i.min_stock, ld:parseFloat(i.rop_lead_time_days)||SUPPLIER_LEAD_TIME_DAYS, s:s, up:up, tp:tp, pc: (i.prototype_consumed_qty||0), prc: (i.production_consumed_qty||0) }; });
+    let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], _f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5}; let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, n:c.itemName, p:c.totalQty, c:i.consumed_qty, sq:i.scrap_qty, a:i.manual_adjustment, ms:i.min_stock, ld:parseFloat(i.rop_lead_time_days)||SUPPLIER_LEAD_TIME_DAYS, s:s, up:up, tp:tp, pc: (i.prototype_consumed_qty||0), prc: (i.production_consumed_qty||0) }; });
     if(a.length===0){ h += "<tr><td colspan='13' style='text-align:center;'>No raw inventory.</td></tr>"; }
     else {
         a.sort((x,y) => { let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
@@ -677,7 +677,7 @@ window.handleCreateSnapshot = function() {
     if (input) input.value = "";
 };
 
-function printReorderReport() {
+window.printReorderReport = function() {
     try {
         let html = `<html><head><title>Neogleamz Reorder Report</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; font-size:14px; margin-top: 15px;} th,td{border:1px solid #ccc; padding:8px; text-align:left;} th{background:#f1f5f9;}</style></head><body>`;
         html += `<h2>🚨 Low Stock Reorder Report</h2><p style="color:#64748b; font-size:14px;">Date: ${new Date().toLocaleDateString()}</p>`;
@@ -831,7 +831,7 @@ function printReorderReport() {
         html += `<h3>📦 Supply Chain Deficits (Order These)</h3>`;
         
         Object.keys(purchaseTargets).forEach(k => {
-            let c = catalogCache[k] || {}; let f = fmtKey(k); let i = inventoryDB[k] || {};
+            let c = catalogCache[k] || {}; let _f = fmtKey(k); let i = inventoryDB[k] || {};
             let currentStock = onHand[k] || 0;
             let ms = parseFloat(i.min_stock) || 0;
             let depDemand = dependentDemand[k] || 0;
@@ -1152,10 +1152,10 @@ window.startCycleCount = async function() {
         await html5QrCode.start(
             { facingMode: "environment" },
             { fps: 12, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-            (decodedText, decodedResult) => {
+            (decodedText, _decodedResult) => {
                 window.onScanSuccess(decodedText);
             },
-            (errorMessage) => {
+            (_errorMessage) => {
                 // ignore per-frame scan errors
             }
         );

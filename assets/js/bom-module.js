@@ -219,7 +219,7 @@ window.renderProductList = function() {
     }
 
     let savedRecipeState = null;
-    try { savedRecipeState = JSON.parse(localStorage.getItem('recipeGroupState') || "null"); } catch(e) { console.warn('Invalid Recipe Group State cache cleared.'); localStorage.removeItem('recipeGroupState'); }
+    try { savedRecipeState = JSON.parse(localStorage.getItem('recipeGroupState') || "null"); } catch(_e) { console.warn('Invalid Recipe Group State cache cleared.'); localStorage.removeItem('recipeGroupState'); }
     window.recipeGroupState = window.recipeGroupState || savedRecipeState || {
         'cat-retail': true,
         'cat-sub': true,
@@ -330,7 +330,7 @@ window.renderProductBOM = function() {
     document.getElementById('recipePrintTimeInput').value = p.print_time_mins || 0;
     if (document.getElementById('isLabelInput')) document.getElementById('isLabelInput').checked = !!p.is_label;
 
-    let gt = 0; let wrap = document.getElementById('bomTableWrap');
+    let _gt = 0; let wrap = document.getElementById('bomTableWrap');
 
     let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="nn">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="np">Neogleamz Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="n">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="sp">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="q">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="uc">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="ec">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
@@ -357,7 +357,7 @@ window.renderProductBOM = function() {
                     let parts = k.split(':::');
                     if(parts.length === 4) {
                         let oldNN = parts[0];
-                        let oldNP = parts[1];
+                        let _oldNP = parts[1];
                         let oldItem = parts[2];
                         let oldSpec = parts[3];
                         
@@ -390,7 +390,6 @@ window.renderProductBOM = function() {
                 } 
             } 
             let ec = uc*q; 
-            gt+=ec; 
             a.push({rawKey: k, nn: nn, np: np, n: n, sp: sp, q: q, uc: uc, ec: ec}); 
         });
         a.sort((x,y) => { let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; });

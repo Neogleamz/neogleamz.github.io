@@ -23,9 +23,9 @@ function openMediaModal(url, renderType) { try { const container = document.getE
 ); } else { container.style.background = '#ffffff'; container.innerHTML = window.safeHTML(
     `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen allow="autoplay"></iframe>`
 ); } document.getElementById('mediaModal').style.display = 'flex'; } catch(e) { sysLog(e.message, true); } }
-function closeMediaModal() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = window.safeHTML(''); } catch(e) { sysLog(e.message, true); } }
+window.closeMediaModal = function() { try { document.getElementById('mediaModal').style.display = 'none'; document.getElementById('mediaContainer').innerHTML = window.safeHTML(''); } catch(e) { sysLog(e.message, true); } }
 
-function execRT(cmd, val=null) { document.execCommand(cmd, false, val); }
+window.execRT = function(cmd, val=null) { document.execCommand(cmd, false, val); }
 function getRTToolbar() { return `<div class="rt-toolbar"><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('bold')" title="Bold"><b>B</b></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('italic')" title="Italic"><i>I</i></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('underline')" title="Underline"><u>U</u></button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('strikeThrough')" title="Strikethrough"><s>S</s></button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyLeft')" title="Align Left">⬅</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyCenter')" title="Align Center">⬌</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('justifyRight')" title="Align Right">➡</button><span style="color:var(--border-input); margin:0 4px;">|</span><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertUnorderedList')" title="Bullet List">●</button><button type="button" class="rt-btn" onmousedown="event.preventDefault(); execRT('insertOrderedList')" title="Number List">1.</button><span style="color:var(--border-input); margin:0 4px;">|</span><input type="color" onchange="execRT('foreColor', this.value)" title="Text Color" style="width:24px; height:24px; padding:0; border:none; cursor:pointer; background:transparent; flex-shrink:0;"><select onchange="execRT('fontSize', this.value)" style="max-width:100px; min-width:0; padding:4px; font-size:12px; border:1px solid var(--border-input); border-radius:4px; background:var(--bg-input); color:var(--text-main); margin-right:4px;"><option value="3">Normal Font</option><option value="4">Large Font</option><option value="5">Huge Font</option></select></div>`; }
 
 window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = 'batches') {
@@ -49,7 +49,7 @@ window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = '
 
     let attachmentHtml = '';
     attachments.forEach((m, i) => {
-        let n = i + 1;
+        let _n = i + 1;
         let u = (m.url||'').replace(/"/g,'"').replace(/'/g,"\\'"); 
         attachmentHtml += `
             <div class="media-row media-row-dynamic" style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
@@ -223,7 +223,7 @@ window.triggerSopDirectUpload = function(btn) {
                 let cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
                 let path = `sops/${sopType}/${prodId}/${Date.now()}_${cleanName}`;
                 
-                const { data, error } = await supabaseClient.storage.from('sop-media').upload(path, file);
+                const { _data, error } = await supabaseClient.storage.from('sop-media').upload(path, file);
                 if (error) throw error;
                 
                 const { data: urlData } = supabaseClient.storage.from('sop-media').getPublicUrl(path);
@@ -303,7 +303,7 @@ function extractSOPDataFromUI(containerId) {
     return steps;
 }
 
-async function saveMasterSOP() {
+window.saveMasterSOP = async function() {
     const p = document.getElementById('sopMasterProductSelect').value;
     if(!p) return;
 
@@ -326,7 +326,7 @@ async function saveMasterSOP() {
         sysLog(e.message, true); setMasterStatus("Error", "mod-error");
     });
 }
-async function saveInlineSOP() {
+window.saveInlineSOP = async function() {
     if(typeof currentWO === 'undefined' || !currentWO) return;
 
     await executeWithButtonAction('btnSaveInlineSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
@@ -364,7 +364,7 @@ function openNewWOModal() {
 
 let multiBatchItems = [];
 
-function openMultiBatchModal(mode = 'all') {
+function openMultiBatchModal(_mode = 'all') {
     multiBatchItems = [];
     document.getElementById('multiBatchQty').value = 1;
     let r = document.getElementById('multiBatchProductRetail'); if(r) r.value = '';
@@ -393,7 +393,7 @@ function getNewWOProduct() {
     return (r && r.value) || (s && s.value) || (p && p.value) || '';
 }
 
-function stageBatchItem() {
+window.stageBatchItem = function() {
     try {
     const p = getMultiBatchProduct();
     const q = parseFloat(document.getElementById('multiBatchQty').value);
@@ -415,7 +415,7 @@ function stageBatchItem() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function removeBatchItem(index) {
+window.removeBatchItem = function(index) {
     multiBatchItems.splice(index, 1);
     renderStagedBatchItems();
 }
@@ -541,7 +541,7 @@ function checkWORouting() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function balanceRoute(safeKey, total, changed, maxPull) {
+window.balanceRoute = function(safeKey, total, changed, maxPull) {
     let pullEl = document.getElementById(`route_pull_${safeKey}`); let buildEl = document.getElementById(`route_build_${safeKey}`);
     if(changed === 'pull') {
         let val = parseFloat(pullEl.value) || 0;
@@ -666,7 +666,7 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
     return prints;
 }
 
-function sortReportTable(th, n, isNumeric) {
+window.sortReportTable = function(th, n, isNumeric) {
     let table = th.closest('table');
     let tbody = table.querySelector('tbody');
     let rows = Array.from(tbody.querySelectorAll('tr'));
@@ -698,7 +698,7 @@ function sortReportTable(th, n, isNumeric) {
     tbody.appendChild(frag);
 }
 
-function generateMultiBatchOrderReport() {
+window.generateMultiBatchOrderReport = function() {
     try {
     if(multiBatchItems.length === 0) return alert("Cart is empty.");
 
@@ -879,7 +879,7 @@ function generateMultiBatchOrderReport() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function printBatchOrderReport() {
+window.printBatchOrderReport = function() {
     const printContent = document.getElementById('batchOrderReportContent').innerHTML;
     const printWindow = window.open('', '', 'height=600,width=800');
     // Ensure styles map to printable black/white/red/green versions for paper
@@ -959,7 +959,7 @@ async function validateAndCreateWO() {
             let invKey = isLegacyRaw ? part : `RECIPE:::${part}`;
             let prefix = isLegacyRaw ? "" : "RECIPE:::";
 
-            let i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
+            let _i = inventoryDB[invKey] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment: 0};
 
             let amountToPrint = totalNeeded;
 
@@ -1043,14 +1043,14 @@ function renderWOList() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function woDragStart(e, index) {
+window.woDragStart = function(e, index) {
     woDraggedIndex = index;
     e.target.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
 }
-function woDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-function woDragEnd(e) { e.target.style.opacity = '1'; }
-function woDrop(e, index) {
+window.woDragOver = function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+window.woDragEnd = function(e) { e.target.style.opacity = '1'; }
+window.woDrop = function(e, index) {
     e.preventDefault();
     if (woDraggedIndex !== null && woDraggedIndex !== index) {
         let movedItem = workOrdersDB.splice(woDraggedIndex, 1)[0];
@@ -1061,8 +1061,8 @@ function woDrop(e, index) {
 }
 function selectWO(id) { try { currentWO = workOrdersDB.find(w => w.wo_id === id); isSOPLocked = true; renderWOList(); } catch(e) { sysLog(e.message, true); } }
 
-async function toggleWIPCheckbox(chk, key) { try { if(!currentWO) return; let isChecked = chk.checked; if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done'); if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked; await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } catch(e) { sysLog("Failed to save checkbox state.", true); } }
-async function checkAllInGroup(grpId) { try { if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {}; chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } }); if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } } catch(e) { sysLog("Failed to save group check.", true); } }
+async function toggleWIPCheckbox(chk, key) { try { if(!currentWO) return; let isChecked = chk.checked; if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done'); if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked; await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } catch(_e) { sysLog("Failed to save checkbox state.", true); } }
+async function checkAllInGroup(grpId) { try { if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {}; chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } }); if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } } catch(_e) { sysLog("Failed to save group check.", true); } }
 function toggleSOPLock() { isSOPLocked = !isSOPLocked; const btn = document.getElementById('sopLockBtn'); if(btn) btn.innerText = isSOPLocked ? '🔒' : '🔓'; if(currentWO) renderActiveWO(currentWO.wo_id); }
 
 function formatWOTime(ms) {
@@ -1098,12 +1098,12 @@ window.togglePipelinePause = async function() {
     try {
         await supabaseClient.from('work_orders').update({ wip_state: w }).eq('wo_id', currentWO.wo_id);
         renderActiveWO(currentWO.wo_id);
-    } catch(e) {
+    } catch(_e) {
         sysLog("Failed to pause/resume pipeline timer.", true);
     }
 };
 
-async function editWOQty(id) {
+window.editWOQty = async function(id) {
     let wo = workOrdersDB.find(w => w.wo_id === id);
     if (!wo) return;
     if ((wo.wip_state && wo.wip_state.materials_pulled) || wo.status === 'Completed') return alert("Cannot edit quantity after materials have been physically pulled from shelf stock!");
@@ -1314,14 +1314,14 @@ function renderActiveWO(id) {
             });
             pList.querySelectorAll('.wip-checkbox').forEach(chk => {
                 let key = chk.getAttribute('data-key');
-                chk.addEventListener('change', (e) => { toggleWIPCheckbox(chk, key); });
+                chk.addEventListener('change', (_e) => { toggleWIPCheckbox(chk, key); });
             });
         }
         else if(wo.status === 'In Production') {
             document.getElementById('pipe-Production').classList.add('active'); document.getElementById('sect-Production').classList.add('active');
             if(timerUI) document.getElementById('pipe-Production').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">3. Send to Production ${timerUI}</div>`);
 
-            let sList = document.getElementById('woSOPList'); sList.innerHTML = window.safeHTML(""); let saveContainer = document.getElementById('inlineSaveContainer');
+            let sList = document.getElementById('woSOPList'); sList.innerHTML = window.safeHTML(""); let _saveContainer = document.getElementById('inlineSaveContainer');
 
                             let sopGroups = [];
 
@@ -1380,7 +1380,7 @@ function renderActiveWO(id) {
                 }
 
                 let htmlOut = '';
-                sopGroups.forEach((grp, grpIdx) => {
+                sopGroups.forEach((grp, _grpIdx) => {
                     let isExpanded = localStorage.getItem('batchezSopExpanded_' + grp.id) === 'true';
                     let disp = isExpanded ? 'block' : 'none';
                     let chev = isExpanded ? '▼' : '▶';
@@ -1638,7 +1638,7 @@ function renderActiveWO(id) {
                 });
                 sList.querySelectorAll('.wip-checkbox').forEach(chk => {
                     let key = chk.getAttribute('data-key');
-                    chk.addEventListener('change', (e) => { toggleWIPCheckbox(chk, key); });
+                    chk.addEventListener('change', (_e) => { toggleWIPCheckbox(chk, key); });
                 });
 
                 if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sList);
@@ -1858,9 +1858,9 @@ async function advanceWO(newStatus, bypassModal = false) {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
 }
 
-async function deleteCurrentWO() { try { if(!currentWO) return; if(confirm(`Delete ${currentWO.wo_id}?`)) { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null; renderWOList(); } } catch(e) { sysLog(e.message, true); } }
+window.deleteCurrentWO = async function() { try { if(!currentWO) return; if(confirm(`Delete ${currentWO.wo_id}?`)) { await supabaseClient.from('work_orders').delete().eq('wo_id', currentWO.wo_id); workOrdersDB = workOrdersDB.filter(w => w.wo_id !== currentWO.wo_id); currentWO = workOrdersDB.find(w => w.status !== 'Archived') || null; renderWOList(); } } catch(e) { sysLog(e.message, true); } }
 
-async function archiveCurrentWO() {
+window.archiveCurrentWO = async function() {
     try {
         if(!currentWO) return;
         if(currentWO.status === 'Archived') return showToast('Already archived.', 'error');
@@ -1941,7 +1941,7 @@ function renderArchiveList() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function filterArchiveList(q) {
+window.filterArchiveList = function(q) {
     try {
         if (!q || !q.trim()) { _renderArchiveCards(_archiveFullData); return; }
         const lq = q.toLowerCase().trim();
@@ -1963,7 +1963,7 @@ function filterArchiveList(q) {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function toggleArchiveDetail(id) {
+window.toggleArchiveDetail = function(id) {
     try {
         const detail = document.getElementById(id);
         const chevron = document.getElementById(id + '-chev');

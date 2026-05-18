@@ -9,7 +9,7 @@ try {
         const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
         if (match) process.env[match[1]] = match[2].replace(/(^['"]|['"]$)/g, '').trim();
     });
-} catch(e) { /* skip if missing */ }
+} catch(_e) { /* skip if missing */ }
 
 // We expect these in environment, or prompt user to supply them.
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -121,7 +121,7 @@ async function fetchGraphQLFinancials(shopifyId) {
             }
         }
         return { fee, payout, trackingNumber, carrierName };
-    } catch (e) {
+    } catch (_e) {
         return { fee: null, payout: null, trackingNumber: null, carrierName: null };
     }
 }

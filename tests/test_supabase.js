@@ -11,10 +11,10 @@ const supabaseKey = keyMatch[1].trim();
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
-    const { data, error } = await supabase.from('taskz').update({ is_archived: false }).in('id', ['9f5393af-4228-431e-ad2e-a7303ca94804']);
+    const { _data, error } = await supabase.from('taskz').update({ is_archived: false }).in('id', ['9f5393af-4228-431e-ad2e-a7303ca94804']);
     console.log("Update error with is_archived:", error);
     
-    const { data: d2, error: e2 } = await supabase.from('taskz').select('*').limit(1);
+    const { data: d2, error: _e2 } = await supabase.from('taskz').select('*').limit(1);
     console.log("Task columns:", Object.keys(d2[0]));
 }
 run();

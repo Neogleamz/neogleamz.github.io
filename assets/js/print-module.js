@@ -120,14 +120,14 @@ function renderPrintQueue() {
     if (timeEl) timeEl.innerText = formatPrintTime(totalWaitTime) || "0m";
 }
 
-function printDragStart(e, index) { 
+window.printDragStart = function(e, index) { 
     printDraggedIndex = index; 
     e.target.style.opacity = '0.5'; 
     e.dataTransfer.effectAllowed = 'move';
 }
-function printDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-function printDragEnd(e) { e.target.style.opacity = '1'; }
-function printDrop(e, index) {
+window.printDragOver = function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+window.printDragEnd = function(e) { e.target.style.opacity = '1'; }
+window.printDrop = function(e, index) {
     e.preventDefault();
     if (printDraggedIndex !== null && printDraggedIndex !== index) {
         let movedItem = printQueueDB.splice(printDraggedIndex, 1)[0];
@@ -519,7 +519,7 @@ async function deletePrintJob() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-async function archiveCurrentPrint() {
+window.archiveCurrentPrint = async function() {
     try {
         if(!currentPrintJob) return;
         if(currentPrintJob.status === 'Archived') return alert("Already archived.");
@@ -541,7 +541,7 @@ async function archiveCurrentPrint() {
 }
 
 
-function openPrintSOP(pName) {
+window.openPrintSOP = function(pName) {
     try {
         pName = pName.split(':::')[0];
         let steps = sopsDB[pName] || [];
