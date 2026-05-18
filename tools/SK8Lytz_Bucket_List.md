@@ -8,7 +8,6 @@
 
 This document acts as the permanent, living task tracker integrated directly with your autonomous AI development agents. 
 
-
 > [!CAUTION]
 > **THE IMMUTABLE LEDGER DIRECTIVE:** You are STRICTLY FORBIDDEN from deleting history in this file. Even if this file becomes extremely long, do NOT "clean up" the history or truncate the `🗄️ Completed & Archived Epics` section. Completed items must remain exactly as they are until the `/release` workflow tags them with `[🚀]`.
 
@@ -43,7 +42,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 - *0 outdated breaking dependencies found. (Only minor/patch bumps pending)* ✅
 
 ### 🟠 Code Debt Hunt (TODO / FIXME / HACK)
-*0 new code-debt items found.* ✅
+### Target: `main`
+**Epic: Global ESLint Hardening**
+- [ ] `debt/eslint-sweep` : **Resolve Legacy no-undef Warnings** - Systematically audit and resolve the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping. [🤖 TBD] [🧠 TBD / 25k] [💸 TBD / $0.05]
 
 
 ---
