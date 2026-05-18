@@ -27,8 +27,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-### Target: main
-- [ ] `feat/task-engine-project-section-colors` : **Task Engine Project Section Colors** - Update the task engine UI so that when viewing a project, the sections are the same color as the color picked for that project. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 ---
 
 ## 🧹 Technical Debt
@@ -411,3 +409,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Task Engine Routing Bugs**
 *(Shipped v.2026.05.17.2248 — 2026-05-17)*
 - [🚀] `fix/task-modal-routing` : **Fix Task Modal Inbox Routing** - When using CTRL+K to open the global task modal, clicking the "go to inbox and create new task" button fails to route the user, while the "manage tags" button routes correctly. Needs DOM routing repair. [🤖 Gemini] [🧠 4.5k / 5k] [💸 $0.01 / $0.02]
+
+### Target: main
+**Epic: Task Engine Project Section Colors**
+- [🚀] `feat/task-engine-project-section-colors` : **Task Engine Project Section Colors** - Update the task engine UI so that when viewing a project, the sections are the same color as the color picked for that project. [🤖 Gemini 3.1 Pro (High)] [🧠 4k / 5k] [💸 $0.01 / $0.02]
