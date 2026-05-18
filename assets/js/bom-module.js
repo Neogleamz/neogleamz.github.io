@@ -567,7 +567,7 @@ window.renderRecipeManager = function() {
                     else if (sStr) changeStr = `<span style="color:#6ee7b7;">${sStr}</span>`;
                     else changeStr = "Apply Match";
                     
-                    suggestionHtml = `<button onclick="applyRecipeSuggestion(${idx}, '${escapedSugg}')" style="background:rgba(14, 165, 233, 0.2); color:#e0f2fe; border:1px solid rgba(14, 165, 233, 0.4); padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; flex-shrink:0; transition:all 0.2s; white-space:nowrap; font-weight:bold; text-transform:none !important;" onmouseover="this.style.background='rgba(14, 165, 233, 0.4)'" onmouseout="this.style.background='rgba(14, 165, 233, 0.2)'">💡 Fix: ${changeStr}</button>`;
+                    suggestionHtml = `<button data-app-click="applyRecipeSuggestion" data-idx="${idx}" data-sugg="${escapedSugg}" class="btn-blue" style="padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; flex-shrink:0; white-space:nowrap; font-weight:bold; text-transform:none !important;">💡 Fix: ${changeStr}</button>`;
                 }
             }
             
@@ -633,7 +633,7 @@ window.renderRecipeManager = function() {
 
             let formattedNewKey = getFormattedNewKey(r, bestMatch, isFixed);
             let escapedVal = (r.newKey||'').replace(/"/g, '&quot;');
-            let displayDiv = `<div onclick="this.style.display='none'; document.getElementById('rmInput_${idx}').style.display='block'; document.getElementById('rmInput_${idx}').focus();" style="flex-grow:1; max-width:400px; padding:8px; background:var(--bg-input); border:1px solid ${isFixed ? '#10b981' : 'var(--border-input)'}; border-radius:4px; font-family:monospace; font-size:11px; cursor:text; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-color);" title="Click to Edit">${formattedNewKey}</div>`;
+            let displayDiv = `<div data-app-click="editRecipeKey" data-idx="${idx}" style="flex-grow:1; max-width:400px; padding:8px; background:var(--bg-input); border:1px solid ${isFixed ? '#10b981' : 'var(--border-input)'}; border-radius:4px; font-family:monospace; font-size:11px; cursor:text; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-color);" title="Click to Edit">${formattedNewKey}</div>`;
 
             let rowInput = `<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%;">
                 ${displayDiv}
@@ -783,6 +783,12 @@ document.addEventListener('click', (e) => {
     if (action === 'toggleRecipeCat') { if(typeof window.toggleRecipeCategory === 'function') window.toggleRecipeCategory(btn.dataset.cat, btn.querySelector('span') || btn); }
     if (action === 'sortBOM') { if(typeof sortBOM === 'function') sortBOM(btn.dataset.col); }
     if (action === 'removeBOMPart') { if(typeof removePart === 'function') removePart(btn); }
+    if (action === 'applyRecipeSuggestion') { if(typeof window.applyRecipeSuggestion === 'function') window.applyRecipeSuggestion(parseInt(btn.dataset.idx, 10), btn.dataset.sugg); }
+    if (action === 'editRecipeKey') { 
+        btn.style.display = 'none'; 
+        let input = document.getElementById('rmInput_' + btn.dataset.idx); 
+        if(input) { input.style.display='block'; input.focus(); } 
+    }
 });
 document.addEventListener('dragstart', (e) => {
     let el = e.target.closest('[data-app-dragstart]');
