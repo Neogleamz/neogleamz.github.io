@@ -1,6 +1,9 @@
 # SK8Lytz Application Changelog
 
 ## [Unreleased]
+### Features & Bug Fixes
+- **Fix Task Modal Inbox Routing** (`fix/task-modal-routing`): When using CTRL+K to open the global task modal, clicking the "go to inbox" and "create new task" buttons failed to route the user. Refactored `system-event-delegator.js` logic to chain visibility states, hiding the Command Palette and explicitly forcing the Task Planner to open and switch views correctly.
+
 ### Chores & Maintenance
 - **Resolve Legacy no-undef Warnings**: Systematically audited and resolved the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping.
 
