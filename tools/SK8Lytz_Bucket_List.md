@@ -36,6 +36,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🟡 P2 Medium Priority (Enhancements)
 
 ---
+### Target: main
+- [ ] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button** - The light/dark mode button doesn't work. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 ---
