@@ -750,7 +750,7 @@
             }
         }
 
-        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
 
         document.getElementById('search-input').addEventListener('input', renderSkaters);
         renderSkaters();

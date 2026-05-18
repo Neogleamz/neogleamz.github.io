@@ -37,7 +37,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ---
 ### Target: main
-- [ ] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button** - The light/dark mode button doesn't work. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [x] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button & Tasks UI** - Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red. [🤖 Gemini 3.1 Pro (High)] [🧠 6k / 5k] [💸 0.02 / $0.02]
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 ---
