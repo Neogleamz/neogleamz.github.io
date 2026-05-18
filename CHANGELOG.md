@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.41] - 2026-05-17
+### Features & Bug Fixes
+- **Fix Light/Dark Mode Button & Tasks UI**: Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red.
+
 ## [1.0.40] - 2026-05-17
 ### Features & Bug Fixes
 - **Webhook Idempotency Race Condition Fix**: Refactored the Shopify `orders/create` Edge Function to aggregate identical line items organically, and implemented a strict `UNIQUE(order_id, storefront_sku)` constraint to the PostgreSQL `sales_ledger`. This guarantees mathematical parity during millisecond-simultaneous webhook triggers and totally eliminates duplicate record generation inside the financial trace pipeline.
