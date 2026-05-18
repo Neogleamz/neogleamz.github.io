@@ -35,7 +35,7 @@ function _scraperSetStatus(msg, color) {
     el.textContent = msg;
 }
 
-function openScraperFoundry() {
+window.openScraperFoundry = function() {
     if (document.getElementById('scraperFoundryOverlay')) {
         document.getElementById('scraperFoundryOverlay').style.display = 'flex';
         return;
@@ -391,7 +391,7 @@ function _scraperGetRelativeSelector(childNode, parentNode) {
         if (!domParent) break;
         
         let siblings = Array.from(domParent.children).filter(n => n.nodeType === Node.ELEMENT_NODE && n.tagName !== 'SPAN'); // ignore injected xray badges
-        let legitimateSiblings = siblings.filter(s => s.tagName.toLowerCase() === tag);
+        let _legitimateSiblings = siblings.filter(s => s.tagName.toLowerCase() === tag);
 
         // ALWAYS use simple nth-child routing vertically upwards
         let physicalIndex = siblings.indexOf(current) + 1;
@@ -452,7 +452,7 @@ function _scraperMapChildColumn() {
                     _scraperDataset[rowIdx][colName] = ""; // Graceful null mapping for missing DOM blocks
                 }
             }
-        } catch(e) {
+        } catch(_e) {
             _scraperDataset[rowIdx][colName] = ""; 
         }
     });

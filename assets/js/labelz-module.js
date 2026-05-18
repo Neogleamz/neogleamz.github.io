@@ -12,10 +12,10 @@
 // and jsPDF. Integrated with Catalog for barcode mappings.
 // ============================================================
 
-const LABEL_STORAGE_BUCKET = 'sop-media';
+const _LABEL_STORAGE_BUCKET = 'sop-media';
 
 let labelzDB = [];
-let labelzCurrentEdit = null;
+let _labelzCurrentEdit = null;
 
 // Fabric Canvas Instance Variables
 let fCanvas = null;
@@ -186,8 +186,8 @@ function initFabricCanvas() {
         onCanvasSelection(e);
     });
     
-    fCanvas.on('object:added', (e) => { saveLabelzHistory(); });
-    fCanvas.on('object:removed', (e) => { saveLabelzHistory(); });
+    fCanvas.on('object:added', (_e) => { saveLabelzHistory(); });
+    fCanvas.on('object:removed', (_e) => { saveLabelzHistory(); });
 
     // Global copy/paste & keyboard listener cleanup and injection
     window.removeEventListener('paste', handleLabelzPaste);
@@ -250,8 +250,8 @@ function updateLabelCanvasSize() {
     fCanvas.setHeight(pxHeight);
     
     // Resize container visually via CSS so it fits nicely
-    const wrapper = document.getElementById('labelzCanvasWrapper');
-    const container = document.getElementById('labelzCanvasContainer');
+    const _wrapper = document.getElementById('labelzCanvasWrapper');
+    const _container = document.getElementById('labelzCanvasContainer');
     
     // Reset zoom
     currentZoom = 1;
@@ -295,7 +295,7 @@ function addLabelzText() {
     fCanvas.setActiveObject(text);
 }
 
-function addLabelzRect() {
+window.addLabelzRect = function() {
     disableLabelzDrawingMode();
     const rect = new fabric.Rect({
         left: fCanvas.width / 2, top: fCanvas.height / 2,
@@ -307,7 +307,7 @@ function addLabelzRect() {
     fCanvas.setActiveObject(rect);
 }
 
-function addLabelzCircle() {
+window.addLabelzCircle = function() {
     disableLabelzDrawingMode();
     const circ = new fabric.Circle({
         left: fCanvas.width / 2, top: fCanvas.height / 2,
@@ -337,7 +337,7 @@ window.toggleLabelzDrawingMode = function(btnObj) {
     }
 };
 
-function addLabelzLine() {
+window.addLabelzLine = function() {
     disableLabelzDrawingMode();
     const line = new fabric.Line([50, 50, 200, 50], {
         stroke: '#000000',
@@ -347,7 +347,7 @@ function addLabelzLine() {
     fCanvas.setActiveObject(line);
 }
 
-function addLabelzDynamicText(templateContent = '[Item Name]') {
+window.addLabelzDynamicText = function(templateContent = '[Item Name]') {
     disableLabelzDrawingMode();
     const text = new fabric.Textbox(templateContent, {
         left: fCanvas.width / 2, top: fCanvas.height / 2,
@@ -363,12 +363,12 @@ function addLabelzDynamicText(templateContent = '[Item Name]') {
     fCanvas.setActiveObject(text);
 }
 
-function addLabelzImage() {
+window.addLabelzImage = function() {
     disableLabelzDrawingMode();
     document.getElementById('labelzImageUpload').click();
 }
 
-function handleLabelzImageUpload(e) {
+window.handleLabelzImageUpload = function(e) {
     const file = e.target.files[0];
     if(!file) return;
 
@@ -474,7 +474,7 @@ function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
     }
 }
 
-function addLabelzQR(codeStr = 'NEOGLEAMZ') {
+window.addLabelzQR = function(codeStr = 'NEOGLEAMZ') {
     const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
     try {
         bwipjs.toCanvas('labelzBwipjsRenderer', {
@@ -545,7 +545,7 @@ function onCanvasSelectionCleared() {
     ) : '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-style:italic;">Select an element to edit properties.</div>';
 }
 
-function onCanvasSelection(e) {
+function onCanvasSelection(_e) {
     const obj = fCanvas.getActiveObject();
     if (!obj) { onCanvasSelectionCleared(); return; }
     
@@ -676,12 +676,12 @@ window.lblzDuplicateSelected = function() {
     });
 };
 
-function updateLabelCanvasBg() {
+window.updateLabelCanvasBg = function() {
     if(!fCanvas) return;
     fCanvas.backgroundColor = document.getElementById('labelzBgColor').value;
     fCanvas.renderAll();
 }
-function clearLabelCanvasBg() {
+window.clearLabelCanvasBg = function() {
     if(!fCanvas) return;
     document.getElementById('labelzBgColor').value = '#ffffff';
     fCanvas.backgroundColor = '';
@@ -692,7 +692,7 @@ function clearLabelCanvasBg() {
 // CATALOG CONNECTOR
 // ============================================================
 
-function searchLabelzCatalog() {
+window.searchLabelzCatalog = function() {
     try {
         const q = document.getElementById('labelzCatalogSearch').value.toLowerCase();
         const resDiv = document.getElementById('labelzCatalogResults');
@@ -747,7 +747,7 @@ function searchLabelzCatalog() {
     } catch(e) { sysLog('Labelz Catalog Search error: ' + e.message, true); }
 }
 
-window.applyCatalogData = function(name, bcValue, cost) {
+window.applyCatalogData = function(name, bcValue, _cost) {
     const obj = fCanvas.getActiveObject();
     if(!obj) {
         // If nothing selected, drop both a text and barcode element linked
@@ -775,7 +775,7 @@ window.applyCatalogData = function(name, bcValue, cost) {
 // MODAL CONTROLS & LIFECYCLE
 // ============================================================
 
-function toggleLabelzEmojiPicker() {
+window.toggleLabelzEmojiPicker = function() {
     const p = document.getElementById('labelzDesignerEmojiPicker');
     if(p) p.style.display = p.style.display === 'none' ? 'flex' : 'none';
 }
@@ -794,9 +794,9 @@ document.body.addEventListener('click', (e) => {
     }
 });
 
-function openCreateLabelModal() {
+window.openCreateLabelModal = function() {
     initFabricCanvas();
-    labelzCurrentEdit = null;
+    _labelzCurrentEdit = null;
     document.getElementById('labelzDesignerName').value = '';
     assignLabelzDesignerEmoji('🏷️');
     
@@ -812,12 +812,12 @@ function openCreateLabelModal() {
     saveLabelzHistory();
 }
 
-function openEditLabelModal(name) {
+window.openEditLabelModal = function(name) {
     initFabricCanvas();
     const l = labelzDB.find(x => x.product_name === name);
     if(!l) return;
     
-    labelzCurrentEdit = l;
+    _labelzCurrentEdit = l;
     document.getElementById('labelzDesignerName').value = name;
     assignLabelzDesignerEmoji(l.emoji || '🏷️');
     
@@ -851,7 +851,7 @@ function openEditLabelModal(name) {
 
 function closeLabelzDesigner() {
     document.getElementById('labelzDesignerModal').style.display = 'none';
-    labelzCurrentEdit = null;
+    _labelzCurrentEdit = null;
 }
 
 
@@ -859,7 +859,7 @@ function closeLabelzDesigner() {
 // SAVE & EXPORT
 // ============================================================
 
-async function saveLabelzDesign() {
+window.saveLabelzDesign = async function() {
     await executeWithButtonAction('btnSaveLabelz', 'SAVING...', '✅ SAVED!', async () => {
         const name = document.getElementById('labelzDesignerName').value.trim();
         if(!name) return alert('Label name is required.');
@@ -913,7 +913,7 @@ async function saveLabelzDesign() {
 }
 
 // EXPORT TO PDF VIA jsPDF
-async function deleteLabelzDesign() {
+window.deleteLabelzDesign = async function() {
     await executeWithButtonAction('btnDeleteLabelz', 'DELETING...', '✅ DELETED!', async () => {
         const name = document.getElementById('labelzDesignerName').value.trim();
         if(!name) return alert('No label loaded to delete.');
@@ -939,7 +939,7 @@ async function deleteLabelzDesign() {
     });
 }
 
-function exportLabelzPDF() {
+window.exportLabelzPDF = function() {
     if(!fCanvas) return;
     if(typeof window.jspdf === 'undefined') return alert('jsPDF library not loaded.');
     
@@ -970,7 +970,7 @@ function exportLabelzPDF() {
 // ============================================================
 // BARCODZ CACHE INTEGRATION
 // ============================================================
-function getLabelzForBarcodz() {
+window.getLabelzForBarcodz = function() {
     return labelzDB.map(l => ({
         name: l.product_name,
         slug: l.product_name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30),
@@ -983,7 +983,7 @@ function getLabelzForBarcodz() {
     }));
 }
 
-function initLabelzPane() {
+window.initLabelzPane = function() {
     // Already populated on boot, just ensure layout wrapper displays cleanly
     if(labelzDB.length === 0) loadLabelzData();
 }

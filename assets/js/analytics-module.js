@@ -13,7 +13,7 @@ let waterfallChart = null;
 let expenseDoughnut = null;
 let trendsChart = null;
 
-function sortAnalytics(c) { 
+window.sortAnalytics = function(c) { 
     if(isResizing) return; 
     currentAnalyticsSort = { column: c, direction: currentAnalyticsSort.column===c && currentAnalyticsSort.direction==='asc' ? 'desc' : 'asc' }; 
     window.saveSort('currentAnalyticsSort', currentAnalyticsSort);
@@ -259,7 +259,7 @@ function renderProfitabilityMatrix() {
     } catch(e) { sysLog('Profitability matrix render error: ' + e.message, true); }
 }
 
-async function backfillFinancials(context = 'sales') {
+window.backfillFinancials = async function(context = 'sales') {
     if(!confirm("This will recalculate fees and profit for ALL historical sales based on CURRENT engine rules and sync them to the database. Continue?")) return;
     
     let terminalId = context === 'billing' ? 'billingProgressTerminal' : 'syncProgressTerminal';

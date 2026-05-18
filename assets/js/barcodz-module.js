@@ -88,7 +88,7 @@ function buildBarcodzCache() {
     } catch(e) { sysLog('Barcodz cache build error: ' + e.message, true); }
 }
 
-function renderBarcodzGrid(forceRebuild = false) {
+window.renderBarcodzGrid = function(forceRebuild = false) {
     try {
         let hasProducts = barcodzCache.some(x => x.type !== 'Custom Labelz');
         if (barcodzCache.length === 0 || (!hasProducts && typeof productsDB !== 'undefined' && Object.keys(productsDB).length > 0) || forceRebuild) {
@@ -182,7 +182,7 @@ function renderBarcodzGrid(forceRebuild = false) {
 
 window.barcodzSpoolQueue = [];
 
-function addBarcodzToSpool(name, slug, icon, type) {
+window.addBarcodzToSpool = function(name, slug, icon, type) {
     let existing = window.barcodzSpoolQueue.find(x => x.slug === slug);
     if (existing) {
         existing.qty++;
@@ -192,7 +192,7 @@ function addBarcodzToSpool(name, slug, icon, type) {
     renderBarcodzSpool();
 }
 
-function updateSpoolItem(slug, amt) {
+window.updateSpoolItem = function(slug, amt) {
     let existing = window.barcodzSpoolQueue.find(x => x.slug === slug);
     if (!existing) return;
     
@@ -210,18 +210,18 @@ function clearBarcodzSpool() {
 
 window.spoolDragItemIndex = null;
 
-function spoolDragStart(e, idx) {
+window.spoolDragStart = function(e, idx) {
     window.spoolDragItemIndex = idx;
     e.dataTransfer.effectAllowed = 'move';
     setTimeout(() => { if(e.target) e.target.style.opacity = '0.5'; }, 0);
 }
 
-function spoolDragOver(e) {
+window.spoolDragOver = function(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
 }
 
-function spoolDrop(e, targetIdx) {
+window.spoolDrop = function(e, targetIdx) {
     e.preventDefault();
     if (window.spoolDragItemIndex === null || window.spoolDragItemIndex === targetIdx) return;
     
@@ -233,12 +233,12 @@ function spoolDrop(e, targetIdx) {
     renderBarcodzSpool();
 }
 
-function spoolDragEnd(e) {
+window.spoolDragEnd = function(e) {
     if (e && e.target) e.target.style.opacity = '1';
     window.spoolDragItemIndex = null;
 }
 
-function setSpoolItemQty(slug, qty) {
+window.setSpoolItemQty = function(slug, qty) {
     let amt = parseInt(qty, 10);
     if (isNaN(amt) || amt < 0) amt = 0;
     
@@ -294,7 +294,7 @@ function renderBarcodzSpool() {
     counters.forEach(c => c.innerText = totalQty);
 }
 
-function executeBatchPrint() {
+window.executeBatchPrint = function() {
     if (window.barcodzSpoolQueue.length === 0) return alert("Print Spool is empty!");
     
     let activeSizeSelect = 'barcodzSizeSelect';
@@ -362,7 +362,7 @@ function executeBatchPrint() {
                         bwipjs.toCanvas(offC, { bcid: 'qrcode', text: item.slug, scale: 3 });
                         const imgEl = document.getElementById(svgId);
                         if (imgEl) imgEl.src = offC.toDataURL('image/png');
-                    } catch(e) {
+                    } catch(_e) {
                         const imgEl = document.getElementById(svgId);
                         if (imgEl) imgEl.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID QR]</div>`;
                     }
@@ -379,7 +379,7 @@ function executeBatchPrint() {
                             fontSize: 12,
                             margin: 0
                         });
-                    } catch(e) {
+                    } catch(_e) {
                         const ele = document.getElementById(svgId);
                         if(ele) ele.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID FORMAT:\n${typeSelect}]</div>`;
                     }
@@ -392,7 +392,7 @@ function executeBatchPrint() {
                         bwipjs.toCanvas(offC, { bcid: 'qrcode', text: item.slug, scale: 3 });
                         const ele = document.getElementById(svgId);
                         if (ele) ele.src = offC.toDataURL('image/png');
-                    } catch(e) {
+                    } catch(_e) {
                         const ele = document.getElementById(svgId);
                         if (ele) ele.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold;">[INVALID QR]</div>`;
                     }

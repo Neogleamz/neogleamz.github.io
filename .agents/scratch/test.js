@@ -1,5 +1,5 @@
 // test.js
-const fs = require('fs');
+const _fs = require('fs');
 
 // simulate the process
 let oFulfill = "pending";

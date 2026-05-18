@@ -19,7 +19,7 @@
             if (name === 'renderSalesTable') return typeof renderSalesTable === 'function' ? renderSalesTable : null;
             
             return null;
-        } catch (e) {
+        } catch (_e) {
             return null;
         }
     };

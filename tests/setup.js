@@ -60,4 +60,4 @@ window.salesDB = [
     { order_id: 1, internal_recipe_name: "PRO-SKATE-WHEEL", qty_sold: 1, total: 45.00, net: 20.00 }
 ];
 
-window.sysLog = function(msg) { /* silence console spam */ };
+window.sysLog = function(_msg) { /* silence console spam */ };

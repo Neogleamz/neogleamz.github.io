@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             let collapsedCache;
                             try {
                                 collapsedCache = JSON.parse(localStorage.getItem('neogleamz_task_sections_collapsed') || '{}') || {};
-                            } catch(e) { collapsedCache = {}; }
+                            } catch(_e) { collapsedCache = {}; }
                             
                             if (groupEl.style.display === 'none') {
                                 groupEl.style.display = 'flex';

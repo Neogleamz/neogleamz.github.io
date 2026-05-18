@@ -224,7 +224,7 @@ function openPackerzSopTerminal(orderGroup) {
     validatePackerzAssemblyButton(orderGroup.order_id);
 }
 
-window.updatePackerzItemType = async function(orderId, sku, newVal, safeRecipe) {
+window.updatePackerzItemType = async function(orderId, sku, newVal, _safeRecipe) {
     sysLog(`Packerz overriding Sale Type ${orderId}: ${newVal}`);
     const { error } = await supabaseClient.from('sales_ledger').update({transaction_type: newVal}).eq('order_id', orderId).eq('storefront_sku', sku);
     if(error) { alert("Error saving type mapping from Packerz: " + error.message); return; }
@@ -436,7 +436,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     }
 
     try {
-        const { data, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe).single();
+        const { data, _error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe).single();
         // Allow fallback data if error (so we can create a new one inline)
         const instructionJson = data ? JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}') : {steps: [], qaChecks: []};
         currentPackerzSopData = instructionJson;
@@ -696,7 +696,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                             displayValue: true, fontSize: 10, margin: 4,
                             lineColor: '#000', background: '#ffffff'
                         });
-                    } catch (e) {
+                    } catch (_e) {
                         el.outerHTML = `<span style="color:#ef4444; font-size:10px;">⚠️ Barcode error</span>`;
                     }
                 });
@@ -954,7 +954,7 @@ async function executePackerzCompletion(orderId) {
     }
 }
 
-async function unarchivePackerzOrder(orderId) {
+window.unarchivePackerzOrder = async function(orderId) {
     if(!confirm(`Are you absolutely sure you want to UNARCHIVE Order ${orderId} and return it to the active queue?`)) return;
 
     try {
@@ -1015,10 +1015,10 @@ async function unarchivePackerzOrder(orderId) {
 // ==========================================
 
 // BATCHEZ-Legacy Logic Movers
-function movePackerzSOPUp(btn) { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling); }
-function movePackerzSOPDown(btn) { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row); }
-function removePackerzSOPRow(btn) { btn.closest('.sop-step-row').remove(); }
-function addPackerzSOPRow(btn) {
+window.movePackerzSOPUp = function(btn) { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling); }
+window.movePackerzSOPDown = function(btn) { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row); }
+window.removePackerzSOPRow = function(btn) { btn.closest('.sop-step-row').remove(); }
+window.addPackerzSOPRow = function(btn) {
     let newRow = document.createElement('div');
     newRow.innerHTML = window.safeHTML ? window.safeHTML(window.generateEditableSOPRow({text:""}, 999)) : window.generateEditableSOPRow({text:""}, 999);
     let rowNode = newRow.firstChild;
@@ -1058,14 +1058,14 @@ async function initPackerzAdmin() {
 // Hook it universally!
 setTimeout(initPackerzAdmin, 1500);
 
-async function filterPackerzAdminDropdown() {
-    let p = document.getElementById('packerzAdminRecipeSelect').value;
+window.filterPackerzAdminDropdown = async function() {
+    let _p = document.getElementById('packerzAdminRecipeSelect').value;
     loadPackerzSopFromDB();
 }
 
-function openPackerzAuditLog(sku, telemetryJsonString) {
+window.openPackerzAuditLog = function(sku, telemetryJsonString) {
     let data;
-    try { data = JSON.parse(telemetryJsonString); } catch(e) { return alert("Corrupted Audit Log"); }
+    try { data = JSON.parse(telemetryJsonString); } catch(_e) { return alert("Corrupted Audit Log"); }
 
     let h = `
         <div id="packerzAuditOverlay" class="modal-overlay active">
@@ -1271,7 +1271,7 @@ async function loadPackerzSopFromDB() {
     ) : "<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching structural SOP payload from Supabase Edge...</div>";
 
     try {
-        const { data, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku).single();
+        const { data, _error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku).single();
 
         let steps = [{}];
         if(data) {
@@ -1309,7 +1309,7 @@ async function loadPackerzSopFromDB() {
     }
 }
 
-async function savePackerzSOPToDB() {
+window.savePackerzSOPToDB = async function() {
     const sku = document.getElementById('packerzAdminRecipeSelect').value;
     if(!sku) return alert("Must select a Recipe first!");
 
@@ -1422,7 +1422,7 @@ async function refreshSOPMediaGrid() {
             card.classList.add('grid-stack');
             card.style.cssText = 'background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; cursor:pointer; transition:all 0.2s; min-height:110px; padding:8px;';
             card.ondragover = (e) => { e.preventDefault(); card.style.borderColor = '#10b981'; card.style.backgroundColor = 'rgba(16,185,129,0.1)'; };
-            card.ondragleave = (e) => { card.style.borderColor = 'var(--border-color)'; card.style.backgroundColor = 'var(--bg-panel)'; };
+            card.ondragleave = (_e) => { card.style.borderColor = 'var(--border-color)'; card.style.backgroundColor = 'var(--bg-panel)'; };
             card.ondrop = (e) => sopHandleDrop(e, fullPath);
             card.onmouseover = () => { card.style.borderColor = '#10b981'; card.style.transform = 'translateY(-2px)'; };
             card.onmouseout  = () => { card.style.borderColor = 'var(--border-color)'; card.style.transform = ''; };
@@ -1704,7 +1704,7 @@ async function sopHandleDrop(e, destFolder) {
 }
 
 // ---- Deletion & Creation ----
-async function deleteSOPMedia(path, isFolder) {
+window.deleteSOPMedia = async function(path, isFolder) {
     if (!confirm(`⚠️ Are you sure you want to permanently delete:\n\n${path}\n\n${isFolder ? "This will instantly delete ALL files and folders inside it!" : ""}`)) return;
 
     const statusEl = document.getElementById('sopMediaUploadStatus');
@@ -1735,7 +1735,7 @@ async function deleteSOPMedia(path, isFolder) {
     await refreshSOPMediaGrid();
 }
 
-async function createSOPMediaFolder() {
+window.createSOPMediaFolder = async function() {
     const name = prompt('Enter folder name (letters, numbers, hyphens):');
     if (!name || !name.trim()) return;
     const safe = name.trim().replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -1754,7 +1754,7 @@ async function createSOPMediaFolder() {
 }
 
 function openSOPTokenGuide()  { document.getElementById('sopTokenGuideModal').style.display = 'flex'; }
-function closeSOPTokenGuide() { document.getElementById('sopTokenGuideModal').style.display = 'none'; }
+window.closeSOPTokenGuide = function() { document.getElementById('sopTokenGuideModal').style.display = 'none'; }
 
 // ============================================================
 // SOP QA ARCHIVE — snapshot SOP at moment of QA sign-off
@@ -1793,13 +1793,13 @@ let sopAuditLogCache = [];
 
 let sopAuditReturnToPackerz = false;
 
-async function openSOPAuditLog(fromPackerzPage = false) {
+window.openSOPAuditLog = async function(fromPackerzPage = false) {
     sopAuditReturnToPackerz = fromPackerzPage;
     document.getElementById('sopAuditLogModal').style.display = 'flex';
     await loadSOPAuditLog();
 }
 
-function closeSOPAuditLog() {
+window.closeSOPAuditLog = function() {
     document.getElementById('sopAuditLogModal').style.display = 'none';
     if (sopAuditReturnToPackerz) {
         sopAuditReturnToPackerz = false;
@@ -1893,7 +1893,7 @@ async function loadSOPAuditLog() {
     }
 }
 
-function filterSOPAuditLog() {
+window.filterSOPAuditLog = function() {
     const q = (document.getElementById('sopAuditSearch')?.value || '').toLowerCase().trim();
     if (!q) { renderSOPAuditLogRows(sopAuditLogCache); return; }
     const filtered = sopAuditLogCache.filter(r =>
@@ -1920,7 +1920,7 @@ function renderSOPAuditLogRows(rows) {
         let totalPassed = 0;
         let recipeNames = [];
 
-        const itemsHtml = (order.items || []).map((item, idx) => {
+        const itemsHtml = (order.items || []).map((item, _idx) => {
             const telemetry = Array.isArray(item.packer_telemetry) ? item.packer_telemetry : [];
             const checks    = telemetry.filter(t => t.type === 'check');
             const inputs    = telemetry.filter(t => t.type === 'input');
@@ -1992,7 +1992,7 @@ function renderSOPAuditLogRows(rows) {
         let totalPassed = 0;
         let recipeNames = [];
 
-        const itemsHtml = (order.items || []).map((item, idx) => {
+        const itemsHtml = (order.items || []).map((item, _idx) => {
             const telemetry = Array.isArray(item.packer_telemetry) ? item.packer_telemetry : [];
             const checks    = telemetry.filter(t => t.type === 'check');
             const inputs    = telemetry.filter(t => t.type === 'input');
@@ -2059,7 +2059,7 @@ function renderSOPAuditLogRows(rows) {
     }).join("");
 }
 
-function toggleSOPAuditDetail(id) {
+window.toggleSOPAuditDetail = function(id) {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
@@ -2232,7 +2232,7 @@ document.addEventListener('mousedown', (e) => {
 
 let sopSnapshotStream = null;
 
-window.click_openSOPSnapshotCameraInline = function(e) {
+window.click_openSOPSnapshotCameraInline = function(_e) {
     window.activeSOPTextAreaId = 'packerzLiveInlineQA';
     openSOPSnapshotCamera();
 };
@@ -2243,7 +2243,7 @@ window.click_openSOPSnapshotCamera_packerz = function(e) {
     openSOPSnapshotCamera();
 };
 
-window.click_openSOPSnapshotCamera = function(e) {
+window.click_openSOPSnapshotCamera = function(_e) {
     if(window.activeSOPTextAreaId) {
         openSOPSnapshotCamera();
     } else {
