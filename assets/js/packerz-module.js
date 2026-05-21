@@ -445,7 +445,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
             headerButtonsWrapper.innerHTML = window.safeHTML(
                 `<button class="btn-ghost-base btn-ghost-blue" data-click="click_printPackerzSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
                 `<button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_if_typeof_togglePackerzLiveInl" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>` +
-                `<button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" data-click="click_closePackerzSopViewer">X</button>`
+                `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_closePackerzSopViewer">Close</button>`
             );
         }
     }
