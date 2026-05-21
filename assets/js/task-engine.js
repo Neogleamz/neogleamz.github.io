@@ -453,24 +453,44 @@ function teRenderTaskGrid(filter = null) {
             <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: ${group.tasks.length > 0 ? 'auto' : '2px'}; padding-bottom: 0px;">
         `;
         
-        group.tasks.forEach(t => {
-            html += `<div class="te-list-sortable-item" data-id="${t.id}" style="display: flex; flex-direction: column;">`;
-            html += teBuildTaskRowHTML(t, false);
-            // Render children wrapper always to provide a drop zone
-            let children = displayTasks.filter(child => child.parent_task_id === t.id);
-            html += `<div id="te-subtasks-wrapper-${t.id}" class="te-sortable-subtask-list" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px; min-height: ${children.length > 0 ? 'auto' : '2px'}; padding-bottom: 0px;">`;
+        function renderTaskTree(task, depth) {
+            let taskHtml = '';
+            let isTopLevel = (depth === 0);
+            
+            let children = displayTasks.filter(child => child.parent_task_id === task.id);
+            children.sort((a,b) => {
+                let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
+                let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
+                return aSort - bSort;
+            });
+
+            if (isTopLevel) {
+                taskHtml += `<div class="te-list-sortable-item" data-id="${task.id}" style="display: flex; flex-direction: column;">`;
+            } else {
+                taskHtml += `<div class="te-list-sortable-child" data-id="${task.id}" style="display: flex; flex-direction: column;">`;
+            }
+
+            taskHtml += teBuildTaskRowHTML(task, depth, children.length > 0);
+
+            let isCollapsed = window['teSubtaskState_' + task.id] === 'collapsed';
+            let displayState = isCollapsed ? 'none' : 'flex';
+
+            taskHtml += `<div id="te-subtasks-wrapper-${task.id}" class="te-sortable-subtask-list" style="display: ${displayState}; padding-left: 24px; flex-direction: column; gap: 2px; min-height: ${children.length > 0 ? 'auto' : '2px'}; padding-bottom: 0px;">`;
+            
             if (children.length > 0) {
-                children.sort((a,b) => {
-                    let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
-                    let bSort = (b.metadata && typeof b.metadata.sort_order === 'number') ? b.metadata.sort_order : 999999;
-                    return aSort - bSort;
-                });
                 children.forEach(child => {
-                    html += `<div class="te-list-sortable-child" data-id="${child.id}">` + teBuildTaskRowHTML(child, true) + `</div>`;
+                    taskHtml += renderTaskTree(child, depth + 1);
                 });
             }
-            html += `</div>`;
-            html += `</div>`;
+            
+            taskHtml += `</div>`;
+            taskHtml += `</div>`;
+            
+            return taskHtml;
+        }
+
+        group.tasks.forEach(t => {
+            html += renderTaskTree(t, 0);
         });
         
         html += `
