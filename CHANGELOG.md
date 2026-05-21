@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.0.45] - 2026-05-21
+### Features & Bug Fixes
+- **Layerz Stage 3 Cleaning Timers & Independent Yield Tracking**: Overhauled the Cleaned/Post-Processing Stage (Stage 3) to accurately track its own independent yield and time, separating it from the Bed Run Manager. Added Live Timer Control (start, pause, resume) and Context-Aware Part Count calculations. Integrated automatic Recovery Print generation without double-charging raw material inventory.
+- **Inventory Reset Stock Levels Button Fix**: Fixed the orphaned "⚠️ Reset Stock Levels" button by re-implementing the missing `window.resetInventoryConsumption()` logic to properly wipe the `inventory_consumption` table and correctly refresh the local UI caches.
+
 ## [1.0.44] - 2026-05-20
 ### Features & Bug Fixes
 - **Always Render Empty "No Section" Bucket** (`feat/task-engine-always-show-no-section`): Task Engine: Ensure that an empty "No Section" bucket (with the "+ Add Task..." dropzone) is always rendered natively in all views (Inbox, My Tasks, Projects, etc.), even if there are zero tasks currently without a section. This allows users to instantly create a task without having to create a section first. Also tightened UI rendering logic to fix phantom padding gaps on empty section lists.
