@@ -246,6 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openSOPMasterModal_prod':
                     window.openSOPMasterModal('production');
                     break;
+                case 'click_window_openSOPMasterModal_packerz':
+                    window.openSOPMasterModal('packerz');
+                    break;
                 case 'click_window_openArchiveExplorer_bat':
                     window.openArchiveExplorer('batchez');
                     break;
@@ -799,6 +802,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_document_getElementById_sopMas':
                     document.getElementById('sopMasterModal').style.display='none';
+                    if (window.currentActiveSopOrderId && window.currentActiveSopRecipe && window.currentActiveSopSku) {
+                        if (typeof window.loadActiveSOP === 'function') {
+                            window.loadActiveSOP(window.currentActiveSopOrderId, window.currentActiveSopSku, window.currentActiveSopRecipe, window.currentActiveSopType);
+                        }
+                    }
                     break;
                 case 'click_openMediaManager_telemetry':
                     openMediaManager('telemetry');
@@ -806,8 +814,59 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openSOPTokenGuide':
                     openSOPTokenGuide();
                     break;
-                case 'click_if_typeof_toggleHorizontalPrev':
-                    if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('productionSopLeftPane', 'masterSopPreviewCol', this);;
+                case 'click_toggleDashboardPreview':
+                    if (typeof window.toggleHorizontalPreview === 'function') {
+                        window.toggleHorizontalPreview('productionSopLeftPane', 'masterSopPreviewCol', el);
+                    }
+                    break;
+                case 'click_printActiveSOP':
+                    if (typeof window.executeSopPrint === 'function') {
+                        window.executeSopPrint();
+                    }
+                    break;
+                case 'click_openActiveSOPEditor':
+                    {
+                        const savedType = window.currentActiveSopType;
+                        const savedRecipe = window.currentActiveSopRecipe;
+                        const savedOrderId = window.currentActiveSopOrderId;
+                        const savedSku = window.currentActiveSopSku;
+                        
+                        // Hide modal directly so we don't wipe active state variables
+                        const modal = document.getElementById('sopViewerModal');
+                        if (modal) modal.style.display = 'none';
+                        
+                        // Set the live editing states
+                        window.isActiveSopLiveEditing = true;
+                        window.isPackerzLiveEditing = true;
+                        
+                        // Ensure context remains preserved
+                        window.currentActiveSopOrderId = savedOrderId;
+                        window.currentActiveSopSku = savedSku;
+                        window.currentActiveSopRecipe = savedRecipe;
+                        window.currentActiveSopType = savedType;
+                        
+                        if (typeof window.openSOPMasterModal === 'function') {
+                            window.openSOPMasterModal(savedType, savedRecipe);
+                        }
+                    }
+                    break;
+                case 'click_openLayerzSOPEditor':
+                    if (typeof window.openSOPMasterModal === 'function') {
+                        window.openSOPMasterModal('3d', el.getAttribute('data-name'));
+                    }
+                    break;
+                case 'click_addDashboardSOPRow':
+                    {
+                        const area = document.getElementById('sopMasterEditorArea');
+                        if (area) {
+                            let newRow = document.createElement('div');
+                            const prodId = el.getAttribute('data-prodid') || 'unknown';
+                            const sopType = el.getAttribute('data-soptype') || 'batches';
+                            newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, prodId, sopType));
+                            let rowNode = newRow.firstChild;
+                            if (rowNode) area.appendChild(rowNode);
+                        }
+                    }
                     break;
                 case 'click_addSOPRow_this':
                     addSOPRow(el);
@@ -949,9 +1008,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_printPackerzSOP_legacy':
                     printPackerzSOP();
                     break;
-                case 'click_if_typeof_togglePackerzLiveInl':
-                    if(typeof togglePackerzLiveInlineSOP==='function') togglePackerzLiveInlineSOP();;
-                    break;
+
                 case 'click_closePackerzSopViewer':
                     closePackerzSopViewer();
                     break;
@@ -1118,10 +1175,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_toggleLayerzSopGroup':
                     {
                         let grpId = el.getAttribute('data-grp');
-                        let isEditing = window.activeInlineSopEditors && window.activeInlineSopEditors[grpId] === true;
-                        let isClickingIcon = el.getAttribute('data-icon') === 'true';
-                        if(isEditing && !isClickingIcon) break;
-                        
                         let d = document.getElementById('sopgrp_body_'+grpId);
                         let ic = document.getElementById('sopgrp_icon_'+grpId);
                         if(d && ic) {
@@ -1139,14 +1192,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_openPrintSOP':
                     if(window.openPrintSOP) window.openPrintSOP(el.getAttribute('data-name'));
-                    break;
-                case 'click_saveInlineSopBlock_print':
-                    if(window.saveInlineSopBlock) {
-                        window.saveInlineSopBlock(el.getAttribute('data-grp'), el.getAttribute('data-rawname'));
-                        if (window.currentPrintJob && window.renderActivePrintJob) {
-                            setTimeout(() => window.renderActivePrintJob(window.currentPrintJob.id), 500);
-                        }
-                    }
                     break;
 
                 case 'click_movePackerzSOPUp':
@@ -1284,15 +1329,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_toggleHorizontalPreview':
                     if(window.toggleHorizontalPreview) window.toggleHorizontalPreview(el.getAttribute('data-left'), el.getAttribute('data-preview'), el);
                     break;
-                case 'click_addInlineSOPRow':
-                    if(window.addInlineSOPRow) window.addInlineSOPRow(el.getAttribute('data-grp'));
-                    break;
-                case 'click_toggleInlineEditor':
-                    if(window.toggleInlineEditor) window.toggleInlineEditor(el.getAttribute('data-grp'));
-                    break;
-                case 'click_saveInlineSopBlock':
-                    if(window.saveInlineSopBlock) window.saveInlineSopBlock(el.getAttribute('data-grp'), el.getAttribute('data-rawname'));
-                    break;
                 case 'click_deleteAllArchive':
                     if(window.deleteAllArchive) window.deleteAllArchive();
                     break;
@@ -1366,9 +1402,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'mousedown_initPackerzSopResize_event':
                     if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzSopLeftPane', 'packerzSopSplitWrapper', 'packerzSopPreviewCol', false);
                     break;
-                case 'mousedown_initPackerzLiveSopResize_event':
-                    if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzLiveSopLeftPane', 'packerzLiveSopSplitWrapper', null, true);
+                case 'mousedown_initLiveSopResize_event':
+                    if (typeof window.initUnifiedSopResizer === 'function') {
+                        window.initUnifiedSopResizer(event, 'sopViewerLeftPane', 'sopViewerSplitWrapper', 'sopViewerRightPane', true);
+                    }
                     break;
+
                 case 'mousedown_initFlyoutResizer_event':
                     if (typeof initFlyoutResizer === 'function') initFlyoutResizer(event);
                     break;

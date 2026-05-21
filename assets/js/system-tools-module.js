@@ -2326,6 +2326,166 @@ window.change_handleShopifyBillingUpload = async function(e) {
 };
 
 // ============================================================
+// CENTRALIZED SOP LAYOUT TEMPLATE GENERATOR
+// ============================================================
+
+/**
+ * Dynamically builds unified horizontal split-pane grid layout HTML for all
+ * SOP Viewer and Editor configurations (Batchez, Layerz, Packerz) in both 
+ * full-screen and inline modes.
+ * 
+ * @param {Object} options Configuration parameters for the template.
+ * @param {boolean} [options.isEdit=true] Whether layout is in edit or read-only view state.
+ * @param {string} [options.sopType='batches'] The product SOP type target ('batches' or 'packerz').
+ * @param {string} [options.prodId='unknown'] Unique identifier for the associated product.
+ * @param {string} [options.grpId='dashboard'] Sizing/context group identifier (set to dynamic card ID for inline modes).
+ * @param {string} [options.requiredBoxSku=''] [View Mode only] Required box SKU/shipping harness to display.
+ * @param {string} [options.qaChecksHtml=''] [View Mode only] Sanitized pre-rendered HTML list of mandatory QA parameters.
+ * @param {string} [options.stepsHtml=''] [View Mode only] Sanitized pre-rendered HTML list of procedure/instruction steps.
+ * @param {string} [options.viewerHtml=''] [View Mode only] Alternative fallback for pre-rendered instruction steps.
+ * @param {string} [options.qaText=''] [Edit Mode only] Raw text value of the telemetry checklist textarea.
+ * @param {string} [options.rowsHtml=''] [Edit Mode only] Dynamic list elements for procedure builder steps.
+ * @returns {string} The fully composed high-fidelity HTML split-pane string.
+ */
+window.buildUnifiedSopLayoutHTML = function(options) {
+    const isEdit = options.isEdit !== false;
+    const sopType = options.sopType || 'batches'; // 'batches' or 'packerz'
+    const prodId = options.prodId || 'unknown';
+    const grpId = options.grpId || 'dashboard';
+    const isInline = grpId !== 'dashboard';
+    
+    // Sizing and Resizer Identifiers
+    let leftPaneId, wrapperId, previewColId, resizerId, rightPaneId;
+    if (isInline) {
+        leftPaneId = 'sopViewerLeftPane';
+        wrapperId = 'sopViewerSplitWrapper';
+        previewColId = 'sopViewerPreviewCol';
+        resizerId = 'sopViewerResizer';
+        rightPaneId = 'sopViewerRightPane';
+    } else {
+        leftPaneId = 'productionSopLeftPane';
+        wrapperId = 'productionSopSplitWrapper';
+        previewColId = 'masterSopPreviewCol';
+        resizerId = 'productionSopResizer';
+        rightPaneId = 'productionSopRightPane';
+    }
+
+    if (!isEdit) {
+        // VIEW ONLY STATE FOR ALL INLINE SOP WORKFLOWS (BATCHEZ, LAYERZ, PACKERZ)
+        const requiredBoxSku = options.requiredBoxSku || '';
+        const qaChecksHtml = options.qaChecksHtml || '';
+        const stepsHtml = options.stepsHtml || options.viewerHtml || '';
+        
+        let requiredHarnessHtml = '';
+        if (requiredBoxSku) {
+            requiredHarnessHtml = `
+                <div style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; border-radius:12px; padding:20px; margin-bottom:10px;">
+                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:5px; letter-spacing:1px;">REQUIRED SHIPPING HARNESS</div>
+                    <div style="font-size:18px; font-weight:900; color:var(--text-heading); font-family:monospace;">📦 ${requiredBoxSku}</div>
+                </div>
+            `;
+        }
+        
+        return `
+            <div id="${leftPaneId}" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container); min-width:300px;">
+                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
+                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
+                    <div id="sopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;">
+                        ${qaChecksHtml}
+                    </div>
+                </div>
+                <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
+                    <button id="btnSopSignoff" class="btn-green" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" data-click="click_signoffPackerzQA">
+                        COMPLETE QA CHECKS
+                    </button>
+                </div>
+            </div>
+            <div id="${resizerId}" class="h-resizer" data-mousedown="mousedown_initLiveSopResize_event"></div>
+            <div id="${rightPaneId}" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
+                ${requiredHarnessHtml}
+                <div id="sopViewerBody" style="display:flex; flex-direction:column; gap:20px;">
+                    ${stepsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // EDIT STATE FOR ALL (BATCHEZ, LAYERZ, PACKERZ)
+    const checklistHeader = sopType === 'packerz' ? '3. CHECKLIST' : 'CHECKLIST';
+    const richTextHeader = sopType === 'packerz' ? '4. Packing Instructions (Rich Text)' : '4. Rich Text Instructions';
+    
+    let printBtn = `<button class="sop-print-btn" data-click="click_printActiveSOP" style="background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981;">🖨️ Print</button>`;
+    let uploadBtn = `<button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="productionAdminQA" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase">☁️ Upload</button>`;
+    let photoBtn = `<button data-click="click_openSOPSnapshotCamera_dashboard" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;">📸 Photo</button>`;
+    let guideBtn = `<button data-click="click_openSOPTokenGuide" style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B;">❓ Guide</button>`;
+    let previewBtn = `<button data-click="click_toggleDashboardPreview" style="background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6;">👁️ Preview</button>`;
+
+    const qaTextareaId = 'productionAdminQA';
+    const qaPreviewId = 'productionAdminQAPreview';
+    const rowsWrapperId = 'sopMasterEditorArea';
+    const addRowClickAttr = 'data-click="click_addDashboardSOPRow"';
+
+    const qaTextValue = options.qaText || '';
+    const rowsHtml = options.rowsHtml || '';
+    
+    const mainInputHandler = 'data-input="input_renderDashboardTelemetryPreview"';
+
+    const rightPaneInner = `<div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                      <h3 style="margin:0; color:var(--text-heading); font-size:16px;">${richTextHeader}</h3>
+                  </div>
+                  <div id="${rowsWrapperId}" style="display:flex; flex-direction:column; gap:15px; overflow-y:auto; flex-grow:1;">${rowsHtml}</div>
+                  <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px; width: 100% !important;" ${addRowClickAttr} data-prodid="${prodId}" data-soptype="${sopType}">+ ADD PROCEDURE STEP</button>
+               </div>`;
+
+    const mousedownHandler = 'mousedown_initProductionSopResize_event';
+
+    return `
+        <div id="${leftPaneId}" style="flex:0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:0 20px 0 0; background:transparent; border-right:1px solid transparent; overflow:hidden;">
+            <!-- Column 1: Config & Input -->
+            <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                    <h3 style="margin:0; color:var(--text-heading); font-size:16px;">${checklistHeader}</h3>
+                    <div class="sop-editor-checklist-btn-bar">
+                        ${printBtn}
+                        ${uploadBtn}
+                        ${photoBtn}
+                        ${guideBtn}
+                        ${previewBtn}
+                    </div>
+                </div>
+                <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
+                    <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;·&nbsp;
+                    <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;·&nbsp;
+                    <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;·&nbsp;
+                    <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;·&nbsp;
+                    <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
+                    <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
+                    <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;·&nbsp;
+                    <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
+                    &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">❓ Full Guide</span>
+                </div>
+                <textarea id="${qaTextareaId}" ${mainInputHandler} placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaTextValue}</textarea>
+            </div>
+            
+            <!-- Column 2: Live Preview Render -->
+            <div id="${previewColId}" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
+                <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
+                <div id="${qaPreviewId}" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
+                    <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="${resizerId}" class="h-resizer" data-mousedown="${mousedownHandler}"></div>
+        
+        <div id="${rightPaneId}" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto; background:transparent; border-left:1px solid transparent;">
+            ${rightPaneInner}
+        </div>
+    `;
+};
+
+// ============================================================
 // UNIVERSAL SOP RESIZER ENGINE
 // ============================================================
 
@@ -2335,6 +2495,15 @@ window.unifiedSopWrapperId = null;
 window.unifiedSopPreviewColId = null;
 window.unifiedSopIsInline = false;
 
+/**
+ * Initializes the universal horizontal split-pane grid resizing parameters and event listeners.
+ * @function initUnifiedSopResizer
+ * @param {MouseEvent} e - The mouse event initiating the resize action.
+ * @param {string} leftPaneId - DOM ID of the left pane column component.
+ * @param {string} wrapperId - DOM ID of the outer split-pane wrapper container.
+ * @param {string} previewColId - DOM ID of the checklist preview column container.
+ * @param {boolean} isInline - Whether the editor is being resized in inline mode.
+ */
 window.initUnifiedSopResizer = function(e, leftPaneId, wrapperId, previewColId, isInline) {
     if(e) e.preventDefault();
     window.unifiedSopResizing = true;
