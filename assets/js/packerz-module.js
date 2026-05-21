@@ -316,6 +316,13 @@ window.togglePackerzLiveInlineSOP = function() {
     }
 };
 
+/**
+ * Saves the edited inline SOP dataset to the Supabase database.
+ * Collects steps, procedure instructions, and quality checklist items.
+ * @async
+ * @function savePackerzLiveInlineSOP
+ * @returns {Promise<void>} Resolves when the transaction is completed.
+ */
 window.savePackerzLiveInlineSOP = async function() {
     if(!currentPackerzQaRecipe) return alert("SOP Target Unknown!");
     const btn = document.getElementById('btnSavePackerzInlineSOP');
@@ -427,10 +434,20 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     );
     document.getElementById('packerzSopViewerSubtitle').innerText = `Target Alias: ${sku}`;
 
-    const btnEdit = document.getElementById('btnPackerzLiveToggleEdit');
-    if (btnEdit) {
-        btnEdit.innerHTML = window.isPackerzLiveEditing ? '❌ CANCEL' : '✏️ EDIT';
-        btnEdit.className = window.isPackerzLiveEditing ? 'btn-red' : 'btn-blue';
+    const headerButtonsWrapper = document.getElementById('packerzSopViewerHeaderButtons');
+    if (headerButtonsWrapper) {
+        if (window.isPackerzLiveEditing) {
+            headerButtonsWrapper.innerHTML = window.safeHTML(
+                `<button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" data-app-click="saveInlineSOP" id="btnSavePackerzInlineSOP">💾 SAVE MASTER BLUEPRINT</button>` +
+                `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_if_typeof_togglePackerzLiveInl" id="btnPackerzLiveToggleEdit">Close</button>`
+            );
+        } else {
+            headerButtonsWrapper.innerHTML = window.safeHTML(
+                `<button class="btn-ghost-base btn-ghost-blue" data-click="click_printPackerzSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
+                `<button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_if_typeof_togglePackerzLiveInl" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>` +
+                `<button class="icon-btn btn-red" style="width:40px; height:40px; border-radius:10px; font-weight:900; font-size:16px;" data-click="click_closePackerzSopViewer">X</button>`
+            );
+        }
     }
 
     // We target the outer wrapper directly when editing so we can overwrite its layout

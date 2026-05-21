@@ -2489,11 +2489,7 @@ window.buildUnifiedSopLayoutHTML = function(options) {
     let bottomActionsHtml = '';
     if (isInline) {
         if (sopType === 'packerz') {
-            bottomActionsHtml = `
-                <div style="display:flex; gap:10px; margin-top:20px; padding-top:20px; border-top:1px dashed rgba(255,255,255,0.1); width: 100%;">
-                    <button class="btn-green" id="btnSavePackerzInlineSOP" style="padding:10px 25px; font-size:14px; font-weight:900; width:100%;" data-app-click="saveInlineSOP">💾 SAVE SOP MASTER BLUEPRINT</button>
-                </div>
-            `;
+            bottomActionsHtml = ''; // Purged to prevent bottom-bar bloat; saving is driven entirely via dynamic header action controls
         } else {
             bottomActionsHtml = `
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color); width: 100%;">
@@ -2584,6 +2580,15 @@ window.unifiedSopWrapperId = null;
 window.unifiedSopPreviewColId = null;
 window.unifiedSopIsInline = false;
 
+/**
+ * Initializes the universal horizontal split-pane grid resizing parameters and event listeners.
+ * @function initUnifiedSopResizer
+ * @param {MouseEvent} e - The mouse event initiating the resize action.
+ * @param {string} leftPaneId - DOM ID of the left pane column component.
+ * @param {string} wrapperId - DOM ID of the outer split-pane wrapper container.
+ * @param {string} previewColId - DOM ID of the checklist preview column container.
+ * @param {boolean} isInline - Whether the editor is being resized in inline mode.
+ */
 window.initUnifiedSopResizer = function(e, leftPaneId, wrapperId, previewColId, isInline) {
     if(e) e.preventDefault();
     window.unifiedSopResizing = true;
