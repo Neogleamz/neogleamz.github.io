@@ -809,11 +809,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openSOPTokenGuide':
                     openSOPTokenGuide();
                     break;
-                case 'click_toggleInlinePreview':
-                    if (typeof window.toggleHorizontalPreview === 'function') {
-                        window.toggleHorizontalPreview('sopViewerLeftPane', 'sopViewerPreviewCol', el);
-                    }
-                    break;
                 case 'click_toggleDashboardPreview':
                     if (typeof window.toggleHorizontalPreview === 'function') {
                         window.toggleHorizontalPreview('productionSopLeftPane', 'masterSopPreviewCol', el);
@@ -824,22 +819,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.executeSopPrint();
                     }
                     break;
-                case 'click_saveLiveInlineSOP':
-                    if (typeof window.saveLiveInlineSOP === 'function') {
-                        window.saveLiveInlineSOP();
+                case 'click_openActiveSOPEditor':
+                    if (typeof window.closePackerzSopViewer === 'function') {
+                        window.closePackerzSopViewer();
+                    }
+                    if (typeof window.openSOPMasterModal === 'function') {
+                        window.openSOPMasterModal(window.currentActiveSopType, window.currentActiveSopRecipe);
                     }
                     break;
-                case 'click_addInlineSOPRow':
-                    {
-                        const area = document.getElementById('sopViewerBody');
-                        if (area) {
-                            let newRow = document.createElement('div');
-                            const prodId = el.getAttribute('data-prodid') || 'unknown';
-                            const sopType = el.getAttribute('data-soptype') || 'packerz';
-                            newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, prodId, sopType));
-                            let rowNode = newRow.firstChild;
-                            if (rowNode) area.appendChild(rowNode);
-                        }
+                case 'click_openLayerzSOPEditor':
+                    if (typeof window.openSOPMasterModal === 'function') {
+                        window.openSOPMasterModal('3d', el.getAttribute('data-name'));
                     }
                     break;
                 case 'click_addDashboardSOPRow':
@@ -995,9 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_printPackerzSOP_legacy':
                     printPackerzSOP();
                     break;
-                case 'click_if_typeof_togglePackerzLiveInl':
-                    if(typeof togglePackerzLiveInlineSOP==='function') togglePackerzLiveInlineSOP();;
-                    break;
+
                 case 'click_closePackerzSopViewer':
                     closePackerzSopViewer();
                     break;
@@ -1164,10 +1152,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_toggleLayerzSopGroup':
                     {
                         let grpId = el.getAttribute('data-grp');
-                        let isEditing = window.activeInlineSopEditors && window.activeInlineSopEditors[grpId] === true;
-                        let isClickingIcon = el.getAttribute('data-icon') === 'true';
-                        if(isEditing && !isClickingIcon) break;
-                        
                         let d = document.getElementById('sopgrp_body_'+grpId);
                         let ic = document.getElementById('sopgrp_icon_'+grpId);
                         if(d && ic) {
@@ -1185,14 +1169,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_openPrintSOP':
                     if(window.openPrintSOP) window.openPrintSOP(el.getAttribute('data-name'));
-                    break;
-                case 'click_saveInlineSopBlock_print':
-                    if(window.saveInlineSopBlock) {
-                        window.saveInlineSopBlock(el.getAttribute('data-grp'), el.getAttribute('data-rawname'));
-                        if (window.currentPrintJob && window.renderActivePrintJob) {
-                            setTimeout(() => window.renderActivePrintJob(window.currentPrintJob.id), 500);
-                        }
-                    }
                     break;
 
                 case 'click_movePackerzSOPUp':
@@ -1403,17 +1379,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'mousedown_initPackerzSopResize_event':
                     if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzSopLeftPane', 'packerzSopSplitWrapper', 'packerzSopPreviewCol', false);
                     break;
-                case 'mousedown_initPackerzLiveSopResize_event':
-                    if (typeof window.initUnifiedSopResizer === 'function') {
-                        const targetLeftPane = document.getElementById('packerzInlineSopLeftPane') ? 'packerzInlineSopLeftPane' : 'packerzLiveSopLeftPane';
-                        window.initUnifiedSopResizer(event, targetLeftPane, 'packerzLiveSopSplitWrapper', null, true);
-                    }
-                    break;
-                case 'mousedown_initLiveSopResize_event':
-                    if (typeof window.initUnifiedSopResizer === 'function') {
-                        window.initUnifiedSopResizer(event, 'sopViewerLeftPane', 'sopViewerSplitWrapper', null, true);
-                    }
-                    break;
+
                 case 'mousedown_initFlyoutResizer_event':
                     if (typeof initFlyoutResizer === 'function') initFlyoutResizer(event);
                     break;
