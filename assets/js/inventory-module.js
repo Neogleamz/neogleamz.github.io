@@ -83,7 +83,7 @@ function renderFgiTable() {
             { id: 'cat-label',  name: 'Custom Labels',   icn: '🏷️',  items: a.filter(x => x.isLabel).sort(sortFn('cat-label')) }
         ];
 
-        let isFirstGroup = true;
+
         groups.forEach(g => {
             if(g.items.length === 0) return;
             let isExp = window.fgiCategoryState[g.id] !== false;
@@ -96,7 +96,7 @@ function renderFgiTable() {
                 </span>
                 <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(${g.items.length})</span>
             </div>`;
-            isFirstGroup = false;
+
             
             if(isExp) {
                 h += `<table class="neo-table" style="width:100%; margin-bottom:0; background:rgba(0,0,0,0.1); border-top:none; border-radius: 0 0 6px 6px;">`;
