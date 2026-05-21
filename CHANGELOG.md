@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### ✨ Features & Bug Fixes
+- **Task Engine 'T' Shortcut Fix** (`bug/task-engine-shortcut-t-regression`): Fix the regression where pressing 'T' in the task engine no longer starts creating a new task under the "No Section" bucket for rapid-fire task entry, and correctly route users from other hubs natively without triggering DOM node exceptions on Escape.
+
 ## [1.0.49] - 2026-05-21
 ### ✨ Features & Bug Fixes
 - **Hide 3D Printed SOPs in Stage 3** (`feat/batchez-hide-3dprint-sops-stage3`): Ensure 3D printed SOPs do not display in Stage 3 of the Batchez work order process.

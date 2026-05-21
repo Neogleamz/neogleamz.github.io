@@ -22,7 +22,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 P1 High Priority (Core Features & Bugs)
 ### Target: `main`
-- [x] `bug/task-engine-shortcut-t-regression` : **Task Engine 'T' Shortcut Regression** - Fix the regression where pressing 'T' in the task engine no longer starts creating a new task under the "No Section" bucket for rapid-fire task entry. [🤖 Gemini 3.1 Pro (High)] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ## 🟡 P2 Medium Priority (Enhancements)
 
@@ -43,6 +42,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Task Engine 'T' Shortcut Fix**
+*(Shipped Silent — 2026-05-21)*
+- [🚀] `bug/task-engine-shortcut-t-regression` : **Task Engine 'T' Shortcut Regression** - Fix the regression where pressing 'T' in the task engine no longer starts creating a new task under the "No Section" bucket for rapid-fire task entry. [🤖 Gemini 3.1 Pro (High)] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `main`
 **Epic: Code Debt Hunt & Dependencies**
