@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+### Features & Bug Fixes
+- **Hide 3D Printed SOPs in Stage 3** (`feat/batchez-hide-3dprint-sops-stage3`): Ensure 3D printed SOPs do not display in Stage 3 of the Batchez work order process.
+
 ## [1.0.48] - 2026-05-21
 ### Features & Bug Fixes
 - **System Version Telemetry Restoration**: Fixed a critical telemetry disconnect where the "System Ready Unknown" message was being rendered in the Command Center logs. Refactored the `NEOGLEAMZ_VERSION` parsing logic in the global sandbox to strictly utilize `window.NEOGLEAMZ_VERSION` payload mapping, bypassing aggressive ESLint namespace destruction and properly displaying live versions.

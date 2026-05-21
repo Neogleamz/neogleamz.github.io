@@ -30,7 +30,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 ### Target: `main`
-- [ ] `feat/batchez-hide-3dprint-sops-stage3` : **Hide 3D Printed SOPs in Stage 3** - Batchez: Ensure 3D printed SOPs do not display in Stage 3 of the Batchez work order process. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - [ ] `bug/socialz-system-fault-error` : **Socialz "System Fault" on Save** - Investigate the custom diagnostic console error "System Fault: Unknown Error" that triggers immediately after a successful "Saved to DB!" event when adding a new skater. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ## 🧹 Technical Debt
@@ -47,6 +46,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Hide 3D Printed SOPs in Stage 3**
+*(Shipped v.2026.05.21.0350 — 2026-05-21)*
+- [🚀] `feat/batchez-hide-3dprint-sops-stage3` : **Hide 3D Printed SOPs in Stage 3** - Batchez: Ensure 3D printed SOPs do not display in Stage 3 of the Batchez work order process. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### Target: `main`
 **Epic: Socialz Missing Avatars Migration**
