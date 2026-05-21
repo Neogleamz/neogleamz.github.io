@@ -128,15 +128,13 @@ function populateSOPDropdown() {
             }
         });
     } else {
-        // Grouped like RECIPEZ: 📦 Retail → ⚙️ Sub-Assemblies → 🖨️ 3D Prints
+        // Grouped like RECIPEZ: 📦 Retail → ⚙️ Sub-Assemblies
         let sorted = Object.keys(productsDB).sort();
         let retail  = sorted.filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
         let subs    = sorted.filter(p =>  isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
-        let prints  = sorted.filter(p => productsDB[p] && productsDB[p].is_3d_print && !(productsDB[p] && productsDB[p].is_label));
         const grp = (label, icon, arr) => arr.length ? `<optgroup label="${label}">${arr.map(p => `<option value="${String(p).replace(/"/g,'&quot;')}">${icon} ${p}</option>`).join('')}</optgroup>` : '';
         options += grp('📦 RETAIL PRODUCTS', '📦', retail);
         options += grp('⚙️ SUB-ASSEMBLIES',  '⚙️',  subs);
-        options += grp('🖨️ 3D PRINTS',       '🖨️',  prints);
     }
     sopSelect.innerHTML = window.safeHTML(options);
     } catch(e) { sysLog(e.message, true); }
@@ -1336,8 +1334,12 @@ function renderActiveWO(id) {
                                 else if (typeof subPayload === 'object') { subSteps = subPayload.steps || []; subQa = subPayload.qaChecks || []; }
                             }
                             let is3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
-                            let emoji = is3D ? '🖨️' : '⚙️';
-                            let desc = is3D ? '3D Print' : 'Build Sub-Assembly';
+                            
+                            // HIDE 3D PRINTED PARTS FROM BATCHEZ STAGE 3
+                            if (is3D) return;
+
+                            let emoji = '⚙️';
+                            let desc = 'Build Sub-Assembly';
 
                             sopGroups.push({
                                 id: encodeURIComponent(sub.replace(/\s+/g,'_')),
