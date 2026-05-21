@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openRecipeManager':
                     if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
                     break;
+                case 'click_window_closeRecipeManager':
+                    document.getElementById('recipeManagerModal').style.display='none';
+                    break;
+                case 'click_applyAllRecipeSuggestions':
+                    if (typeof window.applyAllRecipeSuggestions === 'function') window.applyAllRecipeSuggestions();
+                    break;
                 case 'click_window_commitRecipeManager':
                     if (typeof window.commitRecipeManager === 'function') window.commitRecipeManager();
                     break;
@@ -60,6 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_switchTab_synchub':
                     switchTab('synchub');
+                    break;
+                case 'click_window_closeForceSyncModal':
+                    if (typeof window.closeForceSyncModal === 'function') window.closeForceSyncModal();
+                    break;
+                case 'click_triggerForceSync':
+                    if (typeof window.triggerForceSync === 'function') window.triggerForceSync();
                     break;
                 case 'click_openTipzModal':
                     openTipzModal();

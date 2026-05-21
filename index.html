@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.05.21.1429"></script>
+    <script src="assets/js/system-version.js?v=v.2026.05.21.1449"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.21.1429"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.21.1449"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.21.1429"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.21.1449"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.05.21.1429"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.05.21.1449"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1697,6 +1697,9 @@
         100% { box-shadow: 0 0 5px rgba(168, 85, 247, 0.5); }
     }
 
+        .hover-green-subtle:hover { background: rgba(16, 185, 129, 0.4) !important; }
+        .hover-white-text:hover { color: white !important; }
+        .hover-opacity-full:hover { opacity: 1 !important; }
 </style>
 </head>
 <body>
@@ -4134,7 +4137,7 @@
 
     function setSysProgress(val, state = 'working') { try { const b = document.getElementById('sysProgress'); if(b) { b.value = val; b.className = 'prog-' + state; } } catch(e) {} }
     function clearLog() { 
-        document.getElementById('debugLog').innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:5px;"><span style="font-weight:bold; color:var(--text-muted); font-size:10px; text-transform:uppercase;">Command Center Diagnostics</span><button data-click="click_clearLog" style="width:auto; padding:2px 8px; font-size:10px; background:var(--bg-surface-light); color:var(--text-main); border-radius:4px; border:1px solid var(--border-color); cursor:pointer;">Clear Log</button></div>'; 
+        document.getElementById('debugLog').innerHTML = window.safeHTML ? window.safeHTML('<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:5px;"><span style="font-weight:bold; color:var(--text-muted); font-size:10px; text-transform:uppercase;">Command Center Diagnostics</span><button data-click="click_clearLog" style="width:auto; padding:2px 8px; font-size:10px; background:var(--bg-surface-light); color:var(--text-main); border-radius:4px; border:1px solid var(--border-color); cursor:pointer;">Clear Log</button></div>') : '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:5px;"><span style="font-weight:bold; color:var(--text-muted); font-size:10px; text-transform:uppercase;">Command Center Diagnostics</span><button data-click="click_clearLog" style="width:auto; padding:2px 8px; font-size:10px; background:var(--bg-surface-light); color:var(--text-main); border-radius:4px; border:1px solid var(--border-color); cursor:pointer;">Clear Log</button></div>'; 
         systemErrorState = false; 
         sysLog("Log Cleared. System Monitoring Resumed."); 
         const h = document.getElementById('termHeader');
@@ -4422,7 +4425,7 @@
         if(btn) {
             originalText = btn.innerHTML;
             originalBg = btn.style.background;
-            btn.innerHTML = loadingStr; 
+            btn.innerHTML = window.safeHTML ? window.safeHTML(loadingStr) : loadingStr; 
             btn.style.opacity = "0.6";
             btn.disabled = true;
             await new Promise(resolve => setTimeout(resolve, 50));
@@ -4430,7 +4433,7 @@
         try {
             await asyncCallback();
             if(btn) {
-                btn.innerHTML = successStr;
+                btn.innerHTML = window.safeHTML ? window.safeHTML(successStr) : successStr;
                 btn.style.background = "#059669";
                 btn.style.opacity = "1";
             }
@@ -4445,7 +4448,7 @@
         } finally {
             if(btn) {
                 setTimeout(() => {
-                    btn.innerHTML = originalText;
+                    btn.innerHTML = window.safeHTML ? window.safeHTML(originalText) : originalText;
                     btn.style.background = originalBg;
                     btn.disabled = false;
                 }, 3000);
@@ -4474,7 +4477,7 @@
             if (socR && socR.data && typeof initSocialzData === 'function') { initSocialzData(socR.data); }
             
             setSysProgress(30, 'working');
-            if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); renderActiveTable(); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalcWrapper').style.display = 'flex'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = "<p>No data.</p>"; }
+            if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); renderActiveTable(); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalcWrapper').style.display = 'flex'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = window.safeHTML ? window.safeHTML("<p>No data.</p>") : "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = window.safeHTML ? window.safeHTML("<p>No data.</p>") : "<p>No data.</p>"; }
             
             setSysProgress(50, 'working'); inventoryDB = {}; 
             if (cR.data) { 
@@ -4717,7 +4720,7 @@
                     </div>`;
               });
         }
-        list.innerHTML = h;
+        list.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
     }
 
     async function removeAliasMapping(sku) {
@@ -4879,7 +4882,7 @@
                 if (headerBar && !headerBar.querySelector('.auto-fit-btn')) {
                     let btn = document.createElement('button');
                     btn.className = 'top-action-btn auto-fit-btn';
-                    btn.innerHTML = '↔️ Auto-Fit';
+                    btn.innerHTML = window.safeHTML ? window.safeHTML('↔️ Auto-Fit') : '↔️ Auto-Fit';
                     btn.style.marginLeft = 'auto';
                     btn.style.marginRight = '10px';
                     btn.style.transform = 'scale(0.85)';
@@ -4890,7 +4893,7 @@
             }
         });
     }
-	function renderColToggles() { if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return; c.innerHTML = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => { let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981'; return `<button data-click="click_toggleSimpleCol" data-key="${safeKey}" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`; }).join(''); }
+	function renderColToggles() { if (finalResults.length === 0) return; const c = document.getElementById('colToggleContainer'); if(!c) return; let bHtml = Object.keys(finalResults[0]).filter(k => k !== '_RowKey').map(key => { let isHidden = hiddenSimpleCols.has(key); let safeKey = key.replace(/'/g, "\\'"); let bg = isHidden ? '#ef4444' : '#10b981'; return `<button data-click="click_toggleSimpleCol" data-key="${safeKey}" style="background-color: ${bg}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: none; cursor: pointer; width: auto; font-weight: bold; margin: 0;">${key}</button>`; }).join(''); c.innerHTML = window.safeHTML ? window.safeHTML(bHtml) : bHtml; }
     function renderActiveTable() { 
         if (document.getElementById('appUI').style.display === 'none') return;
         const pP = document.getElementById('panePipeline');
@@ -4947,7 +4950,7 @@
                 }).join('') + "</tr>"; 
             });
         }
-        document.getElementById(containerId).innerHTML = h + "</tbody></table>"; applyTableInteractivity(containerId);
+        document.getElementById(containerId).innerHTML = window.safeHTML ? window.safeHTML(h + "</tbody></table>") : h + "</tbody></table>"; applyTableInteractivity(containerId);
         if (focusCol) { let inp = document.querySelector(`input[data-col="${focusCol}"]`); if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } }
     }
     
@@ -5011,7 +5014,7 @@
         if(qStr !== "") displayResults = editzBulkStagingArray.filter(row => Object.values(row).some(v => String(v ?? "").toLowerCase().includes(qStr)));
         
         let container = document.getElementById('editzBulkModalBody');
-        if (displayResults.length === 0) { container.innerHTML = "<div style='color:var(--text-muted);'>No matching rows found.</div>"; return; }
+        if (displayResults.length === 0) { container.innerHTML = window.safeHTML ? window.safeHTML("<div style='color:var(--text-muted);'>No matching rows found.</div>") : "<div style='color:var(--text-muted);'>No matching rows found.</div>"; return; }
         
         let keys = Object.keys(displayResults[0]).filter(k => k !== '_RowKey');
         
@@ -5045,7 +5048,7 @@
             }).join('') + "</tr>";
         });
         
-        container.innerHTML = h + "</tbody></table>";
+        container.innerHTML = window.safeHTML ? window.safeHTML(h + "</tbody></table>") : h + "</tbody></table>";
         document.getElementById('editzBulkCommitCount').innerText = `COMMIT ${editzBulkModifiedTracking.size} MODIFIED ITEMS`;
     }
     
@@ -5109,7 +5112,7 @@
         setMasterStatus("Batch Saving...", "mod-working");
         let btn = document.querySelector('[data-click="click_window_commitEditzBulkChanges"]');
         let oldText = btn.innerHTML;
-        btn.innerHTML = "⏳ SAVING...";
+        btn.innerHTML = window.safeHTML ? window.safeHTML("⏳ SAVING...") : "⏳ SAVING...";
         
         try {
             let ups = [];
@@ -5141,7 +5144,7 @@
             setMasterStatus(`Saved ${ups.length} items!`, "mod-success");
             editzBulkModifiedTracking.clear();
             document.getElementById('editzBulkModal').style.display = 'none';
-            btn.innerHTML = oldText;
+            btn.innerHTML = window.safeHTML ? window.safeHTML(oldText) : oldText;
             await loadData(true);
             setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
             
@@ -5149,7 +5152,7 @@
             sysLog(err.message, true);
             setMasterStatus("Error in Batch Commit", "mod-error");
             alert("Error during commit: " + err.message);
-            btn.innerHTML = oldText;
+            btn.innerHTML = window.safeHTML ? window.safeHTML(oldText) : oldText;
         }
     };
     // --- END EDITZ BULK EDIT SYSTEM ---
@@ -5276,7 +5279,7 @@
 
             let raws = `<optgroup label="🔩 RAW COMPONENTS (From Ledger)">` + Object.keys(catalogCache).sort((a, b) => { let x = fmtKey(a), y = fmtKey(b); if (x.np && !y.np) return -1; if (!x.np && y.np) return 1; if (x.nn && !y.nn) return -1; if (!x.nn && y.nn) return 1; return x.np.localeCompare(y.np) || x.nn.localeCompare(y.nn) || x.in.localeCompare(y.in); }).map(k => { let d = catalogCache[k]; let np = d.neoProd ? `【${d.neoProd}】` : `【Uncategorized】`; let nn = d.neoName ? `🔸 ${d.neoName}` : ``; let inam = `🔩 ${d.itemName}`; let sp = d.spec && d.spec !== "(Mixed Specs)" ? `⚙️ ${d.spec}` : (d.spec === "(Mixed Specs)" ? `⚙️ (Mixed Specs)` : ``); let textParts = [np]; if (nn) textParts.push(nn); textParts.push(` |  ${inam}`); if (sp) textParts.push(` |  ${sp}`); let cost = d.avgUnitCost.toFixed(4); let fullText = textParts.join('   '); let escaped = String(fullText).replace(/"/g, '&quot;'); return `<option value="${String(k).replace(/"/g, '&quot;')}" data-fulltxt="${escaped}   💰 $${cost}">${escaped}   💰 $${cost}</option>`; }).join('') + `</optgroup>`;
             
-            const ps = document.getElementById('partSelector'); if(ps) { ps.innerHTML = '<option value="">-- Select a Component --</option>' + recipesHtml + raws; partSelectorObserver.observe(ps); }
+            const ps = document.getElementById('partSelector'); if(ps) { ps.innerHTML = window.safeHTML ? window.safeHTML('<option value="">-- Select a Component --</option>' + recipesHtml + raws) : '<option value="">-- Select a Component --</option>' + recipesHtml + raws; partSelectorObserver.observe(ps); }
             
             let sortedProducts = Object.keys(productsDB).sort((a,b) => { let oa = productsDB[a]?.is_3d_print ? 3 : (isSubassemblyDB[a] ? 2 : 1); let ob = productsDB[b]?.is_3d_print ? 3 : (isSubassemblyDB[b] ? 2 : 1); return oa !== ob ? oa - ob : a.localeCompare(b); });
             let retailProds = sortedProducts.filter(p => !isSubassemblyDB[p] && (!productsDB[p] || !productsDB[p].is_3d_print) && (!productsDB[p] || !productsDB[p].is_label));
@@ -5285,23 +5288,23 @@
             const mapOpts = (arr, char) => arr.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${char} ${p}</option>`).join('');
 
             // Batch builds and routing can use all products — grouped like RECIPEZ
-            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = '<option value="">-- Select Product to Build --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
+            const bs = document.getElementById('batchProductSelect'); if(bs) bs.innerHTML = window.safeHTML ? window.safeHTML('<option value="">-- Select Product to Build --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '')) : '<option value="">-- Select Product to Build --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
             
-            const nwoRetail = document.getElementById('newWOProductRetail'); if(nwoRetail) nwoRetail.innerHTML = '<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦');
-            const nwoSub = document.getElementById('newWOProductSub'); if(nwoSub) nwoSub.innerHTML = '<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️');
-            const nwoPrint = document.getElementById('newWOProductPrint'); if(nwoPrint) nwoPrint.innerHTML = '<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️');
+            const nwoRetail = document.getElementById('newWOProductRetail'); if(nwoRetail) nwoRetail.innerHTML = window.safeHTML ? window.safeHTML('<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦')) : '<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦');
+            const nwoSub = document.getElementById('newWOProductSub'); if(nwoSub) nwoSub.innerHTML = window.safeHTML ? window.safeHTML('<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️')) : '<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️');
+            const nwoPrint = document.getElementById('newWOProductPrint'); if(nwoPrint) nwoPrint.innerHTML = window.safeHTML ? window.safeHTML('<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️')) : '<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️');
 
-            const mboRetail = document.getElementById('multiBatchProductRetail'); if(mboRetail) mboRetail.innerHTML = '<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦');
-            const mboSub = document.getElementById('multiBatchProductSub'); if(mboSub) mboSub.innerHTML = '<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️');
-            const mboPrint = document.getElementById('multiBatchProductPrint'); if(mboPrint) mboPrint.innerHTML = '<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️');
+            const mboRetail = document.getElementById('multiBatchProductRetail'); if(mboRetail) mboRetail.innerHTML = window.safeHTML ? window.safeHTML('<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦')) : '<option value="">📦 Select Retail Product</option>' + mapOpts(retailProds, '📦');
+            const mboSub = document.getElementById('multiBatchProductSub'); if(mboSub) mboSub.innerHTML = window.safeHTML ? window.safeHTML('<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️')) : '<option value="">⚙️ Select Sub-Assembly</option>' + mapOpts(subProds, '⚙️');
+            const mboPrint = document.getElementById('multiBatchProductPrint'); if(mboPrint) mboPrint.innerHTML = window.safeHTML ? window.safeHTML('<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️')) : '<option value="">🖨️ Select 3D Print</option>' + mapOpts(printProds, '🖨️');
 
             // (SOP dropdown now handled in openSOPMasterModal)
             
             // Aliases can link to anything — grouped like RECIPEZ
-            const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = '<option value="">-- Select Neogleamz Recipe --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
+            const aliasDrop = document.getElementById('aliasRecipeSelect'); if(aliasDrop) aliasDrop.innerHTML = window.safeHTML ? window.safeHTML('<option value="">-- Select Neogleamz Recipe --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '')) : '<option value="">-- Select Neogleamz Recipe --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (subProds.length ? `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
             
             // Manual sale — no sub-assemblies; retail first, then 3D prints
-            const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = '<option value="">-- Select Product Sold --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
+            const manualDrop = document.getElementById('manualSaleRecipe'); if(manualDrop) manualDrop.innerHTML = window.safeHTML ? window.safeHTML('<option value="">-- Select Product Sold --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '')) : '<option value="">-- Select Product Sold --</option>' + (retailProds.length ? `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>` : '') + (printProds.length ? `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>` : '');
             
             // Packerz Blueprint Admin Population
             if(typeof initPackerzAdmin === 'function') initPackerzAdmin();
@@ -5362,20 +5365,20 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/bom-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/production-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/sales-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/task-engine.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/print-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.05.21.1429"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.05.21.1429"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/bom-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/production-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/sales-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/task-engine.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/print-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.05.21.1449"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.05.21.1449"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5654,11 +5657,11 @@
 
     async function fetchAndRenderTipz() {
         const container = document.getElementById('tipzListContainer');
-        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding: 20px;">Loading Tipz...</div>`;
+        container.innerHTML = window.safeHTML ? window.safeHTML(`<div style="text-align:center; color:var(--text-muted); padding: 20px;">Loading Tipz...</div>`) : `<div style="text-align:center; color:var(--text-muted); padding: 20px;">Loading Tipz...</div>`;
         
         try {
             if (typeof supabaseClient === 'undefined') {
-                container.innerHTML = `<div style="text-align:center; color:#ef4444; padding: 20px;">Supabase client not found. Cannot load tipz.</div>`;
+                container.innerHTML = window.safeHTML ? window.safeHTML(`<div style="text-align:center; color:#ef4444; padding: 20px;">Supabase client not found. Cannot load tipz.</div>`) : `<div style="text-align:center; color:#ef4444; padding: 20px;">Supabase client not found. Cannot load tipz.</div>`;
                 return;
             }
             
@@ -5667,7 +5670,7 @@
             if (error) {
                 console.warn("Could not fetch tipz:", error);
                 if (error.code === 'PGRST204') {
-                    container.innerHTML = `<div style="text-align:center; color:#ef4444; padding: 20px;">Schema error: It looks like you haven't added the priority & status columns yet! Run the SQL snippet.</div>`;
+                    container.innerHTML = window.safeHTML ? window.safeHTML(`<div style="text-align:center; color:#ef4444; padding: 20px;">Schema error: It looks like you haven't added the priority & status columns yet! Run the SQL snippet.</div>`) : `<div style="text-align:center; color:#ef4444; padding: 20px;">Schema error: It looks like you haven't added the priority & status columns yet! Run the SQL snippet.</div>`;
                 } else {
                     let errMsg = `<div style="text-align:center; color:#ef4444; padding: 20px;">Failed to load tipz: ${error.message}</div>`;
                     container.innerHTML = window.safeHTML ? window.safeHTML(errMsg) : errMsg;
@@ -5692,7 +5695,7 @@
             });
             
             if (currentTipzData.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding: 20px;">No tipz submitted yet! Be the first!</div>`;
+                container.innerHTML = window.safeHTML ? window.safeHTML(`<div style="text-align:center; color:var(--text-muted); padding: 20px;">No tipz submitted yet! Be the first!</div>`) : `<div style="text-align:center; color:var(--text-muted); padding: 20px;">No tipz submitted yet! Be the first!</div>`;
                 return;
             }
             
@@ -5712,7 +5715,7 @@
                 html += `
                 <div class="sop-step-row" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px; opacity: ${opacity}; display:flex; flex-direction:column; gap:4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                     <div style="display:flex; flex-direction:row; justify-content:space-between; align-items:center; gap:8px;">
-                        <div class="sop-controls-container" style="flex-grow:1; opacity: 0.3; transition: opacity 0.2s; overflow-x:auto;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'">
+                        <div class="sop-controls-container hover-opacity-full" style="flex-grow:1; opacity: 0.3; transition: opacity 0.2s; overflow-x:auto;">
                             ${rtToolbarHtml}
                         </div>
                         
@@ -5732,7 +5735,7 @@
                 </div>`;
             });
             html += `</div>`;
-            container.innerHTML = html;
+            container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
         } catch (error) {
             console.error(error);
             let errMsg = `<div style="text-align:center; color:#ef4444; padding: 20px;">Exception fetching tipz: ${error.message}</div>`;
@@ -5807,7 +5810,7 @@
         // Prevent empty save
         if (!editor.textContent.trim() && !newHtml.includes('<img')) {
             alert("Tip cannot be empty. Deleting instead?");
-            editor.innerHTML = originalText;
+            editor.innerHTML = window.safeHTML ? window.safeHTML(originalText) : originalText;
             return;
         }
         
@@ -5843,18 +5846,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.21.1429"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.21.1449"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.21.1429"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.21.1449"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.21.1429"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.21.1449"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.21.1429"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.21.1429"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.21.1429"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.21.1449"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.21.1449"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.21.1449"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.05.21.1429"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.05.21.1429"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.05.21.1449"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.05.21.1449"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -5891,7 +5894,7 @@
                         <option value="orphans">Show Broken Links Only</option>
                         <option value="all">Show All Recipe Components</option>
                     </select>
-                    <button onclick="if(window.applyAllRecipeSuggestions) window.applyAllRecipeSuggestions()" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border:1px solid rgba(16, 185, 129, 0.4); padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; font-weight:bold; transition:all 0.2s; text-transform:none !important;" onmouseover="this.style.background='rgba(16, 185, 129, 0.4)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.2)'">⚡ FIX ALL PREDICTIONS</button>
+                    <button data-click="click_applyAllRecipeSuggestions" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border:1px solid rgba(16, 185, 129, 0.4); padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; font-weight:bold; transition:all 0.2s; text-transform:none !important;" class="hover-green-subtle">🛠️ FIX ALL PREDICTIONS</button>
                 </div>
             </div>
             <div id="recipeManagerModalBody" style="padding:20px; flex:1; overflow:auto; font-family:monospace; font-size:11px;">
@@ -5899,7 +5902,7 @@
             </div>
             <div id="recipeManagerActionFooter" style="padding:15px 25px; border-top:1px solid rgba(255,255,255,0.1); background:var(--bg-panel); justify-content:flex-end; gap:15px; display:flex;">
                 <!-- LIVE STAGING UI -->
-                <button id="btnRecipeManagerDiscard" class="btn-red-muted" style="padding:10px 20px; font-weight:bold; font-size:12px;" onclick="document.getElementById('recipeManagerModal').style.display='none';">🗑️ Discard Changes</button>
+                <button id="btnRecipeManagerDiscard" class="btn-red-muted" style="padding:10px 20px; font-weight:bold; font-size:12px;" data-click="click_window_closeRecipeManager">🚫 Discard Changes</button>
                 <button id="btnRecipeManagerSync" class="btn-green-neon" style="padding:10px 25px; font-weight:bold; font-size:13px;" data-click="click_window_commitRecipeManager">✅ COMMIT FIXES</button>
             </div>
         </div>
@@ -6180,10 +6183,10 @@
                         <button data-click="click_teToggleGlobalCreateMenu" class="btn-red-neon" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px; border-radius: 20px;">+ Create</button>
                         
                         <div id="te-global-create-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin-top: 8px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000; flex-direction: column; gap: 4px;">
-                            <button class="btn-ghost-base" data-click="click_teCreateNewTask" onclick="document.getElementById('te-global-create-dropdown').style.display='none'" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">✅ Task</button>
-                            <button class="btn-ghost-base" data-click="click_teCreateCycle" onclick="document.getElementById('te-global-create-dropdown').style.display='none'" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">📁 Section</button>
-                            <button class="btn-ghost-base" data-click="click_teCreateProject" onclick="document.getElementById('te-global-create-dropdown').style.display='none'" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">📋 Project</button>
-                            <button class="btn-ghost-base" data-click="click_teCreateTeam" onclick="document.getElementById('te-global-create-dropdown').style.display='none'" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">👥 Team</button>
+                            <button class="btn-ghost-base" data-click="click_teCreateNewTask" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">✅ Task</button>
+                            <button class="btn-ghost-base" data-click="click_teCreateCycle" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">📁 Section</button>
+                            <button class="btn-ghost-base" data-click="click_teCreateProject" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">📋 Project</button>
+                            <button class="btn-ghost-base" data-click="click_teCreateTeam" style="width: 100%; justify-content: flex-start; padding: 8px 12px; font-size: 13px; color: white; background: transparent;">👥 Team</button>
                         </div>
                     </div>
                     <!-- Sidebar Links -->
@@ -6321,7 +6324,7 @@
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div style="font-size: 10px; font-weight: bold; color: var(--text-muted);">TAGS</div>
-                                <div data-click="click_teOpenTagManager" style="display: flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: bold; cursor: pointer; padding: 2px;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'" title="Manage Tags">
+                                <div data-click="click_teOpenTagManager" style="display: flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: bold; cursor: pointer; padding: 2px;" class="hover-white-text" title="Manage Tags">
                                     <i class="fa-solid fa-gear"></i> Manage Tags
                                 </div>
                             </div>
@@ -6461,14 +6464,14 @@
                 
                 // Left Clickable Arrow
                 const leftArrow = document.createElement('div');
-                leftArrow.innerHTML = '<i>‹</i>';
+                leftArrow.innerHTML = window.safeHTML ? window.safeHTML('<i>‹</i>') : '<i>‹</i>';
                 leftArrow.style.cssText = arrowStyle;
                 leftArrow.onclick = (e) => { e.preventDefault(); el.scrollBy({ left: -250, behavior: 'smooth' }); };
                 leftContainer.appendChild(leftArrow);
                 
                 // Right Clickable Arrow
                 const rightArrow = document.createElement('div');
-                rightArrow.innerHTML = '<i>›</i>';
+                rightArrow.innerHTML = window.safeHTML ? window.safeHTML('<i>›</i>') : '<i>›</i>';
                 rightArrow.style.cssText = arrowStyle;
                 rightArrow.onclick = (e) => { e.preventDefault(); el.scrollBy({ left: 250, behavior: 'smooth' }); };
                 rightContainer.appendChild(rightArrow);
@@ -6620,7 +6623,7 @@
         <div style="background:#0f172a; width:90%; max-width:400px; border-radius:12px; border:1px solid #1e293b; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
             <div style="padding:1.5rem; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; background:#1e293b; border-radius:12px 12px 0 0;">
                 <h2 style="margin:0; font-size:16px; color:#f8fafc; display:flex; align-items:center; gap:8px;">⚡ FORCE SYNC ORDER</h2>
-                <button onclick="closeForceSyncModal()" style="background:transparent; border:none; color:#64748b; font-size:20px; cursor:pointer; transition:color 0.2s;">&times;</button>
+                <button data-click="click_window_closeForceSyncModal" style="background:transparent; border:none; color:#64748b; font-size:20px; cursor:pointer; transition:color 0.2s;">&times;</button>
             </div>
             
             <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
@@ -6634,8 +6637,8 @@
             </div>
             
             <div style="padding:1rem 1.5rem; border-top:1px solid #1e293b; background:#0b1121; border-radius:0 0 12px 12px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="closeForceSyncModal()" style="background:transparent; border:1px solid #334155; color:#cbd5e1; padding:8px 16px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer; transition:all 0.2s;">CANCEL</button>
-                <button id="btnForceSyncSubmit" onclick="triggerForceSync()" style="background:#10b981; border:none; color:#022c22; padding:8px 16px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">🚀 SYNC NOW</button>
+                <button data-click="click_window_closeForceSyncModal" style="background:transparent; border:1px solid #334155; color:#cbd5e1; padding:8px 16px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer; transition:all 0.2s;">CANCEL</button>
+                <button id="btnForceSyncSubmit" data-click="click_triggerForceSync" style="background:#10b981; border:none; color:#022c22; padding:8px 16px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;">🚀 SYNC NOW</button>
             </div>
         </div>
     </div>
