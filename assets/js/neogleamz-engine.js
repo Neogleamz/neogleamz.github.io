@@ -51,7 +51,7 @@ window.safeHTML = function(dirtyHTML) {
     if (typeof DOMPurify !== 'undefined') {
         return DOMPurify.sanitize(dirtyHTML, { 
             ADD_TAGS: ['iframe', 'video', 'source'],
-            ADD_ATTR: ['target', 'allow', 'allowfullscreen', 'frameborder', 'scrolling', 'muted', 'playsinline', 'preload', 'autoplay', 'loop', 'data-url', 'data-click', 'data-mousedown', 'contenteditable', 'src', 'loading', 'class', 'style', 'selected', 'value', 'checked', 'type']
+            ADD_ATTR: ['target', 'allow', 'allowfullscreen', 'frameborder', 'scrolling', 'muted', 'playsinline', 'preload', 'autoplay', 'loop', 'data-url', 'data-click', 'data-mousedown', 'data-keyup', 'data-blur', 'data-focus', 'data-change', 'data-input', 'data-mouseover', 'data-mouseout', 'data-submit', 'data-colkey', 'data-issimple', 'data-isn', 'data-rowkey', 'data-index', 'data-col', 'contenteditable', 'src', 'loading', 'class', 'style', 'selected', 'value', 'checked', 'type', 'tabindex']
         });
     }
     // Fallback if DOMPurify failed to load

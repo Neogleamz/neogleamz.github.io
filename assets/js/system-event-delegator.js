@@ -1309,6 +1309,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'keyup_window_updateColumnFilter':
+                    if (typeof window.keyup_window_updateColumnFilter === 'function') window.keyup_window_updateColumnFilter(el);
+                    break;
                 case 'keyup_window_renderEditzBulkTable':
                     window.keyup_window_renderEditzBulkTable();
                     break;
@@ -1394,6 +1397,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'change_window_onEditzBulkChange':
+                    if (typeof window.change_window_onEditzBulkChange === 'function') window.change_window_onEditzBulkChange(el);
+                    break;
                 case 'change_window_renderRecipeManager':
                     if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
                     break;
@@ -1621,6 +1627,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'focus_storeOldVal':
+                    if (typeof window.focus_storeOldVal === 'function') window.focus_storeOldVal(el);
+                    break;
                 case 'focus_storeOldVal_this':
                     storeOldVal(el);
                     break;
@@ -1637,6 +1646,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'blur_updateDBCell':
+                    if (typeof window.blur_updateDBCell === 'function') window.blur_updateDBCell(el);
+                    break;
                 case 'blur_window_handleCcMngrTelemetryEd':
                     window.handleCcMngrTelemetryEdit(el, 1);
                     break;

@@ -374,32 +374,7 @@ window.renderProductBOM = function() {
                 sp=""; 
                 uc=getEngineTrueCogs(s); 
             } else { 
-                let c = catalogCache[k]; 
-                
-                // Fallback Auto-Heal for orphaned keys (e.g. Beamz -> Glowz rename)
-                if(!c && k.includes(':::')) {
-                    let parts = k.split(':::');
-                    if(parts.length === 4) {
-                        let oldNN = parts[0];
-                        let _oldNP = parts[1];
-                        let oldItem = parts[2];
-                        let oldSpec = parts[3];
-                        
-                        let fallbackKey = Object.keys(catalogCache).find(ck => {
-                            let entry = catalogCache[ck];
-                            if(oldNN && entry.neoName === oldNN) return true;
-                            if(!oldNN && entry.itemName === oldItem && entry.spec === oldSpec) return true;
-                            return false;
-                        });
-                        
-                        if(fallbackKey) {
-                            c = catalogCache[fallbackKey];
-                            x.item_key = fallbackKey; // Auto-heal locally
-                            k = fallbackKey;
-                            setTimeout(() => { if(typeof window.syncRecipe === 'function') window.syncRecipe(currentProduct); }, 100);
-                        }
-                    }
-                }
+                let c = catalogCache[k];
 
                 if(c){ 
                     nn=c.neoName; 
@@ -561,9 +536,15 @@ window.renderRecipeManager = function() {
                         if (kParts.length >= 3) {
                             let score = 0;
                             for (let i=0; i<Math.max(bPLower.length, kParts.length); i++) {
-                                if (bPLower[i] === kParts[i]) score++;
+                                if (bPLower[i] === kParts[i]) {
+                                    if (i === 0) score += 10; // Name
+                                    else if (i === 1) score += 5; // Product
+                                    else if (i === 2) score += 2; // Raw
+                                    else if (i === 3) score += 1; // Spec
+                                    else score += 1;
+                                }
                             }
-                            if (score > bestScore && score >= 2) { bestScore = score; bestMatch = k; }
+                            if (score > bestScore && score >= 8) { bestScore = score; bestMatch = k; }
                         }
                     }
                 }
