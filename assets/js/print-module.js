@@ -395,7 +395,7 @@ function renderActivePrintJob(id) {
             mgr.innerHTML = window.safeHTML(htmlOut);
         }
     } else if (job.status === 'Cleaned') {
-        const mgr = document.getElementById('layerzRunManager');
+        const mgr = document.getElementById('layerzCleanedManager');
         if (mgr) {
             let isRunning = wip.stage_start_time && !wip.is_paused;
             let elapsed = wip.elapsed_cleaned || 0;
@@ -451,12 +451,13 @@ function renderActivePrintJob(id) {
     } else {
         const mgr = document.getElementById('layerzRunManager');
         if (mgr) mgr.innerHTML = "";
+        const cMgr = document.getElementById('layerzCleanedManager');
+        if (cMgr) cMgr.innerHTML = "";
     }
-
 
     // SOP logic for Printing stage
     if (job.status === 'Printing' || job.status === 'Cleaned') {
-        const sopList = document.getElementById('printSOPList');
+        const sopList = document.getElementById(job.status === 'Cleaned' ? 'printSOPListCleaned' : 'printSOPList');
         let cleanPartName = job.part_name.startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : job.part_name.split(':::')[0];
         let mainPayload = sopsDB[cleanPartName];
         let steps = []; let qa = [];
