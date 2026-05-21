@@ -118,7 +118,7 @@ function teRenderSidebar() {
                             ${p.title}
                         </span>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <span data-click="click_teOpenEditProject" data-project-id="${p.id}" style="font-size: 10px; cursor: pointer; padding: 2px; filter: grayscale(100%); opacity: 0.7;" onmouseover="this.style.filter='grayscale(0%)'; this.style.opacity=1;" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity=0.7;">✏️</span>
+                            <span data-click="click_teOpenEditProject" data-project-id="${p.id}" style="font-size: 10px; cursor: pointer; padding: 2px; filter: grayscale(100%); opacity: 0.7;" class="te-hover-grayscale">✏️</span>
                             <span data-click="click_teDeleteProject" data-project-id="${p.id}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
                         </div>
                     </div>
@@ -442,12 +442,12 @@ function teRenderTaskGrid(filter = null) {
         <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 12px;">
             <div class="te-section-header neo-category-row" style="cursor: grab;">
                 <span style="font-weight:900; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
-                    <span class="cat-arrow" data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="color:var(--text-muted); width:20px; text-align:center; cursor:pointer;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">${toggleIcon}</span> 
-                    <span class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='${headerColor}20'" onmouseout="this.style.background='transparent'">${group.title}</span>
+                    <span class="cat-arrow" data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="color:var(--text-muted); width:20px; text-align:center; cursor:pointer;" class="te-hover-text-white">${toggleIcon}</span> 
+                    <span class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" class="te-hover-bg-dynamic">${group.title}</span>
                 </span>
                 <span style="display:flex; align-items:center; gap:12px;">
                     ${group.badgeHtml ? group.badgeHtml : ''}
-                    <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted)'">✖</div>
+                    <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" class="te-hover-bg-red">✖</div>
                 </span>
             </div>
             <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: ${group.tasks.length > 0 ? 'auto' : '2px'}; padding-bottom: 0px;">
@@ -495,7 +495,7 @@ function teRenderTaskGrid(filter = null) {
         
         html += `
             </div>
-            <div class="task-row te-inline-add-row" data-cycle-id="${cid === 'unassigned' ? '' : cid}" style="padding: 6px 15px; margin-top: 0px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; min-height: unset; background: transparent; border: none; box-shadow: none;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'" onmouseout="this.style.backgroundColor='transparent'">
+            <div class="task-row te-inline-add-row" data-cycle-id="${cid === 'unassigned' ? '' : cid}" style="padding: 6px 15px; margin-top: 0px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; min-height: unset; background: transparent; border: none; box-shadow: none;" class="te-hover-bg-white-05">
                 <div style="width:16px; height:16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: bold; font-size: 16px;">+</div>
                 <div style="flex: 1; display: flex; align-items: flex-start;" class="te-inline-container" data-click="click_teActivateInlineTask">
                     <span class="te-inline-add-placeholder" style="color: var(--text-muted); font-size: 14px; padding-top: 0px;">Add task...</span>
@@ -506,7 +506,7 @@ function teRenderTaskGrid(filter = null) {
     html += `</div>`;
     
     html += `
-        <div style="margin-top: 20px; padding: 10px 15px; cursor: pointer; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; gap: 8px; border-radius: 8px; max-width: 200px;" data-click="click_teCreateCycle" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'">
+        <div style="margin-top: 20px; padding: 10px 15px; cursor: pointer; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; gap: 8px; border-radius: 8px; max-width: 200px;" data-click="click_teCreateCycle" class="te-hover-bg-white-05-text">
             <span style="font-size: 16px;">+</span> Add section
         </div>
     `;
@@ -704,7 +704,7 @@ function teBuildTaskRowHTML(t, depth = 0, hasChildren = false) {
     if (hasChildren) {
         let isCollapsed = window['teSubtaskState_' + t.id] === 'collapsed';
         let arrow = isCollapsed ? '▶' : '▼';
-        expandArrowHtml = `<div data-click="click_teToggleSubtaskVisibility" data-task-id="${t.id}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); opacity: 0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">${arrow}</div>`;
+        expandArrowHtml = `<div data-click="click_teToggleSubtaskVisibility" data-task-id="${t.id}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); opacity: 0.7;" class="te-hover-opacity">${arrow}</div>`;
     } else {
         expandArrowHtml = `<div style="width: 20px; height: 20px; flex-shrink: 0;"></div>`;
     }
@@ -793,7 +793,7 @@ window.teOpenTaskContext = function(taskId) {
                     });
                     opts += '</optgroup>';
                 }
-                assigneeSelect.innerHTML = opts;
+                assigneeSelect.innerHTML = window.safeHTML ? window.safeHTML(opts) : opts;
                 
                 let meta = JSON.parse(JSON.stringify(task.metadata || {}));
                 if (meta.assigned_team_id) {
@@ -820,7 +820,7 @@ window.teOpenTaskContext = function(taskId) {
                 relevantCycles.forEach(c => {
                     opts += `<option value="${c.id}">${c.title}</option>`;
                 });
-                cycleSelect.innerHTML = opts;
+                cycleSelect.innerHTML = window.safeHTML ? window.safeHTML(opts) : opts;
                 cycleSelect.value = task.cycle_id || '';
             }
             
@@ -878,7 +878,7 @@ window.teRenderTagEditor = function(taskId) {
                 html += `
                 <div style="background: ${tagObj.color_hex || '#64748b'}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
                     ${tagObj.name}
-                    <span data-click="click_teRemoveTagFromTask" data-task-id="${taskId}" data-tag-id="${tagId}" style="cursor: pointer; opacity: 0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✖</span>
+                    <span data-click="click_teRemoveTagFromTask" data-task-id="${taskId}" data-tag-id="${tagId}" style="cursor: pointer; opacity: 0.7;" class="te-hover-opacity">✖</span>
                 </div>`;
             }
         });
@@ -932,7 +932,7 @@ window.teRenderActivityFeed = function(taskId) {
     relevantEvents.sort((a,b) => b.ts - a.ts); // descending
     
     if (relevantEvents.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; text-align: center;">No activity yet.</div>';
+        container.innerHTML = window.safeHTML ? window.safeHTML('<div style="color: var(--text-muted); font-size: 12px; text-align: center;">No activity yet.</div>') : '<div style="color: var(--text-muted); font-size: 12px; text-align: center;">No activity yet.</div>';
         return;
     }
     
@@ -995,7 +995,7 @@ window.teOpenStatusDropdown = function(taskId, element) {
         let html = '';
         options.forEach(opt => {
             html += `
-            <div data-click="click_teSetStatus" data-status="${opt.status}" style="padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; color: var(--text-color); display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+            <div data-click="click_teSetStatus" data-status="${opt.status}" style="padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; color: var(--text-color); display: flex; align-items: center; gap: 8px;" class="te-hover-bg-white-10">
                 <span class="status-pill ${opt.class}" style="font-size: 10px; width: auto; display: inline-block;">${opt.status}</span>
             </div>`;
         });
@@ -1342,7 +1342,7 @@ window.teSelectProject = function(projectId) {
     let p = taskEngineDB.projectz.find(x => x.id === projectId);
     if (p) {
         let titleEl = document.getElementById('te-main-header-title');
-        if (titleEl) titleEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`;
+        if (titleEl) titleEl.innerHTML = window.safeHTML ? window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`) : `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`;
     }
     teSwitchView('list');
 };
@@ -1361,7 +1361,7 @@ window.click_teOpenEditProject = function(element) {
         <div style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 400px; max-width: 90vw; margin: auto; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
             <div class="pane-header-bar" style="position: relative; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
                 <div class="pane-header-title">Edit Project</div>
-                <div class="modal-close-btn te-proj-close" data-click="click_window_closeEditProject" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.1)'">✖ CLOSE</div>
+                <div class="modal-close-btn te-proj-close" data-click="click_window_closeEditProject" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" class="te-hover-bg-red-close">✖ CLOSE</div>
             </div>
             <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
                 <div>
@@ -1435,7 +1435,7 @@ window.click_teSaveProjectEdit = async function(element) {
         if (window.teActiveProjectId === projectId) {
             let titleEl = document.getElementById('te-main-header-title');
             if (titleEl) {
-                titleEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`;
+                titleEl.innerHTML = window.safeHTML ? window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`) : `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`;
             }
         }
         
@@ -1482,7 +1482,7 @@ window.teCreateProject = async function() {
         <div style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 400px; max-width: 90vw; margin: auto; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
             <div class="pane-header-bar" style="position: relative; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
                 <div class="pane-header-title">Create New Project</div>
-                <div class="modal-close-btn te-proj-close" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" onmouseover="this.style.background='rgba(255,0,0,0.3)'" onmouseout="this.style.background='rgba(255,0,0,0.1)'">✕ CLOSE</div>
+                <div class="modal-close-btn te-proj-close" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" class="te-hover-bg-red-close">✕ CLOSE</div>
             </div>
             <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
                 <div>
@@ -1592,13 +1592,13 @@ window.teEditSectionTitle = function(cycleId, el) {
     const saveTitle = async () => {
         let newTitle = input.value.trim();
         if (newTitle && newTitle !== currentTitle) {
-            el.innerHTML = newTitle;
+            el.innerHTML = window.safeHTML ? window.safeHTML(newTitle) : newTitle;
             cycle.title = newTitle;
             try {
                 await supabaseClient.from('cyclez').update({ title: newTitle }).eq('id', cycleId);
             } catch(e) { console.error('Failed to update section title', e); }
         } else {
-            el.innerHTML = currentTitle;
+            el.innerHTML = window.safeHTML ? window.safeHTML(currentTitle) : currentTitle;
         }
     };
     
@@ -1997,13 +1997,19 @@ window.teSwitchView = function(view, btnEl) {
         wrapper.innerHTML = window.safeHTML ? window.safeHTML(calendarHtml) : calendarHtml;
     } else if (view === 'overview') {
         header.style.display = 'none';
-        wrapper.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+        wrapper.innerHTML = window.safeHTML ? window.safeHTML(`<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+            <h2 style="color: white; font-weight: 300;">Project Overview</h2>
+            <p>Welcome to the project overview. High-level summaries and briefs will appear here.</p>
+        </div>`) : `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
             <h2 style="color: white; font-weight: 300;">Project Overview</h2>
             <p>Welcome to the project overview. High-level summaries and briefs will appear here.</p>
         </div>`;
     } else if (view === 'dashboard') {
         header.style.display = 'none';
-        wrapper.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+        wrapper.innerHTML = window.safeHTML ? window.safeHTML(`<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+            <h2 style="color: white; font-weight: 300;">Dashboard</h2>
+            <p>Real-time analytics and charts for this project will render here.</p>
+        </div>`) : `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
             <h2 style="color: white; font-weight: 300;">Dashboard</h2>
             <p>Real-time analytics and charts for this project will render here.</p>
         </div>`;
@@ -2202,7 +2208,7 @@ window.teRenderArchiveView = function() {
     if (checkboxAll) checkboxAll.checked = false;
 
     if (archivedTasks.length === 0 && archivedCycles.length === 0 && archivedTeams.length === 0 && archivedProjects.length === 0) {
-        container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>';
+        container.innerHTML = window.safeHTML ? window.safeHTML('<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>') : '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>';
         return;
     }
     
@@ -2488,7 +2494,7 @@ window.keyup_teTagSuggest = function(event) {
     
     let html = '';
     matches.forEach(m => {
-        html += `<div data-click="click_teAddTagToTask" data-tag-id="${m.id}" style="padding: 8px 12px; cursor: pointer; color: white; font-size: 12px; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+        html += `<div data-click="click_teAddTagToTask" data-tag-id="${m.id}" style="padding: 8px 12px; cursor: pointer; color: white; font-size: 12px; display: flex; align-items: center; gap: 8px;" class="te-hover-bg-white-10">
             <span style="width: 12px; height: 12px; border-radius: 50%; background: ${m.color_hex || '#64748b'};"></span> ${m.name}
         </div>`;
     });
@@ -2496,7 +2502,7 @@ window.keyup_teTagSuggest = function(event) {
     // Exact match check
     let exactMatch = taskEngineDB.tagz.find(t => t.name.toLowerCase() === val);
     if (!exactMatch) {
-        html += `<div data-click="click_teCreateNewTag" data-tag-name="${input.value.trim()}" style="padding: 8px 12px; cursor: pointer; color: #2dd4bf; font-size: 12px; font-weight: bold; border-top: 1px solid rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+        html += `<div data-click="click_teCreateNewTag" data-tag-name="${input.value.trim()}" style="padding: 8px 12px; cursor: pointer; color: #2dd4bf; font-size: 12px; font-weight: bold; border-top: 1px solid rgba(255,255,255,0.1);" class="te-hover-bg-white-10">
             + Create "${input.value.trim()}"
         </div>`;
     }
@@ -2604,7 +2610,7 @@ window.tePopulateTagFilter = function() {
     sortedTags.forEach(t => {
         html += `<option value="${t.id}">${t.name}</option>`;
     });
-    filterSelect.innerHTML = html;
+    filterSelect.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 };
 
 window.keyup_teFilterTaskSearch = function() {
@@ -2635,7 +2641,7 @@ window.teRenderTagManagerList = function() {
     let sortedTags = [...taskEngineDB.tagz].sort((a, b) => a.name.localeCompare(b.name));
     
     if (sortedTags.length === 0) {
-        list.innerHTML = '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>';
+        list.innerHTML = window.safeHTML ? window.safeHTML('<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>') : '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>';
         return;
     }
     
@@ -2643,13 +2649,13 @@ window.teRenderTagManagerList = function() {
         html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:6px;">
             <div style="display:flex; align-items:center; gap:10px; flex: 1;">
                 <input type="color" data-change="change_teUpdateTagColor" data-tag-id="${t.id}" value="${t.color_hex || '#64748b'}" style="width:24px; height:24px; padding:0; border:none; border-radius:4px; cursor:pointer; background:transparent; flex-shrink:0;">
-                <input type="text" data-change="change_teUpdateTagName" data-tag-id="${t.id}" value="${t.name.replace(/"/g, '&quot;')}" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; font-size:13px; font-weight:bold; padding:4px 8px; border-radius:4px; width: 100%; outline:none;" onfocus="this.style.border='1px solid #3b82f6'; this.style.background='rgba(255,255,255,0.2)'" onblur="this.style.border='1px solid rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.1)'">
+                <input type="text" data-change="change_teUpdateTagName" data-tag-id="${t.id}" value="${t.name.replace(/"/g, '&quot;')}" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; font-size:13px; font-weight:bold; padding:4px 8px; border-radius:4px; width: 100%; outline:none;" class="te-focus-input-blue">
             </div>
             <button class="btn-red-muted" data-click="click_teDeleteTag" data-tag-id="${t.id}" style="padding:4px 10px; font-size:10px; border-radius:4px; margin-left: 10px; flex-shrink:0; white-space:nowrap; width:max-content; min-width: 80px;">🗑️ Delete</button>
         </div>`;
     });
     
-    list.innerHTML = html;
+    list.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
 };
 
 window.teCreateTagFromManager = async function() {
