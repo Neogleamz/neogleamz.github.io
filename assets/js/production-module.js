@@ -1443,7 +1443,6 @@ function renderActiveWO(id) {
                     `;
 
                     if(isEditing) {
-                        let qaText = grp.qa.join('\\n');
                         let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, attachments: []});
                         if(mappedSteps.length === 0) mappedSteps = [{}];
                         let stepsHtml = '';

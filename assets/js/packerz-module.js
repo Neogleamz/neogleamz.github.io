@@ -440,24 +440,17 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     let btnSignoff = document.getElementById('btnPackerzSopSignoff');
 
     if(!window.isPackerzLiveEditing) {
-        // Normal split-pane setup restored strictly
-        wrapper.innerHTML = window.safeHTML(`
-            <div id="packerzLiveSopLeftPane" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container);">
-                <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
-                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
-                    <div id="packerzSopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
-                </div>
-                <div style="padding:25px; border-top:2px solid var(--border-color); background:rgba(16,185,129,0.05);">
-                    <button id="btnPackerzSopSignoff" class="btn-green-neon" style="width:100%; padding:18px; font-size:15px; border-radius:10px; font-weight:900; letter-spacing:1px; cursor:not-allowed; opacity:0.5; transition:all 0.3s;" data-app-click="signoffQA">
-                        COMPLETE QA CHECKS
-                    </button>
-                </div>
-            </div>
-            <div id="packerzLiveSopResizer" class="h-resizer" data-mousedown="mousedown_initPackerzLiveSopResize_event"></div>
-            <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
-                <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
-            </div>
-        `);
+        // Normal split-pane setup restored strictly using unified template
+        wrapper.innerHTML = window.safeHTML(
+            window.buildUnifiedSopLayoutHTML({
+                isEdit: false,
+                sopType: 'packerz',
+                grpId: 'inline',
+                requiredBoxSku: '',
+                qaChecksHtml: '',
+                stepsHtml: ''
+            })
+        );
         // re-grab references after DOM recreation
         body = document.getElementById('packerzSopViewerBody');
         qaList = document.getElementById('packerzSopViewerQAList');
@@ -493,62 +486,15 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         if(window.isPackerzLiveEditing) {
             let qaText = (qaChecks || []).join('\n');
             let rowsHtml = '';
-            steps.forEach((s, idx) => { rowsHtml += window.generateEditableSOPRow(s, idx); });
+            steps.forEach((s, idx) => { rowsHtml += window.generateEditableSOPRow(s, idx, sku, 'packerz'); });
 
-            let editHtml = `
-            <div style="display:flex; flex-direction:row; gap:15px; width:100%; height:100%; padding:20px; background:var(--bg-body); overflow:hidden;">
-                <!-- Left Pane: Telemetry Editor & Live Preview -->
-                <div id="packerzInlineSopLeftPane" style="flex:0 0 65%; min-width:600px; padding-right:20px; display:flex; flex-direction:row; gap:15px; border-right:1px solid transparent;">
-
-                    <!-- Column 1: Config & Input -->
-                    <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
-                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
-                            <div style="display:flex; gap:5px; flex-wrap:nowrap; align-items:center;">
-                                <button class="sop-print-btn" data-click="click_window_openSopPrintModal_pack" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">🖨️ Print</button>
-                                <button data-app-click="openSOPMediaInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">☁️ Upload</button>
-                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">📸 Photo</button>
-                                <button data-app-click="openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">❓ Guide</button>
-                                <button data-app-click="togglePackerzSOPPreview" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">👁️ Preview</button>
-                            </div>
-                        </div>
-                        <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
-                            <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;&middot;&nbsp;
-                            <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;&middot;&nbsp;
-                            <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;&middot;&nbsp;
-                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;&middot;&nbsp;
-                            <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
-                            <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
-                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;&middot;&nbsp;
-                            <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
-                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-app-click="openSOPTokenGuide">&#10067; Full Guide</span>
-                        </div>
-                        <textarea id="packerzLiveInlineQA" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;" data-app-input="renderSOPPreview">${qaText}</textarea>
-                    </div>
-
-                    <!-- Column 2: Live Preview Render -->
-                    <div id="packerzLiveInlinePreviewCol" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
-                        <div id="packerzLiveInlinePreviewContainer" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;"></div>
-                    </div>
-                </div>
-
-                <!-- Resizer Divider -->
-                <div id="packerzLiveInlineResizerHandle" class="h-resizer packerz-h-resizer" data-mousedown="mousedown_initPackerzLiveSopResize_event"></div>
-
-                <!-- Column 3: Rich Text Row Builders -->
-                <div id="packerzInlineSopRightPane" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:25px; border:1px solid var(--border-color); display:flex; flex-direction:column; overflow-y:auto;">
-                    <h3 style="margin:0 0 15px 0; color:var(--text-heading); font-size:16px;">4. Packing Instructions (Rich Text)</h3>
-                    <div id="packerzLiveInlineRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px; flex-grow:1;">
-                        ${rowsHtml}
-                    </div>
-
-                    <div style="display:flex; gap:10px; margin-top:20px; padding-top:20px; border-top:1px dashed rgba(255,255,255,0.1);">
-                        <button class="btn-green" id="btnSavePackerzInlineSOP" style="padding:10px 25px; font-size:14px; font-weight:900; width:100%;" data-app-click="saveInlineSOP">💾 SAVE SOP MASTER BLUEPRINT</button>
-                    </div>
-                </div>
-            </div>
-            `;
+            let editHtml = window.buildUnifiedSopLayoutHTML({
+                isEdit: true,
+                sopType: 'packerz',
+                grpId: 'inline',
+                qaText: qaText,
+                rowsHtml: rowsHtml
+            });
             wrapper.innerHTML = window.safeHTML(editHtml);
             setTimeout(() => { if(typeof renderPackerzLiveInlineTelemetryPreview==='function') renderPackerzLiveInlineTelemetryPreview(); }, 150);
             return; // EXIT here so we don't render read-only checkboxes!
@@ -1089,13 +1035,15 @@ window.movePackerzSOPDown = function(btn) { let row = btn.closest('.sop-step-row
 window.removePackerzSOPRow = function(btn) { btn.closest('.sop-step-row').remove(); }
 window.addPackerzSOPRow = function(btn) {
     let newRow = document.createElement('div');
-    newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({text:""}, 999));
+    const sku = btn ? (btn.getAttribute('data-prodid') || currentPackerzQaSku || 'unknown') : (currentPackerzQaSku || 'unknown');
+    const sopType = btn ? (btn.getAttribute('data-soptype') || 'packerz') : 'packerz';
+    newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({text:""}, 999, sku, sopType));
     let rowNode = newRow.firstChild;
-    if(btn) {
+    if(btn && btn.closest('.sop-step-row')) {
         let currentRow = btn.closest('.sop-step-row');
         currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling);
     } else {
-        let wrapper = document.getElementById('packerzSopEditorRowsWrapper');
+        let wrapper = document.getElementById('packerzLiveInlineRowsWrapper') || document.getElementById('packerzSopEditorRowsWrapper');
         if(wrapper) wrapper.appendChild(rowNode);
     }
 }
@@ -1325,19 +1273,49 @@ function renderPackerzTelemetryPreview() {
 }
 
 
+/**
+ * Loads and constructs the vertical split-pane Packerz Admin SOP Editor layout.
+ * Fetches existing SOP configurations from the Supabase database for the selected recipe SKU,
+ * populates the telemetry checklist textarea and preview, and dynamically constructs editable procedure step rows.
+ * Uses the centralized unified layout generator to maintain layout and style parity across all editor screens.
+ * 
+ * @async
+ * @function loadPackerzSopFromDB
+ * @returns {Promise<void>} Resolves when the admin editor has been populated and rendered.
+ */
 async function loadPackerzSopFromDB() {
     const sku = document.getElementById('packerzAdminRecipeSelect').value;
+    const wrapper = document.getElementById('packerzSopSplitWrapper');
+    if (!wrapper) return;
+
+    // Initialize split-pane grid structure once to preserve resizing widths
+    if (!wrapper.querySelector('#packerzSopLeftPane')) {
+        wrapper.innerHTML = window.safeHTML(
+            window.buildUnifiedSopLayoutHTML({
+                isEdit: true,
+                sopType: 'packerz',
+                grpId: 'dashboard',
+                qaText: '',
+                rowsHtml: ''
+            })
+        );
+    }
+
     const area = document.getElementById('packerzSopEditorArea');
     if(!sku) {
-        area.innerHTML = window.safeHTML(
-            "<div style='text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;'>Select a target recipe on the left to begin compiling standard operating procedures.</div>"
-        );
+        if (area) {
+            area.innerHTML = window.safeHTML(
+                "<div style='text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;'>Select a target recipe on the left to begin compiling standard operating procedures.</div>"
+            );
+        }
         return;
     }
 
-    area.innerHTML = window.safeHTML(
-        "<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching structural SOP payload from Supabase Edge...</div>"
-    );
+    if (area) {
+        area.innerHTML = window.safeHTML(
+            "<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching structural SOP payload from Supabase Edge...</div>"
+        );
+    }
 
     try {
         const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku);
@@ -1345,36 +1323,41 @@ async function loadPackerzSopFromDB() {
 
         let steps = [{}];
         if(data) {
-
             const instructionJson = JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}');
             steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
-            document.getElementById('packerzAdminQA').value = (instructionJson.qaChecks || []).join('\n');
+            const packerzAdminQA = document.getElementById('packerzAdminQA');
+            if (packerzAdminQA) {
+                packerzAdminQA.value = (instructionJson.qaChecks || []).join('\n');
+            }
             if(typeof renderPackerzTelemetryPreview === 'function') renderPackerzTelemetryPreview();
         } else {
-
-            document.getElementById('packerzAdminQA').value = '';
+            const packerzAdminQA = document.getElementById('packerzAdminQA');
+            if (packerzAdminQA) {
+                packerzAdminQA.value = '';
+            }
             if(typeof renderPackerzTelemetryPreview === 'function') renderPackerzTelemetryPreview();
         }
 
         let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">`;
-        steps.forEach((s, idx) => { h += window.generateEditableSOPRow(s, idx); });
+        steps.forEach((s, idx) => { h += window.generateEditableSOPRow(s, idx, sku, 'packerz'); });
         h += `</div>`;
 
-        area.innerHTML = window.safeHTML(h);
+        if (area) area.innerHTML = window.safeHTML(h);
 
     } catch(e) {
         console.error("SOP Fetch Bound Error:", e);
         if(typeof sysLog === 'function') sysLog(`Packerz SOP Load Error: ${e.message}`, true);
         if(e.code === 'PGRST116') {
-            // Null record perfectly fine (new SOP)
-
-            document.getElementById('packerzAdminQA').value = '';
-            let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">` + window.generateEditableSOPRow({}, 0) + `</div>`;
-            area.innerHTML = window.safeHTML(h);
+            const packerzAdminQA = document.getElementById('packerzAdminQA');
+            if (packerzAdminQA) packerzAdminQA.value = '';
+            let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">` + window.generateEditableSOPRow({}, 0, sku, 'packerz') + `</div>`;
+            if (area) area.innerHTML = window.safeHTML(h);
         } else {
-            area.innerHTML = window.safeHTML(
-                `<div style='padding:20px; color:red; font-weight:900;'>API Disconnect: ${e.message}</div>`
-            );
+            if (area) {
+                area.innerHTML = window.safeHTML(
+                    `<div style='padding:20px; color:red; font-weight:900;'>API Disconnect: ${e.message}</div>`
+                );
+            }
         }
     }
 }
@@ -2165,6 +2148,8 @@ if (!window.isPackerzListenerBound) {
             if(typeof toggleHorizontalPreview === 'function') toggleHorizontalPreview('packerzInlineSopLeftPane', 'packerzLiveInlinePreviewCol', btn);
         } else if (action === 'saveInlineSOP') {
             if(typeof savePackerzLiveInlineSOP === 'function') savePackerzLiveInlineSOP();
+        } else if (action === 'addInlineSOPRow') {
+            if(typeof window.addPackerzSOPRow === 'function') window.addPackerzSOPRow(btn);
         } else if (action === 'openMediaContext') {
             if(typeof openMediaModal === 'function') openMediaModal(btn.dataset.url, btn.dataset.type);
         } else if (action === 'stopProp') {

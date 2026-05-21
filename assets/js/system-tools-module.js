@@ -2355,18 +2355,20 @@ window.buildUnifiedSopLayoutHTML = function(options) {
     const isInline = grpId !== 'dashboard';
     
     // Sizing and Resizer Identifiers
-    let leftPaneId, wrapperId, previewColId, resizerId;
+    let leftPaneId, wrapperId, previewColId, resizerId, rightPaneId;
     if (isInline) {
         if (sopType === 'packerz') {
             leftPaneId = isEdit ? 'packerzInlineSopLeftPane' : 'packerzLiveSopLeftPane';
             wrapperId = 'packerzLiveSopSplitWrapper';
             previewColId = 'packerzLiveInlinePreviewCol';
             resizerId = 'packerzLiveInlineResizerHandle';
+            rightPaneId = isEdit ? 'packerzInlineSopRightPane' : 'packerzLiveSopRightPane';
         } else {
             leftPaneId = `inlineLeftPane_${grpId}`;
             wrapperId = `inlineContainer_${grpId}`;
             previewColId = `inlinePreviewContainer_${grpId}`;
             resizerId = `inlineResizer_${grpId}`;
+            rightPaneId = `inlineRightPane_${grpId}`;
         }
     } else {
         if (sopType === 'packerz') {
@@ -2374,11 +2376,13 @@ window.buildUnifiedSopLayoutHTML = function(options) {
             wrapperId = 'packerzSopSplitWrapper';
             previewColId = 'packerzSopPreviewCol';
             resizerId = 'packerzSopResizer';
+            rightPaneId = 'packerzSopRightPane';
         } else {
             leftPaneId = 'productionSopLeftPane';
             wrapperId = 'productionSopSplitWrapper';
             previewColId = 'masterSopPreviewCol';
             resizerId = 'productionSopResizer';
+            rightPaneId = 'productionSopRightPane';
         }
     }
 
@@ -2426,11 +2430,11 @@ window.buildUnifiedSopLayoutHTML = function(options) {
     const checklistHeader = sopType === 'packerz' ? '3. CHECKLIST' : 'CHECKLIST';
     const richTextHeader = sopType === 'packerz' ? '4. Packing Instructions (Rich Text)' : '4. Rich Text Instructions';
     
-    let printBtn = '';
-    let uploadBtn = '';
-    let photoBtn = '';
-    let guideBtn = '';
-    let previewBtn = '';
+    let printBtn;
+    let uploadBtn;
+    let photoBtn;
+    let guideBtn;
+    let previewBtn;
     
     if (sopType === 'packerz') {
         if (isInline) {
