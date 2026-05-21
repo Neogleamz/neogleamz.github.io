@@ -406,12 +406,17 @@ function renderActivePrintJob(id) {
             let s = Math.floor((elapsed % 60000) / 1000);
             let timeStr = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
             
+            let totalYielded = parseFloat(job.qty) || 0;
+            if (wip.runs && wip.runs.length > 0) {
+                totalYielded = wip.runs.reduce((sum, r) => sum + (parseFloat(r.success_qty) || 0), 0);
+            }
+
             let htmlOut = `
             <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
                 <div style="background:var(--bg-bar); padding:10px 15px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="margin:0; font-size:14px; color:var(--text-heading);">🛠️ Post-Processing Manager</h3>
                     <div style="font-size:12px; font-weight:bold; color:var(--text-muted);">
-                        Parts to Clean: <span style="color:#0ea5e9;">${job.qty}</span>
+                        Parts to Clean: <span style="color:#0ea5e9;">${totalYielded}</span>
                     </div>
                 </div>
                 
@@ -610,6 +615,49 @@ window.submitFinalizePrint = function() {
     advancePrintStatus('Completed', true, success, failed);
 };
 
+async function executeCleaningInventoryMath(partName, failedQ, wo_id, label) {
+    if (failedQ <= 0) return;
+    const k = partName;
+    if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+    
+    // Only increase scrap qty. It was already produced in Stage 2.
+    inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + failedQ;
+    
+    let manualUpserts = [];
+    manualUpserts.push({ item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
+    
+    const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert(manualUpserts, { onConflict: 'item_key' });
+    if (invErr) throw new Error("Cleaning Inventory update failed: " + invErr.message);
+
+    let isScrapTicket = label && label.includes('[SCRAP REBUILD]');
+    let isYieldEnforced = false;
+    
+    if (isScrapTicket || (label && label.includes('[PRINT FAILURE RECOVERY]'))) {
+        isYieldEnforced = true;
+    } else if (wo_id && wo_id !== 'Manual Entry') {
+        let parentWO = typeof workOrdersDB !== 'undefined' ? workOrdersDB.find(w => String(w.wo_id) === String(wo_id)) : null;
+        if (!parentWO) {
+            try {
+                const { data } = await supabaseClient.from('work_orders').select('*').eq('wo_id', wo_id).single();
+                parentWO = data;
+            } catch(e) { console.error(e); }
+        }
+        if (parentWO) {
+            let pNameClean = parentWO.product_name.replace('RECIPE:::', '');
+            let isSub = typeof isSubassemblyDB !== 'undefined' && !!isSubassemblyDB[pNameClean];
+            let is3DP = typeof productsDB !== 'undefined' && !!(productsDB[pNameClean] && productsDB[pNameClean].is_3d_print);
+            if (!isSub && !is3DP) isYieldEnforced = true;
+        }
+    }
+    
+    if (isYieldEnforced) {
+        let recoveryLabel = isScrapTicket ? label : `[PRINT FAILURE RECOVERY]`;
+        if (typeof addPrintJob === 'function') {
+            await addPrintJob(partName, failedQ, wo_id, recoveryLabel);
+        }
+    }
+}
+
 async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTicket, wo_id, label, skipRecovery = false) {
     let manualUpserts = [];
     const k = partName;
@@ -674,10 +722,15 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
         let currentWip = currentPrintJob.wip_state || {};
         let hasRuns = currentWip.runs && currentWip.runs.length > 0;
 
-        if (newStatus === 'Completed' && !bypassModal && !hasRuns) {
+        if (newStatus === 'Completed' && !bypassModal) {
             document.getElementById('finalizePrintName').value = currentPrintJob.part_name;
             document.getElementById('finalizePrintJobId').value = currentPrintJob.id;
+            
             let qty = parseFloat(currentPrintJob.qty) || 0;
+            if (hasRuns) {
+                qty = currentWip.runs.reduce((sum, r) => sum + (parseFloat(r.success_qty) || 0), 0);
+            }
+            
             document.getElementById('finalizePrintSuccess').value = qty;
             document.getElementById('finalizePrintFailed').value = 0;
             
@@ -728,6 +781,11 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
                 let failedQ = finalFailed !== null ? finalFailed : 0;
                 let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
                 await executePrintInventoryMath(currentPrintJob.part_name, successQ, failedQ, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label);
+            } else {
+                let failedQ = finalFailed !== null ? finalFailed : 0;
+                if (failedQ > 0) {
+                    await executeCleaningInventoryMath(currentPrintJob.part_name, failedQ, currentPrintJob.wo_id, currentPrintJob.label);
+                }
             }
         }
 
