@@ -467,139 +467,53 @@ function renderActivePrintJob(id) {
         }
         
         let grpId = 'layerz_' + encodeURIComponent(cleanPartName.replace(/\s+/g,'_'));
-        let isEditing = window.activeInlineSopEditors && window.activeInlineSopEditors[grpId] === true;
         let isExpanded = localStorage.getItem('layerzSopExpanded_' + grpId) !== 'false'; // default expanded
         let disp = isExpanded ? 'block' : 'none';
         let chev = isExpanded ? '▼' : '▶';
-        if(isEditing) { disp = 'block'; chev = '▼'; }
         
         let htmlOut = `
         <div class="sop-grp-card" id="sopgrp_${grpId}" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
-            <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);" data-click="click_toggleLayerzSopGroup" data-grp="${grpId}">
+            <div style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #0ea5e9; font-weight:bold; font-size:13px; color:var(--text-heading);" data-click="click_toggleLayerzSopGroup" data-grp="${grpId}">
                 <div style="flex-grow:1;">
-                    🖨️ 3D Print Instructions: ${cleanPartName} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
+                    🖨️ 3D Print Instructions: ${cleanPartName}
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;" data-click="click_stopPropagation">
                     <button class="btn-slate" style="font-size:10px; padding:2px 8px;" data-click="click_openPrintSOP" data-name="${cleanPartName.replace(/"/g, '&quot;')}">🖨️ PRINT</button>
-                    <button data-click="click_toggleInlineEditor" data-grp="${grpId}" class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
+                    <button data-click="click_openLayerzSOPEditor" data-name="${cleanPartName.replace(/"/g, '&quot;')}" class="btn-orange-muted" style="font-size:10px; padding:2px 8px;">🔒 EDIT</button>
                     <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" data-click="click_toggleLayerzSopGroup" data-grp="${grpId}" data-icon="true" id="sopgrp_icon_${grpId}">${chev}</div>
                 </div>
             </div>
             <div id="sopgrp_body_${grpId}" style="display:${disp}; padding:10px 15px; border-top:1px solid var(--border-color);">
         `;
         
-        if(isEditing) {
-            let qaText = qa.join('\n');
-            let mappedSteps = steps.map(s => typeof s !== 'string' ? s : {text: s, m1: {url: "", type: "img"}, m2: {url: "", type: "img"}, m3: {url: "", type: "img"}});
-            if(mappedSteps.length === 0) mappedSteps = [{}];
-            let stepsHtml = '';
-            mappedSteps.forEach((s, idx) => {
-                stepsHtml += window.generateEditableSOPRow(s, idx);
-            });
-            
-            htmlOut += `
-                            <!-- Layout Container (Side-by-side with resizer) -->
-                            <div id="inlineContainer_${grpId}" style="display:flex; flex-direction:row; width:100%; border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
-                                
-                                <!-- Pane 1: Telemetry & Live Preview (Side-by-side like Master SOP) -->
-                                <div id="inlineLeftPane_${grpId}" style="flex: 0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:15px; background:var(--bg-body); border-right:1px solid var(--border-color);  overflow:hidden;">
-                                    
-                                    <!-- Column 1: Config & Input -->
-                                    <div id="inlineInputCol_${grpId}" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
-                                            <div style="display:flex; gap:8px;">
-                                                <button data-click="click_openMediaManager" data-type="telemetry" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; color:#0ea5e9; border-radius:6px; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-bolt"></i> MEDIA</button>
-                                                <button data-click="click_openSOPTokenGuide" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">❓ GUIDE</button>
-                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grpId}" data-preview="inlinePreviewContainer_${grpId}" style="padding:5px 10px; font-size:11px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:6px; cursor:pointer; letter-spacing:0.5px;">👁️ PREVIEW</button>
-                                            </div>
-                                        </div>
-                                        <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
-                                            <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;·&nbsp;
-                                            <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;·&nbsp;
-                                            <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;·&nbsp;
-                                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN]</b> Bin &nbsp;— <span style="color:#F59E0B; cursor:pointer; font-weight:700;" data-click="click_openSOPTokenGuide">❓ Guide</span>
-                                        </div>
-                                        <textarea id="inlineSopQA_${grpId}" oninput="if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grpId}')" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaText}</textarea>
-                                    </div>
-                                    
-                                    <!-- Column 2: Live Preview Render -->
-                                    <div id="inlinePreviewContainer_${grpId}" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
-                                        <div id="inlineSopQAPreview_${grpId}" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;"></div>
-                                    </div>
-
-                                </div>
-                                
-                                <!-- Dedicated Vertical Resizer Handle -->
-                                <div id="inlineResizer_${grpId}" class="h-resizer" onmousedown="if(typeof initInlineResize==='function'){initInlineResize(event, '${grpId}');}"></div>
-                                
-                                <!-- Pane 2: Rich Text Steps -->
-                                <div id="inlineRightPane_${grpId}" style="flex: 1; min-width:30px; display:flex; flex-direction:column; padding:15px; background:var(--bg-body); border-left:1px solid var(--border-color);  overflow:hidden;">
-                                    <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Rich Text Instructions</h3>
-                                        </div>
-                                        <div id="inlineSopSteps_${grpId}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${stepsHtml}</div>
-                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" data-click="click_addInlineSOPRow" data-grp="${grpId}">+ ADD PROCEDURE STEP</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Save Actions -->
-                            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
-                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" data-click="click_toggleInlineEditor" data-grp="${grpId}">✕ Cancel Changes</button>
-                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" data-click="click_saveInlineSopBlock_print" data-grp="${grpId}" data-rawname="${cleanPartName.replace(/"/g, '&quot;')}">💾 SAVE SOP MASTER BLUEPRINT</button>
-                            </div>
-
-                            <!-- Injecting Drag Handlers for Resizer -->
-                            <script>
-                            setTimeout(() => { 
-                                if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grpId}'); 
-                            let savedOrder = localStorage.getItem('inlineSopSwapOrder_${grpId}');
-                            if(savedOrder === 'right-left') {
-                                let c = document.getElementById('inlineContainer_${grpId}');
-                                let l = document.getElementById('inlineLeftPane_${grpId}');
-                                let r = document.getElementById('inlineRightPane_${grpId}');
-                                let z = document.getElementById('inlineResizer_${grpId}');
-                                if(c && l && r && z) {
-                                    c.insertBefore(r, z);
-                                    c.insertBefore(z, l);
-                                }
-                            } 
-                            }, 20);
-                            </script>
-            `;
+        if (qa.length === 0 && steps.length === 0) {
+            htmlOut += `<div style="color:var(--text-muted); font-size:11px; font-style:italic;">No steps configured.</div>`;
         } else {
-            if (qa.length === 0 && steps.length === 0) {
-                htmlOut += `<div style="color:var(--text-muted); font-size:11px; font-style:italic;">No steps configured.</div>`;
-            } else {
-                if (qa.length > 0) {
-                    htmlOut += `<div style="font-weight:bold; color:var(--text-heading); font-size:12px; margin-bottom:5px; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:3px;">📋 Telemetry / Checks</div>`;
-                    qa.forEach((q, qIdx) => {
-                        let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, qIdx) : q;
-                        if (q.startsWith('> ')) {
-                            htmlOut += `<label class="checklist-item" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:2px 8px 2px 28px; width:100%; transition:all 0.2s; margin-bottom:2px;"><input type="checkbox" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
-                        } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
-                            htmlOut += `<label class="checklist-item" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:4px 8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-container); width:100%; transition:all 0.2s; margin-bottom:4px;"><input type="checkbox" style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:0px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
-                        } else {
-                            htmlOut += `<div style="width:100%; margin-bottom:6px; font-size:11px;">${parsed}</div>`;
-                        }
-                    });
-                    htmlOut += `<div style="height:6px;"></div>`;
-                }
-                
-                if(steps.length > 0) {
-                    let stepCounter = 1;
-                    steps.forEach((s) => {
-                        if (typeof s === 'string') s = { text: s };
-                        htmlOut += `<div class="checklist-item" style="background:var(--bg-container); border:1px solid var(--border-color); margin-bottom:8px;">
-                            <div class="chk-text" style="width:100%;">
-                                <strong style="color:#8b5cf6; font-size:12px;">Step ${stepCounter++}:</strong><br> ${s.text}
-                            </div>
-                        </div>`;
-                    });
-                }
+            if (qa.length > 0) {
+                htmlOut += `<div style="font-weight:bold; color:var(--text-heading); font-size:12px; margin-bottom:5px; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:3px;">📋 Telemetry / Checks</div>`;
+                qa.forEach((q, qIdx) => {
+                    let parsed = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(q, qIdx) : q;
+                    if (q.startsWith('> ')) {
+                        htmlOut += `<label class="checklist-item" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:6px; cursor:pointer; padding:2px 8px 2px 28px; width:100%; transition:all 0.2s; margin-bottom:2px;"><input type="checkbox" style="width:12px; height:12px; flex-shrink:0; cursor:pointer; margin-top:2px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
+                    } else if (!q.startsWith('[INPUT]') && !q.startsWith('# ') && !/^\[(IMG|BARCODE|QR):/.test(q)) {
+                        htmlOut += `<label class="checklist-item" style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:10px; cursor:pointer; padding:4px 8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-container); width:100%; transition:all 0.2s; margin-bottom:4px;"><input type="checkbox" style="width:14px; height:14px; flex-shrink:0; cursor:pointer; margin-top:0px;"><span style="font-size:11px; flex:1;">${parsed}</span></label>`;
+                    } else {
+                        htmlOut += `<div style="width:100%; margin-bottom:6px; font-size:11px;">${parsed}</div>`;
+                    }
+                });
+                htmlOut += `<div style="height:6px;"></div>`;
+            }
+            
+            if(steps.length > 0) {
+                let stepCounter = 1;
+                steps.forEach((s) => {
+                    if (typeof s === 'string') s = { text: s };
+                    htmlOut += `<div class="checklist-item" style="background:var(--bg-container); border:1px solid var(--border-color); margin-bottom:8px;">
+                        <div class="chk-text" style="width:100%;">
+                            <strong style="color:#8b5cf6; font-size:12px;">Step ${stepCounter++}:</strong><br> ${s.text}
+                        </div>
+                    </div>`;
+                });
             }
         }
         
