@@ -221,27 +221,40 @@ function renderActivePrintJob(id) {
 
     let wip = job.wip_state || {};
     
-    if (!window._printTimerInterval) {
-        window._printTimerInterval = setInterval(() => {
-            let span = document.getElementById('printPipelineTimerSpan');
-            if (span && span.getAttribute('data-running') === 'true') {
-                let start = parseInt(span.getAttribute('data-start'));
-                let baseline = parseInt(span.getAttribute('data-baseline'));
-                if (!isNaN(start) && !isNaN(baseline)) {
-                    let elapsed = baseline + (Date.now() - start);
-                    let h = Math.floor(elapsed / 3600000);
-                    let m = Math.floor((elapsed % 3600000) / 60000);
-                    let s = Math.floor((elapsed % 60000) / 1000);
-                    let str = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
-                    span.innerText = `Running (${str})`;
-                }
+    // Clear old interval if it exists so we can re-bind
+    if (window._printTimerInterval) { clearInterval(window._printTimerInterval); window._printTimerInterval = null; }
+    
+    window._printTimerInterval = setInterval(() => {
+        // Pipeline Stage 3 generic timer
+        let pSpan = document.getElementById('printPipelineTimerSpan');
+        if (pSpan && pSpan.getAttribute('data-running') === 'true') {
+            let start = parseInt(pSpan.getAttribute('data-start'));
+            let baseline = parseInt(pSpan.getAttribute('data-baseline'));
+            if (!isNaN(start) && !isNaN(baseline)) {
+                let elapsed = baseline + (Date.now() - start);
+                let h = Math.floor(elapsed / 3600000);
+                let m = Math.floor((elapsed % 3600000) / 60000);
+                let s = Math.floor((elapsed % 60000) / 1000);
+                pSpan.innerText = `Running (${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`})`;
             }
-        }, 1000);
-    }
+        }
+        // Active Sub-Run timer
+        let rSpan = document.getElementById('layerzActiveRunTimerSpan');
+        if (rSpan && rSpan.getAttribute('data-running') === 'true') {
+            let start = parseInt(rSpan.getAttribute('data-start'));
+            let baseline = parseInt(rSpan.getAttribute('data-baseline'));
+            if (!isNaN(start) && !isNaN(baseline)) {
+                let elapsed = baseline + (Date.now() - start);
+                let h = Math.floor(elapsed / 3600000);
+                let m = Math.floor((elapsed % 3600000) / 60000);
+                let s = Math.floor((elapsed % 60000) / 1000);
+                rSpan.innerText = `${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`}`;
+            }
+        }
+    }, 1000);
 
-    let timerUI = "";
-    if (job.status === 'Printing' || job.status === 'Cleaned') {
-        let baseline = (job.status === 'Printing' ? (wip.elapsed_printing||0) : (wip.elapsed_cleaned||0));
+    if (job.status === 'Cleaned') {
+        let baseline = (wip.elapsed_cleaned||0);
         let isRunning = wip.stage_start_time && !wip.is_paused;
         let elapsedSoFar = baseline;
         if (isRunning) elapsedSoFar += (Date.now() - wip.stage_start_time);
@@ -252,16 +265,125 @@ function renderActivePrintJob(id) {
         let timeStr = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
         
         let btnAction = wip.is_paused ? '▶️ Resume' : '⏸️ Pause';
-        timerUI = `<div style="margin-left:auto; display:flex; align-items:center; gap:8px;" data-click="click_stopPropagation">
+        let timerUI = `<div style="margin-left:auto; display:flex; align-items:center; gap:8px;" data-click="click_stopPropagation">
             <span id="printPipelineTimerSpan" data-running="${isRunning}" data-baseline="${baseline}" data-start="${wip.stage_start_time || ''}" style="font-size:11px; font-family:monospace; color:${wip.is_paused ? 'var(--text-muted)' : '#10b981'};">${wip.is_paused ? 'Paused' : 'Running'} (${timeStr})</span>
             <button data-click="click_togglePrintTimerPause" class="btn-slate" style="padding:2px 8px; font-size:10px;">${btnAction}</button>
         </div>`;
+        document.getElementById('pipe-P-Cleaned').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">3. Mark as Cleaned ${timerUI}</div>`);
+    } else if (job.status === 'Printing') {
+        let totalElapsed = (wip.elapsed_printing || 0);
+        if (wip.active_run) {
+            totalElapsed += (wip.active_run.elapsed || 0);
+            if (!wip.active_run.is_paused && wip.active_run.start_time) {
+                totalElapsed += (Date.now() - wip.active_run.start_time);
+            }
+        }
+        let h = Math.floor(totalElapsed / 3600000);
+        let m = Math.floor((totalElapsed % 3600000) / 60000);
+        let s = Math.floor((totalElapsed % 60000) / 1000);
+        let timeStr = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+        let lbl = wip.active_run ? (wip.active_run.is_paused ? 'Paused' : 'Running') : 'Idle';
+        let timerUI = `<div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+            <span style="font-size:11px; font-family:monospace; color:var(--text-muted);">${lbl} (Total: ${timeStr})</span>
+        </div>`;
+        document.getElementById('pipe-P-Printing').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">2. Start Print Job ${timerUI}</div>`);
     }
 
     if (job.status === 'Printing') {
-        if(timerUI) document.getElementById('pipe-P-Printing').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">2. Start Print Job ${timerUI}</div>`);
-    } else if (job.status === 'Cleaned') {
-        if(timerUI) document.getElementById('pipe-P-Cleaned').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">3. Mark as Cleaned ${timerUI}</div>`);
+        const mgr = document.getElementById('layerzRunManager');
+        if (mgr) {
+            let activeRun = wip.active_run;
+            let runs = wip.runs || [];
+            let totalSuccess = runs.reduce((acc, r) => acc + (parseFloat(r.success_qty)||0), 0);
+            let targetQty = parseFloat(job.qty) || 0;
+            let remainingQty = Math.max(0, targetQty - totalSuccess);
+
+            let pct = targetQty > 0 ? Math.min(100, Math.floor((totalSuccess/targetQty)*100)) : 0;
+            
+            let htmlOut = `
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
+                <div style="background:var(--bg-bar); padding:10px 15px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0; font-size:14px; color:var(--text-heading);">🖨️ Bed Run Manager</h3>
+                    <div style="font-size:12px; font-weight:bold; color:var(--text-muted);">
+                        Yield: <span style="color:#10b981;">${totalSuccess}</span> / ${targetQty}
+                    </div>
+                </div>
+                
+                <div style="padding:15px;">
+                    <div style="width:100%; height:6px; background:var(--bg-input); border-radius:3px; margin-bottom:20px; overflow:hidden;">
+                        <div style="width:${pct}%; height:100%; background:#10b981; transition:width 0.3s;"></div>
+                    </div>
+            `;
+            
+            if (activeRun) {
+                let rIsRunning = !activeRun.is_paused;
+                let rElapsed = activeRun.elapsed || 0;
+                if (rIsRunning && activeRun.start_time) rElapsed += (Date.now() - activeRun.start_time);
+                
+                let h = Math.floor(rElapsed / 3600000);
+                let m = Math.floor((rElapsed % 3600000) / 60000);
+                let s = Math.floor((rElapsed % 60000) / 1000);
+                let timeStr = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+                
+                htmlOut += `
+                    <div style="background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; padding:15px; border-radius:8px; display:flex; flex-direction:column; gap:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#0ea5e9; font-size:13px;">Active Run: ${activeRun.run_qty} parts</strong>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="layerzActiveRunTimerSpan" data-running="${rIsRunning}" data-baseline="${activeRun.elapsed || 0}" data-start="${activeRun.start_time || ''}" style="font-family:monospace; font-size:14px; font-weight:bold; color:${activeRun.is_paused ? 'var(--text-muted)' : '#0ea5e9'};">${timeStr}</span>
+                                <button data-click="click_toggleLayerzRunPause" class="${activeRun.is_paused ? 'btn-blue' : 'btn-slate'}" style="padding:4px 10px; font-size:11px;">${activeRun.is_paused ? '▶️ Resume' : '⏸️ Pause'}</button>
+                            </div>
+                        </div>
+                        <button class="btn-orange" style="padding:8px; font-weight:bold; letter-spacing:1px; width:100%;" data-click="click_openLayerzRunCompleteModal">🏁 COMPLETE RUN & RECORD YIELD</button>
+                    </div>
+                `;
+            } else if (remainingQty > 0) {
+                htmlOut += `
+                    <div style="display:flex; gap:10px; align-items:flex-end;">
+                        <div style="flex:1;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:4px; display:block;">Parts on Bed (Qty)</label>
+                            <input type="number" id="layerzNewRunQty" min="1" step="any" value="${remainingQty}" style="width:100%; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); padding:8px; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                        </div>
+                        <button class="btn-blue" style="padding:8px 20px; font-weight:bold; height:37px;" data-click="click_startLayerzRun">▶️ START NEW RUN</button>
+                    </div>
+                `;
+            } else {
+                 htmlOut += `
+                    <div style="text-align:center; padding:10px; color:#10b981; font-weight:bold; font-size:14px;">
+                        ✓ All parts completed. Advance pipeline to Cleaned.
+                    </div>
+                `;
+            }
+            
+            if (runs.length > 0) {
+                htmlOut += `<div style="margin-top:20px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <h4 style="margin:0 0 10px 0; font-size:12px; color:var(--text-heading);">Run History</h4>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                `;
+                runs.forEach((r, idx) => {
+                    let runH = Math.floor((r.elapsed||0) / 3600000);
+                    let runM = Math.floor(((r.elapsed||0) % 3600000) / 60000);
+                    let runT = runH > 0 ? `${runH}h ${runM}m` : `${runM}m`;
+                    htmlOut += `
+                        <div style="background:var(--bg-container); border:1px solid var(--border-color); padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+                            <div><strong style="color:var(--text-main);">Run #${idx+1}</strong> <span style="color:var(--text-muted);">(${runT})</span></div>
+                            <div style="display:flex; gap:15px;">
+                                <span>Target: <strong>${r.run_qty}</strong></span>
+                                <span style="color:#10b981;">Success: <strong>${r.success_qty}</strong></span>
+                                <span style="color:#ef4444;">Scrap: <strong>${r.scrap_qty}</strong></span>
+                            </div>
+                        </div>
+                    `;
+                });
+                htmlOut += `</div></div>`;
+            }
+            
+            htmlOut += `</div></div>`;
+            mgr.innerHTML = window.safeHTML(htmlOut);
+        }
+    } else {
+        const mgr = document.getElementById('layerzRunManager');
+        if (mgr) mgr.innerHTML = "";
     }
 
 
@@ -426,10 +548,71 @@ window.submitFinalizePrint = function() {
     advancePrintStatus('Completed', true, success, failed);
 };
 
+async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTicket, wo_id, label) {
+    let manualUpserts = [];
+    const k = partName;
+    if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+    
+    let totalAttempts = successQ + failedQ;
+    inventoryDB[k].produced_qty += totalAttempts;
+    inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + failedQ;
+
+    let cleanPartName = partName.startsWith('RECIPE:::') ? partName.replace('RECIPE:::', '') : partName.split(':::')[0];
+    if (typeof getDirectMaterials === 'function' && productsDB[cleanPartName]) {
+        let exactRaws = getDirectMaterials(cleanPartName, totalAttempts);
+        Object.keys(exactRaws).forEach(rawK => {
+            let req = exactRaws[rawK];
+            if(!inventoryDB[rawK]) inventoryDB[rawK] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+            if (isScrapTicket) inventoryDB[rawK].scrap_qty = (inventoryDB[rawK].scrap_qty || 0) + req;
+            else inventoryDB[rawK].consumed_qty += req;
+            
+            manualUpserts.push({ item_key: rawK, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
+        });
+    }
+
+    manualUpserts.push({ item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
+    const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert(manualUpserts, { onConflict: 'item_key' });
+    if (invErr) throw new Error("Inventory update failed: " + invErr.message);
+
+    if (failedQ > 0) {
+        let isYieldEnforced = false;
+        if (isScrapTicket || (label && label.includes('[PRINT FAILURE RECOVERY]'))) {
+            isYieldEnforced = true;
+        } else if (wo_id && wo_id !== 'Manual Entry') {
+            let parentWO = typeof workOrdersDB !== 'undefined' ? workOrdersDB.find(w => String(w.wo_id) === String(wo_id)) : null;
+            if (!parentWO) {
+                try {
+                    const { data } = await supabaseClient.from('work_orders').select('*').eq('wo_id', wo_id).single();
+                    parentWO = data;
+                } catch(e) { console.error(e); }
+            }
+            if (parentWO) {
+                let pNameClean = parentWO.product_name.replace('RECIPE:::', '');
+                let isSub = typeof isSubassemblyDB !== 'undefined' && !!isSubassemblyDB[pNameClean];
+                let is3DP = typeof productsDB !== 'undefined' && !!(productsDB[pNameClean] && productsDB[pNameClean].is_3d_print);
+                if (!isSub && !is3DP) isYieldEnforced = true;
+            }
+        }
+        
+        if (isYieldEnforced) {
+            let recoveryLabel = isScrapTicket ? label : `[PRINT FAILURE RECOVERY]`;
+            if (typeof addPrintJob === 'function') {
+                await addPrintJob(partName, failedQ, wo_id, recoveryLabel);
+            }
+        }
+    }
+
+    if (typeof renderInventoryTable === 'function') renderInventoryTable();
+    if (typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
+}
+
 async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess = null, finalFailed = null) {
     if (!currentPrintJob) return;
     try {
-        if (newStatus === 'Completed' && !bypassModal) {
+        let currentWip = currentPrintJob.wip_state || {};
+        let hasRuns = currentWip.runs && currentWip.runs.length > 0;
+
+        if (newStatus === 'Completed' && !bypassModal && !hasRuns) {
             document.getElementById('finalizePrintName').value = currentPrintJob.part_name;
             document.getElementById('finalizePrintJobId').value = currentPrintJob.id;
             let qty = parseFloat(currentPrintJob.qty) || 0;
@@ -453,7 +636,6 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
         setMasterStatus("Updating Status...", "mod-working");
 
         const updatePayload = { status: newStatus };
-        let currentWip = currentPrintJob.wip_state || {};
         
         // Accumulate time for the previous stage if running
         if (currentPrintJob.status === 'Printing' && currentWip.stage_start_time && !currentWip.is_paused) {
@@ -476,75 +658,12 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
             updatePayload.completed_at = new Date().toISOString();
             updatePayload.status = 'Archived';
             
-            // 📦 INVENTORY INTEGRATION: Add finished good and deduct filaments (if manual job)
-            const k = currentPrintJob.part_name;
-            let manualUpserts = [];
-            
-            if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
-            
-            let successQ = finalSuccess !== null ? finalSuccess : (parseFloat(currentPrintJob.qty) || 0);
-            let failedQ = finalFailed !== null ? finalFailed : 0;
-            let totalAttempts = successQ + failedQ;
-            
-            let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
-
-            inventoryDB[k].produced_qty += totalAttempts;
-            inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + failedQ;
-
-            let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
-            if (typeof getDirectMaterials === 'function' && productsDB[cleanPartName]) {
-                let exactRaws = getDirectMaterials(cleanPartName, totalAttempts);
-                Object.keys(exactRaws).forEach(rawK => {
-                    let req = exactRaws[rawK];
-                    if(!inventoryDB[rawK]) inventoryDB[rawK] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
-                    
-                    if (isScrapTicket) {
-                        inventoryDB[rawK].scrap_qty = (inventoryDB[rawK].scrap_qty || 0) + req;
-                    } else {
-                        inventoryDB[rawK].consumed_qty += req;
-                    }
-                    
-                    manualUpserts.push({ item_key: rawK, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
-                });
-            }
-
-            manualUpserts.push({ item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
-            const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert(manualUpserts, { onConflict: 'item_key' });
-            if (invErr) throw new Error("Inventory update failed: " + invErr.message);
-
-            if (failedQ > 0) {
-                let isYieldEnforced = false;
+            if (!hasRuns) {
+                let successQ = finalSuccess !== null ? finalSuccess : (parseFloat(currentPrintJob.qty) || 0);
+                let failedQ = finalFailed !== null ? finalFailed : 0;
                 let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
-                
-                if (isScrapTicket || (currentPrintJob.label && currentPrintJob.label.includes('[PRINT FAILURE RECOVERY]'))) {
-                    isYieldEnforced = true;
-                } else if (currentPrintJob.wo_id && currentPrintJob.wo_id !== 'Manual Entry') {
-                    let parentWO = typeof workOrdersDB !== 'undefined' ? workOrdersDB.find(w => String(w.wo_id) === String(currentPrintJob.wo_id)) : null;
-                    if (!parentWO) {
-                        try {
-                            const { data } = await supabaseClient.from('work_orders').select('*').eq('wo_id', currentPrintJob.wo_id).single();
-                            parentWO = data;
-                        } catch(e) { console.error(e); }
-                    }
-                    if (parentWO) {
-                        let pNameClean = parentWO.product_name.replace('RECIPE:::', '');
-                        let isSub = typeof isSubassemblyDB !== 'undefined' && !!isSubassemblyDB[pNameClean];
-                        let is3DP = typeof productsDB !== 'undefined' && !!(productsDB[pNameClean] && productsDB[pNameClean].is_3d_print);
-                        if (!isSub && !is3DP) isYieldEnforced = true;
-                    }
-                }
-                
-                if (isYieldEnforced) {
-                    let recoveryLabel = isScrapTicket ? currentPrintJob.label : `[PRINT FAILURE RECOVERY]`;
-                    if (typeof addPrintJob === 'function') {
-                        await addPrintJob(currentPrintJob.part_name, failedQ, currentPrintJob.wo_id, recoveryLabel);
-                    }
-                }
+                await executePrintInventoryMath(currentPrintJob.part_name, successQ, failedQ, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label);
             }
-
-            // 🔄 REFRESH UI: Make sure inventory tab reflects the new stock
-            if (typeof renderInventoryTable === 'function') renderInventoryTable();
-            if (typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
         }
 
         const { error } = await supabaseClient.from('print_queue').update(updatePayload).eq('id', currentPrintJob.id);
@@ -726,13 +845,107 @@ if (typeof window !== 'undefined') {
             w.is_paused = false;
         }
         
-        currentPrintJob.wip_state = w;
-        renderActivePrintJob(currentPrintJob.id);
+        const { error } = await supabaseClient.from('print_queue').update({ wip_state: w }).eq('id', currentPrintJob.id);
+        if (error) sysLog("Timer Toggle Error: " + error.message, true);
+        else renderActivePrintJob(currentPrintJob.id);
+    };
+
+    // --- Sub-Run Manager Bindings ---
+    window.startLayerzRun = async function() {
+        if (!currentPrintJob) return;
+        let qty = parseFloat(document.getElementById('layerzNewRunQty')?.value) || 0;
+        if (qty <= 0) return alert("Must specify a run quantity greater than 0.");
+        
+        let w = currentPrintJob.wip_state || {};
+        if (!w.runs) w.runs = [];
+        w.active_run = {
+            run_id: 'r_' + Date.now(),
+            run_qty: qty,
+            start_time: Date.now(),
+            is_paused: false,
+            elapsed: 0
+        };
+        
+        const { error } = await supabaseClient.from('print_queue').update({ wip_state: w }).eq('id', currentPrintJob.id);
+        if (error) sysLog("Start Run Error: " + error.message, true);
+        else renderActivePrintJob(currentPrintJob.id);
+    };
+
+    window.toggleLayerzRunPause = async function() {
+        if (!currentPrintJob || !currentPrintJob.wip_state || !currentPrintJob.wip_state.active_run) return;
+        let w = currentPrintJob.wip_state;
+        let r = w.active_run;
+        
+        if (!r.is_paused) {
+            if (r.start_time) r.elapsed = (r.elapsed || 0) + (Date.now() - r.start_time);
+            r.start_time = null;
+            r.is_paused = true;
+        } else {
+            r.start_time = Date.now();
+            r.is_paused = false;
+        }
+        
+        const { error } = await supabaseClient.from('print_queue').update({ wip_state: w }).eq('id', currentPrintJob.id);
+        if (error) sysLog("Pause Run Error: " + error.message, true);
+        else renderActivePrintJob(currentPrintJob.id);
+    };
+
+    window.closeLayerzRunCompleteModal = function() {
+        document.getElementById('layerzRunCompleteModal').style.display = 'none';
+    };
+
+    window.openLayerzRunCompleteModal = function() {
+        if (!currentPrintJob || !currentPrintJob.wip_state || !currentPrintJob.wip_state.active_run) return;
+        let r = currentPrintJob.wip_state.active_run;
+        document.getElementById('layerzRunPartName').value = currentPrintJob.part_name;
+        document.getElementById('layerzRunSuccessQty').value = r.run_qty;
+        document.getElementById('layerzRunScrapQty').value = 0;
+        
+        document.getElementById('layerzRunSuccessQty').oninput = function() {
+            let v = parseFloat(this.value)||0;
+            document.getElementById('layerzRunScrapQty').value = Math.max(0, r.run_qty - v);
+        };
+        document.getElementById('layerzRunScrapQty').oninput = function() {
+            let v = parseFloat(this.value)||0;
+            document.getElementById('layerzRunSuccessQty').value = Math.max(0, r.run_qty - v);
+        };
+        
+        document.getElementById('layerzRunCompleteModal').style.display = 'flex';
+    };
+
+    window.submitLayerzRun = async function() {
+        if (!currentPrintJob || !currentPrintJob.wip_state || !currentPrintJob.wip_state.active_run) return;
+        let success = parseFloat(document.getElementById('layerzRunSuccessQty').value) || 0;
+        let scrap = parseFloat(document.getElementById('layerzRunScrapQty').value) || 0;
+        
+        document.getElementById('layerzRunCompleteModal').style.display = 'none';
+        setMasterStatus("Recording Yield...", "mod-working");
+        
+        let w = currentPrintJob.wip_state;
+        let r = w.active_run;
+        
+        if (!r.is_paused && r.start_time) r.elapsed = (r.elapsed || 0) + (Date.now() - r.start_time);
+        r.success_qty = success;
+        r.scrap_qty = scrap;
+        r.is_paused = true;
+        r.start_time = null;
         
         try {
-            await supabaseClient.from('print_queue').update({ wip_state: w }).eq('id', currentPrintJob.id);
+            let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
+            await executePrintInventoryMath(currentPrintJob.part_name, success, scrap, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label);
+            
+            w.runs.push(r);
+            w.active_run = null;
+            
+            const { error } = await supabaseClient.from('print_queue').update({ wip_state: w }).eq('id', currentPrintJob.id);
+            if (error) throw error;
+            
+            setMasterStatus("Yield Recorded!", "mod-success");
+            setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
+            renderActivePrintJob(currentPrintJob.id);
+            
         } catch(e) {
-            sysLog("Failed to pause/resume print timer.", true);
+            sysLog("Submit Run Error: " + e.message, true);
         }
     };
 }

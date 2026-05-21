@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.05.20.2339"></script>
+    <script src="assets/js/system-version.js?v=v.2026.05.20.2357"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.20.2339"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.20.2357"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.20.2339"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.20.2357"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.05.20.2339"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.05.20.2357"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -2154,6 +2154,9 @@
                             </div>
                         </div>
                         <div id="printSOPList" style="margin-bottom:20px;"></div>
+                        
+                        <div id="layerzRunManager" style="margin-bottom:20px;"></div>
+                        
                         <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:15px; border-radius:8px; border-left:4px solid #f97316;">
                             <h4 style="margin:0 0 10px 0; color:#f97316;">Next Step: Post-Processing</h4>
                             <p style="font-size:13px; color:var(--text-muted); margin-top:0; margin-bottom:0;">Once the print finishes, remove it from the plate and mark it as cleaned.</p>
@@ -5314,20 +5317,20 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/bom-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/production-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/sales-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/task-engine.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/print-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.05.20.2339"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.05.20.2339"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/bom-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/production-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/sales-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/task-engine.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/print-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.05.20.2357"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.05.20.2357"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5795,18 +5798,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.20.2339"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.20.2357"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.20.2339"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.20.2357"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.20.2339"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.20.2357"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.20.2339"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.20.2339"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.20.2339"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.20.2357"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.20.2357"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.20.2357"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.05.20.2339"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.05.20.2339"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.05.20.2357"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.05.20.2357"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -5908,6 +5911,36 @@
             <div style="padding:15px 25px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); justify-content:flex-end; gap:15px; border-radius:0 0 12px 12px; display:flex;">
                 <button class="btn-ghost-base btn-ghost-brand" style="padding:8px 15px;" data-click="click_document_getElementById_finali">Cancel</button>
                 <button id="finalizeWoActionBtn" class="btn-green" style="padding:8px 20px; font-weight:bold;">Finalize & Deduct</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layerz Sub-Run Complete Modal -->
+    <div id="layerzRunCompleteModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+        <div style="background:var(--bg-panel); border:1px solid #f59e0b; border-radius:12px; width:90%; max-width:400px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
+            <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(245, 158, 11, 0.1); border-radius:12px 12px 0 0;">
+                <h2 style="margin:0; font-size:18px; color:#f59e0b; display:flex; align-items:center; gap:10px;">🏁 Complete Bed Run</h2>
+            </div>
+            <div style="padding:20px; display:flex; flex-direction:column; gap:15px;">
+                <p style="margin:0; font-size:13px; color:var(--text-muted);">Record the yield for this sub-run. Successful parts will immediately enter inventory.</p>
+                <div style="display:flex; flex-direction:column;">
+                    <label style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:4px;">Print Component</label>
+                    <input type="text" id="layerzRunPartName" disabled style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); padding:8px; border-radius:6px; opacity:0.7;">
+                </div>
+                <div style="display:flex; gap:15px;">
+                    <div style="flex:1; display:flex; flex-direction:column;">
+                        <label style="font-size:11px; font-weight:bold; color:#10b981; margin-bottom:4px;">✅ Successful Qty</label>
+                        <input type="number" id="layerzRunSuccessQty" min="0" step="any" required style="background:rgba(16,185,129,0.1); border:1px solid #10b981; color:var(--text-main); padding:8px; border-radius:6px; font-size:16px; font-weight:bold;">
+                    </div>
+                    <div style="flex:1; display:flex; flex-direction:column;">
+                        <label style="font-size:11px; font-weight:bold; color:#ef4444; margin-bottom:4px;">🗑️ Scrap Qty</label>
+                        <input type="number" id="layerzRunScrapQty" min="0" step="any" required value="0" style="background:rgba(239,68,68,0.1); border:1px solid #ef4444; color:var(--text-main); padding:8px; border-radius:6px; font-size:16px; font-weight:bold;">
+                    </div>
+                </div>
+            </div>
+            <div style="padding:15px 25px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); justify-content:flex-end; gap:15px; border-radius:0 0 12px 12px; display:flex;">
+                <button class="btn-ghost-base btn-ghost-brand" style="padding:8px 15px;" data-click="click_closeLayerzRunCompleteModal">Cancel</button>
+                <button id="layerzSubmitRunBtn" class="btn-orange" style="padding:8px 20px; font-weight:bold;" data-click="click_submitLayerzRun">Record Yield & Stop Timer</button>
             </div>
         </div>
     </div>
