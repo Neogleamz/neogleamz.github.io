@@ -1,9 +1,16 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
-### Features & Bug Fixes
+## [1.0.49] - 2026-05-21
+### ✨ Features & Bug Fixes
 - **Hide 3D Printed SOPs in Stage 3** (`feat/batchez-hide-3dprint-sops-stage3`): Ensure 3D printed SOPs do not display in Stage 3 of the Batchez work order process.
 - **Socialz "System Fault" on Save** (`bug/socialz-system-fault-error`): Suppressed cross-origin and Chrome Extension noise (e.g. LastPass DOM scanning crashes) from triggering the global "System Fault: Unknown Error" UI popups.
+
+### 🧹 Chores & Cleanup
+- **Socialz ESLint Cleanup** (`debt/socialz-eslint-warnings`): Resolved 3 ESLint warnings in `socialz-module.js` to achieve zero warnings in the module.
+- **Task Engine Legacy Variable Refactor** (`debt/task-engine-legacy-var`): Migrated legacy `var` declarations in `task-engine.js` to block-scoped `const` to enforce modern ECMAScript standards.
+- **Supabase JS Update** (`chore/dep-supabase-js-update`): Updated `@supabase/supabase-js` from 2.105.4 to 2.106.1.
+- **DOMPurify Update** (`chore/dep-dompurify-update`): Updated `dompurify` from 3.4.4 to 3.4.5.
+- **Supabase CLI Update** (`chore/dep-supabase-cli-update`): Updated `supabase` CLI from 2.98.2 to 2.101.0.
 
 ## [1.0.48] - 2026-05-21
 ### Features & Bug Fixes
