@@ -1367,7 +1367,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzSopLeftPane', 'packerzSopSplitWrapper', 'packerzSopPreviewCol', false);
                     break;
                 case 'mousedown_initPackerzLiveSopResize_event':
-                    if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzLiveSopLeftPane', 'packerzLiveSopSplitWrapper', null, true);
+                    if (typeof window.initUnifiedSopResizer === 'function') {
+                        const targetLeftPane = document.getElementById('packerzInlineSopLeftPane') ? 'packerzInlineSopLeftPane' : 'packerzLiveSopLeftPane';
+                        window.initUnifiedSopResizer(event, targetLeftPane, 'packerzLiveSopSplitWrapper', null, true);
+                    }
                     break;
                 case 'mousedown_initFlyoutResizer_event':
                     if (typeof initFlyoutResizer === 'function') initFlyoutResizer(event);

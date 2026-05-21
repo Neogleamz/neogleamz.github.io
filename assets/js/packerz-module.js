@@ -427,6 +427,12 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     );
     document.getElementById('packerzSopViewerSubtitle').innerText = `Target Alias: ${sku}`;
 
+    const btnEdit = document.getElementById('btnPackerzLiveToggleEdit');
+    if (btnEdit) {
+        btnEdit.innerHTML = window.isPackerzLiveEditing ? '❌ CANCEL' : '✏️ EDIT';
+        btnEdit.className = window.isPackerzLiveEditing ? 'btn-red' : 'btn-blue';
+    }
+
     // We target the outer wrapper directly when editing so we can overwrite its layout
     const wrapper = document.getElementById('packerzLiveSopSplitWrapper');
     let body = document.getElementById('packerzSopViewerBody');
@@ -447,7 +453,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     </button>
                 </div>
             </div>
-            <div id="packerzLiveSopResizer" class="h-resizer" data-app-mousedown="initPackerzResize"></div>
+            <div id="packerzLiveSopResizer" class="h-resizer" data-mousedown="mousedown_initPackerzLiveSopResize_event"></div>
             <div id="packerzLiveSopRightPane" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:30px; background:var(--bg-body); gap:20px;">
                 <div id="packerzSopViewerBody" style="display:flex; flex-direction:column; gap:20px;"></div>
             </div>
@@ -473,7 +479,8 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
     }
 
     try {
-        const { data, _error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe).single();
+        const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe);
+        const data = rows && rows.length > 0 ? rows[0] : null;
         // Allow fallback data if error (so we can create a new one inline)
         const instructionJson = data ? JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}') : {steps: [], qaChecks: []};
         currentPackerzSopData = instructionJson;
@@ -497,12 +504,12 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                             <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
-                            <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
-                                <button data-click="click_window_openSopPrintModal_pack" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
-                                <button data-app-click="openSOPMediaInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">☁️ Upload</button>
-                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
-                                <button data-app-click="openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
-                                <button data-app-click="togglePackerzSOPPreview" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
+                            <div style="display:flex; gap:5px; flex-wrap:nowrap; align-items:center;">
+                                <button class="sop-print-btn" data-click="click_window_openSopPrintModal_pack" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">🖨️ Print</button>
+                                <button data-app-click="openSOPMediaInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">☁️ Upload</button>
+                                <button data-app-click="openSOPSnapshotCameraInline" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">📸 Photo</button>
+                                <button data-app-click="openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">❓ Guide</button>
+                                <button data-app-click="togglePackerzSOPPreview" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap; width:auto !important;">👁️ Preview</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
@@ -527,7 +534,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 </div>
 
                 <!-- Resizer Divider -->
-                <div id="packerzLiveInlineResizerHandle" class="h-resizer packerz-h-resizer" data-app-mousedown="initPackerzResize"></div>
+                <div id="packerzLiveInlineResizerHandle" class="h-resizer packerz-h-resizer" data-mousedown="mousedown_initPackerzLiveSopResize_event"></div>
 
                 <!-- Column 3: Rich Text Row Builders -->
                 <div id="packerzInlineSopRightPane" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:25px; border:1px solid var(--border-color); display:flex; flex-direction:column; overflow-y:auto;">
@@ -932,9 +939,15 @@ async function signoffPackerzQA() {
 
 function closePackerzSopViewer() {
     document.getElementById('packerzSopViewerModal').style.display = 'none';
+    window.isPackerzLiveEditing = false;
     currentPackerzQaOrderId = null;
     currentPackerzQaSku = null;
     currentPackerzQaRecipe = null;
+    const btnEdit = document.getElementById('btnPackerzLiveToggleEdit');
+    if (btnEdit) {
+        btnEdit.innerHTML = '✏️ EDIT';
+        btnEdit.className = 'btn-blue';
+    }
 }
 
 /**
@@ -1327,7 +1340,8 @@ async function loadPackerzSopFromDB() {
     );
 
     try {
-        const { data, _error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku).single();
+        const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku);
+        const data = rows && rows.length > 0 ? rows[0] : null;
 
         let steps = [{}];
         if(data) {
@@ -1803,23 +1817,30 @@ window.closeSOPTokenGuide = function() { document.getElementById('sopTokenGuideM
 
 async function archiveSOPSnapshot(orderId, sku, recipeName, capturedTelemetry) {
     try {
+        // Fallback recipeName if null, empty, or literally "null" to satisfy Postgres NOT NULL
+        const finalRecipeName = (recipeName && recipeName !== 'null') ? recipeName : (sku || 'UNKNOWN_RECIPE');
+
         // Fetch the live SOP at the moment of sign-off (may be null for products without a formal SOP)
-        const { data: sopData } = await supabaseClient
+        const { data: sopRows } = await supabaseClient
             .from('pack_ship_sops')
             .select('instruction_json, required_box_sku')
-            .eq('internal_recipe_name', recipeName)
-            .single();
-
+            .eq('internal_recipe_name', finalRecipeName);
+        
+        const sopData = sopRows && sopRows.length > 0 ? sopRows[0] : null;
         const telemetryData = capturedTelemetry || [];
 
-        await supabaseClient.from('sop_archives').insert({
+        const { error: insErr } = await supabaseClient.from('sop_archives').insert({
             order_id: orderId,
-            internal_recipe_name: recipeName,
+            internal_recipe_name: finalRecipeName,
             qa_passed_at: new Date().toISOString(),
             packer_telemetry: telemetryData,
             sop_snapshot: sopData ? JSON.parse(sopData.instruction_json || '{}') : null,
             required_box_sku: sopData ? (sopData.required_box_sku || '') : ''
         });
+
+        if (insErr) {
+            console.error('SOP archive write rejected:', insErr.message, insErr.details);
+        }
     } catch(e) {
         console.warn('SOP archive write failed (non-critical):', e.message);
     }
@@ -2185,7 +2206,8 @@ if (!window.isPackerzListenerBound) {
         const el = e.target;
         if (el.dataset.appMousedown === 'initPackerzResize') {
             if(typeof window.initUnifiedSopResizer === 'function') {
-                window.initUnifiedSopResizer(e, 'packerzLiveSopLeftPane', 'packerzLiveSopSplitWrapper', null, true);
+                const targetLeftPane = document.getElementById('packerzInlineSopLeftPane') ? 'packerzInlineSopLeftPane' : 'packerzLiveSopLeftPane';
+                window.initUnifiedSopResizer(e, targetLeftPane, 'packerzLiveSopSplitWrapper', null, true);
             }
         }
     });
