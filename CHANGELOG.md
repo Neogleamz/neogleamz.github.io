@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.46] - 2026-05-21
+### Features & Bug Fixes
+- **Socialz Missing Avatars** (`bug/socialz-missing-avatars`): Updated the Socialz page logic to properly pull and display an avatar for each skater by iterating through their available social media links if the primary one is missing. Implemented a native manual upload UI for edge-case skaters blocked by Unavatar rate limits, storing images directly to Supabase Storage.
+
 ## [1.0.45] - 2026-05-21
 ### Features & Bug Fixes
 - **Layerz Stage 3 Cleaning Timers & Independent Yield Tracking**: Overhauled the Cleaned/Post-Processing Stage (Stage 3) to accurately track its own independent yield and time, separating it from the Bed Run Manager. Added Live Timer Control (start, pause, resume) and Context-Aware Part Count calculations. Integrated automatic Recovery Print generation without double-charging raw material inventory.
