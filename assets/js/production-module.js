@@ -1134,24 +1134,17 @@ window.editWOQty = async function(id) {
 
         if (error) throw error;
 
-        // 🖨️ Sync Print Orders logically attached to this Batch
-        const { data: currentPrints } = await supabaseClient.from('print_queue').select('*').eq('wo_id', id);
-        if (currentPrints && currentPrints.length > 0) {
-            const newPrintTargets = typeof find3DPrintedComponents === 'function' ? find3DPrintedComponents(wo.product_name, newQty, clonedRouting) : {};
-            let printPromises = [];
-            currentPrints.forEach(printRow => {
-                let pNameClean = printRow.part_name.replace('RECIPE:::', '');
-                if (newPrintTargets[pNameClean] !== undefined) {
-                    let targetPrintQty = parseFloat(newPrintTargets[pNameClean]);
-                    if (parseFloat(printRow.qty) !== targetPrintQty) {
-                        printPromises.push(supabaseClient.from('print_queue').update({ qty: targetPrintQty }).eq('id', printRow.id));
-                        sysLog(`Print Job scaled: ${printRow.id} from ${printRow.qty} to ${targetPrintQty}`);
+        // Proportional scale for any pending Print Jobs
+        const { data: printJobs, error: fetchErr } = await supabaseClient.from('print_queue').select('*').eq('wo_id', id);
+        if (!fetchErr && printJobs && printJobs.length > 0) {
+            for (let pj of printJobs) {
+                if (pj.status === 'Queued') {
+                    let oldPjQty = parseFloat(pj.qty || 0);
+                    let newPjQty = Math.ceil(oldPjQty * ratio);
+                    if (newPjQty !== oldPjQty) {
+                        await supabaseClient.from('print_queue').update({ qty: newPjQty }).eq('id', pj.id);
                     }
                 }
-            });
-            if (printPromises.length > 0) {
-                await Promise.all(printPromises);
-                if (typeof refreshPrintQueue === 'function') setTimeout(refreshPrintQueue, 500);
             }
         }
 
