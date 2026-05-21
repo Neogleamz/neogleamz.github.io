@@ -15,7 +15,18 @@
  * @property {Object|string} steps
  */
 // --- 11. PRODUCTION MANAGER, ROUTING ENGINE, MEDIA, EXPORTS ---
-function parseMediaUrl(url) { if(!url) return null; let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
+
+/**
+ * Extracts standard Google Drive resource identifiers from dynamic web links.
+ * 
+ * @param {string} url The target media url.
+ * @returns {string|null} Google Drive file identifier, or null if unresolvable.
+ */
+function parseMediaUrl(url) {
+    if(!url) return null;
+    let m = url.match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+}
 function openMediaModal(url, renderType) { try { const container = document.getElementById('mediaContainer'); if(renderType === 'img') { container.style.background = 'transparent'; container.innerHTML = window.safeHTML(
     `<img src="${url}" style="max-width:100%; max-height:100%; object-fit:contain; cursor: zoom-out;" data-click="click_closeMediaModal">`
 ); } else if (renderType === 'vid') { container.style.background = '#000000'; container.innerHTML = window.safeHTML(
@@ -142,14 +153,21 @@ function populateSOPDropdown() {
 
 function renderMasterSOP() {
     try {
+        const wrapper = document.getElementById('productionSopSplitWrapper');
+        if(!wrapper) return;
+        
         const p = document.getElementById('sopMasterProductSelect').value;
-        const area = document.getElementById('sopMasterEditorArea');
-        const qaArea = document.getElementById('productionAdminQA');
         if(!p) {
-            area.innerHTML = window.safeHTML(
-                "<div style='color:var(--text-muted); text-align:center; padding:20px; font-size:18px;'>Select an item above to start writing instructions.</div>"
+            wrapper.innerHTML = window.safeHTML(
+                window.buildUnifiedSopLayoutHTML({
+                    isEdit: true,
+                    sopType: 'batches',
+                    prodId: 'unknown',
+                    qaText: '',
+                    rowsHtml: `<div style='color:var(--text-muted); text-align:center; padding:40px; font-size:14px; font-style:italic;'>Select an item above to start writing instructions.</div>`
+                })
             );
-            if(qaArea) { qaArea.value = ''; if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview(); }
+            if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
             return;
         }
         let dbPayload = sopsDB[p];
@@ -162,15 +180,21 @@ function renderMasterSOP() {
                 qaChecks = dbPayload.qaChecks || [];
             }
         }
-        if(qaArea) {
-            qaArea.value = qaChecks.join('\n');
-            if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
-        }
         let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, attachments: []} : s);
         if(mappedSteps.length === 0) mappedSteps = [{}];
-        let h = "";
-        mappedSteps.forEach((s, idx) => { h += generateEditableSOPRow(s, idx, p, 'batches'); });
-        area.innerHTML = window.safeHTML(h);
+        let stepsHtml = "";
+        mappedSteps.forEach((s, idx) => { stepsHtml += generateEditableSOPRow(s, idx, p, 'batches'); });
+        
+        wrapper.innerHTML = window.safeHTML(
+            window.buildUnifiedSopLayoutHTML({
+                isEdit: true,
+                sopType: 'batches',
+                prodId: p,
+                qaText: qaChecks.join('\n'),
+                rowsHtml: stepsHtml
+            })
+        );
+        if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -1427,73 +1451,19 @@ function renderActiveWO(id) {
                             stepsHtml += window.generateEditableSOPRow(s, idx, wo.product_name, 'batches');
                         });
 
+                        const layoutHtml = window.buildUnifiedSopLayoutHTML({
+                            isEdit: true,
+                            sopType: 'batches',
+                            prodId: wo.product_name,
+                            grpId: grp.id,
+                            qaText: grp.qa.join('\n'),
+                            rowsHtml: stepsHtml
+                        });
+
                         htmlOut += `
                             <!-- Layout Container (Side-by-side with resizer) -->
                             <div id="inlineContainer_${grp.id}" style="display:flex; flex-direction:row; width:100%; border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
-
-                                <!-- Pane 1: Telemetry & Live Preview (Side-by-side like Master SOP) -->
-                                <div id="inlineLeftPane_${grp.id}" style="flex: 0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:15px; background:var(--bg-body); border-right:1px solid var(--border-color);  overflow:hidden;">
-
-                                    <!-- Column 1: Config & Input -->
-                                    <div id="inlineInputCol_${grp.id}" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
-                                            <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
-
-                                                <button class="sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, '\'')}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
-
-                                                <button data-mousedown="mousedown_sopDirectUpload" data-prodid="${wo.product_name.replace(/'/g, '\'')}" data-soptype="batches" data-target-textarea="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ Upload</button>
-
-                                                <button data-click="click_openSOPSnapshotCamera_inlineProduction" data-textid="inlineSopQA_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
-
-                                                <button data-click="click_openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
-
-                                                <button data-click="click_toggleHorizontalPreview" data-left="inlineLeftPane_${grp.id}" data-preview="inlinePreviewContainer_${grp.id}" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
-
-                                            </div>
-
-                                        </div>
-                                        <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
-                                            <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;&middot;&nbsp;
-                                            <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;&middot;&nbsp;
-                                            <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;&middot;&nbsp;
-                                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;&middot;&nbsp;
-                                            <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;&middot;&nbsp;
-                                            <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;&middot;&nbsp;
-                                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;&middot;&nbsp;
-                                            <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
-                                            &nbsp;&mdash; <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">&#10067; Full Guide</span>
-                                        </div>
-                                        <textarea id="inlineSopQA_${grp.id}" oninput="if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}')" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;">${qaText}</textarea>
-                                    </div>
-
-                                    <!-- Column 2: Live Preview Render -->
-                                    <div id="inlinePreviewContainer_${grp.id}" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
-                                        <div id="inlineSopQAPreview_${grp.id}" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;"></div>
-                                    </div>
-
-                                </div>
-
-                                <!-- Dedicated Vertical Resizer Handle -->
-                                <div id="inlineResizer_${grp.id}" class="h-resizer" onmousedown="if(typeof initInlineResize==='function'){initInlineResize(event, '${grp.id}');}"></div>
-
-                                <!-- Pane 2: Rich Text Steps -->
-                                <div id="inlineRightPane_${grp.id}" style="flex: 1; min-width:30px; display:flex; flex-direction:column; padding:15px; background:var(--bg-body); border-left:1px solid var(--border-color);  overflow:hidden;">
-                                    <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">Rich Text Instructions</h3>
-                                        </div>
-                                        <div id="inlineSopSteps_${grp.id}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${stepsHtml}</div>
-                                        <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px;" data-click="click_addInlineSOPRow" data-grp="${grp.id}">+ ADD PROCEDURE STEP</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Save Actions -->
-                            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color);">
-                                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px;" data-click="click_toggleInlineEditor" data-grp="${grp.id}">✕ Cancel Changes</button>
-                                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900;" data-click="click_saveInlineSopBlock" data-grp="${grp.id}" data-rawname="${grp.rawName.replace(/'/g, "\\'")}">💾 SAVE SOP MASTER BLUEPRINT</button>
+                                ${layoutHtml}
                             </div>
                         </div>
                         <script>
@@ -1510,39 +1480,12 @@ function renderActiveWO(id) {
                             }
 
                             let rz = document.getElementById('inlineResizer_${grp.id}');
-                            let lp = document.getElementById('inlineLeftPane_${grp.id}');
-                            let rp = document.getElementById('inlineRightPane_${grp.id}');
-                            let isDragging = false;
-
-                            if(rz && lp && rp) {
+                            if(rz) {
                                 rz.addEventListener('mousedown', (e) => {
-                                    isDragging = true;
-                                    document.body.style.cursor = 'col-resize';
-                                    e.preventDefault();
-                                });
-                                function doInlineSOPResize_${grp.id}(e) {
-                                    if(!isDragging) return;
-                                    let container = rz.parentElement;
-                                    let totalW = container.getBoundingClientRect().width;
-                                    let rect = container.getBoundingClientRect();
-                                    let newLeftW = e.clientX - rect.left;
-
-                                    if(newLeftW < 100) newLeftW = 100;
-                                    if(totalW - newLeftW < 100) newLeftW = totalW - 100;
-
-                                    lp.style.flex = \`0 0 \${newLeftW}px\`;
-                                    rp.style.flex = \`1 1 0\`;
-                                }
-                                function stopInlineSOPResize_${grp.id}() {
-                                    if(isDragging) {
-                                        isDragging = false;
-                                        document.body.style.cursor = '';
-                                        document.removeEventListener('mousemove', doInlineSOPResize_${grp.id});
-                                        document.removeEventListener('mouseup', stopInlineSOPResize_${grp.id});
+                                    if(typeof window.initUnifiedSopResizer === 'function') {
+                                        window.initUnifiedSopResizer(e, 'inlineLeftPane_${grp.id}', 'inlineContainer_${grp.id}', 'inlinePreviewContainer_${grp.id}', true);
                                     }
-                                }
-                                document.addEventListener('mousemove', doInlineSOPResize_${grp.id});
-                                document.addEventListener('mouseup', stopInlineSOPResize_${grp.id});
+                                });
                             }
                         }, 20);
                         </script>
