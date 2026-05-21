@@ -441,13 +441,16 @@ function teRenderTaskGrid(filter = null) {
         let toggleIcon = isCollapsed ? '▶' : '▼';
         
         html += `
-        <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 20px;">
-            <div class="te-section-header" style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; cursor: grab;">
-                <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">${toggleIcon}</div>
-                <div class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="font-size: 14px; font-weight: bold; color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='${headerColor}20'" onmouseout="this.style.background='transparent'">${group.title}</div>
-                ${group.badgeHtml ? group.badgeHtml : ''}
-                <div style="flex-grow: 1; height: 1px; background: ${headerColor}40; margin-left: 10px;"></div>
-                <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'" onmouseout="this.style.background='transparent'">✖</div>
+        <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 12px;">
+            <div class="te-section-header neo-category-row" style="cursor: grab;">
+                <span style="font-weight:900; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                    <span class="cat-arrow" data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="color:var(--text-muted); width:20px; text-align:center; cursor:pointer;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">${toggleIcon}</span> 
+                    <span class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='${headerColor}20'" onmouseout="this.style.background='transparent'">${group.title}</span>
+                </span>
+                <span style="display:flex; align-items:center; gap:12px;">
+                    ${group.badgeHtml ? group.badgeHtml : ''}
+                    <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted)'">✖</div>
+                </span>
             </div>
             <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: 20px; padding-bottom: 10px;">
         `;

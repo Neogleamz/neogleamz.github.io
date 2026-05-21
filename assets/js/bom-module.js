@@ -256,28 +256,52 @@ window.renderProductList = function() {
     let html = "";
     if(retailProds.length > 0) {
         let st = getCatState('cat-retail', retailProds);
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" data-app-click="toggleRecipeCat" data-cat="cat-retail">📦 RETAIL PRODUCTS <span>${st.arr}</span></li>`;
+        html += `<li class="neo-category-row" data-app-click="toggleRecipeCat" data-cat="cat-retail">
+            <span style="font-weight:900; color:var(--text-heading); font-size:12px; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">${st.arr}</span> 
+                <span>📦 RETAIL PRODUCTS</span>
+            </span>
+            <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(${retailProds.length})</span>
+        </li>`;
         html += `<div id="cat-retail" style="display:${st.disp};">`;
         retailProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
     if(subProds.length > 0) {
         let st = getCatState('cat-sub', subProds);
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" data-app-click="toggleRecipeCat" data-cat="cat-sub">⚙️ SUB-ASSEMBLIES <span>${st.arr}</span></li>`;
+        html += `<li class="neo-category-row" data-app-click="toggleRecipeCat" data-cat="cat-sub">
+            <span style="font-weight:900; color:var(--text-heading); font-size:12px; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">${st.arr}</span> 
+                <span>⚙️ SUB-ASSEMBLIES</span>
+            </span>
+            <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(${subProds.length})</span>
+        </li>`;
         html += `<div id="cat-sub" style="display:${st.disp};">`;
         subProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
     if(realPrintProds.length > 0) {
         let st = getCatState('cat-3d', realPrintProds);
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" data-app-click="toggleRecipeCat" data-cat="cat-3d">🖨️ 3D PRINTS <span>${st.arr}</span></li>`;
+        html += `<li class="neo-category-row" data-app-click="toggleRecipeCat" data-cat="cat-3d">
+            <span style="font-weight:900; color:var(--text-heading); font-size:12px; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">${st.arr}</span> 
+                <span>🖨️ 3D PRINTS</span>
+            </span>
+            <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(${realPrintProds.length})</span>
+        </li>`;
         html += `<div id="cat-3d" style="display:${st.disp};">`;
         realPrintProds.forEach(p => html += buildItem(p));
         html += `</div>`;
     }
     if(labelProds.length > 0) {
         let st = getCatState('cat-labels', labelProds);
-        html += `<li style="cursor:pointer; background:transparent; border:none; padding:4px 0; margin-bottom:5px; margin-top:10px; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:11px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;" data-app-click="toggleRecipeCat" data-cat="cat-labels">🏷️ CUSTOM LABELZ <span>${st.arr}</span></li>`;
+        html += `<li class="neo-category-row" data-app-click="toggleRecipeCat" data-cat="cat-labels">
+            <span style="font-weight:900; color:var(--text-heading); font-size:12px; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">${st.arr}</span> 
+                <span>🏷️ CUSTOM LABELZ</span>
+            </span>
+            <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(${labelProds.length})</span>
+        </li>`;
         html += `<div id="cat-labels" style="display:${st.disp};">`;
         labelProds.forEach(p => html += buildItem(p));
         html += `</div>`;
@@ -779,7 +803,7 @@ document.addEventListener('click', (e) => {
     const action = btn.dataset.appClick;
     if (action === 'sortBulk') { if(typeof sortBulk === 'function') sortBulk(btn.dataset.col); }
     if (action === 'selectProd') { if(typeof window.selectProduct === 'function') window.selectProduct(btn.dataset.name); }
-    if (action === 'toggleRecipeCat') { if(typeof window.toggleRecipeCategory === 'function') window.toggleRecipeCategory(btn.dataset.cat, btn.querySelector('span') || btn); }
+    if (action === 'toggleRecipeCat') { if(typeof window.toggleRecipeCategory === 'function') window.toggleRecipeCategory(btn.dataset.cat, btn.querySelector('.cat-arrow') || btn); }
     if (action === 'sortBOM') { if(typeof sortBOM === 'function') sortBOM(btn.dataset.col); }
     if (action === 'removeBOMPart') { if(typeof removePart === 'function') removePart(btn); }
     if (action === 'applyRecipeSuggestion') { if(typeof window.applyRecipeSuggestion === 'function') window.applyRecipeSuggestion(parseInt(btn.dataset.idx, 10), btn.dataset.sugg); }

@@ -89,8 +89,13 @@ function renderFgiTable() {
             let isExp = window.fgiCategoryState[g.id] !== false;
             let chevron = isExp ? '▼' : '▶';
             
-            let mt = isFirstGroup ? '0px' : '20px';
-            h += `<div class="category-header" class="category-header inv-cat-header" data-app-click="toggleFgiCat" data-cat="${g.id}" style="margin-top:${mt};"><span style="font-weight:900; color:var(--primary-color); font-size:13px; text-transform:uppercase; letter-spacing:1px;"><span style="display:inline-block; width:20px; color:var(--text-muted);">${chevron}</span> ${g.icn} ${g.name} <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${g.items.length})</span></span></div>`;
+            h += `<div class="neo-category-row" data-app-click="toggleFgiCat" data-cat="${g.id}">
+                <span style="font-weight:900; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                    <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">${chevron}</span> 
+                    <span>${g.icn} ${g.name}</span>
+                </span>
+                <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(${g.items.length})</span>
+            </div>`;
             isFirstGroup = false;
             
             if(isExp) {
