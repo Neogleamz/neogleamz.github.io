@@ -2442,7 +2442,7 @@ window.buildUnifiedSopLayoutHTML = function(options) {
     const rowsHtml = options.rowsHtml || '';
     
     let bottomActionsHtml = '';
-    if (isInline) {
+    if (isInline && sopType !== 'packerz') {
         bottomActionsHtml = `
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color); width: 100%;">
                 <button class="btn-red-muted" style="padding:8px 15px; font-size:12px; width: auto !important;" data-click="click_closePackerzSopViewer">✕ Cancel Changes</button>
