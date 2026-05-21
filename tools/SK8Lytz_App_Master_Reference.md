@@ -293,7 +293,7 @@ Known verified tables currently in active use across the JavaScript modules:
 ### Manufacturing (Cofoundry)
 - `work_orders`: Production tracking. Fields: `wo_id` (PK), `product_name`, `qty`, `status`, `started_at`, `completed_at`, `wip_state` (JSONB), `routing` (JSONB). **Standard**: Always store native JSON objects; never stringify. `materials_pulled` state is stored within `wip_state`.
 - `production_sops`: Step-by-step instructions (`product_name`, `steps`).
-- `print_queue`: Tracking active label prints for Work Orders.
+- `print_queue`: Tracking active label prints for Work Orders. Includes `wip_state` JSONB field for autonomous tracking of post-processing Stage 3 timers and yield states without clashing with Stage 2 physical hardware Bed Run Manager counts.
 
 ### Utilities & Backups
 - `inventory_snapshots`: Point-in-time recovery points. Fields: `id` (PK), `name`, `snapshot_data` (JSONB - full consumption array), `created_at`, `created_by`.
