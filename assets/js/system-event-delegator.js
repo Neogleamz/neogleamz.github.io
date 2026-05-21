@@ -1082,6 +1082,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_selectPrintJob':
                     if(window.selectPrintJob) window.selectPrintJob(el.getAttribute('data-id'));
                     break;
+                case 'click_startLayerzRun':
+                    if(window.startLayerzRun) window.startLayerzRun();
+                    break;
+                case 'click_toggleLayerzRunPause':
+                    if(window.toggleLayerzRunPause) window.toggleLayerzRunPause();
+                    break;
+                case 'click_togglePrintTimerPause':
+                    if(window.togglePrintTimerPause) window.togglePrintTimerPause();
+                    break;
+                case 'click_openLayerzRunCompleteModal':
+                    if(window.openLayerzRunCompleteModal) window.openLayerzRunCompleteModal();
+                    break;
+                case 'click_closeLayerzRunCompleteModal':
+                    if(window.closeLayerzRunCompleteModal) window.closeLayerzRunCompleteModal();
+                    break;
+                case 'click_submitLayerzRun':
+                    if(window.submitLayerzRun) window.submitLayerzRun();
+                    break;
                 case 'click_stopPropagation':
                     event.stopPropagation();
                     break;
