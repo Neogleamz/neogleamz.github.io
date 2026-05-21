@@ -507,6 +507,11 @@ window.getPrintTime = function(partName) {
 // CENTRAL KPI RENDER ENGINE (MIGRATED & AUDITED)
 // ==========================================
 
+/**
+ * Surgically sets the text content of a DOM element by ID with a micro-pulse animation.
+ * @param {string} id - The target element ID.
+ * @param {string|number} val - The content to write safely to the DOM.
+ */
 const setStat = (id, val) => { 
     const el = document.getElementById(id); 
     if (el) { 
@@ -515,7 +520,19 @@ const setStat = (id, val) => {
         setTimeout(() => el.classList.remove('pulse-orange'), 4000); 
     } 
 };
+
+/**
+ * Formats a raw number or string representation with standard locale thousands separators.
+ * @param {number|string} n - The raw numeric value.
+ * @returns {string} The formatted local representation.
+ */
 const fmtNum = (n) => (!isNaN(n) && n !== null) ? Number(n).toLocaleString() : n;
+
+/**
+ * Formats a raw number into a highly-precise locale USD currency string.
+ * @param {number|string} n - The raw monetary value.
+ * @returns {string} The formatted USD string.
+ */
 const fmtMoney = (n) => (!isNaN(n) && n !== null) ? '$' + Number(n).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : n;
 
 function syncDatazStats() {
@@ -595,12 +612,14 @@ function syncStockzStats() {
         });
     }
 
+    const hasSubassemblyDB = typeof isSubassemblyDB !== 'undefined';
+
     if (typeof productsDB !== 'undefined') {
         Object.keys(productsDB).forEach(p => {
             let k = `RECIPE:::` + p;
             let i = inventoryDB[k] || {produced_qty:0, sold_qty:0};
             let s = (i.produced_qty || 0) - (i.sold_qty || 0);
-            if (!isSubassemblyDB[p]) {
+            if (!hasSubassemblyDB || !isSubassemblyDB[p]) {
                 fgiUnits += Math.max(0, s);
             }
             fgiVal += Math.max(0, s) * window.getEngineTrueCogs(p); 
@@ -615,7 +634,7 @@ function syncStockzStats() {
             let i = inventoryDB[k] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0};
             simStock[k] = (catalogCache[k].totalQty || 0) - (i.consumed_qty || 0) - (i.scrap_qty || 0) + (i.manual_adjustment || 0);
         });
-        Object.keys(productsDB).filter(p => isSubassemblyDB[p]).forEach(p => {
+        Object.keys(productsDB).filter(p => hasSubassemblyDB && isSubassemblyDB[p]).forEach(p => {
             let k = `RECIPE:::` + p;
             let i = inventoryDB[k] || {produced_qty:0, sold_qty:0};
             simStock[k] = (i.produced_qty || 0) - (i.sold_qty || 0);
@@ -649,7 +668,7 @@ function syncStockzStats() {
         }
 
         let buildable = true;
-        let retailRecipes = Object.keys(productsDB).filter(p => !isSubassemblyDB[p]);
+        let retailRecipes = Object.keys(productsDB).filter(p => !hasSubassemblyDB || !isSubassemblyDB[p]);
         let loopGuard = 0;
         while (buildable && retailRecipes.length > 0 && loopGuard < 100000) {
             loopGuard++;
