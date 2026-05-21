@@ -54,4 +54,5 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - If the Epic block was just fully completed and archived, you must output a massive warning message tailored to the context:
      - **If it was a Single-Task Epic directly on `main`**: Tell the user to run `[/ship_it]` to merge the feature branch, followed by `[/release]` to formally deploy it.
      - **If it was a Multi-Part Epic on an `epic/*` branch**: Tell the user to run `[/ship_it]` to merge this final feature into the epic branch, and then run `[/finalize_epic]` to safely deploy the entire Epic branch into production.
+   - **Mandatory UI Testing Instructions**: You MUST output a clearly formatted list instructing the user exactly *where* and *how* to manually test the changes in the live browser. You must explicitly name the correct Hub tab (e.g., STOCKZ, EDITZ, SOCIALZ) and the specific page elements or buttons they need to click to verify your work.
    - Output a clean confirmation message to the chat that the task is complete and the branch is ready for testing. Do not automatically start the next task.
