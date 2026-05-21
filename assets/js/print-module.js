@@ -215,6 +215,55 @@ function renderActivePrintJob(id) {
     if (activePipe) activePipe.classList.add('active');
     if (activeSect) activeSect.style.display = 'block';
 
+    // Timer Logic
+    document.getElementById('pipe-P-Printing').innerHTML = window.safeHTML('2. Start Print Job');
+    document.getElementById('pipe-P-Cleaned').innerHTML = window.safeHTML('3. Mark as Cleaned');
+
+    let wip = job.wip_state || {};
+    
+    if (!window._printTimerInterval) {
+        window._printTimerInterval = setInterval(() => {
+            let span = document.getElementById('printPipelineTimerSpan');
+            if (span && span.getAttribute('data-running') === 'true') {
+                let start = parseInt(span.getAttribute('data-start'));
+                let baseline = parseInt(span.getAttribute('data-baseline'));
+                if (!isNaN(start) && !isNaN(baseline)) {
+                    let elapsed = baseline + (Date.now() - start);
+                    let h = Math.floor(elapsed / 3600000);
+                    let m = Math.floor((elapsed % 3600000) / 60000);
+                    let s = Math.floor((elapsed % 60000) / 1000);
+                    let str = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+                    span.innerText = `Running (${str})`;
+                }
+            }
+        }, 1000);
+    }
+
+    let timerUI = "";
+    if (job.status === 'Printing' || job.status === 'Cleaned') {
+        let baseline = (job.status === 'Printing' ? (wip.elapsed_printing||0) : (wip.elapsed_cleaned||0));
+        let isRunning = wip.stage_start_time && !wip.is_paused;
+        let elapsedSoFar = baseline;
+        if (isRunning) elapsedSoFar += (Date.now() - wip.stage_start_time);
+        
+        let h = Math.floor(elapsedSoFar / 3600000);
+        let m = Math.floor((elapsedSoFar % 3600000) / 60000);
+        let s = Math.floor((elapsedSoFar % 60000) / 1000);
+        let timeStr = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+        
+        let btnAction = wip.is_paused ? '▶️ Resume' : '⏸️ Pause';
+        timerUI = `<div style="margin-left:auto; display:flex; align-items:center; gap:8px;" data-click="click_stopPropagation">
+            <span id="printPipelineTimerSpan" data-running="${isRunning}" data-baseline="${baseline}" data-start="${wip.stage_start_time || ''}" style="font-size:11px; font-family:monospace; color:${wip.is_paused ? 'var(--text-muted)' : '#10b981'};">${wip.is_paused ? 'Paused' : 'Running'} (${timeStr})</span>
+            <button data-click="click_togglePrintTimerPause" class="btn-slate" style="padding:2px 8px; font-size:10px;">${btnAction}</button>
+        </div>`;
+    }
+
+    if (job.status === 'Printing') {
+        if(timerUI) document.getElementById('pipe-P-Printing').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">2. Start Print Job ${timerUI}</div>`);
+    } else if (job.status === 'Cleaned') {
+        if(timerUI) document.getElementById('pipe-P-Cleaned').innerHTML = window.safeHTML(`<div style="display:flex; align-items:center; width:100%;">3. Mark as Cleaned ${timerUI}</div>`);
+    }
+
 
     // SOP logic for Printing stage
     if (job.status === 'Printing' || job.status === 'Cleaned') {
@@ -404,6 +453,24 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
         setMasterStatus("Updating Status...", "mod-working");
 
         const updatePayload = { status: newStatus };
+        let currentWip = currentPrintJob.wip_state || {};
+        
+        // Accumulate time for the previous stage if running
+        if (currentPrintJob.status === 'Printing' && currentWip.stage_start_time && !currentWip.is_paused) {
+            currentWip.elapsed_printing = (currentWip.elapsed_printing || 0) + (Date.now() - currentWip.stage_start_time);
+        } else if (currentPrintJob.status === 'Cleaned' && currentWip.stage_start_time && !currentWip.is_paused) {
+            currentWip.elapsed_cleaned = (currentWip.elapsed_cleaned || 0) + (Date.now() - currentWip.stage_start_time);
+        }
+
+        // Setup timer for the newly entered stage
+        if (newStatus === 'Printing' || newStatus === 'Cleaned') {
+            currentWip.stage_start_time = Date.now();
+            currentWip.is_paused = false;
+        } else if (newStatus === 'Completed') {
+            currentWip.stage_start_time = null;
+        }
+        updatePayload.wip_state = currentWip;
+
         if (newStatus === 'Printing') updatePayload.started_at = new Date().toISOString();
         if (newStatus === 'Completed') {
             updatePayload.completed_at = new Date().toISOString();
@@ -641,4 +708,31 @@ if (typeof window !== 'undefined') {
     window.submitManualPrint = typeof submitManualPrint !== 'undefined' ? submitManualPrint : undefined;
     window.executeBatchPrint = typeof executeBatchPrint !== 'undefined' ? executeBatchPrint : undefined;
     window.submitFinalizePrint = typeof submitFinalizePrint !== 'undefined' ? submitFinalizePrint : undefined;
+    window.togglePrintTimerPause = async function() {
+        if (!currentPrintJob) return;
+        let w = currentPrintJob.wip_state || {};
+        let stageKey = currentPrintJob.status === 'Printing' ? 'elapsed_printing' : 'elapsed_cleaned';
+        
+        if (!w.is_paused) {
+            // Pausing
+            if (w.stage_start_time) {
+                w[stageKey] = (w[stageKey] || 0) + (Date.now() - w.stage_start_time);
+            }
+            w.stage_start_time = null;
+            w.is_paused = true;
+        } else {
+            // Resuming
+            w.stage_start_time = Date.now();
+            w.is_paused = false;
+        }
+        
+        currentPrintJob.wip_state = w;
+        renderActivePrintJob(currentPrintJob.id);
+        
+        try {
+            await supabaseClient.from('print_queue').update({ wip_state: w }).eq('id', currentPrintJob.id);
+        } catch(e) {
+            sysLog("Failed to pause/resume print timer.", true);
+        }
+    };
 }

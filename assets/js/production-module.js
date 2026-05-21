@@ -2031,6 +2031,14 @@ function _renderArchiveCards(items) {
             const catItem = typeof catalogByName !== 'undefined' ? catalogByName[cleanPartName] : null;
             const displayName = catItem ? (catItem.neoName || catItem.itemName) : cleanPartName;
             const displayID = (job.wo_id && job.wo_id.startsWith('WO-')) ? job.wo_id : ('PR-' + String(job.id || '').substring(0, 8).toUpperCase());
+            
+            let w = job.wip_state || {};
+            let pTime = w.elapsed_printing || 0;
+            let cTime = w.elapsed_cleaned || 0;
+            let totalT = pTime + cTime;
+            let timeHtml = totalT > 0 ? `<div class="archive-card-detail-row"><span>Print Time:</span><strong>${formatWOTime(pTime)}</strong></div><div class="archive-card-detail-row"><span>Clean Time:</span><strong>${formatWOTime(cTime)}</strong></div><div class="archive-card-detail-row"><span>Total Build Time:</span><strong style="color:#10b981;">${formatWOTime(totalT)}</strong></div>` : '';
+            let headerTimes = totalT > 0 ? `<div style="display:flex; gap:8px; font-family:monospace; font-size:10px; color:var(--text-muted); margin-right:10px; white-space:nowrap;"><span>Print: ${formatWOTime(pTime)}</span><span>Clean: ${formatWOTime(cTime)}</span></div>` : '';
+
             return `
             <div class="archive-card">
                 <div class="archive-card-header" data-click="toggleArchiveDetail" data-arc-id="${arcId}">
@@ -2038,6 +2046,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-id">${displayID}</div>
                     <div class="archive-card-title" style="flex-grow:1; margin-left:15px; overflow:hidden; text-overflow:ellipsis; min-width:50px;">${job.label ? `"${job.label}" — ` : ''}${displayName}</div>
                     <div class="archive-card-meta" style="white-space:nowrap; margin-right:10px;">x${job.qty} · ${fmtShort(job.completed_at || job.created_at)}</div>
+                    ${headerTimes}
                     <button data-click="hardDeleteArchive" data-arc-type="layerz" data-arc-id="${job.id}" class="btn-red-neon" style="width:auto; padding:4px 10px; font-size:10px; flex-shrink:0;">🗑️ DELETE</button>
                     <div class="archive-card-chevron" id="${arcId}-chev">▶</div>
                 </div>
@@ -2048,6 +2057,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-detail-row"><span>Source WO:</span><strong>${job.wo_id || 'Manual Entry'}</strong></div>
                     <div class="archive-card-detail-row"><span>Started:</span><strong>${dtC}</strong></div>
                     <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
+                    ${timeHtml}
                 </div>
             </div>`;
         }).join(''));
