@@ -2159,13 +2159,17 @@ document.addEventListener('keydown', (e) => {
         return;
     }
 
-    // Press 'T' to toggle Task Planner
+    // Press 'T' to jump to Task Planner, or if already open, activate inline task creation
     if (e.key.toLowerCase() === 't') {
         e.preventDefault();
-        if (isTaskPlannerOpen) {
-            window.closeTaskPlanner();
-        } else {
+        
+        if (!isTaskPlannerOpen) {
             window.openTaskPlanner();
+        } else {
+            const noSectionContainer = document.querySelector('.te-inline-add-row[data-cycle-id=""] .te-inline-container');
+            if (noSectionContainer && typeof window.teActivateInlineTask === 'function') {
+                window.teActivateInlineTask(noSectionContainer);
+            }
         }
     }
 
@@ -2399,13 +2403,15 @@ window.teActivateInlineTask = function(containerElement) {
     
     textarea.addEventListener('keydown', async function(e) {
         if (e.key === 'Escape') {
-            textarea.remove();
-            if (placeholder) placeholder.style.display = 'block';
+            e.preventDefault();
+            e.stopPropagation();
+            this.value = ''; // clear value so blur doesn't create a task
+            this.blur(); // Trigger blur to gracefully handle the cleanup
         } else if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             const val = this.value.trim();
             if (val === '') {
-                textarea.remove();
+                if (textarea.parentNode) textarea.remove();
                 if (placeholder) placeholder.style.display = 'block';
                 return;
             }
@@ -2430,7 +2436,7 @@ window.teActivateInlineTask = function(containerElement) {
                 let cycleId = containerElement.closest('.te-inline-add-row').getAttribute('data-cycle-id') || null;
                 await window.teCreateInlineTask(val, cycleId);
             }
-            textarea.remove();
+            if (textarea.parentNode) textarea.remove();
             if (placeholder) placeholder.style.display = 'block';
         }
     });
