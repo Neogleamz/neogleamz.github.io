@@ -86,6 +86,10 @@ function renderAnalyticsDashboard() {
     } catch(e) { console.error("Analytics Error:", e); sysLog(e.message, true); }
 }
 
+/**
+ * Renders the primary financial waterfall chart indicating gross to net progression.
+ * @param {TrueNetWaterfallToken} t - The financial totals token.
+ */
 function renderWaterfallChart(t) {
     try {
         const ctx = document.getElementById('waterfallChart');
@@ -145,6 +149,10 @@ function renderWaterfallChart(t) {
     } catch(e) { sysLog('Waterfall chart render error: ' + e.message, true); }
 }
 
+/**
+ * Renders the expense distribution doughnut chart for visualizing COGS, Shipping, and Fees.
+ * @param {TrueNetWaterfallToken} t - The financial totals token.
+ */
 function renderExpenseDoughnut(t) {
     try {
         const ctx = document.getElementById('expenseDoughnut');
@@ -174,6 +182,10 @@ function renderExpenseDoughnut(t) {
     } catch(e) { sysLog('Expense doughnut render error: ' + e.message, true); }
 }
 
+/**
+ * Renders the time-series trends chart mapping captured revenue versus net profit.
+ * @param {Object} trendData - Dictionary mapping YYYY-MM-DD dates to {captured, net} totals.
+ */
 function renderTrendsChart(trendData) {
     try {
         const ctx = document.getElementById('trendsChart');
@@ -223,10 +235,21 @@ function renderTrendsChart(trendData) {
     } catch(e) { sysLog('Trends chart render error: ' + e.message, true); }
 }
 
+/**
+ * Renders the dense profitability matrix for all standard retail products.
+ * Includes column sorting and financial derivations based on the master ledger.
+ */
 function renderProfitabilityMatrix() {
     try {
     let wrap = document.getElementById('analyticsTableWrap'); if(!wrap) return;
-    let ths = ` <th class="${currentAnalyticsSort.column==='n'?'sorted-'+currentAnalyticsSort.direction:''}" data-click="click_sortAnalytics" data-col="n">Retail Product</th> <th class="${currentAnalyticsSort.column==='tc'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="tc">True COGS</th> <th class="${currentAnalyticsSort.column==='ms'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="ms">Live MSRP</th> <th class="${currentAnalyticsSort.column==='mg'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="mg">Gross Margin %</th> <th class="${currentAnalyticsSort.column==='ts'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="ts">Total Units Sold</th> <th class="${currentAnalyticsSort.column==='tp'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="tp">Actual Net Profit</th> `;
+    let ths = `
+        <th class="${currentAnalyticsSort.column==='n'?'sorted-'+currentAnalyticsSort.direction:''}" data-click="click_sortAnalytics" data-col="n">Retail Product</th>
+        <th class="${currentAnalyticsSort.column==='tc'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="tc">True COGS</th>
+        <th class="${currentAnalyticsSort.column==='ms'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="ms">Live MSRP</th>
+        <th class="${currentAnalyticsSort.column==='mg'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="mg">Gross Margin %</th>
+        <th class="${currentAnalyticsSort.column==='ts'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="ts">Total Units Sold</th>
+        <th class="${currentAnalyticsSort.column==='tp'?'sorted-'+currentAnalyticsSort.direction:''} text-right" data-click="click_sortAnalytics" data-col="tp">Actual Net Profit</th>
+    `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
 
     let a = Object.keys(productsDB).filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label)).map(p => {
@@ -248,7 +271,23 @@ function renderProfitabilityMatrix() {
 
     if(a.length===0){ h += "<tr><td colspan='6' style='text-align:center;'>No retail products defined yet.</td></tr>"; }
     else {
-        a.sort((x,y) => { let u = x[currentAnalyticsSort.column]; let v = y[currentAnalyticsSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentAnalyticsSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentAnalyticsSort.direction==='asc'?-1:1; if(u>v) return currentAnalyticsSort.direction==='asc'?1:-1; return 0; });
+        a.sort((x, y) => {
+            let u = x[currentAnalyticsSort.column];
+            let v = y[currentAnalyticsSort.column];
+            
+            // Numeric sorting
+            if (typeof u === 'number' && typeof v === 'number') {
+                return currentAnalyticsSort.direction === 'asc' ? u - v : v - u;
+            }
+            
+            // Lexicographical sorting
+            u = (u || "").toString().toLowerCase();
+            v = (v || "").toString().toLowerCase();
+            
+            if (u < v) return currentAnalyticsSort.direction === 'asc' ? -1 : 1;
+            if (u > v) return currentAnalyticsSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
         a.forEach(x => { 
             let badgeClass = x.mg >= 50 ? 'margin-good' : (x.mg >= 25 ? 'margin-ok' : 'margin-bad');
             let profitColor = x.tp < 0 ? '#ef4444' : '#10b981';
