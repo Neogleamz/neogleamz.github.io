@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.44] - 2026-05-20
+### Features & Bug Fixes
+- **Always Render Empty "No Section" Bucket** (`feat/task-engine-always-show-no-section`): Task Engine: Ensure that an empty "No Section" bucket (with the "+ Add Task..." dropzone) is always rendered natively in all views (Inbox, My Tasks, Projects, etc.), even if there are zero tasks currently without a section. This allows users to instantly create a task without having to create a section first. Also tightened UI rendering logic to fix phantom padding gaps on empty section lists.
+
 ## [1.0.43] - 2026-05-20
 ### Features & Bug Fixes
 - **Shopify Missing Order Sync** (`bug/shopify-missing-order-sync`): Restored Shopify webhook integration by removing strict JWT verification on edge functions. Built a secure native Edge Function and a visual UI modal (`shopify-force-sync`) to manually ingest dropped Shopify JSON payloads cleanly into the database.
