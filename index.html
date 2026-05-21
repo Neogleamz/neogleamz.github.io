@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.05.21.1739"></script>
+    <script src="assets/js/system-version.js?v=v.2026.05.21.1740"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.21.1739"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.21.1740"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.21.1739"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.21.1740"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.05.21.1739"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.05.21.1740"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -3877,62 +3877,7 @@
             </div>
         </div>
         
-        <div id="packerzSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; padding:30px; min-height:0; overflow:hidden;">
-                
-                <!-- Left Pane: Telemetry Editor & Live Preview -->
-                <div id="packerzSopLeftPane" style="flex:0 0 65%; min-width:600px; padding-right:20px; display:flex; flex-direction:row; gap:15px; border-right:1px solid transparent;">
-                    
-                    <!-- Column 1: Config & Input -->
-                    <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
-                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">3. CHECKLIST</h3>
-                            <div style="display:flex; gap:5px; flex-wrap:nowrap; align-items:center;">
-                                <button class="sop-print-btn" data-click="click_window_openSopPrintModal_pack" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
-                                <button data-mousedown="mousedown_sopDirectUpload" data-soptype="packerz" data-target-textarea="packerzAdminQA" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ Upload</button>
-                                <button data-click="click_openSOPSnapshotCamera_packerz" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
-                                <button data-click="click_openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
-                                <button data-click="click_if_typeof_toggleHorizontalPrev_12" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
-                            </div>
-                        </div>
-                        <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
-                            <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;·&nbsp;
-                            <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;·&nbsp;
-                            <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;·&nbsp;
-                            <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;·&nbsp;
-                            <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
-                            <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
-                            <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;·&nbsp;
-                            <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
-                            &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">❓ Full Guide</span>
-                        </div>
-                        <textarea id="packerzAdminQA" data-input="input_renderPackerzTelemetryPreview" placeholder="# Gather SOULZ Parts&#10;- 2 x SK8Lytz Units&#10;[BARCODE:SK8LYTZ-4x6-STICKER]&#10;[IMG:https://your-bucket.supabase.co/...]&#10;[QR:https://zengge.app]&#10;[INPUT] Enter Serial Number" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px;"></textarea>
-                    </div>
-                    
-                    <!-- Column 2: Live Preview Render -->
-                    <div id="packerzSopPreviewCol" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                        <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
-                        <div id="packerzAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
-                            <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resizer Divider — uses global .h-resizer standard -->
-                <div id="packerzSopResizer" class="h-resizer" data-mousedown="mousedown_initPackerzSopResize_event"></div>
-
-                <!-- Right Pane: Rich Text -->
-                <div id="packerzSopRightPane" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto;">
-                    <div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <h3 style="margin:0; color:var(--text-heading); font-size:16px;">4. Packing Instructions (Rich Text)</h3>
-                        </div>
-                        <div id="packerzSopEditorArea" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
-                            <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the top bar to begin compiling standard operating procedures.</div>
-                        </div>
-                        <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" data-click="click_addPackerzSOPRow_this">+ ADD PROCEDURE STEP</button>
-                    </div>
-                </div>
-            </div>
+        <div id="packerzSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; padding:30px; min-height:0; overflow:hidden;"></div>
         </div>
 </div>
 
@@ -5352,20 +5297,20 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/bom-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/production-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/sales-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/task-engine.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/print-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.05.21.1739"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.05.21.1739"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/bom-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/production-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/sales-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/task-engine.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/print-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.05.21.1740"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.05.21.1740"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5833,18 +5778,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.21.1739"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.21.1740"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.21.1739"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.21.1740"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.21.1739"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.21.1740"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.21.1739"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.21.1739"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.21.1739"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.21.1740"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.21.1740"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.21.1740"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.05.21.1739"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.05.21.1739"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.05.21.1740"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.05.21.1740"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
