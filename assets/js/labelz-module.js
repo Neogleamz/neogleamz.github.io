@@ -98,15 +98,12 @@ function renderLabelzGrid() {
         const filtered = labelzDB.filter(l => l.product_name.toLowerCase().includes(search));
 
         if (filtered.length === 0) {
-            grid.innerHTML = window.safeHTML ? window.safeHTML(
-                `<div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
+            grid.innerHTML = window.safeHTML(`
+                <div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
                     <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
                     ${search ? 'No labels match your search.' : 'No custom labels yet. Click <strong>+ NEW LABEL</strong> to create your first one.'}
-                </div>`
-            ) : `<div style="text-align:center;padding:60px;color:var(--text-muted);font-style:italic;">
-                <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
-                ${search ? 'No labels match your search.' : 'No custom labels yet. Click <strong>+ NEW LABEL</strong> to create your first one.'}
-            </div>`;
+                </div>
+            `);
             return;
         }
 
@@ -130,7 +127,7 @@ function renderLabelzGrid() {
             const safeSize  = label.label_size || '2.25x1.25';
 
             html += `
-                <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                <div class="hover-border-primary" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;">
                     
                     <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
                         <!-- Emoji Top Left -->
@@ -157,7 +154,7 @@ function renderLabelzGrid() {
         });
 
         html += '</div>';
-        grid.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        grid.innerHTML = window.safeHTML(html);
     } catch(e) { sysLog('Labelz grid render error: ' + e.message, true); }
 }
 
@@ -540,9 +537,9 @@ function regenerateBarcodeImage(obj, text, format) {
 
 function onCanvasSelectionCleared() {
     const pnl = document.getElementById('labelzPropertiesPanel');
-    pnl.innerHTML = window.safeHTML ? window.safeHTML(
+    pnl.innerHTML = window.safeHTML(
         '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-style:italic;">Select an element to edit properties.</div>'
-    ) : '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-style:italic;">Select an element to edit properties.</div>';
+    );
 }
 
 function onCanvasSelection(_e) {
@@ -556,19 +553,19 @@ function onCanvasSelection(_e) {
     // Common Position/Size
     html += `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-            <div><label style="font-size:10px;">X</label><input type="number" onchange="updObj('left', parseFloat(this.value))" value="${Math.round(obj.left)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
-            <div><label style="font-size:10px;">Y</label><input type="number" onchange="updObj('top', parseFloat(this.value))" value="${Math.round(obj.top)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
-            <div><label style="font-size:10px;">Scale W%</label><input type="number" onchange="updObj('scaleX', parseFloat(this.value)/100)" value="${Math.round(obj.scaleX*100)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
-            <div><label style="font-size:10px;">Scale H%</label><input type="number" onchange="updObj('scaleY', parseFloat(this.value)/100)" value="${Math.round(obj.scaleY*100)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
+            <div><label style="font-size:10px;">X</label><input type="number" data-app-change="lblzUpdObj" data-key="left" data-type="float" value="${Math.round(obj.left)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
+            <div><label style="font-size:10px;">Y</label><input type="number" data-app-change="lblzUpdObj" data-key="top" data-type="float" value="${Math.round(obj.top)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
+            <div><label style="font-size:10px;">Scale W%</label><input type="number" data-app-change="lblzUpdObj" data-key="scaleX" data-type="float100" value="${Math.round(obj.scaleX*100)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
+            <div><label style="font-size:10px;">Scale H%</label><input type="number" data-app-change="lblzUpdObj" data-key="scaleY" data-type="float100" value="${Math.round(obj.scaleY*100)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
         </div>
         <div>
             <label style="font-size:10px;">Rotation</label>
-            <input type="range" min="0" max="360" value="${obj.angle || 0}" oninput="document.getElementById('lblzRotDisp').innerText=this.value; updObj('angle', parseFloat(this.value))" style="width:100%;">
+            <input type="range" min="0" max="360" value="${obj.angle || 0}" data-app-input="lblzUpdObjSync" data-key="angle" data-type="float" data-sync-id="lblzRotDisp" style="width:100%;">
             <span id="lblzRotDisp" style="font-size:10px;">${obj.angle||0}</span>°
         </div>
         <div>
             <label style="font-size:10px;">Opacity</label>
-            <input type="range" min="0" max="100" value="${(obj.opacity || 1)*100}" oninput="document.getElementById('lblzOpDisp').innerText=this.value+'%'; updObj('opacity', parseFloat(this.value)/100)" style="width:100%;">
+            <input type="range" min="0" max="100" value="${(obj.opacity || 1)*100}" data-app-input="lblzUpdObjSync" data-key="opacity" data-type="float100" data-sync-id="lblzOpDisp" data-sync-suffix="%" style="width:100%;">
             <span id="lblzOpDisp" style="font-size:10px;">${Math.round((obj.opacity||1)*100)}%</span>
         </div>
         
@@ -583,11 +580,11 @@ function onCanvasSelection(_e) {
     // Text specific
     if (obj.type === 'text' || obj.type === 'textbox' || obj.type === 'i-text') {
         html += `
-            <div><label style="font-size:10px;">Text Value</label><input type="text" oninput="updObj('text', this.value)" value="${obj.text}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
-            <div><label style="font-size:10px;">Font Size</label><input type="number" onchange="updObj('fontSize', parseFloat(this.value))" value="${obj.fontSize}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
+            <div><label style="font-size:10px;">Text Value</label><input type="text" data-app-input="lblzUpdObj" data-key="text" data-type="string" value="${obj.text}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
+            <div><label style="font-size:10px;">Font Size</label><input type="number" data-app-change="lblzUpdObj" data-key="fontSize" data-type="float" value="${obj.fontSize}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
             <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label style="font-size:10px;">Color</label><input type="color" onchange="updObj('fill', this.value)" value="${obj.fill}" style="width:100%; height:24px; border:none; padding:0;"></div>
-                <div style="flex:1;"><label style="font-size:10px;">Weight</label><select onchange="updObj('fontWeight', this.value)" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"><option value="normal" ${obj.fontWeight==='normal'?'selected':''}>Normal</option><option value="bold" ${obj.fontWeight==='bold'?'selected':''}>Bold</option></select></div>
+                <div style="flex:1;"><label style="font-size:10px;">Color</label><input type="color" data-app-change="lblzUpdObj" data-key="fill" data-type="string" value="${obj.fill}" style="width:100%; height:24px; border:none; padding:0;"></div>
+                <div style="flex:1;"><label style="font-size:10px;">Weight</label><select data-app-change="lblzUpdObj" data-key="fontWeight" data-type="string" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"><option value="normal" ${obj.fontWeight==='normal'?'selected':''}>Normal</option><option value="bold" ${obj.fontWeight==='bold'?'selected':''}>Bold</option></select></div>
             </div>
             <div style="display:flex; gap:4px; margin-top:4px;">
                <button data-click="click_lblzUpdObj" data-key="textAlign" data-val="left" style="flex:1; padding:4px 8px; font-size:14px; background:var(--bg-input); border:1px solid var(--border-color); color:white; border-radius:4px; cursor:pointer; font-weight:bold;">⇤</button>
@@ -602,14 +599,14 @@ function onCanvasSelection(_e) {
         let opts = obj.barcodeOpts || { bcid: 'code128', text: '' };
         html += `
             <div><label style="font-size:10px; color:#0ea5e9;">Barcode Format</label>
-            <select id="lblzBcFormat" onchange="updBc()" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
+            <select id="lblzBcFormat" data-app-change="lblzUpdBc" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
                 <option value="code128" ${opts.bcid==='code128'?'selected':''}>CODE 128 (Universal)</option>
                 <option value="qrcode" ${opts.bcid==='qrcode'?'selected':''}>QR Code</option>
                 <option value="code39" ${opts.bcid==='code39'?'selected':''}>CODE 39</option>
             </select></div>
             <div>
                 <label style="font-size:10px; color:#0ea5e9;">Encoded Data</label>
-                <input type="text" id="lblzBcVal" onchange="updBc()" value="${opts.text}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
+                <input type="text" id="lblzBcVal" data-app-change="lblzUpdBc" value="${opts.text}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
                 <p style="font-size:10px; color:var(--text-muted); margin:4px 0 0 0;">Search catalog to auto-link this.</p>
             </div>
         `;
@@ -619,7 +616,7 @@ function onCanvasSelection(_e) {
     if (obj.type === 'rect' || obj.type === 'line' || obj.type === 'circle' || obj.type === 'path') {
         html += `
             <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label style="font-size:10px;">Color</label><input type="color" onchange="updObj('fill', this.value); updObj('stroke', this.value);" value="${obj.fill || obj.stroke}" style="width:100%; height:24px; border:none; padding:0;"></div>
+                <div style="flex:1;"><label style="font-size:10px;">Color</label><input type="color" data-app-change="lblzUpdObjDouble" data-key1="fill" data-key2="stroke" data-type="string" value="${obj.fill || obj.stroke}" style="width:100%; height:24px; border:none; padding:0;"></div>
             </div>
         `;
     }
@@ -634,7 +631,7 @@ function onCanvasSelection(_e) {
         </div>
     `;
     html += `</div>`;
-    pnl.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    pnl.innerHTML = window.safeHTML(html);
 }
 
 // Global update handlers for property panel inputs
@@ -696,9 +693,9 @@ window.searchLabelzCatalog = function() {
     try {
         const q = document.getElementById('labelzCatalogSearch').value.toLowerCase();
         const resDiv = document.getElementById('labelzCatalogResults');
-        if(!q || q.length < 2) { resDiv.innerHTML = window.safeHTML ? window.safeHTML(
+        if(!q || q.length < 2) { resDiv.innerHTML = window.safeHTML(
             '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>'
-        ) : '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>'; return; }
+        ); return; }
 
         let results = [];
         
@@ -725,16 +722,16 @@ window.searchLabelzCatalog = function() {
             });
         }
 
-        if(results.length === 0) { resDiv.innerHTML = window.safeHTML ? window.safeHTML(
+        if(results.length === 0) { resDiv.innerHTML = window.safeHTML(
             '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px;">No results found.</div>'
-        ) : '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px;">No results found.</div>'; return; }
+        ); return; }
 
         let html = '';
         results.slice(0, 15).forEach(r => {
             let safeName = r.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             let safeVal = String(r.val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
             html += `
-                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.borderColor='#0ea5e9'" onmouseout="this.style.borderColor='var(--border-color)'" data-click="click_applyCatalogData" data-name="${safeName}" data-val="${safeVal}" data-cogs="${r.cogs}">
+                <div class="hover-border-primary" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:8px; cursor:pointer; transition:0.2s;" data-click="click_applyCatalogData" data-name="${safeName}" data-val="${safeVal}" data-cogs="${r.cogs}">
                     <div style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:2px;">${r.name}</div>
                     <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted);">
                         <span>[${r.source}] ${r.spec}</span>
@@ -743,7 +740,7 @@ window.searchLabelzCatalog = function() {
                 </div>
             `;
         });
-        resDiv.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        resDiv.innerHTML = window.safeHTML(html);
     } catch(e) { sysLog('Labelz Catalog Search error: ' + e.message, true); }
 }
 
@@ -781,7 +778,7 @@ window.toggleLabelzEmojiPicker = function() {
 }
 function assignLabelzDesignerEmoji(emoji) {
     document.getElementById('labelzDesignerEmojiVal').value = emoji;
-    document.getElementById('labelzDesignerEmojiBtn').innerHTML = window.safeHTML ? window.safeHTML(emoji + ' <span style="font-size:10px">▼</span>') : emoji + ' <span style="font-size:10px">▼</span>';
+    document.getElementById('labelzDesignerEmojiBtn').innerHTML = window.safeHTML(emoji + ' <span style="font-size:10px">▼</span>');
     const p = document.getElementById('labelzDesignerEmojiPicker');
     if(p) p.style.display = 'none';
 }
@@ -1002,4 +999,50 @@ window.addLabelzToSpool = function(name, emoji) {
         alert('Barcodz subsystem not loaded yet. Try again.');
     }
 };
+
+// ============================================================
+// EVENT DELEGATOR REGISTRATION (LOCAL)
+// ============================================================
+document.addEventListener('change', (e) => {
+    if (e.target.dataset.appChange === 'lblzUpdObj') {
+        const key = e.target.dataset.key;
+        let val = e.target.value;
+        if (e.target.dataset.type === 'float') val = parseFloat(val);
+        if (e.target.dataset.type === 'float100') val = parseFloat(val) / 100;
+        if (typeof window.updObj === 'function') window.updObj(key, val);
+    } else if (e.target.dataset.appChange === 'lblzUpdBc') {
+        if (typeof window.updBc === 'function') window.updBc();
+    } else if (e.target.dataset.appChange === 'lblzUpdObjDouble') {
+        const key1 = e.target.dataset.key1;
+        const key2 = e.target.dataset.key2;
+        let val = e.target.value;
+        if (typeof window.updObj === 'function') {
+            window.updObj(key1, val);
+            window.updObj(key2, val);
+        }
+    }
+});
+
+document.addEventListener('input', (e) => {
+    if (e.target.dataset.appInput === 'lblzUpdObjSync') {
+        const key = e.target.dataset.key;
+        let val = e.target.value;
+        
+        const syncId = e.target.dataset.syncId;
+        const syncSuffix = e.target.dataset.syncSuffix || '';
+        if (syncId) {
+            const syncEl = document.getElementById(syncId);
+            if (syncEl) syncEl.innerText = val + syncSuffix;
+        }
+
+        if (e.target.dataset.type === 'float') val = parseFloat(val);
+        if (e.target.dataset.type === 'float100') val = parseFloat(val) / 100;
+        
+        if (typeof window.updObj === 'function') window.updObj(key, val);
+    } else if (e.target.dataset.appInput === 'lblzUpdObj') {
+        const key = e.target.dataset.key;
+        let val = e.target.value;
+        if (typeof window.updObj === 'function') window.updObj(key, val);
+    }
+});
 
