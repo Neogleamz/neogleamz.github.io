@@ -481,9 +481,10 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz', is
     const headerButtonsWrapper = document.getElementById('sopViewerHeaderButtons');
     if (headerButtonsWrapper) {
         if (window.isActiveSopLiveEditing) {
+            const closeAction = type === 'packerz' ? 'click_if_typeof_togglePackerzLiveInl' : 'click_closePackerzSopViewer';
             headerButtonsWrapper.innerHTML = window.safeHTML(
                 `<button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" data-click="click_saveLiveInlineSOP" id="btnSaveLiveInlineSOP">💾 SAVE MASTER BLUEPRINT</button>` +
-                `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_if_typeof_togglePackerzLiveInl" id="btnPackerzLiveToggleEdit">Close</button>`
+                `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="${closeAction}" id="btnPackerzLiveToggleEdit">Close</button>`
             );
         } else {
             headerButtonsWrapper.innerHTML = window.safeHTML(
