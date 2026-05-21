@@ -40,7 +40,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `debt/socialz-eslint-warnings` : Resolve the 3 ESLint warnings (IntersectionObserver no-undef, ig and data no-unused-vars) in socialz-module.js to achieve zero warnings. [🤖 Gemini 3.1 Pro (High)] [🧠 6.5k / 5k] [💸 $0.02 / $0.02]
 - [x] `debt/task-engine-legacy-var` : Migrate the legacy `var r = ...` scope declaration in task-engine.js (Line 8) to block-scoped let/const to enforce modern ECMAScript standards. [🤖 Gemini 3.1 Pro (High)] [🧠 4.5k / 5k] [💸 $0.01 / $0.02]
 - [x] `chore/dep-supabase-js-update` : Update `@supabase/supabase-js` from 2.105.4 to 2.106.1. [🤖 Gemini 3.1 Pro (High)] [🧠 4k / 1k] [💸 $0.01 / $0.01]
-- [ ] `chore/dep-dompurify-update` : Update `dompurify` from 3.4.4 to 3.4.5. [🤖 AI Model] [🧠 TBD / 1k] [💸 TBD / $0.01]
+- [x] `chore/dep-dompurify-update` : Update `dompurify` from 3.4.4 to 3.4.5. [🤖 Gemini 3.1 Pro (High)] [🧠 4k / 1k] [💸 $0.01 / $0.01]
 - [ ] `chore/dep-supabase-cli-update` : Update `supabase` CLI from 2.98.2 to 2.101.0. [🤖 AI Model] [🧠 TBD / 1k] [💸 TBD / $0.01]
 
 ---
