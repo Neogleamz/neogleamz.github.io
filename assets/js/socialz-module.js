@@ -27,9 +27,46 @@
  * @property {number} raw_followers
  */
 // --- Global Helpers ---
+        let _unavatarErrors = 0;
+        let _unavatarCircuitBroken = false;
+        setInterval(() => { _unavatarErrors = Math.max(0, _unavatarErrors - 1); }, 2000); // Gradual cooldown
+
+        const avatarObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const trueSrc = img.getAttribute('data-src');
+                    if (trueSrc) {
+                        const isDirectUrl = trueSrc.includes('supabase.co') || trueSrc.includes('fbcdn.net') || trueSrc.includes('instagram.com');
+                        if (isDirectUrl || !_unavatarCircuitBroken) {
+                            img.src = trueSrc;
+                            img.removeAttribute('data-src');
+                        }
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        }, { rootMargin: '50px 0px', threshold: 0.1 });
+
         function handleAvatarError(img) {
-            const _tt = img.getAttribute('data-tt'), yt = img.getAttribute('data-yt'), fb = img.getAttribute('data-fb'), p = img.getAttribute('data-provider');
-            if (p === 'tiktok') { 
+            if (_unavatarCircuitBroken) { img.style.display = 'none'; return; }
+            _unavatarErrors++;
+            if (_unavatarErrors > 15) {
+                _unavatarCircuitBroken = true;
+                if (window.sysLog) sysLog("Avatar fallback circuit broken due to 429 Rate Limits.", true);
+                setTimeout(() => { _unavatarCircuitBroken = false; _unavatarErrors = 0; }, 60000); // 1 min cooldown
+                img.style.display = 'none';
+                return;
+            }
+
+            const ig = img.getAttribute('data-ig'), tt = img.getAttribute('data-tt'), yt = img.getAttribute('data-yt'), fb = img.getAttribute('data-fb'), p = img.getAttribute('data-provider');
+            if (p === 'instagram') {
+                if (tt) { img.setAttribute('data-provider', 'tiktok'); img.src = `https://unavatar.io/tiktok/${tt}?fallback=false`; }
+                else if (yt) { img.setAttribute('data-provider', 'youtube'); img.src = `https://unavatar.io/youtube/${yt}?fallback=false`; }
+                else if (fb) { img.setAttribute('data-provider', 'facebook'); img.src = `https://unavatar.io/facebook/${fb}?fallback=false`; }
+                else img.style.display = 'none';
+            }
+            else if (p === 'tiktok') { 
                 if (yt) { img.setAttribute('data-provider', 'youtube'); img.src = `https://unavatar.io/youtube/${yt}?fallback=false`; } 
                 else if (fb) { img.setAttribute('data-provider', 'facebook'); img.src = `https://unavatar.io/facebook/${fb}?fallback=false`; } 
                 else img.style.display = 'none'; 
@@ -96,7 +133,8 @@
                 handles: { ig: row.handle_ig || '', tt: row.handle_tt || '', yt: row.handle_yt || '', fb: row.handle_fb || '' },
                 links: { ig: row.link_ig || '', tt: row.link_tt || '', yt: row.link_yt || '', fb: row.link_fb || '' },
                 followers: { ig: parseFloat(row.followers_ig) || 0, tt: parseFloat(row.followers_tt) || 0, yt: parseFloat(row.followers_yt) || 0, fb: parseFloat(row.followers_fb) || 0 },
-                rawFollowers: parseFloat(row.raw_followers) || 0
+                rawFollowers: parseFloat(row.raw_followers) || 0,
+                avatarUrl: row.avatar_url || ''
             }));
             updateFilterDropdownOptions();
             renderSkaters();
@@ -386,12 +424,10 @@
                         const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
                         const styleList = s.style ? s.style.split(';').map(st => st.trim()).filter(st => st).slice(0, 3) : [];
                         const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
-                        const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
+                        const igHandle = cleanH(s.handles.ig), ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
 
                         let src = ''; let prov = '';
-                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; prov = 'tiktok'; }
-                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; prov = 'youtube'; }
-                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; prov = 'facebook'; }
+                        if (s.avatarUrl) { src = s.avatarUrl; prov = 'direct'; }
                         
                         const typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
                             'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
@@ -409,7 +445,7 @@
                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                     <div class="grid-stack" style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
                        <div style="background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
-                       ${src ? `<img loading="lazy" src="${src}" style="width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}">` : ''}
+                       ${src ? `<img loading="lazy" data-src="${src}" class="lazy-avatar" style="width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-ig="${igHandle}" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}">` : ''}
                    </div>
                    <div style="overflow: hidden; flex-grow: 1;">
                        <h2 style="font-weight: bold; font-size: 20px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: var(--text-heading); margin: 0;">${s.name}</h2>
@@ -455,12 +491,10 @@
                         const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
                         const styleList = s.style ? s.style.split(';').map(st => st.trim()).filter(st => st).slice(0, 3) : [];
                         const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
-                        const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
+                        const igHandle = cleanH(s.handles.ig), ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
 
                         let src = ''; let prov = '';
-                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; prov = 'tiktok'; }
-                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; prov = 'youtube'; }
-                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; prov = 'facebook'; }
+                        if (s.avatarUrl) { src = s.avatarUrl; prov = 'direct'; }
                         
                         const typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
                             'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
@@ -478,7 +512,7 @@
                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                     <div class="grid-stack" style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
                        <div style="background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
-                       ${src ? `<img loading="lazy" src="${src}" style="width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}">` : ''}
+                       ${src ? `<img loading="lazy" src="${src}" style="width: 100%; height: 100%; object-fit: cover; z-index: 10; background: var(--bg-container);" data-ig="${igHandle}" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${prov}">` : ''}
                    </div>
                    <div style="overflow: hidden; flex-grow: 1;">
                        <h2 style="font-weight: bold; font-size: 20px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; color: var(--text-heading); margin: 0;">${s.name}</h2>
@@ -545,12 +579,10 @@
                     tableHtml += filtered.map(s => {
                         const originalIndex = socialzSkaters.findIndex(orig => orig.id === s.id);
                         const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
-                        const ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
+                        const igHandle = cleanH(s.handles.ig), ttHandle = cleanH(s.handles.tt), ytHandle = cleanH(s.handles.yt), fbHandle = cleanH(s.handles.fb);
 
                         let src = ''; let _prov = '';
-                        if (ttHandle) { src = `https://unavatar.io/tiktok/${ttHandle}?fallback=false`; _prov = 'tiktok'; }
-                        else if (ytHandle) { src = `https://unavatar.io/youtube/${ytHandle}?fallback=false`; _prov = 'youtube'; }
-                        else if (fbHandle) { src = `https://unavatar.io/facebook/${fbHandle}?fallback=false`; _prov = 'facebook'; }
+                        if (s.avatarUrl) { src = s.avatarUrl; _prov = 'direct'; }
                         
                         const _typeClass = (s.type || '').toLowerCase() === 'outdoor' ? 
                             'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 
@@ -567,7 +599,7 @@
                                 <div style="display: flex; align-items: center; gap: 8px; min-width: 0; width: 100%;">
                                     <div class="grid-stack" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-muted); flex-shrink: 0;">
                                         <div style="display: flex; align-items: center; justify-content: center; z-index: 0; font-size: 10px;">${s.name.charAt(0)}</div>
-                                        ${src ? `<img loading="lazy" src="${src}" style="width: 100%; height: 100%; object-fit: cover; z-index: 10;" onerror="this.style.display='none'">` : ''}
+                                        ${src ? `<img loading="lazy" data-src="${src}" class="lazy-avatar" style="width: 100%; height: 100%; object-fit: cover; z-index: 10;" data-ig="${igHandle}" data-tt="${ttHandle}" data-yt="${ytHandle}" data-fb="${fbHandle}" data-provider="${_prov}">` : ''}
                                     </div>
                                     <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${s.name}</span>
                                 </div>
@@ -590,6 +622,10 @@
                     setTimeout(() => { if(typeof applyTableInteractivity === 'function') applyTableInteractivity('skater-grid-wrapper'); }, 50);
                 }
             }
+            
+            document.querySelectorAll('.lazy-avatar').forEach(img => {
+                if (img.getAttribute('data-src')) avatarObserver.observe(img);
+            });
         }
 
         // --- Export CSV ---
@@ -688,12 +724,149 @@
             reader.readAsArrayBuffer(f);
         }
 
+        // --- MIGRATION ENGINE (PASSIVE MONITOR) ---
+        let _migrationMonitorInterval = null;
+        
+        window.click_startAvatarMigration = async function() { 
+            document.getElementById('migration-modal').style.display = 'flex'; 
+            
+            const statusEl = document.getElementById('migration-status-text');
+            const progressText = document.getElementById('migration-progress-text');
+            const progressBar = document.getElementById('migration-progress-bar');
+            const term = document.getElementById('migration-log-terminal');
+            
+            term.innerHTML = '> Connecting to Supabase Storage...<br>';
+            statusEl.innerText = "Monitoring DB Sync...";
+            
+            async function checkProgress() {
+                const { data, error } = await supabaseClient.from('socialz_audience').select('name, avatar_url');
+                if(!error && data) {
+                    const total = data.length;
+                    const complete = data.filter(s => s.avatar_url && s.avatar_url.includes('supabase.co')).length;
+                    
+                    progressText.innerText = `${complete} / ${total}`;
+                    progressBar.style.width = `${(complete/total)*100}%`;
+                    
+                    if(complete >= total) {
+                        term.innerHTML += '> 100% Complete. All avatars safely stored.<br>';
+                        statusEl.innerText = "Migration Complete!";
+                        clearInterval(_migrationMonitorInterval);
+                    } else {
+                        term.innerHTML = '> Syncing with background Node task...<br>> ' + complete + ' avatars securely stored in Supabase.<br>> Awaiting next batch...<br>';
+                    }
+                }
+            }
+            
+            checkProgress();
+            _migrationMonitorInterval = setInterval(checkProgress, 3000);
+        }
+        
+        window.click_closeMigrationModal = function() { 
+            document.getElementById('migration-modal').style.display = 'none'; 
+            if(_migrationMonitorInterval) clearInterval(_migrationMonitorInterval);
+        }
+        
+        window.click_runMigrationEngine = async function() {
+            const statusEl = document.getElementById('migration-status-text');
+            const progressText = document.getElementById('migration-progress-text');
+            const progressBar = document.getElementById('migration-progress-bar');
+            const term = document.getElementById('migration-log-terminal');
+            
+            function log(msg) { term.innerHTML += '> ' + msg + '<br>'; term.scrollTop = term.scrollHeight; }
+            
+            statusEl.innerText = "Scanning database...";
+            
+            // Only target skaters without a Supabase Storage URL
+            const targets = socialzSkaters.filter(s => !s.avatarUrl || !s.avatarUrl.includes('supabase.co'));
+            
+            if(targets.length === 0) {
+                statusEl.innerText = "Complete - No missing avatars!";
+                log("Zero missing avatars found in database. You are 100% synced.");
+                return;
+            }
+            
+            statusEl.innerText = "Migration active...";
+            log(`Found ${targets.length} skaters needing avatars. Proceeding with 2.5s delays...`);
+            
+            let success = 0;
+            for(let i = 0; i < targets.length; i++) {
+                const s = targets[i];
+                progressText.innerText = `${i+1} / ${targets.length}`;
+                progressBar.style.width = `${((i+1)/targets.length)*100}%`;
+                
+                log(`[${i+1}/${targets.length}] Fetching ${s.name}...`);
+                const cleanH = (h) => h ? h.replace(/^@/, '').trim() : '';
+                const ig = cleanH(s.handles.ig), tt = cleanH(s.handles.tt), yt = cleanH(s.handles.yt), fb = cleanH(s.handles.fb);
+                
+                let fetchedBlob = null;
+                let ext = 'jpeg';
+                let successProvider = null;
+                
+                async function tryFetch(prov, handle) {
+                    if(!handle) return false;
+                    try {
+                        const r = await fetch(`https://unavatar.io/${prov}/${handle}?fallback=false`);
+                        if(r.status === 429) {
+                            log(`  <span style="color:#ef4444;">[!] 429 RATE LIMIT. Switch your VPN.</span>`);
+                            return false;
+                        }
+                        if(r.ok) {
+                            fetchedBlob = await r.blob();
+                            const cType = r.headers.get('content-type') || 'image/jpeg';
+                            ext = cType.split('/')[1] || 'jpeg';
+                            successProvider = prov;
+                            return true;
+                        }
+                    } catch(e) { log(`  <span style="color:#ef4444;">[FETCH ERR]</span> ${e.message}`); }
+                    return false;
+                }
+                
+                log(`  -> Trying providers...`);
+                let found = await tryFetch('instagram', ig);
+                if(!found && tt) { await new Promise(r=>setTimeout(r,1000)); found = await tryFetch('tiktok', tt); }
+                if(!found && yt) { await new Promise(r=>setTimeout(r,1000)); found = await tryFetch('youtube', yt); }
+                if(!found && fb) { await new Promise(r=>setTimeout(r,1000)); found = await tryFetch('facebook', fb); }
+                
+                if(found && fetchedBlob) {
+                    const filename = `${s.id}_${successProvider}.${ext}`;
+                    log(`  <span style="color:#3b82f6;">[+]</span> Downloading... Uploading to Supabase...`);
+                    
+                    try {
+                        const { data: _uploadData, error: uploadError } = await window.supabaseClient.storage.from('avatars').upload(filename, fetchedBlob, { upsert: true });
+                        if(uploadError) {
+                            log(`  <span style="color:#ef4444;">[STORAGE ERROR]</span> ${uploadError.message}`);
+                            // Usually means RLS policies don't allow public inserts!
+                        } else {
+                            const { data: { publicUrl } } = supabaseClient.storage.from('avatars').getPublicUrl(filename);
+                            const { error: dbErr } = await supabaseClient.from('socialz_audience').update({ avatar_url: publicUrl }).eq('id', s.id);
+                            if(dbErr) log(`  <span style="color:#ef4444;">[DB ERROR]</span> ${dbErr.message}`);
+                            else {
+                                log(`  <span style="color:#10b981;">[$$]</span> Saved to Storage!`);
+                                success++;
+                                s.avatarUrl = publicUrl;
+                            }
+                        }
+                    } catch(err) { log(`  <span style="color:#ef4444;">[FATAL]</span> ${err.message}`); }
+                } else {
+                    log(`  <span style="color:#f59e0b;">[SKIP]</span> No valid avatar returned (or rate limited).`);
+                }
+                
+                // Sleep for rate limits
+                if (i < targets.length - 1) await new Promise(r => setTimeout(r, 2500));
+            }
+            
+            statusEl.innerText = "Migration Finished";
+            log(`<strong>Job Finished.</strong> Saved ${success} new avatars! You can safely close this window.`);
+            renderSkaters();
+        }
+
         // --- CRUD Modals ---
         window.openModal = function openModal() { document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('skater-form').reset(); document.getElementById('edit-index').value = "-1"; document.getElementById('modal-title').innerText = "Add New Skater"; }
         function closeModal() { document.getElementById('skater-modal').style.display = 'none'; }
         window.editSkater = function editSkater(index) {
             const s = socialzSkaters[index]; document.getElementById('skater-modal').style.display = 'flex'; document.getElementById('edit-index').value = index; document.getElementById('modal-title').innerText = "Edit Skater";
             document.getElementById('input-name').value = s.name; document.getElementById('input-location').value = s.location; document.getElementById('input-region').value = s.region; document.getElementById('input-contact').value = s.contactInfo; document.getElementById('input-style').value = s.style; document.getElementById('input-type').value = s.type; document.getElementById('input-collab-tier').value = s.collabTier; document.getElementById('input-collab-status').value = s.collabStatus; document.getElementById('input-summary').value = s.summary; document.getElementById('input-viral').value = s.viralUrl;
+            if (document.getElementById('input-avatar-url')) document.getElementById('input-avatar-url').value = s.avatarUrl || '';
             document.getElementById('input-favorite').checked = s.isFavorite || false;
             document.getElementById('input-ig').value = s.handles.ig; document.getElementById('input-ig-link').value = s.links.ig; document.getElementById('input-ig-followers').value = s.followers.ig;
             document.getElementById('input-tt').value = s.handles.tt; document.getElementById('input-tt-link').value = s.links.tt; document.getElementById('input-tt-followers').value = s.followers.tt;
@@ -731,6 +904,7 @@
                 contact_info: document.getElementById('input-contact').value,
                 collab_tier: document.getElementById('input-collab-tier').value,
                 collab_status: document.getElementById('input-collab-status').value,
+                avatar_url: document.getElementById('input-avatar-url') ? document.getElementById('input-avatar-url').value : null,
                 handle_ig: document.getElementById('input-ig').value, handle_tt: document.getElementById('input-tt').value, handle_yt: document.getElementById('input-yt').value, handle_fb: document.getElementById('input-fb').value,
                 link_ig: document.getElementById('input-ig-link').value, link_tt: document.getElementById('input-tt-link').value, link_yt: document.getElementById('input-yt-link').value, link_fb: document.getElementById('input-fb-link').value,
                 followers_ig: parseFollowerCount(igf), followers_tt: parseFollowerCount(ttf), followers_yt: parseFollowerCount(ytf), followers_fb: parseFollowerCount(fbf),
@@ -776,6 +950,37 @@
         } catch(e) { sysLog("UI Error hiding social pane: " + e.message, true); }
     }
     
+        window.handleManualAvatarUpload = async function(inputElem) {
+            const file = inputElem.files[0];
+            if(!file) return;
+            
+            const urlInput = document.getElementById('input-avatar-url');
+            urlInput.value = "Uploading to Storage...";
+            urlInput.disabled = true;
+            
+            try {
+                // Generate a unique filename using timestamp and original name
+                const ext = file.name.split('.').pop() || 'jpeg';
+                const filename = `manual_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+                
+                const { data, error } = await supabaseClient.storage.from('avatars').upload(filename, file, { upsert: true });
+                if(error) {
+                    alert("Upload failed! RLS policy might be blocking Public Inserts: " + error.message);
+                    urlInput.value = "";
+                } else {
+                    const { data: { publicUrl } } = supabaseClient.storage.from('avatars').getPublicUrl(filename);
+                    urlInput.value = publicUrl;
+                    sysLog("Manual avatar uploaded to Storage: " + filename);
+                }
+            } catch(e) {
+                alert("Upload failed: " + e.message);
+                urlInput.value = "";
+            } finally {
+                urlInput.disabled = false;
+                inputElem.value = ""; // reset input
+            }
+        };
+
     // --- LIVE ANALYTICS DATA BINDING ---
     let socialzChartInstances = {};
     window.openAnalyticsDashboard = function() {
