@@ -450,12 +450,12 @@ window.savePackerzLiveInlineSOP = window.saveLiveInlineSOP;
  * @param {boolean} [isEditMode=false] - Whether to launch directly in Edit Mode.
  * @returns {Promise<void>} Resolves when the active SOP modal has been loaded and rendered.
  */
-window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz', isEditMode = false) {
+window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
     window.currentActiveSopOrderId = orderId;
     window.currentActiveSopSku = sku;
     window.currentActiveSopRecipe = recipe;
     window.currentActiveSopType = type;
-    window.isActiveSopLiveEditing = isEditMode;
+    window.isActiveSopLiveEditing = false;
 
     // Preserve legacy compatibility inside packerz module
     currentPackerzQaOrderId = orderId;
@@ -468,9 +468,7 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz', is
 
     const titleEl = document.getElementById('sopViewerTitle');
     if (titleEl) {
-        titleEl.innerHTML = window.safeHTML(
-            window.isActiveSopLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`
-        );
+        titleEl.innerHTML = window.safeHTML(`🎯 ACTIVE SOP: ${recipe}`);
     }
 
     const subtitleEl = document.getElementById('sopViewerSubtitle');
@@ -480,60 +478,42 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz', is
 
     const headerButtonsWrapper = document.getElementById('sopViewerHeaderButtons');
     if (headerButtonsWrapper) {
-        if (window.isActiveSopLiveEditing) {
-            const closeAction = type === 'packerz' ? 'click_if_typeof_togglePackerzLiveInl' : 'click_closePackerzSopViewer';
-            headerButtonsWrapper.innerHTML = window.safeHTML(
-                `<button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" data-click="click_saveLiveInlineSOP" id="btnSaveLiveInlineSOP">💾 SAVE MASTER BLUEPRINT</button>` +
-                `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="${closeAction}" id="btnPackerzLiveToggleEdit">Close</button>`
-            );
-        } else {
-            headerButtonsWrapper.innerHTML = window.safeHTML(
-                `<button class="btn-ghost-base btn-ghost-blue" data-click="click_printActiveSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
-                `<button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_if_typeof_togglePackerzLiveInl" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>` +
-                `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_closePackerzSopViewer">Close</button>`
-            );
-        }
+        headerButtonsWrapper.innerHTML = window.safeHTML(
+            `<button class="btn-ghost-base btn-ghost-blue" data-click="click_printActiveSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
+            `<button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_openActiveSOPEditor" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>` +
+            `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_closePackerzSopViewer">Close</button>`
+        );
     }
 
     const wrapper = document.getElementById('sopViewerSplitWrapper');
     if (!wrapper) return;
 
+    wrapper.innerHTML = window.safeHTML(
+        window.buildUnifiedSopLayoutHTML({
+            isEdit: false,
+            sopType: type,
+            grpId: 'inline',
+            requiredBoxSku: '',
+            qaChecksHtml: '',
+            stepsHtml: ''
+        })
+    );
+
+    // re-grab references after DOM recreation
     let body = document.getElementById('sopViewerBody');
     let qaList = document.getElementById('sopViewerQAList');
     let btnSignoff = document.getElementById('btnSopSignoff');
 
-    if (!window.isActiveSopLiveEditing) {
-        wrapper.innerHTML = window.safeHTML(
-            window.buildUnifiedSopLayoutHTML({
-                isEdit: false,
-                sopType: type,
-                grpId: 'inline',
-                requiredBoxSku: '',
-                qaChecksHtml: '',
-                stepsHtml: ''
-            })
+    if (body) {
+        body.innerHTML = window.safeHTML(
+            `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`
         );
-        // re-grab references after DOM recreation
-        body = document.getElementById('sopViewerBody');
-        qaList = document.getElementById('sopViewerQAList');
-        btnSignoff = document.getElementById('btnSopSignoff');
-
-        if (body) {
-            body.innerHTML = window.safeHTML(
-                `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`
-            );
-        }
-        if (qaList) qaList.innerHTML = window.safeHTML('');
-        if (btnSignoff) {
-            btnSignoff.style.opacity = '0.5';
-            btnSignoff.style.cursor = 'not-allowed';
-            btnSignoff.onclick = null;
-        }
-    } else {
-        wrapper.innerHTML = window.safeHTML(
-            `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`
-        );
-        if (btnSignoff) btnSignoff.style.display = 'none';
+    }
+    if (qaList) qaList.innerHTML = window.safeHTML('');
+    if (btnSignoff) {
+        btnSignoff.style.opacity = '0.5';
+        btnSignoff.style.cursor = 'not-allowed';
+        btnSignoff.onclick = null;
     }
 
     try {
@@ -560,25 +540,8 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz', is
 
         const steps = instructionJson.steps && instructionJson.steps.length > 0 
             ? instructionJson.steps 
-            : (window.isActiveSopLiveEditing ? [{}] : []);
+            : [];
         const qaChecks = instructionJson.qaChecks || [];
-
-        if (window.isActiveSopLiveEditing) {
-            let qaText = (qaChecks || []).join('\n');
-            let rowsHtml = '';
-            steps.forEach((s, idx) => { rowsHtml += window.generateEditableSOPRow(s, idx, sku, type); });
-
-            let editHtml = window.buildUnifiedSopLayoutHTML({
-                isEdit: true,
-                sopType: type,
-                grpId: 'inline',
-                qaText: qaText,
-                rowsHtml: rowsHtml
-            });
-            wrapper.innerHTML = window.safeHTML(editHtml);
-            setTimeout(() => { if (typeof window.renderInlineSopTelemetryPreview === 'function') window.renderInlineSopTelemetryPreview(); }, 150);
-            return;
-        }
 
         // View Mode: Render visual steps
         let h = '';
