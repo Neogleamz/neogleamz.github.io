@@ -2204,7 +2204,7 @@ window.teRenderArchiveView = function() {
     
     const renderRow = (id, title, type) => `
         <div class="task-row te-archive-row" style="display: flex; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 4px;">
-            <input type="checkbox" class="te-archive-checkbox" data-id="${id}" data-type="${type}" style="cursor: pointer; width:16px; height:16px; accent-color: var(--neon-green); margin-right: 15px;" data-change="change_teUpdateArchiveSelection">
+            <input type="checkbox" class="te-archive-checkbox" data-id="${id}" data-type="${type}" style="cursor: pointer; width:16px; height:16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); accent-color: var(--neon-green); margin-right: 15px; flex-shrink: 0;" data-change="change_teUpdateArchiveSelection">
             <span style="font-weight: bold; color: var(--text-muted); width: 80px; text-transform: uppercase; font-size: 10px;">${type}</span>
             <span style="flex-grow: 1; color: white;">${title}</span>
             <div style="display: flex; gap: 8px;">
