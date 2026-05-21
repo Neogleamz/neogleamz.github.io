@@ -1577,7 +1577,6 @@ function renderActiveWO(id) {
                                 });
                             }
                         }
-                    }
                     htmlOut += `</div></div>`;
                 });
                 sList.innerHTML = window.safeHTML(htmlOut);
@@ -2572,73 +2571,6 @@ function toggleBatchezSopGroup(grpId) {
     }
 }
 
-
-window.activeInlineSopEditors = window.activeInlineSopEditors || {};
-window.toggleInlineEditor = function(id) {
-    try {
-    window.activeInlineSopEditors[id] = !window.activeInlineSopEditors[id];
-    if(typeof currentPrintJob !== "undefined" && currentPrintJob && currentPrintJob.id && document.getElementById("paneProdPrint") && document.getElementById("paneProdPrint").style.display !== "none") {
-        if(typeof renderActivePrintJob === "function") renderActivePrintJob(currentPrintJob.id);
-    } else {
-        if(typeof renderActiveWO === "function" && typeof currentWO !== "undefined" && currentWO) renderActiveWO(currentWO.wo_id);
-    }
-    setTimeout(() => {
-        if(window.activeInlineSopEditors[id] && typeof inlineRenderTelemetryPreview === 'function') {
-            inlineRenderTelemetryPreview(id);
-        }
-    }, 150);
-    } catch(e) { sysLog(e.message, true); }
-};
-
-window.saveInlineSopBlock = async function(grpId, productName) {
-    try {
-        let stepsContainer = 'inlineSopSteps_' + grpId;
-        // Check if extractSOPDataFromUI is available globally, which it is in production-module.js
-        let steps = typeof extractSOPDataFromUI === 'function' ? extractSOPDataFromUI(stepsContainer) : [];
-        if (typeof extractSOPDataFromUI !== 'function') {
-            sysLog('extractSOPDataFromUI is not defined!', true);
-        }
-
-        let rawQa = document.getElementById('inlineSopQA_' + grpId)?.value || '';
-        let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
-
-        const payload = { qaChecks: qaLines, steps: steps };
-        if(typeof sopsDB !== 'undefined') sopsDB[productName] = payload;
-        if(typeof sysLog === 'function') sysLog('Saving Inline SOP for ' + productName);
-
-        if(typeof supabaseClient !== 'undefined') {
-            const {error} = await supabaseClient.from('production_sops').upsert({product_name: productName, steps: payload}, {onConflict: 'product_name'});
-            if(error) throw new Error(error.message);
-        }
-
-        // Turn off inline edit mode for this item
-        window.activeInlineSopEditors[grpId] = false;
-
-        // Rerender view
-        if(typeof currentPrintJob !== "undefined" && currentPrintJob && currentPrintJob.id && document.getElementById("paneProdPrint") && document.getElementById("paneProdPrint").style.display !== "none") {
-            if(typeof renderActivePrintJob === "function") renderActivePrintJob(currentPrintJob.id);
-        } else {
-            if(typeof renderActiveWO === "function" && typeof currentWO !== "undefined" && currentWO) renderActiveWO(currentWO.wo_id);
-        }
-
-    } catch(e) {
-        if(typeof sysLog === 'function') sysLog(e.message, true);
-        alert("Failed to save SOP: " + e.message);
-    }
-};
-
-window.addInlineSOPRow = function(grpId) {
-    try {
-        let newRow = document.createElement('div');
-        newRow.innerHTML = window.safeHTML(
-            typeof window.generateEditableSOPRow === 'function' ? window.generateEditableSOPRow({}, 999) : ''
-        );
-        let rowNode = newRow.firstChild;
-        let area = document.getElementById('inlineSopSteps_' + grpId);
-        if(area && rowNode) area.appendChild(rowNode);
-    } catch(e) { console.error(e); }
-};
-
 window.toggleHorizontalPreview = function(paneId, colId, btnEl) {
     let pane = document.getElementById(paneId);
     let col = document.getElementById(colId);
@@ -3048,9 +2980,6 @@ if (typeof window !== 'undefined') {
     window.switchArchiveTab = typeof switchArchiveTab !== 'undefined' ? switchArchiveTab : undefined;
     window.hardDeleteArchive = typeof hardDeleteArchive !== 'undefined' ? hardDeleteArchive : undefined;
     window.closeSOPMasterModal = typeof closeSOPMasterModal !== 'undefined' ? closeSOPMasterModal : undefined;
-    window.toggleInlineEditor = typeof toggleInlineEditor !== 'undefined' ? toggleInlineEditor : undefined;
-    window.saveInlineSopBlock = typeof saveInlineSopBlock !== 'undefined' ? saveInlineSopBlock : undefined;
-    window.addInlineSOPRow = typeof addInlineSOPRow !== 'undefined' ? addInlineSOPRow : undefined;
     window.toggleBatchezSopGroup = typeof toggleBatchezSopGroup !== 'undefined' ? toggleBatchezSopGroup : undefined;
     window.submitFinalizeWo = typeof submitFinalizeWo !== 'undefined' ? submitFinalizeWo : undefined;
     window.openDraftScrapModal = typeof openDraftScrapModal !== 'undefined' ? openDraftScrapModal : undefined;

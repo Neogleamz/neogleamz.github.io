@@ -307,75 +307,25 @@ function validatePackerzAssemblyButton(orderId) {
 let currentPackerzQaOrderId = null;
 let currentPackerzQaSku = null;
 let currentPackerzQaRecipe = null;
-let currentPackerzSopData = null;
+
+window.currentActiveSopOrderId = null;
+window.currentActiveSopSku = null;
+window.currentActiveSopRecipe = null;
+window.currentActiveSopType = 'packerz';
+window.currentActiveSopData = null;
+window.isActiveSopLiveEditing = false;
 
 window.togglePackerzLiveInlineSOP = function() {
-    window.isPackerzLiveEditing = !window.isPackerzLiveEditing;
-    if(typeof loadPackerzActiveSOP === 'function' && currentPackerzQaRecipe) {
-        loadPackerzActiveSOP(currentPackerzQaOrderId, currentPackerzQaSku, currentPackerzQaRecipe);
+    window.isActiveSopLiveEditing = !window.isActiveSopLiveEditing;
+    window.isPackerzLiveEditing = window.isActiveSopLiveEditing;
+    if(window.currentActiveSopRecipe) {
+        window.loadActiveSOP(window.currentActiveSopOrderId, window.currentActiveSopSku, window.currentActiveSopRecipe, window.currentActiveSopType, window.isActiveSopLiveEditing);
     }
 };
 
-/**
- * Saves the edited inline SOP dataset to the Supabase database.
- * Collects steps, procedure instructions, and quality checklist items.
- * @async
- * @function savePackerzLiveInlineSOP
- * @returns {Promise<void>} Resolves when the transaction is completed.
- */
-window.savePackerzLiveInlineSOP = async function() {
-    if(!currentPackerzQaRecipe) return alert("SOP Target Unknown!");
-    const btn = document.getElementById('btnSavePackerzInlineSOP');
-    if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity="0.5"; }
-
-    try {
-        let rows = document.querySelectorAll('#packerzLiveInlineRowsWrapper .sop-step-row');
-        let stepsArray = [];
-        rows.forEach(r => {
-            let richText = r.querySelector('.sop-text-rich').innerHTML;
-            let attachments = [];
-            r.querySelectorAll('.media-row').forEach(mr => {
-                let typeSel = mr.querySelector('.m-type');
-                let urlInp = mr.querySelector('.m-url');
-                if (typeSel && urlInp) {
-                    attachments.push({type: typeSel.value, url: urlInp.value});
-                }
-            });
-            stepsArray.push({
-                text: richText,
-                attachments: attachments
-            });
-        });
-
-        let rawQa = document.getElementById('packerzLiveInlineQA')?.value || '';
-        let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
-
-        const payload = {
-            internal_recipe_name: currentPackerzQaRecipe,
-            required_box_sku: currentPackerzSopData?.required_box_sku || null,
-            instruction_json: JSON.stringify({ steps: stepsArray, qaChecks: qaLines })
-        };
-
-        const { error } = await supabaseClient.from('pack_ship_sops').upsert(payload, { onConflict: 'internal_recipe_name' });
-        if(error) throw error;
-
-        if(btn) { btn.innerText = "💾 SAVED SUCCESSFULLY!"; btn.style.background = "#059669"; }
-        setTimeout(() => {
-            window.isPackerzLiveEditing = false;
-            loadPackerzActiveSOP(currentPackerzQaOrderId, currentPackerzQaSku, currentPackerzQaRecipe);
-        }, 1200);
-
-    } catch(e) {
-        console.error(e);
-        if(typeof sysLog === 'function') sysLog(`Packerz Inline Save Error: ${e.message}`, true);
-        alert("CRITICAL SAVE ERROR: " + e.message);
-        if(btn) { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.opacity="1"; btn.style.background = ""; }
-    }
-};
-
-window.renderPackerzLiveInlineTelemetryPreview = function() {
-    const rawText = document.getElementById('packerzLiveInlineQA')?.value || '';
-    const previewContainer = document.getElementById('packerzLiveInlinePreviewCol');
+window.renderInlineSopTelemetryPreview = function() {
+    const rawText = document.getElementById('sopViewerQA')?.value || '';
+    const previewContainer = document.getElementById('sopViewerQAPreview');
     if(!previewContainer) return;
 
     if(!rawText.trim()) {
@@ -412,56 +362,150 @@ window.renderPackerzLiveInlineTelemetryPreview = function() {
     }
 };
 
+window.renderPackerzLiveInlineTelemetryPreview = window.renderInlineSopTelemetryPreview;
+
+window.saveLiveInlineSOP = async function() {
+    const type = window.currentActiveSopType || 'packerz';
+    const recipe = window.currentActiveSopRecipe;
+    if(!recipe) return alert("SOP Target Unknown!");
+    const btn = document.getElementById('btnSaveLiveInlineSOP') || document.getElementById('btnSavePackerzInlineSOP');
+    if(btn) { btn.innerText = "UPLOADING PROTOCOLS..."; btn.style.opacity="0.5"; }
+
+    try {
+        let rows = document.querySelectorAll('#sopViewerBody .sop-step-row');
+        let stepsArray = [];
+        rows.forEach(r => {
+            let richText = r.querySelector('.sop-text-rich').innerHTML;
+            let attachments = [];
+            r.querySelectorAll('.media-row').forEach(mr => {
+                let typeSel = mr.querySelector('.m-type');
+                let urlInp = mr.querySelector('.m-url');
+                if (typeSel && urlInp) {
+                    attachments.push({type: typeSel.value, url: urlInp.value});
+                }
+            });
+            stepsArray.push({
+                text: richText,
+                attachments: attachments
+            });
+        });
+
+        let rawQa = document.getElementById('sopViewerQA')?.value || '';
+        let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
+
+        if (type === 'packerz') {
+            const payload = {
+                internal_recipe_name: recipe,
+                required_box_sku: window.currentActiveSopData?.required_box_sku || null,
+                instruction_json: JSON.stringify({ steps: stepsArray, qaChecks: qaLines })
+            };
+
+            const { error } = await supabaseClient.from('pack_ship_sops').upsert(payload, { onConflict: 'internal_recipe_name' });
+            if(error) throw error;
+        } else {
+            const payload = { qaChecks: qaLines, steps: stepsArray };
+            
+            if(typeof sopsDB !== 'undefined') sopsDB[recipe] = payload;
+            
+            const { error } = await supabaseClient.from('production_sops').upsert({ product_name: recipe, steps: payload }, { onConflict: 'product_name' });
+            if(error) throw error;
+        }
+
+        if(btn) { btn.innerText = "💾 SAVED SUCCESSFULLY!"; btn.style.background = "#059669"; }
+        setTimeout(async () => {
+            window.isActiveSopLiveEditing = false;
+            window.isPackerzLiveEditing = false;
+            await window.loadActiveSOP(window.currentActiveSopOrderId, window.currentActiveSopSku, window.currentActiveSopRecipe, type);
+            
+            if (type !== 'packerz') {
+                if(typeof currentPrintJob !== "undefined" && currentPrintJob && currentPrintJob.id && document.getElementById("paneProdPrint") && document.getElementById("paneProdPrint").style.display !== "none") {
+                    if(typeof renderActivePrintJob === "function") renderActivePrintJob(currentPrintJob.id);
+                } else {
+                    if(typeof window.renderActiveWO === "function" && window.currentActiveSopOrderId) {
+                        window.renderActiveWO(window.currentActiveSopOrderId);
+                    }
+                }
+            }
+        }, 1200);
+
+    } catch(e) {
+        console.error(e);
+        if(typeof sysLog === 'function') sysLog(`Inline SOP Save Error: ${e.message}`, true);
+        alert("CRITICAL SAVE ERROR: " + e.message);
+        if(btn) { btn.innerText = "💾 SAVE MASTER BLUEPRINT"; btn.style.opacity="1"; btn.style.background = ""; }
+    }
+};
+
+window.savePackerzLiveInlineSOP = window.saveLiveInlineSOP;
+
 /**
  * Loads the active Standard Operating Procedure (SOP) view/edit pane for a given order, SKU, and recipe.
  * Clears scanner telemetry, opens the modal, and renders active checklist guidelines.
  * @async
- * @function loadPackerzActiveSOP
- * @param {string|number} orderId - The target Order ID.
+ * @function loadActiveSOP
+ * @param {string|number} orderId - The target Order ID or Work Order ID.
  * @param {string} sku - The SKU of the item being checked.
  * @param {string} recipe - The recipe name.
+ * @param {string} type - The product context type ('packerz', 'batches', or 'layerz').
+ * @param {boolean} [isEditMode=false] - Whether to launch directly in Edit Mode.
  * @returns {Promise<void>} Resolves when the active SOP modal has been loaded and rendered.
  */
-async function loadPackerzActiveSOP(orderId, sku, recipe) {
+window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz', isEditMode = false) {
+    window.currentActiveSopOrderId = orderId;
+    window.currentActiveSopSku = sku;
+    window.currentActiveSopRecipe = recipe;
+    window.currentActiveSopType = type;
+    window.isActiveSopLiveEditing = isEditMode;
+
+    // Preserve legacy compatibility inside packerz module
     currentPackerzQaOrderId = orderId;
     currentPackerzQaSku = sku;
     currentPackerzQaRecipe = recipe;
     scanConfirmations.clear();
 
-    document.getElementById('packerzSopViewerModal').style.display = 'flex';
-    document.getElementById('packerzSopViewerTitle').innerHTML = window.safeHTML(
-        window.isPackerzLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`
-    );
-    document.getElementById('packerzSopViewerSubtitle').innerText = `Target Alias: ${sku}`;
+    const modal = document.getElementById('sopViewerModal');
+    if (modal) modal.style.display = 'flex';
 
-    const headerButtonsWrapper = document.getElementById('packerzSopViewerHeaderButtons');
+    const titleEl = document.getElementById('sopViewerTitle');
+    if (titleEl) {
+        titleEl.innerHTML = window.safeHTML(
+            window.isActiveSopLiveEditing ? `✏️ EDITING SOP: ${recipe}` : `🎯 ACTIVE SOP: ${recipe}`
+        );
+    }
+
+    const subtitleEl = document.getElementById('sopViewerSubtitle');
+    if (subtitleEl) {
+        subtitleEl.innerText = `Target Alias: ${sku} [${type.toUpperCase()}]`;
+    }
+
+    const headerButtonsWrapper = document.getElementById('sopViewerHeaderButtons');
     if (headerButtonsWrapper) {
-        if (window.isPackerzLiveEditing) {
+        if (window.isActiveSopLiveEditing) {
             headerButtonsWrapper.innerHTML = window.safeHTML(
-                `<button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" data-app-click="saveInlineSOP" id="btnSavePackerzInlineSOP">💾 SAVE MASTER BLUEPRINT</button>` +
+                `<button class="btn-green" style="padding:10px 25px; font-size:14px; font-weight:900; letter-spacing:1px; box-shadow:0 4px 15px rgba(16,185,129,0.3); border-radius:8px;" data-click="click_saveLiveInlineSOP" id="btnSaveLiveInlineSOP">💾 SAVE MASTER BLUEPRINT</button>` +
                 `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_if_typeof_togglePackerzLiveInl" id="btnPackerzLiveToggleEdit">Close</button>`
             );
         } else {
             headerButtonsWrapper.innerHTML = window.safeHTML(
-                `<button class="btn-ghost-base btn-ghost-blue" data-click="click_printPackerzSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
+                `<button class="btn-ghost-base btn-ghost-blue" data-click="click_printActiveSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
                 `<button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_if_typeof_togglePackerzLiveInl" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>` +
                 `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_closePackerzSopViewer">Close</button>`
             );
         }
     }
 
-    // We target the outer wrapper directly when editing so we can overwrite its layout
-    const wrapper = document.getElementById('packerzLiveSopSplitWrapper');
-    let body = document.getElementById('packerzSopViewerBody');
-    let qaList = document.getElementById('packerzSopViewerQAList');
-    let btnSignoff = document.getElementById('btnPackerzSopSignoff');
+    const wrapper = document.getElementById('sopViewerSplitWrapper');
+    if (!wrapper) return;
 
-    if(!window.isPackerzLiveEditing) {
-        // Normal split-pane setup restored strictly using unified template
+    let body = document.getElementById('sopViewerBody');
+    let qaList = document.getElementById('sopViewerQAList');
+    let btnSignoff = document.getElementById('btnSopSignoff');
+
+    if (!window.isActiveSopLiveEditing) {
         wrapper.innerHTML = window.safeHTML(
             window.buildUnifiedSopLayoutHTML({
                 isEdit: false,
-                sopType: 'packerz',
+                sopType: type,
                 grpId: 'inline',
                 requiredBoxSku: '',
                 qaChecksHtml: '',
@@ -469,105 +513,125 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
             })
         );
         // re-grab references after DOM recreation
-        body = document.getElementById('packerzSopViewerBody');
-        qaList = document.getElementById('packerzSopViewerQAList');
-        btnSignoff = document.getElementById('btnPackerzSopSignoff');
+        body = document.getElementById('sopViewerBody');
+        qaList = document.getElementById('sopViewerQAList');
+        btnSignoff = document.getElementById('btnSopSignoff');
 
-        body.innerHTML = window.safeHTML(
-            `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`
-        );
-        qaList.innerHTML = window.safeHTML('');
-        btnSignoff.style.opacity = '0.5';
-        btnSignoff.style.cursor = 'not-allowed';
-        btnSignoff.onclick = null;
+        if (body) {
+            body.innerHTML = window.safeHTML(
+                `<div style='padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;'>Fetching restricted SOP clearance logic from Supabase Edge...</div>`
+            );
+        }
+        if (qaList) qaList.innerHTML = window.safeHTML('');
+        if (btnSignoff) {
+            btnSignoff.style.opacity = '0.5';
+            btnSignoff.style.cursor = 'not-allowed';
+            btnSignoff.onclick = null;
+        }
     } else {
         wrapper.innerHTML = window.safeHTML(
             `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`
         );
-        // Guard against null reference on live-editing toggle state shifts
         if (btnSignoff) btnSignoff.style.display = 'none';
     }
 
     try {
-        const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe);
-        const data = rows && rows.length > 0 ? rows[0] : null;
-        // Allow fallback data if error (so we can create a new one inline)
-        const instructionJson = data ? JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}') : {steps: [], qaChecks: []};
-        currentPackerzSopData = instructionJson;
-        // Return empty array in standard view if no steps are configured, enabling clean fallback UI
+        let instructionJson = { steps: [], qaChecks: [] };
+        let requiredBoxSku = '';
+        let rowData = null;
+
+        if (type === 'packerz') {
+            const { data: rows, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe);
+            if (error) throw error;
+            rowData = rows && rows.length > 0 ? rows[0] : null;
+            instructionJson = rowData ? JSON.parse(rowData.instruction_json || '{"steps": [], "qaChecks": []}') : { steps: [], qaChecks: [] };
+            requiredBoxSku = rowData ? rowData.required_box_sku : '';
+        } else {
+            const { data: rows, error } = await supabaseClient.from('production_sops').select('*').eq('product_name', recipe);
+            if (error) throw error;
+            rowData = rows && rows.length > 0 ? rows[0] : null;
+            if (rowData) {
+                instructionJson = (typeof rowData.steps === 'string') ? JSON.parse(rowData.steps) : (rowData.steps || { steps: [], qaChecks: [] });
+            }
+        }
+
+        window.currentActiveSopData = instructionJson;
+
         const steps = instructionJson.steps && instructionJson.steps.length > 0 
             ? instructionJson.steps 
-            : (window.isPackerzLiveEditing ? [{}] : []);
+            : (window.isActiveSopLiveEditing ? [{}] : []);
         const qaChecks = instructionJson.qaChecks || [];
 
-        if(window.isPackerzLiveEditing) {
+        if (window.isActiveSopLiveEditing) {
             let qaText = (qaChecks || []).join('\n');
             let rowsHtml = '';
-            steps.forEach((s, idx) => { rowsHtml += window.generateEditableSOPRow(s, idx, sku, 'packerz'); });
+            steps.forEach((s, idx) => { rowsHtml += window.generateEditableSOPRow(s, idx, sku, type); });
 
             let editHtml = window.buildUnifiedSopLayoutHTML({
                 isEdit: true,
-                sopType: 'packerz',
+                sopType: type,
                 grpId: 'inline',
                 qaText: qaText,
                 rowsHtml: rowsHtml
             });
             wrapper.innerHTML = window.safeHTML(editHtml);
-            setTimeout(() => { if(typeof renderPackerzLiveInlineTelemetryPreview==='function') renderPackerzLiveInlineTelemetryPreview(); }, 150);
-            return; // EXIT here so we don't render read-only checkboxes!
+            setTimeout(() => { if (typeof window.renderInlineSopTelemetryPreview === 'function') window.renderInlineSopTelemetryPreview(); }, 150);
+            return;
         }
 
-                 // 1. Render Read-Only Steps
-          let h = '';
+        // View Mode: Render visual steps
+        let h = '';
+        let getDId = (u) => { let match = (u||'').match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return match ? match[1] : null; };
 
-          let getDId = (u) => { let match = (u||'').match(/\/(?:file\/d\/|uc\?id=|open\?id=)([a-zA-Z0-9_-]+)/); return match ? match[1] : null; };
+        steps.forEach((s, idx) => {
+            let mediaHtml = '';
+            let stepAttachments = s.attachments && s.attachments.length > 0 ? s.attachments : [s.m1, s.m2, s.m3];
+            stepAttachments.forEach(m => {
+                if (m && m.url) {
+                    let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
+                    let dId = getDId(m.url);
+                    if (m.type === 'img') {
+                        mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="img">`;
+                    } else {
+                        let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
+                        if (isNativeVid) {
+                            mediaHtml += `<div class="media-thumb grid-stack" style="background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="vid"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div class="overlay-center-flex" style="flex-direction:column; gap:8px; z-index:1;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
+                        } else {
+                            let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
+                            if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
+                            mediaHtml += `<div class="media-thumb grid-stack" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" data-app-click="openMediaContext" data-url="${mediaUrl}" data-type="iframe"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`;
+                        }
+                    }
+                }
+            });
 
-          steps.forEach((s, idx) => {
-              let mediaHtml = '';
-              let stepAttachments = s.attachments && s.attachments.length > 0 ? s.attachments : [s.m1, s.m2, s.m3];
-              stepAttachments.forEach(m => {
-                  if(m && m.url) {
-                      let safeUrl = m.url.replace(/'/g, "\\'").replace(/"/g, '"');
-                      let dId = getDId(m.url);
-                      if (m.type === 'img') {
-                          mediaHtml += `<img loading="lazy" src="${safeUrl}" style="max-height:200px; max-width:100%; object-fit:contain; border-radius:8px; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="img">`;
-                      } else {
-                          let isNativeVid = !dId && m.type === 'vid' && (safeUrl.includes('.mp4') || safeUrl.includes('.webm') || safeUrl.includes('supabase.co'));
-                          if (isNativeVid) {
-                              mediaHtml += `<div class="media-thumb grid-stack" style="background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid var(--border-color); cursor:zoom-in;" data-app-click="openMediaContext" data-url="${safeUrl}" data-type="vid"><video preload="none" src="${safeUrl}" style="width:100%; height:100%; object-fit:cover; opacity:0;" muted playsinline></video><div class="overlay-center-flex" style="flex-direction:column; gap:8px; z-index:1;"><i class="fa-solid fa-play" style="font-size:32px; color:white; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="color:white; font-size:11px; font-weight:bold;">NATIVE VIDEO</span></div></div>`;
-                          } else {
-                              let mediaUrl = dId ? `https://drive.google.com/file/d/${dId}/preview` : safeUrl;
-                              if (mediaUrl.includes('sharepoint.com') && !mediaUrl.includes('action=embedview')) mediaUrl += (mediaUrl.includes('?') ? '&' : '?') + 'action=embedview';
-                              mediaHtml += `<div class="media-thumb grid-stack" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); cursor: zoom-in;" data-app-click="openMediaContext" data-url="${mediaUrl}" data-type="iframe"><iframe loading="lazy" src="${mediaUrl}" style="width: 100%; height: 100%; border: none; pointer-events: none;"></iframe></div>`;
-                          }
-                      }
-                  }
-              });
+            h += `
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; padding:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:10px; letter-spacing:1px;">PROCEDURE STEP ${idx+1}</div>
+                <div class="sop-text-rich" style="font-size:15px; line-height:1.5;">${s.text || ''}</div>
+                ${mediaHtml ? `<div style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--border-color); display:flex; gap:15px; flex-wrap:wrap;">${mediaHtml}</div>` : ''}
+            </div>`;
+        });
 
-              h += `
-              <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; padding:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
-                  <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:10px; letter-spacing:1px;">PROCEDURE STEP ${idx+1}</div>
-                  <div class="sop-text-rich" style="font-size:15px; line-height:1.5;">${s.text || ''}</div>
-                  ${mediaHtml ? `<div style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--border-color); display:flex; gap:15px; flex-wrap:wrap;">${mediaHtml}</div>` : ''}
-              </div>`;
-          });
+        if (steps.length === 0) h = `<div style="padding:20px; color:var(--text-muted); font-style:italic;">No visual steps configured. Proceed strictly to QA Checks.</div>`;
 
-        if(steps.length === 0) h = `<div style="padding:20px; color:var(--text-muted); font-style:italic;">No visual steps configured. Proceed strictly to QA Checks.</div>`;
-
-        // Guard against missing SOP data from Supabase for ignored or raw materials
-        if(data && data.required_box_sku) {
-            h = `<div style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; border-radius:12px; padding:20px; margin-bottom:10px;">
+        if (requiredBoxSku) {
+            h = `
+            <div style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; border-radius:12px; padding:20px; margin-bottom:10px;">
                 <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:5px; letter-spacing:1px;">REQUIRED SHIPPING HARNESS</div>
-                <div style="font-size:18px; font-weight:900; color:var(--text-heading); font-family:monospace;">📦 ${data.required_box_sku}</div>
+                <div style="font-size:18px; font-weight:900; color:var(--text-heading); font-family:monospace;">📦 ${requiredBoxSku}</div>
             </div>` + h;
         }
-        body.innerHTML = window.safeHTML(h);
 
-        // 2. Render Checkboxes
-        if(qaChecks.length === 0) {
-            qaList.innerHTML = window.safeHTML(
-                `<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No custom QA parameters required for this module. Free clear.</div>`
-            );
+        if (body) body.innerHTML = window.safeHTML(h);
+
+        // View Mode: Render Checkboxes
+        if (qaChecks.length === 0) {
+            if (qaList) {
+                qaList.innerHTML = window.safeHTML(
+                    `<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No custom QA parameters required for this module. Free clear.</div>`
+                );
+            }
             checkPackerzSopSignoffState(); // Automatically unlocks button
         } else {
             let html = '';
@@ -613,7 +677,6 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 let q = line.trim();
                 if(!q) return;
 
-                // ── [SCAN:itemName] ──────────────────────────────────
                 if (/^\[SCAN:(.+)\]$/i.test(q)) {
                     const itemName = q.match(/^\[SCAN:(.+)\]$/i)[1].trim();
                     const expected = getItemBarcodeValue(itemName);
@@ -649,12 +712,10 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                             <input type="text" class="packerz-qa-input" data-label="${safeLabel}" placeholder="..." style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:11px;" data-app-keyup="sopSignoffCheck">
                         </div>
                     `;
-                }
-                else if (q.startsWith('# ')) {
+                } else if (q.startsWith('# ')) {
                     let content = parseInlineMedia(parseInputs(q.substring(2).trim()));
                     html += `<div style="font-size:13px; font-weight:900; color:#10b981; margin-top:8px; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:2px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap;">${content}</div>`;
-                }
-                else if (q.startsWith('> ')) {
+                } else if (q.startsWith('> ')) {
                     let subQ = q.substring(2).trim();
                     let safeSubQ = subQ.replace(/"/g, '&quot;');
                     let content = parseInlineMedia(parseInputs(subQ));
@@ -664,8 +725,7 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                             <span style="display:flex; align-items:center; flex-wrap:wrap;">${content}</span>
                         </label>
                     `;
-                }
-                else {
+                } else {
                     if(q.startsWith('- ')) q = q.substring(2).trim();
                     let safeQ = q.replace(/"/g, '&quot;');
                     let content = parseInlineMedia(parseInputs(q));
@@ -677,19 +737,18 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                     `;
                 }
             });
-            qaList.innerHTML = window.safeHTML(html);
+            if (qaList) qaList.innerHTML = window.safeHTML(html);
 
-            // Hydrate scan row QR codes after innerHTML
+            // Hydrate QR Codes
             if (typeof QRCode !== 'undefined') {
-                document.querySelectorAll('#packerzSopViewerQAList canvas[id^="scan-qr-"]').forEach(el => {
+                document.querySelectorAll('#sopViewerQAList canvas[id^="scan-qr-"]').forEach(el => {
                     const rowId = el.id.replace('scan-qr-', '');
                     const row = document.getElementById(`scanrow-${rowId}`);
                     const value = row ? row.dataset.expected : 'NGZ';
                     QRCode.toCanvas(el, value, { width: 56, margin: 0, color: { dark: '#000', light: '#fff' } }).catch(() => {});
                 });
 
-                // Hydrate inline QR
-                document.querySelectorAll('#packerzSopViewerQAList .sop-qr-canvas').forEach(el => {
+                document.querySelectorAll('#sopViewerQAList .sop-qr-canvas').forEach(el => {
                     try {
                         QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', {
                             margin: 1, width: 45, color: { dark: '#000', light: '#fff' }
@@ -698,9 +757,9 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
                 });
             }
 
-            // Hydrate inline Barcodes
+            // Hydrate Barcodes
             if (typeof JsBarcode !== 'undefined') {
-                document.querySelectorAll('#packerzSopViewerQAList .sop-barcode-svg').forEach(el => {
+                document.querySelectorAll('#sopViewerQAList .sop-barcode-svg').forEach(el => {
                     try {
                         JsBarcode(el, el.dataset.value || 'NEOGLEAMZ', {
                             format: 'CODE128', width: 1.5, height: 40,
@@ -717,24 +776,32 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         }
 
     } catch(err) {
-        body.innerHTML = window.safeHTML(
-            `<div style='padding:40px 20px; text-align:center; color:#ef4444; font-weight:900;'>SOP Hook Failed: ${err.message}<br><br><span style="color:var(--text-muted); font-size:12px; font-weight:normal;">If this item does not strictly require a physical procedure (e.g. Raw Materials or Legacy Orders), you may click COMPLETE below to securely bypass this check.</span></div>`
-        );
-        qaList.innerHTML = window.safeHTML('');
+        if (body) {
+            body.innerHTML = window.safeHTML(
+                `<div style='padding:40px 20px; text-align:center; color:#ef4444; font-weight:900;'>SOP Hook Failed: ${err.message}<br><br><span style="color:var(--text-muted); font-size:12px; font-weight:normal;">If this item does not strictly require a physical procedure (e.g. Raw Materials or Legacy Orders), you may click COMPLETE below to securely bypass this check.</span></div>`
+            );
+        }
+        if (qaList) qaList.innerHTML = window.safeHTML('');
         checkPackerzSopSignoffState();
     }
-}
+};
 
-window.executePackerzSopPrint = function(printType) {
+window.loadPackerzActiveSOP = async function(orderId, sku, recipe) {
+    return window.loadActiveSOP(orderId, sku, recipe, 'packerz');
+};
+
+window.executeSopPrint = function(printType) {
     try {
-        if(!currentPackerzQaRecipe || !currentPackerzSopData) {
-            sysLog("No active Packerz SOP data available to print.", true);
+        const recipe = window.currentActiveSopRecipe;
+        const sopData = window.currentActiveSopData;
+        if(!recipe || !sopData) {
+            sysLog("No active SOP data available to print.", true);
             return;
         }
 
-        let pName = currentPackerzQaRecipe;
-        let steps = currentPackerzSopData.steps || [];
-        let qaChecks = currentPackerzSopData.qaChecks || [];
+        let pName = recipe;
+        let steps = sopData.steps || [];
+        let qaChecks = sopData.qaChecks || [];
 
         // Safety check
         if(!Array.isArray(steps)) steps = Object.keys(steps).map(k => steps[k]);
@@ -771,7 +838,6 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
                 html += `<div class="header" style="color:#F59E0B; border-left-color:#F59E0B;">MANDATORY QA CHECKS</div>`;
                 qaChecks.forEach((qa, idx) => {
                     let parsedHTML = typeof parseProductionTelemetryLine === 'function' ? parseProductionTelemetryLine(qa, idx) : qa;
-                    // Inject empty checkbox if it's not a header
                     if (qa.startsWith('# ')) {
                         html += `<div class="step-content" style="margin-top:15px; margin-bottom:10px;">${parsedHTML}</div>`;
                     } else {
@@ -812,9 +878,11 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
         setTimeout(() => win.print(), 700);
         
     } catch(e) {
-        sysLog(`Print Packerz SOP Error: ${e.message}`, true);
+        if(typeof sysLog === 'function') sysLog(`Print SOP Error: ${e.message}`, true);
     }
-}
+};
+
+window.executePackerzSopPrint = window.executeSopPrint;
 
 function checkPackerzSopSignoffState() {
     const checks = document.querySelectorAll('.packerz-qa-check');
@@ -824,27 +892,31 @@ function checkPackerzSopSignoffState() {
     const inputs = document.querySelectorAll('.packerz-qa-input');
     inputs.forEach(i => { if(i.value.trim() === '') allValid = false; });
 
-    // Gate on unconfirmed scan rows
     document.querySelectorAll('.packerz-scan-row').forEach(row => {
         if (row.dataset.confirmed !== 'true') allValid = false;
     });
 
-    const btnSignoff = document.getElementById('btnPackerzSopSignoff');
-    if(allValid) {
-        btnSignoff.style.opacity = '1';
-        btnSignoff.style.cursor = 'pointer';
-        btnSignoff.onclick = signoffPackerzQA;
-    } else {
-        btnSignoff.style.opacity = '0.5';
-        btnSignoff.style.cursor = 'not-allowed';
-        btnSignoff.onclick = null;
+    const btnSignoff = document.getElementById('btnSopSignoff') || document.getElementById('btnPackerzSopSignoff');
+    if(btnSignoff) {
+        if(allValid) {
+            btnSignoff.style.opacity = '1';
+            btnSignoff.style.cursor = 'pointer';
+            btnSignoff.onclick = signoffPackerzQA;
+        } else {
+            btnSignoff.style.opacity = '0.5';
+            btnSignoff.style.cursor = 'not-allowed';
+            btnSignoff.onclick = null;
+        }
     }
 }
 
 async function signoffPackerzQA() {
-    if(!currentPackerzQaOrderId || !currentPackerzQaSku) return;
+    const orderId = window.currentActiveSopOrderId || currentPackerzQaOrderId;
+    const sku = window.currentActiveSopSku || currentPackerzQaSku;
+    const recipe = window.currentActiveSopRecipe || currentPackerzQaRecipe;
 
-    // Snag telemetry object map
+    if(!orderId || !sku) return;
+
     let telemetryData = [];
     document.querySelectorAll('.packerz-qa-check').forEach(c => {
         telemetryData.push({ type: 'check', text: c.getAttribute('data-label'), valid: c.checked });
@@ -853,30 +925,44 @@ async function signoffPackerzQA() {
         telemetryData.push({ type: 'input', text: i.getAttribute('data-label'), value: i.value.trim() });
     });
 
-    // Natively stamp the physical QA clearance via the Edge Ledger
     try {
         if(supabaseClient) {
-            const { error: updErr } = await supabaseClient.from('sales_ledger')
-                .update({
-                    qa_cleared_at: new Date().toISOString()
-                })
-                .eq('order_id', currentPackerzQaOrderId)
-                .eq('storefront_sku', currentPackerzQaSku);
+            if (window.currentActiveSopType === 'packerz') {
+                const { error: updErr } = await supabaseClient.from('sales_ledger')
+                    .update({
+                        qa_cleared_at: new Date().toISOString()
+                    })
+                    .eq('order_id', orderId)
+                    .eq('storefront_sku', sku);
 
-            if (updErr) {
-                console.error("QA Ledger Update silently rejected heavily:", updErr);
-                alert("Critical Database Warning: Your QA Signoff was not committed to the ledger! " + updErr.message);
-                return; // halt execution
+                if (updErr) {
+                    console.error("QA Ledger Update silently rejected heavily:", updErr);
+                    alert("Critical Database Warning: Your QA Signoff was not committed to the ledger! " + updErr.message);
+                    return;
+                }
+            } else {
+                // For Batchez/Layerz, clear QA in production_wos table!
+                const { error: updErr } = await supabaseClient.from('production_wos')
+                    .update({
+                        qa_cleared_at: new Date().toISOString(),
+                        qa_user: window.currentActiveUser || 'System'
+                    })
+                    .eq('wo_id', orderId);
+
+                if (updErr) {
+                    console.error("QA Production WO Update rejected:", updErr);
+                    alert("Critical Database Warning: Your QA Signoff was not committed! " + updErr.message);
+                    return;
+                }
             }
         }
-        // Fire-and-forget: archive a full SOP snapshot at QA sign-off moment using securely captured telemetry
-        archiveSOPSnapshot(currentPackerzQaOrderId, currentPackerzQaSku, currentPackerzQaRecipe, telemetryData);
+        archiveSOPSnapshot(orderId, sku, recipe, telemetryData);
     } catch(err) {
         console.warn("Audit tracking mathematically failed on the Edge.", err);
     }
 
-    const rowId = `qa-row-${currentPackerzQaOrderId}-${currentPackerzQaSku}`;
-    const btnId = `qa-btn-${currentPackerzQaOrderId}-${currentPackerzQaSku}`;
+    const rowId = `qa-row-${orderId}-${sku}`;
+    const btnId = `qa-btn-${orderId}-${sku}`;
 
     const row = document.getElementById(rowId);
     if(row) {
@@ -895,23 +981,34 @@ async function signoffPackerzQA() {
         btn.style.color = 'white';
     }
 
-    const capturedOrderId = currentPackerzQaOrderId;
+    const capturedOrderId = orderId;
     closePackerzSopViewer();
-    validatePackerzAssemblyButton(capturedOrderId);
+    if (window.currentActiveSopType === 'packerz') {
+        validatePackerzAssemblyButton(capturedOrderId);
+    } else {
+        if (typeof window.renderActiveWO === 'function') window.renderActiveWO(capturedOrderId);
+    }
 }
 
-function closePackerzSopViewer() {
-    document.getElementById('packerzSopViewerModal').style.display = 'none';
+window.closePackerzSopViewer = function() {
+    const modal = document.getElementById('sopViewerModal');
+    if (modal) modal.style.display = 'none';
+    window.isActiveSopLiveEditing = false;
     window.isPackerzLiveEditing = false;
     currentPackerzQaOrderId = null;
     currentPackerzQaSku = null;
     currentPackerzQaRecipe = null;
+    window.currentActiveSopOrderId = null;
+    window.currentActiveSopSku = null;
+    window.currentActiveSopRecipe = null;
+    window.currentActiveSopType = null;
+    window.currentActiveSopData = null;
     const btnEdit = document.getElementById('btnPackerzLiveToggleEdit');
     if (btnEdit) {
         btnEdit.innerHTML = '✏️ EDIT';
         btnEdit.className = 'btn-blue';
     }
-}
+};
 
 /**
  * Executes the final order assembly completion, updating the internal fulfillment status to "Completed"
@@ -2151,7 +2248,7 @@ if (!window.isPackerzListenerBound) {
         if (action === 'openSopTerminal') {
             if(typeof openPackerzSopTerminal === 'function') openPackerzSopTerminal(window.currentPackerzGroupedOrders[btn.dataset.orderId]);
         } else if (action === 'loadActiveSOP') {
-            if(typeof loadPackerzActiveSOP === 'function') loadPackerzActiveSOP(btn.dataset.orderId, btn.dataset.sku, btn.dataset.recipe);
+            if(typeof window.loadActiveSOP === 'function') window.loadActiveSOP(btn.dataset.orderId, btn.dataset.sku, btn.dataset.recipe, 'packerz');
         } else if (action === 'signoffQA') {
             if(typeof signoffPackerzQA === 'function') signoffPackerzQA();
         } else if (action === 'openSOPMediaInline') {

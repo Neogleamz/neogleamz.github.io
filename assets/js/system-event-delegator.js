@@ -246,6 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openSOPMasterModal_prod':
                     window.openSOPMasterModal('production');
                     break;
+                case 'click_window_openSOPMasterModal_packerz':
+                    window.openSOPMasterModal('packerz');
+                    break;
                 case 'click_window_openArchiveExplorer_bat':
                     window.openArchiveExplorer('batchez');
                     break;
@@ -806,8 +809,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openSOPTokenGuide':
                     openSOPTokenGuide();
                     break;
-                case 'click_if_typeof_toggleHorizontalPrev':
-                    if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('productionSopLeftPane', 'masterSopPreviewCol', this);;
+                case 'click_toggleInlinePreview':
+                    if (typeof window.toggleHorizontalPreview === 'function') {
+                        window.toggleHorizontalPreview('sopViewerLeftPane', 'sopViewerPreviewCol', el);
+                    }
+                    break;
+                case 'click_toggleDashboardPreview':
+                    if (typeof window.toggleHorizontalPreview === 'function') {
+                        window.toggleHorizontalPreview('productionSopLeftPane', 'masterSopPreviewCol', el);
+                    }
+                    break;
+                case 'click_printActiveSOP':
+                    if (typeof window.executeSopPrint === 'function') {
+                        window.executeSopPrint();
+                    }
+                    break;
+                case 'click_saveLiveInlineSOP':
+                    if (typeof window.saveLiveInlineSOP === 'function') {
+                        window.saveLiveInlineSOP();
+                    }
+                    break;
+                case 'click_addInlineSOPRow':
+                    {
+                        const area = document.getElementById('sopViewerBody');
+                        if (area) {
+                            let newRow = document.createElement('div');
+                            const prodId = el.getAttribute('data-prodid') || 'unknown';
+                            const sopType = el.getAttribute('data-soptype') || 'packerz';
+                            newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, prodId, sopType));
+                            let rowNode = newRow.firstChild;
+                            if (rowNode) area.appendChild(rowNode);
+                        }
+                    }
+                    break;
+                case 'click_addDashboardSOPRow':
+                    {
+                        const area = document.getElementById('sopMasterEditorArea');
+                        if (area) {
+                            let newRow = document.createElement('div');
+                            const prodId = el.getAttribute('data-prodid') || 'unknown';
+                            const sopType = el.getAttribute('data-soptype') || 'batches';
+                            newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, prodId, sopType));
+                            let rowNode = newRow.firstChild;
+                            if (rowNode) area.appendChild(rowNode);
+                        }
+                    }
                     break;
                 case 'click_addSOPRow_this':
                     addSOPRow(el);
@@ -1284,15 +1330,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_toggleHorizontalPreview':
                     if(window.toggleHorizontalPreview) window.toggleHorizontalPreview(el.getAttribute('data-left'), el.getAttribute('data-preview'), el);
                     break;
-                case 'click_addInlineSOPRow':
-                    if(window.addInlineSOPRow) window.addInlineSOPRow(el.getAttribute('data-grp'));
-                    break;
-                case 'click_toggleInlineEditor':
-                    if(window.toggleInlineEditor) window.toggleInlineEditor(el.getAttribute('data-grp'));
-                    break;
-                case 'click_saveInlineSopBlock':
-                    if(window.saveInlineSopBlock) window.saveInlineSopBlock(el.getAttribute('data-grp'), el.getAttribute('data-rawname'));
-                    break;
                 case 'click_deleteAllArchive':
                     if(window.deleteAllArchive) window.deleteAllArchive();
                     break;
@@ -1370,6 +1407,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.initUnifiedSopResizer === 'function') {
                         const targetLeftPane = document.getElementById('packerzInlineSopLeftPane') ? 'packerzInlineSopLeftPane' : 'packerzLiveSopLeftPane';
                         window.initUnifiedSopResizer(event, targetLeftPane, 'packerzLiveSopSplitWrapper', null, true);
+                    }
+                    break;
+                case 'mousedown_initLiveSopResize_event':
+                    if (typeof window.initUnifiedSopResizer === 'function') {
+                        window.initUnifiedSopResizer(event, 'sopViewerLeftPane', 'sopViewerSplitWrapper', null, true);
                     }
                     break;
                 case 'mousedown_initFlyoutResizer_event':
