@@ -110,14 +110,43 @@ window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = '
     `;
 };
 
-// Map old local function name to global function just in case
-function generateEditableSOPRow(s, idx, prodId = 'unknown', sopType = 'batches') { return window.generateEditableSOPRow(s, idx, prodId, sopType); }
+// Redundant generateEditableSOPRow wrapper removed under Boy Scout Mandate
 
 let currentSopMode = 'production'; // 'production' or '3d'
 
 function openSOPMasterModal(mode = 'production') {
     currentSopMode = mode;
-    document.getElementById('sopMasterTitle').innerText = (mode === '3d') ? '📝 LAYERZ SOP EDITOR' : '📝 BATCHEZ SOP EDITOR';
+    let title = '📝 BATCHEZ SOP EDITOR';
+    let borderColor = 'rgba(16,185,129,0.3)';
+    let headerBorder = '2px solid #10b981';
+    let titleColor = '#10b981';
+    
+    if (mode === '3d') {
+        title = '📝 LAYERZ SOP EDITOR';
+        borderColor = 'rgba(14,165,233,0.3)';
+        headerBorder = '2px solid #0ea5e9';
+        titleColor = '#0ea5e9';
+    } else if (mode === 'packerz') {
+        title = '📝 PACKERZ SOP EDITOR';
+        borderColor = 'rgba(59,130,246,0.3)';
+        headerBorder = '2px solid #3b82f6';
+        titleColor = '#3b82f6';
+    }
+    
+    const container = document.querySelector('#sopMasterModal .massive-container');
+    if (container) {
+        container.style.borderColor = borderColor;
+    }
+    const header = document.querySelector('#sopMasterModal div[style*="padding:15px 30px"]');
+    if (header) {
+        header.style.borderBottom = headerBorder;
+    }
+    const titleEl = document.getElementById('sopMasterTitle');
+    if (titleEl) {
+        titleEl.innerText = title;
+        titleEl.style.color = titleColor;
+    }
+    
     populateSOPDropdown();
     document.getElementById('sopMasterModal').style.display = 'flex';
     renderMasterSOP();
@@ -138,6 +167,15 @@ function populateSOPDropdown() {
                 options += `<option value="${String(p).replace(/"/g, '&quot;')}">🖨️ ${p}${time ? ' (' + time + 'm)' : ''}</option>`;
             }
         });
+    } else if (currentSopMode === 'packerz') {
+        let sorted = Object.keys(productsDB).sort();
+        let retail  = sorted.filter(p => !isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
+        let subs    = sorted.filter(p =>  isSubassemblyDB[p] && !(productsDB[p] && productsDB[p].is_3d_print) && !(productsDB[p] && productsDB[p].is_label));
+        let prints  = sorted.filter(p => productsDB[p] && productsDB[p].is_3d_print && !(productsDB[p] && productsDB[p].is_label));
+        const grp = (label, icon, arr) => arr.length ? `<optgroup label="${label}">${arr.map(p => `<option value="${String(p).replace(/"/g,'&quot;')}">${icon} ${p}</option>`).join('')}</optgroup>` : '';
+        options += grp('📦 RETAIL PRODUCTS', '📦', retail);
+        options += grp('⚙️ SUB-ASSEMBLIES',  '⚙️',  subs);
+        options += grp('🖨️ 3D PRINTS',       '🖨️',  prints);
     } else {
         // Grouped like RECIPEZ: 📦 Retail → ⚙️ Sub-Assemblies
         let sorted = Object.keys(productsDB).sort();
@@ -151,17 +189,18 @@ function populateSOPDropdown() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function renderMasterSOP() {
+async function renderMasterSOP() {
     try {
         const wrapper = document.getElementById('productionSopSplitWrapper');
         if(!wrapper) return;
         
         const p = document.getElementById('sopMasterProductSelect').value;
+        const sopType = currentSopMode === '3d' ? 'layerz' : (currentSopMode === 'packerz' ? 'packerz' : 'batches');
         if(!p) {
             wrapper.innerHTML = window.safeHTML(
                 window.buildUnifiedSopLayoutHTML({
                     isEdit: true,
-                    sopType: 'batches',
+                    sopType: sopType,
                     prodId: 'unknown',
                     qaText: '',
                     rowsHtml: `<div style='color:var(--text-muted); text-align:center; padding:40px; font-size:14px; font-style:italic;'>Select an item above to start writing instructions.</div>`
@@ -170,25 +209,56 @@ function renderMasterSOP() {
             if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
             return;
         }
-        let dbPayload = sopsDB[p];
+
+        wrapper.innerHTML = window.safeHTML(
+            `<div style="padding:40px; text-align:center; color:#10b981; font-weight:900; font-style:italic;">Fetching structural SOP payload from Supabase Edge...</div>`
+        );
+
         let steps = [];
         let qaChecks = [];
-        if (dbPayload) {
-            if (Array.isArray(dbPayload)) { steps = dbPayload; }
-            else if (typeof dbPayload === 'object') {
-                steps = dbPayload.steps || [];
-                qaChecks = dbPayload.qaChecks || [];
+
+        if (sopType === 'packerz') {
+            const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', p);
+            const data = rows && rows.length > 0 ? rows[0] : null;
+            if(data) {
+                const instructionJson = JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}');
+                steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
+                qaChecks = instructionJson.qaChecks || [];
+                sopsDB[p] = { qaChecks, steps };
+            } else {
+                steps = [{}];
+                qaChecks = [];
+            }
+        } else {
+            const { data: rows, error: _selectErr } = await supabaseClient.from('production_sops').select('*').eq('product_name', p);
+            const data = rows && rows.length > 0 ? rows[0] : null;
+            if(data) {
+                const instructionJson = typeof data.steps === 'string' ? JSON.parse(data.steps) : data.steps;
+                steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
+                qaChecks = instructionJson.qaChecks || [];
+                sopsDB[p] = { qaChecks, steps };
+            } else {
+                let dbPayload = sopsDB[p];
+                if (dbPayload) {
+                    if (Array.isArray(dbPayload)) { steps = dbPayload; }
+                    else if (typeof dbPayload === 'object') {
+                        steps = dbPayload.steps || [];
+                        qaChecks = dbPayload.qaChecks || [];
+                    }
+                }
+                if (steps.length === 0) steps = [{}];
             }
         }
+
         let mappedSteps = steps.map(s => typeof s === 'string' ? {text: s, attachments: []} : s);
         if(mappedSteps.length === 0) mappedSteps = [{}];
         let stepsHtml = "";
-        mappedSteps.forEach((s, idx) => { stepsHtml += generateEditableSOPRow(s, idx, p, 'batches'); });
+        mappedSteps.forEach((s, idx) => { stepsHtml += window.generateEditableSOPRow(s, idx, p, sopType); });
         
         wrapper.innerHTML = window.safeHTML(
             window.buildUnifiedSopLayoutHTML({
                 isEdit: true,
-                sopType: 'batches',
+                sopType: sopType,
                 prodId: p,
                 qaText: qaChecks.join('\n'),
                 rowsHtml: stepsHtml
@@ -198,7 +268,7 @@ function renderMasterSOP() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function addSOPRow(btn) { try { let pId = btn ? btn.getAttribute('data-prodid') : 'unknown'; let sType = btn ? btn.getAttribute('data-soptype') : 'batches'; let newRow = document.createElement('div'); newRow.innerHTML = window.safeHTML(generateEditableSOPRow({}, 999, pId, sType)); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
+function addSOPRow(btn) { try { let pId = btn ? btn.getAttribute('data-prodid') : 'unknown'; let sType = btn ? btn.getAttribute('data-soptype') : 'batches'; let newRow = document.createElement('div'); newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, pId, sType)); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
 function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) { sysLog("UI Error removing SOP step: " + e.message, true); } }
 function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) { sysLog("UI Error moving SOP up: " + e.message, true); } }
 function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) { sysLog("UI Error moving SOP down: " + e.message, true); } }
@@ -338,8 +408,18 @@ window.saveMasterSOP = async function() {
         sysLog(`Saving Master SOP for ${p}`);
         setMasterStatus("Saving...", "mod-working");
 
-        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'});
-        if(error) throw new Error(error.message);
+        if (currentSopMode === 'packerz') {
+            const dbPayload = {
+                internal_recipe_name: p,
+                required_box_sku: null,
+                instruction_json: JSON.stringify(payload)
+            };
+            const { error } = await supabaseClient.from('pack_ship_sops').upsert(dbPayload, { onConflict: 'internal_recipe_name' });
+            if(error) throw new Error(error.message);
+        } else {
+            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'});
+            if(error) throw new Error(error.message);
+        }
 
         setMasterStatus("Saved!", "mod-success");
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
@@ -1424,72 +1504,21 @@ function renderActiveWO(id) {
                     let isExpanded = localStorage.getItem('batchezSopExpanded_' + grp.id) === 'true';
                     let disp = isExpanded ? 'block' : 'none';
                     let chev = isExpanded ? '▼' : '▶';
-                    let isEditing = window.activeInlineSopEditors && window.activeInlineSopEditors[grp.id] === true;
-                    if(isEditing) { disp = 'block'; chev = '▼'; }
 
                     htmlOut += `
                     <div class="sop-grp-card" id="sopgrp_${grp.id}" draggable="true" data-grp-id="${grp.id}" data-prod-name="${wo.product_name.replace(/'/g, "\\'")}" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:6px; margin-bottom:12px; transition:transform 0.2s;">
-                        <div class="sop-grp-header-click" data-grp-id="${grp.id}" style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${isEditing ? '#F59E0B' : '#0ea5e9'}; font-weight:bold; font-size:13px; color:var(--text-heading);">
+                        <div class="sop-grp-header-click" data-grp-id="${grp.id}" style="background:var(--bg-bar); padding:8px 12px; border-radius: 6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #0ea5e9; font-weight:bold; font-size:13px; color:var(--text-heading);">
                             <div style="flex-grow:1; pointer-events:none;">
-                                ${grp.title} ${isEditing ? ' <span style="color:#F59E0B; font-size:11px; font-weight:900;">[ INLINE EDIT MODE ]</span>' : ''}
+                                ${grp.title}
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <button class="btn-slate sop-print-btn" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="font-size:10px; padding:2px 8px;">🖨️ PRINT SOP</button>
-                                <button class="${isEditing ? 'btn-red-muted' : 'btn-orange-muted'} sop-edit-btn" data-grp-id="${grp.id}" style="font-size:10px; padding:2px 8px;">${isEditing ? '✕ CANCEL' : '🔒 EDIT'}</button>
+                                <button class="btn-orange-muted sop-edit-btn" data-grp-id="${grp.id}" data-raw-name="${grp.rawName.replace(/'/g, "\\'")}" style="font-size:10px; padding:2px 8px;">🔒 EDIT</button>
                                 <div class="sop-chev-btn" data-grp-id="${grp.id}" style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" id="sopgrp_icon_${grp.id}">${chev}</div>
                             </div>
                         </div>
                         <div id="sopgrp_body_${grp.id}" style="display:${disp}; padding:10px 15px; border-top:1px solid var(--border-color);">
                     `;
-
-                    if(isEditing) {
-                        let mappedSteps = grp.steps.map(s => typeof s !== 'string' ? s : {text: s, attachments: []});
-                        if(mappedSteps.length === 0) mappedSteps = [{}];
-                        let stepsHtml = '';
-                        mappedSteps.forEach((s, idx) => {
-                            stepsHtml += window.generateEditableSOPRow(s, idx, wo.product_name, 'batches');
-                        });
-
-                        const layoutHtml = window.buildUnifiedSopLayoutHTML({
-                            isEdit: true,
-                            sopType: 'batches',
-                            prodId: wo.product_name,
-                            grpId: grp.id,
-                            qaText: grp.qa.join('\n'),
-                            rowsHtml: stepsHtml
-                        });
-
-                        htmlOut += `
-                            <!-- Layout Container (Side-by-side with resizer) -->
-                            <div id="inlineContainer_${grp.id}" style="display:flex; flex-direction:row; width:100%; border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
-                                ${layoutHtml}
-                            </div>
-                        </div>
-                        <script>
-                        setTimeout(() => {
-                            if(typeof inlineRenderTelemetryPreview==='function') inlineRenderTelemetryPreview('${grp.id}');
-
-                            let savedOrder = localStorage.getItem('inlineSopSwapOrder_${grp.id}');
-                            if(savedOrder === 'right-left') {
-                                let c = document.getElementById('inlineContainer_${grp.id}');
-                                let l = document.getElementById('inlineLeftPane_${grp.id}');
-                                let r = document.getElementById('inlineRightPane_${grp.id}');
-                                let z = document.getElementById('inlineResizer_${grp.id}');
-                                if(c && l && r && z) { c.insertBefore(r, z); c.insertBefore(z, l); }
-                            }
-
-                            let rz = document.getElementById('inlineResizer_${grp.id}');
-                            if(rz) {
-                                rz.addEventListener('mousedown', (e) => {
-                                    if(typeof window.initUnifiedSopResizer === 'function') {
-                                        window.initUnifiedSopResizer(e, 'inlineLeftPane_${grp.id}', 'inlineContainer_${grp.id}', 'inlinePreviewContainer_${grp.id}', true);
-                                    }
-                                });
-                            }
-                        }, 20);
-                        </script>
-                        `;
-                    } else {
                         if (grp.qa.length === 0 && grp.steps.length === 0) {
                             htmlOut += `<div style="color:var(--text-muted); font-size:11px; font-style:italic;">No steps configured.</div>`;
                         } else {
@@ -1565,9 +1594,7 @@ function renderActiveWO(id) {
                 sList.querySelectorAll('.sop-grp-header-click').forEach(el => {
                     let grpId = el.getAttribute('data-grp-id');
                     el.addEventListener('click', () => { 
-                        if(!(window.activeInlineSopEditors && window.activeInlineSopEditors[grpId])) {
-                            toggleBatchezSopGroup(grpId); 
-                        }
+                        toggleBatchezSopGroup(grpId); 
                     });
                 });
                 sList.querySelectorAll('.sop-print-btn').forEach(btn => {
@@ -1575,8 +1602,12 @@ function renderActiveWO(id) {
                     btn.addEventListener('click', (e) => { e.stopPropagation(); window.openSopPrintModal('production', rawName); });
                 });
                 sList.querySelectorAll('.sop-edit-btn').forEach(btn => {
-                    let grpId = btn.getAttribute('data-grp-id');
-                    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleInlineEditor(grpId); });
+                    let rawName = btn.getAttribute('data-raw-name');
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const activeMode = currentSopMode === '3d' ? 'layerz' : 'batches';
+                        window.loadActiveSOP(wo.wo_id, wo.sku || '', rawName, activeMode, true);
+                    });
                 });
                 sList.querySelectorAll('.sop-chev-btn').forEach(btn => {
                     let grpId = btn.getAttribute('data-grp-id');
@@ -2600,7 +2631,7 @@ window.addInlineSOPRow = function(grpId) {
     try {
         let newRow = document.createElement('div');
         newRow.innerHTML = window.safeHTML(
-            typeof generateEditableSOPRow === 'function' ? generateEditableSOPRow({}, 999) : ''
+            typeof window.generateEditableSOPRow === 'function' ? window.generateEditableSOPRow({}, 999) : ''
         );
         let rowNode = newRow.firstChild;
         let area = document.getElementById('inlineSopSteps_' + grpId);
