@@ -299,7 +299,7 @@ Known verified tables currently in active use across the JavaScript modules:
 - `inventory_snapshots`: Point-in-time recovery points. Fields: `id` (PK), `name`, `snapshot_data` (JSONB - full consumption array), `created_at`, `created_by`.
 - `app_settings`: Global configurations (e.g. `paper_profiles`).
 - `raw_orders`, `raw_parcel_summary`, `raw_parcel_items`: Webhook inbound raw data caches.
-- `socialz_audience`: Outreach CRM for skaters (`name`, `is_favorite`).
+- `socialz_audience`: Outreach CRM for skaters (`name`, `is_favorite`, `avatar_url`).
 
 ### Task Engine (ERP Command Center)
 - `projectz`: Top-level Asana-style hierarchical container for tracking initiatives. Fields: `title`, `color_hex`, `visibility`, `health_status`, `is_archived`.
