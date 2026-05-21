@@ -23,7 +23,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟠 P1 High Priority (Core Features & Bugs)
 
 ## 🟡 P2 Medium Priority (Enhancements)
-- [ ] `feat/task-engine-always-show-no-section` : **Always Render Empty "No Section" Bucket** - Task Engine: Ensure that an empty "No Section" bucket (with the "+ Add Task..." dropzone) is always rendered natively in all views (Inbox, My Tasks, Projects, etc.), even if there are zero tasks currently without a section. This allows users to instantly create a task without having to create a section first. [🤖 Gemini 1.5 Pro] [🧠 TBD / 5k] [💸 TBD / $0.02]
+
 
 ---
 
@@ -48,6 +48,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Always Render Empty "No Section" Bucket**
+*(Shipped v1.0.43 — 2026-05-20)*
+- [x] `feat/task-engine-always-show-no-section` : **Always Render Empty "No Section" Bucket** - Task Engine: Ensure that an empty "No Section" bucket (with the "+ Add Task..." dropzone) is always rendered natively in all views (Inbox, My Tasks, Projects, etc.), even if there are zero tasks currently without a section. This allows users to instantly create a task without having to create a section first. [🤖 Gemini 1.5 Pro] [🧠 85k / 5k] [💸 $0.20 / $0.02]
 
 ### Target: `main`
 **Epic: Shopify Missing Order Sync (Hotfix)**
