@@ -18,6 +18,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🚨 P0 Critical (Immediate Blocker)
+- [ ] `bug/shopify-missing-order-sync` : **Shopify Missing Order Sync** - Investigate why order 1043 (completed in Shopify) failed to import into the application via webhook/sync. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
 
 ### 🟠 P1 High Priority (Core Features & Bugs)
 
