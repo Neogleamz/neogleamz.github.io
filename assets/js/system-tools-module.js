@@ -2520,9 +2520,9 @@ window.buildUnifiedSopLayoutHTML = function(options) {
                   <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px; width: 100% !important;" ${addRowClickAttr}>+ ADD PROCEDURE STEP</button>
                </div>`;
 
-    const mousedownHandler = sopType === 'packerz'
-        ? (isInline ? 'mousedown_initPackerzLiveSopResize_event' : 'mousedown_initPackerzSopResize_event')
-        : 'mousedown_initProductionSopResize_event';
+    const mousedownHandler = isInline
+        ? (sopType === 'packerz' ? 'mousedown_initPackerzLiveSopResize_event' : '')
+        : (sopType === 'packerz' ? 'mousedown_initPackerzSopResize_event' : 'mousedown_initProductionSopResize_event');
 
     return `
         <div id="${leftPaneId}" style="flex:0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:${isInline ? '15px' : '0 20px 0 0'}; background:${isInline ? 'var(--bg-body)' : 'transparent'}; border-right:1px solid ${isInline ? 'var(--border-color)' : 'transparent'}; overflow:hidden;">
