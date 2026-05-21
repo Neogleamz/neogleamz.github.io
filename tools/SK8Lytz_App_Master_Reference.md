@@ -399,8 +399,16 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 
 ## 🌐 7. Edge Functions & Webhooks
 
-### A. Active Shopify Webhook Infrastructure
+### A. Active Shopify Webhook Infrastructure (`shopify-webhook`)
 The `shopify-webhook` Edge Function natively processes inbound JSON payloads directly from Shopify. Because Shopify requires OAuth Dev Apps for historical API pulls, this application relies **strictly** on live Webhook pushes for operational data.
+
+**CRITICAL DEPLOYMENT FLAG:** The `shopify-webhook` Edge Function MUST be deployed with the `--no-verify-jwt` flag (`npx supabase functions deploy shopify-webhook --no-verify-jwt`). If deployed with default JWT verification, Supabase will reject Shopify's HMAC payloads with a 401 Unauthorized error before they reach the parser.
+
+### B. Force Sync Proxy Architecture (`shopify-force-sync`)
+To gracefully handle dropped webhooks without requiring terminal scripts or sacrificing native deduplication logic, the system utilizes a `shopify-force-sync` Edge Function.
+* **Security:** Deployed with standard JWT verification. Can only be invoked securely from the frontend authenticated UI.
+* **Architecture:** It utilizes the `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` secrets to query the Shopify REST API for a specific Order ID.
+* **Data Parity:** Instead of duplicating complex parsing logic, it cryptographically signs the fetched JSON payload and *proxies* it locally via POST request directly to the `shopify-webhook` endpoint. This guarantees 100% data parity and leverages existing idempotency locks.
 
 **Required Shopify Admin Configuration:**
 To ensure data flows correctly into the `sales_ledger`, the following Webhooks MUST be manually configured in the Shopify Admin Panel (Settings -> Notifications -> Webhooks) pointing to the Supabase Edge Function URL:

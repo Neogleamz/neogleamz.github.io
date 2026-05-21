@@ -18,7 +18,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ### 🚨 P0 Critical (Immediate Blocker)
-- [🚀] `bug/shopify-missing-order-sync` : **Shopify Missing Order Sync** - Investigate why order 1043 (completed in Shopify) failed to import into the application via webhook/sync. [🤖 Gemini 1.5 Pro] [🧠 85k / 10k] [💸 $0.20 / $0.05]
+
 
 ### 🟠 P1 High Priority (Core Features & Bugs)
 
@@ -47,6 +47,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Shopify Missing Order Sync (Hotfix)**
+*(Shipped v1.0.43 — 2026-05-20)*
+- [🚀] `bug/shopify-missing-order-sync` : **Shopify Missing Order Sync** - Investigate why order 1043 (completed in Shopify) failed to import into the application via webhook/sync. [🤖 Gemini 1.5 Pro] [🧠 85k / 10k] [💸 $0.20 / $0.05]
 
 ### Target: `main`
 **Epic: Infinite Nested Subtasks & UI Auto-Fit Density**
