@@ -130,6 +130,123 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **The Stacking Pattern**: To eliminate `position: absolute` for layered UI (badges, overlays, buttons), use the project-standard `.grid-stack` architecture:
   ```css
   .grid-stack { display: grid; }
+### Dynamic Event Delegation
+* **Global Interaction Controller**: Rather than inline DOM handlers (`onclick="..."`) scattered throughout the HTML, the application utilizes a centralized, native `system-event-delegator.js`.
+* **Action Tokens**: All interactive elements MUST be tagged with native data attributes like `data-click`, `data-change`, or `data-input` containing specific string tokens (e.g., `data-click="closeModal"`).
+* **The Intercept**: The delegator bounds to `document.body` and natively catches all bubbled interactions. It maps the `data-*` tokens directly to legacy functions within standard `switch()` matrices, providing maximum DOM performance and mitigating memory leaks.
+
+### Sitewide Real-Time Synchronization (Zero-Cache Protocol)
+* **Global Websocket Channel**: `system-realtime-sync.js` initializes a global Supabase Realtime channel (`neogleamz-global-sync`) listening to all exposed PostgreSQL tables for `INSERT`, `UPDATE`, and `DELETE` payloads.
+* **Active Focus Guard**: To prevent the UI from aggressively re-rendering while the user is actively typing, the sync module monitors standard DOM focus events (`input`, `textarea`, `[contenteditable]`). If focused, updates are buffered; once blurred, the accumulated payload is processed and the DOM is repainted.
+* **In-Memory Caches**: Rather than triggering massive `fetch()` sweeps, real-time broadcasts inject or modify the targeted object directly inside the global state arrays (e.g., `taskEngineDB`, `productionDB`) before calling the contextual `render()` function.
+
+### DOM Security & Injection (safeHTML)
+* **The safeHTML Protocol**: All dynamically generated HTML strings MUST be injected using `window.safeHTML(string)`. This relies on DOMPurify to strip away XSS vectors.
+* **Inline Handlers Scrubbed**: `DOMPurify` will violently scrub all inline JavaScript execution attributes (`onclick`, `onchange`, `ondragstart`, etc.) from HTML strings.
+* **The Solution**: When generating complex dynamic DOM elements (like lists or SOP groups), you MUST assign explicit CSS classes or `data-*` attributes within the template string. Immediately following the `innerHTML = window.safeHTML(html)` assignment, you MUST natively attach event handlers via `querySelectorAll` and `addEventListener()`. Relying on inline string execution will result in dead UI components.
+
+### Local State Caching Matrix
+* **Synchronous Speed Priority**: `localStorage` is used exclusively for global toggles, persistent states, and zero-latency configs.
+* **Storage Keys**:
+  * `neogleamz_default_lead_time`: Sets the global fallback ROP lead time (in days) if a raw good does not have a unique one set.
+---
+
+## 🎨 2. UI & Front-End Architecture Standards
+The CSS system is hardcoded into the massive `index.html` style block using native CSS Variables.
+
+### A. The Z-Index Authority Hierarchy
+* **0-1**: Base DOM Elements
+* **10**: Drag Resizers (`.h-resizer`, `.v-resizer`)
+* **20**: Sticky Table Headers (`<th>`)
+* **50**: Custom `.pane-header-bar`
+* **500**: Custom Dropdown Panels (Multi-Select wrappers)
+* **10000+**: `.modal-overlay` wrappers (Ensures Modals ALWAYS win over dropsdowns)
+
+### B. Global Action Button Matrix
+Buttons follow a 3-intensity system (Muted, Standard/Ghost, Neon). Use the following semantic colors and intensity suffixes to maintain UI coherence:
+
+**Color Semantics:**
+* **🟢 Green**: Positive commits, saves, submits, creations.
+* **🔴 Red**: Destructive actions, resets, closes, deletes.
+* **🟠 Orange / Brand**: Inline properties, editing modes, and configuration tools.
+* **🔵 Blue / Slate**: Neutral tools, nav, safe auxiliary tasks.
+
+**The 3-Intensity Bordered System:**
+* **Neon (`.btn-[color]-neon`)**: Highest priority. Solid vibrant background. Use for primary call-to-actions (e.g. `btn-green-neon` for "Save Profile").
+* **Standard Ghost (`.btn-[color]`)**: Neutral priority. Translucent background with a corresponding solid outline border (e.g. `.btn-red` for "Delete"). NOTE: `.btn-ghost-[color]` classes (e.g. `.btn-ghost-red`) strictly govern color schemes but omit border mapping. To render properly, they MUST be paired with `.btn-ghost-base` in the HTML class array to draw the physical boundary box.
+* **Muted Ghost (`.btn-[color]-muted`)**: Lowest priority. Translucent background with a lighter translucent outline border. Perfect for secondary cancel flows (e.g. `.btn-red-muted` for "Cancel").
+
+* **Special Rules:** All async Database/API buttons MUST inject tactile loading via the global wrapper `executeWithButtonAction('btnId', 'SYNCING...', '✅ SAVED!', async () => { ... })`. Silent payloads are strictly forbidden.
+
+### C. Executive Panes & Layout Geometry
+* **Split-Panes:** All split interfaces MUST use `<div class="bom-layout">` separated by an `.h-resizer` that explicitly binds to `onmousedown="initNeoSidebarResizer(event)"`.
+* **⚠️ Inline Resize Listener Pattern (Memory Safety):** When resize logic is injected via dynamic `<script>` blocks (e.g. inside `renderActivePrintJob`, `renderWOList`), `document.addEventListener('mousemove'/'mouseup')` MUST use **named function declarations**, never anonymous arrow functions. Anonymous functions cannot be passed to `removeEventListener`, causing compounding listener accumulation on every re-render. Canonical pattern:
+  ```js
+  function doXyzResize(e) { /* resize logic */ }
+  function stopXyzResize() {
+      isDragging = false;
+      document.removeEventListener('mousemove', doXyzResize);
+      document.removeEventListener('mouseup', stopXyzResize);
+  }
+  document.addEventListener('mousemove', doXyzResize);
+  document.addEventListener('mouseup', stopXyzResize);
+  ```
+* **Pure Flex Fluid Headers:** Executive headers (`.pane-header-bar`) must be structured organically utilizing pure Flexbox. Titles (`.pane-header-title`) and action blocks (`.top-controls`) must naturally flow as standard flex items and are strictly forbidden from utilizing `position: absolute` or translation hacks. To mathematically prevent UI overlapping during horizontal squeeze, rigid containers containing buttons or text must enforce `min-width: max-content` boundries, forcing the flexible center wrappers to assume 100% of the flex-shrink burden cleanly. The header must expand vertically (`height: auto`) and wrap when content collides, ensuring perfect scaling dynamically at any view width.
+* **No Spacers:** Do NOT use empty HTML `<div>` elements as visual spacers or layout controls. Unused blocks must be explicitly set to `display: none;`.
+
+### J. Dynamic HTML Event Exception
+* **The `onclick=` Exemption:** While the primary UI components in `index.html` strictly adhere to the Vanilla Event Delegator pattern via `data-click` and `data-change` attributes (Rule §1), **dynamically injected HTML via JS template literals** (e.g., dynamically built table rows, dynamic checklist generation) are explicitly exempt. They may utilize inline `onclick="functionName()"` bindings.
+* **Rationale:** Since the `system-event-delegator.js` matrix relies on precompiled `switch` tokens, managing dynamic tokens on the fly is highly fragile. Safely scoping localized events inside dynamic layout injection blocks is acceptable and mathematically sound compared to attempting complex mutation observers.
+
+### K. Modal Table Sorting & Data Matrix Standards
+* **Data Matrix Layout:** For data-dense modals (e.g., `ltv-metrics-modal`), rely on `display: grid` with `grid-template-columns` utilizing `fr` units (e.g., `repeat(4, 1fr)`) to render KPI summary blocks efficiently across the top horizontal axis without relying on heavy flex constraints. Modal containers must expand horizontally via `max-width: 1000px; max-height: 90vh` to properly accommodate dense analytical tables.
+* **Modal Sort Flags:** Unlike main Executive Panes that rely on global persistent configurations, Modal table headers MUST use locally isolated custom state sort flags (e.g., `window._ltvSortKey`, `window._ltvSortAsc`) triggered strictly by dedicated native data tokens (e.g., `data-ltvsort`). Overloading existing Pane tokens (like `data-ceosort`) risks cross-contaminating view states between the background and the overlay.
+* **Cohort Intelligence Ledger:** The LTV Metrics Modal acts as a granular, order-level transaction ledger. It MUST NOT sum pseudo-returns, zero-intent orders (Warranty, Gifts, ignored rows) or purely physical exchanges (Exchange Replacements) into a customer's repeat trajectory. Additionally, the decrypted short PII hash reference (e.g., `[a3c9b1f]`) MUST be explicitly rendered and bound to bidirectional sorting logic (`data-ltvsort="pii"`) so operators can linearly align distinct purchases originating from the same anonymous client.
+
+### D. Master Emojis & Item Archetypes
+Consistently map these tokens globally across dropdowns, tables, and Hub cards:
+* 📦 Retail Products
+* ⚙️ Sub-Assemblies
+* 🖨️ 3D Prints
+* 🏷️ Custom Labelz
+* 🔩 Raw Materials
+
+### E. SOP Editor Standardization (Batchez, Layerz, Packerz)
+* **Button Anchoring:** All command buttons ("SAVE", "EDIT", "PRINT") must anchor exclusively to the **top-right** of the header `.pane-header-actions`. Left-side is reserved strictly for breadcrumbs.
+* **Unified Telemetry Parsing:** ALL checklist previews MUST utilize `parseProductionTelemetryLine` logic to process `# Headers`, `> Subtext`, `[INPUT]`, `[SCAN]`, `[IMG]`, `[BARCODE]`, and `[QR]`.
+* **Multi-Select Panels:** Never use raw `<select multiple>`. Use absolute-positioned custom `.ms-panel` wrappers with checkboxes to maintain aesthetic continuity.
+* **Direct File Uploads:** All file attachments natively route through `triggerSopDirectUpload()`. Files are safely uploaded to the Supabase `sop-media` bucket utilizing dynamic context paths (`sops/{sop_type}/{product_id}/{timestamp}_{filename}`) and their resulting public URLs are injected back into the checklist natively via `[IMG:url]` or `[MEDIA:url]` tokens.
+
+### F. Explorer Memory & Immutability
+* **Source-Aware Accounting:** Financial webhook data (Shopify, Parcels) is fundamentally Read-Only. Users cannot manually "type over" original ingested strings. Corrections must be derived algorithmically via engine transaction tags.
+* **Mathematical Idempotency (Hub Cards):** All metrics requiring aggregate mathematical summation across the entire application (e.g., Total Orderz, Total Goods Cost) MUST execute a strict JavaScript `Set()` based deduplication pre-flight gate. Iterating raw arrays containing multi-item orders will trigger geometric inflation of cost values if physical Order IDs are not successfully isolated prior to calculation.
+* **Archive Explorer:** All archived/deleted records must use the `.archive-card` expandable accordion. Hard-delete UI nodes must utilize `stopPropagation()` to shield them from misclicks.
+* **Data Table Memory:** Header sorting events must explicitly hook into isolated, pane-specific configuration objects (e.g., `currentDatazSort` vs `currentEditzSort`) rather than shared global ones, preventing layout bleeding. They must hook into `window.saveSort('keyName', obj)` and initialize with `window.getSavedSort('keyName')` to persist unique, decoupled grid layouts horizontally across caching refreshes.
+* **Version Bumping:** When altering core logic, `system-version.js` MUST be bumped manually to purge live `.com` clients.
+
+### G. Modal Close Button Standard
+* **Positioning:** All modal headers must use `position: relative`. The close button is `position: absolute; top: 50%; right: 16px; transform: translateY(-50%)`.
+* **Style:** MUST use `class="modal-close-btn"` with the explicit text `✕ CLOSE`.
+* **Dimensions:** Standardized at `height: 32px` with `padding: 0 16px` to ensure a clear touch target and premium aesthetic.
+* **Why:** Consistent with §2B (Red = destructive/close), and the absolute-position pattern ensures the title remains visually centered regardless of header padding.
+
+### H. The Sandbox Preview Enforcer (`customCommitFn`)
+* **The Rule:** Any CSV or JSON file uploaded that fundamentally modifies the core Ledgers (Salez, Orders, Parcels) MUST natively route through `openSandboxModal()`. 
+* **The Architecture:** Raw data must *not* be de-duplicated or wiped by the parsing function beforehand. Let the Sandbox grid physically render all rows visually to the user.
+* **The Commit Hook:** Execution logic and data deduplication must only occur inside the `customCommitFn` callback when the user clicks 'Upload & Sync'. This enforces explicit user consent before data hits the Supabase instance, preventing runaway blind overwrites.
+
+### I. Scraper Foundry (Visual Extraction Engine)
+* **Row Integrity Architecture:** The Scraper Foundry leverages a strict Two-Step Parent-Child bounding algorithm. 
+* **Execution Constraint:** Global string queries (`document.querySelectorAll`) are forbidden for child fields to prevent cross-row layout corruption. The engine MUST identify the Parent Row wrapper first, count the rows, and then map all child elements *relative* to the specific instance of the outer wrapper. Missing DOM elements in anomalous rows will safely degrade to `""` rather than misaligning the underlying matrix array.
+
+### I. WebRTC Scanner Layouts & iOS Compatibility
+* **Dual-Card Architecture:** When building inline hardware camera scanners (like the Cycle Count engine), you must NEVER use abrasive full-screen blackout modals. You must deploy a responsive `flex-wrap` layout (`align-items: stretch`) where the Primary Form and the Scanner Card lock into a rigid side-by-side array natively.
+* **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#barcode-reader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
+
+### L. Hardened Layout Patterns (Zero-Trust)
+* **The Stacking Pattern**: To eliminate `position: absolute` for layered UI (badges, overlays, buttons), use the project-standard `.grid-stack` architecture:
+  ```css
+  .grid-stack { display: grid; }
   .grid-stack > * { grid-area: 1 / 1; }
   ```
 * **Utility Overlays**:
@@ -142,7 +259,8 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **Fluid Grid Constraints**: To prevent data-heavy columns (like Storefront SKU, Recipe Name, Source, Location) from blowing out the bounds of Flexbox or CSS Grid layouts, you MUST wrap their native `<td>` or container elements with the `.trunc-col` class.
 * **Class Definition**: The `.trunc-col` class natively enforces `white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: clamp(100px, 15vw, 250px); cursor: pointer;`. 
 * **Interaction**: Hovering or clicking (focus) natively overrides the constraint to `max-width: none !important; position: relative; z-index: 100;` displaying the full string in an elevated pop-out.
----
+* **Extreme Auto-Fit Density Trap (`width: 0px`)**: If a table demands extreme column shrink-wrapping (e.g. matching column width exactly to the header text), `table-layout: fixed` MUST be paired with an inline `width: 0px !important;` injected directly into the `<table>` element. Native browser engines silently abort the fixed-layout algorithm if a table is `width: max-content` or `width: auto`, destroying column boundaries. Forcing `0px` physical bounds mathematically traps the browser, making it absolutely respect the `<th>` widths while elegant ellipsis truncation manages the overflowing data inside.
+---
 
 ### N. Universal Category Header Standardization
 * **The Template:** All collapsible category or accordion headers across all modules (Inventory, Recipez, Task Engine) MUST use the `.neo-category-row` class.
