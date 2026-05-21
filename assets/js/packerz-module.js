@@ -63,6 +63,13 @@ injectPackerzStyles();
  * @property {Array<{sku: string, recipe: string, qty: number, transaction_type: string}>} items
  */
 
+/**
+ * Queries Supabase edge nodes to retrieve all orders marked globally as incomplete
+ * ("Awaiting Assembly") and updates the awaiting orders queue UI in real time.
+ * @async
+ * @function fetchUnfulfilledOrders
+ * @returns {Promise<void>} Resolves when the unfulfilled orders queue has been fetched and rendered.
+ */
 async function fetchUnfulfilledOrders() {
     try {
         if (!supabaseClient) return console.error("Supabase client not initialized.");
@@ -175,6 +182,13 @@ function getItemBarcodeValue(itemName) {
 // Track scan confirmations per session (reset on modal open)
 const scanConfirmations = new Map(); // rowId → true/false
 
+/**
+ * Opens the interactive Packerz SOP terminal for a specific order group, updating the active queue
+ * and rendering all individual item cards with their specific QA status and guidelines.
+ * @function openPackerzSopTerminal
+ * @param {Object} orderGroup - The grouped order object containing order details and items.
+ * @returns {void}
+ */
 function openPackerzSopTerminal(orderGroup) {
     const activeQueue = document.getElementById('packerzActiveQueue');
     if (!activeQueue) return;
@@ -391,6 +405,16 @@ window.renderPackerzLiveInlineTelemetryPreview = function() {
     }
 };
 
+/**
+ * Loads the active Standard Operating Procedure (SOP) view/edit pane for a given order, SKU, and recipe.
+ * Clears scanner telemetry, opens the modal, and renders active checklist guidelines.
+ * @async
+ * @function loadPackerzActiveSOP
+ * @param {string|number} orderId - The target Order ID.
+ * @param {string} sku - The SKU of the item being checked.
+ * @param {string} recipe - The recipe name.
+ * @returns {Promise<void>} Resolves when the active SOP modal has been loaded and rendered.
+ */
 async function loadPackerzActiveSOP(orderId, sku, recipe) {
     currentPackerzQaOrderId = orderId;
     currentPackerzQaSku = sku;
@@ -908,6 +932,14 @@ function closePackerzSopViewer() {
     currentPackerzQaRecipe = null;
 }
 
+/**
+ * Executes the final order assembly completion, updating the internal fulfillment status to "Completed"
+ * and setting the timestamp in the Supabase sales ledger.
+ * @async
+ * @function executePackerzCompletion
+ * @param {string|number} orderId - The ID of the order being completed.
+ * @returns {Promise<void>} Resolves when the completion update is fully synced with the remote database.
+ */
 async function executePackerzCompletion(orderId) {
     if(!confirm(`Are you absolutely sure you want to officially mark Order ${orderId} as completely assembled?`)) return;
 
@@ -966,6 +998,13 @@ async function executePackerzCompletion(orderId) {
     }
 }
 
+/**
+ * Unarchives a completed order, returning it to the active queue and dynamically adjusting inventory values.
+ * @async
+ * @function unarchivePackerzOrder
+ * @param {string|number} orderId - The target Order ID.
+ * @returns {Promise<void>} Resolves when the order unarchival process is complete.
+ */
 window.unarchivePackerzOrder = async function(orderId) {
     if(!confirm(`Are you absolutely sure you want to UNARCHIVE Order ${orderId} and return it to the active queue?`)) return;
 
