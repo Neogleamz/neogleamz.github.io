@@ -2410,60 +2410,27 @@ window.buildUnifiedSopLayoutHTML = function(options) {
         `;
     }
 
-    // EDIT STATE FOR ALL (BATCHEZ, LAYERZ, PACKERZ - DASHBOARD AND INLINE)
+    // EDIT STATE FOR ALL (BATCHEZ, LAYERZ, PACKERZ)
     const checklistHeader = sopType === 'packerz' ? '3. CHECKLIST' : 'CHECKLIST';
     const richTextHeader = sopType === 'packerz' ? '4. Packing Instructions (Rich Text)' : '4. Rich Text Instructions';
     
-    let printBtn, uploadBtn, photoBtn, guideBtn, previewBtn;
-    
-    if (isInline) {
-        printBtn = `<button class="sop-print-btn" data-click="click_printActiveSOP" style="background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981;">🖨️ Print</button>`;
-        uploadBtn = `<button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="sopViewerQA" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase">☁️ Upload</button>`;
-        photoBtn = `<button data-click="click_openSOPSnapshotCamera_inline" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;">📸 Photo</button>`;
-        guideBtn = `<button data-click="click_openSOPTokenGuide" style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B;">❓ Guide</button>`;
-        previewBtn = `<button data-click="click_toggleInlinePreview" style="background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6;">👁️ Preview</button>`;
-    } else {
-        printBtn = `<button class="sop-print-btn" data-click="click_printActiveSOP" style="background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981;">🖨️ Print</button>`;
-        uploadBtn = `<button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="productionAdminQA" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase">☁️ Upload</button>`;
-        photoBtn = `<button data-click="click_openSOPSnapshotCamera_dashboard" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;">📸 Photo</button>`;
-        guideBtn = `<button data-click="click_openSOPTokenGuide" style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B;">❓ Guide</button>`;
-        previewBtn = `<button data-click="click_toggleDashboardPreview" style="background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6;">👁️ Preview</button>`;
-    }
+    let printBtn = `<button class="sop-print-btn" data-click="click_printActiveSOP" style="background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981;">🖨️ Print</button>`;
+    let uploadBtn = `<button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="productionAdminQA" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase">☁️ Upload</button>`;
+    let photoBtn = `<button data-click="click_openSOPSnapshotCamera_dashboard" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;">📸 Photo</button>`;
+    let guideBtn = `<button data-click="click_openSOPTokenGuide" style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B;">❓ Guide</button>`;
+    let previewBtn = `<button data-click="click_toggleDashboardPreview" style="background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6;">👁️ Preview</button>`;
 
-    const qaTextareaId = isInline ? 'sopViewerQA' : 'productionAdminQA';
-    const qaPreviewId = isInline ? 'sopViewerQAPreview' : 'productionAdminQAPreview';
-    const rowsWrapperId = isInline ? 'sopViewerBody' : 'sopMasterEditorArea';
-    
-    const addRowClickAttr = isInline
-        ? 'data-click="click_addInlineSOPRow"'
-        : 'data-click="click_addDashboardSOPRow"';
+    const qaTextareaId = 'productionAdminQA';
+    const qaPreviewId = 'productionAdminQAPreview';
+    const rowsWrapperId = 'sopMasterEditorArea';
+    const addRowClickAttr = 'data-click="click_addDashboardSOPRow"';
 
     const qaTextValue = options.qaText || '';
     const rowsHtml = options.rowsHtml || '';
     
-    let bottomActionsHtml = '';
-    if (isInline && sopType !== 'packerz') {
-        bottomActionsHtml = `
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; padding-top:15px; border-top:1px solid var(--border-color); width: 100%;">
-                <button class="btn-red-muted" style="padding:8px 15px; font-size:12px; width: auto !important;" data-click="click_closePackerzSopViewer">✕ Cancel Changes</button>
-                <button class="btn-green-neon" style="padding:8px 25px; font-size:14px; font-weight:900; width: auto !important;" data-click="click_saveLiveInlineSOP">💾 SAVE SOP MASTER BLUEPRINT</button>
-            </div>
-        `;
-    }
-    
-    const mainInputHandler = isInline
-        ? 'data-input="input_renderInlineSopTelemetryPreview"'
-        : 'data-input="input_renderDashboardTelemetryPreview"';
+    const mainInputHandler = 'data-input="input_renderDashboardTelemetryPreview"';
 
-    const rightPaneInner = isInline
-        ? `<div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                  <h3 style="margin:0; color:var(--text-heading); font-size:16px;">${richTextHeader}</h3>
-              </div>
-              <div id="${rowsWrapperId}" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex-grow:1;">${rowsHtml}</div>
-              <button class="btn-blue-muted" style="padding:10px; font-size:12px; font-weight:bold; margin-top:15px; width: 100% !important;" ${addRowClickAttr} data-prodid="${prodId}" data-soptype="${sopType}">+ ADD PROCEDURE STEP</button>
-           </div>`
-        : `<div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
+    const rightPaneInner = `<div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                       <h3 style="margin:0; color:var(--text-heading); font-size:16px;">${richTextHeader}</h3>
                   </div>
@@ -2471,12 +2438,12 @@ window.buildUnifiedSopLayoutHTML = function(options) {
                   <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px; width: 100% !important;" ${addRowClickAttr} data-prodid="${prodId}" data-soptype="${sopType}">+ ADD PROCEDURE STEP</button>
                </div>`;
 
-    const mousedownHandler = isInline ? 'mousedown_initLiveSopResize_event' : 'mousedown_initProductionSopResize_event';
+    const mousedownHandler = 'mousedown_initProductionSopResize_event';
 
     return `
-        <div id="${leftPaneId}" style="flex:0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:${isInline ? '15px' : '0 20px 0 0'}; background:${isInline ? 'var(--bg-body)' : 'transparent'}; border-right:1px solid ${isInline ? 'var(--border-color)' : 'transparent'}; overflow:hidden;">
+        <div id="${leftPaneId}" style="flex:0 0 65%; min-width:30px; display:flex; flex-direction:row; gap:15px; padding:0 20px 0 0; background:transparent; border-right:1px solid transparent; overflow:hidden;">
             <!-- Column 1: Config & Input -->
-            <div id="${isInline ? 'sopViewerInputCol' : ''}" style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
+            <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:320px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                     <h3 style="margin:0; color:var(--text-heading); font-size:16px;">${checklistHeader}</h3>
                     <div class="sop-editor-checklist-btn-bar">
@@ -2512,9 +2479,8 @@ window.buildUnifiedSopLayoutHTML = function(options) {
         
         <div id="${resizerId}" class="h-resizer" data-mousedown="${mousedownHandler}"></div>
         
-        <div id="${rightPaneId}" style="flex:1; padding-left:${isInline ? '15px' : '12px'}; display:flex; flex-direction:column; overflow-y:auto; background:${isInline ? 'var(--bg-body)' : 'transparent'}; border-left:1px solid ${isInline ? 'var(--border-color)' : 'transparent'};">
+        <div id="${rightPaneId}" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto; background:transparent; border-left:1px solid transparent;">
             ${rightPaneInner}
-            ${bottomActionsHtml}
         </div>
     `;
 };
