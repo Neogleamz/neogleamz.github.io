@@ -251,6 +251,19 @@ function renderActivePrintJob(id) {
                 rSpan.innerText = `${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`}`;
             }
         }
+        // Active Cleaned timer
+        let cSpan = document.getElementById('layerzCleanedTimerSpan');
+        if (cSpan && cSpan.getAttribute('data-running') === 'true') {
+            let start = parseInt(cSpan.getAttribute('data-start'));
+            let baseline = parseInt(cSpan.getAttribute('data-baseline'));
+            if (!isNaN(start) && !isNaN(baseline)) {
+                let elapsed = baseline + (Date.now() - start);
+                let h = Math.floor(elapsed / 3600000);
+                let m = Math.floor((elapsed % 3600000) / 60000);
+                let s = Math.floor((elapsed % 60000) / 1000);
+                cSpan.innerText = `${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`}`;
+            }
+        }
     }, 1000);
 
     if (job.status === 'Cleaned') {
@@ -339,12 +352,12 @@ function renderActivePrintJob(id) {
                 `;
             } else if (remainingQty > 0) {
                 htmlOut += `
-                    <div style="display:flex; gap:10px; align-items:flex-end;">
-                        <div style="flex:1;">
-                            <label style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:4px; display:block;">Parts on Bed (Qty)</label>
+                    <div style="display:flex; gap:15px; align-items:flex-end;">
+                        <div style="width:140px; flex-shrink:0;">
+                            <label style="font-size:11px; font-weight:bold; color:var(--text-heading); margin-bottom:4px; display:block; white-space:nowrap;">Parts on Bed (Qty)</label>
                             <input type="number" id="layerzNewRunQty" min="1" step="any" value="${remainingQty}" style="width:100%; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); padding:8px; border-radius:6px; font-size:14px; box-sizing:border-box;">
                         </div>
-                        <button class="btn-blue" style="padding:8px 20px; font-weight:bold; height:37px;" data-click="click_startLayerzRun">▶️ START NEW RUN</button>
+                        <button class="btn-blue" style="padding:8px 20px; font-weight:bold; height:37px; flex:1; display:flex; justify-content:center; align-items:center;" data-click="click_startLayerzRun">▶️ START NEW RUN</button>
                     </div>
                 `;
             } else {
@@ -378,6 +391,55 @@ function renderActivePrintJob(id) {
                 htmlOut += `</div></div>`;
             }
             
+            htmlOut += `</div></div>`;
+            mgr.innerHTML = window.safeHTML(htmlOut);
+        }
+    } else if (job.status === 'Cleaned') {
+        const mgr = document.getElementById('layerzRunManager');
+        if (mgr) {
+            let isRunning = wip.stage_start_time && !wip.is_paused;
+            let elapsed = wip.elapsed_cleaned || 0;
+            if (isRunning && wip.stage_start_time) elapsed += (Date.now() - wip.stage_start_time);
+            
+            let h = Math.floor(elapsed / 3600000);
+            let m = Math.floor((elapsed % 3600000) / 60000);
+            let s = Math.floor((elapsed % 60000) / 1000);
+            let timeStr = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+            
+            let htmlOut = `
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
+                <div style="background:var(--bg-bar); padding:10px 15px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0; font-size:14px; color:var(--text-heading);">🛠️ Post-Processing Manager</h3>
+                    <div style="font-size:12px; font-weight:bold; color:var(--text-muted);">
+                        Parts to Clean: <span style="color:#0ea5e9;">${job.qty}</span>
+                    </div>
+                </div>
+                
+                <div style="padding:15px;">
+            `;
+            
+            if (!wip.stage_start_time && elapsed === 0) {
+                // Not started yet
+                htmlOut += `
+                    <div style="display:flex; justify-content:center; padding:20px 0;">
+                        <button class="btn-blue" style="padding:12px 30px; font-weight:bold; font-size:14px; letter-spacing:1px;" data-click="click_togglePrintTimerPause">▶️ START CLEANING</button>
+                    </div>
+                `;
+            } else {
+                // Running or Paused
+                htmlOut += `
+                    <div style="background:rgba(14,165,233,0.1); border:1px solid #0ea5e9; padding:15px; border-radius:8px; display:flex; flex-direction:column; gap:15px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#0ea5e9; font-size:13px;">Cleaning in Progress</strong>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="layerzCleanedTimerSpan" data-running="${isRunning}" data-baseline="${wip.elapsed_cleaned || 0}" data-start="${wip.stage_start_time || ''}" style="font-family:monospace; font-size:16px; font-weight:bold; color:${wip.is_paused ? 'var(--text-muted)' : '#0ea5e9'};">${timeStr}</span>
+                                <button data-click="click_togglePrintTimerPause" class="${wip.is_paused ? 'btn-blue' : 'btn-slate'}" style="padding:6px 12px; font-size:12px;">${wip.is_paused ? '▶️ Resume' : '⏸️ Pause'}</button>
+                            </div>
+                        </div>
+                        <button class="btn-orange" style="padding:10px; font-weight:bold; letter-spacing:1px; width:100%; font-size:14px;" data-click="click_advancePrintStatus_Completed">🏁 COMPLETE CLEANING & RECORD YIELD</button>
+                    </div>
+                `;
+            }
             htmlOut += `</div></div>`;
             mgr.innerHTML = window.safeHTML(htmlOut);
         }
@@ -548,7 +610,7 @@ window.submitFinalizePrint = function() {
     advancePrintStatus('Completed', true, success, failed);
 };
 
-async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTicket, wo_id, label) {
+async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTicket, wo_id, label, skipRecovery = false) {
     let manualUpserts = [];
     const k = partName;
     if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
@@ -594,7 +656,7 @@ async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTic
             }
         }
         
-        if (isYieldEnforced) {
+        if (isYieldEnforced && !skipRecovery) {
             let recoveryLabel = isScrapTicket ? label : `[PRINT FAILURE RECOVERY]`;
             if (typeof addPrintJob === 'function') {
                 await addPrintJob(partName, failedQ, wo_id, recoveryLabel);
@@ -645,9 +707,12 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
         }
 
         // Setup timer for the newly entered stage
-        if (newStatus === 'Printing' || newStatus === 'Cleaned') {
+        if (newStatus === 'Printing') {
             currentWip.stage_start_time = Date.now();
             currentWip.is_paused = false;
+        } else if (newStatus === 'Cleaned') {
+            currentWip.stage_start_time = null;
+            currentWip.is_paused = true;
         } else if (newStatus === 'Completed') {
             currentWip.stage_start_time = null;
         }
@@ -932,7 +997,7 @@ if (typeof window !== 'undefined') {
         
         try {
             let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
-            await executePrintInventoryMath(currentPrintJob.part_name, success, scrap, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label);
+            await executePrintInventoryMath(currentPrintJob.part_name, success, scrap, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label, true);
             
             w.runs.push(r);
             w.active_run = null;

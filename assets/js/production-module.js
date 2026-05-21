@@ -976,7 +976,7 @@ async function validateAndCreateWO() {
             await Promise.all(printPromises);
         }
 
-        workOrdersDB.unshift(wo); document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
+        if (!workOrdersDB.some(w => w.wo_id === wo.wo_id)) { workOrdersDB.unshift(wo); } else { let idx = workOrdersDB.findIndex(w => w.wo_id === wo.wo_id); if(idx !== -1) workOrdersDB[idx] = wo; } document.getElementById('newWOModal').style.display = 'none'; setMasterStatus("Created!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); currentWO = wo; renderWOList(); saveWOOrderPrefs();
     }).catch(e => { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); });
 }
 
