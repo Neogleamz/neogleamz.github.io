@@ -335,6 +335,38 @@ async function runProductionBatch() {
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
 }
 
+window.resetInventoryConsumptionLocally = async function() {
+    inventoryDB = {};
+    if (typeof window.renderInventoryTable === 'function') window.renderInventoryTable();
+    if (typeof window.updateCcMngrStock === 'function') window.updateCcMngrStock();
+};
+
+window.resetInventoryConsumption = async function() {
+    if (!confirm("⚠️ WARNING: This will completely WIPE all inventory and FGI quantities to 0. Are you absolutely sure?")) return;
+    try {
+        setSysProgress(30, 'working');
+        sysLog("Resetting all inventory consumption to zero...");
+        
+        const { error: delErr } = await supabaseClient
+            .from('inventory_consumption')
+            .delete()
+            .neq('item_key', 'system_lock_preventer'); // "delete all" hack
+            
+        if (delErr) throw delErr;
+        
+        await window.resetInventoryConsumptionLocally();
+        
+        setSysProgress(100, 'success');
+        sysLog("Inventory completely reset.");
+        showToast("✅ All stock levels have been wiped.");
+        setTimeout(() => setSysProgress(0, 'working'), 3000);
+    } catch(e) {
+        setSysProgress(100, 'error');
+        sysLog("Reset error: " + e.message, true);
+        showToast("Reset Error: " + e.message, 'error');
+    }
+};
+
 /**
  * Creates a global snapshot of the entire inventory_consumption table.
  * @param {string} name - User-provided name for the snapshot.
