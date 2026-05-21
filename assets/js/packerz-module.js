@@ -468,7 +468,8 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         wrapper.innerHTML = window.safeHTML(
             `<div style='padding:40px; width:100%; text-align:center; color:#3b82f6; font-weight:900; font-style:italic;'>Constructing Inline Admin Workspace...</div>`
         );
-        btnSignoff.style.display = 'none';
+        // Guard against null reference on live-editing toggle state shifts
+        if (btnSignoff) btnSignoff.style.display = 'none';
     }
 
     try {
@@ -476,7 +477,10 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
         // Allow fallback data if error (so we can create a new one inline)
         const instructionJson = data ? JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}') : {steps: [], qaChecks: []};
         currentPackerzSopData = instructionJson;
-        const steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
+        // Return empty array in standard view if no steps are configured, enabling clean fallback UI
+        const steps = instructionJson.steps && instructionJson.steps.length > 0 
+            ? instructionJson.steps 
+            : (window.isPackerzLiveEditing ? [{}] : []);
         const qaChecks = instructionJson.qaChecks || [];
 
         if(window.isPackerzLiveEditing) {
@@ -580,7 +584,8 @@ async function loadPackerzActiveSOP(orderId, sku, recipe) {
 
         if(steps.length === 0) h = `<div style="padding:20px; color:var(--text-muted); font-style:italic;">No visual steps configured. Proceed strictly to QA Checks.</div>`;
 
-        if(data.required_box_sku) {
+        // Guard against missing SOP data from Supabase for ignored or raw materials
+        if(data && data.required_box_sku) {
             h = `<div style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; border-radius:12px; padding:20px; margin-bottom:10px;">
                 <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:5px; letter-spacing:1px;">REQUIRED SHIPPING HARNESS</div>
                 <div style="font-size:18px; font-weight:900; color:var(--text-heading); font-family:monospace;">📦 ${data.required_box_sku}</div>
