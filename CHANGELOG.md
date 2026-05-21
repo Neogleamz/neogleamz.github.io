@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.48] - 2026-05-21
+### Features & Bug Fixes
+- **System Version Telemetry Restoration**: Fixed a critical telemetry disconnect where the "System Ready Unknown" message was being rendered in the Command Center logs. Refactored the `NEOGLEAMZ_VERSION` parsing logic in the global sandbox to strictly utilize `window.NEOGLEAMZ_VERSION` payload mapping, bypassing aggressive ESLint namespace destruction and properly displaying live versions.
+- **Pre-Commit Hook Engine Patched**: Updated the `bump-system-version.js` regex parser to flawlessly mutate the new `window.*` syntax on commits, re-establishing continuous integration parity.
 ## [1.0.47] - 2026-05-21
 ### Features & Bug Fixes
 - **Recursive Subtask Rendering**: Implemented a recursive `renderTaskTree()` function in the Task Engine to elegantly render infinite N-depth nested subtasks, directly fixing a bug where dragging a task into another subtask's wrapper caused its descendants to become invisible.
