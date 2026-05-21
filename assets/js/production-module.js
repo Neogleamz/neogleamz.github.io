@@ -439,7 +439,26 @@ window.saveMasterSOP = async function() {
 
         setMasterStatus("Saved!", "mod-success");
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-        if(typeof currentWO !== 'undefined' && currentWO && currentWO.product_name === p) renderActiveWO(currentWO.wo_id);
+        
+        // Refresh Batchez active Work Order card if matches
+        if(typeof currentWO !== 'undefined' && currentWO && currentWO.product_name === p) {
+            renderActiveWO(currentWO.wo_id);
+        }
+        
+        // Refresh Layerz (3D Print Instructions) if currently viewing the print job
+        if (typeof currentPrintJob !== 'undefined' && currentPrintJob && currentPrintJob.part_name) {
+            let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+            if (cleanPartName === p && typeof renderActivePrintJob === 'function') {
+                renderActivePrintJob(currentPrintJob.id);
+            }
+        }
+        
+        // Refresh Packerz checklist view if currently active
+        if (window.currentActiveSopOrderId && window.currentActiveSopRecipe === p) {
+            if (typeof window.loadActiveSOP === 'function') {
+                window.loadActiveSOP(window.currentActiveSopOrderId, window.currentActiveSopSku, window.currentActiveSopRecipe, window.currentActiveSopType);
+            }
+        }
     }).catch(e => {
         sysLog(e.message, true); setMasterStatus("Error", "mod-error");
     });
