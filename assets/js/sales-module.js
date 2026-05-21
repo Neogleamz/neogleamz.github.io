@@ -1584,3 +1584,85 @@ function renderActualNetList() {
         }, { signal });
     });
 }
+
+
+// --- FORCE SYNC MODAL LOGIC ---
+window.openForceSyncModal = function() {
+    let modal = document.getElementById('force-sync-modal');
+    if(modal) {
+        modal.style.display = 'flex';
+        document.getElementById('forceSyncInput').value = '';
+        document.getElementById('forceSyncStatus').style.display = 'none';
+        document.getElementById('forceSyncInput').focus();
+    }
+};
+
+window.closeForceSyncModal = function() {
+    let modal = document.getElementById('force-sync-modal');
+    if(modal) modal.style.display = 'none';
+};
+
+window.triggerForceSync = async function() {
+    let input = document.getElementById('forceSyncInput').value.trim();
+    if(!input) return;
+    
+    let orderIdStr = input.replace('#', '');
+    let btn = document.getElementById('btnForceSyncSubmit');
+    let statusDiv = document.getElementById('forceSyncStatus');
+    
+    btn.innerHTML = '⚙️ SYNCING...';
+    btn.style.opacity = '0.5';
+    btn.disabled = true;
+    
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = 'rgba(59, 130, 246, 0.1)';
+    statusDiv.style.color = '#3b82f6';
+    statusDiv.style.border = '1px solid rgba(59, 130, 246, 0.3)';
+    statusDiv.innerHTML = `Fetching payload for order #${orderIdStr}...`;
+    
+    try {
+        const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError || !sessionData.session) throw new Error("Authentication failed. Please reload.");
+        
+        // Ensure VITE_SUPABASE_URL is available from env in main JS scope if needed, or we just rely on standard supabase fetch
+        const functionUrl = `${supabaseClient.supabaseUrl}/functions/v1/shopify-force-sync`;
+        
+        const res = await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({ order_id: orderIdStr })
+        });
+        
+        const text = await res.text();
+        let json;
+        try { json = JSON.parse(text); } catch(e) { json = { error: text }; }
+        
+        if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+        
+        statusDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+        statusDiv.style.color = '#10b981';
+        statusDiv.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+        statusDiv.innerHTML = `✅ Success! Order #${orderIdStr} injected natively.`;
+        
+        sysLog(`Force Synced Order #${orderIdStr} successfully!`);
+        
+        // Refresh the ledger
+        if(typeof fetchSalesData === 'function') {
+            setTimeout(() => { fetchSalesData(true); }, 1500);
+        }
+        
+    } catch (err) {
+        console.error(err);
+        statusDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusDiv.style.color = '#ef4444';
+        statusDiv.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+        statusDiv.innerHTML = `❌ Error: ${err.message}`;
+    } finally {
+        btn.innerHTML = '🚀 SYNC NOW';
+        btn.style.opacity = '1';
+        btn.disabled = false;
+    }
+};
