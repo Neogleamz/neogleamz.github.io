@@ -3715,69 +3715,7 @@
             </div>
         </div>
         
-        <div id="productionSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; padding:30px; min-height:0; overflow:hidden;">
-            <!-- Left Pane: Telemetry Editor & Live Preview -->
-            <div id="productionSopLeftPane" style="flex:0 0 65%; min-width:600px; padding-right:20px; display:flex; flex-direction:row; gap:15px; border-right:1px solid transparent;">
-                
-                <!-- Column 1: Config & Input -->
-                <div style="flex:1; background:var(--bg-panel); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
-                        <h3 style="margin:0; color:var(--text-heading); font-size:16px;">CHECKLIST</h3>
-                        <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
-
-                            <button class="sop-print-btn" data-click="click_window_openSopPrintModal_prod" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981; border-radius:5px; cursor:pointer; white-space:nowrap;">🖨️ Print</button>
-
-                            <button data-mousedown="mousedown_sopDirectUpload" data-soptype="batches" data-target-textarea="productionAdminQA" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;" title="Upload File to Supabase">☁️ Upload</button>
-
-                            <button data-click="click_openSOPSnapshotCamera_production" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">📸 Photo</button>
-
-                            <button data-click="click_openSOPTokenGuide" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B; border-radius:5px; cursor:pointer; white-space:nowrap;">❓ Guide</button>
-
-                            <button data-click="click_if_typeof_toggleHorizontalPrev" style="padding:3px 8px; font-size:10px; font-weight:700; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6; border-radius:5px; cursor:pointer; white-space:nowrap;">👁️ Preview</button>
-
-                        </div>
-
-                    </div>
-                    <div style="font-size:11px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; background:var(--bg-bar); padding:8px 12px; border-radius:6px;">
-                        <b style="color:#10b981; font-family:monospace;"># </b>Header &nbsp;·&nbsp;
-                        <b style="color:var(--text-muted); font-family:monospace;">&gt; </b>Subtext &nbsp;·&nbsp;
-                        <b style="color:#F59E0B; font-family:monospace;">[INPUT]</b> Field &nbsp;·&nbsp;
-                        <b style="color:#0ea5e9; font-family:monospace;">[SCAN:itemKey]</b> Bin Scan &nbsp;·&nbsp;
-                        <b style="color:#a78bfa; font-family:monospace;">[IMG:url]</b> Image &nbsp;·&nbsp;
-                        <b style="color:#f472b6; font-family:monospace;">[BARCODE:val]</b> Barcode &nbsp;·&nbsp;
-                        <b style="color:#fb923c; font-family:monospace;">[QR:val]</b> QR Code &nbsp;·&nbsp;
-                        <b style="color:#10b981; font-family:monospace;">[CAMERA]</b> Take Photo
-                        &nbsp;— <span style="color:#ef4444; cursor:pointer; font-weight:900;" data-click="click_openSOPTokenGuide">❓ Full Guide</span>
-                    </div>
-                    <textarea id="productionAdminQA" data-input="input_renderProductionTelemetryPrevi" placeholder="# Checklist Step" style="flex-grow:1; width:100%; padding:15px; border-radius:8px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); resize:none; font-size:12px; font-family:monospace; line-height:1.5; outline:none; min-height:150px; white-space:nowrap;"></textarea>
-                </div>
-
-                <!-- Column 2: Live Preview Render -->
-                <div id="masterSopPreviewCol" style="flex:1; background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; min-width:0;">
-                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">CHECKLIST PREVIEW</div>
-                    <div id="productionAdminQAPreview" style="flex-grow:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; padding-right:10px;">
-                        <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic;">Type in the telemetry editor to preview elements.</div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Resizer Divider — uses global .h-resizer standard -->
-            <div id="productionSopResizer" class="h-resizer" data-mousedown="mousedown_initProductionSopResize_event"></div>
-
-            <!-- Right Pane: Legacy Rich Text Arrays -->
-            <div id="productionSopRightPane" style="flex:1; padding-left:12px; display:flex; flex-direction:column; overflow-y:auto;">
-                <div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3 style="margin:0; color:var(--text-heading); font-size:16px;">4. Rich Text Instructions</h3>
-                    </div>
-                    <div id="sopMasterEditorArea" style="flex-grow:1; display:flex; flex-direction:column; gap:15px; overflow-y:auto;">
-                        <div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px; font-style:italic;">Select a target recipe on the top bar to begin compiling standard operating procedures.</div>
-                    </div>
-                    <button class="btn-green" style="margin-top:20px; padding:15px; font-size:14px; font-weight:bold; letter-spacing:1px; outline:1px dashed #10b981; outline-offset:-4px;" data-click="click_addSOPRow_this">+ ADD PROCEDURE STEP</button>
-                </div>
-            </div>
-        </div>
+        <div id="productionSopSplitWrapper" style="display:flex; flex-direction:row; flex-grow:1; padding:30px; min-height:0; overflow:hidden;"></div>
     </div>
 </div>
 
