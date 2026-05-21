@@ -443,6 +443,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.stopPropagation();
                     if(typeof window.teToggleTaskDone==='function') window.teToggleTaskDone(el.closest('.task-row').getAttribute('data-task-id'));
                     break;
+                case 'click_teToggleSubtaskVisibility':
+                    {
+                        const tId = el.getAttribute('data-task-id');
+                        const wrapperEl = document.getElementById('te-subtasks-wrapper-' + tId);
+                        if (wrapperEl) {
+                            event.stopPropagation();
+                            let isCollapsed = window['teSubtaskState_' + tId] === 'collapsed';
+                            if (isCollapsed) {
+                                wrapperEl.style.display = 'flex';
+                                el.textContent = '▼';
+                                window['teSubtaskState_' + tId] = 'expanded';
+                            } else {
+                                wrapperEl.style.display = 'none';
+                                el.textContent = '▶';
+                                window['teSubtaskState_' + tId] = 'collapsed';
+                            }
+                        }
+                    }
+                    break;
                 case 'click_teToggleTaskDoneInFlyout':
                     if(typeof window.teToggleTaskDone==='function' && window.currentOpenTaskId) {
                         window.teToggleTaskDone(window.currentOpenTaskId);

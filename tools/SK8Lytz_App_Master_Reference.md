@@ -142,6 +142,21 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **Fluid Grid Constraints**: To prevent data-heavy columns (like Storefront SKU, Recipe Name, Source, Location) from blowing out the bounds of Flexbox or CSS Grid layouts, you MUST wrap their native `<td>` or container elements with the `.trunc-col` class.
 * **Class Definition**: The `.trunc-col` class natively enforces `white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: clamp(100px, 15vw, 250px); cursor: pointer;`. 
 * **Interaction**: Hovering or clicking (focus) natively overrides the constraint to `max-width: none !important; position: relative; z-index: 100;` displaying the full string in an elevated pop-out.
+---
+
+### N. Universal Category Header Standardization
+* **The Template:** All collapsible category or accordion headers across all modules (Inventory, Recipez, Task Engine) MUST use the `.neo-category-row` class.
+* **Layout Requirements:** The chevron toggle MUST be positioned on the far left. The title (with emoji) is centered alongside it inside a Flex group. Any counts or badges MUST be positioned on the far right.
+* **Mandatory DOM Structure:**
+  ```html
+  <div class="neo-category-row" data-app-click="toggleAction" data-cat="cat-id">
+      <span style="font-weight:900; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+          <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">▶</span> 
+          <span>📦 CATEGORY NAME</span>
+      </span>
+      <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(Count)</span>
+  </div>
+  ```
 
 ---
 

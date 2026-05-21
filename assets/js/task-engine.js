@@ -250,15 +250,29 @@ function teRenderTaskGrid(filter = null) {
     // 1. Initial UI Hierarchy Safety: Build the COMPLETE list of tasks that belong in this view regardless of search/tag filters.
     // This ensures that if a parent is in the Inbox, we pull its children into the view BEFORE filtering.
     let fullViewTasks = new Set(displayTasks);
-    displayTasks.forEach(t => {
-        if (!t.parent_task_id) {
-            let children = taskEngineDB.taskz.filter(child => child.parent_task_id === t.id && child.status !== 'Archived');
-            children.forEach(c => fullViewTasks.add(c));
-        }
-        if (t.parent_task_id) {
+    
+    function getAllDescendants(taskId) {
+        let children = taskEngineDB.taskz.filter(t => t.parent_task_id === taskId && t.status !== 'Archived');
+        children.forEach(c => {
+            fullViewTasks.add(c);
+            getAllDescendants(c.id);
+        });
+    }
+    
+    function getAllAncestors(taskId) {
+        let t = taskEngineDB.taskz.find(task => task.id === taskId);
+        if (t && t.parent_task_id) {
             let p = taskEngineDB.taskz.find(pt => pt.id === t.parent_task_id);
-            if (p && !p.is_archived) fullViewTasks.add(p);
+            if (p && !p.is_archived) {
+                fullViewTasks.add(p);
+                getAllAncestors(p.id);
+            }
         }
+    }
+    
+    displayTasks.forEach(t => {
+        getAllDescendants(t.id);
+        getAllAncestors(t.id);
     });
     displayTasks = Array.from(fullViewTasks);
 
@@ -293,16 +307,21 @@ function teRenderTaskGrid(filter = null) {
             return matchSearch && matchTag;
         });
 
-        // 2. Post-Filter Hierarchy Safety: Ensure parents of matching tasks are visible so accordions don't break.
+        // 2. Post-Filter Hierarchy Safety: Ensure all ancestors of matching tasks are visible so nested structures don't break.
         let extraIdsToAdd = new Set();
-        displayTasks.forEach(t => {
-            if (t.parent_task_id && !displayTasks.some(p => p.id === t.parent_task_id)) {
-                extraIdsToAdd.add(t.parent_task_id);
+        function ensureAncestors(taskId) {
+            let t = taskEngineDB.taskz.find(tk => tk.id === taskId);
+            if (t && t.parent_task_id) {
+                if (!displayTasks.some(p => p.id === t.parent_task_id) && !extraIdsToAdd.has(t.parent_task_id)) {
+                    extraIdsToAdd.add(t.parent_task_id);
+                }
+                ensureAncestors(t.parent_task_id);
             }
-        });
+        }
+        displayTasks.forEach(t => ensureAncestors(t.id));
         extraIdsToAdd.forEach(id => {
             let task = taskEngineDB.taskz.find(t => t.id === id);
-            if (task) displayTasks.push(task);
+            if (task && !task.is_archived) displayTasks.push(task);
         });
     }
 
@@ -422,13 +441,16 @@ function teRenderTaskGrid(filter = null) {
         let toggleIcon = isCollapsed ? '▶' : '▼';
         
         html += `
-        <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 20px;">
-            <div class="te-section-header" style="margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; cursor: grab;">
-                <div data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">${toggleIcon}</div>
-                <div class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="font-size: 14px; font-weight: bold; color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='${headerColor}20'" onmouseout="this.style.background='transparent'">${group.title}</div>
-                ${group.badgeHtml ? group.badgeHtml : ''}
-                <div style="flex-grow: 1; height: 1px; background: ${headerColor}40; margin-left: 10px;"></div>
-                <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'" onmouseout="this.style.background='transparent'">✖</div>
+        <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 12px;">
+            <div class="te-section-header neo-category-row" style="cursor: grab;">
+                <span style="font-weight:900; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                    <span class="cat-arrow" data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="color:var(--text-muted); width:20px; text-align:center; cursor:pointer;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">${toggleIcon}</span> 
+                    <span class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" onmouseover="this.style.background='${headerColor}20'" onmouseout="this.style.background='transparent'">${group.title}</span>
+                </span>
+                <span style="display:flex; align-items:center; gap:12px;">
+                    ${group.badgeHtml ? group.badgeHtml : ''}
+                    <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted)'">✖</div>
+                </span>
             </div>
             <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: 20px; padding-bottom: 10px;">
         `;
@@ -618,7 +640,7 @@ window.teFormatTimeline = function(startDateStr, dueDateStr) {
     return `${d1.toLocaleDateString('en-US', formatOptions)} - ${d2.toLocaleDateString('en-US', formatOptions)}`;
 };
 
-function teBuildTaskRowHTML(t, isChild) {
+function teBuildTaskRowHTML(t, depth = 0, hasChildren = false) {
     let statusColorClass = 'status-in-progress';
     if (t.status === 'Done' || t.status === 'Completed') statusColorClass = 'status-completed';
     if (t.status === 'Todo' || t.status === 'Backlog') statusColorClass = 'status-todo';
@@ -643,8 +665,12 @@ function teBuildTaskRowHTML(t, isChild) {
     }
 
     let timelineStr = window.teFormatTimeline(meta.start_date, t.due_date);
-    let rowPadding = isChild ? '5px 15px' : '10px 15px';
-    let titleWeight = isChild ? '400' : '500';
+    let rowPadding = '10px 15px';
+    let titleWeight = depth > 0 ? '400' : '500';
+    
+    // Glassmorphism styling based on mockup request
+    let rowBg = depth > 0 ? 'rgba(255, 255, 255, 0.02)' : 'transparent';
+    let borderStyle = depth > 0 ? 'border-left: 2px solid rgba(255, 255, 255, 0.1); border-radius: 4px;' : 'border-bottom: 1px solid rgba(255,255,255,0.05);';
 
     let tagsHtml = '';
     if (meta.tag_ids && Array.isArray(meta.tag_ids)) {
@@ -656,25 +682,37 @@ function teBuildTaskRowHTML(t, isChild) {
         });
     }
 
+    let expandArrowHtml;
+    if (hasChildren) {
+        let isCollapsed = window['teSubtaskState_' + t.id] === 'collapsed';
+        let arrow = isCollapsed ? '▶' : '▼';
+        expandArrowHtml = `<div data-click="click_teToggleSubtaskVisibility" data-task-id="${t.id}" style="cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); opacity: 0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">${arrow}</div>`;
+    } else {
+        expandArrowHtml = `<div style="width: 20px; height: 20px; flex-shrink: 0;"></div>`;
+    }
+    
+    let isDone = (t.status === 'Completed' || t.status === 'Done');
+
     return `
-    <div class="task-row" data-task-id="${t.id}" data-click="click_teOpenTaskContext" style="padding: ${rowPadding}; min-height: unset;">
-        <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-            <input type="checkbox" class="te-task-checkbox" data-id="${t.id}" style="cursor: pointer; width:16px; height:16px; accent-color: var(--primary-color); flex-shrink: 0;" data-change="change_teUpdateMainSelection">
-            <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                <span style="color: white; font-weight: ${titleWeight}; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">${t.title}</span>
+    <div class="task-row" data-task-id="${t.id}" style="padding: ${rowPadding}; min-height: unset; background: ${rowBg}; ${borderStyle} margin-bottom: 2px; transition: all 0.2s ease;">
+        <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex-grow: 1;">
+            ${expandArrowHtml}
+            <input type="checkbox" class="te-task-checkbox" data-id="${t.id}" ${isDone ? 'checked' : ''} style="cursor: pointer; width:16px; height:16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); accent-color: var(--primary-color); flex-shrink: 0;" data-change="change_teUpdateMainSelection">
+            <div data-click="click_teOpenTaskContext" data-task-id="${t.id}" style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; flex-grow: 1;">
+                <span style="color: ${isDone ? 'var(--text-muted)' : 'white'}; text-decoration: ${isDone ? 'line-through' : 'none'}; text-decoration-color: var(--primary-color); text-decoration-thickness: 2px; font-weight: ${titleWeight}; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">${t.title}</span>
                 ${tagsHtml ? `<div style="display: flex; gap: 4px; overflow: hidden; white-space: nowrap;">${tagsHtml}</div>` : ''}
             </div>
         </div>
-        <div style="display: flex; align-items: center; justify-content: center;">
+        <div style="display: flex; align-items: center; justify-content: center;" data-click="click_teOpenTaskContext" data-task-id="${t.id}" style="cursor: pointer;">
             <div style="width: 24px; height: 24px; border-radius: 50%; background: ${ownerBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid var(--bg-panel);" title="${ownerTitle}">${ownerInitials}</div>
         </div>
         <div style="display: flex; justify-content: center;">
             <span class="status-pill ${statusColorClass}" data-click="click_teOpenStatusDropdown" style="position: relative; z-index: 2; cursor: pointer;">${t.status}</span>
         </div>
-        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; justify-content: center;" data-click="click_teOpenTaskContext" data-task-id="${t.id}" style="cursor: pointer;">
             ${timelineStr}
         </div>
-        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: bold; display: flex; align-items: center; justify-content: center;" data-click="click_teOpenTaskContext" data-task-id="${t.id}" style="cursor: pointer;">
             #${(meta.priority || 'normal').toLowerCase()}
         </div>
     </div>
@@ -2116,7 +2154,7 @@ document.addEventListener('keydown', (e) => {
     // Press 'C' to Create Task (placeholder for now)
     if (e.key.toLowerCase() === 'c' && isTaskPlannerOpen) {
         e.preventDefault();
-        console.log('[TaskEngine] Create Task triggered via keyboard shortcut.');
+        // Create Task shortcut triggered
         // FUTURE: document.getElementById('newTaskInput').focus();
     }
 });
