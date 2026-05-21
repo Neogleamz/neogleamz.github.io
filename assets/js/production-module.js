@@ -114,7 +114,7 @@ window.generateEditableSOPRow = function(s, idx, prodId = 'unknown', sopType = '
 
 let currentSopMode = 'production'; // 'production' or '3d'
 
-function openSOPMasterModal(mode = 'production') {
+function openSOPMasterModal(mode = 'production', targetRecipe = null) {
     currentSopMode = mode;
     let title = '📝 BATCHEZ SOP EDITOR';
     let borderColor = 'rgba(16,185,129,0.3)';
@@ -141,6 +141,17 @@ function openSOPMasterModal(mode = 'production') {
     if (header) {
         header.style.borderBottom = headerBorder;
     }
+    
+    const sopSelect = document.getElementById('sopMasterProductSelect');
+    if (sopSelect) {
+        if (targetRecipe) {
+            sopSelect.style.display = 'none';
+            title = `✏️ EDITING SOP: ${targetRecipe}`;
+        } else {
+            sopSelect.style.display = 'block';
+        }
+    }
+    
     const titleEl = document.getElementById('sopMasterTitle');
     if (titleEl) {
         titleEl.innerText = title;
@@ -148,6 +159,11 @@ function openSOPMasterModal(mode = 'production') {
     }
     
     populateSOPDropdown();
+    
+    if (sopSelect && targetRecipe) {
+        sopSelect.value = targetRecipe;
+    }
+    
     document.getElementById('sopMasterModal').style.display = 'flex';
     renderMasterSOP();
 }
@@ -428,29 +444,7 @@ window.saveMasterSOP = async function() {
         sysLog(e.message, true); setMasterStatus("Error", "mod-error");
     });
 }
-window.saveInlineSOP = async function() {
-    if(typeof currentWO === 'undefined' || !currentWO) return;
 
-    await executeWithButtonAction('btnSaveInlineSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
-        const p = currentWO.product_name;
-        let steps = extractSOPDataFromUI('inlineSOPContainer');
-        let existingQa = [];
-        if (sopsDB[p] && typeof sopsDB[p] === 'object' && !Array.isArray(sopsDB[p])) existingQa = sopsDB[p].qaChecks || [];
-        const payload = { qaChecks: existingQa, steps: steps };
-        sopsDB[p] = payload;
-        sysLog(`Saving Inline SOP for ${p}`);
-        setMasterStatus("Saving...", "mod-working");
-
-        const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'});
-        if(error) throw new Error(error.message);
-
-        setMasterStatus("Saved!", "mod-success");
-        setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-        toggleSOPLock();
-    }).catch(e => {
-        sysLog(e.message, true); setMasterStatus("Error", "mod-error");
-    });
-}
 
 function openNewWOModal() {
     document.getElementById('woErrorBox').style.display = 'none';
@@ -1604,8 +1598,7 @@ function renderActiveWO(id) {
                     let rawName = btn.getAttribute('data-raw-name');
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        const activeMode = currentSopMode === '3d' ? 'layerz' : 'batches';
-                        window.loadActiveSOP(wo.wo_id, wo.sku || '', rawName, activeMode, true);
+                        window.openSOPMasterModal('production', rawName);
                     });
                 });
                 sList.querySelectorAll('.sop-chev-btn').forEach(btn => {
