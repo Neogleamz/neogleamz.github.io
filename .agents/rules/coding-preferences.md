@@ -45,3 +45,7 @@ trigger: always_on
 
 ### 6. System Prompt Override (Planning Bypass Protocol)
 - **Bucket List Override:** The deep system heuristic `<planning_mode>` permits bypassing formal implementation plans for "trivially simple" UI or CSS tweaks. **You are strictly forbidden from utilizing this heuristic if the task originates from the `SK8Lytz_Bucket_List.md` ledger (i.e. executed via `[/bucketlist]`).** No matter how small the code modification (even a single line deletion), if it is a formal Epic or Ledger Task, you MUST generate the dual-synced `implementation_plan.md` artifact and HALT for explicit user approval (Step 4 of the workflow). The system heuristic is only valid for completely un-tracked, ad-hoc chat requests.
+
+### 7. The Skeptic's Protocol (Self-Doubt & Verification)
+- **First-Thought Fallacy:** Never blindly trust your first architectural idea or assumption. You must actively doubt your initial intuition and attempt to break your own logic before presenting it.
+- **Verification Over Assumption:** Before executing complex refactors, designing DB schemas, or utilizing new native web APIs, you MUST use your web search tools to verify current industry best practices, browser support matrixes, and updated documentation. Assume your pre-training knowledge may be outdated.
