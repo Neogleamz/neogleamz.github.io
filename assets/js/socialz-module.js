@@ -31,7 +31,7 @@
         let _unavatarCircuitBroken = false;
         setInterval(() => { _unavatarErrors = Math.max(0, _unavatarErrors - 1); }, 2000); // Gradual cooldown
 
-        const avatarObserver = new IntersectionObserver((entries, observer) => {
+        const avatarObserver = new window.IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const img = entry.target;
@@ -59,7 +59,7 @@
                 return;
             }
 
-            const ig = img.getAttribute('data-ig'), tt = img.getAttribute('data-tt'), yt = img.getAttribute('data-yt'), fb = img.getAttribute('data-fb'), p = img.getAttribute('data-provider');
+            const tt = img.getAttribute('data-tt'), yt = img.getAttribute('data-yt'), fb = img.getAttribute('data-fb'), p = img.getAttribute('data-provider');
             if (p === 'instagram') {
                 if (tt) { img.setAttribute('data-provider', 'tiktok'); img.src = `https://unavatar.io/tiktok/${tt}?fallback=false`; }
                 else if (yt) { img.setAttribute('data-provider', 'youtube'); img.src = `https://unavatar.io/youtube/${yt}?fallback=false`; }
@@ -963,7 +963,7 @@
                 const ext = file.name.split('.').pop() || 'jpeg';
                 const filename = `manual_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
                 
-                const { data, error } = await supabaseClient.storage.from('avatars').upload(filename, file, { upsert: true });
+                const { error } = await supabaseClient.storage.from('avatars').upload(filename, file, { upsert: true });
                 if(error) {
                     alert("Upload failed! RLS policy might be blocking Public Inserts: " + error.message);
                     urlInput.value = "";
