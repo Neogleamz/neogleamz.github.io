@@ -161,6 +161,21 @@ function openSOPMasterModal(mode = 'production', targetRecipe = null) {
     populateSOPDropdown();
     
     if (sopSelect && targetRecipe) {
+        // Ensure the option exists dynamically so we never fall back to empty/unselected state
+        let exists = false;
+        for (let i = 0; i < sopSelect.options.length; i++) {
+            if (sopSelect.options[i].value === targetRecipe) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            const opt = document.createElement('option');
+            opt.value = targetRecipe;
+            const prefix = mode === '3d' ? '🖨️ ' : (mode === 'packerz' ? '📦 ' : '🏭 ');
+            opt.text = `${prefix}${targetRecipe}`;
+            sopSelect.appendChild(opt);
+        }
         sopSelect.value = targetRecipe;
     }
     
