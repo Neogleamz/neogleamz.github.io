@@ -65,10 +65,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 **Epic: Infinite Nested Subtasks & UI Auto-Fit Density**
+*(Shipped v1.0.47 — 2026-05-21)*
 - [🚀] `feat/infinite-nested-subtasks` : **Infinite Nested Subtasks** - Task Engine: Support infinite nested subtasks (n-level hierarchy) and drag-and-drop subtask repositioning. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### Target: `main`
 **Epic: ESLint Persistent Warnings Sweep**
+*(Shipped v1.0.43 — 2026-05-18)*
 - [🚀] `debt/eslint-warnings-sweep` : **ESLint Warnings Sweep** - Perform a comprehensive tech debt sweep to resolve the 158 persistent `no-unused-vars` and related ESLint warnings to harden the application and clean up CI output. [🤖 AI Model] [🧠 25k / 25k] [💸 $0.08 / $0.08]
 
 ### Target: `main`
@@ -433,6 +435,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Shipped v.2026.05.17.2248 — 2026-05-17)*
 - [🚀] `fix/task-modal-routing` : **Fix Task Modal Inbox Routing** - When using CTRL+K to open the global task modal, clicking the "go to inbox and create new task" button fails to route the user, while the "manage tags" button routes correctly. Needs DOM routing repair. [🤖 Gemini] [🧠 4.5k / 5k] [💸 $0.01 / $0.02]
 
-### Target: main
+### Target: `main`
 **Epic: Task Engine Project Section Colors**
+*(Shipped v1.0.43 — 2026-05-18)*
 - [🚀] `feat/task-engine-project-section-colors` : **Task Engine Project Section Colors** - Update the task engine UI so that when viewing a project, the sections are the same color as the color picked for that project. [🤖 Gemini 3.1 Pro (High)] [🧠 4k / 5k] [💸 $0.01 / $0.02]
