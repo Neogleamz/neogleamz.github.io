@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.47] - 2026-05-21
+### Features & Bug Fixes
+- **Recursive Subtask Rendering**: Implemented a recursive `renderTaskTree()` function in the Task Engine to elegantly render infinite N-depth nested subtasks, directly fixing a bug where dragging a task into another subtask's wrapper caused its descendants to become invisible.
+- **Master Checkbox Glassmorphism Sync**: Systematically upgraded the master "Select All" table headers and the unified Archive view rows to match the modern `border-radius: 4px` glassmorphism aesthetic utilized by inline tasks, ensuring 100% UI checkbox parity.
 ## [1.0.46] - 2026-05-21
 ### Features & Bug Fixes
 - **Socialz Missing Avatars** (`bug/socialz-missing-avatars`): Updated the Socialz page logic to properly pull and display an avatar for each skater by iterating through their available social media links if the primary one is missing. Implemented a native manual upload UI for edge-case skaters blocked by Unavatar rate limits, storing images directly to Supabase Storage.
