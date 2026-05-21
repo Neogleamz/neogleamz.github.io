@@ -158,7 +158,7 @@ function renderFgiTable() {
             }
         });
     }
-    wrap.innerHTML = h; applyTableInteractivity('fgiTableWrap');
+    wrap.innerHTML = window.safeHTML(h); applyTableInteractivity('fgiTableWrap');
 }
 
 let SUPPLIER_LEAD_TIME_DAYS = parseFloat(localStorage.getItem('neogleamz_default_lead_time')) || 5;
@@ -243,7 +243,7 @@ function renderInventoryTable() {
 
         });
     }
-    wrap.innerHTML = h + `</tbody></table>`; applyTableInteractivity('invTableWrap');
+    wrap.innerHTML = window.safeHTML(h + `</tbody></table>`); applyTableInteractivity('invTableWrap');
 }
 
 async function handleInvEdit(cell, key, p, c, a, sq, mode) {
@@ -472,7 +472,7 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         // Reset Preview Area
         const previewArea = document.getElementById('snapshotPreviewArea');
         const previewActions = document.getElementById('snapshotPreviewActions');
-        if (previewArea) previewArea.innerHTML = '<div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); opacity:0.5;"><span style="font-size:48px;">✅</span><p>Restore Complete.</p></div>';
+        if (previewArea) previewArea.innerHTML = window.safeHTML('<div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); opacity:0.5;"><span style="font-size:48px;">✅</span><p>Restore Complete.</p></div>');
         if (previewActions) previewActions.style.display = 'none';
 
         // Close modal if open
@@ -496,7 +496,7 @@ window.previewInventorySnapshot = async function(snapshotId) {
     if (!previewArea) return;
 
     try {
-        previewArea.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">Analyzing stock impact...</div>';
+        previewArea.innerHTML = window.safeHTML('<div style="padding:40px; text-align:center; color:var(--text-muted);">Analyzing stock impact...</div>');
         previewActions.style.display = 'none';
 
         // 1. Fetch Snapshot & Current Live Data in parallel
@@ -547,11 +547,11 @@ window.previewInventorySnapshot = async function(snapshotId) {
 
         // 4. Render Delta Table
         if (deltas.length === 0) {
-            previewArea.innerHTML = `
+            previewArea.innerHTML = window.safeHTML(`
                 <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#10b981; gap:10px;">
                     <span style="font-size:32px;">🎯</span>
                     <p>Current stock matches snapshot exactly. No changes required.</p>
-                </div>`;
+                </div>`);
             return;
         }
 
@@ -584,7 +584,7 @@ window.previewInventorySnapshot = async function(snapshotId) {
         });
 
         html += `</tbody></table>`;
-        previewArea.innerHTML = html;
+        previewArea.innerHTML = window.safeHTML(html);
 
         // 5. Setup Action Buttons
         previewActions.style.display = 'flex';
@@ -594,7 +594,7 @@ window.previewInventorySnapshot = async function(snapshotId) {
         }
 
     } catch (e) {
-        previewArea.innerHTML = `<div style="padding:40px; text-align:center; color:#ef4444;">Preview Error: ${e.message}</div>`;
+        previewArea.innerHTML = window.safeHTML(`<div style="padding:40px; text-align:center; color:#ef4444;">Preview Error: ${e.message}</div>`);
     }
 };
 
@@ -614,22 +614,22 @@ window.fetchInventorySnapshots = async function() {
         if (!listWrap) return;
 
         if (!data || data.length === 0) {
-            listWrap.innerHTML = '<div style="padding:20px; color:var(--text-muted); text-align:center;">No snapshots found.</div>';
+            listWrap.innerHTML = window.safeHTML('<div style="padding:20px; color:var(--text-muted); text-align:center;">No snapshots found.</div>');
             return;
         }
 
-        listWrap.innerHTML = data.map(s => `
+        listWrap.innerHTML = window.safeHTML(data.map(s => `
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; transition:0.2s hover; margin-bottom:8px; min-width: 0;">
                 <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width: 0; margin-right: 15px;">
                     <span style="font-weight:bold; color:var(--text-main); font-size:13px; line-height:1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${s.name}">${s.name}</span>
                     <span style="font-size:10px; color:var(--text-muted);">${new Date(s.created_at).toLocaleString()}</span>
                 </div>
                 <div style="display:flex; gap:6px; flex-shrink: 0;">
-                    <button class="btn-amber" style="padding:4px 10px; font-size:10px; height:28px; line-height:1; display:flex; align-items:center;" onclick="window.previewInventorySnapshot('${s.id}')">🔬 PREVIEW</button>
-                    <button class="btn-red" style="padding:4px 8px; font-size:10px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); height:28px;" onclick="window.deleteInventorySnapshot('${s.id}')">✕</button>
+                    <button class="btn-amber" style="padding:4px 10px; font-size:10px; height:28px; line-height:1; display:flex; align-items:center;" data-app-click="previewSnapshot" data-id="${s.id}">🔬 PREVIEW</button>
+                    <button class="btn-red" style="padding:4px 8px; font-size:10px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); height:28px;" data-app-click="deleteSnapshot" data-id="${s.id}">✕</button>
                 </div>
             </div>
-        `).join('');
+        `).join(''));
 
     } catch (e) {
         console.error("Snapshot Fetch Error:", e);
@@ -997,8 +997,8 @@ window.renderVelocityzFGI = function() {
     let keys = Object.keys(velocityzState).sort();
     
     if (keys.length === 0) {
-        tbody.innerHTML = 
-            '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">No FGI history found.</td></tr>';
+        tbody.innerHTML = window.safeHTML(
+            '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">No FGI history found.</td></tr>');
         return;
     }
 
@@ -1027,13 +1027,13 @@ window.renderVelocityzFGI = function() {
             <td class="text-right" style="color: #8b5cf6; font-weight: bold;">${mTotal.toFixed(1).replace(/\.?0+$/,'')}</td>
             <td class="text-right">
                 <input type="number" min="0" value="${st.forecastQty}" 
-                       oninput="window.updateVelocityzForecast('${pName.replace(/'/g, "\\'")}', this.value)" 
+                       data-app-input="forecast" data-item="${pName.replace(/'/g, "&apos;")}" 
                        style="width: 70px; text-align: right; background: var(--bg-input); border: 1px solid #f59e0b; color: #f59e0b; font-weight: bold; padding: 4px;">
             </td>
         </tr>`;
     });
     
-    tbody.innerHTML = html;
+    tbody.innerHTML = window.safeHTML(html);
 };
 
 window.buildVelocityzTreeHTML = function(pName, reqQty, isRoot = false, idPath = "") {
@@ -1146,7 +1146,7 @@ window.runVelocityzExplosion = function() {
         html = '<div style="text-align: center; color: var(--text-muted); padding: 50px;">Input forecast targets to explode BOM</div>';
     }
 
-    outContainer.innerHTML = html;
+    outContainer.innerHTML = window.safeHTML(html);
 };
 
 // ========================================================
@@ -1306,12 +1306,12 @@ window.filterCcMngrItems = function() {
     if(!window.cachedCcMngrOptions) return;
     
     if(term === '') {
-        dropdown.innerHTML = window.cachedCcMngrOptions;
+        dropdown.innerHTML = window.safeHTML(window.cachedCcMngrOptions);
         dropdown.style.display = 'none';
         return;
     }
     
-    dropdown.innerHTML = window.cachedCcMngrOptions;
+    dropdown.innerHTML = window.safeHTML(window.cachedCcMngrOptions);
     
     let items = dropdown.querySelectorAll('.cc-dropdown-item');
     items.forEach(o => {
@@ -1323,8 +1323,8 @@ window.filterCcMngrItems = function() {
     if(dropdown.querySelectorAll('.cc-dropdown-item').length > 0) {
         dropdown.style.display = 'block';
     } else {
-        dropdown.innerHTML = 
-            '<div style="padding:10px; color:var(--text-muted); text-align:center;">No items found.</div>';
+        dropdown.innerHTML = window.safeHTML(
+            '<div style="padding:10px; color:var(--text-muted); text-align:center;">No items found.</div>');
         dropdown.style.display = 'block';
     }
 };
@@ -1412,8 +1412,8 @@ window.openCycleCountManager = function() {
     if (labelProds.length > 0) { finalHtml += optGroups.label; finalNativeHtml += nativeGroups.label; }
     if (rawArr.length > 0) { finalHtml += optGroups.raw; finalNativeHtml += nativeGroups.raw; }
     
-    document.getElementById('ccMngrDropdown').innerHTML = finalHtml;
-    select.innerHTML = finalNativeHtml;
+    document.getElementById('ccMngrDropdown').innerHTML = window.safeHTML(finalHtml);
+    select.innerHTML = window.safeHTML(finalNativeHtml);
     window.cachedCcMngrOptions = finalHtml;
     
     let searchEl = document.getElementById('ccMngrSearch');
@@ -1695,6 +1695,8 @@ document.addEventListener('click', (e) => {
     if (action === 'sortInv') { if(typeof sortInventory === 'function') sortInventory(btn.dataset.col); }
     if (action === 'toggleFgiCat') { if(typeof toggleFgiCategory === 'function') toggleFgiCategory(btn.dataset.cat); }
     if (action === 'selectCcItem') { if(typeof selectCcMngrItem === 'function') selectCcMngrItem(btn.dataset.val, btn.dataset.txt); }
+    if (action === 'previewSnapshot') { if(typeof window.previewInventorySnapshot === 'function') window.previewInventorySnapshot(btn.dataset.id); }
+    if (action === 'deleteSnapshot') { if(typeof window.deleteInventorySnapshot === 'function') window.deleteInventorySnapshot(btn.dataset.id); }
 });
 document.addEventListener('input', (e) => {
     if (e.target.dataset.appInput === 'forecast') {
