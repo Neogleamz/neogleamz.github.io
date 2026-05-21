@@ -18,6 +18,11 @@
 
 let ordersDB = [];
 
+/**
+ * Boots the ORDERZ sub-core, pulls dynamic Shopify orders from the global Sales Ledger cache,
+ * and requests list rendering.
+ * @returns {void}
+ */
 window.initOrderzCore = function() {
     try {
         sysLog("Booting ORDERZ Sub-Core...");
@@ -27,29 +32,34 @@ window.initOrderzCore = function() {
     } catch(e) { sysLog('ORDERZ init error: ' + e.message, true); }
 };
 
+/**
+ * Renders the order list table using authorized Shopify order records,
+ * sorting by purchase date (newest first) and rendering up to 100 items.
+ * @returns {void}
+ */
 window.renderOrderzTable = function() {
     try {
         const listBody = document.getElementById('orderzList');
         if (!listBody) return;
 
         if (!ordersDB || ordersDB.length === 0) {
-            listBody.innerHTML = window.safeHTML ? window.safeHTML(
+            listBody.innerHTML = window.safeHTML(
                 `<tr><td colspan="8" style="text-align:center; padding: 50px; color: var(--text-muted);">No Order Data Found in Ledger.</td></tr>`
-            ) : `<tr><td colspan="8" style="text-align:center; padding: 50px; color: var(--text-muted);">No Order Data Found in Ledger.</td></tr>`;
+            );
             return;
         }
 
         let html = '';
         // Sort newest orders first (reverse chronological)
-        let sorted = [...ordersDB].sort((a,b) => new Date(b.sale_date).getTime() - new Date(a.sale_date).getTime());
+        const sorted = [...ordersDB].sort((a, b) => new Date(b.sale_date).getTime() - new Date(a.sale_date).getTime());
 
         // Take top 100 to avoid locking DOM if dataset is large
         sorted.slice(0, 100).forEach(order => {
-            let fStatus = order.financial_status || 'UNKNOWN';
-            let fBadge = fStatus.toLowerCase() === 'paid' ? `<span style="color:#10b981; font-weight:bold;">PAID</span>` : `<span style="color:#f59e0b;">${fStatus}</span>`;
+            const fStatus = order.financial_status || 'UNKNOWN';
+            const fBadge = fStatus.toLowerCase() === 'paid' ? `<span style="color:#10b981; font-weight:bold;">PAID</span>` : `<span style="color:#f59e0b;">${fStatus}</span>`;
 
-            let pStatus = order.fulfillment_status || 'UNFULFILLED';
-            let pBadge = pStatus.toLowerCase() === 'fulfilled' ? `<span style="color:#10b981;">DONE</span>` : `<span style="color:#ef4444; font-weight:bold;">${pStatus}</span>`;
+            const pStatus = order.fulfillment_status || 'UNFULFILLED';
+            const pBadge = pStatus.toLowerCase() === 'fulfilled' ? `<span style="color:#10b981;">DONE</span>` : `<span style="color:#ef4444; font-weight:bold;">${pStatus}</span>`;
 
             html += `
                 <tr style="border-bottom: 1px solid var(--border-color); font-size: 13px;">
@@ -64,15 +74,23 @@ window.renderOrderzTable = function() {
             `;
         });
 
-        listBody.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        listBody.innerHTML = window.safeHTML(html);
     } catch(e) { sysLog('ORDERZ render error: ' + e.message, true); }
 };
 
-// Listen for global dataset refresh
-document.addEventListener('neogleamzSystemDatasetReady', () => {
-    // Re-init only if the ORDERZ screen is currently visible
+// Listen for global dataset refresh with duplication prevention
+if (!window.isOrdersListenerBound) {
+    document.addEventListener('neogleamzSystemDatasetReady', handleOrdersDatasetReady);
+    window.isOrdersListenerBound = true;
+}
+
+/**
+ * Orchestrates rendering re-initialization if the orders screen is active and visible.
+ * @returns {void}
+ */
+function handleOrdersDatasetReady() {
     const ordersScreen = document.getElementById('ordersScreen');
     if (ordersScreen && ordersScreen.style.display !== 'none') {
         window.initOrderzCore();
     }
-});
+}
