@@ -802,6 +802,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_document_getElementById_sopMas':
                     document.getElementById('sopMasterModal').style.display='none';
+                    if (window.currentActiveSopOrderId && window.currentActiveSopRecipe && window.currentActiveSopSku) {
+                        if (typeof window.loadActiveSOP === 'function') {
+                            window.loadActiveSOP(window.currentActiveSopOrderId, window.currentActiveSopSku, window.currentActiveSopRecipe, window.currentActiveSopType);
+                        }
+                    }
                     break;
                 case 'click_openMediaManager_telemetry':
                     openMediaManager('telemetry');
@@ -820,11 +825,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
                 case 'click_openActiveSOPEditor':
-                    if (typeof window.closePackerzSopViewer === 'function') {
-                        window.closePackerzSopViewer();
-                    }
-                    if (typeof window.openSOPMasterModal === 'function') {
-                        window.openSOPMasterModal(window.currentActiveSopType, window.currentActiveSopRecipe);
+                    {
+                        const savedType = window.currentActiveSopType;
+                        const savedRecipe = window.currentActiveSopRecipe;
+                        const savedOrderId = window.currentActiveSopOrderId;
+                        const savedSku = window.currentActiveSopSku;
+                        
+                        // Hide modal directly so we don't wipe active state variables
+                        const modal = document.getElementById('sopViewerModal');
+                        if (modal) modal.style.display = 'none';
+                        
+                        // Set the live editing states
+                        window.isActiveSopLiveEditing = true;
+                        window.isPackerzLiveEditing = true;
+                        
+                        // Ensure context remains preserved
+                        window.currentActiveSopOrderId = savedOrderId;
+                        window.currentActiveSopSku = savedSku;
+                        window.currentActiveSopRecipe = savedRecipe;
+                        window.currentActiveSopType = savedType;
+                        
+                        if (typeof window.openSOPMasterModal === 'function') {
+                            window.openSOPMasterModal(savedType, savedRecipe);
+                        }
                     }
                     break;
                 case 'click_openLayerzSOPEditor':
@@ -1378,6 +1401,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'mousedown_initPackerzSopResize_event':
                     if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzSopLeftPane', 'packerzSopSplitWrapper', 'packerzSopPreviewCol', false);
+                    break;
+                case 'mousedown_initLiveSopResize_event':
+                    if (typeof window.initUnifiedSopResizer === 'function') {
+                        window.initUnifiedSopResizer(event, 'sopViewerLeftPane', 'sopViewerSplitWrapper', 'sopViewerRightPane', true);
+                    }
                     break;
 
                 case 'mousedown_initFlyoutResizer_event':
