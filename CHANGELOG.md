@@ -1,7 +1,8 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.43] - 2026-05-20
 ### Features & Bug Fixes
+- **Shopify Missing Order Sync** (`bug/shopify-missing-order-sync`): Restored Shopify webhook integration by removing strict JWT verification on edge functions. Built a secure native Edge Function and a visual UI modal (`shopify-force-sync`) to manually ingest dropped Shopify JSON payloads cleanly into the database.
 - **Purge Inline onclick Handlers (bom-module.js)** (`refactor/audit-bom-module`): Migrated all inline `onclick`, `onmouseover`, and `onmouseout` handlers in the Recipe Manager UI to `data-app-click` delegators registered in `system-event-delegator.js`. Replaced inline hover styles with standard Vanilla DOM classes to enforce Vanilla DOM Mastery standards and resolve XSS risk vectors.
 - **Fix Task Modal Inbox Routing** (`fix/task-modal-routing`): When using CTRL+K to open the global task modal, clicking the "go to inbox" and "create new task" buttons failed to route the user. Refactored `system-event-delegator.js` logic to chain visibility states, hiding the Command Palette and explicitly forcing the Task Planner to open and switch views correctly.
 - **Task Engine Project Section Colors** (`feat/task-engine-project-section-colors`): Updated the task engine UI so that when viewing a project, the sections dynamically inherit the color assigned to that project.
