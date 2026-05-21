@@ -129,7 +129,7 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
         groupsToRender.forEach(type => {
             let isOpen = window.barcodzGroupState[type] !== false;
             html += `
-            <details ${isOpen ? 'open' : ''} ontoggle="window.barcodzGroupState['${type}'] = this.open; localStorage.setItem('barcodzGroupState', JSON.stringify(window.barcodzGroupState));" style="margin-bottom:20px; background:rgba(0,0,0,0.1); border-radius:12px; border:1px solid var(--border-color); grid-column: 1 / -1;">
+            <details ${isOpen ? 'open' : ''} class="barcodz-group-details" data-type="${type}" style="margin-bottom:20px; background:rgba(0,0,0,0.1); border-radius:12px; border:1px solid var(--border-color); grid-column: 1 / -1;">
                 <summary style="padding:14px 20px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; color:var(--text-heading); list-style:none; display:flex; align-items:center; border-bottom:1px solid var(--border-color); background:var(--bg-panel); border-radius:12px 12px 0 0;">
                     <span style="font-size:18px; margin-right:10px;">${grouped[type][0].icon}</span> 
                     ${type.endsWith('z') ? type : type + 's'} <span style="margin-left:10px; background:var(--bg-input); padding:2px 8px; border-radius:12px; font-size:10px; color:var(--text-muted);">${grouped[type].length}</span>
@@ -139,7 +139,7 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
 
             grouped[type].forEach(item => {
                 html += `
-                    <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                    <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;" class="barcodz-card">
 
                         <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:center; margin-bottom:8px; gap:8px;">
                             <!-- Emoji Top Left -->
@@ -171,8 +171,18 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
         });
 
         // Push grid layout down into details elements
+        
         grid.style.display = 'block';
         grid.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        
+        // Post-render bindings for details toggle
+        grid.querySelectorAll('.barcodz-group-details').forEach(el => {
+            el.addEventListener('toggle', function() {
+                const type = this.getAttribute('data-type');
+                window.barcodzGroupState[type] = this.open;
+                localStorage.setItem('barcodzGroupState', JSON.stringify(window.barcodzGroupState));
+            });
+        });
     } catch(e) { sysLog('Barcodz grid render error: ' + e.message, true); }
 }
 
@@ -270,7 +280,7 @@ function renderBarcodzSpool() {
         window.barcodzSpoolQueue.forEach((item, index) => {
             totalQty += item.qty;
             html += `
-                <div draggable="true" ondragstart="spoolDragStart(event, ${index})" ondragover="spoolDragOver(event)" ondrop="spoolDrop(event, ${index})" ondragend="spoolDragEnd(event)" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; display:grid; grid-template-columns:12px 20px minmax(0, 1fr) 40px 20px; align-items:center; gap:8px; cursor:grab; width:100%; box-sizing:border-box;" onmousedown="this.style.cursor='grabbing'" onmouseup="this.style.cursor='grab'">
+                <div draggable="true" class="spool-drag-item" data-index="${index}" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; display:grid; grid-template-columns:12px 20px minmax(0, 1fr) 40px 20px; align-items:center; gap:8px; cursor:grab; width:100%; box-sizing:border-box; cursor: grab;">
                     
                     <div style="color:var(--text-muted); cursor:grab; font-size:12px; margin-right:-4px; user-select:none;">⋮⋮</div>
                     
@@ -281,17 +291,38 @@ function renderBarcodzSpool() {
                         <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.slug}</div>
                     </div>
                     
-                    <input type="number" min="0" value="${item.qty}" onchange="setSpoolItemQty('${item.slug}', this.value)" style="width:100%; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 2px;" />
+                    <input type="number" min="0" value="${item.qty}" class="spool-qty-input" data-slug="${item.slug}" style="width:100%; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 2px;" />
                 <div style="flex:0 0 30px; display:flex; align-items:stretch;">
-                    <button data-click="click_updateSpoolItem" data-slug="${item.slug}" data-amt="-999" style="background:transparent; border:none; cursor:pointer; font-size:11px; opacity:0.6; padding:4px; display:flex; justify-content:center; align-items:center; width:100%; height:100%;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="Remove from queue">❌</button>
+                    <button data-click="click_updateSpoolItem" data-slug="${item.slug}" data-amt="-999" style="background:transparent; border:none; cursor:pointer; font-size:11px; opacity:0.6; padding:4px; display:flex; justify-content:center; align-items:center; width:100%; height:100%;" class="spool-remove-btn" title="Remove from queue">❌</button>
                 </div>    
                 </div>
             `;
         });
     }
     
+    
     lists.forEach(list => list.innerHTML = window.safeHTML ? window.safeHTML(html) : html);
     counters.forEach(c => c.innerText = totalQty);
+
+    // Post-render bindings for drag, drop, and inputs
+    lists.forEach(list => {
+        list.querySelectorAll('.spool-drag-item').forEach(el => {
+            const idx = parseInt(el.getAttribute('data-index'), 10);
+            el.addEventListener('dragstart', (e) => window.spoolDragStart(e, idx));
+            el.addEventListener('dragover', (e) => window.spoolDragOver(e));
+            el.addEventListener('drop', (e) => window.spoolDrop(e, idx));
+            el.addEventListener('dragend', (e) => window.spoolDragEnd(e));
+            el.addEventListener('mousedown', function() { this.style.cursor = 'grabbing'; });
+            el.addEventListener('mouseup', function() { this.style.cursor = 'grab'; });
+        });
+        
+        list.querySelectorAll('.spool-qty-input').forEach(el => {
+            el.addEventListener('change', function() {
+                const slug = this.getAttribute('data-slug');
+                window.setSpoolItemQty(slug, this.value);
+            });
+        });
+    });
 }
 
 window.executeBatchPrint = function() {
@@ -364,7 +395,10 @@ window.executeBatchPrint = function() {
                         if (imgEl) imgEl.src = offC.toDataURL('image/png');
                     } catch(_e) {
                         const imgEl = document.getElementById(svgId);
-                        if (imgEl) imgEl.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID QR]</div>`;
+                        if (imgEl && imgEl.parentElement) {
+                            let h = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID QR]</div>`;
+                            imgEl.parentElement.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
+                        }
                     }
                 }
             } else if (sizeSelect !== '1x1') {
@@ -381,7 +415,10 @@ window.executeBatchPrint = function() {
                         });
                     } catch(_e) {
                         const ele = document.getElementById(svgId);
-                        if(ele) ele.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID FORMAT:\n${typeSelect}]</div>`;
+                        if(ele && ele.parentElement) {
+                            let h = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID FORMAT:\n${typeSelect}]</div>`;
+                            ele.parentElement.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
+                        }
                     }
                 }
             } else {
@@ -394,7 +431,10 @@ window.executeBatchPrint = function() {
                         if (ele) ele.src = offC.toDataURL('image/png');
                     } catch(_e) {
                         const ele = document.getElementById(svgId);
-                        if (ele) ele.outerHTML = `<div style="color:red; font-size:10px; font-weight:bold;">[INVALID QR]</div>`;
+                        if (ele && ele.parentElement) {
+                            let h = `<div style="color:red; font-size:10px; font-weight:bold;">[INVALID QR]</div>`;
+                            ele.parentElement.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
+                        }
                     }
                 }
             }
