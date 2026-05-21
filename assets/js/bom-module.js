@@ -374,32 +374,7 @@ window.renderProductBOM = function() {
                 sp=""; 
                 uc=getEngineTrueCogs(s); 
             } else { 
-                let c = catalogCache[k]; 
-                
-                // Fallback Auto-Heal for orphaned keys (e.g. Beamz -> Glowz rename)
-                if(!c && k.includes(':::')) {
-                    let parts = k.split(':::');
-                    if(parts.length === 4) {
-                        let oldNN = parts[0];
-                        let _oldNP = parts[1];
-                        let oldItem = parts[2];
-                        let oldSpec = parts[3];
-                        
-                        let fallbackKey = Object.keys(catalogCache).find(ck => {
-                            let entry = catalogCache[ck];
-                            if(oldNN && entry.neoName === oldNN) return true;
-                            if(!oldNN && entry.itemName === oldItem && entry.spec === oldSpec) return true;
-                            return false;
-                        });
-                        
-                        if(fallbackKey) {
-                            c = catalogCache[fallbackKey];
-                            x.item_key = fallbackKey; // Auto-heal locally
-                            k = fallbackKey;
-                            setTimeout(() => { if(typeof window.syncRecipe === 'function') window.syncRecipe(currentProduct); }, 100);
-                        }
-                    }
-                }
+                let c = catalogCache[k];
 
                 if(c){ 
                     nn=c.neoName; 
@@ -561,9 +536,15 @@ window.renderRecipeManager = function() {
                         if (kParts.length >= 3) {
                             let score = 0;
                             for (let i=0; i<Math.max(bPLower.length, kParts.length); i++) {
-                                if (bPLower[i] === kParts[i]) score++;
+                                if (bPLower[i] === kParts[i]) {
+                                    if (i === 0) score += 10; // Name
+                                    else if (i === 1) score += 5; // Product
+                                    else if (i === 2) score += 2; // Raw
+                                    else if (i === 3) score += 1; // Spec
+                                    else score += 1;
+                                }
                             }
-                            if (score > bestScore && score >= 2) { bestScore = score; bestMatch = k; }
+                            if (score > bestScore && score >= 8) { bestScore = score; bestMatch = k; }
                         }
                     }
                 }
@@ -660,7 +641,7 @@ window.renderRecipeManager = function() {
 
             let rowInput = `<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%;">
                 ${displayDiv}
-                <input type="text" id="rmInput_${idx}" list="rmCatalogDatalist" data-idx="${idx}" data-input="input_window_updateRecipeManagerStaging" data-change="change_window_updateRecipeManagerStaging" onblur="if(typeof window.renderRecipeManager==='function') window.renderRecipeManager()" value="${escapedVal}" style="display:none; flex-grow:1; max-width:400px; padding:8px; background:var(--bg-input); border:1px solid ${isFixed ? '#10b981' : 'var(--border-input)'}; color:var(--text-color); border-radius:4px; font-family:monospace; font-size:11px; transition:all 0.2s ease;" placeholder="Search or paste exact key...">
+                <input type="text" id="rmInput_${idx}" list="rmCatalogDatalist" data-idx="${idx}" data-input="input_window_updateRecipeManagerStaging" data-change="change_window_updateRecipeManagerStaging" class="recipe-manager-input" value="${escapedVal}" style="display:none; flex-grow:1; max-width:400px; padding:8px; background:var(--bg-input); border:1px solid ${isFixed ? '#10b981' : 'var(--border-input)'}; color:var(--text-color); border-radius:4px; font-family:monospace; font-size:11px; transition:all 0.2s ease;" placeholder="Search or paste exact key...">
                 ${suggestionHtml}
             </div>`;
             
@@ -674,7 +655,14 @@ window.renderRecipeManager = function() {
     }
     
     html += `</tbody></table>`;
-    tbody.innerHTML = html;
+    tbody.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    
+    // Post-render bindings
+    tbody.querySelectorAll('.recipe-manager-input').forEach(el => {
+        el.addEventListener('blur', function() {
+            if(typeof window.renderRecipeManager === 'function') window.renderRecipeManager();
+        });
+    });
 };
 
 window.updateRecipeManagerStaging = function(el) {
@@ -692,7 +680,8 @@ window.updateRecipeManagerStaging = function(el) {
         if (tr) {
             let statusTd = tr.querySelector('.rm-status-badge');
             if (statusTd) {
-                statusTd.innerHTML = isFixed ? `<span style="background:#10b981; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Valid</span>` : `<span style="background:#ef4444; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Orphaned</span>`;
+                let payload = isFixed ? `<span style="background:#10b981; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Valid</span>` : `<span style="background:#ef4444; padding:2px 6px; border-radius:4px; font-weight:bold; color:#fff;">Orphaned</span>`;
+            statusTd.innerHTML = window.safeHTML ? window.safeHTML(payload) : payload;
             }
         }
     }
