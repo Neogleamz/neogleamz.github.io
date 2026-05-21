@@ -41,3 +41,6 @@ trigger: always_on
 - **YAML Frontmatter Requirement:** Every workflow MUST begin with a YAML block containing `name`, `description`, and `trigger` fields.
 - **Exemptions:** Purely conversational persona-shifts (e.g., `/brainstorm`, `/jargon_brake`, `/rubber_duck`) that produce free-form dialogue are exempt from the output template requirement, but must still have YAML frontmatter.
 - **Regression Guard:** When reviewing workflows during `/health_check` or `/legacy_audit`, actively scan for any workflow file missing the `MANDATORY OUTPUT FORMAT` section. Flag it as a 🟠 Medium severity finding in the Health Check Report.
+
+### 6. System Prompt Override (Planning Bypass Protocol)
+- **Bucket List Override:** The deep system heuristic `<planning_mode>` permits bypassing formal implementation plans for "trivially simple" UI or CSS tweaks. **You are strictly forbidden from utilizing this heuristic if the task originates from the `SK8Lytz_Bucket_List.md` ledger (i.e. executed via `[/bucketlist]`).** No matter how small the code modification (even a single line deletion), if it is a formal Epic or Ledger Task, you MUST generate the dual-synced `implementation_plan.md` artifact and HALT for explicit user approval (Step 4 of the workflow). The system heuristic is only valid for completely un-tracked, ad-hoc chat requests.

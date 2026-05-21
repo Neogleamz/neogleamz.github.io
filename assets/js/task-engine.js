@@ -450,7 +450,7 @@ function teRenderTaskGrid(filter = null) {
                     <div data-click="click_teDeleteCycle" data-cycle-id="${cid}" style="cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 4px;" onmouseover="this.style.background='rgba(255,0,0,0.2)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted)'">✖</div>
                 </span>
             </div>
-            <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: 20px; padding-bottom: 0px;">
+            <div id="te-cycle-group-${cid}" class="te-sortable-cycle-list" style="display: ${displayState}; flex-direction: column; gap: 4px; min-height: ${group.tasks.length > 0 ? 'auto' : '2px'}; padding-bottom: 0px;">
         `;
         
         group.tasks.forEach(t => {
@@ -458,7 +458,7 @@ function teRenderTaskGrid(filter = null) {
             html += teBuildTaskRowHTML(t, false);
             // Render children wrapper always to provide a drop zone
             let children = displayTasks.filter(child => child.parent_task_id === t.id);
-            html += `<div id="te-subtasks-wrapper-${t.id}" class="te-sortable-subtask-list" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px; min-height: ${children.length > 0 ? 'auto' : '10px'}; padding-bottom: 0px;">`;
+            html += `<div id="te-subtasks-wrapper-${t.id}" class="te-sortable-subtask-list" style="padding-left: 24px; display: flex; flex-direction: column; gap: 2px; min-height: ${children.length > 0 ? 'auto' : '2px'}; padding-bottom: 0px;">`;
             if (children.length > 0) {
                 children.sort((a,b) => {
                     let aSort = (a.metadata && typeof a.metadata.sort_order === 'number') ? a.metadata.sort_order : 999999;
