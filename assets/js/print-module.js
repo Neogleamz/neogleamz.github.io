@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * @typedef {Object} PrintQueueRow
  * @property {string} id
@@ -62,16 +63,16 @@ let printDraggedIndex = null;
 function renderPrintQueue() {
     const ui = document.getElementById('printListUI');
     if (!ui) return;
-    ui.innerHTML = window.safeHTML ? window.safeHTML("") : "";
+    ui.innerHTML = window.safeHTML("");
 
     let totalWaitTime = 0;
     let totalTasks = 0;
     const activePrints = printQueueDB.filter(p => p.status !== 'Archived');
 
     if (activePrints.length === 0) {
-        ui.innerHTML = window.safeHTML ? window.safeHTML(
+        ui.innerHTML = window.safeHTML(
             "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>"
-        ) : "<li style='cursor:default; background:transparent; border:none;'>No 3D print jobs in queue.</li>";
+        );
         document.getElementById('printMainArea').style.display = 'none';
     } else {
         let printListHtml = [];
@@ -98,10 +99,7 @@ function renderPrintQueue() {
 
             printListHtml.push(`<li class="${sel}" 
                 draggable="true"
-                ondragstart="printDragStart(event, ${index})" 
-                ondragover="printDragOver(event)" 
-                ondrop="printDrop(event, ${index})" 
-                ondragend="printDragEnd(event)"
+                data-drag-index="${index}"
                 data-click="click_selectPrintJob" data-id="${job.id}"
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
@@ -111,7 +109,16 @@ function renderPrintQueue() {
                 <span style="font-weight:900; font-family:monospace; flex-shrink:0;">x${job.qty}</span>
             </li>`);
         });
-        ui.innerHTML = window.safeHTML ? window.safeHTML(printListHtml.join('')) : printListHtml.join('');
+        ui.innerHTML = window.safeHTML(printListHtml.join(''));
+        
+        // Attach drag events to newly rendered items
+        const listItems = ui.querySelectorAll('li[draggable="true"]');
+        listItems.forEach(li => {
+            li.addEventListener('dragstart', printDragStart);
+            li.addEventListener('dragover', printDragOver);
+            li.addEventListener('drop', printDrop);
+            li.addEventListener('dragend', printDragEnd);
+        });
     }
 
     const tasksEl = document.getElementById('totalPrintTasks');
@@ -120,16 +127,17 @@ function renderPrintQueue() {
     if (timeEl) timeEl.innerText = formatPrintTime(totalWaitTime) || "0m";
 }
 
-window.printDragStart = function(e, index) { 
-    printDraggedIndex = index; 
-    e.target.style.opacity = '0.5'; 
+function printDragStart(e) { 
+    printDraggedIndex = parseInt(e.currentTarget.getAttribute('data-drag-index')); 
+    e.currentTarget.style.opacity = '0.5'; 
     e.dataTransfer.effectAllowed = 'move';
 }
-window.printDragOver = function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-window.printDragEnd = function(e) { e.target.style.opacity = '1'; }
-window.printDrop = function(e, index) {
+function printDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function printDragEnd(e) { e.currentTarget.style.opacity = '1'; }
+function printDrop(e) {
     e.preventDefault();
-    if (printDraggedIndex !== null && printDraggedIndex !== index) {
+    let index = parseInt(e.currentTarget.getAttribute('data-drag-index'));
+    if (printDraggedIndex !== null && printDraggedIndex !== index && !isNaN(index)) {
         let movedItem = printQueueDB.splice(printDraggedIndex, 1)[0];
         printQueueDB.splice(index, 0, movedItem);
         renderPrintQueue();
@@ -222,49 +230,9 @@ function renderActivePrintJob(id) {
     let wip = job.wip_state || {};
     
     // Clear old interval if it exists so we can re-bind
-    if (window._printTimerInterval) { clearInterval(window._printTimerInterval); window._printTimerInterval = null; }
     
-    window._printTimerInterval = setInterval(() => {
-        // Pipeline Stage 3 generic timer
-        let pSpan = document.getElementById('printPipelineTimerSpan');
-        if (pSpan && pSpan.getAttribute('data-running') === 'true') {
-            let start = parseInt(pSpan.getAttribute('data-start'));
-            let baseline = parseInt(pSpan.getAttribute('data-baseline'));
-            if (!isNaN(start) && !isNaN(baseline)) {
-                let elapsed = baseline + (Date.now() - start);
-                let h = Math.floor(elapsed / 3600000);
-                let m = Math.floor((elapsed % 3600000) / 60000);
-                let s = Math.floor((elapsed % 60000) / 1000);
-                pSpan.innerText = `Running (${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`})`;
-            }
-        }
-        // Active Sub-Run timer
-        let rSpan = document.getElementById('layerzActiveRunTimerSpan');
-        if (rSpan && rSpan.getAttribute('data-running') === 'true') {
-            let start = parseInt(rSpan.getAttribute('data-start'));
-            let baseline = parseInt(rSpan.getAttribute('data-baseline'));
-            if (!isNaN(start) && !isNaN(baseline)) {
-                let elapsed = baseline + (Date.now() - start);
-                let h = Math.floor(elapsed / 3600000);
-                let m = Math.floor((elapsed % 3600000) / 60000);
-                let s = Math.floor((elapsed % 60000) / 1000);
-                rSpan.innerText = `${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`}`;
-            }
-        }
-        // Active Cleaned timer
-        let cSpan = document.getElementById('layerzCleanedTimerSpan');
-        if (cSpan && cSpan.getAttribute('data-running') === 'true') {
-            let start = parseInt(cSpan.getAttribute('data-start'));
-            let baseline = parseInt(cSpan.getAttribute('data-baseline'));
-            if (!isNaN(start) && !isNaN(baseline)) {
-                let elapsed = baseline + (Date.now() - start);
-                let h = Math.floor(elapsed / 3600000);
-                let m = Math.floor((elapsed % 3600000) / 60000);
-                let s = Math.floor((elapsed % 60000) / 1000);
-                cSpan.innerText = `${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`}`;
-            }
-        }
-    }, 1000);
+    
+    
 
     if (job.status === 'Cleaned') {
         let baseline = (wip.elapsed_cleaned||0);
@@ -518,7 +486,7 @@ function renderActivePrintJob(id) {
         }
         
         htmlOut += `</div></div>`;
-        sopList.innerHTML = window.safeHTML ? window.safeHTML(htmlOut) : htmlOut;
+        sopList.innerHTML = window.safeHTML(htmlOut);
         if (typeof processTelemetryCanvasRendering === 'function') processTelemetryCanvasRendering(sopList);
     }
 }
@@ -743,7 +711,7 @@ async function deletePrintJob() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-window.archiveCurrentPrint = async function() {
+async function archiveCurrentPrint() {
     try {
         if(!currentPrintJob) return;
         if(currentPrintJob.status === 'Archived') return alert("Already archived.");
@@ -765,7 +733,7 @@ window.archiveCurrentPrint = async function() {
 }
 
 
-window.openPrintSOP = function(pName) {
+function openPrintSOP(pName) {
     try {
         pName = pName.split(':::')[0];
         let steps = sopsDB[pName] || [];
@@ -827,7 +795,7 @@ function openManualPrintModal() {
                 manualPrintHtml.push(`<option value="RECIPE:::${String(k).replace(/"/g, '&quot;')}">🖨️ ${k}</option>`);
             }
         });
-        sel.innerHTML = window.safeHTML ? window.safeHTML(manualPrintHtml.join('')) : manualPrintHtml.join('');
+        sel.innerHTML = window.safeHTML(manualPrintHtml.join(''));
     }
     const q = document.getElementById('manualPrintQty');
     if(q) q.value = 1;
@@ -857,15 +825,15 @@ async function submitManualPrint() {
 
 
 // ====== GLOBAL BINDINGS ======
-if (typeof window !== 'undefined') {
-    window.advancePrintStatus = typeof advancePrintStatus !== 'undefined' ? advancePrintStatus : undefined;
-    window.deletePrintJob = typeof deletePrintJob !== 'undefined' ? deletePrintJob : undefined;
-    window.openManualPrintModal = typeof openManualPrintModal !== 'undefined' ? openManualPrintModal : undefined;
-    window.closeManualPrintModal = typeof closeManualPrintModal !== 'undefined' ? closeManualPrintModal : undefined;
-    window.submitManualPrint = typeof submitManualPrint !== 'undefined' ? submitManualPrint : undefined;
-    window.executeBatchPrint = typeof executeBatchPrint !== 'undefined' ? executeBatchPrint : undefined;
-    window.submitFinalizePrint = typeof submitFinalizePrint !== 'undefined' ? submitFinalizePrint : undefined;
-    window.togglePrintTimerPause = async function() {
+
+    
+    
+    
+    
+    
+    
+    
+    async function togglePrintTimerPause() {
         if (!currentPrintJob) return;
         let w = currentPrintJob.wip_state || {};
         let stageKey = currentPrintJob.status === 'Printing' ? 'elapsed_printing' : 'elapsed_cleaned';
@@ -889,7 +857,7 @@ if (typeof window !== 'undefined') {
     };
 
     // --- Sub-Run Manager Bindings ---
-    window.startLayerzRun = async function() {
+    async function startLayerzRun() {
         if (!currentPrintJob) return;
         let qty = parseFloat(document.getElementById('layerzNewRunQty')?.value) || 0;
         if (qty <= 0) return alert("Must specify a run quantity greater than 0.");
@@ -909,7 +877,7 @@ if (typeof window !== 'undefined') {
         else renderActivePrintJob(currentPrintJob.id);
     };
 
-    window.toggleLayerzRunPause = async function() {
+    async function toggleLayerzRunPause() {
         if (!currentPrintJob || !currentPrintJob.wip_state || !currentPrintJob.wip_state.active_run) return;
         let w = currentPrintJob.wip_state;
         let r = w.active_run;
@@ -928,11 +896,11 @@ if (typeof window !== 'undefined') {
         else renderActivePrintJob(currentPrintJob.id);
     };
 
-    window.closeLayerzRunCompleteModal = function() {
+    function closeLayerzRunCompleteModal() {
         document.getElementById('layerzRunCompleteModal').style.display = 'none';
     };
 
-    window.openLayerzRunCompleteModal = function() {
+    function openLayerzRunCompleteModal() {
         if (!currentPrintJob || !currentPrintJob.wip_state || !currentPrintJob.wip_state.active_run) return;
         let r = currentPrintJob.wip_state.active_run;
         document.getElementById('layerzRunPartName').value = currentPrintJob.part_name;
@@ -951,7 +919,7 @@ if (typeof window !== 'undefined') {
         document.getElementById('layerzRunCompleteModal').style.display = 'flex';
     };
 
-    window.submitLayerzRun = async function() {
+    async function submitLayerzRun() {
         if (!currentPrintJob || !currentPrintJob.wip_state || !currentPrintJob.wip_state.active_run) return;
         let success = parseFloat(document.getElementById('layerzRunSuccessQty').value) || 0;
         let scrap = parseFloat(document.getElementById('layerzRunScrapQty').value) || 0;
@@ -986,4 +954,47 @@ if (typeof window !== 'undefined') {
             sysLog("Submit Run Error: " + e.message, true);
         }
     };
+
+
+function initPrintTimers() {
+    if (window._printTimerInterval) clearInterval(window._printTimerInterval);
+    window._printTimerInterval = setInterval(() => {
+        let pSpan = document.getElementById('printPipelineTimerSpan');
+        if (pSpan && pSpan.getAttribute('data-running') === 'true') {
+            let start = parseInt(pSpan.getAttribute('data-start'));
+            let baseline = parseInt(pSpan.getAttribute('data-baseline'));
+            if (!isNaN(start) && !isNaN(baseline)) {
+                let elapsed = baseline + (Date.now() - start);
+                let h = Math.floor(elapsed / 3600000);
+                let m = Math.floor((elapsed % 3600000) / 60000);
+                let s = Math.floor((elapsed % 60000) / 1000);
+                pSpan.innerText = `Running (${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`})`;
+            }
+        }
+        let rSpan = document.getElementById('layerzActiveRunTimerSpan');
+        if (rSpan && rSpan.getAttribute('data-running') === 'true') {
+            let start = parseInt(rSpan.getAttribute('data-start'));
+            let baseline = parseInt(rSpan.getAttribute('data-baseline'));
+            if (!isNaN(start) && !isNaN(baseline)) {
+                let elapsed = baseline + (Date.now() - start);
+                let h = Math.floor(elapsed / 3600000);
+                let m = Math.floor((elapsed % 3600000) / 60000);
+                let s = Math.floor((elapsed % 60000) / 1000);
+                rSpan.innerText = `${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`}`;
+            }
+        }
+        let cSpan = document.getElementById('layerzCleanedTimerSpan');
+        if (cSpan && cSpan.getAttribute('data-running') === 'true') {
+            let start = parseInt(cSpan.getAttribute('data-start'));
+            let baseline = parseInt(cSpan.getAttribute('data-baseline'));
+            if (!isNaN(start) && !isNaN(baseline)) {
+                let elapsed = baseline + (Date.now() - start);
+                let h = Math.floor(elapsed / 3600000);
+                let m = Math.floor((elapsed % 3600000) / 60000);
+                let s = Math.floor((elapsed % 60000) / 1000);
+                cSpan.innerText = `${h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`}`;
+            }
+        }
+    }, 1000);
 }
+initPrintTimers();
