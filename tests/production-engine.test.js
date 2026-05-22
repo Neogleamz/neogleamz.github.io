@@ -1,7 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-
-const prodCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/production-module.js'), 'utf8');
 
 beforeAll(() => {
     // Provide global variables needed for production-module logic
@@ -18,7 +14,7 @@ beforeAll(() => {
         <div id="mediaModal"></div>
     `;
 
-    eval(prodCode);
+    require('../assets/js/production-module.js');
 });
 
 describe("Production Algorithm: calculateExactWODeductions", () => {

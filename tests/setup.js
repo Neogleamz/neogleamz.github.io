@@ -61,3 +61,8 @@ window.salesDB = [
 ];
 
 window.sysLog = function(_msg) { /* silence console spam */ };
+
+// Mock DOMPurify to silence fallback warnings during tests
+window.DOMPurify = {
+    sanitize: (html) => html
+};
