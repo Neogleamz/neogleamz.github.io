@@ -149,7 +149,7 @@
 
 
         // The AI Diagnostics Scanner Logic
-        async function runScannerForCurrentViewport(currentHubName = 'Current View') {
+        async function runScannerForCurrentViewport(hubName = 'Base', pageName = 'Main', modalName = null) {
             logToPanel(`[🔍 Scanning] Executing geometric pass at <strong>${frame.width}x${frame.height}</strong>...`, 'info');
             return new Promise((resolve) => {
                 try {
@@ -161,7 +161,7 @@
                     
                     let localIssues = 0;
                     let emptySpaceIssues = 0;
-                    let markdownLog = `### Hub: ${currentHubName}\n`;
+                    let markdownLog = `### Hub: ${hubName} | Page: ${pageName}${modalName ? ' | Modal: ' + modalName : ''}\n`;
                     
                     // 1. Check root document horizontal overflow
                     if (doc.documentElement.scrollWidth > doc.documentElement.clientWidth + 5) {
@@ -170,8 +170,6 @@
                         localIssues++;
                     }
 
-                    let emptySpaceIssues = 0;
-                    
                     // 2. Iterate all elements for nested collisions & density checks
                     const allNodes = doc.querySelectorAll('div, section, header, nav, button, input, table');
                     allNodes.forEach(node => {
@@ -256,7 +254,13 @@
                     // Post to local server for file generation
                     fetch('http://127.0.0.1:5501', {
                         method: 'POST',
-                        body: JSON.stringify({ resolution: `${frame.width}x${frame.height}`, markdown: markdownLog }),
+                        body: JSON.stringify({ 
+                            resolution: `${frame.width}x${frame.height}`, 
+                            hub: hubName, 
+                            page: pageName, 
+                            modal: modalName,
+                            markdown: markdownLog 
+                        }),
                         headers: { 'Content-Type': 'application/json' }
                     }).catch(e => { /* server off, ignore */ });
 
@@ -335,22 +339,61 @@
                 const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
                 const isTurbo = chkTurbo.checked;
 
-                for (const tab of tabs) {
-                    const hubName = tab.textContent.trim();
-                    logToPanel(`<h2>Navigating to Hub: ${hubName}</h2>`, 'info');
-                    
-                    // Click the tab in the iframe
-                    tab.click();
-                    await sleep(isTurbo ? 600 : 1500); // Fast PCs can render hub data in 600ms
-
-                    // Run the resolution cycler for this Hub
+                // Helper function for the inner loop
+                async function scanViewportCycle(hName, pName, mName) {
                     for (const res of options) {
                         const [w, h] = res.split('x');
                         select.value = res;
                         setViewport(w, h);
-                        await sleep(isTurbo ? 150 : 1000); // Layout reflow takes barely ~30ms on modern PCs
-                        await runScannerForCurrentViewport(hubName);
+                        await sleep(isTurbo ? 150 : 800); // Wait for layout
+                        await runScannerForCurrentViewport(hName, pName, mName);
                         await sleep(isTurbo ? 50 : 200);
+                    }
+                }
+
+                for (const tab of tabs) {
+                    const hubName = tab.textContent.trim() || 'UnknownHub';
+                    logToPanel(`<h2>Navigating to Hub: ${hubName}</h2>`, 'info');
+                    
+                    // Click the tab in the iframe
+                    tab.click();
+                    await sleep(isTurbo ? 600 : 1500); 
+
+                    // 1. Scan Base Hub
+                    await scanViewportCycle(hubName, 'Main', null);
+
+                    // 2. Deep Dive: Sub-Navigation Pages
+                    // Find visible sub-nav buttons inside the hub
+                    const subBtns = Array.from(doc.querySelectorAll('.sub-nav-btn')).filter(b => frame.contentWindow.getComputedStyle(b).display !== 'none');
+                    for (const subBtn of subBtns) {
+                        const pageName = subBtn.textContent.trim() || 'UnknownPage';
+                        logToPanel(`<h3>Navigating to Sub-Page: ${pageName}</h3>`, 'info');
+                        subBtn.click();
+                        await sleep(isTurbo ? 400 : 1000);
+                        await scanViewportCycle(hubName, pageName, null);
+                    }
+
+                    // 3. Deep Dive: Modals
+                    // Find all modal containers (we scan them all for every hub just to be extremely thorough)
+                    const modals = Array.from(doc.querySelectorAll('.modal-overlay, [id$="Modal"]')).filter(m => m.id !== 'loginUI');
+                    for (const modal of modals) {
+                        const modalName = modal.id || modal.className.split(' ')[0] || 'UnknownModal';
+                        logToPanel(`<h4>Forcing Open Modal: ${modalName}</h4>`, 'info');
+                        
+                        // Force it open
+                        const oldDisplay = modal.style.display;
+                        const hasActive = modal.classList.contains('active');
+                        modal.style.setProperty('display', 'flex', 'important');
+                        modal.classList.add('active');
+                        
+                        await sleep(isTurbo ? 300 : 800);
+                        
+                        await scanViewportCycle(hubName, 'Main', modalName);
+                        
+                        // Restore it
+                        modal.style.display = oldDisplay;
+                        if (!hasActive) modal.classList.remove('active');
+                        await sleep(isTurbo ? 100 : 300);
                     }
                 }
 

@@ -23,35 +23,41 @@ http.createServer((req, res) => {
 
     if (req.method === 'POST') {
         let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
+        req.on('data', chunk => { body += chunk.toString(); });
         req.on('end', () => {
             try {
                 const data = JSON.parse(body);
                 
                 if (data.action === 'clear') {
-                    // Delete all .md files in LOG_DIR
-                    const files = fs.readdirSync(LOG_DIR);
-                    for (const file of files) {
-                        if (file.endsWith('.md')) {
-                            fs.unlinkSync(path.join(LOG_DIR, file));
-                        }
+                    if (fs.existsSync(LOG_DIR)) {
+                        fs.rmSync(LOG_DIR, { recursive: true, force: true });
                     }
-                    console.log('Cleared old reports.');
+                    fs.mkdirSync(LOG_DIR, { recursive: true });
+                    console.log('Cleared all reports.');
                     res.writeHead(200);
                     return res.end(JSON.stringify({ success: true }));
                 }
 
-                // Sanitize filename
-                const safeRes = data.resolution.replace(/[^a-z0-9x-]/gi, '_');
+                // Sanitize parameters
+                const safeRes = data.resolution ? data.resolution.replace(/[^a-z0-9x-]/gi, '_') : 'unknown';
+                const hub = data.hub ? data.hub.replace(/[^a-z0-9-]/gi, '_') : 'Base_Hubs';
+                const page = data.page ? data.page.replace(/[^a-z0-9-]/gi, '_') : 'Main';
+                const modal = data.modal ? data.modal.replace(/[^a-z0-9-]/gi, '_') : null;
+
+                // Build path hierarchy
+                let targetDir = path.join(LOG_DIR, hub, page);
+                if (modal) targetDir = path.join(targetDir, modal);
+
+                if (!fs.existsSync(targetDir)) {
+                    fs.mkdirSync(targetDir, { recursive: true });
+                }
+
                 const filename = `qa-report-${safeRes}.md`;
+                const filepath = path.join(targetDir, filename);
                 
-                // Append to the file so it builds up across Hubs
-                const filepath = path.join(LOG_DIR, filename);
                 fs.appendFileSync(filepath, data.markdown + '\n');
                 
-                console.log(`Updated report: ${filename}`);
+                console.log(`Updated report: ${hub}/${page}${modal ? '/' + modal : ''}/${filename}`);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true }));
             } catch (e) {
