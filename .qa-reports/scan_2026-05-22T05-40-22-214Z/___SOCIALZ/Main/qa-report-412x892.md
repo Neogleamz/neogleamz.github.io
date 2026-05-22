@@ -1,0 +1,83 @@
+### Hub: 👥 SOCIALZ | Page: Main
+- **Usability**: Tap target too small on `<button id="tipzBtn" class="top-action-btn">` (55.775001525878906x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="themeToggle" class="top-action-btn">` (64.11250305175781x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="taskPlannerBtn" class="top-action-btn">` (67.26250457763672x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="activeUserBadge" class="top-action-btn logout-btn">` (71.3375015258789x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="search-input" class="w-full pl-9 pr-4 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#f97316] transition-all text-xs border">` (96.1875x27.200000762939453). Recommended 44x44px.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.9%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.3%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.2%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.4%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.4%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.1%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.3%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.2%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.3%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.2%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.7%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.7%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.3%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.9%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.7%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.7%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.2%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.2%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.9%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.2%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.5%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.7%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.4%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.3%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.1%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.9%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.1%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.1%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.4%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.4%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.2%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 3.6%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 1.4%). Consider flexing children or adjusting width.
+- **Layout Density**: `<div class="top-right-action-flex">` has excessive wasted space (Density: 2.0%). Consider flexing children or adjusting width.
+
+

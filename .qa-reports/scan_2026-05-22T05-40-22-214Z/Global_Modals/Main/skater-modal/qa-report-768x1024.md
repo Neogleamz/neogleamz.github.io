@@ -1,0 +1,35 @@
+### Hub: Global_Modals | Page: Main | Modal: skater-modal
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (127.5999984741211x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (102.3499984741211x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (107.4000015258789x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (116.76250457763672x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (103.875x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn active">` (98.13750457763672x35.20000076293945). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="tipzBtn" class="top-action-btn">` (71.4124984741211x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="themeToggle" class="top-action-btn">` (81.4124984741211x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="taskPlannerBtn" class="top-action-btn">` (85.20000457763672x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="activeUserBadge" class="top-action-btn logout-btn">` (90.0875015258789x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-favorite" class="">` (15.600000381469727x28.80000114440918). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-name" class="">` (224.10000610351562x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-location" class="">` (224.10000610351562x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-avatar-url" class="">` (184.5x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-style" class="">` (224.1125030517578x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-contact" class="">` (224.10000610351562x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-viral" class="">` (350x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-ig" class="">` (176.65000915527344x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-ig-link" class="">` (265x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-ig-followers" class="">` (176.66250610351562x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-tt" class="">` (176.65000915527344x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-tt-link" class="">` (265x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-tt-followers" class="">` (176.66250610351562x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-yt" class="">` (176.65000915527344x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-yt-link" class="">` (265x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-yt-followers" class="">` (176.66250610351562x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-fb" class="">` (176.65000915527344x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-fb-link" class="">` (265x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="input-fb-followers" class="">` (176.66250610351562x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="btn-delete-modal" class="btn-red">` (192.08750915527344x43.20000076293945). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="btn-red-muted">` (192.08750915527344x43.20000076293945). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="btn-green-neon">` (288.13751220703125x43.20000076293945). Recommended 44x44px.
+
+

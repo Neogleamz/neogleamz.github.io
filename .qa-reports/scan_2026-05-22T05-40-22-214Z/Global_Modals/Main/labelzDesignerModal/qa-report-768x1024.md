@@ -1,0 +1,34 @@
+### Hub: Global_Modals | Page: Main | Modal: labelzDesignerModal
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (127.57500457763672x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (102.32500457763672x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (107.375x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (116.73750305175781x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn">` (103.8499984741211x33.60000228881836). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="tab-btn active">` (98.11250305175781x35.20000076293945). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="tipzBtn" class="top-action-btn">` (71.38750457763672x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="themeToggle" class="top-action-btn">` (81.375x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="taskPlannerBtn" class="top-action-btn">` (85.1624984741211x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="activeUserBadge" class="top-action-btn logout-btn">` (90.0374984741211x40). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="labelzDesignerName" class="">` (135.1999969482422x26.399999618530273). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="labelzDesignerEmojiBtn" class="">` (42.32500076293945x29.600000381469727). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (61.85000228881836x20.80000114440918). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (60.4375x20.80000114440918). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="btnSaveLabelz" class="btn-green">` (65.38750457763672x43.20000076293945). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="btn-red">` (88.07500457763672x29.600000381469727). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="lblzBrushBtn" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (121.5999984741211x32.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (132.6999969482422x15.199999809265137). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="labelzBgColor" class="">` (249.1999969482422x30). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (37.337501525878906x38.400001525878906). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (40.1875x36.79999923706055). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="">` (48.5x32). Recommended 44x44px.
+- **Usability**: Tap target too small on `<button id="" class="print-btn">` (124.0875015258789x25.600000381469727). Recommended 44x44px.
+- **Usability**: Tap target too small on `<input id="labelzCatalogSearch" class="">` (269.20001220703125x31.200000762939453). Recommended 44x44px.
+
+
