@@ -117,12 +117,12 @@
             if (type === 'info') cls += ' log-info';
             if (type === 'success') cls += ' log-success';
             div.className = cls;
-            div.innerHTML = msg; // allow basic HTML formatting
+            div.innerHTML = window.safeHTML ? window.safeHTML(msg) : msg; // allow basic HTML formatting
             reportPanel.prepend(div);
         }
 
         btnClear.addEventListener('click', () => {
-            reportPanel.innerHTML = '<div class="log-entry log-info">Logs cleared.</div>';
+            reportPanel.innerHTML = window.safeHTML ? window.safeHTML('<div class="log-entry log-info">Logs cleared.</div>') : '<div class="log-entry log-info">Logs cleared.</div>';
             globalErrorsFound = 0;
         });
 
