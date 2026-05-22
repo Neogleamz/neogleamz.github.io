@@ -131,7 +131,22 @@
             frame.width = w;
             frame.height = h;
             statusEl.textContent = `Viewport active: ${w}px \u00d7 ${h}px`;
+            
+            // Auto-scale iframe so you can see the whole thing, even if it's 2560px wide!
+            const container = document.querySelector('.iframe-container');
+            const scaleW = (container.clientWidth - 40) / w; 
+            const scaleH = (container.clientHeight - 40) / h;
+            let scale = Math.min(scaleW, scaleH);
+            if (scale > 1) scale = 1; // Never scale above 100%
+            
+            frame.style.transform = `scale(${scale})`;
+            frame.style.transformOrigin = 'center center';
         }
+
+        window.addEventListener('resize', () => {
+            const [w, h] = select.value.split('x');
+            setViewport(w, h);
+        });
 
         btnResize.addEventListener('click', () => {
             const [w, h] = select.value.split('x');
