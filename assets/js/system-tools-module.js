@@ -743,7 +743,7 @@ window.openSandboxModal = async function(payload, title, payload2=null, table1Ti
 
     if (liveImportMeta && liveImportMeta.resObj) {
         if(btnSync) {
-            btnSync.innerHTML = "⏳ CALCULATING DIFFS...";
+            btnSync.innerHTML = window.safeHTML("⏳ CALCULATING DIFFS...");
             btnSync.disabled = true;
         }
         if (typeof window.applyDifferentialHighlighting === 'function') {
@@ -755,7 +755,7 @@ window.openSandboxModal = async function(payload, title, payload2=null, table1Ti
             }
         }
         if(btnSync) {
-            btnSync.innerHTML = "✅ UPLOAD & SYNC";
+            btnSync.innerHTML = window.safeHTML("✅ UPLOAD & SYNC");
             btnSync.disabled = false;
         }
     }
@@ -852,7 +852,7 @@ window._renderSandboxModal = function() {
         ? `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#64748b;">■ RAW API DATA</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`
         : `<div style="font-size:11px; margin-top:8px; display:flex; gap:15px; font-weight:bold; letter-spacing:1px; color:#94a3b8;"><span style="color:#3b82f6;">■ ORIGINAL CSV HEADER</span> <span style="color:#f59e0b;">■ DATABASE COLUMN NAME</span> <span style="color:#c084fc;">■ NEOGLEAMZ ENGINE MATH</span></div>`;
 
-    document.getElementById('sandboxModalTitle').innerHTML = window.__sandboxTitle + legendHTML;
+    document.getElementById('sandboxModalTitle').innerHTML = window.safeHTML(window.__sandboxTitle + legendHTML);
     
     let body = document.getElementById('sandboxModalBody');
     if ((!payload || payload.length === 0) && !dictPayload) {
@@ -1858,7 +1858,7 @@ window.openGlobalRegexPlayground = function(type) {
         </div>
     </div>`;
 
-    document.getElementById("globalRegexPlaygroundModalContainer").innerHTML = h;
+    document.getElementById("globalRegexPlaygroundModalContainer").innerHTML = window.safeHTML(h);
     document.getElementById("globalRegexPlaygroundModalContainer").style.display = "flex";
 
     // Bind scroll syncing between textarea and highlight layer safely
@@ -1977,7 +1977,7 @@ function renderPaperProfileTable() {
              h += `</tr>`;
         }
     });
-    tbody.innerHTML = h;
+    tbody.innerHTML = window.safeHTML(h);
 }
 
 function editPaperProfile(idx) {
