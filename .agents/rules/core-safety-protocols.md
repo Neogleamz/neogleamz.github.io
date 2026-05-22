@@ -26,3 +26,7 @@ trigger: always_on
 - **Provide Proof:** When tracing bugs, mathematically show hex arrays, or cite explicit line numbers from the Reference/Source files.
 - **Contradiction Halt:** If the Reference file contradicts Live Code, HALT and request human clarification.
 - **Discovery Mode:** If charting undocumented protocols, explicitly declare "Discovery Mode" to authorize logical deduction sequences out-of-bounds from the Reference file.
+
+### 5. Continuous Trunk Hydration (The Concurrency Lock)
+- **Frequent Merging:** When operating on long-running feature or epic branches (`feat/*`, `epic/*`), you must frequently execute `git merge main` to absorb parallel completed tasks.
+- **Ledger Hydration:** Before altering the `@/tools/SK8Lytz_Bucket_List.md` file at the conclusion of any task, you must explicitly fetch and hydrate the latest version from `main` to prevent overwriting other sessions' release tags (`[🚀]`).

@@ -22,6 +22,7 @@ When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize 
 6. **Knowledge Audit Gate**: Evaluate if this feature branch established new critical knowledge (DB tables, Bluetooth commands, global contexts). If yes, ensure it is documented in @/tools/SK8Lytz_App_Master_Reference.md using your standard editing tools before proceeding.
 7. **Merge Routine & Conflict Check**:
    - Run `git checkout <base-branch>`.
+   - **CRITICAL HYDRATION GATE:** Run `git pull origin <base-branch>` to absorb any concurrent merges and prevent `non-fast-forward` crashes.
    - Run `git merge --no-ff <feature-branch> -m "chore(merge): integrate <feature-branch>"`.
    - **CRITICAL:** Run `git status`. If there are merge conflicts, you must **HALT**, output the conflicted files to the chat, and wait for the user to resolve them. Do NOT proceed to step 8.
 8. **Push to Remote**: If the merge was clean, run `git push origin <base-branch>` (if a remote is configured).
