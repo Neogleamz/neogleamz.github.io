@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'click_renderSimulatorOrder':
+                    if (typeof window.renderSimulatorOrder === 'function') window.renderSimulatorOrder(el.getAttribute('data-oid'));
+                    break;
                 case 'click_window_openRecipeManager':
                     if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
                     break;
@@ -1447,6 +1450,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'change_updateSaleType':
+                    if (typeof window.updateSaleType === 'function') window.updateSaleType(el, el.getAttribute('data-order'), el.getAttribute('data-sku'));
+                    break;
                 case 'change_window_onEditzBulkChange':
                     if (typeof window.change_window_onEditzBulkChange === 'function') window.change_window_onEditzBulkChange(el);
                     break;
@@ -1710,6 +1716,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             switch(action) {
+                case 'blur_updateSaleCell':
+                    if (typeof window.updateSaleCell === 'function') window.updateSaleCell(el, el.getAttribute('data-order'), el.getAttribute('data-sku'), el.getAttribute('data-col'), el.getAttribute('data-isnum') === 'true');
+                    break;
                 case 'blur_updateDBCell':
                     if (typeof window.blur_updateDBCell === 'function') window.blur_updateDBCell(el);
                     break;
