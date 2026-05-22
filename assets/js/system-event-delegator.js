@@ -129,6 +129,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_closeTagManager':
                     if (typeof window.teCloseTagManager === 'function') window.teCloseTagManager();
                     break;
+                case 'click_closeScraperFoundry':
+                    if (typeof window.closeScraperFoundry === 'function') window.closeScraperFoundry();
+                    break;
+                case 'click_scraperSetContainerBounds':
+                    if (typeof window.scraperSetContainerBounds === 'function') window.scraperSetContainerBounds();
+                    break;
+                case 'click_scraperMapChildColumn':
+                    if (typeof window.scraperMapChildColumn === 'function') window.scraperMapChildColumn();
+                    break;
+                case 'click_scraperExportXLSX':
+                    if (typeof window.scraperExportXLSX === 'function') window.scraperExportXLSX();
+                    break;
+                case 'click_scraperCopyJSON':
+                    if (typeof window.scraperCopyJSON === 'function') window.scraperCopyJSON();
+                    break;
+                case 'click_scraperClearDataset':
+                    if (typeof window.scraperClearDataset === 'function') window.scraperClearDataset();
+                    break;
                 case 'click_teCreateTagFromManager':
                     if (typeof window.teCreateTagFromManager === 'function') window.teCreateTagFromManager();
                     break;
@@ -1765,6 +1783,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleFileSelectTest_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
+                    break;
+                case 'change_scraperFileInput':
+                    if (typeof window.change_scraperFileInput === 'function') window.change_scraperFileInput(event);
                     break;
                 case 'change_teUpdateTagColor':
                     if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
