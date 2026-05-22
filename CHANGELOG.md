@@ -1,8 +1,22 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.0.50] - 2026-05-21
 ### ✨ Features & Bug Fixes
 - **Task Engine 'T' Shortcut Fix** (`bug/task-engine-shortcut-t-regression`): Fix the regression where pressing 'T' in the task engine no longer starts creating a new task under the "No Section" bucket for rapid-fire task entry, and correctly route users from other hubs natively without triggering DOM node exceptions on Escape.
+
+### 🧹 Chores & Cleanup
+- **Legacy Audit File-by-File Sequence**: Executed `/legacy_audit` and systematically eradicated technical debt, absolute positioning, inline onclick handlers, and enforced modern ES6 Vanilla JS standards across the following modules:
+  - `index.html` (`refactor/audit-index`)
+  - `task-engine.js` (`refactor/audit-task-engine`)
+  - `analytics-module.js` (`refactor/audit-analytics-module`)
+  - `barcodz-module.js` (`refactor/audit-barcodz-module`)
+  - `bom-module.js` (`refactor/audit-bom-module`)
+  - `ceo-module.js` (`refactor/audit-ceo-module`)
+  - `inventory-module.js` (`refactor/audit-inventory-module`)
+  - `labelz-module.js` (`refactor/audit-labelz-module`)
+  - `neogleamz-engine.js` (`refactor/audit-neogleamz-engine`)
+  - `orders-module.js` (`refactor/audit-orders-module`)
+  - `packerz-module.js` (`refactor/audit-packerz-module`)
 
 ## [1.0.49] - 2026-05-21
 ### ✨ Features & Bug Fixes
