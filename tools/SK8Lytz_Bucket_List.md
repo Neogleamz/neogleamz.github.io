@@ -63,7 +63,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 - [🚀] `test/audit-jest-coverage` : **Jest Test Coverage Audit** - Ensure the npm test suite is updated and aligned with all the recent structural changes and that it is testing everything possible across the platform. [🤖 Gemini 3.1 Pro (High)] [🧠 5k / 25k] [💸 $0.02 / $0.08]
-- [ ] `feat/global-error-telemetry` : **Global Error Telemetry Wrapper** - Implement a global execution wrapper to catch, log, and surface 100% of UI events, interactions, and silent errors directly to the Diagnostics Console. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [x] `feat/global-error-telemetry` : **Global Error Telemetry Wrapper** - Implement a global execution wrapper to catch, log, and surface 100% of UI events, interactions, and silent errors directly to the Diagnostics Console. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
 
 ---
 

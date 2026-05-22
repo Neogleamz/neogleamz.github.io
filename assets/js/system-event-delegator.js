@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-click');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'click_renderSimulatorOrder':
                     if (typeof window.renderSimulatorOrder === 'function') window.renderSimulatorOrder(el.getAttribute('data-oid'));
@@ -1364,6 +1365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1374,6 +1376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-keyup');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'keyup_window_updateColumnFilter':
                     if (typeof window.keyup_window_updateColumnFilter === 'function') window.keyup_window_updateColumnFilter(el);
@@ -1410,6 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1420,6 +1424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-mousedown');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'mousedown_initNeoSidebarResizer_event':
                     initNeoSidebarResizer(event);
@@ -1461,6 +1466,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1471,6 +1477,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-change');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'change_updateSaleType':
                     if (typeof window.updateSaleType === 'function') window.updateSaleType(el, el.getAttribute('data-order'), el.getAttribute('data-sku'));
@@ -1628,6 +1635,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1638,6 +1646,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-input');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'input_renderBarcodzGrid':
                     renderBarcodzGrid();
@@ -1688,6 +1697,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1698,6 +1708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-mouseover');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'mouseover_this_style_borderColor_var_pri':
                     el.style.borderColor='var(--primary-color)';
@@ -1708,6 +1719,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1718,6 +1730,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-mouseout');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'mouseout_this_style_borderColor_var_bor':
                     el.style.borderColor='var(--border-input)';
@@ -1728,6 +1741,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1738,6 +1752,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-submit');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'submit_handleFormSubmit_event':
                     handleFormSubmit(event);
@@ -1745,6 +1760,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, false);
 
@@ -1755,6 +1771,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-focus');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'focus_storeOldVal':
                     if (typeof window.focus_storeOldVal === 'function') window.focus_storeOldVal(el);
@@ -1765,6 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Event Delegator] Error: ${action} - ${error.message}`, true, error.stack); }
         }
     }, true);
 
@@ -1775,6 +1793,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = el.getAttribute('data-blur');
         
         try {
+            if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'blur_updateSaleCell':
                     if (typeof window.updateSaleCell === 'function') window.updateSaleCell(el, el.getAttribute('data-order'), el.getAttribute('data-sku'), el.getAttribute('data-col'), el.getAttribute('data-isnum') === 'true');
