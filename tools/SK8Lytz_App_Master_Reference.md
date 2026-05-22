@@ -149,6 +149,11 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **Synchronous Speed Priority**: `localStorage` is used exclusively for global toggles, persistent states, and zero-latency configs.
 * **Storage Keys**:
   * `neogleamz_default_lead_time`: Sets the global fallback ROP lead time (in days) if a raw good does not have a unique one set.
+
+### Internal Developer Tooling (QA Dashboard)
+* **Responsive Flex Diagnostics:** The root directory contains `qa-dashboard.html`, a standalone diagnostic tool used by AI/Developers to mathematically test Flexbox geometry.
+* **The AI Scanner:** It loads `index.html` via `iframe`, cycles through standard viewport breakpoints (1440p to Mobile), and uses `getBoundingClientRect()` to detect horizontal overflows and boundary collisions without relying on visual screenshots.
+
 ---
 
 ## 🎨 2. UI & Front-End Architecture Standards

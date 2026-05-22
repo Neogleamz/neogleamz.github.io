@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8Lytz | Responsive QA Diagnostics</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; 
+            background: #0f172a; color: #fff; 
+            font-family: monospace; 
+            display: flex; flex-direction: column; 
+            height: 100vh; overflow: hidden; 
+        }
+        .qa-header { 
+            background: #1e293b; padding: 10px 20px; 
+            display: flex; gap: 15px; align-items: center; justify-content: space-between; 
+            border-bottom: 2px solid #3b82f6; 
+        }
+        .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        select, button { 
+            background: #334155; color: #fff; 
+            border: 1px solid #475569; padding: 6px 12px; 
+            border-radius: 4px; cursor: pointer; 
+            font-family: monospace;
+        }
+        button:hover { background: #475569; }
+        .qa-main { flex: 1; display: flex; overflow: hidden; }
+        .iframe-container { 
+            flex: 1; display: flex; justify-content: center; align-items: flex-start; 
+            background: #000; overflow: auto; padding: 20px; 
+            transition: all 0.3s ease; 
+        }
+        iframe { 
+            background: #fff; border: none; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.8); 
+            transition: width 0.4s ease, height 0.4s ease; 
+        }
+        .report-panel { 
+            width: 450px; background: #1e293b; 
+            border-left: 2px solid #3b82f6; padding: 15px; 
+            overflow-y: auto; font-size: 13px; line-height: 1.4; 
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .log-entry { 
+            padding: 8px; border-left: 4px solid #ef4444; 
+            background: rgba(239, 68, 68, 0.1); word-wrap: break-word;
+        }
+        .log-info { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .log-success { border-left-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="qa-header">
+        <div class="controls">
+            <strong style="color: #3b82f6; font-size: 16px;">SK8Lytz QA</strong>
+            <select id="viewport-select">
+                <optgroup label="Desktop">
+                    <option value="2560x1440">1440p Ultrawide (2560x1440)</option>
+                    <option value="2240x1260">Desktop Target 1 (2240x1260)</option>
+                    <option value="1920x1080" selected>1080p Standard (1920x1080)</option>
+                    <option value="1760x990">Desktop Target 2 (1760x990)</option>
+                    <option value="1600x900">900p Medium (1600x900)</option>
+                    <option value="1480x830">Desktop Target 3 (1480x830)</option>
+                    <option value="1366x768">768p Laptop (1366x768)</option>
+                    <option value="1280x720">720p Small (1280x720)</option>
+                </optgroup>
+                <optgroup label="Tablet">
+                    <option value="1024x1366">iPad Pro (1024x1366)</option>
+                    <option value="800x1280">Android Tablet (800x1280)</option>
+                    <option value="768x1024">iPad Mini (768x1024)</option>
+                </optgroup>
+                <optgroup label="Mobile">
+                    <option value="430x932">iPhone 15 Pro Max (430x932)</option>
+                    <option value="412x892">Pixel 8 Pro (412x892)</option>
+                    <option value="390x844">iPhone 14 (390x844)</option>
+                    <option value="320x568">iPhone SE / Legacy (320x568)</option>
+                </optgroup>
+            </select>
+            <button id="btn-scan" style="background:#059669; border-color:#059669;">Run Current View</button>
+            <button id="btn-cycle" style="background:#2563eb; border-color:#2563eb;">Auto-Cycle View</button>
+            <button id="btn-deep-scan" style="background:#8b5cf6; border-color:#8b5cf6;">🚀 DEEP SCAN (All Hubs)</button>
+            <button id="btn-clear" style="background:#dc2626; border-color:#dc2626;">Clear Log</button>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:#fcd34d;">
+                <input type="checkbox" id="chk-turbo" checked> ⚡ Turbo Mode
+            </label>
+        </div>
+        <div id="status" style="color: #94a3b8;">Status: Idle</div>
+    </div>
+    <div class="qa-main">
+        <div class="iframe-container">
+            <iframe id="target-frame" src="./index.html" width="1920" height="1080"></iframe>
+        </div>
+        <div class="report-panel" id="report-panel">
+            <div class="log-entry log-info">🚀 QA Diagnostics Engine Ready.<br><br><strong>1.</strong> Log into the app inside the window.<br><strong>2.</strong> Click <strong>DEEP SCAN</strong> to automatically cycle through every Hub and resolution!</div>
+        </div>
+    </div>
+
+    <script>
+        const frame = document.getElementById('target-frame');
+        const select = document.getElementById('viewport-select');
+        const btnScan = document.getElementById('btn-scan');
+        const btnCycle = document.getElementById('btn-cycle');
+        const btnDeepScan = document.getElementById('btn-deep-scan');
+        const btnClear = document.getElementById('btn-clear');
+        const chkTurbo = document.getElementById('chk-turbo');
+        const reportPanel = document.getElementById('report-panel');
+        const statusEl = document.getElementById('status');
+
+        let isAutoCycling = false;
+        let globalErrorsFound = 0;
+
+        function logToPanel(msg, type = 'error') {
+            const div = document.createElement('div');
+            let cls = 'log-entry';
+            if (type === 'info') cls += ' log-info';
+            if (type === 'success') cls += ' log-success';
+            div.className = cls;
+            div.innerHTML = msg; // allow basic HTML formatting
+            reportPanel.prepend(div);
+        }
+
+        btnClear.addEventListener('click', () => {
+            reportPanel.innerHTML = '<div class="log-entry log-info">Logs cleared.</div>';
+            globalErrorsFound = 0;
+        });
+
+        function setViewport(w, h) {
+            frame.width = w;
+            frame.height = h;
+            statusEl.textContent = `Viewport active: ${w}px \u00d7 ${h}px`;
+            
+            // Auto-scale iframe so you can see the whole thing, even if it's 2560px wide!
+            const container = document.querySelector('.iframe-container');
+            const scaleW = (container.clientWidth - 40) / w; 
+            const scaleH = (container.clientHeight - 40) / h;
+            let scale = Math.min(scaleW, scaleH);
+            if (scale > 1) scale = 1; // Never scale above 100%
+            
+            frame.style.transform = `scale(${scale})`;
+            frame.style.transformOrigin = 'top center';
+        }
+
+        window.addEventListener('resize', () => {
+            const [w, h] = select.value.split('x');
+            setViewport(w, h);
+        });
+
+
+        // The AI Diagnostics Scanner Logic
+        async function runScannerForCurrentViewport(hubName = 'Base', pageName = 'Main', modalName = null) {
+            logToPanel(`[🔍 Scanning] Executing geometric pass at <strong>${frame.width}x${frame.height}</strong>...`, 'info');
+            return new Promise((resolve) => {
+                try {
+                    const doc = frame.contentWindow.document;
+                    if(!doc || !doc.body) {
+                        logToPanel(`CORS Error: Cannot read iframe DOM. Ensure you are running on 127.0.0.1.`, 'error');
+                        return resolve(false);
+                    }
+                    
+                    let localIssues = 0;
+                    let emptySpaceIssues = 0;
+                    let usabilityIssues = 0;
+                    let markdownLog = `### Hub: ${hubName} | Page: ${pageName}${modalName ? ' | Modal: ' + modalName : ''}\n`;
+                    
+                    // 1. Check root document horizontal overflow
+                    if (doc.documentElement.scrollWidth > doc.documentElement.clientWidth + 5) {
+                        logToPanel(`[${frame.width}x${frame.height}] <strong>CRITICAL:</strong> Document horizontal overflow! (Scroll: ${doc.documentElement.scrollWidth}px, Client: ${doc.documentElement.clientWidth}px)`);
+                        markdownLog += `- **CRITICAL**: Document horizontal overflow! (Scroll: ${doc.documentElement.scrollWidth}px, Client: ${doc.documentElement.clientWidth}px)\n`;
+                        localIssues++;
+                    }
+
+                    // 2. Iterate all elements for nested collisions & density checks
+                    const allNodes = doc.querySelectorAll('div, section, header, nav, button, input, table');
+                    allNodes.forEach(node => {
+                        // Ignore hidden elements
+                        const style = frame.contentWindow.getComputedStyle(node);
+                        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return;
+                        
+                        const rect = node.getBoundingClientRect();
+                        const parent = node.parentElement;
+                        
+                        // Ignore non-rendered geometry
+                        if (rect.width === 0 || rect.height === 0) return;
+
+                        // Tap Target Density Check (Mobile constraints)
+                        if ((node.tagName === 'BUTTON' || node.tagName === 'INPUT') && frame.width <= 768) {
+                            if (rect.width < 44 || rect.height < 44) {
+                                logToPanel(`[${frame.width}x${frame.height}] <strong>Usability:</strong> Tap target too small on &lt;${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}"&gt; (${rect.width}x${rect.height}). Recommended 44x44px.`, 'info');
+                                markdownLog += `- **Usability**: Tap target too small on \`<${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}">\` (${rect.width}x${rect.height}). Recommended 44x44px.\n`;
+                                usabilityIssues++;
+                            }
+                        }
+
+                        // Wasted Space / Low Density Check
+                        if (['DIV', 'SECTION', 'MAIN'].includes(node.tagName) && rect.width > 300 && rect.height > 200) {
+                            // Calculate children area
+                            let childrenArea = 0;
+                            let childCount = 0;
+                            Array.from(node.children).forEach(child => {
+                                const cStyle = frame.contentWindow.getComputedStyle(child);
+                                if (cStyle.position !== 'absolute' && cStyle.display !== 'none') {
+                                    const cRect = child.getBoundingClientRect();
+                                    childrenArea += (cRect.width * cRect.height);
+                                    childCount++;
+                                }
+                            });
+                            
+                            const nodeArea = rect.width * rect.height;
+                            if (childCount > 0 && nodeArea > 0) {
+                                const density = (childrenArea / nodeArea) * 100;
+                                if (density < 15) { // If content takes up less than 15% of a large container
+                                    logToPanel(`[${frame.width}x${frame.height}] <strong>Layout Density:</strong> &lt;${node.tagName.toLowerCase()} class="${node.className}"&gt; has excessive wasted space (Density: ${density.toFixed(1)}%). Consider flexing children or adjusting width.`, 'info');
+                                    markdownLog += `- **Layout Density**: \`<${node.tagName.toLowerCase()} class="${node.className}">\` has excessive wasted space (Density: ${density.toFixed(1)}%). Consider flexing children or adjusting width.\n`;
+                                    emptySpaceIssues++;
+                                }
+                            }
+                        }
+
+                        // Check horizontal overflow of container (with 5px tolerance for border sub-pixels)
+                        if (node.scrollWidth > node.clientWidth + 5 && style.overflowX !== 'auto' && style.overflowX !== 'scroll' && style.overflow !== 'hidden') {
+                            // Text inputs often have scrollWidth > clientWidth, ignore them
+                            if (node.tagName !== 'INPUT' && node.tagName !== 'TEXTAREA') {
+                                // Walk up the tree to see if any parent provides a horizontal scrollbar
+                                let p = node.parentElement;
+                                let isHandledByParent = false;
+                                while (p) {
+                                    const pStyle = frame.contentWindow.getComputedStyle(p);
+                                    if (pStyle.overflowX === 'auto' || pStyle.overflowX === 'scroll') {
+                                        isHandledByParent = true;
+                                        break;
+                                    }
+                                    p = p.parentElement;
+                                }
+                                
+                                if (!isHandledByParent) {
+                                    logToPanel(`[${frame.width}x${frame.height}] <strong>Internal Overflow:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}"&gt; is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).`);
+                                    markdownLog += `- **Internal Overflow**: \`<${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}">\` is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).\n`;
+                                    localIssues++;
+                                }
+                            }
+                        }
+
+                        // Check boundary violation (child breaching parent)
+                        if (parent) {
+                            const parentRect = parent.getBoundingClientRect();
+                            if (parentRect.width > 0) {
+                                // 5px tolerance for border box anomalies, ignore position: fixed
+                                if (rect.right > parentRect.right + 5 && style.position !== 'fixed' && style.position !== 'absolute') {
+                                    const ignoreTags = ['BODY', 'HTML', 'MAIN'];
+                                    if (!ignoreTags.includes(node.tagName) && !ignoreTags.includes(parent.tagName)) {
+                                        // Walk up the tree to see if ANY parent handles horizontal scroll
+                                        let p = node.parentElement;
+                                        let isHandledByParentScroll = false;
+                                        while (p) {
+                                            const pStyle = frame.contentWindow.getComputedStyle(p);
+                                            if (pStyle.overflowX === 'auto' || pStyle.overflowX === 'scroll' || pStyle.overflow === 'hidden') {
+                                                isHandledByParentScroll = true;
+                                                break;
+                                            }
+                                            p = p.parentElement;
+                                        }
+                                        
+                                        if (!isHandledByParentScroll) {
+                                            logToPanel(`[${frame.width}x${frame.height}] <strong>Boundary Breach:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}"&gt; clipped right edge of parent &lt;${parent.tagName.toLowerCase()} class="${parent.className}"&gt;.`);
+                                            markdownLog += `- **Boundary Breach**: \`<${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}">\` clipped right edge of parent \`<${parent.tagName.toLowerCase()} class="${parent.className}">\`.\n`;
+                                            localIssues++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    if (localIssues === 0 && emptySpaceIssues === 0 && usabilityIssues === 0) {
+                        logToPanel(`[${frame.width}x${frame.height}] ✅ Clean geometry. Optimal layout density.`, 'success');
+                        markdownLog += `- ✅ Clean geometry. Optimal layout density.\n`;
+                    }
+                    
+                    markdownLog += '\n'; // Add spacing between hubs
+                    
+                    // Post to local server for file generation
+                    fetch('http://127.0.0.1:5501', {
+                        method: 'POST',
+                        body: JSON.stringify({ 
+                            resolution: `${frame.width}x${frame.height}`, 
+                            hub: hubName, 
+                            page: pageName, 
+                            modal: modalName,
+                            markdown: markdownLog 
+                        }),
+                        headers: { 'Content-Type': 'application/json' }
+                    }).catch(e => { /* server off, ignore */ });
+
+                    globalErrorsFound += localIssues;
+                    resolve(true);
+
+                } catch (e) {
+                    logToPanel(`Error accessing iframe DOM. Are we strictly on a local HTTP server? (${e.message})`, 'error');
+                    resolve(false);
+                }
+            });
+        }
+
+        btnScan.addEventListener('click', async () => {
+            await runScannerForCurrentViewport();
+        });
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        btnCycle.addEventListener('click', async () => {
+            if (isAutoCycling) return;
+            isAutoCycling = true;
+            btnCycle.textContent = "Cycling (Do not touch)...";
+            btnCycle.disabled = true;
+            
+            globalErrorsFound = 0;
+            logToPanel(`--- <strong>INITIATING AUTOMATED AI AUDIT</strong> ---`, 'info');
+
+            // Select all options across optgroups
+            const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
+            const isTurbo = chkTurbo.checked;
+
+            for (const res of options) {
+                const [w, h] = res.split('x');
+                select.value = res;
+                setViewport(w, h);
+                await sleep(isTurbo ? 250 : 1200);
+                await runScannerForCurrentViewport();
+                await sleep(isTurbo ? 50 : 400);
+            }
+
+            logToPanel(`--- <strong>AUDIT COMPLETE</strong> ---<br>Total Layout Violations Detected: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
+            
+            btnCycle.textContent = "Auto-Cycle View";
+            btnCycle.disabled = false;
+            isAutoCycling = false;
+        });
+
+        btnDeepScan.addEventListener('click', async () => {
+            if (isAutoCycling) return;
+            
+            try {
+                const doc = frame.contentWindow.document;
+                
+                // Instead of getComputedStyle which might fail or be tricky, let's just check if the tab buttons exist!
+                // If there are tab buttons, we are logged in.
+                const tabs = Array.from(doc.querySelectorAll('.tab-btn'));
+                if (tabs.length === 0) {
+                    logToPanel("Error: No Hub tabs found. Are you logged in?", "error");
+                    alert("Please log into the application inside the iframe first!");
+                    return;
+                }
+
+                isAutoCycling = true;
+                btnDeepScan.textContent = "DEEP SCAN RUNNING (Do not touch)...";
+                btnDeepScan.disabled = true;
+                
+                globalErrorsFound = 0;
+                logToPanel(`--- <strong>INITIATING MASSIVE DEEP SCAN (ALL HUBS)</strong> ---`, 'info');
+
+                // Clear old files from logger
+                try {
+                    await fetch('http://127.0.0.1:5501', { method: 'POST', body: JSON.stringify({ action: 'clear' }) });
+                } catch(e) {}
+
+                const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
+                const isTurbo = chkTurbo.checked;
+
+                // Helper function for the inner loop
+                async function scanViewportCycle(hName, pName, mName) {
+                    for (const res of options) {
+                        const [w, h] = res.split('x');
+                        select.value = res;
+                        setViewport(w, h);
+                        await sleep(isTurbo ? 150 : 800); // Wait for layout
+                        await runScannerForCurrentViewport(hName, pName, mName);
+                        await sleep(isTurbo ? 50 : 200);
+                    }
+                }
+
+                for (const tab of tabs) {
+                    const hubName = tab.textContent.trim() || 'UnknownHub';
+                    logToPanel(`<h2>Navigating to Hub: ${hubName}</h2>`, 'info');
+                    
+                    // Click the tab in the iframe
+                    tab.click();
+                    await sleep(isTurbo ? 600 : 1500); 
+
+                    // 1. Scan Base Hub
+                    await scanViewportCycle(hubName, 'Main', null);
+
+                    // 2. Deep Dive: Sub-Navigation Pages
+                    // Find visible sub-nav buttons inside the hub
+                    const subBtns = Array.from(doc.querySelectorAll('.sub-nav-btn')).filter(b => frame.contentWindow.getComputedStyle(b).display !== 'none');
+                    for (const subBtn of subBtns) {
+                        const pageName = subBtn.textContent.trim() || 'UnknownPage';
+                        logToPanel(`<h3>Navigating to Sub-Page: ${pageName}</h3>`, 'info');
+                        subBtn.click();
+                        await sleep(isTurbo ? 400 : 1000);
+                        await scanViewportCycle(hubName, pageName, null);
+                    }
+                }
+
+                // 3. Deep Dive: Global Modals
+                // Find all modal containers (these are global in the DOM, so we scan them once at the end)
+                logToPanel(`<h2>Scanning Global Modals</h2>`, 'info');
+                const modals = Array.from(doc.querySelectorAll('.modal-overlay, [id$="Modal"]')).filter(m => m.id !== 'loginUI');
+                for (const modal of modals) {
+                    const modalName = modal.id || modal.className.split(' ')[0] || 'UnknownModal';
+                    logToPanel(`<h4>Forcing Open Modal: ${modalName}</h4>`, 'info');
+                    
+                    // Force it open
+                    const oldDisplay = modal.style.display;
+                    const hasActive = modal.classList.contains('active');
+                    modal.style.setProperty('display', 'flex', 'important');
+                    modal.classList.add('active');
+                    
+                    await sleep(isTurbo ? 300 : 800);
+                    
+                    await scanViewportCycle('Global_Modals', 'Main', modalName);
+                    
+                    // Restore it
+                    modal.style.display = oldDisplay;
+                    if (!hasActive) modal.classList.remove('active');
+                    await sleep(isTurbo ? 100 : 300);
+                }
+
+                logToPanel(`--- <strong>DEEP SCAN COMPLETE</strong> ---<br>Total Layout Violations Detected Globally: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
+                
+            } catch (err) {
+                logToPanel(`FATAL ERROR in Deep Scan: ${err.message}`, 'error');
+                console.error(err);
+            } finally {
+                btnDeepScan.textContent = "🚀 DEEP SCAN (All Hubs)";
+                btnDeepScan.disabled = false;
+                isAutoCycling = false;
+            }
+        });
+
+        // Initialize viewport on load
+        window.onload = () => {
+            const [w, h] = select.value.split('x');
+            setViewport(w, h);
+        };
+    </script>
+</body>
+</html>

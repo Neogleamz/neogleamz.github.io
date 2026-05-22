@@ -31,4 +31,4 @@ supabase/.branches/
 scratch/
 data/exports/
 supabase/dumps/
-coverage/
+coverage/.qa-reports/
