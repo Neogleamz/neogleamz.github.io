@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('click', function(event) {
         if (event.target.type === 'checkbox') return;
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-click]');
         if (!el) return;
         
@@ -128,6 +129,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_window_closeTagManager':
                     if (typeof window.teCloseTagManager === 'function') window.teCloseTagManager();
+                    break;
+                case 'click_closeScraperFoundry':
+                    if (typeof window.closeScraperFoundry === 'function') window.closeScraperFoundry();
+                    break;
+                case 'click_scraperSetContainerBounds':
+                    if (typeof window.scraperSetContainerBounds === 'function') window.scraperSetContainerBounds();
+                    break;
+                case 'click_scraperMapChildColumn':
+                    if (typeof window.scraperMapChildColumn === 'function') window.scraperMapChildColumn();
+                    break;
+                case 'click_scraperExportXLSX':
+                    if (typeof window.scraperExportXLSX === 'function') window.scraperExportXLSX();
+                    break;
+                case 'click_scraperCopyJSON':
+                    if (typeof window.scraperCopyJSON === 'function') window.scraperCopyJSON();
+                    break;
+                case 'click_scraperClearDataset':
+                    if (typeof window.scraperClearDataset === 'function') window.scraperClearDataset();
                     break;
                 case 'click_teCreateTagFromManager':
                     if (typeof window.teCreateTagFromManager === 'function') window.teCreateTagFromManager();
@@ -1581,6 +1600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('input', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-input]');
         if (!el) return;
         const action = el.getAttribute('data-input');
@@ -1637,6 +1657,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('mouseover', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-mouseover]');
         if (!el) return;
         const action = el.getAttribute('data-mouseover');
@@ -1656,6 +1677,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('mouseout', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-mouseout]');
         if (!el) return;
         const action = el.getAttribute('data-mouseout');
@@ -1675,6 +1697,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('submit', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-submit]');
         if (!el) return;
         const action = el.getAttribute('data-submit');
@@ -1691,6 +1714,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('focus', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-focus]');
         if (!el) return;
         const action = el.getAttribute('data-focus');
@@ -1710,6 +1734,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true);
 
     document.body.addEventListener('blur', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-blur]');
         if (!el) return;
         const action = el.getAttribute('data-blur');
@@ -1754,6 +1779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true);
 
     document.body.addEventListener('change', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-change]');
         if (!el) return;
         const action = el.getAttribute('data-change');
@@ -1765,6 +1791,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleFileSelectTest_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
+                    break;
+                case 'change_scraperFileInput':
+                    if (typeof window.change_scraperFileInput === 'function') window.change_scraperFileInput(event);
                     break;
                 case 'change_teUpdateTagColor':
                     if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
