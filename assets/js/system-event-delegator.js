@@ -1368,6 +1368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('keyup', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-keyup]');
         if (!el) return;
         const action = el.getAttribute('data-keyup');
@@ -1413,6 +1414,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('mousedown', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-mousedown]');
         if (!el) return;
         const action = el.getAttribute('data-mousedown');
@@ -1463,6 +1465,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('change', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-change]');
         if (!el) return;
         const action = el.getAttribute('data-change');
@@ -1509,7 +1512,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.change_handleShopifyBillingUpload === 'function') window.change_handleShopifyBillingUpload(event);
                     break;
                 case 'change_handleFileSelect_this':
-                    handleFileSelect(el);
+                    if (typeof handleFileSelect === 'function') handleFileSelect(el, false);
+                    break;
+                case 'change_handleFileSelectTest_this':
+                    if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
                     break;
                 case 'change_handleCSVImport_this':
                     handleCSVImport(el);
@@ -1593,6 +1599,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
                 }
+                case 'change_handleStyleToggle_this':
+                    if (typeof window.handleStyleToggle === 'function') {
+                        window.handleStyleToggle(el.getAttribute('data-style'));
+                    }
+                    break;
+                case 'change_scraperFileInput':
+                    if (typeof window.change_scraperFileInput === 'function') window.change_scraperFileInput(event);
+                    break;
+                case 'change_teUpdateTagColor':
+                    if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
+                    break;
+                case 'change_teUpdateTagName':
+                    if (typeof window.change_teUpdateTagName === 'function') window.change_teUpdateTagName(el);
+                    break;
+                case 'change_teChangeIdentity':
+                    if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
+                    break;
+                case 'change_teUpdateStartDate':
+                    if (typeof window.teUpdateStartDate === 'function' && window.currentOpenTaskId) window.teUpdateStartDate(window.currentOpenTaskId, el.value);
+                    break;
+                case 'change_teUpdateDueDate':
+                    if (typeof window.teUpdateDueDate === 'function' && window.currentOpenTaskId) window.teUpdateDueDate(window.currentOpenTaskId, el.value);
+                    break;
+                case 'change_teFilterTaskSearch':
+                    if (window.change_teFilterTaskSearch) window.change_teFilterTaskSearch(event);
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
@@ -1781,50 +1813,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, true);
 
-    document.body.addEventListener('change', function(event) {
-        if (!event.target || typeof event.target.closest !== 'function') return;
-        const el = event.target.closest('[data-change]');
-        if (!el) return;
-        const action = el.getAttribute('data-change');
-        
-        try {
-            switch(action) {
-                case 'change_handleFileSelect_this':
-                    if (typeof handleFileSelect === 'function') handleFileSelect(el, false);
-                    break;
-                case 'change_handleStyleToggle_this':
-                    if (typeof window.handleStyleToggle === 'function') {
-                        window.handleStyleToggle(el.getAttribute('data-style'));
-                    }
-                    break;
-                case 'change_handleFileSelectTest_this':
-                    if (typeof handleFileSelect === 'function') handleFileSelect(el, true);
-                    break;
-                case 'change_scraperFileInput':
-                    if (typeof window.change_scraperFileInput === 'function') window.change_scraperFileInput(event);
-                    break;
-                case 'change_teUpdateTagColor':
-                    if (typeof window.change_teUpdateTagColor === 'function') window.change_teUpdateTagColor(el);
-                    break;
-                case 'change_teUpdateTagName':
-                    if (typeof window.change_teUpdateTagName === 'function') window.change_teUpdateTagName(el);
-                    break;
-                case 'change_teChangeIdentity':
-                    if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
-                    break;
-                case 'change_teUpdateStartDate':
-                    if (typeof window.teUpdateStartDate === 'function' && window.currentOpenTaskId) window.teUpdateStartDate(window.currentOpenTaskId, el.value);
-                    break;
-                case 'change_teUpdateDueDate':
-                    if (typeof window.teUpdateDueDate === 'function' && window.currentOpenTaskId) window.teUpdateDueDate(window.currentOpenTaskId, el.value);
-                    break;
-                case 'change_teFilterTaskSearch':
-                    if (window.change_teFilterTaskSearch) window.change_teFilterTaskSearch(event);
-                    break;
-            }
-        } catch (error) {
-            console.error(`[Event Delegator] Error executing ${action} on change:`, error);
-        }
-    }, false);
 
 });
