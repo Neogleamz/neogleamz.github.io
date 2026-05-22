@@ -1433,7 +1433,7 @@ function renderActualNetList() {
     window.actualNetEventController = new AbortController();
     const signal = window.actualNetEventController.signal;
 
-    let container = document.getElementById('actualNetContainer');
+    let container = document.getElementById('actualNetTableWrapper');
     if(!container) return;
     
     let searchTerm = (document.getElementById('actualNetSearch') ? document.getElementById('actualNetSearch').value.toLowerCase() : "");
@@ -1568,7 +1568,34 @@ function renderActualNetList() {
         html = `<tr><td colspan='16' style='text-align:center; padding:20px; color:#888;'>No results found.</td></tr>`;
     }
     
-    container.innerHTML = window.safeHTML(html);
+    let fullTableHtml = `
+        <table style="width:100%; margin:0; table-layout:fixed;">
+            <thead style="position:sticky; top:0; z-index:2; background:var(--bg-panel); font-size:11px;">
+                <tr>
+                    <th style="width:20px;"></th>
+                    <th style="cursor:pointer;" data-click="click_actualNetSort_o">Order ID</th>
+                    <th style="cursor:pointer;" data-click="click_actualNetSort_d">Date</th>
+                    <th class="text-right" style="cursor:pointer;">Price (R)</th>
+                    <th class="text-right" style="cursor:pointer;">Qty</th>
+                    <th class="text-right" style="cursor:pointer;">Subtot</th>
+                    <th class="text-right" style="cursor:pointer;">Disc (N)</th>
+                    <th class="text-right" style="cursor:pointer;">Ship (J)</th>
+                    <th class="text-right" style="cursor:pointer;" data-click="click_actualNetSort_t">Tax (K)</th>
+                    <th class="text-right" style="cursor:pointer;">Out.Bal (AY)</th>
+                    <th class="text-right" style="cursor:pointer;" data-click="click_actualNetSort_g">Total (L)</th>
+                    <th class="text-right" style="cursor:pointer;" data-click="click_actualNetSort_a">Refund (M)</th>
+                    <th class="text-right" style="cursor:pointer;" data-click="click_actualNetSort_c">COGS</th>
+                    <th class="text-right" style="cursor:pointer;" data-click="click_actualNetSort_s">Ship Exp</th>
+                    <th class="text-right" style="cursor:pointer;" data-click="click_actualNetSort_f">Fees</th>
+                    <th class="text-right" style="cursor:pointer;" data-click="click_actualNetSort_n">TRUE NET</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${html}
+            </tbody>
+        </table>`;
+
+    container.innerHTML = window.safeHTML(fullTableHtml);
     
     container.querySelectorAll('.net-modal-parent').forEach(tr => {
         tr.addEventListener('click', () => {
