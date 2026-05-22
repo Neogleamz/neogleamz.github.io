@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.0.56] - 2026-05-22
+### 🧪 Automated Testing
+- **Jest Test Coverage Audit** (`test/audit-jest-coverage`): Refactored the testing framework to use standard `require()` instead of `eval()`, unlocking accurate Istanbul coverage matrices for math, sales, inventory, production, and CEO engines. Mocked `DOMPurify` to ensure clean terminal output.
+
 ## [1.0.55] - 2026-05-22
 ### 🧹 Chores & Cleanup
 - **Legacy Audit File-by-File Sequence**: Executed `/legacy_audit` and systematically eradicated technical debt, absolute positioning, inline onclick handlers, and enforced modern ES6 Vanilla JS standards across the following modules:
