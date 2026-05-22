@@ -1426,6 +1426,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.preventDefault();
                     if (typeof window.click_addAttachmentRow === 'function') window.click_addAttachmentRow(el);
                     break;
+                case 'mousedown_execRT':
+                    event.preventDefault();
+                    if (typeof window.execRT === 'function') window.execRT(el.getAttribute('data-action'));
+                    break;
                 case 'mousedown_sopDirectUpload':
                     event.preventDefault();
                     if (typeof window.triggerSopDirectUpload === 'function') window.triggerSopDirectUpload(el);
@@ -1448,6 +1452,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_window_renderRecipeManager':
                     if (typeof window.openRecipeManager === 'function') window.openRecipeManager();
+                    break;
+                case 'change_execRT':
+                    if (typeof window.execRT === 'function') window.execRT(el.getAttribute('data-action'), el.value);
                     break;
                 case 'change_window_updateRecipeManagerStaging':
                     if (typeof window.updateRecipeManagerStaging === 'function') window.updateRecipeManagerStaging(el);
@@ -1582,6 +1589,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'input_searchLabelzCatalog':
                     searchLabelzCatalog();
+                    break;
+                case 'input_balanceRoute':
+                    if (typeof window.balanceRoute === 'function') {
+                        window.balanceRoute(
+                            el.getAttribute('data-safek'),
+                            parseFloat(el.getAttribute('data-req')),
+                            el.getAttribute('data-type'),
+                            parseFloat(el.getAttribute('data-maxpull'))
+                        );
+                    }
                     break;
                 case 'input_checkWORouting':
                     checkWORouting();
