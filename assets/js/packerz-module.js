@@ -358,7 +358,7 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
     const headerButtonsWrapper = document.getElementById('sopViewerHeaderButtons');
     if (headerButtonsWrapper) {
         headerButtonsWrapper.innerHTML = window.safeHTML(
-            `<button class="btn-ghost-base btn-ghost-blue" data-click="click_printActiveSOP" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
+            `<button class="btn-ghost-base btn-ghost-blue" data-click="click_window_openSopPrintModal_pack" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
             `<button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_openActiveSOPEditor" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>` +
             `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_closePackerzSopViewer">Close</button>`
         );

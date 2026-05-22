@@ -456,8 +456,11 @@ window.saveMasterSOP = async function() {
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
         
         // Refresh Batchez active Work Order card if matches
-        if(typeof currentWO !== 'undefined' && currentWO && currentWO.product_name === p) {
-            renderActiveWO(currentWO.wo_id);
+        if(typeof currentWO !== 'undefined' && currentWO) {
+            let isRelated = (currentWO.product_name === p) || (currentWO.routing && currentWO.routing[p]);
+            if (isRelated) {
+                renderActiveWO(currentWO.wo_id);
+            }
         }
         
         // Refresh Layerz (3D Print Instructions) if currently viewing the print job

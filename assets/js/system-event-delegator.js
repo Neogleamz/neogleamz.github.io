@@ -820,8 +820,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
                 case 'click_printActiveSOP':
-                    if (typeof window.executeSopPrint === 'function') {
-                        window.executeSopPrint();
+                    if (typeof window.openSopPrintModal === 'function') {
+                        let activeCtx = window.currentActiveSopType === 'packerz' ? 'packerz' : 'production';
+                        window.openSopPrintModal(activeCtx, window.currentActiveSopRecipe);
                     }
                     break;
                 case 'click_openActiveSOPEditor':
@@ -1189,6 +1190,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     }
+                    break;
+                case 'click_openLayerzPrintSOP':
+                    if(window.openSopPrintModal) window.openSopPrintModal('production', el.getAttribute('data-name'));
                     break;
                 case 'click_openPrintSOP':
                     if(window.openPrintSOP) window.openPrintSOP(el.getAttribute('data-name'));
@@ -1580,6 +1584,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     checkWORouting();
                     break;
                 case 'input_renderProductionTelemetryPrevi':
+                case 'input_renderDashboardTelemetryPreview':
                     renderProductionTelemetryPreview();
                     break;
                 case 'input_filterArchiveList_this_value':
