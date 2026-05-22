@@ -3,6 +3,14 @@ import js from "@eslint/js";
 export default [
   js.configs.recommended,
   {
+    ignores: [
+      "node_modules/",
+      "supabase/",
+      ".git/",
+      "scripts/",
+      ".agents/",
+      "docs/"
+    ],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

@@ -1645,6 +1645,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'input_actualNetSearch':
                     if (typeof renderActualNetList === 'function') renderActualNetList();
                     break;
+                case 'input_renderSkaters':
+                    if (typeof window.renderSkaters === 'function') window.renderSkaters();
+                    break;
                 case 'input_window_updateRecipeManagerStaging':
                     if (typeof window.updateRecipeManagerStaging === 'function') {
                         window.updateRecipeManagerStaging(el);
@@ -1788,6 +1791,11 @@ document.addEventListener('DOMContentLoaded', () => {
             switch(action) {
                 case 'change_handleFileSelect_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, false);
+                    break;
+                case 'change_handleStyleToggle_this':
+                    if (typeof window.handleStyleToggle === 'function') {
+                        window.handleStyleToggle(el.getAttribute('data-style'));
+                    }
                     break;
                 case 'change_handleFileSelectTest_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, true);

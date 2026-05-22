@@ -164,19 +164,21 @@
 
         function generateSocial(link, followers, icon, colorClass, handle) {
             if (!handle || handle === '-' || handle === '') return "";
-            let tc = ''; let hb = '';
-            if (colorClass === 'pink') { tc = '#ec4899'; hb = 'rgba(236,72,153, 0.1)'; }
-            else if(colorClass === 'cyan') { tc = '#06b6d4'; hb = 'rgba(6,182,212, 0.1)'; }
-            else if(colorClass === 'red') { tc = '#ef4444'; hb = 'rgba(239,68,68, 0.1)'; }
-            else if(colorClass === 'blue') { tc = '#3b82f6'; hb = 'rgba(59,130,246, 0.1)'; }
+            let tc = ''; 
+            if (colorClass === 'pink') { tc = '#ec4899'; }
+            else if(colorClass === 'cyan') { tc = '#06b6d4'; }
+            else if(colorClass === 'red') { tc = '#ef4444'; }
+            else if(colorClass === 'blue') { tc = '#3b82f6'; }
             
+            let hoverClass = `socialz-hover-bg-${colorClass}`;
+
             let safeLink = link ? link.trim() : '';
             if (safeLink && !safeLink.startsWith('http://') && !safeLink.startsWith('https://')) {
                 safeLink = 'https://' + safeLink;
             }
 
             return `
-                <a href="${safeLink}" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; transition: all 0.2s; flex: 1; min-width: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none; background: var(--bg-panel); border: 1px solid var(--border-color);" onmouseover="this.style.background='${hb}'" onmouseout="this.style.background='var(--bg-panel)'">
+                <a href="${safeLink}" target="_blank" class="${hoverClass}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; transition: all 0.2s; flex: 1; min-width: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none; background: var(--bg-panel); border: 1px solid var(--border-color);">
                     <span style="font-size: 14px; color: ${tc}; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; font-weight: 500; text-align: center;">${handle}</span>
                     <div style="display: flex; align-items: center; gap: 8px; min-width: 0; justify-content: center; width: 100%;">
                         <i class="fa-brands ${icon}" style="color: ${tc}; font-size: 24px;"> </i>
@@ -265,13 +267,13 @@
             const sortedStyles = Array.from(uniqueStyles).sort();
             if (styleList) {
                 styleList.innerHTML = window.safeHTML ? window.safeHTML(sortedStyles.map(st => `
-                    <label style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; background:transparent;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} onchange="handleStyleToggle('${st}')">
+                    <label class="socialz-hover-bg-input" style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; background:transparent;">
+                        <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} data-change="change_handleStyleToggle_this" data-style="${st}">
                         <span style="font-size:12px; color:var(--text-main); font-weight:600; user-select:none;">${st}</span>
                     </label>
                 `).join('')) : sortedStyles.map(st => `
-                    <label style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; background:transparent;" onmouseover="this.style.background='var(--bg-input)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} onchange="handleStyleToggle('${st}')">
+                    <label class="socialz-hover-bg-input" style="display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; cursor:pointer; background:transparent;">
+                        <input type="checkbox" style="width:13px; height:13px; accent-color:var(--primary-color); cursor:pointer; flex-shrink:0;" ${selectedStyles.includes(st) ? 'checked' : ''} data-change="change_handleStyleToggle_this" data-style="${st}">
                         <span style="font-size:12px; color:var(--text-main); font-weight:600; user-select:none;">${st}</span>
                     </label>
                 `).join('');
@@ -468,7 +470,7 @@
                     </div>
 
                     <div style="display: flex; justify-content: flex-end;">
-                        <button data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='#f97316'"><i class="fa-solid fa-pen"> </i> EDIT</button>
+                        <button class="socialz-hover-color-orange" data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;"><i class="fa-solid fa-pen"> </i> EDIT</button>
                     </div>
                 </div></div>
                <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
@@ -535,7 +537,7 @@
                     </div>
 
                     <div style="display: flex; justify-content: flex-end;">
-                        <button data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;" onmouseover="this.style.color='#ea580c'" onmouseout="this.style.color='#f97316'"><i class="fa-solid fa-pen"> </i> EDIT</button>
+                        <button class="socialz-hover-color-orange" data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;"><i class="fa-solid fa-pen"> </i> EDIT</button>
                     </div>
                 </div></div>
                <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
@@ -591,9 +593,9 @@
                         const regStyles = getRegionStyleConfig(s.region);
                         const parsedStyles = s.style ? s.style.split(';').map(st => `<span style="background: var(--bg-input); padding: 2px 6px; border-radius: 4px; margin: 0 2px; font-size: 9px; text-transform: uppercase; font-weight: bold; border: 1px solid var(--border-color);" style="border-color:var(--border-color)">${st.trim()}</span>`).join('') : '-';
                         
-                        return `<tr style="border-bottom:1px solid var(--border-color); background:var(--bg-panel);" onmouseover="this.style.background='rgba(59, 130, 246, 0.05)'" onmouseout="this.style.background='var(--bg-panel)'">
+                        return `<tr class="socialz-hover-bg-blue-light" style="border-bottom:1px solid var(--border-color); background:var(--bg-panel);">
                             <td class="overflow-hidden" style="padding:4px; text-align:center;">
-                                <button data-click="click_toggleFavorite" data-index="${originalIndex}" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; transition: transform 0.2s; color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
+                                <button class="socialz-hover-scale-11" data-click="click_toggleFavorite" data-index="${originalIndex}" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; color: ${s.isFavorite ? '#ef4444' : 'var(--text-muted)'};">${s.isFavorite ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'}</button>
                             </td>
                             <td class="trunc-col" style="padding:4px 12px; font-weight:bold; color:var(--text-heading); text-align:left;">
                                 <div style="display: flex; align-items: center; gap: 8px; min-width: 0; width: 100%;">
@@ -611,9 +613,9 @@
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.tt||'#'}" target="_blank" style="font-weight:800; color:#06b6d4; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.tt||'0'}</a></td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.yt||'#'}" target="_blank" style="font-weight:800; color:#ef4444; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.yt||'0'}</a></td>
                             <td class="overflow-hidden" style="padding:4px; text-align:center;"><a href="${s.links.fb||'#'}" target="_blank" style="font-weight:800; color:#3b82f6; display:block; overflow:hidden; text-overflow:ellipsis;">${s.followers.fb||'0'}</a></td>
-                            <td class="overflow-hidden" style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; height: 100%; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform='scale(1)'" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;">${s.viralUrl ? `<a href="${s.viralUrl}" target="_blank" class="socialz-hover-scale-125" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; height: 100%;" title="View Viral Video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: #FBBF24; filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.006z" clip-rule="evenodd" /></svg></a>` : '-'}</td>
                             <td class="overflow-hidden" style="padding:4px; text-align:right; font-weight:900; color:var(--text-heading); font-size:13px;">${formatCountShort(s.rawFollowers)}</td>
-                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><button data-click="click_editSkater" data-index="${originalIndex}" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9px; display: flex; align-items: center; justify-content: center; gap: 4px; margin: 0 auto; transition: color 0.2s; color: var(--text-muted); background: var(--bg-input); border: 1px solid var(--border-color);" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='var(--text-muted)'"><i class="fa-solid fa-pen"> </i> EDIT</button></td>
+                            <td class="overflow-hidden" style="padding:4px; text-align:center;"><button class="socialz-hover-color-orange-light" data-click="click_editSkater" data-index="${originalIndex}" style="padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 9px; display: flex; align-items: center; justify-content: center; gap: 4px; margin: 0 auto; color: var(--text-muted); background: var(--bg-input); border: 1px solid var(--border-color);"><i class="fa-solid fa-pen"> </i> EDIT</button></td>
                         </tr>`;
                     }).join('');
                     
@@ -735,7 +737,7 @@
             const progressBar = document.getElementById('migration-progress-bar');
             const term = document.getElementById('migration-log-terminal');
             
-            term.innerHTML = '> Connecting to Supabase Storage...<br>';
+            term.innerHTML = window.safeHTML ? window.safeHTML('> Connecting to Supabase Storage...<br>') : '> Connecting to Supabase Storage...<br>';
             statusEl.innerText = "Monitoring DB Sync...";
             
             async function checkProgress() {
@@ -748,11 +750,12 @@
                     progressBar.style.width = `${(complete/total)*100}%`;
                     
                     if(complete >= total) {
-                        term.innerHTML += '> 100% Complete. All avatars safely stored.<br>';
+                        term.innerHTML = window.safeHTML ? window.safeHTML(term.innerHTML + '> 100% Complete. All avatars safely stored.<br>') : term.innerHTML + '> 100% Complete. All avatars safely stored.<br>';
                         statusEl.innerText = "Migration Complete!";
                         clearInterval(_migrationMonitorInterval);
                     } else {
-                        term.innerHTML = '> Syncing with background Node task...<br>> ' + complete + ' avatars securely stored in Supabase.<br>> Awaiting next batch...<br>';
+                        const newContent = '> Syncing with background Node task...<br>> ' + complete + ' avatars securely stored in Supabase.<br>> Awaiting next batch...<br>';
+                        term.innerHTML = window.safeHTML ? window.safeHTML(newContent) : newContent;
                     }
                 }
             }
@@ -772,7 +775,7 @@
             const progressBar = document.getElementById('migration-progress-bar');
             const term = document.getElementById('migration-log-terminal');
             
-            function log(msg) { term.innerHTML += '> ' + msg + '<br>'; term.scrollTop = term.scrollHeight; }
+            function log(msg) { term.innerHTML = window.safeHTML ? window.safeHTML(term.innerHTML + '> ' + msg + '<br>') : term.innerHTML + '> ' + msg + '<br>'; term.scrollTop = term.scrollHeight; }
             
             statusEl.innerText = "Scanning database...";
             
@@ -926,9 +929,6 @@
             }
         }
 
-
-
-        document.getElementById('search-input').addEventListener('input', renderSkaters);
         renderSkaters();
     
     // V11 NEOGLEAMZ NATIVE METRICS SYNC & SHIM
