@@ -1148,10 +1148,7 @@ function renderWOList() {
 
             woListHtml.push(`<li class="${sel}"
                 draggable="true"
-                ondragstart="woDragStart(event, ${index})"
-                ondragover="woDragOver(event)"
-                ondrop="woDrop(event, ${index})"
-                ondragend="woDragEnd(event)"
+                data-drag-index="${index}"
                 data-click="click_selectWO" data-id="${wo.wo_id}"
                 style="display:flex; justify-content:space-between; align-items:center; cursor:grab; padding: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; border-radius: 4px;">
                 <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
@@ -1162,6 +1159,13 @@ function renderWOList() {
             </li>`);
         });
         ui.innerHTML = window.safeHTML(woListHtml.join(''));
+        const listItems = ui.querySelectorAll('li[draggable="true"]');
+        listItems.forEach(li => {
+            li.addEventListener('dragstart', window.woDragStart);
+            li.addEventListener('dragover', window.woDragOver);
+            li.addEventListener('drop', window.woDrop);
+            li.addEventListener('dragend', window.woDragEnd);
+        });
         if(!currentWO) {
             let activeWO = workOrdersDB.find(w => w.status !== 'Archived');
             if(activeWO) {
@@ -1176,16 +1180,17 @@ function renderWOList() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-window.woDragStart = function(e, index) {
-    woDraggedIndex = index;
-    e.target.style.opacity = '0.5';
+window.woDragStart = function(e) {
+    woDraggedIndex = parseInt(e.currentTarget.getAttribute('data-drag-index'));
+    e.currentTarget.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
 }
 window.woDragOver = function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-window.woDragEnd = function(e) { e.target.style.opacity = '1'; }
-window.woDrop = function(e, index) {
+window.woDragEnd = function(e) { e.currentTarget.style.opacity = '1'; }
+window.woDrop = function(e) {
     e.preventDefault();
-    if (woDraggedIndex !== null && woDraggedIndex !== index) {
+    let index = parseInt(e.currentTarget.getAttribute('data-drag-index'));
+    if (woDraggedIndex !== null && woDraggedIndex !== index && !isNaN(index)) {
         let movedItem = workOrdersDB.splice(woDraggedIndex, 1)[0];
         workOrdersDB.splice(index, 0, movedItem);
         renderWOList();
