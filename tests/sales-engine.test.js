@@ -14,10 +14,7 @@ window.NEOGLEAMZ_CONFIG = {
 window.sysLog = jest.fn();
 
 // Import Engine
-const fs = require('fs');
-const path = require('path');
-const engineCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/neogleamz-engine.js'), 'utf-8');
-eval(engineCode);
+require('../assets/js/neogleamz-engine.js');
 
 // Mock COGS
 window.getEngineTrueCogs = function(recipeName) {

@@ -1,8 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-
-const engineCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/neogleamz-engine.js'), 'utf8');
-const ceoCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/ceo-module.js'), 'utf8');
 
 beforeAll(() => {
     // Provide a basic DOM for ceo-module
@@ -47,8 +42,8 @@ beforeAll(() => {
     window.ChartDataLabels = {};
     window.ceoFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
     
-    eval(engineCode);
-    eval(ceoCode);
+    require('../assets/js/neogleamz-engine.js');
+    require('../assets/js/ceo-module.js');
 
     window.sysLog = jest.fn();
     window.calculateProductBreakdown = jest.fn((name) => ({ total: name === 'PROD-A' ? 10.00 : 30.00 }));

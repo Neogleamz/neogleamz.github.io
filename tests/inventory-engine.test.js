@@ -1,8 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-
-const engineCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/neogleamz-engine.js'), 'utf8');
-const invCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/inventory-module.js'), 'utf8');
 
 beforeAll(() => {
     // Provide a basic DOM for inventory-module since it creates <style> tags
@@ -17,8 +12,8 @@ beforeAll(() => {
         clear: () => mockStorage = {}
     };
 
-    eval(engineCode);
-    eval(invCode);
+    require('../assets/js/neogleamz-engine.js');
+    require('../assets/js/inventory-module.js');
 });
 
 describe('📦 Inventory Intelligence & ROP Algorithms', () => {
