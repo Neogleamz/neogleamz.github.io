@@ -149,7 +149,7 @@
 
 
         // The AI Diagnostics Scanner Logic
-        async function runScannerForCurrentViewport() {
+        async function runScannerForCurrentViewport(currentHubName = 'Current View') {
             logToPanel(`[🔍 Scanning] Executing geometric pass at <strong>${frame.width}x${frame.height}</strong>...`, 'info');
             return new Promise((resolve) => {
                 try {
@@ -160,10 +160,13 @@
                     }
                     
                     let localIssues = 0;
+                    let emptySpaceIssues = 0;
+                    let markdownLog = `### Hub: ${currentHubName}\n`;
                     
                     // 1. Check root document horizontal overflow
                     if (doc.documentElement.scrollWidth > doc.documentElement.clientWidth + 5) {
                         logToPanel(`[${frame.width}x${frame.height}] <strong>CRITICAL:</strong> Document horizontal overflow! (Scroll: ${doc.documentElement.scrollWidth}px, Client: ${doc.documentElement.clientWidth}px)`);
+                        markdownLog += `- **CRITICAL**: Document horizontal overflow! (Scroll: ${doc.documentElement.scrollWidth}px, Client: ${doc.documentElement.clientWidth}px)\n`;
                         localIssues++;
                     }
 
@@ -186,6 +189,7 @@
                         if ((node.tagName === 'BUTTON' || node.tagName === 'INPUT') && frame.width <= 768) {
                             if (rect.width < 44 || rect.height < 44) {
                                 logToPanel(`[${frame.width}x${frame.height}] <strong>Usability:</strong> Tap target too small on &lt;${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}"&gt; (${rect.width}x${rect.height}). Recommended 44x44px.`, 'info');
+                                markdownLog += `- **Usability**: Tap target too small on \`<${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}">\` (${rect.width}x${rect.height}). Recommended 44x44px.\n`;
                                 localIssues++;
                             }
                         }
@@ -209,6 +213,7 @@
                                 const density = (childrenArea / nodeArea) * 100;
                                 if (density < 15) { // If content takes up less than 15% of a large container
                                     logToPanel(`[${frame.width}x${frame.height}] <strong>Layout Density:</strong> &lt;${node.tagName.toLowerCase()} class="${node.className}"&gt; has excessive wasted space (Density: ${density.toFixed(1)}%). Consider flexing children or adjusting width.`, 'info');
+                                    markdownLog += `- **Layout Density**: \`<${node.tagName.toLowerCase()} class="${node.className}">\` has excessive wasted space (Density: ${density.toFixed(1)}%). Consider flexing children or adjusting width.\n`;
                                     emptySpaceIssues++;
                                 }
                             }
@@ -219,6 +224,7 @@
                             // Text inputs often have scrollWidth > clientWidth, ignore them
                             if (node.tagName !== 'INPUT' && node.tagName !== 'TEXTAREA') {
                                 logToPanel(`[${frame.width}x${frame.height}] <strong>Internal Overflow:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}"&gt; is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).`);
+                                markdownLog += `- **Internal Overflow**: \`<${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}">\` is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).\n`;
                                 localIssues++;
                             }
                         }
@@ -232,6 +238,7 @@
                                     const ignoreTags = ['BODY', 'HTML', 'MAIN'];
                                     if (!ignoreTags.includes(node.tagName) && !ignoreTags.includes(parent.tagName)) {
                                         logToPanel(`[${frame.width}x${frame.height}] <strong>Boundary Breach:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}"&gt; clipped right edge of parent &lt;${parent.tagName.toLowerCase()} class="${parent.className}"&gt;.`);
+                                        markdownLog += `- **Boundary Breach**: \`<${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}">\` clipped right edge of parent \`<${parent.tagName.toLowerCase()} class="${parent.className}">\`.\n`;
                                         localIssues++;
                                     }
                                 }
@@ -241,8 +248,18 @@
 
                     if (localIssues === 0 && emptySpaceIssues === 0) {
                         logToPanel(`[${frame.width}x${frame.height}] ✅ Clean geometry. Optimal layout density.`, 'success');
+                        markdownLog += `- ✅ Clean geometry. Optimal layout density.\n`;
                     }
                     
+                    markdownLog += '\n'; // Add spacing between hubs
+                    
+                    // Post to local server for file generation
+                    fetch('http://127.0.0.1:5501', {
+                        method: 'POST',
+                        body: JSON.stringify({ resolution: `${frame.width}x${frame.height}`, markdown: markdownLog }),
+                        headers: { 'Content-Type': 'application/json' }
+                    }).catch(e => { /* server off, ignore */ });
+
                     globalErrorsFound += localIssues;
                     resolve(true);
 
@@ -310,6 +327,11 @@
                 globalErrorsFound = 0;
                 logToPanel(`--- <strong>INITIATING MASSIVE DEEP SCAN (ALL HUBS)</strong> ---`, 'info');
 
+                // Clear old files from logger
+                try {
+                    await fetch('http://127.0.0.1:5501', { method: 'POST', body: JSON.stringify({ action: 'clear' }) });
+                } catch(e) {}
+
                 const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
                 const isTurbo = chkTurbo.checked;
 
@@ -327,7 +349,7 @@
                         select.value = res;
                         setViewport(w, h);
                         await sleep(isTurbo ? 150 : 1000); // Layout reflow takes barely ~30ms on modern PCs
-                        await runScannerForCurrentViewport();
+                        await runScannerForCurrentViewport(hubName);
                         await sleep(isTurbo ? 50 : 200);
                     }
                 }
