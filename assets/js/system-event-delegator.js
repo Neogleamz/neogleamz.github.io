@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('click', function(event) {
         if (event.target.type === 'checkbox') return;
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-click]');
         if (!el) return;
         
@@ -1599,6 +1600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('input', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-input]');
         if (!el) return;
         const action = el.getAttribute('data-input');
@@ -1655,6 +1657,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('mouseover', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-mouseover]');
         if (!el) return;
         const action = el.getAttribute('data-mouseover');
@@ -1674,6 +1677,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('mouseout', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-mouseout]');
         if (!el) return;
         const action = el.getAttribute('data-mouseout');
@@ -1693,6 +1697,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('submit', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-submit]');
         if (!el) return;
         const action = el.getAttribute('data-submit');
@@ -1709,6 +1714,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
 
     document.body.addEventListener('focus', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-focus]');
         if (!el) return;
         const action = el.getAttribute('data-focus');
@@ -1728,6 +1734,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true);
 
     document.body.addEventListener('blur', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-blur]');
         if (!el) return;
         const action = el.getAttribute('data-blur');
@@ -1772,6 +1779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true);
 
     document.body.addEventListener('change', function(event) {
+        if (!event.target || typeof event.target.closest !== 'function') return;
         const el = event.target.closest('[data-change]');
         if (!el) return;
         const action = el.getAttribute('data-change');

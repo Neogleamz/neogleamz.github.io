@@ -742,6 +742,7 @@ window.closeLtvModal = function() {
 // --- CEO Terminal Global Event Delegation ---
 document.addEventListener('click', (e) => {
     try {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         if (e.target.closest('#btn-open-ceo-add-modal')) openCeoAddModal();
         
         const toggleBtn = e.target.closest('.ceo-toggle-btn');
@@ -773,6 +774,7 @@ document.addEventListener('click', (e) => {
 
 document.addEventListener('change', (e) => {
     try {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         const testMsrpInput = e.target.closest('.ceo-test-msrp-listen');
         if (testMsrpInput) updateCeoEngine();
     } catch (err) { console.error(err); }
@@ -780,6 +782,7 @@ document.addEventListener('change', (e) => {
 
 document.addEventListener('input', (e) => {
     try {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         const volInput = e.target.closest('.ceo-vol-listen');
         if (volInput) {
             let idx = volInput.getAttribute('data-vol-idx');
@@ -791,6 +794,7 @@ document.addEventListener('input', (e) => {
 });
 
 document.addEventListener('dragstart', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const sliderGroup = e.target.closest('.ceo-slider-group');
     if (sliderGroup) {
         let idx = sliderGroup.getAttribute('data-slider-idx');
@@ -798,10 +802,12 @@ document.addEventListener('dragstart', (e) => {
     }
 });
 document.addEventListener('dragover', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const sliderGroup = e.target.closest('.ceo-slider-group');
     if (sliderGroup) ceoDragOver(e);
 });
 document.addEventListener('drop', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const sliderGroup = e.target.closest('.ceo-slider-group');
     if (sliderGroup) {
         let idx = sliderGroup.getAttribute('data-slider-idx');
@@ -809,6 +815,7 @@ document.addEventListener('drop', (e) => {
     }
 });
 document.addEventListener('dragend', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const sliderGroup = e.target.closest('.ceo-slider-group');
     if (sliderGroup) ceoDragEnd(e);
 });
