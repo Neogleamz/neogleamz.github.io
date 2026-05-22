@@ -294,7 +294,7 @@ async function processParsedSales(rows, isTestMode = false) {
     if(unmapped.size > 0) {
         let uList = Array.from(unmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
         uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" data-click="click_openAliasModal" data-sku="${u.replace(/'/g, "\\'")}">🔗 Map SKU: ${u}</button>`);
-        document.getElementById('unmappedSkusList').innerHTML = h;
+        document.getElementById('unmappedSkusList').innerHTML = window.safeHTML(h);
         setMasterStatus("Action Required", "mod-error"); setSysProgress(0, 'working'); return;
     }
 
@@ -302,7 +302,7 @@ async function processParsedSales(rows, isTestMode = false) {
         syncTrace("HALT WARNING: Zero valid rows inherently parsed from target file. Aborting.", true);
         setTimeout(() => showToast("No valid row structures found in this file!"), 10);
         let elUnmapped = document.getElementById('unmappedSkusList');
-        if (elUnmapped) elUnmapped.innerHTML = "";
+        if (elUnmapped) elUnmapped.innerHTML = window.safeHTML("");
 
         setMasterStatus("Ready.", "status-idle"); setSysProgress(0, 'working');
         let elFile = document.getElementById('salesCsvFile');
@@ -335,7 +335,7 @@ async function saveAliasMapping() {
             let uList = Array.from(stillUnmapped); let h = `Found ${uList.length} unmapped SKU(s).<br>`;
             uList.forEach(u => h += `<button class="btn-blue btn-sm" style="margin-top:8px; text-align:left;" data-click="click_openAliasModal" data-sku="${u.replace(/'/g, "\\'")}">🔗 Map SKU: ${u}</button>`);
             let elUnmapped = document.getElementById('unmappedSkusList');
-            if (elUnmapped) elUnmapped.innerHTML = h;
+            if (elUnmapped) elUnmapped.innerHTML = window.safeHTML(h);
         }
         if (typeof renderAliasManager === 'function') renderAliasManager();
     }).catch(e => {
@@ -474,7 +474,7 @@ async function executeSalesSync(isTestMode = false) {
                     let count = cleanPayload.length;
                     pendingSalesRows = [];
                     let elUnmapped = document.getElementById('unmappedSkusList');
-                    if (elUnmapped) elUnmapped.innerHTML = "";
+                    if (elUnmapped) elUnmapped.innerHTML = window.safeHTML("");
                     syncTrace("All storefront SKUs are strictly mapped to Local Recipes.", false);
 
                     renderSalesTable();
@@ -582,8 +582,8 @@ function renderSalesTable() {
             <td class="trunc-col" style="font-weight:bold;">${x.order_id}</td>
             <td class="trunc-col" style="color:var(--text-muted);">${x["Source"] || ''}</td>
             <td class="trunc-col">${x.storefront_sku}</td>
-            <td class="editable trunc-col" contenteditable="true" onfocus="storeOldVal(this)" onblur="updateSaleCell(this, '${x.order_id}', '${safeSku}', 'internal_recipe_name', false)" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
-            <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" onchange="updateSaleType(this, '${x.order_id}', '${safeSku}')">
+            <td class="editable trunc-col" contenteditable="true" data-focus="focus_storeOldVal" data-blur="blur_updateSaleCell" data-order="${x.order_id}" data-sku="${safeSku}" data-col="internal_recipe_name" data-isnum="false" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
+            <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" data-change="change_updateSaleType" data-order="${x.order_id}" data-sku="${safeSku}">
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
@@ -613,7 +613,7 @@ function renderSalesTable() {
         });
     }
 
-        wrap.innerHTML = h + `</tbody></table>`;
+        wrap.innerHTML = window.safeHTML(h + `</tbody></table>`);
         
         wrap.querySelectorAll('th[data-sortcol]').forEach(th => {
             th.addEventListener('click', () => {
@@ -824,15 +824,15 @@ function initMathSimulator() {
     orderIds.forEach(id => {
         opts += `<option value="${id}">Order #${id}</option>`;
     });
-    sel.innerHTML = opts;
+    sel.innerHTML = window.safeHTML(opts);
     
     // Bind change listener
     sel.onchange = function(e) {
         renderSimulatorOrder(e.target.value);
     };
     
-    document.getElementById('math-simulator-sandbox').innerHTML = `<div style="color:#888; text-align:center; padding: 2rem; font-family: monospace;">Please load an order to begin simulation.</div>`;
-    document.getElementById('math-simulator-console').innerHTML = "";
+    document.getElementById('math-simulator-sandbox').innerHTML = window.safeHTML(`<div style="color:#888; text-align:center; padding: 2rem; font-family: monospace;">Please load an order to begin simulation.</div>`);
+    document.getElementById('math-simulator-console').innerHTML = window.safeHTML("");
 
     let commitBtn = document.getElementById('sim-commit-btn');
     if (commitBtn) {
@@ -856,8 +856,8 @@ function renderSimulatorOrder(orderId) {
     
     let commitBtn = document.getElementById('sim-commit-btn');
     if(!orderId) {
-        sandbox.innerHTML = `<div style="color:#888; text-align:center; padding: 2rem; font-family: monospace;">Please load an order to begin simulation.</div>`;
-        consoleDiv.innerHTML = "";
+        sandbox.innerHTML = window.safeHTML(`<div style="color:#888; text-align:center; padding: 2rem; font-family: monospace;">Please load an order to begin simulation.</div>`);
+        consoleDiv.innerHTML = window.safeHTML("");
         if (commitBtn) {
             commitBtn.style.opacity = '0.2';
             commitBtn.style.pointerEvents = 'none';
@@ -1021,7 +1021,7 @@ function renderSimulatorOrder(orderId) {
         `;
     });
     
-    sandbox.innerHTML = html;
+    sandbox.innerHTML = window.safeHTML(html);
     
     document.querySelectorAll('.sim-type-sel').forEach(el => {
         el.addEventListener('change', (e) => {
@@ -1103,7 +1103,7 @@ function recomputeSimulator() {
     let consoleDiv = document.getElementById('math-simulator-console');
     if(!consoleDiv) return;
     
-    consoleDiv.innerHTML = `<div style="color:#3b82f6; font-weight:bold; margin-bottom:10px;">[EXECUTING] LIVE SANDBOX MATH ENGINE</div>`;
+    consoleDiv.innerHTML = window.safeHTML(`<div style="color:#3b82f6; font-weight:bold; margin-bottom:10px;">[EXECUTING] LIVE SANDBOX MATH ENGINE</div>`);
     let htmlLogs = "";
     function log(msg) { htmlLogs += `<div>${msg}</div>`; }
     
@@ -1299,13 +1299,13 @@ function recomputeSimulator() {
         }
     });
     
-    consoleDiv.innerHTML += htmlLogs;
+    consoleDiv.innerHTML += window.safeHTML(htmlLogs);
 }
 window.runGlobalReconciliationAudit = function() {
     let consoleDiv = document.getElementById('math-simulator-console');
     if(!consoleDiv) return;
     
-    consoleDiv.innerHTML = `<div style="color:#60a5fa; font-weight:bold; margin-bottom:1rem; font-size:14px; text-transform:uppercase; letter-spacing:1px;">🚀 INITIALIZING GLOBAL FORENSIC HEALTH CHECK...</div>`;
+    consoleDiv.innerHTML = window.safeHTML(`<div style="color:#60a5fa; font-weight:bold; margin-bottom:1rem; font-size:14px; text-transform:uppercase; letter-spacing:1px;">🚀 INITIALIZING GLOBAL FORENSIC HEALTH CHECK...</div>`);
     
     let db = window.processedSalesDB || [];
     let orderGroups = {};
@@ -1404,7 +1404,7 @@ window.runGlobalReconciliationAudit = function() {
                     </div>
                     <div style="text-align:right;">
                         <span style="color:#ff3b30; font-weight:bold;">Delta: $${f.unaccounted.toFixed(2)}</span><br>
-                        <button class="btn-blue-muted" style="width:auto; padding:2px 8px; font-size:10px; margin-top:4px;" onclick="renderSimulatorOrder('${f.oid}')">INVESTIGATE</button>
+                        <button class="btn-blue-muted" style="width:auto; padding:2px 8px; font-size:10px; margin-top:4px;" data-click="click_renderSimulatorOrder" data-oid="${f.oid}">INVESTIGATE</button>
                     </div>
                   </div>`;
         });
@@ -1414,7 +1414,7 @@ window.runGlobalReconciliationAudit = function() {
     }
     h += `</div>`;
     
-    consoleDiv.innerHTML += h;
+    consoleDiv.innerHTML += window.safeHTML(h);
 }
 
 
@@ -1568,7 +1568,7 @@ function renderActualNetList() {
         html = `<tr><td colspan='16' style='text-align:center; padding:20px; color:#888;'>No results found.</td></tr>`;
     }
     
-    container.innerHTML = html;
+    container.innerHTML = window.safeHTML(html);
     
     container.querySelectorAll('.net-modal-parent').forEach(tr => {
         tr.addEventListener('click', () => {
@@ -1580,7 +1580,7 @@ function renderActualNetList() {
             children.forEach(child => {
                 child.style.display = isHidden ? 'table-row' : 'none';
             });
-            icon.innerHTML = isHidden ? '▼' : '▶';
+            icon.innerHTML = window.safeHTML(isHidden ? '▼' : '▶');
         }, { signal });
     });
 }
@@ -1610,7 +1610,7 @@ window.triggerForceSync = async function() {
     let btn = document.getElementById('btnForceSyncSubmit');
     let statusDiv = document.getElementById('forceSyncStatus');
     
-    btn.innerHTML = '⚙️ SYNCING...';
+    btn.innerHTML = window.safeHTML('⚙️ SYNCING...');
     btn.style.opacity = '0.5';
     btn.disabled = true;
     
@@ -1618,7 +1618,7 @@ window.triggerForceSync = async function() {
     statusDiv.style.background = 'rgba(59, 130, 246, 0.1)';
     statusDiv.style.color = '#3b82f6';
     statusDiv.style.border = '1px solid rgba(59, 130, 246, 0.3)';
-    statusDiv.innerHTML = `Fetching payload for order #${orderIdStr}...`;
+    statusDiv.innerHTML = window.safeHTML(`Fetching payload for order #${orderIdStr}...`);
     
     try {
         const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
@@ -1645,7 +1645,7 @@ window.triggerForceSync = async function() {
         statusDiv.style.background = 'rgba(16, 185, 129, 0.1)';
         statusDiv.style.color = '#10b981';
         statusDiv.style.border = '1px solid rgba(16, 185, 129, 0.3)';
-        statusDiv.innerHTML = `✅ Success! Order #${orderIdStr} injected natively.`;
+        statusDiv.innerHTML = window.safeHTML(`✅ Success! Order #${orderIdStr} injected natively.`);
         
         sysLog(`Force Synced Order #${orderIdStr} successfully!`);
         
@@ -1659,9 +1659,9 @@ window.triggerForceSync = async function() {
         statusDiv.style.background = 'rgba(239, 68, 68, 0.1)';
         statusDiv.style.color = '#ef4444';
         statusDiv.style.border = '1px solid rgba(239, 68, 68, 0.3)';
-        statusDiv.innerHTML = `❌ Error: ${err.message}`;
+        statusDiv.innerHTML = window.safeHTML(`❌ Error: ${err.message}`);
     } finally {
-        btn.innerHTML = '🚀 SYNC NOW';
+        btn.innerHTML = window.safeHTML('🚀 SYNC NOW');
         btn.style.opacity = '1';
         btn.disabled = false;
     }
