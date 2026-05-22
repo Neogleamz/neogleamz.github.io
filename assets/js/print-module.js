@@ -478,7 +478,7 @@ function renderActivePrintJob(id) {
                     🖨️ 3D Print Instructions: ${cleanPartName}
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;" data-click="click_stopPropagation">
-                    <button class="btn-slate" style="font-size:10px; padding:2px 8px;" data-click="click_openPrintSOP" data-name="${cleanPartName.replace(/"/g, '&quot;')}">🖨️ PRINT</button>
+                    <button class="btn-slate" style="font-size:10px; padding:2px 8px;" data-click="click_openLayerzPrintSOP" data-name="${cleanPartName.replace(/"/g, '&quot;')}">🖨️ PRINT</button>
                     <button data-click="click_openLayerzSOPEditor" data-name="${cleanPartName.replace(/"/g, '&quot;')}" class="btn-orange-muted" style="font-size:10px; padding:2px 8px;">🔒 EDIT</button>
                     <div style="cursor:pointer; padding:0 8px; font-size:11px; margin-left:4px;" data-click="click_toggleLayerzSopGroup" data-grp="${grpId}" data-icon="true" id="sopgrp_icon_${grpId}">${chev}</div>
                 </div>
