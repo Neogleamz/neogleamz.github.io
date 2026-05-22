@@ -3,7 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 5501;
-const LOG_DIR = path.join(__dirname, '..', 'docs', 'qa-reports');
+// Generate a unique folder name per logger session
+const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+const LOG_DIR = path.join(__dirname, `../.qa-reports/scan_${timestamp}`);
 
 if (!fs.existsSync(LOG_DIR)) {
     fs.mkdirSync(LOG_DIR, { recursive: true });

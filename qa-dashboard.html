@@ -161,6 +161,7 @@
                     
                     let localIssues = 0;
                     let emptySpaceIssues = 0;
+                    let usabilityIssues = 0;
                     let markdownLog = `### Hub: ${hubName} | Page: ${pageName}${modalName ? ' | Modal: ' + modalName : ''}\n`;
                     
                     // 1. Check root document horizontal overflow
@@ -188,7 +189,7 @@
                             if (rect.width < 44 || rect.height < 44) {
                                 logToPanel(`[${frame.width}x${frame.height}] <strong>Usability:</strong> Tap target too small on &lt;${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}"&gt; (${rect.width}x${rect.height}). Recommended 44x44px.`, 'info');
                                 markdownLog += `- **Usability**: Tap target too small on \`<${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}">\` (${rect.width}x${rect.height}). Recommended 44x44px.\n`;
-                                localIssues++;
+                                usabilityIssues++;
                             }
                         }
 
@@ -217,13 +218,27 @@
                             }
                         }
 
-                        // Check horizontal overflow of container
-                        if (node.scrollWidth > node.clientWidth && style.overflowX !== 'auto' && style.overflowX !== 'scroll' && style.overflow !== 'hidden') {
+                        // Check horizontal overflow of container (with 5px tolerance for border sub-pixels)
+                        if (node.scrollWidth > node.clientWidth + 5 && style.overflowX !== 'auto' && style.overflowX !== 'scroll' && style.overflow !== 'hidden') {
                             // Text inputs often have scrollWidth > clientWidth, ignore them
                             if (node.tagName !== 'INPUT' && node.tagName !== 'TEXTAREA') {
-                                logToPanel(`[${frame.width}x${frame.height}] <strong>Internal Overflow:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}"&gt; is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).`);
-                                markdownLog += `- **Internal Overflow**: \`<${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}">\` is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).\n`;
-                                localIssues++;
+                                // Walk up the tree to see if any parent provides a horizontal scrollbar
+                                let p = node.parentElement;
+                                let isHandledByParent = false;
+                                while (p) {
+                                    const pStyle = frame.contentWindow.getComputedStyle(p);
+                                    if (pStyle.overflowX === 'auto' || pStyle.overflowX === 'scroll') {
+                                        isHandledByParent = true;
+                                        break;
+                                    }
+                                    p = p.parentElement;
+                                }
+                                
+                                if (!isHandledByParent) {
+                                    logToPanel(`[${frame.width}x${frame.height}] <strong>Internal Overflow:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}"&gt; is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).`);
+                                    markdownLog += `- **Internal Overflow**: \`<${node.tagName.toLowerCase()} id="${node.id}" class="${node.className}">\` is hiding content (Scroll: ${node.scrollWidth}px > Client: ${node.clientWidth}px).\n`;
+                                    localIssues++;
+                                }
                             }
                         }
 
@@ -231,20 +246,34 @@
                         if (parent) {
                             const parentRect = parent.getBoundingClientRect();
                             if (parentRect.width > 0) {
-                                // 5px tolerance for border box anomalies
-                                if (rect.right > parentRect.right + 5) {
+                                // 5px tolerance for border box anomalies, ignore position: fixed
+                                if (rect.right > parentRect.right + 5 && style.position !== 'fixed' && style.position !== 'absolute') {
                                     const ignoreTags = ['BODY', 'HTML', 'MAIN'];
                                     if (!ignoreTags.includes(node.tagName) && !ignoreTags.includes(parent.tagName)) {
-                                        logToPanel(`[${frame.width}x${frame.height}] <strong>Boundary Breach:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}"&gt; clipped right edge of parent &lt;${parent.tagName.toLowerCase()} class="${parent.className}"&gt;.`);
-                                        markdownLog += `- **Boundary Breach**: \`<${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}">\` clipped right edge of parent \`<${parent.tagName.toLowerCase()} class="${parent.className}">\`.\n`;
-                                        localIssues++;
+                                        // Walk up the tree to see if ANY parent handles horizontal scroll
+                                        let p = node.parentElement;
+                                        let isHandledByParentScroll = false;
+                                        while (p) {
+                                            const pStyle = frame.contentWindow.getComputedStyle(p);
+                                            if (pStyle.overflowX === 'auto' || pStyle.overflowX === 'scroll' || pStyle.overflow === 'hidden') {
+                                                isHandledByParentScroll = true;
+                                                break;
+                                            }
+                                            p = p.parentElement;
+                                        }
+                                        
+                                        if (!isHandledByParentScroll) {
+                                            logToPanel(`[${frame.width}x${frame.height}] <strong>Boundary Breach:</strong> &lt;${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}"&gt; clipped right edge of parent &lt;${parent.tagName.toLowerCase()} class="${parent.className}"&gt;.`);
+                                            markdownLog += `- **Boundary Breach**: \`<${node.tagName.toLowerCase()} id="${node.id || ''}" class="${node.className}">\` clipped right edge of parent \`<${parent.tagName.toLowerCase()} class="${parent.className}">\`.\n`;
+                                            localIssues++;
+                                        }
                                     }
                                 }
                             }
                         }
                     });
 
-                    if (localIssues === 0 && emptySpaceIssues === 0) {
+                    if (localIssues === 0 && emptySpaceIssues === 0 && usabilityIssues === 0) {
                         logToPanel(`[${frame.width}x${frame.height}] ✅ Clean geometry. Optimal layout density.`, 'success');
                         markdownLog += `- ✅ Clean geometry. Optimal layout density.\n`;
                     }
@@ -372,29 +401,30 @@
                         await sleep(isTurbo ? 400 : 1000);
                         await scanViewportCycle(hubName, pageName, null);
                     }
+                }
 
-                    // 3. Deep Dive: Modals
-                    // Find all modal containers (we scan them all for every hub just to be extremely thorough)
-                    const modals = Array.from(doc.querySelectorAll('.modal-overlay, [id$="Modal"]')).filter(m => m.id !== 'loginUI');
-                    for (const modal of modals) {
-                        const modalName = modal.id || modal.className.split(' ')[0] || 'UnknownModal';
-                        logToPanel(`<h4>Forcing Open Modal: ${modalName}</h4>`, 'info');
-                        
-                        // Force it open
-                        const oldDisplay = modal.style.display;
-                        const hasActive = modal.classList.contains('active');
-                        modal.style.setProperty('display', 'flex', 'important');
-                        modal.classList.add('active');
-                        
-                        await sleep(isTurbo ? 300 : 800);
-                        
-                        await scanViewportCycle(hubName, 'Main', modalName);
-                        
-                        // Restore it
-                        modal.style.display = oldDisplay;
-                        if (!hasActive) modal.classList.remove('active');
-                        await sleep(isTurbo ? 100 : 300);
-                    }
+                // 3. Deep Dive: Global Modals
+                // Find all modal containers (these are global in the DOM, so we scan them once at the end)
+                logToPanel(`<h2>Scanning Global Modals</h2>`, 'info');
+                const modals = Array.from(doc.querySelectorAll('.modal-overlay, [id$="Modal"]')).filter(m => m.id !== 'loginUI');
+                for (const modal of modals) {
+                    const modalName = modal.id || modal.className.split(' ')[0] || 'UnknownModal';
+                    logToPanel(`<h4>Forcing Open Modal: ${modalName}</h4>`, 'info');
+                    
+                    // Force it open
+                    const oldDisplay = modal.style.display;
+                    const hasActive = modal.classList.contains('active');
+                    modal.style.setProperty('display', 'flex', 'important');
+                    modal.classList.add('active');
+                    
+                    await sleep(isTurbo ? 300 : 800);
+                    
+                    await scanViewportCycle('Global_Modals', 'Main', modalName);
+                    
+                    // Restore it
+                    modal.style.display = oldDisplay;
+                    if (!hasActive) modal.classList.remove('active');
+                    await sleep(isTurbo ? 100 : 300);
                 }
 
                 logToPanel(`--- <strong>DEEP SCAN COMPLETE</strong> ---<br>Total Layout Violations Detected Globally: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
