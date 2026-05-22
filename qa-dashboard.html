@@ -27,7 +27,7 @@
         button:hover { background: #475569; }
         .qa-main { flex: 1; display: flex; overflow: hidden; }
         .iframe-container { 
-            flex: 1; display: flex; justify-content: center; align-items: center; 
+            flex: 1; display: flex; justify-content: center; align-items: flex-start; 
             background: #000; overflow: auto; padding: 20px; 
             transition: all 0.3s ease; 
         }
@@ -140,7 +140,7 @@
             if (scale > 1) scale = 1; // Never scale above 100%
             
             frame.style.transform = `scale(${scale})`;
-            frame.style.transformOrigin = 'center center';
+            frame.style.transformOrigin = 'top center';
         }
 
         window.addEventListener('resize', () => {
