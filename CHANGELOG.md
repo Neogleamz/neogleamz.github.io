@@ -1,6 +1,8 @@
 # SK8Lytz Application Changelog
 
 ## [Unreleased]
+- **qa-dashboard.html innerHTML** (debt/security): Wrapped .innerHTML assignments with window.safeHTML() to enforce zero-trust UI.
+- **check_syntax.js orphan** (debt/cleanup): Relocated the orphan script check_syntax.js from root to the scripts/ directory.
 
 ## [1.1.0] - 2026-05-22
 ### ✨ Features & Bug Fixes
