@@ -1523,7 +1523,7 @@ function renderActualNetList() {
         
         let childHtml = "";
         g.lines.forEach(l => {
-            let trueCapHtml = (l.trueLineCapture !== undefined) ? `<br/><span style='color:#f59e0b; font-size:9px;'>Cap: $${parseFloat(l.trueLineCapture).toFixed(2)}</span>` : '';
+            let trueCapHtml = (l.trueLineCaptured !== undefined) ? `<br/><span style='color:#f59e0b; font-size:9px;'>Cap: $${parseFloat(l.trueLineCaptured).toFixed(2)}</span>` : '';
             
             let p = parseFloat(l.actual_sale_price || 0);
             let q = parseFloat(l.qty_sold || 0);
