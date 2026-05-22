@@ -296,52 +296,57 @@
         btnDeepScan.addEventListener('click', async () => {
             if (isAutoCycling) return;
             
-            const doc = frame.contentWindow.document;
-            const appDashboard = doc.getElementById('app-dashboard');
-            if (!appDashboard || frame.contentWindow.getComputedStyle(appDashboard).display === 'none') {
-                alert("Please log into the application inside the iframe first!");
-                return;
-            }
-
-            isAutoCycling = true;
-            btnDeepScan.textContent = "DEEP SCAN RUNNING (Do not touch)...";
-            btnDeepScan.disabled = true;
-            
-            globalErrorsFound = 0;
-            logToPanel(`--- <strong>INITIATING MASSIVE DEEP SCAN (ALL HUBS)</strong> ---`, 'info');
-
-            const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
-            const tabs = Array.from(doc.querySelectorAll('.tab-btn'));
-            const isTurbo = chkTurbo.checked;
-
-            if (tabs.length === 0) {
-                logToPanel(`Could not find any Hub tabs to click!`, 'error');
-            }
-
-            for (const tab of tabs) {
-                const hubName = tab.textContent.trim();
-                logToPanel(`<h2>Navigating to Hub: ${hubName}</h2>`, 'info');
+            try {
+                const doc = frame.contentWindow.document;
                 
-                // Click the tab in the iframe
-                tab.click();
-                await sleep(isTurbo ? 600 : 1500); // Fast PCs can render hub data in 600ms
-
-                // Run the resolution cycler for this Hub
-                for (const res of options) {
-                    const [w, h] = res.split('x');
-                    select.value = res;
-                    setViewport(w, h);
-                    await sleep(isTurbo ? 150 : 1000); // Layout reflow takes barely ~30ms on modern PCs
-                    await runScannerForCurrentViewport();
-                    await sleep(isTurbo ? 50 : 200);
+                // Instead of getComputedStyle which might fail or be tricky, let's just check if the tab buttons exist!
+                // If there are tab buttons, we are logged in.
+                const tabs = Array.from(doc.querySelectorAll('.tab-btn'));
+                if (tabs.length === 0) {
+                    logToPanel("Error: No Hub tabs found. Are you logged in?", "error");
+                    alert("Please log into the application inside the iframe first!");
+                    return;
                 }
-            }
 
-            logToPanel(`--- <strong>DEEP SCAN COMPLETE</strong> ---<br>Total Layout Violations Detected Globally: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
-            
-            btnDeepScan.textContent = "🚀 DEEP SCAN (All Hubs)";
-            btnDeepScan.disabled = false;
-            isAutoCycling = false;
+                isAutoCycling = true;
+                btnDeepScan.textContent = "DEEP SCAN RUNNING (Do not touch)...";
+                btnDeepScan.disabled = true;
+                
+                globalErrorsFound = 0;
+                logToPanel(`--- <strong>INITIATING MASSIVE DEEP SCAN (ALL HUBS)</strong> ---`, 'info');
+
+                const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
+                const isTurbo = chkTurbo.checked;
+
+                for (const tab of tabs) {
+                    const hubName = tab.textContent.trim();
+                    logToPanel(`<h2>Navigating to Hub: ${hubName}</h2>`, 'info');
+                    
+                    // Click the tab in the iframe
+                    tab.click();
+                    await sleep(isTurbo ? 600 : 1500); // Fast PCs can render hub data in 600ms
+
+                    // Run the resolution cycler for this Hub
+                    for (const res of options) {
+                        const [w, h] = res.split('x');
+                        select.value = res;
+                        setViewport(w, h);
+                        await sleep(isTurbo ? 150 : 1000); // Layout reflow takes barely ~30ms on modern PCs
+                        await runScannerForCurrentViewport();
+                        await sleep(isTurbo ? 50 : 200);
+                    }
+                }
+
+                logToPanel(`--- <strong>DEEP SCAN COMPLETE</strong> ---<br>Total Layout Violations Detected Globally: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
+                
+            } catch (err) {
+                logToPanel(`FATAL ERROR in Deep Scan: ${err.message}`, 'error');
+                console.error(err);
+            } finally {
+                btnDeepScan.textContent = "🚀 DEEP SCAN (All Hubs)";
+                btnDeepScan.disabled = false;
+                isAutoCycling = false;
+            }
         });
 
         // Initialize viewport on load
