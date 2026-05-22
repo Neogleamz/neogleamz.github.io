@@ -79,8 +79,9 @@
                 </optgroup>
             </select>
             <button id="btn-resize">Set Viewport</button>
-            <button id="btn-scan" style="background:#059669; border-color:#059669;">Run AI Diagnostics</button>
-            <button id="btn-cycle" style="background:#2563eb; border-color:#2563eb;">Auto-Cycle Full Audit</button>
+            <button id="btn-scan" style="background:#059669; border-color:#059669;">Run Current View</button>
+            <button id="btn-cycle" style="background:#2563eb; border-color:#2563eb;">Auto-Cycle View</button>
+            <button id="btn-deep-scan" style="background:#8b5cf6; border-color:#8b5cf6;">🚀 DEEP SCAN (All Hubs)</button>
             <button id="btn-clear" style="background:#dc2626; border-color:#dc2626;">Clear Log</button>
         </div>
         <div id="status" style="color: #94a3b8;">Status: Idle</div>
@@ -90,7 +91,7 @@
             <iframe id="target-frame" src="./index.html" width="1920" height="1080"></iframe>
         </div>
         <div class="report-panel" id="report-panel">
-            <div class="log-entry log-info">🚀 QA Diagnostics Engine Ready.<br><br>Click <strong>Auto-Cycle Full Audit</strong> to let the AI scanner systematically resize the viewport and detect layout collisions, Flexbox breakage, and element overflows.</div>
+            <div class="log-entry log-info">🚀 QA Diagnostics Engine Ready.<br><br><strong>1.</strong> Log into the app inside the window.<br><strong>2.</strong> Click <strong>DEEP SCAN</strong> to automatically cycle through every Hub and resolution!</div>
         </div>
     </div>
 
@@ -100,6 +101,7 @@
         const btnResize = document.getElementById('btn-resize');
         const btnScan = document.getElementById('btn-scan');
         const btnCycle = document.getElementById('btn-cycle');
+        const btnDeepScan = document.getElementById('btn-deep-scan');
         const btnClear = document.getElementById('btn-clear');
         const reportPanel = document.getElementById('report-panel');
         const statusEl = document.getElementById('status');
@@ -268,8 +270,58 @@
 
             logToPanel(`--- <strong>AUDIT COMPLETE</strong> ---<br>Total Layout Violations Detected: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
             
-            btnCycle.textContent = "Auto-Cycle Full Audit";
+            btnCycle.textContent = "Auto-Cycle View";
             btnCycle.disabled = false;
+            isAutoCycling = false;
+        });
+
+        btnDeepScan.addEventListener('click', async () => {
+            if (isAutoCycling) return;
+            
+            const doc = frame.contentWindow.document;
+            const appDashboard = doc.getElementById('app-dashboard');
+            if (!appDashboard || frame.contentWindow.getComputedStyle(appDashboard).display === 'none') {
+                alert("Please log into the application inside the iframe first!");
+                return;
+            }
+
+            isAutoCycling = true;
+            btnDeepScan.textContent = "DEEP SCAN RUNNING (Do not touch)...";
+            btnDeepScan.disabled = true;
+            
+            globalErrorsFound = 0;
+            logToPanel(`--- <strong>INITIATING MASSIVE DEEP SCAN (ALL HUBS)</strong> ---`, 'info');
+
+            const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
+            const tabs = Array.from(doc.querySelectorAll('.tab-btn'));
+
+            if (tabs.length === 0) {
+                logToPanel(`Could not find any Hub tabs to click!`, 'error');
+            }
+
+            for (const tab of tabs) {
+                const hubName = tab.textContent.trim();
+                logToPanel(`<h2>Navigating to Hub: ${hubName}</h2>`, 'info');
+                
+                // Click the tab in the iframe
+                tab.click();
+                await sleep(1500); // Wait for Hub to fully render and fetch data
+
+                // Run the resolution cycler for this Hub
+                for (const res of options) {
+                    const [w, h] = res.split('x');
+                    select.value = res;
+                    setViewport(w, h);
+                    await sleep(1000);
+                    await runScannerForCurrentViewport();
+                    await sleep(200);
+                }
+            }
+
+            logToPanel(`--- <strong>DEEP SCAN COMPLETE</strong> ---<br>Total Layout Violations Detected Globally: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
+            
+            btnDeepScan.textContent = "🚀 DEEP SCAN (All Hubs)";
+            btnDeepScan.disabled = false;
             isAutoCycling = false;
         });
 
