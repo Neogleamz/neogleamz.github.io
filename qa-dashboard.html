@@ -78,11 +78,13 @@
                     <option value="320x568">iPhone SE / Legacy (320x568)</option>
                 </optgroup>
             </select>
-            <button id="btn-resize">Set Viewport</button>
             <button id="btn-scan" style="background:#059669; border-color:#059669;">Run Current View</button>
             <button id="btn-cycle" style="background:#2563eb; border-color:#2563eb;">Auto-Cycle View</button>
             <button id="btn-deep-scan" style="background:#8b5cf6; border-color:#8b5cf6;">🚀 DEEP SCAN (All Hubs)</button>
             <button id="btn-clear" style="background:#dc2626; border-color:#dc2626;">Clear Log</button>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:#fcd34d;">
+                <input type="checkbox" id="chk-turbo" checked> ⚡ Turbo Mode
+            </label>
         </div>
         <div id="status" style="color: #94a3b8;">Status: Idle</div>
     </div>
@@ -103,6 +105,7 @@
         const btnCycle = document.getElementById('btn-cycle');
         const btnDeepScan = document.getElementById('btn-deep-scan');
         const btnClear = document.getElementById('btn-clear');
+        const chkTurbo = document.getElementById('chk-turbo');
         const reportPanel = document.getElementById('report-panel');
         const statusEl = document.getElementById('status');
 
@@ -257,15 +260,15 @@
 
             // Select all options across optgroups
             const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
+            const isTurbo = chkTurbo.checked;
 
             for (const res of options) {
                 const [w, h] = res.split('x');
                 select.value = res;
                 setViewport(w, h);
-                // Allow browser 1.2s to repaint the iframe CSS reflow
-                await sleep(1200);
+                await sleep(isTurbo ? 250 : 1200);
                 await runScannerForCurrentViewport();
-                await sleep(400);
+                await sleep(isTurbo ? 50 : 400);
             }
 
             logToPanel(`--- <strong>AUDIT COMPLETE</strong> ---<br>Total Layout Violations Detected: ${globalErrorsFound}`, globalErrorsFound > 0 ? 'error' : 'success');
@@ -294,6 +297,7 @@
 
             const options = Array.from(document.querySelectorAll('#viewport-select option')).map(opt => opt.value);
             const tabs = Array.from(doc.querySelectorAll('.tab-btn'));
+            const isTurbo = chkTurbo.checked;
 
             if (tabs.length === 0) {
                 logToPanel(`Could not find any Hub tabs to click!`, 'error');
@@ -305,16 +309,16 @@
                 
                 // Click the tab in the iframe
                 tab.click();
-                await sleep(1500); // Wait for Hub to fully render and fetch data
+                await sleep(isTurbo ? 600 : 1500); // Fast PCs can render hub data in 600ms
 
                 // Run the resolution cycler for this Hub
                 for (const res of options) {
                     const [w, h] = res.split('x');
                     select.value = res;
                     setViewport(w, h);
-                    await sleep(1000);
+                    await sleep(isTurbo ? 150 : 1000); // Layout reflow takes barely ~30ms on modern PCs
                     await runScannerForCurrentViewport();
-                    await sleep(200);
+                    await sleep(isTurbo ? 50 : 200);
                 }
             }
 
