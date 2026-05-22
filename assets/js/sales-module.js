@@ -1433,7 +1433,7 @@ function renderActualNetList() {
     window.actualNetEventController = new AbortController();
     const signal = window.actualNetEventController.signal;
 
-    let container = document.getElementById('actualNetTableWrapper');
+    let container = document.getElementById('actualNetContainer');
     if(!container) return;
     
     let searchTerm = (document.getElementById('actualNetSearch') ? document.getElementById('actualNetSearch').value.toLowerCase() : "");
