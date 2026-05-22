@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-05-22
+### ✨ Features & Bug Fixes
+- **Responsive Flex QA Framework** (`feat/responsive-flex-qa-framework`): Develop a standardized testing protocol and/or automated toolset to test every page and full-screen modal at varying desktop and mobile resolutions, ensuring 100% adherence to pure Flex standards without clipping headers, buttons, or elements.
 ## [1.0.57] - 2026-05-22
 ### ✨ Features & Bug Fixes
 - **Global Error Telemetry Wrapper** (`feat/global-error-telemetry`): Implemented a global execution wrapper in the system event delegator to catch, log, and surface 100% of UI events, interactions, and silent errors directly to the Diagnostics Console with full stack traces and subtle styling.
