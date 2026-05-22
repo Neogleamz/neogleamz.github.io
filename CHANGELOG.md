@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.0.51] - 2026-05-21
+### ✨ Features & Bug Fixes
+- **SOP Live Telemetry & Nested Sync Fixes** (Ad-Hoc): Mapped the missing `input_renderDashboardTelemetryPreview` event listener natively to the telemetry render engine to enable live real-time UI previews in all SOP checklist editors. Refactored the `saveMasterSOP` Batchez refresh logic to recursively search `currentWO.routing` objects, guaranteeing that modifying nested sub-assembly recipes natively forces an immediate DOM redraw of the parent Work Order UI.
+
 ## [1.0.50] - 2026-05-21
 ### ✨ Features & Bug Fixes
 - **Task Engine 'T' Shortcut Fix** (`bug/task-engine-shortcut-t-regression`): Fix the regression where pressing 'T' in the task engine no longer starts creating a new task under the "No Section" bucket for rapid-fire task entry, and correctly route users from other hubs natively without triggering DOM node exceptions on Escape.
