@@ -100,7 +100,6 @@
     <script>
         const frame = document.getElementById('target-frame');
         const select = document.getElementById('viewport-select');
-        const btnResize = document.getElementById('btn-resize');
         const btnScan = document.getElementById('btn-scan');
         const btnCycle = document.getElementById('btn-cycle');
         const btnDeepScan = document.getElementById('btn-deep-scan');
@@ -148,10 +147,6 @@
             setViewport(w, h);
         });
 
-        btnResize.addEventListener('click', () => {
-            const [w, h] = select.value.split('x');
-            setViewport(w, h);
-        });
 
         // The AI Diagnostics Scanner Logic
         async function runScannerForCurrentViewport() {
