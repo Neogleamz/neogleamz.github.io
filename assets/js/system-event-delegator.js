@@ -516,7 +516,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     advancePrintStatus('Completed');
                     break;
                 case 'click_window_openLayerzPrintSOP_currentPri':
-                    window.openPrintSOP(currentPrintJob.part_name);
+                    if(window.openSopPrintModal && typeof currentPrintJob !== 'undefined' && currentPrintJob) {
+                        let cleanName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+                        window.openSopPrintModal('production', cleanName);
+                    }
                     break;
                 case 'click_showSalezPane_bridge':
                     showSalezPane('bridge');
