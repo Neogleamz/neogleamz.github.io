@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.0.57] - 2026-05-22
+### ✨ Features & Bug Fixes
+- **Global Error Telemetry Wrapper** (`feat/global-error-telemetry`): Implemented a global execution wrapper in the system event delegator to catch, log, and surface 100% of UI events, interactions, and silent errors directly to the Diagnostics Console with full stack traces and subtle styling.
+
 ## [1.0.56] - 2026-05-22
 ### 🧪 Automated Testing
 - **Jest Test Coverage Audit** (`test/audit-jest-coverage`): Refactored the testing framework to use standard `require()` instead of `eval()`, unlocking accurate Istanbul coverage matrices for math, sales, inventory, production, and CEO engines. Mocked `DOMPurify` to ensure clean terminal output.
