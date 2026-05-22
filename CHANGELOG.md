@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.0.54] - 2026-05-21
+### 🧹 Chores & Cleanup
+- **Legacy Audit File-by-File Sequence**: Executed `/legacy_audit` and systematically eradicated technical debt, absolute positioning, inline onclick handlers, and enforced modern ES6 Vanilla JS standards across the following modules:
+  - `sales-module.js` (`refactor/audit-sales-module`)
+- **ESLint Config Fixes**: Migrated legacy `.eslintignore` logic directly into `eslint.config.mjs` to resolve the persistent `ignores` deprecation warning.
+
 ## [1.0.53] - 2026-05-21
 ### 🧹 Chores & Cleanup
 - **Legacy Audit File-by-File Sequence**: Executed `/legacy_audit` and systematically eradicated technical debt, absolute positioning, inline onclick handlers, and enforced modern ES6 Vanilla JS standards across the following modules:
