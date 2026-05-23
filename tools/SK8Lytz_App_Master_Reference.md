@@ -18,7 +18,7 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 
 ### Architectural Hierarchy Diagram
 ```mermaid
-graph TD
+graph LR
     App[index.html SPA]
     
     %% Global

@@ -12,7 +12,7 @@
 
 ### Architectural Hierarchy Diagram
 ```mermaid
-graph TD
+graph LR
     App[index.html SPA]
     
     %% Global
