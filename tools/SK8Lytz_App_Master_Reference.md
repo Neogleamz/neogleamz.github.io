@@ -281,7 +281,9 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
   </div>
   ```
 
----
+---### O. Fabric.js Canvas Paint Architecture
+When changing the size or orientation of a `<canvas>` element via CSS properties or `setDimensions`, the browser's physical rendering engine wipes the actual byte-buffer of the canvas. You MUST explicitly fire a `fCanvas.renderAll()` command immediately after resizing the DOM boundaries (e.g. `zoomLabelzCanvas`), otherwise the canvas visually drops to full transparency until a user interacts with it and triggers an auto-paint.
+
 
 ## 🗄️ 3. Database Schemas (Supabase)
 
