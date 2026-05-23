@@ -16,8 +16,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-- [x] chore/hub-hierarchy-nomenclature-audit : **Hub Hierarchy & Nomenclature Audit** - Deploy Teamwork Swarm to map a comprehensive hierarchy chart of all Hubz, Pagez, and Modalz, establish official nomenclature, and refactor the entire repository to purge legacy references. [🤖 Teamwork Swarm] [🧠 TBD / 5k] [💸 TBD / .02]
-- [x] research/task-engine-competitive-analysis : **Task Engine Competitive Analysis** - Deploy Teamwork Swarm to analyze the current Task Engine architecture against Asana/Jira and generate an improvement proposal artifact. [🤖 Teamwork Swarm] [🧠 TBD / 5k] [💸 TBD / .02]
 
 
 
@@ -33,6 +31,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Architecture and Task Engine Sweeps**
+*(Archived — 2026-05-23)*
+- [🚀] chore/hub-hierarchy-nomenclature-audit : **Hub Hierarchy & Nomenclature Audit** - Deploy Teamwork Swarm to map a comprehensive hierarchy chart of all Hubz, Pagez, and Modalz, establish official nomenclature, and refactor the entire repository to purge legacy references. [🤖 Teamwork Swarm] [🧠 TBD / 5k] [💸 TBD / .02]
+- [🚀] research/task-engine-competitive-analysis : **Task Engine Competitive Analysis** - Deploy Teamwork Swarm to analyze the current Task Engine architecture against Asana/Jira and generate an improvement proposal artifact. [🤖 Teamwork Swarm] [🧠 TBD / 5k] [💸 TBD / .02]
 
 ### Target: main
 **Epic: Standalone Cleanups**
