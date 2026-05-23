@@ -23,7 +23,7 @@ graph LR
     
     subgraph Global [Global Header Triggers]
         TipzModal[TIPZ Modal<br>Btn: 💡 TIPZ]
-        TaskzModal[TASKZ Modal<br>Btn: 🎯 TASKS]
+        TaskzModal[TASKZ Modal<br>Btn: 🎯 TASKZ]
     end
     
     App --> TipzModal
