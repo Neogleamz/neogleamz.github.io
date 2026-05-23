@@ -26,20 +26,20 @@ graph LR
     
     %% STOCKPILEZ HUB
     App --> Stockpilez[STOCKPILEZ Hub<br>DOM: stockpilez-tab]
-    Stockpilez -.-> SP_Landing[stockpilezHubLanding]
-    Stockpilez -.-> SP_Pipeline[panePipeline]
-    Stockpilez -.-> SP_Simple[paneSimple]
-    Stockpilez -.-> SP_Inventory[paneInventory]
+    Stockpilez -.-> SP_Landing[STOCKPILEZ Landing]
+    Stockpilez -.-> SP_Pipeline[DATAZ Pane<br>DOM: panePipeline]
+    Stockpilez -.-> SP_Simple[EDITZ Pane<br>DOM: paneSimple]
+    Stockpilez -.-> SP_Inventory[STOCKZ Pane<br>DOM: paneInventory]
     
     SP_Simple --> EditzBulkModal[EditzBulk Modal]
     SP_Inventory --> VelocityzModal[Velocityz Modal]
     
     %% MAKERZ HUB
     App --> Makerz[MAKERZ Hub<br>DOM: makerz-tab]
-    Makerz -.-> MK_Landing[makerzHubLanding]
-    Makerz -.-> MK_Builder[paneProdBuilder]
-    Makerz -.-> MK_Control[paneProdControl]
-    Makerz -.-> MK_Print[paneProdPrint]
+    Makerz -.-> MK_Landing[MAKERZ Landing]
+    Makerz -.-> MK_Builder[RECIPEZ Pane<br>DOM: paneProdBuilder]
+    Makerz -.-> MK_Control[BATCHEZ Pane<br>DOM: paneProdControl]
+    Makerz -.-> MK_Print[LAYERZ Pane<br>DOM: paneProdPrint]
     
     MK_Builder --> RecipeModal[Recipe Modal]
     MK_Builder --> BulkAddModal[Bulk Add Modal]
@@ -51,19 +51,19 @@ graph LR
     
     %% FULFILLZ HUB
     App --> Fulfillz[FULFILLZ Hub<br>DOM: fulfillz-tab]
-    Fulfillz -.-> FZ_Packerz[paneFulfillzPackerz]
-    Fulfillz -.-> FZ_Barcodz[paneFulfillzBarcodz]
-    Fulfillz -.-> FZ_Labelz[paneFulfillzLabelz]
+    Fulfillz -.-> FZ_Packerz[PACKERZ Pane<br>DOM: paneFulfillzPackerz]
+    Fulfillz -.-> FZ_Barcodz[BARCODZ Pane<br>DOM: paneFulfillzBarcodz]
+    Fulfillz -.-> FZ_Labelz[LABELZ Pane<br>DOM: paneFulfillzLabelz]
     
     FZ_Packerz --> SOPMasterModal
     FZ_Labelz --> CreateLabelModal[Create Label Modal]
     
     %% REVENUEZ HUB
     App --> Revenuez[REVENUEZ Hub<br>DOM: revenuez-tab]
-    Revenuez -.-> RV_Landing[revenuezHubLanding]
-    Revenuez -.-> RV_Bridge[paneSalezBridge]
-    Revenuez -.-> RV_Analyticz[paneSalezAnalyticz]
-    Revenuez -.-> RV_Commandz[paneSalezCommandz]
+    Revenuez -.-> RV_Landing[REVENUEZ Landing]
+    Revenuez -.-> RV_Bridge[ORDERZ Pane<br>DOM: paneSalezBridge]
+    Revenuez -.-> RV_Analyticz[STATZ Pane<br>DOM: paneSalezAnalyticz]
+    Revenuez -.-> RV_Commandz[SIMULATORZ Pane<br>DOM: paneSalezCommandz]
     
     RV_Bridge --> ActualNetModal[Actual Net Modal]
     RV_Commandz --> CeoAddModal[CEO Add Modal]
@@ -71,16 +71,16 @@ graph LR
     
     %% SOCIALZ HUB
     App --> Socialz[SOCIALZ Hub<br>DOM: socialz-tab]
-    Socialz -.-> SZ_Roster[paneSocialzRoster]
+    Socialz -.-> SZ_Roster[ROSTER Pane<br>DOM: paneSocialzRoster]
     
     SZ_Roster --> SkaterModal[Skater Modal]
     
     %% NEXUZ HUB
     App --> Nexuz[NEXUZ Hub<br>DOM: nexuz-tab]
-    Nexuz -.-> NX_Landing[nexuzHubLanding]
-    Nexuz -.-> NX_Importz[paneNexuzImportz]
-    Nexuz -.-> NX_Salez[paneNexuzSalez]
-    Nexuz -.-> NX_Brainz[paneNexuzBrainz]
+    Nexuz -.-> NX_Landing[NEXUZ Landing]
+    Nexuz -.-> NX_Importz[IMPORTZ Pane<br>DOM: paneNexuzImportz]
+    Nexuz -.-> NX_Salez[SALEZ Pane<br>DOM: paneNexuzSalez]
+    Nexuz -.-> NX_Brainz[BRAINZ Pane<br>DOM: paneNexuzBrainz]
     
     NX_Salez --> AliasModal[Alias Modal]
 ```
