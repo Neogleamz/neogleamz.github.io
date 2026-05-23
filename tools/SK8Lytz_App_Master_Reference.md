@@ -19,6 +19,12 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 ### Architectural Hierarchy Diagram
 ```mermaid
 graph LR
+    classDef sharedSop fill:#3b82f6,color:#fff,stroke:#2563eb;
+    classDef sharedArchive fill:#f97316,color:#fff,stroke:#ea580c;
+    classDef sharedPaper fill:#a855f7,color:#fff,stroke:#9333ea;
+    classDef sharedPrint fill:#10b981,color:#fff,stroke:#059669;
+    classDef sharedEstimator fill:#eab308,color:#000,stroke:#ca8a04;
+
     subgraph Global [Global Header Triggers]
         TipzModal[TIPZ Modal<br>Btn: 💡 TIPZ]
         TaskzModal[TASKZ Modal<br>Btn: 🎯 TASKZ] -.-> TaskzBoardActions[Kanban & Task Actions<br>Btns: Create, Archive, Status...]
@@ -54,13 +60,13 @@ graph LR
         MK_Builder --> RecipeCommitFixes[Commit Manager Fixes Action<br>Btn: COMMIT FIXES]
         
         MK_Control --> NewWOModal[Start Production Batch Modal<br>Btn: + CreateBatch]
-        MK_Control --> MultiBatchModal[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
-        MK_Control --> SOPMasterModal_Prod[SOP EDITOR Modal<br>Btn: BATCHEZ SOP EDITOR]
+        MK_Control --> MultiBatchModal[🌍 SHARED: Batch Estimator Modal<br>Btn: + BatchOrder]
+        MK_Control --> SOPMasterModal_Prod[🌍 SHARED: SOP Editor Modal<br>Btn: BATCHEZ SOP EDITOR]
         MK_Control --> DraftScrapModal[Draft Scrap Modal<br>Btn: Update Scrap Tally]
-        MK_Control --> ArchiveExplorerModal_Bat[Archive Explorer Modal<br>Btn: 🗄️ Archives]
-        MK_Control --> BatchezPrintSOP[SOP Print Configuration Modal<br>Btn: 🖨️ Print SOP]
+        MK_Control --> ArchiveExplorerModal_Bat[🌍 SHARED: Archive Explorer Modal<br>Btn: 🗄️ Archives]
+        MK_Control --> BatchezPrintSOP[🌍 SHARED: Print SOP Modal<br>Btn: 🖨️ Print SOP]
         MK_Control --> BatchezPickList[Pick List Print Configuration<br>Btn: 🖨️ Print List]
-        MK_Control --> BatchezSOPEditorModal[Active SOP Editor Modal<br>Btn: 🔒 EDIT]
+        MK_Control --> BatchezSOPEditorModal[🌍 SHARED: SOP Editor Modal<br>Btn: 🔒 EDIT]
         MK_Control --> BatchezDeleteWO[Delete Work Order Action<br>Btn: DELETE]
         MK_Control --> BatchezStatusActions[Workflow Status Advance Actions<br>Btns: Queued, Picking, Production, Finalize]
         MK_Control --> BatchezSaveInline[Save SOP Changes Action<br>Btn: Save Changes to Cloud]
@@ -72,11 +78,11 @@ graph LR
         MK_Control --> BatchezClearArchive[Delete All Archives Action<br>Btn: Clear Archive]
         
         MK_Print --> ManualPrintModal[Manual Print Modal<br>Btn: + PRINTBATCH]
-        MK_Print --> MultiBatchModal_3d[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
-        MK_Print --> SOPMasterModal_Print[SOP EDITOR Modal<br>Btn: LAYERZ SOP EDITOR]
-        MK_Print --> ArchiveExplorerModal_Lay[Archive Explorer Modal<br>Btn: 🗄️ Archives]
-        MK_Print --> LayerzSOPEditorModal[Active SOP Editor Modal<br>Btn: 🔒 EDIT]
-        MK_Print --> LayerzPrintSOPModal[SOP Print Configuration Modal<br>Btn: 🖨️ PRINT]
+        MK_Print --> MultiBatchModal_3d[🌍 SHARED: Batch Estimator Modal<br>Btn: + BatchOrder]
+        MK_Print --> SOPMasterModal_Print[🌍 SHARED: SOP Editor Modal<br>Btn: LAYERZ SOP EDITOR]
+        MK_Print --> ArchiveExplorerModal_Lay[🌍 SHARED: Archive Explorer Modal<br>Btn: 🗄️ Archives]
+        MK_Print --> LayerzSOPEditorModal[🌍 SHARED: SOP Editor Modal<br>Btn: 🔒 EDIT]
+        MK_Print --> LayerzPrintSOPModal[🌍 SHARED: Print SOP Modal<br>Btn: 🖨️ PRINT]
         MK_Print --> LayerzDeletePrint[Delete Print Job Action<br>Btn: DELETE]
         MK_Print --> LayerzStatusActions[Workflow Status Advance Actions<br>Btns: Queued, Printing, Cleaned, Finalize]
         MK_Print --> LayerzRecordYield[Record Run Yield Action<br>Btn: Record Yield & Stop Timer]
@@ -88,20 +94,20 @@ graph LR
         Fulfillz -.-> FZ_Barcodz[BARCODZ Pane<br>DOM: paneFulfillzBarcodz]
         Fulfillz -.-> FZ_Labelz[LABELZ Pane<br>DOM: paneFulfillzLabelz]
         
-        FZ_Packerz --> SOPMasterModal_Pack[SOP EDITOR Modal<br>Btn: PACKERZ SOP EDITOR]
-        FZ_Packerz --> PackerzArchiveModal[Archive Explorer Modal<br>Btn: 🗄️ Archives]
-        FZ_Packerz --> PackerzPrintSOP[Print SOP Action<br>Btn: Print SOP]
-        FZ_Packerz --> PackerzEditSOP[Open Active Editor Action<br>Btn: EDIT]
+        FZ_Packerz --> SOPMasterModal_Pack[🌍 SHARED: SOP Editor Modal<br>Btn: PACKERZ SOP EDITOR]
+        FZ_Packerz --> PackerzArchiveModal[🌍 SHARED: Archive Explorer Modal<br>Btn: 🗄️ Archives]
+        FZ_Packerz --> PackerzPrintSOP[🌍 SHARED: Print SOP Modal<br>Btn: Print SOP]
+        FZ_Packerz --> PackerzEditSOP[🌍 SHARED: SOP Editor Modal<br>Btn: EDIT]
         FZ_Packerz --> PackerzSignoffQA[Signoff QA Action<br>Btn: COMPLETE QA CHECKS]
         FZ_Packerz --> PackerzViewPDF[View PDF Media Action<br>Btn: 📄 View PDF]
         FZ_Packerz --> PackerzPlayVideo[Play Video Media Action<br>Btn: 🎥 Play Video]
         
-        FZ_Barcodz --> PaperSettingsModal_Bar[Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
-        FZ_Barcodz --> PrintBatchModal_Bar[Execute Batch Print Trigger<br>Btn: 🖨️ PRINT BATCH]
+        FZ_Barcodz --> PaperSettingsModal_Bar[🌍 SHARED: Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
+        FZ_Barcodz --> PrintBatchModal_Bar[🌍 SHARED: Execute Batch Print<br>Btn: 🖨️ PRINT BATCH]
         
         FZ_Labelz --> CreateLabelModal[Create Label Modal<br>Btn: + NEW LABEL]
-        FZ_Labelz --> PaperSettingsModal_Lab[Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
-        FZ_Labelz --> PrintBatchModal_Lab[Execute Batch Print Trigger<br>Btn: 🖨️ PRINT BATCH]
+        FZ_Labelz --> PaperSettingsModal_Lab[🌍 SHARED: Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
+        FZ_Labelz --> PrintBatchModal_Lab[🌍 SHARED: Execute Batch Print<br>Btn: 🖨️ PRINT BATCH]
         FZ_Labelz --> LabelDesignerToolbar[Designer Canvas Actions<br>Btns: Text, Image, Shape, Undo, Save...]
     end
     
@@ -158,6 +164,12 @@ graph LR
         NX_Brainz --> BrainzExactCalc[Force DB Recalculation<br>Btn: EXACT CALC]
         NX_Brainz --> BrainzGuide[Show Guide Alert<br>Btn: READ GUIDE]
     end
+
+    class SOPMasterModal_Prod,SOPMasterModal_Print,SOPMasterModal_Pack,BatchezSOPEditorModal,LayerzSOPEditorModal,PackerzEditSOP sharedSop;
+    class ArchiveExplorerModal_Bat,ArchiveExplorerModal_Lay,PackerzArchiveModal sharedArchive;
+    class PaperSettingsModal_Bar,PaperSettingsModal_Lab sharedPaper;
+    class PrintBatchModal_Bar,PrintBatchModal_Lab,BatchezPrintSOP,LayerzPrintSOPModal,PackerzPrintSOP sharedPrint;
+    class MultiBatchModal,MultiBatchModal_3d sharedEstimator;
 ```
 
 ---
