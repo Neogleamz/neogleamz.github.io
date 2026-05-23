@@ -24,135 +24,100 @@ graph LR
     subgraph Global [Global Header Triggers]
         TipzModal[TIPZ Modal<br>Btn: 💡 TIPZ]
         TaskzModal[TASKZ Modal<br>Btn: 🎯 TASKZ]
-        TipzModal ~~~ TaskzModal
     end
     
-    App --> TipzModal
-    App --> TaskzModal
+    %% 1. Establish strict Root -> Hub order FIRST
+    App --> Stockpilez[STOCKPILEZ Hub<br>DOM: stockpilez-tab]
+    App --> Makerz[MAKERZ Hub<br>DOM: makerz-tab]
+    App --> Fulfillz[FULFILLZ Hub<br>DOM: fulfillz-tab]
+    App --> Revenuez[REVENUEZ Hub<br>DOM: revenuez-tab]
+    App --> Socialz[SOCIALZ Hub<br>DOM: socialz-tab]
+    App --> Nexuz[NEXUZ Hub<br>DOM: nexuz-tab]
     
     subgraph Core [Main Hub Architecture]
-        %% STOCKPILEZ HUB
-        Stockpilez[STOCKPILEZ Hub<br>DOM: stockpilez-tab]
+        
+        %% 2. Establish strict Hub -> Pane order FIRST
+        %% STOCKPILEZ
         Stockpilez -.-> SP_Inventory[STOCKZ Pane<br>DOM: paneInventory]
         Stockpilez -.-> SP_Pipeline[DATAZ Pane<br>DOM: panePipeline]
         Stockpilez -.-> SP_Simple[EDITZ Pane<br>DOM: paneSimple]
         
-        %% Enforce Pane Order
-        SP_Inventory ~~~ SP_Pipeline
-        SP_Pipeline ~~~ SP_Simple
-        
-        SP_Inventory --> SnapshotManagerModal[Snapshot Manager Modal<br>Btn: 🗂️ SNAPSHOTS]
-        SP_Inventory --> ResetStockLevels[Reset Stock Levels Trigger<br>Btn: ⚠️ RESET STOCK LEVELS]
-        SP_Inventory --> CycleCountManagerModal[Cycle Count Manager Modal<br>Btn: 🔄 CYCLE COUNTS]
-        SP_Inventory --> VelocityzModal[Map Unknown SKU Modal<br>Btn: ⏳ VELOCITYZ]
-        SP_Inventory --> GlobalLeadModal[Global Lead Editor Modal<br>Btn: ✏️ EDIT GLOBAL LEAD]
-        SP_Inventory --> LowStockzReport[Low Stockz Report Trigger<br>Btn: 📉 LOW STOCKZ REPORT]
-        
-        %% Enforce Modal Order
-        SnapshotManagerModal ~~~ ResetStockLevels
-        ResetStockLevels ~~~ CycleCountManagerModal
-        CycleCountManagerModal ~~~ VelocityzModal
-        VelocityzModal ~~~ GlobalLeadModal
-        GlobalLeadModal ~~~ LowStockzReport
-        
-        SP_Simple --> EditzBulkModal[EDITZ BULK STAGING Modal<br>Btn: Bulk Edit]
-        
-        %% MAKERZ HUB
-        Makerz[MAKERZ Hub<br>DOM: makerz-tab]
+        %% MAKERZ
         Makerz -.-> MK_Builder[RECIPEZ Pane<br>DOM: paneProdBuilder]
         Makerz -.-> MK_Control[BATCHEZ Pane<br>DOM: paneProdControl]
         Makerz -.-> MK_Print[LAYERZ Pane<br>DOM: paneProdPrint]
         
-        MK_Builder ~~~ MK_Control
-        MK_Control ~~~ MK_Print
+        %% FULFILLZ
+        Fulfillz -.-> FZ_Packerz[PACKERZ Pane<br>DOM: paneFulfillzPackerz]
+        Fulfillz -.-> FZ_Barcodz[BARCODZ Pane<br>DOM: paneFulfillzBarcodz]
+        Fulfillz -.-> FZ_Labelz[LABELZ Pane<br>DOM: paneFulfillzLabelz]
         
+        %% REVENUEZ
+        Revenuez -.-> RV_Bridge[ORDERZ Pane<br>DOM: paneSalezBridge]
+        Revenuez -.-> RV_Analyticz[STATZ Pane<br>DOM: paneSalezAnalyticz]
+        Revenuez -.-> RV_Commandz[SIMULATORZ Pane<br>DOM: paneSalezCommandz]
+        
+        %% SOCIALZ
+        Socialz -.-> SZ_Roster[ROSTER Pane<br>DOM: paneSocialzRoster]
+        
+        %% NEXUZ
+        Nexuz -.-> NX_Importz[IMPORTZ Pane<br>DOM: paneNexuzImportz]
+        Nexuz -.-> NX_Salez[SALEZ Pane<br>DOM: paneNexuzSalez]
+        Nexuz -.-> NX_Brainz[BRAINZ Pane<br>DOM: paneNexuzBrainz]
+        
+        %% 3. Finally, define Pane -> Button order
+        
+        %% STOCKZ
+        SP_Inventory --> SnapshotManagerModal[Snapshot Manager Modal<br>Btn: 🗂️ SNAPSHOTS]
+        SP_Inventory --> CycleCountManagerModal[Cycle Count Manager Modal<br>Btn: 🔄 CYCLE COUNTS]
+        SP_Inventory --> VelocityzModal[Map Unknown SKU Modal<br>Btn: ⏳ VELOCITYZ]
+        SP_Inventory --> GlobalLeadModal[Global Lead Editor Modal<br>Btn: ✏️ EDIT GLOBAL LEAD]
+        SP_Inventory --> LowStockzReport[Low Stockz Report Trigger<br>Btn: 📉 LOW STOCKZ REPORT]
+        SP_Inventory --> ResetStockLevels[Reset Stock Levels Trigger<br>Btn: ⚠️ RESET STOCK LEVELS]
+        
+        %% EDITZ
+        SP_Simple --> EditzBulkModal[EDITZ BULK STAGING Modal<br>Btn: Bulk Edit]
+        
+        %% RECIPEZ
         MK_Builder --> RecipeModal[Recipe Action Modal<br>Btn: + CREATE]
         MK_Builder --> RecipeManagerModal[RECIPE MANAGER STAGING Modal<br>Btn: 🛠️ MANAGER]
         MK_Builder --> BulkAddModal[Bulk Add Modal<br>Btn: BULK ADD]
         
-        RecipeModal ~~~ RecipeManagerModal
-        RecipeManagerModal ~~~ BulkAddModal
-        
+        %% BATCHEZ
         MK_Control --> NewWOModal[Start Production Batch Modal<br>Btn: + CreateBatch]
         MK_Control --> MultiBatchModal[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
         MK_Control --> SOPMasterModal_Prod[SOP EDITOR Modal<br>Btn: BATCHEZ SOP EDITOR]
         MK_Control --> DraftScrapModal[Draft Scrap Modal<br>Btn: Update Scrap Tally]
         MK_Control --> ArchiveExplorerModal_Bat[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         
-        NewWOModal ~~~ MultiBatchModal
-        MultiBatchModal ~~~ SOPMasterModal_Prod
-        SOPMasterModal_Prod ~~~ DraftScrapModal
-        DraftScrapModal ~~~ ArchiveExplorerModal_Bat
-        
+        %% LAYERZ
         MK_Print --> ManualPrintModal[Manual Print Modal<br>Btn: + PRINTBATCH]
         MK_Print --> SOPMasterModal_Print[SOP EDITOR Modal<br>Btn: LAYERZ SOP EDITOR]
         MK_Print --> ArchiveExplorerModal_Lay[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         
-        ManualPrintModal ~~~ SOPMasterModal_Print
-        SOPMasterModal_Print ~~~ ArchiveExplorerModal_Lay
-        
-        %% FULFILLZ HUB
-        Fulfillz[FULFILLZ Hub<br>DOM: fulfillz-tab]
-        Fulfillz -.-> FZ_Packerz[PACKERZ Pane<br>DOM: paneFulfillzPackerz]
-        Fulfillz -.-> FZ_Barcodz[BARCODZ Pane<br>DOM: paneFulfillzBarcodz]
-        Fulfillz -.-> FZ_Labelz[LABELZ Pane<br>DOM: paneFulfillzLabelz]
-        
-        FZ_Packerz ~~~ FZ_Barcodz
-        FZ_Barcodz ~~~ FZ_Labelz
-        
+        %% PACKERZ
         FZ_Packerz --> SOPMasterModal_Pack[SOP EDITOR Modal<br>Btn: PACKERZ SOP EDITOR]
         FZ_Packerz --> PackerzArchiveModal[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         
-        SOPMasterModal_Pack ~~~ PackerzArchiveModal
-        
+        %% LABELZ
         FZ_Labelz --> CreateLabelModal[Create Label Modal<br>Btn: + NEW LABEL]
         
-        %% REVENUEZ HUB
-        Revenuez[REVENUEZ Hub<br>DOM: revenuez-tab]
-        Revenuez -.-> RV_Bridge[ORDERZ Pane<br>DOM: paneSalezBridge]
-        Revenuez -.-> RV_Analyticz[STATZ Pane<br>DOM: paneSalezAnalyticz]
-        Revenuez -.-> RV_Commandz[SIMULATORZ Pane<br>DOM: paneSalezCommandz]
-        
-        RV_Bridge ~~~ RV_Analyticz
-        RV_Analyticz ~~~ RV_Commandz
-        
+        %% ORDERZ
         RV_Bridge --> ActualNetModal[Actual Net Breakdown Modal<br>Btn: ACTUAL NET]
+        
+        %% SIMULATORZ
         RV_Commandz --> CeoAddModal[CEO Terminal Modal<br>Btn: +PRODUCT ANALYSIS]
         RV_Commandz --> LtvModal[Cohort Intelligence Modal<br>Btn: LTV]
         
-        CeoAddModal ~~~ LtvModal
-        
-        %% SOCIALZ HUB
-        Socialz[SOCIALZ Hub<br>DOM: socialz-tab]
-        Socialz -.-> SZ_Roster[ROSTER Pane<br>DOM: paneSocialzRoster]
-        
+        %% ROSTER
         SZ_Roster --> SkaterModal[Profile Information Modal<br>Btn: Open Skater]
         
-        %% NEXUZ HUB
-        Nexuz[NEXUZ Hub<br>DOM: nexuz-tab]
-        Nexuz -.-> NX_Importz[IMPORTZ Pane<br>DOM: paneNexuzImportz]
-        Nexuz -.-> NX_Salez[SALEZ Pane<br>DOM: paneNexuzSalez]
-        Nexuz -.-> NX_Brainz[BRAINZ Pane<br>DOM: paneNexuzBrainz]
-        
-        NX_Importz ~~~ NX_Salez
-        NX_Salez ~~~ NX_Brainz
-        
+        %% SALEZ
         NX_Salez --> AliasModal[Alias Modal<br>Btn: + ADD NEW]
     end
 
-    App --> Stockpilez
-    App --> Makerz
-    App --> Fulfillz
-    App --> Revenuez
-    App --> Socialz
-    App --> Nexuz
-    
-    %% Enforce Hub Order
-    Stockpilez ~~~ Makerz
-    Makerz ~~~ Fulfillz
-    Fulfillz ~~~ Revenuez
-    Revenuez ~~~ Socialz
-    Socialz ~~~ Nexuz
+    App --> TipzModal
+    App --> TaskzModal
 ```
 
 ---
