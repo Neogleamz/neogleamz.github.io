@@ -102,3 +102,8 @@ trigger: always_on
 - **Show and Tell Testing:** Each time you finish executing code for an Implementation Plan (after the user types "Proceed") OR when actively troubleshooting/making ad-hoc changes that need verification before a `/ship_it`, you MUST output a clearly formatted testing guide.
 - **Precision Mapping:** You must explicitly name the exact internal Hub tab corresponding to the active project (`STOCKPILEZ`, `MAKERZ`, `FULFILLZ`, `REVENUEZ`, `SOCIALZ`, `NEXL`). You are strictly forbidden from guessing generalized names (e.g. "PRODUCTION Hub"). You must explicitly specify the exact sub-pane/page to click inside the Hub, along with the specific modals, UI elements, or buttons they need to click to verify your work in the live browser.
 - **Emoji Structuring:** Use proper emojis (e.g., 🧪, 🖱️, 👁️) to structure the testing procedure blocks so they are highly readable.
+
+### 10. Swarm Delegation Ledger Protocol (Teamwork Sync)
+- **The Swarm Lock:** Whenever you dispatch a subagent or a Teamwork Swarm via `[/teamwork-preview]`, you MUST immediately open the `@/tools/SK8Lytz_Bucket_List.md` ledger and physically change the task's checkbox from `- [ ]` (Incomplete) to `- [/]` (In Progress).
+- **Why:** This prevents the primary `[/bucketlist]` parser from accidentally hijacking the active swarm task and attempting to execute it synchronously on the main thread.
+- **Completion Handoff:** Once the swarm returns their final artifact, you must merge it, then manually update the `- [/]` token to `- [x]`, and finally execute standard archival logic.
