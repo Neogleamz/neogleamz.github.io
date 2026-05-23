@@ -76,6 +76,8 @@ graph LR
         Revenuez -.-> RV_Commandz[SIMULATORZ Pane<br>DOM: paneSalezCommandz]
         
         RV_Bridge --> ActualNetModal[Actual Net Breakdown Modal<br>Btn: ACTUAL NET]
+        RV_Bridge --> MathSimulatorModal[Sandbox Math Simulator Modal<br>Btn: SANDBOX NET]
+        
         RV_Commandz --> CeoAddModal[CEO Terminal Modal<br>Btn: +PRODUCT ANALYSIS]
         RV_Commandz --> LtvModal[Cohort Intelligence Modal<br>Btn: LTV]
     end
@@ -84,13 +86,19 @@ graph LR
         Socialz[SOCIALZ Hub<br>DOM: socialz-tab] -.-> SZ_Roster[ROSTER Pane<br>DOM: paneSocialzRoster]
         
         SZ_Roster --> SkaterModal[Profile Information Modal<br>Btn: Open Skater]
+        SZ_Roster --> AnalyticsDashboardModal[Analytics Dashboard Modal<br>Btn: 📊 Analytics]
     end
     
     subgraph H6 [NEXUZ HUB Architecture]
-        Nexuz[NEXUZ Hub<br>DOM: nexuz-tab] -.-> NX_Importz[IMPORTZ Pane<br>DOM: paneNexuzImportz]
-        Nexuz -.-> NX_Salez[SALEZ Pane<br>DOM: paneNexuzSalez]
-        Nexuz -.-> NX_Brainz[BRAINZ Pane<br>DOM: paneNexuzBrainz]
+        Nexuz[NEXUZ Hub<br>DOM: nexuz-tab] -.-> NX_Importz[IMPORTZ Pane<br>DOM: paneNexlImportz]
+        Nexuz -.-> NX_Salez[SALEZ Pane<br>DOM: paneNexlSalez]
+        Nexuz -.-> NX_Brainz[BRAINZ Pane<br>DOM: paneNexlBrainz]
+        
+        NX_Importz --> ParserConfigModal[Parser Config Modal<br>Btn: ⚙️ PARSER CONFIG]
+        NX_Importz --> ParcelConfigModal[Parcel Config Modal<br>Btn: ⚙️ PARCEL CONFIG]
         
         NX_Salez --> AliasModal[Alias Modal<br>Btn: + ADD NEW]
+        
+        NX_Brainz --> ScraperFoundryModal[Scraper Foundry Modal<br>Btn: 🚀 LAUNCH SCRAPER]
     end
 ```
