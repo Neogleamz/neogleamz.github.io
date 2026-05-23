@@ -107,3 +107,9 @@ trigger: always_on
 - **The Swarm Lock:** Whenever you dispatch a subagent or a Teamwork Swarm via `[/teamwork-preview]`, you MUST immediately open the `@/tools/SK8Lytz_Bucket_List.md` ledger and physically change the task's checkbox from `- [ ]` (Incomplete) to `- [/]` (In Progress).
 - **Why:** This prevents the primary `[/bucketlist]` parser from accidentally hijacking the active swarm task and attempting to execute it synchronously on the main thread.
 - **Completion Handoff:** Once the swarm returns their final artifact, you must merge it, then manually update the `- [/]` token to `- [x]`, and finally execute standard archival logic.
+
+### 11. Empirical Verification Mandate
+- **No Guessing Allowed:** You are STRICTLY FORBIDDEN from presenting an unverified solution or claiming a fix is complete without hard, empirical proof. 
+- **Mathematical / Physical Proof:** If resolving layout or rendering issues, write scripts to parse the DOM/SVG coordinates. If resolving code logic, execute local Node/Python scripts to verify the data structures. You must physically test your theories.
+- **Provide Receipts:** Always show the user the mathematical or programmatic output of your verification as proof before concluding the interaction.
+- **Direct Links Mandate:** You MUST ALWAYS provide direct, clickable markdown links to any file you modify or reference (e.g., `[filename.md](file:///absolute/path/to/filename.md)`) in every single response where that file is relevant, ensuring the user never has to hunt for the file.
