@@ -39,6 +39,10 @@ When the user invokes `/wind-down` (or strongly implies they are ending the sess
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 After completing all 5 steps above, you MUST render the following structured sections. Do NOT output a plain text summary. Do NOT skip any section. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 1. Session Gate Checklist

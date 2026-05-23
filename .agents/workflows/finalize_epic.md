@@ -49,6 +49,10 @@ When the user invokes `/finalize_epic` (or instructs you to "deploy epic" or "fi
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 After the Epic is fully merged and archived, you MUST render the following structured output. Do NOT summarize as prose. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 🏁 Epic Finalization SITREP

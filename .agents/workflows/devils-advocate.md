@@ -19,6 +19,10 @@ When my prompt includes "roast this idea", "pre-mortem", or "find the flaws in",
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 You MUST render the Pre-Mortem using the following exact Markdown structure. Do NOT output a plain text numbered list. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 💀 Pre-Mortem Analysis — `<Idea Title>`

@@ -28,6 +28,10 @@ When the user invokes a version control escape hatch, you must act as the Versio
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 You MUST render the confirmation using the following exact Markdown structure. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### For Path A (Checkpoint):

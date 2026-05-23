@@ -46,6 +46,10 @@ When the user invokes `/ui_xray` (or says "debug this layout", "show boundaries"
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 When presenting the Analysis & Diagnosis (Step 3), you MUST render the following structured output. Do NOT output a plain text paragraph. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 🔬 UI X-Ray Diagnosis

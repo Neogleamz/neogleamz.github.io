@@ -30,6 +30,10 @@ When the user invokes `/ux-pass` (or says "simulate user", "run a UX pass"), you
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 You MUST render the UX critique using the following exact Markdown structure. Do NOT output a plain text critique. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 🧑‍🔧 Simulated UX Report — `<Feature Name>`

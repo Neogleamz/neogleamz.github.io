@@ -33,6 +33,10 @@ When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize 
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 After the merge is complete, you MUST render a structured **Gate Results Table** and a **Boy Scout Audit** block. Do NOT output a plain text summary. The exact template is:
 
 ### Gate Results Table

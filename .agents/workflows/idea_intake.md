@@ -26,6 +26,10 @@ When the user requests to log an idea or task for later, you must execute the fo
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 You MUST render the confirmation as a compact card. Do NOT output a plain text paragraph. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 Render a `> [!NOTE]` block:

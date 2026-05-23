@@ -18,6 +18,10 @@ Whenever your Implementation Plan requires adding a new external library, packag
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 When presenting the Dependency Proposal (Step 2), you MUST render the following structured output. Do NOT output a plain text justification. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 📦 Dependency Proposal — `<library-name>`

@@ -31,6 +31,10 @@ When the user invokes `/release` (or instructs you to "cut a release", "prepare 
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 After the tag is created, you MUST render the following structured output. Do NOT output a plain text summary. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 1. Release Confirmation Block

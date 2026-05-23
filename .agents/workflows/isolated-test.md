@@ -31,6 +31,10 @@ When the user invokes `/test` (or asks to "test this", "check the browser", or "
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 Every model (Claude, Gemini, GPT) must produce this exact structure when executing `/isolated_test_and_verify`. You are strictly forbidden from summarizing as plain prose paragraphs.
 
 > [!NOTE]

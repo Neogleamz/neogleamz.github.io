@@ -23,6 +23,10 @@ Whenever you are instructed to alter a Supabase Database table, modify RLS (Row 
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 After completing the schema sync, you MUST render the following structured output. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 🗄️ Schema Sync Confirmation

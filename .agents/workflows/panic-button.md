@@ -22,6 +22,10 @@ When the user invokes `/panic` (or says "PANIC", "everything is broken", or "eme
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 When presenting the Situation Assessment (Steps 2-3), you MUST render the following structured output. Do NOT output a plain text paragraph. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 🚨 PANIC — Emergency Triage Report

@@ -38,6 +38,10 @@ When the user invokes `/audit [filename/directory]` (or says "clean up legacy", 
 
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
+> [!CAUTION]
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+
+
 When presenting the Audit Report (Step 2), you MUST render the following structured output. Do NOT output a plain text bullet list. Every model (Claude, Gemini, GPT) must produce this exact structure:
 
 ### 🔍 Legacy Audit Report — `<filename>`
