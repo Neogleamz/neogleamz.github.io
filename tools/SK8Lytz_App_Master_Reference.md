@@ -37,7 +37,13 @@ graph LR
         Stockpilez -.-> SP_Inventory[STOCKZ Pane<br>DOM: paneInventory]
         
         SP_Simple --> EditzBulkModal[EDITZ BULK STAGING Modal<br>Btn: Bulk Edit]
-        SP_Inventory --> VelocityzModal[Map Unknown SKU Modal<br>Btn: Velocityz]
+        
+        SP_Inventory --> SnapshotManagerModal[Snapshot Manager Modal<br>Btn: 🗂️ SNAPSHOTS]
+        SP_Inventory --> CycleCountManagerModal[Cycle Count Manager Modal<br>Btn: 🔄 CYCLE COUNTS]
+        SP_Inventory --> VelocityzModal[Map Unknown SKU Modal<br>Btn: ⏳ VELOCITYZ]
+        SP_Inventory --> GlobalLeadModal[Global Lead Editor Modal<br>Btn: ✏️ EDIT GLOBAL LEAD]
+        SP_Inventory --> LowStockzReport[Low Stockz Report Trigger<br>Btn: 📉 LOW STOCKZ REPORT]
+        SP_Inventory --> ResetStockLevels[Reset Stock Levels Trigger<br>Btn: ⚠️ RESET STOCK LEVELS]
         
         %% MAKERZ HUB
         Makerz[MAKERZ Hub<br>DOM: makerz-tab]
