@@ -15,23 +15,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 
----
-
-### 🚨 P0 Critical (Immediate Blocker)
-
-
-### 🟠 P1 High Priority (Core Features & Bugs)
-### Target: `main`
-
-## 🟡 P2 Medium Priority (Enhancements)
-
-
----
-
-
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
 ### Target: main
+- [ ] `feat/unavatar-supabase-sync` : **Recommission Avatar Engine** - Re-enable the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ## 🧹 Technical Debt
 - [🚀] debt/cleanup : **check_syntax.js orphan** - Relocate the orphan script check_syntax.js from root to the scripts/ directory. [🤖 Antigravity] [🧠 TBD / 1k] [💸 TBD / .01]
