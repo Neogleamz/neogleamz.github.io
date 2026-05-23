@@ -60,6 +60,7 @@ graph LR
         MK_Control --> ArchiveExplorerModal_Bat[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         MK_Control --> BatchezPrintSOP[SOP Print Configuration Modal<br>Btn: 🖨️ Print SOP]
         MK_Control --> BatchezPickList[Pick List Print Configuration<br>Btn: 🖨️ Print List]
+        MK_Control --> BatchezSOPEditorModal[Active SOP Editor Modal<br>Btn: 🔒 EDIT]
         MK_Control --> BatchezDeleteWO[Delete Work Order Action<br>Btn: DELETE]
         MK_Control --> BatchezStatusActions[Workflow Status Advance Actions<br>Btns: Queued, Picking, Production, Finalize]
         MK_Control --> BatchezSaveInline[Save SOP Changes Action<br>Btn: Save Changes to Cloud]
