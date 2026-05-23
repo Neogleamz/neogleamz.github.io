@@ -65,23 +65,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_commitEditzBulkChanges':
                     window.click_window_commitEditzBulkChanges();
                     break;
-                case 'click_switchTab_invhub':
-                    switchTab('invhub');
+                case 'click_switchTab_stockpilez':
+                    switchTab('stockpilez');
                     break;
-                case 'click_switchTab_prodhub':
-                    switchTab('prodhub');
+                case 'click_switchTab_makerz':
+                    switchTab('makerz');
                     break;
-                case 'click_switchTab_fulfillzhub':
-                    switchTab('fulfillzhub');
+                case 'click_switchTab_fulfillz':
+                    switchTab('fulfillz');
                     break;
-                case 'click_switchTab_salezhub':
-                    switchTab('salezhub');
+                case 'click_switchTab_revenuez':
+                    switchTab('revenuez');
                     break;
-                case 'click_switchTab_socialzhub':
-                    switchTab('socialzhub');
+                case 'click_switchTab_socialz':
+                    switchTab('socialz');
                     break;
-                case 'click_switchTab_synchub':
-                    switchTab('synchub');
+                case 'click_switchTab_nexl':
+                    switchTab('nexl');
                     break;
                 case 'click_window_closeForceSyncModal':
                     if (typeof window.closeForceSyncModal === 'function') window.closeForceSyncModal();
@@ -690,14 +690,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_exportLabelzPDF':
                     exportLabelzPDF();
                     break;
-                case 'click_showNexuzPane_importz':
-                    showNexuzPane('importz');
+                case 'click_showNexlPane_importz':
+                    showNexlPane('importz');
                     break;
-                case 'click_showNexuzPane_salez':
-                    showNexuzPane('salez');
+                case 'click_showNexlPane_salez':
+                    showNexlPane('salez');
                     break;
-                case 'click_showNexuzPane_brainz':
-                    showNexuzPane('brainz');
+                case 'click_showNexlPane_brainz':
+                    showNexlPane('brainz');
                     break;
                 case 'click_document_getElementById_orderF':
                     document.getElementById('orderFiles').click();

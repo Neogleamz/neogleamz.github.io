@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
     window.switchTab = function(tabId) {
         if (origSwitchTab) origSwitchTab(tabId);
-        if (tabId === 'fulfillzhub') {
+        if (tabId === 'fulfillz') {
             // Optional lazy init
             if(barcodzCache.length === 0) buildBarcodzCache();
         }
