@@ -1,29 +1,29 @@
-# BRIEFING — 2026-05-22T19:29:39-05:00
+# BRIEFING — 2026-05-22T22:55:53Z
 
 ## Mission
-Recommission the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, upload the image blob to Supabase Storage, and update the database URL in `socialz_audience`.
+Map out a hierarchy chart of Hubz, Pagez, and Modalz, establish a nomenclature dictionary, and refactor the front-end to purge legacy references.
 
 ## 🔒 My Identity
 - Archetype: sentinel
 - Working directory: d:\GitHub\neogleamz.github.io\.agents\
-- Orchestrator: TBD
+- Orchestrator: e697a00e-0d51-43df-b636-b6bcb8b69312
 - Victory Auditor: to be spawned on victory claim
 
 ## 🔒 Key Constraints
 - No technical decisions — relay only
 - Victory Audit is MANDATORY before reporting completion
-- R4 Bucketlist Override: MUST HALT and request user approval after generating the `implementation_plan.md` artifact (and dual-syncing it to `docs/plans/feat/unavatar-supabase-sync.md`). Code must not be written until approved.
+- No modifications allowed to Supabase Edge Functions, backend routing, or PostgreSQL DB schemas.
 
 ## User Context
-- **Last user request**: Recommission Avatar Migration Engine. Fetch avatars from unavatar.io, natively upload to Supabase 'avatars' storage bucket, update `avatar_url` in `socialz_audience`, safely close connection and report completion.
+- **Last user request**: Map comprehensive Mermaid hierarchy chart, establish canonical naming dictionary in SK8Lytz_App_Master_Reference.md, and perform safe front-end refactoring via strict string replacements.
 - **Pending clarifications**: none
 - **Delivered results**: []
 
 ## Project Status
-- **Phase**: in progress
+- **Phase**: auditing
 
 ## Victory Audit Status
-- **Triggered**: no
+- **Triggered**: yes
 - **Verdict**: pending
 - **Retry count**: 0
 

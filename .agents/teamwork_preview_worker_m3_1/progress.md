@@ -1,0 +1,7 @@
+- Read nomenclature_dictionary.md mapping
+- Searched all `.html` and `.js` frontend files
+- Found legacy string references in index.html, assets/js/system-event-delegator.js, assets/js/barcodz-module.js, assets/js/packerz-module.js
+- Created and executed surgical string replacement script avoiding supabase schemas
+- Validated via git diff that no functional logic broke, pure text node and css updates
+- Committed changes
+- Created handoff.md

@@ -1,0 +1,43 @@
+<button class="tab-btn active" data-click="click_switchTab_invhub">
+<button class="tab-btn" data-click="click_switchTab_prodhub">
+<button class="tab-btn" data-click="click_switchTab_fulfillzhub">
+<button class="tab-btn" data-click="click_switchTab_salezhub">
+<button class="tab-btn" data-click="click_switchTab_socialzhub">
+<button class="tab-btn" data-click="click_switchTab_synchub">
+<div id="invhub-tab" class="tab-content active" style="padding:0;">
+<div id="prodhub-tab" class="tab-content" style="padding:0;">
+<div id="salezhub-tab" class="tab-content" style="padding:0;">
+<div id="fulfillzhub-tab" class="tab-content" style="padding:0;">
+<div id="synchub-tab" class="tab-content" style="padding:0;">
+<div id="socialzhub-tab" class="tab-content" style="padding:0;">
+<div id="ltv-metrics-modal" class="modal-overlay">
+<div id="actual-net-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px); font-family:'Inter', sans-serif;">
+<div id="math-simulator-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:10010; justify-content:center; align-items:center; font-family:'Inter', sans-serif;">
+<div id="analytics-modal" class="modal-overlay" style="z-index:100; font-family:'Inter', sans-serif;">
+<div id="skater-modal" class="modal-overlay">
+<div id="migration-modal" class="modal-overlay" style="display: none; z-index: 1000;">
+<div id="recipeActionModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10006; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+<div id="multiBatchOrderModal" class="modal-overlay" style="display:none; z-index:10001; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+<div id="batchOrderReportModal" class="modal-overlay" style="display:none; z-index:10002; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+<div id="sopMasterModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+<div id="ceoAddModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+<div id="sopMediaPickerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" data-click="click_if_event_target_this_closeSOPM">
+<div id="sopSnapshotModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.96); z-index:11000; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+<div id="sopAuditLogModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);" data-click="click_if_event_target_this_closeSOPA">
+<div id="manualPrintModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+<div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+<div id="packerzArchiveModal" class="modal-overlay" style="display:none; align-items:center; z-index:1000;" data-click="click_if_event_target_this_this_styl">
+<div id="sopViewerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10005; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+<div id="sopCameraModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.96); z-index:11000; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+<div id="sopTokenGuideModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.88); z-index:11001; justify-content:center; align-items:center; backdrop-filter:blur(8px);" data-click="click_if_event_target_this_closeSOPT">
+<div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="recipeManagerModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="editzBulkModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="finalizeWoModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="layerzRunCompleteModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="finalizePrintModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="paperProfileModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:99999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="taskPlannerModal" class="modal-overlay task-engine-overlay" style="display: none;">
+<div id="te-tag-manager-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg-panel); z-index:9999999; justify-content:center; align-items:flex-start;">
+<div id="sopPrintOptionsModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:99999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+<div id="force-sync-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px); font-family:'Inter', sans-serif;">

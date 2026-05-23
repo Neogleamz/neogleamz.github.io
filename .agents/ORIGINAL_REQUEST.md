@@ -1,77 +1,52 @@
 # Original User Request
 
-## Initial Request â€” 2026-05-22T19:12:52-05:00
+## Initial Request â€” 2026-05-22T22:47:02Z
 
-# Teamwork Project Prompt â€” Draft
-
-> Status: Launched
-> Goal: Execute the delegated teamwork tasks
-
-Revamp the Labelz Designer web application for the internal warehouse team's production use. The project must fix ViewBox scaling inconsistencies between different label dimensions, forcefully hide phantom UI elements during printing, enable CSS-based landscape/portrait rotation, and wire up the PDF Preview engine.
+Analyze the current Neogleamz Task Engine codebase and architecture, perform a blind and unbiased market comparison against industry-leading project management software (e.g., Asana, Jira, Linear), and architect a comprehensive upgrade proposal including Supabase schema designs and Vanilla JS UI mockups.
 
 Working directory: d:\GitHub\neogleamz.github.io
 Integrity mode: development
 
 ## Requirements
 
-### R1. Dynamic ViewBox Scaling
-Decouple the viewport scale from the physical print payload. Ensure that all label dimensions (e.g., 2.25x1.25", 4x6") fit optimally within the center of the UI canvas without exceeding viewport boundaries or shrinking unreadably small, utilizing standard Vanilla JS and CSS mapping.
+### R1. Unbiased Market Gap Analysis
+The swarm must independently research modern task management platforms and compare their core philosophies, UI/UX paradigms, and data structures against the current `task-engine.js` implementation to identify critical missing features.
 
-### R2. Phantom QR Code Eradication
-Hijack the browser's native print spooler using dynamically injected `@page` rules and `@media print` blocks. Ensure that when `window.print()` is triggered, absolutely all UI elements (including default barcodes) are hidden, leaving only a 1:1 representation of the active label payload on the designated physical dimensions.
+### R2. Strict Architectural Adherence
+The swarm must act as Lead Architects. When proposing solutions, they are strictly bound by the Neogleamz Core Safety Protocols: 100% Vanilla JS (zero frameworks), zero reliance on Node.js modules, and strict adherence to the existing `SK8Lytz_App_Master_Reference.md` design patterns.
 
-### R3. Native Label Rotation
-Provide a native mechanism to rotate the label payload between Landscape and Portrait orientations using CSS `transform: rotate(90deg)` to ensure compatibility with standard unidirectional thermal printers.
-
-### R4. PDF Preview Integration
-Wire up the existing "PDF PREVIEW" UI button to trigger the browser's native `window.print()` engine, allowing the user to utilize the browser's built-in "Save as PDF" functionality.
+### R3. Tangible Design Assets
+For the highest-priority missing features, the swarm must design the required Supabase PostgreSQL schema migrations and map out the raw Vanilla JS DOM structures (e.g., how the UI will render). They should utilize Mermaid diagrams for database relations and standard markdown/images for UI mockups.
 
 ## Acceptance Criteria
 
-### R1 Verification (ViewBox Scaling)
-- [ ] A 4x6" label fits 100% within the viewport without triggering scrollbars or massive overflow.
-- [ ] A 2.25x1.25" label renders large enough to be easily readable and editable without manually zooming to 200%.
+### Verification & Deliverables
+- [ ] A final report artifact (`task_engine_evolution.md`) is successfully generated in the project root or docs folder.
+- [ ] The report contains a clear Feature Comparison Matrix against at least 3 major industry competitors.
+- [ ] The report includes at least one Mermaid Entity-Relationship Diagram (ERD) detailing how the new proposed features will integrate natively with the existing `taskz`, `cyclez`, and `task_templates` tables.
+- [ ] The report includes concrete Vanilla JS DOM layout structures for the proposed UI enhancements, strictly avoiding any React/Vue/jQuery syntax.
 
-### R2 Verification (Phantom QR Codes)
-- [ ] Printing a blank label results in a 100% blank page with zero ghost UI elements or unassigned barcodes.
-- [ ] The browser print dialog defaults to the exact dimensions of the active label (e.g., 4x6) instead of 8.5x11 Letter size.
+## Follow-up — 2026-05-22T22:55:53Z
 
-### R3 Verification (Rotation)
-- [ ] Triggering rotation applies a CSS transform that visually flips the canvas 90 degrees.
-
-### R4 Verification (PDF Preview)
-- [ ] Clicking the "PDF PREVIEW" button successfully opens the native browser print spooler dialog.
-
-## Follow-up — 2026-05-22T19:29:39-05:00
-
-# Teamwork Project Prompt — Draft (Avatar Engine)
-
-> Status: Launched
-> Goal: Execute the delegated teamwork tasks
-
-Recommission the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the database URL to completely remove external API reliance.
+Map a comprehensive Mermaid hierarchy chart of all Hubz, Pagez, and Modalz, establish an official nomenclature dictionary, and systematically refactor the front-end repository using strict string replacements to purge legacy references.
 
 Working directory: d:\GitHub\neogleamz.github.io
 Integrity mode: development
 
 ## Requirements
 
-### R1. Storage Bucket Upload
-The migration loop must download the avatar binary blob from unavatar.io and natively upload it to the Supabase `avatars` storage bucket.
+### R1. Comprehensive Hierarchy Mapping
+The swarm must deeply audit the Vanilla JS files and HTML DOM to map out every single active Hub, Page, and Modal. They must output a Mermaid hierarchy diagram that visually represents the entire application architecture.
 
-### R2. Database Sync
-After successful upload, the script must retrieve the `getPublicUrl()` from Supabase and immediately update the `avatar_url` column in the `socialz_audience` database table.
+### R2. Strict Nomenclature Standardization
+The swarm must establish an official canonical naming dictionary (e.g., explicitly defining the new names for all Hubz, Pagez, and Modalz) to replace any old, confusing development terms. They MUST inject this dictionary directly into the `SK8Lytz_App_Master_Reference.md` file to ensure the AI and user never use legacy terms in future sessions.
 
-### R3. Engine Decommission
-Once the `socialz_audience` table is 100% hydrated with `supabase.co` image links, the engine must safely close its connection and report completion.
-
-### R4. The Bucketlist Override (MANDATORY)
-You must execute the `[/bucketlist]` workflow for this task. Your very first action must be to research the codebase and generate the `implementation_plan.md` artifact (and dual-sync it to `docs/plans/feat/unavatar-supabase-sync.md`). **YOU MUST HALT AND REQUEST USER APPROVAL.** You are strictly forbidden from writing code until the user approves the plan.
+### R3. Front-End Safe Refactoring (No DB Impact)
+The swarm must execute strict, surgical string replacements across the frontend (`.html` and `.js` files) to update all textual references, IDs, or comments to the new nomenclature. **CRITICAL GUARDRAIL:** The swarm is strictly forbidden from modifying any Supabase Edge Functions, backend routing, or PostgreSQL DB Schemas.
 
 ## Acceptance Criteria
 
-### Execution Verification
-- [ ] You generated the `implementation_plan.md` and halted execution to await the user's "proceed" command.
-- [ ] Running the Avatar Migration Engine successfully fetches 100% of missing avatars and uploads them to the `avatars` bucket.
-- [ ] No skaters in the `socialz_audience` table have `unavatar.io` as their `avatar_url` after completion.
-- [ ] No external libraries or bloated Node.js modules are used; all fetching and uploading relies strictly on the native Vanilla JS `fetch()` and `window.supabaseClient`.
+### Verification & Deliverables
+- [ ] A `nomenclature_dictionary.md` artifact is successfully generated containing both the visual Mermaid Hierarchy Chart and the explicit Legacy-to-Canonical mapping table.
+- [ ] The `SK8Lytz_App_Master_Reference.md` file is successfully updated to include the new official Nomenclature Dictionary.
+- [ ] Refactoring is completed solely via safe string-replacements, and running `git status` verifies that zero backend or database files were touched.

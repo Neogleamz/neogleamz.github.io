@@ -1,17 +1,17 @@
-# Project: Labelz Designer Revamp & Avatar Migration Engine
+# Project: Task Engine Evolution
 
 ## Architecture
-- **Labelz Module** (`assets/js/labelz-module.js`): Canvas scaling, print CSS, rotation.
-- **Socialz Module** (`assets/js/socialz-module.js` or similar): Likely the place where the Avatar Migration Engine lives. Will use `supabaseClient` and native JS `fetch()`.
+- Codebase: `assets/js/task-engine.js` (Vanilla JS)
+- Database: Supabase (tables: `taskz`, `cyclez`, `task_templates`)
+- Deliverable: `task_engine_evolution.md`
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 1 | Labelz ViewBox & Print | Fix scaling, phantom UI, CSS rotation, PDF preview in `labelz-module.js` and `index.html`. | none | DONE |
-| 2 | Avatar Migration Plan | Generate `implementation_plan.md` for fetching unavatar.io images, uploading to `avatars` bucket, updating `socialz_audience` table, and decommissioning engine. | none | PLANNED |
-| 3 | Avatar Migration Impl | Write the migration script/logic natively using Vanilla JS `fetch()` and `window.supabaseClient`. | M2 (Approval) | PLANNED |
+| 1 | Research & Architecture | Analyze `task-engine.js`, perform market comparison (Asana, Jira, Linear). Draft new Supabase ERD and Vanilla JS UI DOM. | none | DONE |
+| 2 | Report Authoring | Compile findings into `task_engine_evolution.md`. Format with Feature Comparison Matrix, Mermaid ERD, UI layout mockups. | M1 | DONE |
+| 3 | Final Audit & Victory | Verify report against constraints (Core Safety Protocols, Vanilla JS, no Node.js). Claim victory. | M2 | DONE |
 
 ## Interface Contracts
-- Canvas dimensions must correctly reflect physical dimensions scaled without overflowing the UI.
-- `window.print()` must cleanly output only the active label canvas.
-- Migration engine must use `fetch()` and Supabase storage `upload`, then Supabase DB `update`. No Node.js bloated modules.
+- Must output 100% Vanilla JS UI mockups. No React/Vue/jQuery.
+- Supabase ERD must use Mermaid diagrams.
