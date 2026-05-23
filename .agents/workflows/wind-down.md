@@ -17,7 +17,7 @@ When the user invokes `/wind-down` (or strongly implies they are ending the sess
 2. **Bucket List Grooming (Zero-Trust Ledger Sync)**:
    - Parse @/tools/SK8Lytz_Bucket_List.md.
    - Mark tasks completed during this session with `[x]`.
-   - **CRITICAL (Stray Task Sweep):** Run a global scan of the document. If you find any orphaned completed tasks (marked either `[x]` or `[🚀]`) that are still sitting in the active queue ABOVE the `🗄️ Completed & Archived Epics` section and are not part of an active Epic block, you MUST autonomously move them into the `🗄️ Completed & Archived Epics` section and ensure they are tagged with `[🚀]`. You are forbidden from shutting down the server if phantom tasks exist.
+   - **CRITICAL (Stray Task Sweep):** Run a global scan of the document. If you find any orphaned completed tasks (marked either `[x]` or `[🚀]`) that are still sitting in the active queue ABOVE the `🗄️ Completed & Archived Epics` section and are not part of an active Epic block, you MUST autonomously move them into the `🗄️ Completed & Archived Epics` section and ensure they are tagged with `[🚀]`. *WARNING: Do NOT rely on PowerShell/bash `Select-String` or `grep` to scan for `[🚀]` as terminal regex engines frequently mangle UTF-16 surrogate pair emojis, resulting in false negatives. You MUST use a pure Python script with strict `utf-8` encoding, or the native `view_file` tool to manually parse the active sections.* You are forbidden from shutting down the server if phantom tasks exist.
    - Identify the next logical Task/Epic.
    - Ask the user: *"What is the absolute #1 priority for our next session?"* and move their chosen item to the top of the active list.
 
