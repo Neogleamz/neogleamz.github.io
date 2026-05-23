@@ -21,12 +21,12 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 graph LR
     App[index.html SPA]
     
-    %% Global
+    %% Global Header Modals
     App --> TipzModal[Tipz Modal <br> 💡 Global Header]
+    App --> TaskPlannerModal[Task Planner Modal <br> 🎯 Global Header]
     
     %% STOCKPILEZ HUB
     App --> Stockpilez[STOCKPILEZ Hub<br>DOM: stockpilez-tab]
-    Stockpilez -.-> SP_Landing[STOCKPILEZ Landing]
     Stockpilez -.-> SP_Pipeline[DATAZ Pane<br>DOM: panePipeline]
     Stockpilez -.-> SP_Simple[EDITZ Pane<br>DOM: paneSimple]
     Stockpilez -.-> SP_Inventory[STOCKZ Pane<br>DOM: paneInventory]
@@ -36,7 +36,6 @@ graph LR
     
     %% MAKERZ HUB
     App --> Makerz[MAKERZ Hub<br>DOM: makerz-tab]
-    Makerz -.-> MK_Landing[MAKERZ Landing]
     Makerz -.-> MK_Builder[RECIPEZ Pane<br>DOM: paneProdBuilder]
     Makerz -.-> MK_Control[BATCHEZ Pane<br>DOM: paneProdControl]
     Makerz -.-> MK_Print[LAYERZ Pane<br>DOM: paneProdPrint]
@@ -60,7 +59,6 @@ graph LR
     
     %% REVENUEZ HUB
     App --> Revenuez[REVENUEZ Hub<br>DOM: revenuez-tab]
-    Revenuez -.-> RV_Landing[REVENUEZ Landing]
     Revenuez -.-> RV_Bridge[ORDERZ Pane<br>DOM: paneSalezBridge]
     Revenuez -.-> RV_Analyticz[STATZ Pane<br>DOM: paneSalezAnalyticz]
     Revenuez -.-> RV_Commandz[SIMULATORZ Pane<br>DOM: paneSalezCommandz]
@@ -77,7 +75,6 @@ graph LR
     
     %% NEXUZ HUB
     App --> Nexuz[NEXUZ Hub<br>DOM: nexuz-tab]
-    Nexuz -.-> NX_Landing[NEXUZ Landing]
     Nexuz -.-> NX_Importz[IMPORTZ Pane<br>DOM: paneNexuzImportz]
     Nexuz -.-> NX_Salez[SALEZ Pane<br>DOM: paneNexuzSalez]
     Nexuz -.-> NX_Brainz[BRAINZ Pane<br>DOM: paneNexuzBrainz]
