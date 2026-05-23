@@ -1503,6 +1503,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_updateLabelCanvasSize':
                     updateLabelCanvasSize();
                     break;
+                case 'change_updateLabelCanvasOrientation':
+                    updateLabelCanvasOrientation();
+                    break;
                 case 'change_updateLabelCanvasBg':
                     updateLabelCanvasBg();
                     break;
