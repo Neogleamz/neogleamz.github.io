@@ -8,8 +8,8 @@
 // ============================================================
 // LABELZ MODULE — Neogleamz Custom Label Manager (Canvas)
 // ============================================================
-// Manages custom thermal-printed labels using Fabric.js, bwip-js,
-// and jsPDF. Integrated with Catalog for barcode mappings.
+// Manages custom thermal-printed labels using Fabric.js and bwip-js.
+// Integrated with Catalog for barcode mappings.
 // ============================================================
 
 const _LABEL_STORAGE_BUCKET = 'sop-media';
@@ -166,6 +166,7 @@ function initFabricCanvas() {
     if (fCanvas) return;
     const canvasEl = document.getElementById('labelzFabricCanvas');
     fCanvas = new fabric.Canvas(canvasEl, { preserveObjectStacking: true });
+    fCanvas.backgroundColor = '#ffffff'; // Set default solid white background
 
     fCanvas.on('selection:created', onCanvasSelection);
     fCanvas.on('selection:updated', onCanvasSelection);
@@ -233,7 +234,9 @@ function updateLabelCanvasSize() {
     
     let sizeStr = document.getElementById('labelzDesignerSize').value;
     let pObj = {w: 2.25, h: 1.25};
-    try { pObj = JSON.parse(sizeStr); } catch(e) { console.error(e); }
+    if (sizeStr) {
+        try { pObj = JSON.parse(sizeStr); } catch(e) { console.error("Canvas Size Parse Error:", e.message); }
+    }
     
     let pxWidth = pObj.w * PPI;
     let pxHeight = pObj.h * PPI;
@@ -252,15 +255,43 @@ function updateLabelCanvasSize() {
     
     // Reset zoom
     currentZoom = 1;
-    zoomLabelzCanvas('fit');
+    if (typeof updateLabelCanvasOrientation === 'function') {
+        updateLabelCanvasOrientation();
+    } else {
+        zoomLabelzCanvas('fit');
+    }
 }
+
+window.updateLabelCanvasOrientation = function() {
+    const orientation = document.getElementById('labelzOrientation') ? document.getElementById('labelzOrientation').value : 'Portrait';
+    const container = document.getElementById('labelzCanvasContainer');
+    
+    if (container) {
+        if (orientation === 'Landscape' || orientation === '90') {
+            container.style.transform = 'translate(-50%, -50%) rotate(90deg)';
+        } else {
+            container.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+        }
+    }
+    
+    zoomLabelzCanvas('fit');
+};
 
 function zoomLabelzCanvas(delta) {
     if(delta === 'fit') {
         const wrapper = document.getElementById('labelzCanvasWrapper');
         const padding = 60;
-        let scaleW = (wrapper.offsetWidth - padding) / fCanvas.width;
-        let scaleH = (wrapper.offsetHeight - padding) / fCanvas.height;
+        const orientation = document.getElementById('labelzOrientation') ? document.getElementById('labelzOrientation').value : 'Portrait';
+        
+        let cWidth = fCanvas.width;
+        let cHeight = fCanvas.height;
+        if (orientation === 'Landscape' || orientation === '90') {
+            cWidth = fCanvas.height;
+            cHeight = fCanvas.width;
+        }
+
+        let scaleW = (wrapper.offsetWidth - padding) / cWidth;
+        let scaleH = (wrapper.offsetHeight - padding) / cHeight;
         currentZoom = Math.min(scaleW, scaleH);
         if(currentZoom > 2) currentZoom = 2; // cap max initial fit zoom
     } else {
@@ -269,7 +300,24 @@ function zoomLabelzCanvas(delta) {
         if(currentZoom > 5) currentZoom = 5;
     }
     
-    document.getElementById('labelzCanvasContainer').style.transform = `scale(${currentZoom})`;
+    fCanvas.setDimensions({ width: fCanvas.width * currentZoom + 'px', height: fCanvas.height * currentZoom + 'px' }, { cssOnly: true });
+    
+    // Update Rotator Box to fix Flex Layout bounds
+    const rotator = document.getElementById('labelzCanvasRotatorBox');
+    if (rotator) {
+        const orientation = document.getElementById('labelzOrientation') ? document.getElementById('labelzOrientation').value : 'Portrait';
+        if (orientation === 'Landscape' || orientation === '90') {
+            rotator.style.width = (fCanvas.height * currentZoom) + 'px';
+            rotator.style.height = (fCanvas.width * currentZoom) + 'px';
+        } else {
+            rotator.style.width = (fCanvas.width * currentZoom) + 'px';
+            rotator.style.height = (fCanvas.height * currentZoom) + 'px';
+        }
+    }
+    
+    // Force a complete repaint of the canvas buffer to prevent background transparency drops
+    if (fCanvas) fCanvas.renderAll();
+    
     document.getElementById('labelzZoomReadout').innerText = `${Math.round(currentZoom * 100)}%`;
 }
 
@@ -798,11 +846,13 @@ window.openCreateLabelModal = function() {
     assignLabelzDesignerEmoji('🏷️');
     
     document.getElementById('labelzDesignerModal').style.display = 'flex';
-    document.getElementById('labelzDesignerSize').value = '2.25x1.25';
+    let sizeSel = document.getElementById('labelzDesignerSize');
+    if(sizeSel && sizeSel.options && sizeSel.options.length > 0) { sizeSel.selectedIndex = 0; }
     updateLabelCanvasSize();
     fCanvas.clear();
     fCanvas.backgroundColor = '#ffffff';
     document.getElementById('labelzBgColor').value = '#ffffff';
+    fCanvas.renderAll();
     
     lblzHistory = [];
     lblzHistoryProg = -1;
@@ -838,6 +888,7 @@ window.openEditLabelModal = function(name) {
     } else {
         fCanvas.clear();
         fCanvas.backgroundColor = '#ffffff';
+        fCanvas.renderAll();
         lblzHistory = [];
         lblzHistoryProg = -1;
         saveLabelzHistory();
@@ -909,7 +960,7 @@ window.saveLabelzDesign = async function() {
     });
 }
 
-// EXPORT TO PDF VIA jsPDF
+// EXPORT TO NATIVE PRINT
 window.deleteLabelzDesign = async function() {
     await executeWithButtonAction('btnDeleteLabelz', 'DELETING...', '✅ DELETED!', async () => {
         const name = document.getElementById('labelzDesignerName').value.trim();
@@ -938,30 +989,58 @@ window.deleteLabelzDesign = async function() {
 
 window.exportLabelzPDF = function() {
     if(!fCanvas) return;
-    if(typeof window.jspdf === 'undefined') return alert('jsPDF library not loaded.');
     
+    if(fCanvas.getObjects().length === 0) {
+        alert("Cannot print an empty label. Please add elements first.");
+        return;
+    }
+
     fCanvas.discardActiveObject();
     fCanvas.renderAll();
 
-    const { jsPDF } = window.jspdf;
-    let {w, h} = parseSize(document.getElementById('labelzDesignerSize').dataset.customSize || document.getElementById('labelzDesignerSize').value);
+    let sizeStr = document.getElementById('labelzDesignerSize').dataset.customSize || document.getElementById('labelzDesignerSize').value;
+    let w = 2.25, h = 1.25;
+    try {
+        if (sizeStr.includes('{')) {
+            let pObj = JSON.parse(sizeStr);
+            w = pObj.w; h = pObj.h;
+        } else if (sizeStr.includes('x')) {
+            w = parseFloat(sizeStr.split('x')[0]);
+            h = parseFloat(sizeStr.split('x')[1]);
+        }
+    } catch(e) { console.error(e); }
     
-    // Create PDF targeting exact dimensions in inches
-    const doc = new jsPDF({
-        orientation: w > h ? 'landscape' : 'portrait',
-        unit: 'in',
-        format: [w, h]
-    });
+    const b64 = fCanvas.toDataURL({ format: 'png', multiplier: 1 });
+    const printArea = document.getElementById('printableBarcodeArea');
+    printArea.innerHTML = '';
 
-    // Get high-res snapshot of canvas
-    const imgData = fCanvas.toDataURL({ format: 'png', multiplier: 3 });
+    const orientation = document.getElementById('labelzOrientation') ? document.getElementById('labelzOrientation').value : 'Portrait';
     
-    doc.addImage(imgData, 'PNG', 0, 0, w, h);
-    
-    // We open in new tab so user can print, ensuring they know to check 'Fit to Scale / 100%'
-    const blobUrl = doc.output('bloburl');
-    const win = window.open(blobUrl, '_blank');
-    if(!win) alert('Popup blocked! Please allow popups to open PDF preview.');
+    let pageW = w;
+    let pageH = h;
+    let imgStyle = '';
+
+    if (orientation === 'Landscape' || orientation === '90') { // Check whatever value the select uses
+        pageW = h;
+        pageH = w;
+        imgStyle = 'transform-origin: top left; transform: rotate(90deg) translateY(-100%);';
+    }
+
+    const img = new Image();
+    img.onload = function() {
+        printArea.innerHTML = window.safeHTML(`
+            <style>@page { size: ${pageW}in ${pageH}in; margin: 0; }</style>
+            <img src="${b64}" style="width: ${w}in; height: ${h}in; display: block; ${imgStyle}" />
+        `);
+        window.print();
+    };
+    img.src = b64;
+
+    const cleanupPrint = function() {
+        printArea.innerHTML = '';
+        window.removeEventListener('afterprint', cleanupPrint);
+    };
+    window.addEventListener('afterprint', cleanupPrint);
 }
 
 // ============================================================

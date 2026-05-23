@@ -17,8 +17,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
-### Target: main
-- [ ] `feat/unavatar-supabase-sync` : **Recommission Avatar Engine** - Re-enable the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance. [🤖 Gemini 3.1 Pro (High)] [🧠 TBD / 5k] [💸 TBD / $0.02]
+
 
 ## 🧹 Technical Debt
 - [🚀] debt/cleanup : **check_syntax.js orphan** - Relocate the orphan script check_syntax.js from root to the scripts/ directory. [🤖 Antigravity] [🧠 TBD / 1k] [💸 TBD / .01]
@@ -477,4 +476,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Task Engine Project Section Colors**
 *(Shipped v1.0.43 — 2026-05-18)*
-- [🚀] `feat/task-engine-project-section-colors` : **Task Engine Project Section Colors** - Update the task engine UI so that when viewing a project, the sections are the same color as the color picked for that project. [🤖 Gemini 3.1 Pro (High)] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+- [🚀] `feat/task-engine-project-section-colors` : **Task Engine Project Section Colors** - Update the task engine UI so that when viewing a project, the sections are the same color as the color picked for that project. [🤖 Gemini 3.1 Pro (High)] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+
+### Target: `main`
+**Epic: Recommission Avatar Engine**
+*(Completed — 2026-05-22)*
+- [x] `feat/unavatar-supabase-sync` : **Recommission Avatar Engine** - Re-enable the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance. [🤖 Antigravity] [🧠 4k / 5k] [💸 $0.01 / $0.02]

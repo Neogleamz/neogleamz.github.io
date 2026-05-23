@@ -27,6 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
+                case 'click_startAvatarMigration':
+                    if (typeof window.click_startAvatarMigration === 'function') window.click_startAvatarMigration();
+                    break;
+                case 'click_runMigrationEngine':
+                    if (typeof window.click_runMigrationEngine === 'function') window.click_runMigrationEngine();
+                    break;
+                case 'click_closeMigrationModal': {
+                    const migrationModal = document.getElementById('migration-modal');
+                    if (migrationModal) migrationModal.style.display = 'none';
+                    break;
+                }
                 case 'click_renderSimulatorOrder':
                     if (typeof window.renderSimulatorOrder === 'function') window.renderSimulatorOrder(el.getAttribute('data-oid'));
                     break;
@@ -1502,6 +1513,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_updateLabelCanvasSize':
                     updateLabelCanvasSize();
+                    break;
+                case 'change_updateLabelCanvasOrientation':
+                    updateLabelCanvasOrientation();
                     break;
                 case 'change_updateLabelCanvasBg':
                     updateLabelCanvasBg();
