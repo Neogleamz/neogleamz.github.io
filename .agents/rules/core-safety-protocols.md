@@ -8,6 +8,7 @@ trigger: always_on
 
 ### 1. Mandatory Branching & Git Hooks
 - **No Direct Main Pushes:** Logic/Feature code cannot be pushed directly to `main` or `master`. Must use isolated feature branches merging via `/ship_it`. 
+- **Lightweight Bug Branching (Interrupt Constraint):** If the user reports an ad-hoc bug, stack trace, or error mid-session, you are STRICTLY FORBIDDEN from writing fix code directly to `main`. You must quietly run `git checkout -b fix/...` in the background, write the code, await user testing, and run `[/ship_it]` to merge cleanly.
 - **Exemption:** Administrative `chore:` commits (e.g. tagging, doc syncs via `/release` or `/wind_down`) are authorized directly to `main`.
 - **Git Hook Protection:** Absolutely forbidden from reading, editing, or deleting files in `.git/hooks/`.
 
