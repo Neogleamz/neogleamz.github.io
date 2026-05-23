@@ -24,6 +24,7 @@ trigger: always_on
 ### 4. Anti-Hallucination Guardrails
 - **The Ground Truth:** Assume zero generic context. Always verify payloads, architectures, and DB Schemas against `@/tools/SK8Lytz_App_Master_Reference.md`.
 - **Provide Proof:** When tracing bugs, mathematically show hex arrays, or cite explicit line numbers from the Reference/Source files.
+- **Topological Integrity:** You are strictly forbidden from creating, deleting, or moving any buttons, modals, or UI elements without simultaneously updating the Mermaid Architectural Blueprint in `@/tools/SK8Lytz_App_Master_Reference.md`.
 - **Contradiction Halt:** If the Reference file contradicts Live Code, HALT and request human clarification.
 - **Discovery Mode:** If charting undocumented protocols, explicitly declare "Discovery Mode" to authorize logical deduction sequences out-of-bounds from the Reference file.
 

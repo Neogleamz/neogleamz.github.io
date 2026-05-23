@@ -16,7 +16,9 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 | 👥 SOCIALZ | `socialzhub-tab` | **SOCIALZ** | `socialz-module.js` |
 | ⚡ NEXUZ | `synchub-tab` | **NEXUZ** | `system-tools-module.js`, `task-engine.js` |
 
-### Architectural Hierarchy Diagram
+### Architectural Hierarchy Blueprint (IMMUTABLE)
+> **CRITICAL DIRECTIVE:** The following Mermaid topology is the mathematically isolated, canonical map of the entire Neogleamz ecosystem. EVERY SINGLE actionable modal, toggle, or UI flow must be explicitly mapped here. If you are tasked with creating, moving, or deleting a UI element, you MUST update this dictionary.
+
 ```mermaid
 graph LR
     classDef sharedSop fill:#3b82f6,color:#fff,stroke:#2563eb;
