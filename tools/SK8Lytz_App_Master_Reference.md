@@ -53,11 +53,15 @@ graph LR
         MK_Control --> SOPMasterModal_Prod[SOP EDITOR Modal<br>Btn: BATCHEZ SOP EDITOR]
         MK_Control --> DraftScrapModal[Draft Scrap Modal<br>Btn: Update Scrap Tally]
         MK_Control --> ArchiveExplorerModal_Bat[Archive Explorer Modal<br>Btn: 🗄️ Archives]
+        MK_Control --> BatchezPrintSOP[SOP Print Configuration Modal<br>Btn: 🖨️ Print SOP]
+        MK_Control --> BatchezPickList[Pick List Print Configuration<br>Btn: 🖨️ Print List]
         
         MK_Print --> ManualPrintModal[Manual Print Modal<br>Btn: + PRINTBATCH]
         MK_Print --> MultiBatchModal_3d[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
         MK_Print --> SOPMasterModal_Print[SOP EDITOR Modal<br>Btn: LAYERZ SOP EDITOR]
         MK_Print --> ArchiveExplorerModal_Lay[Archive Explorer Modal<br>Btn: 🗄️ Archives]
+        MK_Print --> LayerzSOPEditorModal[Active SOP Editor Modal<br>Btn: 🔒 EDIT]
+        MK_Print --> LayerzPrintSOPModal[SOP Print Configuration Modal<br>Btn: 🖨️ PRINT]
     end
     
     subgraph H3 [FULFILLZ HUB Architecture]
