@@ -1912,7 +1912,8 @@
 <a name='L1847'></a><a href='#L1847'>1847</a>
 <a name='L1848'></a><a href='#L1848'>1848</a>
 <a name='L1849'></a><a href='#L1849'>1849</a>
-<a name='L1850'></a><a href='#L1850'>1850</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1850'></a><a href='#L1850'>1850</a>
+<a name='L1851'></a><a href='#L1851'>1851</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1951,6 +1952,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3796,10 +3798,11 @@
                 case 'click_runMigrationEngine':
 <span class="cstat-no" title="statement not covered" >                    if (typeof window.click_runMigrationEngine === 'function') <span class="cstat-no" title="statement not covered" >window.click_runMigrationEngine();</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_closeMigrationModal':
+                case 'click_closeMigrationModal': {
                     const migrationModal = <span class="cstat-no" title="statement not covered" >document.getElementById('migration-modal');</span>
 <span class="cstat-no" title="statement not covered" >                    if (migrationModal) <span class="cstat-no" title="statement not covered" >migrationModal.style.display = 'none';</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
+                }
                 case 'click_renderSimulatorOrder':
 <span class="cstat-no" title="statement not covered" >                    if (typeof window.renderSimulatorOrder === 'function') <span class="cstat-no" title="statement not covered" >window.renderSimulatorOrder(el.getAttribute('data-oid'));</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
@@ -3827,23 +3830,23 @@
                 case 'click_window_commitEditzBulkChanges':
 <span class="cstat-no" title="statement not covered" >                    window.click_window_commitEditzBulkChanges();</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_switchTab_invhub':
-<span class="cstat-no" title="statement not covered" >                    switchTab('invhub');</span>
+                case 'click_switchTab_stockpilez':
+<span class="cstat-no" title="statement not covered" >                    switchTab('stockpilez');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_switchTab_prodhub':
-<span class="cstat-no" title="statement not covered" >                    switchTab('prodhub');</span>
+                case 'click_switchTab_makerz':
+<span class="cstat-no" title="statement not covered" >                    switchTab('makerz');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_switchTab_fulfillzhub':
-<span class="cstat-no" title="statement not covered" >                    switchTab('fulfillzhub');</span>
+                case 'click_switchTab_fulfillz':
+<span class="cstat-no" title="statement not covered" >                    switchTab('fulfillz');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_switchTab_salezhub':
-<span class="cstat-no" title="statement not covered" >                    switchTab('salezhub');</span>
+                case 'click_switchTab_revenuez':
+<span class="cstat-no" title="statement not covered" >                    switchTab('revenuez');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_switchTab_socialzhub':
-<span class="cstat-no" title="statement not covered" >                    switchTab('socialzhub');</span>
+                case 'click_switchTab_socialz':
+<span class="cstat-no" title="statement not covered" >                    switchTab('socialz');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_switchTab_synchub':
-<span class="cstat-no" title="statement not covered" >                    switchTab('synchub');</span>
+                case 'click_switchTab_nexl':
+<span class="cstat-no" title="statement not covered" >                    switchTab('nexl');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_window_closeForceSyncModal':
 <span class="cstat-no" title="statement not covered" >                    if (typeof window.closeForceSyncModal === 'function') <span class="cstat-no" title="statement not covered" >window.closeForceSyncModal();</span></span>
@@ -4452,14 +4455,14 @@
                 case 'click_exportLabelzPDF':
 <span class="cstat-no" title="statement not covered" >                    exportLabelzPDF();</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_showNexuzPane_importz':
-<span class="cstat-no" title="statement not covered" >                    showNexuzPane('importz');</span>
+                case 'click_showNexlPane_importz':
+<span class="cstat-no" title="statement not covered" >                    showNexlPane('importz');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_showNexuzPane_salez':
-<span class="cstat-no" title="statement not covered" >                    showNexuzPane('salez');</span>
+                case 'click_showNexlPane_salez':
+<span class="cstat-no" title="statement not covered" >                    showNexlPane('salez');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
-                case 'click_showNexuzPane_brainz':
-<span class="cstat-no" title="statement not covered" >                    showNexuzPane('brainz');</span>
+                case 'click_showNexlPane_brainz':
+<span class="cstat-no" title="statement not covered" >                    showNexlPane('brainz');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_document_getElementById_orderF':
 <span class="cstat-no" title="statement not covered" >                    document.getElementById('orderFiles').click();</span>
@@ -5617,7 +5620,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-23T02:54:04.639Z
+                at 2026-05-23T04:09:26.302Z
             </div>
         <script src="prettify.js"></script>
         <script>

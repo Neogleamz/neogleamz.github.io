@@ -14,54 +14,75 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 | 📦 FULFILLZ | `fulfillzhub-tab` | **FULFILLZ** | `packerz-module.js`, `print-module.js`, `labelz-module.js` |
 | 🛒 REVENUEZ | `salezhub-tab` | **REVENUEZ** | `sales-module.js`, `ceo-module.js` |
 | 👥 SOCIALZ | `socialzhub-tab` | **SOCIALZ** | `socialz-module.js` |
-| ⚡ NEXUZ | `synchub-tab` | **NEXL** | `system-tools-module.js`, `task-engine.js` |
+| ⚡ NEXUZ | `synchub-tab` | **NEXUZ** | `system-tools-module.js`, `task-engine.js` |
 
 ### Architectural Hierarchy Diagram
 ```mermaid
 graph TD
     App[index.html SPA]
     
-    %% Hubs Layer
-    App --> Stockpilez[STOCKPILEZ Hub<br>DOM: invhub-tab]
-    App --> Makerz[MAKERZ Hub<br>DOM: prodhub-tab]
-    App --> Fulfillz[FULFILLZ Hub<br>DOM: fulfillzhub-tab]
-    App --> Revenuez[REVENUEZ Hub<br>DOM: salezhub-tab]
-    App --> Socialz[SOCIALZ Hub<br>DOM: socialzhub-tab]
-    App --> Nexl[NEXL Hub<br>DOM: synchub-tab]
-
-    %% Example Modules Layer
-    Stockpilez -.-> InventoryModule[inventory-module.js]
-    Stockpilez -.-> BomModule[bom-module.js]
+    %% Global
+    App --> TipzModal[Tipz Modal <br> 💡 Global Header]
     
-    Makerz -.-> ProductionModule[production-module.js]
-    Makerz -.-> BarcodzModule[barcodz-module.js]
+    %% STOCKPILEZ HUB
+    App --> Stockpilez[STOCKPILEZ Hub<br>DOM: stockpilez-tab]
+    Stockpilez -.-> SP_Landing[stockpilezHubLanding]
+    Stockpilez -.-> SP_Pipeline[panePipeline]
+    Stockpilez -.-> SP_Simple[paneSimple]
+    Stockpilez -.-> SP_Inventory[paneInventory]
     
-    Fulfillz -.-> PackerzModule[packerz-module.js]
-    Fulfillz -.-> PrintModule[print-module.js]
-    Fulfillz -.-> LabelzModule[labelz-module.js]
-
-    Revenuez -.-> SalesModule[sales-module.js]
-    Revenuez -.-> CeoModule[ceo-module.js]
-
-    Socialz -.-> SocialzModule[socialz-module.js]
-
-    Nexl -.-> SystemToolsModule[system-tools-module.js]
-    Nexl -.-> TaskEngine[task-engine.js]
+    SP_Simple --> EditzBulkModal[EditzBulk Modal]
+    SP_Inventory --> VelocityzModal[Velocityz Modal]
     
-    %% Core Engines
-    Core[Core Engines]
-    App --> Core
-    Core -.-> NeogleamzEngine[neogleamz-engine.js]
-    Core -.-> EventDelegator[system-event-delegator.js]
-    Core -.-> ScraperModule[scraper-module.js]
-    Core -.-> AnalyticsModule[analytics-module.js]
+    %% MAKERZ HUB
+    App --> Makerz[MAKERZ Hub<br>DOM: makerz-tab]
+    Makerz -.-> MK_Landing[makerzHubLanding]
+    Makerz -.-> MK_Builder[paneProdBuilder]
+    Makerz -.-> MK_Control[paneProdControl]
+    Makerz -.-> MK_Print[paneProdPrint]
     
-    %% Global Modals (Grouped for simplicity)
-    Modals[Global Overlay Modals]
-    App --> Modals
-    Modals -.-> SOP[SOP Master/Viewer]
-    Modals -.-> Recipe[Recipe Manager]
-    Modals -.-> Data[Actual Net / Analytics / Task Planner]
+    MK_Builder --> RecipeModal[Recipe Modal]
+    MK_Builder --> BulkAddModal[Bulk Add Modal]
+    MK_Control --> NewWOModal[New WO Modal]
+    MK_Control --> MultiBatchModal[Multi Batch Modal]
+    MK_Control --> SOPMasterModal[SOP Master Modal]
+    MK_Control --> DraftScrapModal[Draft Scrap Modal]
+    MK_Print --> ManualPrintModal[Manual Print Modal]
+    
+    %% FULFILLZ HUB
+    App --> Fulfillz[FULFILLZ Hub<br>DOM: fulfillz-tab]
+    Fulfillz -.-> FZ_Packerz[paneFulfillzPackerz]
+    Fulfillz -.-> FZ_Barcodz[paneFulfillzBarcodz]
+    Fulfillz -.-> FZ_Labelz[paneFulfillzLabelz]
+    
+    FZ_Packerz --> SOPMasterModal
+    FZ_Labelz --> CreateLabelModal[Create Label Modal]
+    
+    %% REVENUEZ HUB
+    App --> Revenuez[REVENUEZ Hub<br>DOM: revenuez-tab]
+    Revenuez -.-> RV_Landing[revenuezHubLanding]
+    Revenuez -.-> RV_Bridge[paneSalezBridge]
+    Revenuez -.-> RV_Analyticz[paneSalezAnalyticz]
+    Revenuez -.-> RV_Commandz[paneSalezCommandz]
+    
+    RV_Bridge --> ActualNetModal[Actual Net Modal]
+    RV_Commandz --> CeoAddModal[CEO Add Modal]
+    RV_Commandz --> LtvModal[LTV Modal]
+    
+    %% SOCIALZ HUB
+    App --> Socialz[SOCIALZ Hub<br>DOM: socialz-tab]
+    Socialz -.-> SZ_Roster[paneSocialzRoster]
+    
+    SZ_Roster --> SkaterModal[Skater Modal]
+    
+    %% NEXUZ HUB
+    App --> Nexuz[NEXUZ Hub<br>DOM: nexuz-tab]
+    Nexuz -.-> NX_Landing[nexuzHubLanding]
+    Nexuz -.-> NX_Importz[paneNexuzImportz]
+    Nexuz -.-> NX_Salez[paneNexuzSalez]
+    Nexuz -.-> NX_Brainz[paneNexuzBrainz]
+    
+    NX_Salez --> AliasModal[Alias Modal]
 ```
 
 ---
@@ -343,7 +364,8 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
   </div>
   ```
 
----### O. Fabric.js Canvas Paint Architecture
+---
+### O. Fabric.js Canvas Paint Architecture
 When changing the size or orientation of a `<canvas>` element via CSS properties or `setDimensions`, the browser's physical rendering engine wipes the actual byte-buffer of the canvas. You MUST explicitly fire a `fCanvas.renderAll()` command immediately after resizing the DOM boundaries (e.g. `zoomLabelzCanvas`), otherwise the canvas visually drops to full transparency until a user interacts with it and triggers an auto-paint.
 
 
@@ -575,7 +597,8 @@ All financial rendering and aggregation must strictly filter through the forensi
 ### A. The 3-Mode Print Modal (openSopPrintModal)
 The SOP print system was refactored from a direct window.print() call to a structured selection modal. The global function openSopPrintModal(context) accepts a context string ('production' or 'packerz') and injects a full-screen modal with 3 print mode buttons. Execution is handled by window.executeSopPrint(mode) where mode is one of:
 * **checklist** � Renders only the checklist SOP rows. Markdown-formatted headers (# Header) are styled as <h3> section blocks. Block-quote subtexts (> text) are rendered as styled .sop-subtext callout spans. Checkboxes are stripped from header rows.
-* **ichtext** � Renders only the Rich Text (contenteditable) SOP body, injecting white-space: pre-wrap to preserve operator-entered formatting during physical print output.
+* **
+ichtext** � Renders only the Rich Text (contenteditable) SOP body, injecting white-space: pre-wrap to preserve operator-entered formatting during physical print output.
 * **ull** � Renders both checklist and rich text sections sequentially in a single print document.
 
 The modal is registered in system-event-delegator.js via the following data-click case labels:
@@ -595,7 +618,8 @@ All SOP action button bars (Master Production, Master Packerz, Inline Packerz, I
 `
 **CRITICAL:** lex-wrap: nowrap is FORBIDDEN on SOP button bar containers. All button rows must use lex-wrap: wrap to allow graceful vertical stacking at narrow viewport widths.
 
-### C. Rich Text Toolbar (t-toolbar) Flex Rules
+### C. Rich Text Toolbar (
+t-toolbar) Flex Rules
 The Rich Text editor toolbar is generated by getRTToolbar() in production-module.js. To prevent overflow when the editor pane is compressed by the horizontal split resizer, the following constraints are mandatory:
 * **Container:** display:flex; flex-wrap:wrap; overflow:hidden; gap:4px; min-width:0;
 * **Font-size <select>:** max-width:100px; min-width:0; � prevents the select from expanding and blowing out the toolbar width.

@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     switchTab('socialz');
                     break;
                 case 'click_switchTab_nexl':
-                    switchTab('nexl');
+                    switchTab('nexuz');
                     break;
                 case 'click_window_closeForceSyncModal':
                     if (typeof window.closeForceSyncModal === 'function') window.closeForceSyncModal();

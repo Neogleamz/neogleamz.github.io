@@ -1,7 +1,7 @@
 window.isPackerzLiveEditing = false;
 
 // ==========================================
-// NEXL: PACKERZ TERMINAL STYLE INJECTION
+// NEXUZ: PACKERZ TERMINAL STYLE INJECTION
 // ==========================================
 function injectPackerzStyles() {
     if (document.getElementById('packerz-dynamic-styles')) return;
@@ -52,7 +52,7 @@ function injectPackerzStyles() {
 injectPackerzStyles();
 
 // ==========================================
-// NEXL: PACKERZ TERMINAL LOGIC
+// NEXUZ: PACKERZ TERMINAL LOGIC
 // ==========================================
 
 /**
