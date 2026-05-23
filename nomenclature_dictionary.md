@@ -16,8 +16,8 @@ graph LR
     App[index.html SPA]
     
     %% Global Header Modals
-    App --> TipzModal[Tipz Modal <br> 💡 Global Header]
-    App --> TaskPlannerModal[Task Planner Modal <br> 🎯 Global Header]
+    App --> TipzModal[Tipz Board & Suggestions <br> 💡 Global Header]
+    App --> TaskPlannerModal[Manage Tags <br> 🎯 Global Header]
     
     %% STOCKPILEZ HUB
     App --> Stockpilez[STOCKPILEZ Hub<br>DOM: stockpilez-tab]
@@ -25,8 +25,8 @@ graph LR
     Stockpilez -.-> SP_Simple[EDITZ Pane<br>DOM: paneSimple]
     Stockpilez -.-> SP_Inventory[STOCKZ Pane<br>DOM: paneInventory]
     
-    SP_Simple --> EditzBulkModal[EditzBulk Modal]
-    SP_Inventory --> VelocityzModal[Velocityz Modal]
+    SP_Simple --> EditzBulkModal[EDITZ BULK STAGING Modal<br>Btn: Bulk Edit]
+    SP_Inventory --> VelocityzModal[Map Unknown SKU Modal<br>Btn: Velocityz]
     
     %% MAKERZ HUB
     App --> Makerz[MAKERZ Hub<br>DOM: makerz-tab]
@@ -34,13 +34,13 @@ graph LR
     Makerz -.-> MK_Control[BATCHEZ Pane<br>DOM: paneProdControl]
     Makerz -.-> MK_Print[LAYERZ Pane<br>DOM: paneProdPrint]
     
-    MK_Builder --> RecipeModal[Recipe Modal]
-    MK_Builder --> BulkAddModal[Bulk Add Modal]
-    MK_Control --> NewWOModal[New WO Modal]
-    MK_Control --> MultiBatchModal[Multi Batch Modal]
-    MK_Control --> SOPMasterModal[SOP Master Modal]
-    MK_Control --> DraftScrapModal[Draft Scrap Modal]
-    MK_Print --> ManualPrintModal[Manual Print Modal]
+    MK_Builder --> RecipeModal[Recipe Action Modal<br>Btn: + Create]
+    MK_Builder --> BulkAddModal[Bulk Add Modal<br>Btn: Bulk Add]
+    MK_Control --> NewWOModal[Start Production Batch Modal<br>Btn: + CreateBatch]
+    MK_Control --> MultiBatchModal[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
+    MK_Control --> SOPMasterModal[SOP EDITOR Modal<br>Btn: BATCHEZ SOP EDITOR]
+    MK_Control --> DraftScrapModal[Draft Scrap Modal<br>Btn: Update Scrap Tally]
+    MK_Print --> ManualPrintModal[Manual Print Modal<br>Btn: + PRINTBATCH]
     
     %% FULFILLZ HUB
     App --> Fulfillz[FULFILLZ Hub<br>DOM: fulfillz-tab]
@@ -49,7 +49,7 @@ graph LR
     Fulfillz -.-> FZ_Labelz[LABELZ Pane<br>DOM: paneFulfillzLabelz]
     
     FZ_Packerz --> SOPMasterModal
-    FZ_Labelz --> CreateLabelModal[Create Label Modal]
+    FZ_Labelz --> CreateLabelModal[Create Label Modal<br>Btn: + NEW LABEL]
     
     %% REVENUEZ HUB
     App --> Revenuez[REVENUEZ Hub<br>DOM: revenuez-tab]
@@ -57,15 +57,15 @@ graph LR
     Revenuez -.-> RV_Analyticz[STATZ Pane<br>DOM: paneSalezAnalyticz]
     Revenuez -.-> RV_Commandz[SIMULATORZ Pane<br>DOM: paneSalezCommandz]
     
-    RV_Bridge --> ActualNetModal[Actual Net Modal]
-    RV_Commandz --> CeoAddModal[CEO Add Modal]
-    RV_Commandz --> LtvModal[LTV Modal]
+    RV_Bridge --> ActualNetModal[Actual Net Breakdown Modal<br>Btn: ACTUAL NET]
+    RV_Commandz --> CeoAddModal[CEO Terminal Modal<br>Btn: +PRODUCT ANALYSIS]
+    RV_Commandz --> LtvModal[Cohort Intelligence Modal<br>Btn: LTV]
     
     %% SOCIALZ HUB
     App --> Socialz[SOCIALZ Hub<br>DOM: socialz-tab]
     Socialz -.-> SZ_Roster[ROSTER Pane<br>DOM: paneSocialzRoster]
     
-    SZ_Roster --> SkaterModal[Skater Modal]
+    SZ_Roster --> SkaterModal[Profile Information Modal<br>Btn: Open Skater]
     
     %% NEXUZ HUB
     App --> Nexuz[NEXUZ Hub<br>DOM: nexuz-tab]
@@ -73,5 +73,5 @@ graph LR
     Nexuz -.-> NX_Salez[SALEZ Pane<br>DOM: paneNexuzSalez]
     Nexuz -.-> NX_Brainz[BRAINZ Pane<br>DOM: paneNexuzBrainz]
     
-    NX_Salez --> AliasModal[Alias Modal]
+    NX_Salez --> AliasModal[Alias Modal<br>Btn: + ADD NEW]
 ```
