@@ -49,6 +49,7 @@ graph LR
         MK_Control --> ArchiveExplorerModal_Bat[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         
         MK_Print --> ManualPrintModal[Manual Print Modal<br>Btn: + PRINTBATCH]
+        MK_Print --> MultiBatchModal_3d[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
         MK_Print --> SOPMasterModal_Print[SOP EDITOR Modal<br>Btn: LAYERZ SOP EDITOR]
         MK_Print --> ArchiveExplorerModal_Lay[Archive Explorer Modal<br>Btn: 🗄️ Archives]
     end
@@ -61,7 +62,12 @@ graph LR
         FZ_Packerz --> SOPMasterModal_Pack[SOP EDITOR Modal<br>Btn: PACKERZ SOP EDITOR]
         FZ_Packerz --> PackerzArchiveModal[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         
+        FZ_Barcodz --> PaperSettingsModal_Bar[Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
+        FZ_Barcodz --> PrintBatchModal_Bar[Execute Batch Print Trigger<br>Btn: 🖨️ PRINT BATCH]
+        
         FZ_Labelz --> CreateLabelModal[Create Label Modal<br>Btn: + NEW LABEL]
+        FZ_Labelz --> PaperSettingsModal_Lab[Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
+        FZ_Labelz --> PrintBatchModal_Lab[Execute Batch Print Trigger<br>Btn: 🖨️ PRINT BATCH]
     end
     
     subgraph H4 [REVENUEZ HUB Architecture]
