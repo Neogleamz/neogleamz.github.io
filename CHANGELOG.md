@@ -6,6 +6,9 @@
 - **Recommission Avatar Engine** (`feat/unavatar-supabase-sync`): Re-enabled the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance.
 - **qa-dashboard.html innerHTML** (debt/security): Wrapped .innerHTML assignments with window.safeHTML() to enforce zero-trust UI.
 - **check_syntax.js orphan** (debt/cleanup): Relocated the orphan script check_syntax.js from root to the scripts/ directory.
+- **Avatar Upload Storage Fix** (`fix/socialz-avatar-upload`): Created the `avatars` Storage bucket with RLS policies and restored the missing upload UI text to repair the manual upload crash.
+- **Lightweight Bug Branching Rule** (`chore/core-safety-evolution`): Evolved the core safety protocols to permanently enforce mandatory isolated branching (`fix/...`) for all ad-hoc mid-session bug reports.
+- **Anti-Hallucination Formatting Lock** (`chore/coding-preferences-evolution`): Injected a strict format adherence rule into the persona mandates to explicitly ban non-compliant markdown alerts and enforce clickable hyperlink formatting.
 
 ## [1.1.0] - 2026-05-22
 ### ✨ Features & Bug Fixes
