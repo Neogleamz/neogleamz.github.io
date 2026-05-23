@@ -17,6 +17,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
+### 🟠 P1 High Priority (Active Epics)
 
 
 ## 🧹 Technical Debt
