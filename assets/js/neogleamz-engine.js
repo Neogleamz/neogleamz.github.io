@@ -31,10 +31,12 @@ window.addEventListener('error', (event) => {
     // Suppress cross-origin and Chrome Extension noise (e.g., LastPass DOM scanning crashes)
     if (!event.error && event.message === 'Script error.') return;
     if (event.filename && event.filename.includes('chrome-extension://')) return;
+    if (event.message && event.message.includes('ResizeObserver')) return;
 
-    console.error('System Error:', event.error);
+    console.error('System Error:', event.message, event.error);
     if (typeof sysLog === 'function') {
-        sysLog(`System Fault: ${event.error?.message || 'Unknown Error'}`, true);
+        const errorMsg = event.error?.message || event.message || 'Unknown Error';
+        sysLog(`System Fault: ${errorMsg}`, true);
     }
 });
 
