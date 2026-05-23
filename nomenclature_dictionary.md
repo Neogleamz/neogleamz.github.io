@@ -15,7 +15,7 @@
 graph LR
     subgraph Global [Global Header Triggers]
         TipzModal[TIPZ Modal<br>Btn: 💡 TIPZ]
-        TaskzModal[TASKZ Modal<br>Btn: 🎯 TASKZ]
+        TaskzModal[TASKZ Modal<br>Btn: 🎯 TASKZ] -.-> TaskzBoardActions[Kanban & Task Actions<br>Btns: Create, Archive, Status...]
     end
     
     subgraph H1 [STOCKPILEZ HUB Architecture]
@@ -30,7 +30,9 @@ graph LR
         SP_Inventory --> LowStockzReport[Low Stockz Report Trigger<br>Btn: 📉 LOW STOCKZ REPORT]
         SP_Inventory --> ResetStockLevels[Reset Stock Levels Trigger<br>Btn: ⚠️ RESET STOCK LEVELS]
         
+        SP_Simple --> EditzAutoFill[Auto-Fill Ledger Action<br>Btn: Auto-Fill Ledger]
         SP_Simple --> EditzBulkModal[EDITZ BULK STAGING Modal<br>Btn: Bulk Edit]
+        SP_Simple --> EditzAddRow[Add Manual Row Action<br>Btn: + Add Row]
     end
     
     subgraph H2 [MAKERZ HUB Architecture]
@@ -41,6 +43,9 @@ graph LR
         MK_Builder --> RecipeModal[Recipe Action Modal<br>Btn: + CREATE]
         MK_Builder --> RecipeManagerModal[RECIPE MANAGER STAGING Modal<br>Btn: 🛠️ MANAGER]
         MK_Builder --> BulkAddModal[Bulk Add Modal<br>Btn: BULK ADD]
+        MK_Builder --> RecipeAddPart[Add BOM Part Action<br>Btn: Add Part]
+        MK_Builder --> RecipeFixPredictions[Apply All Suggestions Action<br>Btn: FIX ALL PREDICTIONS]
+        MK_Builder --> RecipeCommitFixes[Commit Manager Fixes Action<br>Btn: COMMIT FIXES]
         
         MK_Control --> NewWOModal[Start Production Batch Modal<br>Btn: + CreateBatch]
         MK_Control --> MultiBatchModal[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
@@ -49,6 +54,15 @@ graph LR
         MK_Control --> ArchiveExplorerModal_Bat[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         MK_Control --> BatchezPrintSOP[SOP Print Configuration Modal<br>Btn: 🖨️ Print SOP]
         MK_Control --> BatchezPickList[Pick List Print Configuration<br>Btn: 🖨️ Print List]
+        MK_Control --> BatchezDeleteWO[Delete Work Order Action<br>Btn: DELETE]
+        MK_Control --> BatchezStatusActions[Workflow Status Advance Actions<br>Btns: Queued, Picking, Production, Finalize]
+        MK_Control --> BatchezSaveInline[Save SOP Changes Action<br>Btn: Save Changes to Cloud]
+        MK_Control --> BatchezStageItem[Stage Batch Item Action<br>Btn: + Add]
+        MK_Control --> BatchezValidateCreate[Validate & Create WO Action<br>Btn: Verify Inventory & Create]
+        MK_Control --> BatchezGenProjection[Generate Projection Action<br>Btn: Generate Master Projection]
+        MK_Control --> BatchezPrintReport[Print Batch Report Action<br>Btn: Print Report]
+        MK_Control --> BatchezSaveBlueprint[Save Master SOP Action<br>Btn: SAVE MASTER BLUEPRINT]
+        MK_Control --> BatchezClearArchive[Delete All Archives Action<br>Btn: Clear Archive]
         
         MK_Print --> ManualPrintModal[Manual Print Modal<br>Btn: + PRINTBATCH]
         MK_Print --> MultiBatchModal_3d[Multi-Item Batch Estimator Modal<br>Btn: + BatchOrder]
@@ -56,6 +70,10 @@ graph LR
         MK_Print --> ArchiveExplorerModal_Lay[Archive Explorer Modal<br>Btn: 🗄️ Archives]
         MK_Print --> LayerzSOPEditorModal[Active SOP Editor Modal<br>Btn: 🔒 EDIT]
         MK_Print --> LayerzPrintSOPModal[SOP Print Configuration Modal<br>Btn: 🖨️ PRINT]
+        MK_Print --> LayerzDeletePrint[Delete Print Job Action<br>Btn: DELETE]
+        MK_Print --> LayerzStatusActions[Workflow Status Advance Actions<br>Btns: Queued, Printing, Cleaned, Finalize]
+        MK_Print --> LayerzRecordYield[Record Run Yield Action<br>Btn: Record Yield & Stop Timer]
+        MK_Print --> LayerzFinalizePrint[Submit Finalize Print Action<br>Btn: Complete & Log]
     end
     
     subgraph H3 [FULFILLZ HUB Architecture]
@@ -65,6 +83,11 @@ graph LR
         
         FZ_Packerz --> SOPMasterModal_Pack[SOP EDITOR Modal<br>Btn: PACKERZ SOP EDITOR]
         FZ_Packerz --> PackerzArchiveModal[Archive Explorer Modal<br>Btn: 🗄️ Archives]
+        FZ_Packerz --> PackerzPrintSOP[Print SOP Action<br>Btn: Print SOP]
+        FZ_Packerz --> PackerzEditSOP[Open Active Editor Action<br>Btn: EDIT]
+        FZ_Packerz --> PackerzSignoffQA[Signoff QA Action<br>Btn: COMPLETE QA CHECKS]
+        FZ_Packerz --> PackerzViewPDF[View PDF Media Action<br>Btn: 📄 View PDF]
+        FZ_Packerz --> PackerzPlayVideo[Play Video Media Action<br>Btn: 🎥 Play Video]
         
         FZ_Barcodz --> PaperSettingsModal_Bar[Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
         FZ_Barcodz --> PrintBatchModal_Bar[Execute Batch Print Trigger<br>Btn: 🖨️ PRINT BATCH]
@@ -72,6 +95,7 @@ graph LR
         FZ_Labelz --> CreateLabelModal[Create Label Modal<br>Btn: + NEW LABEL]
         FZ_Labelz --> PaperSettingsModal_Lab[Paper Profile Modal<br>Btn: ⚙️ PAPER SETTINGS]
         FZ_Labelz --> PrintBatchModal_Lab[Execute Batch Print Trigger<br>Btn: 🖨️ PRINT BATCH]
+        FZ_Labelz --> LabelDesignerToolbar[Designer Canvas Actions<br>Btns: Text, Image, Shape, Undo, Save...]
     end
     
     subgraph H4 [REVENUEZ HUB Architecture]
@@ -91,6 +115,11 @@ graph LR
         
         SZ_Roster --> SkaterModal[Profile Information Modal<br>Btn: Open Skater]
         SZ_Roster --> AnalyticsDashboardModal[Analytics Dashboard Modal<br>Btn: 📊 Analytics]
+        SZ_Roster --> RosterImport[Import Roster Action<br>Btn: Import]
+        SZ_Roster --> RosterExport[Export Roster Action<br>Btn: Export]
+        SZ_Roster --> RosterMigrateAvatars[Migrate Avatars Action<br>Btn: Migrate Avatars]
+        SZ_Roster --> RosterAddSkater[Add Skater Action<br>Btn: Add Skater]
+        SZ_Roster --> RosterViewToggles[View Toggles<br>Btns: Grid, Row, Sort...]
     end
     
     subgraph H6 [NEXUZ HUB Architecture]
@@ -100,9 +129,26 @@ graph LR
         
         NX_Importz --> ParserConfigModal[Parser Config Modal<br>Btn: ⚙️ PARSER CONFIG]
         NX_Importz --> ParcelConfigModal[Parcel Config Modal<br>Btn: ⚙️ PARCEL CONFIG]
+        NX_Importz --> ImportzOrder[Import Superbuy Orders<br>Btn: IMPORT ORDERs]
+        NX_Importz --> ImportzOrderTest[Ingest Test Sandbox<br>Btn: INGEST TEST FILE]
+        NX_Importz --> ImportzParcel[Import Superbuy Parcels<br>Btn: IMPORT PARCELs]
+        NX_Importz --> ImportzParcelTest[Ingest Test Sandbox<br>Btn: INGEST TEST FILE]
         
         NX_Salez --> AliasModal[Alias Modal<br>Btn: + ADD NEW]
+        NX_Salez --> SalezImportSales[Import Sales CSV<br>Btn: IMPORT SALEZ CSV]
+        NX_Salez --> SalezImportSalesTest[Ingest Test Sandbox<br>Btn: INGEST TEST FILE]
+        NX_Salez --> SalezBackfillSales[Backfill Sales Financials<br>Btn: BACKFILL]
+        NX_Salez --> SalezGuide[Show Guide Alert<br>Btn: GUIDE]
+        NX_Salez --> SalezImportBilling[Import Billing CSV<br>Btn: IMPORT BILLING CSV]
+        NX_Salez --> SalezImportBillingTest[Ingest Test Sandbox<br>Btn: INGEST TEST FILE]
+        NX_Salez --> SalezBackfillBilling[Backfill Billing Financials<br>Btn: BACKFILL]
         
         NX_Brainz --> ScraperFoundryModal[Scraper Foundry Modal<br>Btn: 🚀 LAUNCH SCRAPER]
+        NX_Brainz --> BrainzExport[Export DB Vault Backup<br>Btn: EXPORT BACKUP]
+        NX_Brainz --> BrainzImport[Import DB Vault Backup<br>Btn: IMPORT BACKUP FILE]
+        NX_Brainz --> BrainzInspectTest[Inspect Test Backup<br>Btn: INSPECT TEST FILE]
+        NX_Brainz --> BrainzRestore[Execute Live Restore<br>Btn: LIVE RESTORE]
+        NX_Brainz --> BrainzExactCalc[Force DB Recalculation<br>Btn: EXACT CALC]
+        NX_Brainz --> BrainzGuide[Show Guide Alert<br>Btn: READ GUIDE]
     end
 ```
