@@ -481,4 +481,4 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Recommission Avatar Engine**
 *(Completed — 2026-05-22)*
-- [x] `feat/unavatar-supabase-sync` : **Recommission Avatar Engine** - Re-enable the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance. [🤖 Antigravity] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+- [🚀] `feat/unavatar-supabase-sync` : **Recommission Avatar Engine** - Re-enable the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance. [🤖 Antigravity] [🧠 4k / 5k] [💸 $0.01 / $0.02]

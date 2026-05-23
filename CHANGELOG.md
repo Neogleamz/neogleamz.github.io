@@ -1,6 +1,7 @@
 # SK8Lytz Application Changelog
 
 ## [Unreleased]
+- **Recommission Avatar Engine** (`feat/unavatar-supabase-sync`): Re-enabled the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance.
 - **qa-dashboard.html innerHTML** (debt/security): Wrapped .innerHTML assignments with window.safeHTML() to enforce zero-trust UI.
 - **check_syntax.js orphan** (debt/cleanup): Relocated the orphan script check_syntax.js from root to the scripts/ directory.
 
