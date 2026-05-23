@@ -166,6 +166,7 @@ function initFabricCanvas() {
     if (fCanvas) return;
     const canvasEl = document.getElementById('labelzFabricCanvas');
     fCanvas = new fabric.Canvas(canvasEl, { preserveObjectStacking: true });
+    fCanvas.backgroundColor = '#ffffff'; // Set default solid white background
 
     fCanvas.on('selection:created', onCanvasSelection);
     fCanvas.on('selection:updated', onCanvasSelection);
@@ -233,7 +234,9 @@ function updateLabelCanvasSize() {
     
     let sizeStr = document.getElementById('labelzDesignerSize').value;
     let pObj = {w: 2.25, h: 1.25};
-    try { pObj = JSON.parse(sizeStr); } catch(e) { console.error(e); }
+    if (sizeStr) {
+        try { pObj = JSON.parse(sizeStr); } catch(e) { console.error("Canvas Size Parse Error:", e.message); }
+    }
     
     let pxWidth = pObj.w * PPI;
     let pxHeight = pObj.h * PPI;
@@ -265,9 +268,9 @@ window.updateLabelCanvasOrientation = function() {
     
     if (container) {
         if (orientation === 'Landscape' || orientation === '90') {
-            container.style.transform = 'rotate(90deg)';
+            container.style.transform = 'translate(-50%, -50%) rotate(90deg)';
         } else {
-            container.style.transform = 'rotate(0deg)';
+            container.style.transform = 'translate(-50%, -50%) rotate(0deg)';
         }
     }
     
@@ -298,6 +301,23 @@ function zoomLabelzCanvas(delta) {
     }
     
     fCanvas.setDimensions({ width: fCanvas.width * currentZoom + 'px', height: fCanvas.height * currentZoom + 'px' }, { cssOnly: true });
+    
+    // Update Rotator Box to fix Flex Layout bounds
+    const rotator = document.getElementById('labelzCanvasRotatorBox');
+    if (rotator) {
+        const orientation = document.getElementById('labelzOrientation') ? document.getElementById('labelzOrientation').value : 'Portrait';
+        if (orientation === 'Landscape' || orientation === '90') {
+            rotator.style.width = (fCanvas.height * currentZoom) + 'px';
+            rotator.style.height = (fCanvas.width * currentZoom) + 'px';
+        } else {
+            rotator.style.width = (fCanvas.width * currentZoom) + 'px';
+            rotator.style.height = (fCanvas.height * currentZoom) + 'px';
+        }
+    }
+    
+    // Force a complete repaint of the canvas buffer to prevent background transparency drops
+    if (fCanvas) fCanvas.renderAll();
+    
     document.getElementById('labelzZoomReadout').innerText = `${Math.round(currentZoom * 100)}%`;
 }
 
@@ -826,11 +846,13 @@ window.openCreateLabelModal = function() {
     assignLabelzDesignerEmoji('🏷️');
     
     document.getElementById('labelzDesignerModal').style.display = 'flex';
-    document.getElementById('labelzDesignerSize').value = '2.25x1.25';
+    let sizeSel = document.getElementById('labelzDesignerSize');
+    if(sizeSel && sizeSel.options && sizeSel.options.length > 0) { sizeSel.selectedIndex = 0; }
     updateLabelCanvasSize();
     fCanvas.clear();
     fCanvas.backgroundColor = '#ffffff';
     document.getElementById('labelzBgColor').value = '#ffffff';
+    fCanvas.renderAll();
     
     lblzHistory = [];
     lblzHistoryProg = -1;
@@ -866,6 +888,7 @@ window.openEditLabelModal = function(name) {
     } else {
         fCanvas.clear();
         fCanvas.backgroundColor = '#ffffff';
+        fCanvas.renderAll();
         lblzHistory = [];
         lblzHistoryProg = -1;
         saveLabelzHistory();

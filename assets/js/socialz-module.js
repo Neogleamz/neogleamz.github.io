@@ -352,8 +352,8 @@
         window.toggleSortDirection = function toggleSortDirection() {
             socialzSortDirection = socialzSortDirection === 'asc' ? 'desc' : 'asc';
             if (window.saveSort) window.saveSort('socialzSortDirection', socialzSortDirection);
-            const icon = document.getElementById('sort-dir-icon');
-            icon.className = socialzSortDirection === 'asc' ? 'fa-solid fa-arrow-up-wide-short' : 'fa-solid fa-arrow-down-short-wide';
+            const icon = document.getElementById('sort-dir-btn');
+            if (icon) icon.innerText = socialzSortDirection === 'asc' ? 'UP' : 'DOWN';
             renderSkaters();
         }
 
@@ -370,8 +370,8 @@
                     window.saveSort('socialzSortDirection', socialzSortDirection);
                 }
             }
-            const icon = document.getElementById('sort-dir-icon');
-            if (icon) icon.className = socialzSortDirection === 'asc' ? 'fa-solid fa-arrow-up-wide-short' : 'fa-solid fa-arrow-down-short-wide';
+            const icon = document.getElementById('sort-dir-btn');
+            if (icon) icon.innerText = socialzSortDirection === 'asc' ? 'UP' : 'DOWN';
             renderSkaters(); 
         }
 
@@ -770,10 +770,20 @@
         }
         
         window.click_runMigrationEngine = async function() {
+            const btn = document.querySelector('[data-click="click_runMigrationEngine"]');
+            if (btn && btn.disabled) return; // Prevent double execution
+            
             const statusEl = document.getElementById('migration-status-text');
             const progressText = document.getElementById('migration-progress-text');
             const progressBar = document.getElementById('migration-progress-bar');
             const term = document.getElementById('migration-log-terminal');
+            
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> MIGRATING...';
+                btn.style.opacity = '0.7';
+                btn.style.cursor = 'not-allowed';
+            }
             
             function log(msg) { term.innerHTML = window.safeHTML ? window.safeHTML(term.innerHTML + '> ' + msg + '<br>') : term.innerHTML + '> ' + msg + '<br>'; term.scrollTop = term.scrollHeight; }
             
@@ -785,6 +795,10 @@
             if(targets.length === 0) {
                 statusEl.innerText = "Complete - No missing avatars!";
                 log("Zero missing avatars found in database. You are 100% synced.");
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> COMPLETE';
+                    btn.style.opacity = '1';
+                }
                 return;
             }
             
@@ -806,11 +820,17 @@
                 let successProvider = null;
                 
                 async function tryFetch(prov, handle) {
-                    if(!handle) return false;
+                    if(!handle) {
+                        log(`  <span style="color:#64748b;">[SKIP]</span> ${prov} (No handle mapped in DB)`);
+                        return false;
+                    }
+                    log(`  <span style="color:#0ea5e9;">[FETCH]</span> querying unavatar.io/${prov}/${handle}...`);
                     try {
-                        const r = await fetch(`https://unavatar.io/${prov}/${handle}?fallback=false`);
+                        const targetUrl = `https://unavatar.io/${prov}/${handle}?fallback=false`;
+                        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+                        const r = await fetch(proxyUrl);
                         if(r.status === 429) {
-                            log(`  <span style="color:#ef4444;">[!] 429 RATE LIMIT. Switch your VPN.</span>`);
+                            log(`  <span style="color:#ef4444;">[!] 429 RATE LIMIT on ${prov}.</span>`);
                             return false;
                         }
                         if(r.ok) {
@@ -818,13 +838,16 @@
                             const cType = r.headers.get('content-type') || 'image/jpeg';
                             ext = cType.split('/')[1] || 'jpeg';
                             successProvider = prov;
+                            log(`  <span style="color:#10b981;">[SUCCESS]</span> Acquired ${prov} avatar!`);
                             return true;
+                        } else {
+                            log(`  <span style="color:#f59e0b;">[NOT FOUND]</span> Server returned HTTP ${r.status} for ${prov}`);
                         }
-                    } catch(e) { log(`  <span style="color:#ef4444;">[FETCH ERR]</span> ${e.message}`); }
+                    } catch(e) { log(`  <span style="color:#ef4444;">[NETWORK ERR]</span> ${e.message} (CORS or AdBlocker blocking unavatar)`); }
                     return false;
                 }
                 
-                log(`  -> Trying providers...`);
+                log(`  -> Initializing provider scan sequence...`);
                 let found = await tryFetch('instagram', ig);
                 if(!found && tt) { await new Promise(r=>setTimeout(r,1000)); found = await tryFetch('tiktok', tt); }
                 if(!found && yt) { await new Promise(r=>setTimeout(r,1000)); found = await tryFetch('youtube', yt); }
@@ -860,6 +883,10 @@
             
             statusEl.innerText = "Migration Finished";
             log(`<strong>Job Finished.</strong> Saved ${success} new avatars! You can safely close this window.`);
+            if (btn) {
+                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> COMPLETE';
+                btn.style.opacity = '1';
+            }
             renderSkaters();
         }
 
