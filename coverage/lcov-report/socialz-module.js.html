@@ -2583,7 +2583,7 @@
             const container = <span class="cstat-no" title="statement not covered" >document.getElementById('skater-grid');</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >            if (!isCompact) {</span>
-<span class="cstat-no" title="statement not covered" >                container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full";</span>
+<span class="cstat-no" title="statement not covered" >                container.className = "socialz-roster-grid transition-all duration-300 min-w-full";</span>
             } else {
 <span class="cstat-no" title="statement not covered" >                container.className = "block transition-all duration-300 min-w-full overflow-x-auto";</span>
             }
@@ -2682,9 +2682,9 @@
                         const ytHtml = <span class="cstat-no" title="statement not covered" >generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);</span>
                         const fbHtml = <span class="cstat-no" title="statement not covered" >generateSocial(s.links.fb, s.followers.fb, 'fa-facebook', 'blue', s.handles.fb);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >                        return `&lt;div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color);"&gt;</span>
-               &lt;div style="display: flex; flex-direction: column; z-index: 1;"&gt;
-                 &lt;div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column;"&gt;
+<span class="cstat-no" title="statement not covered" >                        return `&lt;div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color); min-width: 0; width: 100%;"&gt;</span>
+               &lt;div style="display: flex; flex-direction: column; z-index: 1; min-width: 0; width: 100%;"&gt;
+                 &lt;div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column; min-width: 0;"&gt;
                &lt;div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;"&gt;
                     &lt;div class="grid-stack" style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);"&gt;
                        &lt;div style="background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;"&gt;${s.name.charAt(0)}&lt;/div&gt;
@@ -2714,7 +2714,7 @@
                         &lt;button class="socialz-hover-color-orange" data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;"&gt;&lt;i class="fa-solid fa-pen"&gt; &lt;/i&gt; EDIT&lt;/button&gt;
                     &lt;/div&gt;
                 &lt;/div&gt;&lt;/div&gt;
-               &lt;div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;"&gt;
+               &lt;div style="margin-top: auto; padding: 16px; display: flex; justify-content: flex-start; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto; min-width: 0; width: 100%;"&gt;
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
                 &lt;/div&gt;
                &lt;/div&gt;
@@ -2749,9 +2749,9 @@
                         const ytHtml = <span class="cstat-no" title="statement not covered" >generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);</span>
                         const fbHtml = <span class="cstat-no" title="statement not covered" >generateSocial(s.links.fb, s.followers.fb, 'fa-facebook', 'blue', s.handles.fb);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >                        return `&lt;div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color);"&gt;</span>
-               &lt;div style="display: flex; flex-direction: column; z-index: 1;"&gt;
-                 &lt;div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column;"&gt;
+<span class="cstat-no" title="statement not covered" >                        return `&lt;div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color); min-width: 0; width: 100%;"&gt;</span>
+               &lt;div style="display: flex; flex-direction: column; z-index: 1; min-width: 0; width: 100%;"&gt;
+                 &lt;div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column; min-width: 0;"&gt;
                &lt;div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;"&gt;
                     &lt;div class="grid-stack" style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);"&gt;
                        &lt;div style="background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;"&gt;${s.name.charAt(0)}&lt;/div&gt;
@@ -2781,7 +2781,7 @@
                         &lt;button class="socialz-hover-color-orange" data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;"&gt;&lt;i class="fa-solid fa-pen"&gt; &lt;/i&gt; EDIT&lt;/button&gt;
                     &lt;/div&gt;
                 &lt;/div&gt;&lt;/div&gt;
-               &lt;div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;"&gt;
+               &lt;div style="margin-top: auto; padding: 16px; display: flex; justify-content: flex-start; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto; min-width: 0; width: 100%;"&gt;
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
                 &lt;/div&gt;
                &lt;/div&gt;
@@ -3334,7 +3334,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-24T08:28:02.281Z
+                at 2026-05-24T08:44:52.716Z
             </div>
         <script src="prettify.js"></script>
         <script>

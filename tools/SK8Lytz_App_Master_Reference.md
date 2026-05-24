@@ -453,9 +453,14 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
   </div>
   ```
 
----
 ### O. Fabric.js Canvas Paint Architecture
 When changing the size or orientation of a `<canvas>` element via CSS properties or `setDimensions`, the browser's physical rendering engine wipes the actual byte-buffer of the canvas. You MUST explicitly fire a `fCanvas.renderAll()` command immediately after resizing the DOM boundaries (e.g. `zoomLabelzCanvas`), otherwise the canvas visually drops to full transparency until a user interacts with it and triggers an auto-paint.
+
+### P. Fluid Responsive CSS Grid & Flex Sizing Standard
+To prevent fluid cards (such as skater profile cards or team roster cards) inside a CSS Grid from expanding beyond column bounds and causing horizontal overflow or clipping, the grid container and its children MUST adhere to these standard layout constraints:
+1. **Grid Column Sizing**: Grid column templates must always use `minmax(0, 1fr)` rather than raw fraction units (e.g., `grid-template-columns: repeat(auto-fill, minmax(0, 1fr))`). This signals to the browser that columns are permitted to compress below their default content-sizing threshold.
+2. **Card Grid Children**: Every direct grid child container (e.g., `.socialz-influencer-card`) MUST explicitly enforce `min-width: 0; width: 100%;`. Because browser-native grid and flex cell calculations default to minimum content size (`min-width: auto`), setting `min-width: 0` is mathematically required to unlock fluid shrink behavior.
+3. **Nested Flex Layouts**: Any inner flex sub-containers (e.g., social links row, button bars) within cards MUST also enforce `min-width: 0; width: 100%;` and utilize `flex-wrap: wrap` or overflow truncation (`.trunc-col`) to guarantee graceful content reflow without expanding the parent card boundaries.
 
 
 ## 🗄️ 3. Database Schemas (Supabase)
