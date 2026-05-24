@@ -1,7 +1,5 @@
 ---
-name: bucketlist
 description: "The primary project engine. Automates branching, planning, execution, and documentation for the next item on the Bucket List."
-trigger: "/bucketlist, /start_next, start working on the bucket list, start bucket list, what's next, what's next on the list?"
 ---
 
 # Auto-Branching Execution Workflow
@@ -49,7 +47,6 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
 
 8. **Update Tracking, Archive & Halt**: 
    - **LEDGER HYDRATION GATE:** Before modifying the ledger, you MUST execute `git checkout main && git pull origin main && git checkout -` to ensure your local `SK8Lytz_Bucket_List.md` is not stale.
-   - Modify `@/tools/SK8Lytz_Bucket_List.md`. **CRITICAL:** Ensure the required token metadata `[🤖 AI Model] [🧠 Actual / Expected] [💸 Cost]` is correctly appended to the task string *before* you mark it complete.
    - Change the checkbox for this item to `- [x]`.
    - **Enforce Archiving Protocol**: Scan the surrounding epic `### Target:` block. If every single item in this specific Epic is now marked as `[x]` (or if it was a single-task Epic to begin with), you MUST autonomously cut the entire block (the `### Target:` header, the `*(Epic...)*` subheader, and all the `[x]` tasks) and paste it at the absolute bottom of the file under the `🗄️ Completed & Archived Epics` section to keep the active list clean. Do not wait for the wind-down sequence to do this. **NEVER DELETE THE RAW TASKS**. The Bucket List is an immutable ledger.
    - If the Epic block was just fully completed and archived, you must output a massive warning message tailored to the context:

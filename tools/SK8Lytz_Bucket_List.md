@@ -18,6 +18,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
 ### 🟠 P1 High Priority (Active Epics)
+- [/] epic/red-team-audit : **Red Team Security Pentest** - Deploy Teamwork Swarm to run a deep penetration scan across the core Vanilla DOM modules, validating window.safeHTML and input isolation. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
+- [/] epic/legacy-code-janitor : **Legacy Code Audit & Refactor** - Deploy Teamwork Swarm to execute system-wide audit on any remaining legacy JS templates to enforce modern block-scoping and event delegator standards. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
 
 
 ## 🧹 Technical Debt
