@@ -19,6 +19,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 P1 High Priority (Active Epics)
 - [/] debt/legacy-audit-qa-dashboard : **Legacy QA Dashboard Refactor Swarm** - Dispatched Teamwork Swarm to execute full legacy audit and refactor on qa-dashboard.html. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
+- [/] debt/legacy-audit-test-print : **Legacy Test Print Refactor Swarm** - Dispatched Teamwork Swarm to execute full legacy audit and refactor on test_print.html. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
 
 
 ## 🧹 Technical Debt
