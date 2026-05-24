@@ -1,7 +1,6 @@
 ---
 name: core_safety_protocols
 description: "Mission-critical constraints regarding Security, Version Control, Tooling usage, and Anti-Hallucination bounds."
-trigger: always_on
 ---
 
 # Core Safety Protocols (Ultra-Dense)

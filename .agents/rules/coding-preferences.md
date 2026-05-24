@@ -1,7 +1,6 @@
 ---
 name: coding_preferences
 description: "Strict Vanilla architecture, State Handling, UI paradigms, and active code maintenance rules."
-trigger: always_on
 ---
 
 # Optimal Coding Preferences (Ultra-Dense)
@@ -40,11 +39,6 @@ trigger: always_on
 ### 5. Workflow Authoring Standard (Model-Agnostic Output Parity)
 - **Mandatory Output Format Sections:** Whenever you create a NEW workflow file (`.agents/workflows/*.md`) or significantly modify an existing one, it MUST end with a section titled `## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)`. This section must contain exact Markdown table templates with placeholder values, specific `> [!NOTE/WARNING/TIP/IMPORTANT/CAUTION]` block assignments, and the phrase "Every model (Claude, Gemini, GPT) must produce this exact structure" to eliminate model-specific interpretation differences.
 - **YAML Frontmatter Requirement:** Every workflow MUST begin with a YAML block containing `name`, `description`, and `trigger` fields.
----
-name: coding_preferences
-description: "Strict Vanilla architecture, State Handling, UI paradigms, and active code maintenance rules."
-trigger: always_on
----
 
 # Optimal Coding Preferences (Ultra-Dense)
 
