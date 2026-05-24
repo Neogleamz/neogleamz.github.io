@@ -694,13 +694,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     exportLabelzPDF();
                     break;
                 case 'click_showNexlPane_importz':
-                    showNexlPane('importz');
+                    if (typeof window.showNexlPane === 'function') window.showNexlPane('importz');
                     break;
                 case 'click_showNexlPane_salez':
-                    showNexlPane('salez');
+                    if (typeof window.showNexlPane === 'function') window.showNexlPane('salez');
                     break;
                 case 'click_showNexlPane_brainz':
-                    showNexlPane('brainz');
+                    if (typeof window.showNexlPane === 'function') window.showNexlPane('brainz');
                     break;
                 case 'click_document_getElementById_orderF':
                     document.getElementById('orderFiles').click();
@@ -1518,7 +1518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateLabelCanvasSize();
                     break;
                 case 'change_updateLabelCanvasOrientation':
-                    updateLabelCanvasOrientation();
+                    if (typeof window.updateLabelCanvasOrientation === 'function') window.updateLabelCanvasOrientation();
                     break;
                 case 'change_updateLabelCanvasBg':
                     updateLabelCanvasBg();
