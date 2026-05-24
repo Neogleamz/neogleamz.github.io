@@ -29,7 +29,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 Stale Warnings & Orphaned Scripts
 - [🚀] debt/eslint-warnings-sweep : Resolve the 11 ESLint warnings (no-undef on updateLabelCanvasOrientation, showNexlPane, Image, and no-unused-vars) to achieve 100% warning-free lint output. [🤖 Antigravity] [🧠 4.5k / 5k] [💸 $0.02 / $0.02]
-- [x] debt/orphan-scripts-root : Relocate remaining 2 orphaned scripts (dump_buttons.py, trace3.py) from root to tools/ or scripts/ directories. [🤖 Antigravity] [🧠 1.5k / 1.5k] [💸 $0.01 / $0.01]
+- [🚀] debt/orphan-scripts-root : Relocate remaining 2 orphaned scripts (dump_buttons.py, trace3.py) from root to tools/ or scripts/ directories. [🤖 Antigravity] [🧠 1.5k / 1.5k] [💸 $0.01 / $0.01]
 
 
 

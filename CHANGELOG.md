@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### 🧹 Chores & Cleanup
+- **Orphan Scripts Relocation** (`debt/orphan-scripts-root`): Relocated `dump_buttons.py` and `trace3.py` from the root directory to the scripts/ directory using standard git mv to maintain perfect rename tracking and history.
+
 ## [1.1.1] - 2026-05-24
 
 ### ✨ Features & Bug Fixes
