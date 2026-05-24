@@ -31,6 +31,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟠 Stale Warnings & Orphaned Scripts
 *Clean sweep — all technical debt successfully resolved and archived!* ✅
 
+### 🟡 Legacy HTML Audits
+- [ ] debt/legacy-audit-qa-dashboard : **qa-dashboard.html** - Execute /legacy_audit and refactor target to enforce Vanilla JS rules, removing any inline layout styles. [🤖 Antigravity] [🧠 1k / 1.5k] [💸 $0.01 / $0.01]
+- [ ] debt/legacy-audit-test-print : **test-print.html** - Execute /legacy_audit and refactor target to enforce Vanilla JS rules, removing any inline layout styles. [🤖 Antigravity] [🧠 0.5k / 1k] [💸 $0.01 / $0.01]
+
 
 
 ---
