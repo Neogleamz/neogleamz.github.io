@@ -83,6 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_switchTab_nexl':
                     switchTab('nexuz');
                     break;
+                case 'click_openForceSyncModal':
+                    if (typeof window.openForceSyncModal === 'function') window.openForceSyncModal();
+                    break;
                 case 'click_window_closeForceSyncModal':
                     if (typeof window.closeForceSyncModal === 'function') window.closeForceSyncModal();
                     break;
@@ -1624,6 +1627,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.handleStyleToggle === 'function') {
                         window.handleStyleToggle(el.getAttribute('data-style'));
                     }
+                    break;
+                case 'change_handleManualAvatarUpload':
+                    if (typeof window.handleManualAvatarUpload === 'function') window.handleManualAvatarUpload(el);
                     break;
                 case 'change_scraperFileInput':
                     if (typeof window.change_scraperFileInput === 'function') window.change_scraperFileInput(event);
