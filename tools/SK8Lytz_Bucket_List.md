@@ -29,10 +29,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 *0 native system vulnerabilities globally found.* ✅
 
 ### 🟠 Stale Warnings & Orphaned Scripts
-*Clean sweep — all technical debt successfully resolved and archived!* ✅
+- [ ] debt/orphan-diagnostic-dumps : **Root Diagnostic Orphan Dumps** - Move root-level diagnostic files (all_buttons.txt, modals_trace.txt, pane_orders.txt) to a consolidated diagnostics/ folder to ensure perfect repository hygiene. [🤖 Antigravity] [🧠 1k / 1k] [💸 $0.01 / $0.01]
 
 ### 🟡 Legacy HTML Audits
-*Clean sweep — all technical debt successfully resolved and archived!* ✅
+*Clean sweep — all legacy HTML audits successfully resolved!* ✅
 
 
 
