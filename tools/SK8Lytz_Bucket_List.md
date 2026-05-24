@@ -17,9 +17,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
-### Target: `main`
-- [ ] style/socialz-cards-flex-scaling : **Socialz Cards Flex & Scaling Fix** - Fix the issue where the Socialz tab cards do not flex or scale correctly (the right side gets chopped off) when scaled down before snapping to 2 cards. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
-
 ### 🟠 P1 High Priority (Active Epics)
 *Clean sweep — all active epics successfully completed and archived!* ✅
 
@@ -530,4 +527,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Completed — 2026-05-22)*
 - [🚀] `feat/unavatar-supabase-sync` : **Recommission Avatar Engine** - Re-enable the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance. [🤖 Antigravity] [🧠 4k / 5k] [💸 $0.01 / $0.02]
 
+### Target: `main`
+**Epic: Socialz Cards Flex & Scaling Fix**
+*(Completed — 2026-05-24)*
+- [x] style/socialz-cards-flex-scaling : **Socialz Cards Flex & Scaling Fix** - Fix the issue where the Socialz tab cards do not flex or scale correctly (the right side gets chopped off) when scaled down before snapping to 2 cards. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
