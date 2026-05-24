@@ -44,6 +44,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Standalone Technical Debt Sweep**
 *(Archived — 2026-05-24)*
 - [🚀] debt/orphan-diagnostic-dumps : **Root Diagnostic Orphan Dumps** - Move root-level diagnostic files (all_buttons.txt, modals_trace.txt, pane_orders.txt) to a consolidated diagnostics/ folder to ensure perfect repository hygiene. [🤖 Antigravity] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+- [🚀] debt/documentation-consolidation : **Documentation Relocation & Master Reference Integration** - Relocate loose root markdown documents and SVG assets to the /docs/ folder, update root whitelists, and integrate under Section 8 of the Master Reference. [🤖 Antigravity] [🧠 1.5k / 1.5k] [💸 $0.01 / $0.01]
 
 ### Target: `main`
 **Epic: Swarm HTML Utility Audits**

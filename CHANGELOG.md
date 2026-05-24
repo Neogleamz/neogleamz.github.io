@@ -8,6 +8,7 @@
 
 ### 🧹 Chores & Cleanup
 - **Orphan Scripts Relocation** (`debt/orphan-scripts-root`): Relocated `dump_buttons.py` and `trace3.py` from the root directory to the scripts/ directory using standard git mv to maintain perfect rename tracking and history.
+- **Documentation & Visual Asset Relocation** (`debt/documentation-consolidation`): Consolidated loose root documentation (`nomenclature_dictionary.md`, `task_engine_evolution.md`, `test_shared.md`) and compiled vector SVGs (`diagram-1.svg`) into the `/docs/` subdirectory. Safely deleted legacy rotated barcode test snippet `test_print.html` and updated all system whitelists in the pre-commit hooks, core safety rules, and the App Master Reference to enforce absolute root isolation (Core Safety Protocol 6).
 
 ## [1.1.1] - 2026-05-24
 
