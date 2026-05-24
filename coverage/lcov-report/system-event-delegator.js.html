@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1462</span>
+                <span class='fraction'>0/1472</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1146</span>
+                <span class='fraction'>0/1160</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1195</span>
+                <span class='fraction'>0/1199</span>
             </div>
         
             
@@ -1913,7 +1913,13 @@
 <a name='L1848'></a><a href='#L1848'>1848</a>
 <a name='L1849'></a><a href='#L1849'>1849</a>
 <a name='L1850'></a><a href='#L1850'>1850</a>
-<a name='L1851'></a><a href='#L1851'>1851</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1851'></a><a href='#L1851'>1851</a>
+<a name='L1852'></a><a href='#L1852'>1852</a>
+<a name='L1853'></a><a href='#L1853'>1853</a>
+<a name='L1854'></a><a href='#L1854'>1854</a>
+<a name='L1855'></a><a href='#L1855'>1855</a>
+<a name='L1856'></a><a href='#L1856'>1856</a>
+<a name='L1857'></a><a href='#L1857'>1857</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2030,6 +2036,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3539,6 +3548,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3846,7 +3858,10 @@
 <span class="cstat-no" title="statement not covered" >                    switchTab('socialz');</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_switchTab_nexl':
-<span class="cstat-no" title="statement not covered" >                    switchTab('nexl');</span>
+<span class="cstat-no" title="statement not covered" >                    switchTab('nexuz');</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_openForceSyncModal':
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.openForceSyncModal === 'function') <span class="cstat-no" title="statement not covered" >window.openForceSyncModal();</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_window_closeForceSyncModal':
 <span class="cstat-no" title="statement not covered" >                    if (typeof window.closeForceSyncModal === 'function') <span class="cstat-no" title="statement not covered" >window.closeForceSyncModal();</span></span>
@@ -4456,13 +4471,13 @@
 <span class="cstat-no" title="statement not covered" >                    exportLabelzPDF();</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_showNexlPane_importz':
-<span class="cstat-no" title="statement not covered" >                    showNexlPane('importz');</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.showNexlPane === 'function') <span class="cstat-no" title="statement not covered" >window.showNexlPane('importz');</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_showNexlPane_salez':
-<span class="cstat-no" title="statement not covered" >                    showNexlPane('salez');</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.showNexlPane === 'function') <span class="cstat-no" title="statement not covered" >window.showNexlPane('salez');</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_showNexlPane_brainz':
-<span class="cstat-no" title="statement not covered" >                    showNexlPane('brainz');</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.showNexlPane === 'function') <span class="cstat-no" title="statement not covered" >window.showNexlPane('brainz');</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_document_getElementById_orderF':
 <span class="cstat-no" title="statement not covered" >                    document.getElementById('orderFiles').click();</span>
@@ -5280,7 +5295,7 @@
 <span class="cstat-no" title="statement not covered" >                    updateLabelCanvasSize();</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'change_updateLabelCanvasOrientation':
-<span class="cstat-no" title="statement not covered" >                    updateLabelCanvasOrientation();</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.updateLabelCanvasOrientation === 'function') <span class="cstat-no" title="statement not covered" >window.updateLabelCanvasOrientation();</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'change_updateLabelCanvasBg':
 <span class="cstat-no" title="statement not covered" >                    updateLabelCanvasBg();</span>
@@ -5389,6 +5404,9 @@
 <span class="cstat-no" title="statement not covered" >                    if (typeof window.handleStyleToggle === 'function') {</span>
 <span class="cstat-no" title="statement not covered" >                        window.handleStyleToggle(el.getAttribute('data-style'));</span>
                     }
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'change_handleManualAvatarUpload':
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.handleManualAvatarUpload === 'function') <span class="cstat-no" title="statement not covered" >window.handleManualAvatarUpload(el);</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'change_scraperFileInput':
 <span class="cstat-no" title="statement not covered" >                    if (typeof window.change_scraperFileInput === 'function') <span class="cstat-no" title="statement not covered" >window.change_scraperFileInput(event);</span></span>
@@ -5620,7 +5638,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-23T04:09:26.302Z
+                at 2026-05-24T08:28:02.281Z
             </div>
         <script src="prettify.js"></script>
         <script>
