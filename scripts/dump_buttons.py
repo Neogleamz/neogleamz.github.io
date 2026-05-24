@@ -1,4 +1,4 @@
-﻿import re
+import re
 with open('index.html', 'r', encoding='utf-8') as f:
     html = f.read()
 
@@ -18,5 +18,5 @@ for m in matches:
     
     out.append(f"{pane} | {click} | {text}")
 
-with open('all_buttons.txt', 'w', encoding='utf-8') as f:
+with open('diagnostics/all_buttons.txt', 'w', encoding='utf-8') as f:
     f.write('\n'.join(out))
