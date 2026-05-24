@@ -1,8 +1,14 @@
+/* global initFabricCanvas */
 const fs = require('fs');
 const path = require('path');
 
 describe('Labelz PDF Export', () => {
     let createdImage = null;
+    let originalImage = null;
+
+    afterEach(() => {
+        global.Image = originalImage;
+    });
 
     beforeEach(() => {
         document.body.innerHTML = `
@@ -38,7 +44,7 @@ describe('Labelz PDF Export', () => {
             getObjects: jest.fn().mockReturnValue(['mock_element'])
         };
 
-        const OriginalImage = global.Image;
+        originalImage = global.Image;
         global.Image = class {
             constructor() {
                 this._src = '';

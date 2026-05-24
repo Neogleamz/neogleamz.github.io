@@ -255,8 +255,8 @@ function updateLabelCanvasSize() {
     
     // Reset zoom
     currentZoom = 1;
-    if (typeof updateLabelCanvasOrientation === 'function') {
-        updateLabelCanvasOrientation();
+    if (typeof window.updateLabelCanvasOrientation === 'function') {
+        window.updateLabelCanvasOrientation();
     } else {
         zoomLabelzCanvas('fit');
     }
@@ -1026,7 +1026,7 @@ window.exportLabelzPDF = function() {
         imgStyle = 'transform-origin: top left; transform: rotate(90deg) translateY(-100%);';
     }
 
-    const img = new Image();
+    const img = new window.Image();
     img.onload = function() {
         printArea.innerHTML = window.safeHTML(`
             <style>@page { size: ${pageW}in ${pageH}in; margin: 0; }</style>
