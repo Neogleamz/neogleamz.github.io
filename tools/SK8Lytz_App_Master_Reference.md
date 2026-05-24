@@ -732,3 +732,9 @@ To prevent race conditions during simultaneous webhook transmissions (e.g. order
 
 ### Diagnostic & Administration Scripts
 To preserve repository cleanliness, all one-shot Python/JS diagnostic utilities, trace scripts, and administrative hooks (such as dump_buttons.py, trace3.py, and database schema checkers) MUST be stored exclusively inside the scripts/ directory. No loose diagnostic or utility scripts are permitted to reside in the repository root.
+
+### Root Directory Isolation & Whitelisting Standard (CRITICAL)
+To maintain absolute workspace hygiene, a strict, programmatic root-level file whitelist is enforced globally. 
+* **Whitelisted Root Files:** The only authorized files permitted in the repository root are configuration assets (`.gitignore`, `.eslintrc.json`, `eslint.config.mjs`, `jest.config.js`, `.hintrc`, `.htmlhintrc`, `.prettierrc`, `.prettierignore`, `package.json`, `package-lock.json`, `.env.example`, `.env.local`), core markup templates (`index.html`, `qa-dashboard.html`, `test_print.html`), and standard documentation (`README.md`, `CHANGELOG.md`, `nomenclature_dictionary.md`, `test_shared.md`, `diagram-1.svg`).
+* **Interactive Diagnostic Output Rule:** Any diagnostic outputs, console logs, buttons dumps (such as `all_buttons.txt`, `modals_trace.txt`, `pane_orders.txt`), or scratchpads must be created either inside a dedicated `/diagnostics/` subfolder, or securely stored under the local developer sandbox `C:\Users\Chriviper\.gemini\antigravity-ide\brain\<conversation-id>/scratch/`.
+* **Programmatic Git Hook Guardrail:** Enforced via [.githooks/pre-commit](file:///d:/GitHub/neogleamz.github.io/.githooks/pre-commit) check, which automatically runs during any `git commit` to parse staged changes. If any unwhitelisted root-level file is detected, the hook aborts the commit transaction immediately.
