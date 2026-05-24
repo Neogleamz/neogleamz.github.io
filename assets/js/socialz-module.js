@@ -342,7 +342,7 @@
             const container = document.getElementById('skater-grid');
 
             if (!isCompact) {
-                container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 transition-all duration-300 min-w-full";
+                container.className = "socialz-roster-grid transition-all duration-300 min-w-full";
             } else {
                 container.className = "block transition-all duration-300 min-w-full overflow-x-auto";
             }
@@ -441,9 +441,9 @@
                         const ytHtml = generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);
                         const fbHtml = generateSocial(s.links.fb, s.followers.fb, 'fa-facebook', 'blue', s.handles.fb);
 
-                        return `<div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color);">
-               <div style="display: flex; flex-direction: column; z-index: 1;">
-                 <div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column;">
+                        return `<div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color); min-width: 0; width: 100%;">
+               <div style="display: flex; flex-direction: column; z-index: 1; min-width: 0; width: 100%;">
+                 <div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                     <div class="grid-stack" style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
                        <div style="background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
@@ -473,7 +473,7 @@
                         <button class="socialz-hover-color-orange" data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;"><i class="fa-solid fa-pen"> </i> EDIT</button>
                     </div>
                 </div></div>
-               <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
+               <div style="margin-top: auto; padding: 16px; display: flex; justify-content: flex-start; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto; min-width: 0; width: 100%;">
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
                 </div>
                </div>
@@ -508,9 +508,9 @@
                         const ytHtml = generateSocial(s.links.yt, s.followers.yt, 'fa-youtube', 'red', s.handles.yt);
                         const fbHtml = generateSocial(s.links.fb, s.followers.fb, 'fa-facebook', 'blue', s.handles.fb);
 
-                        return `<div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color);">
-               <div style="display: flex; flex-direction: column; z-index: 1;">
-                 <div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column;">
+                        return `<div class="socialz-influencer-card grid-stack" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; box-shadow: 0 4px 6px var(--shadow-color); min-width: 0; width: 100%;">
+               <div style="display: flex; flex-direction: column; z-index: 1; min-width: 0; width: 100%;">
+                 <div style="padding: 12px 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                     <div class="grid-stack" style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color);">
                        <div style="background: linear-gradient(to bottom right, #fb923c, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; z-index: 0;">${s.name.charAt(0)}</div>
@@ -540,7 +540,7 @@
                         <button class="socialz-hover-color-orange" data-click="click_editSkater" data-index="${originalIndex}" style="font-size: 11px; font-weight: bold; color: #f97316; border:none; background:none; cursor:pointer;"><i class="fa-solid fa-pen"> </i> EDIT</button>
                     </div>
                 </div></div>
-               <div style="margin-top: auto; padding: 16px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto;">
+               <div style="margin-top: auto; padding: 16px; display: flex; justify-content: flex-start; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-input); overflow-x: auto; min-width: 0; width: 100%;">
                    ${igHtml}${ttHtml}${ytHtml}${fbHtml}
                 </div>
                </div>
