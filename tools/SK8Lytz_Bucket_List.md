@@ -529,6 +529,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 **Epic: Socialz Cards Flex & Scaling Fix**
-*(Completed — 2026-05-24)*
-- [x] style/socialz-cards-flex-scaling : **Socialz Cards Flex & Scaling Fix** - Fix the issue where the Socialz tab cards do not flex or scale correctly (the right side gets chopped off) when scaled down before snapping to 2 cards. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+*(Shipped v1.1.2 — 2026-05-24)*
+- [🚀] style/socialz-cards-flex-scaling : **Socialz Cards Flex & Scaling Fix** - Fix the issue where the Socialz tab cards do not flex or scale correctly (the right side gets chopped off) when scaled down before snapping to 2 cards. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
