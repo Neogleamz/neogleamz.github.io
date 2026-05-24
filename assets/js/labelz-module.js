@@ -8,9 +8,22 @@
 // ============================================================
 // LABELZ MODULE — Neogleamz Custom Label Manager (Canvas)
 // ============================================================
-// Manages custom thermal-printed labels using Fabric.js and bwip-js.
-// Integrated with Catalog for barcode mappings.
-// ============================================================
+// Global hotfix for Fabric.js text baseline Chrome/Edge enum warning
+(function() {
+    if (typeof window !== 'undefined' && window.CanvasRenderingContext2D) {
+        const descriptor = Object.getOwnPropertyDescriptor(window.CanvasRenderingContext2D.prototype, 'textBaseline');
+        if (descriptor && descriptor.set) {
+            const originalSet = descriptor.set;
+            Object.defineProperty(window.CanvasRenderingContext2D.prototype, 'textBaseline', {
+                set: function(value) {
+                    originalSet.call(this, value === 'alphabetical' ? 'alphabetic' : value);
+                },
+                configurable: true,
+                enumerable: true
+            });
+        }
+    }
+})();
 
 const _LABEL_STORAGE_BUCKET = 'sop-media';
 
