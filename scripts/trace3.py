@@ -1,4 +1,4 @@
-﻿import re
+import re
 
 with open('assets/js/system-event-delegator.js', 'r', encoding='utf-8') as f:
     sed = f.read()
@@ -46,5 +46,5 @@ for click_fn, mid in triggers:
                 
         results.append(f"{pane} | {mid} ({title}) | {click_fn} | {text}")
 
-with open('modals_trace.txt', 'w', encoding='utf-8') as f:
+with open('diagnostics/modals_trace.txt', 'w', encoding='utf-8') as f:
     f.write('\n'.join(results))

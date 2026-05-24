@@ -29,7 +29,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *0 native system vulnerabilities globally found.* ✅
 
 ### 🟠 Stale Warnings & Orphaned Scripts
-- [ ] debt/orphan-diagnostic-dumps : **Root Diagnostic Orphan Dumps** - Move root-level diagnostic files (all_buttons.txt, modals_trace.txt, pane_orders.txt) to a consolidated diagnostics/ folder to ensure perfect repository hygiene. [🤖 Antigravity] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+*Clean sweep — all technical debt successfully resolved and archived!* ✅
 
 ### 🟡 Legacy HTML Audits
 *Clean sweep — all legacy HTML audits successfully resolved!* ✅
@@ -39,6 +39,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Standalone Technical Debt Sweep**
+*(Archived — 2026-05-24)*
+- [🚀] debt/orphan-diagnostic-dumps : **Root Diagnostic Orphan Dumps** - Move root-level diagnostic files (all_buttons.txt, modals_trace.txt, pane_orders.txt) to a consolidated diagnostics/ folder to ensure perfect repository hygiene. [🤖 Antigravity] [🧠 1k / 1k] [💸 $0.01 / $0.01]
 
 ### Target: `main`
 **Epic: Swarm HTML Utility Audits**
