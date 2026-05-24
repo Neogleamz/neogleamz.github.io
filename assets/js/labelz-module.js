@@ -620,9 +620,14 @@ function onCanvasSelection(_e) {
             <div><label style="font-size:10px;">Scale H%</label><input type="number" data-app-change="lblzUpdObj" data-key="scaleY" data-type="float100" value="${Math.round(obj.scaleY*100)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
         </div>
         <div>
-            <label style="font-size:10px;">Rotation</label>
-            <input type="range" min="0" max="360" value="${obj.angle || 0}" data-app-input="lblzUpdObjSync" data-key="angle" data-type="float" data-sync-id="lblzRotDisp" style="width:100%;">
-            <span id="lblzRotDisp" style="font-size:10px;">${obj.angle||0}</span>°
+            <label style="font-size:10px; display:block; margin-bottom:2px;">Rotation</label>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <input type="range" id="lblzRotSlider" min="0" max="360" value="${Math.round(obj.angle || 0)}" data-app-input="lblzUpdObjSync" data-key="angle" data-type="float" data-sync-id="lblzRotInput" style="flex:1; margin:0;">
+                <div style="display:flex; align-items:center; gap:2px;">
+                    <input type="number" id="lblzRotInput" min="0" max="360" value="${Math.round(obj.angle || 0)}" data-app-input="lblzUpdObjSync" data-key="angle" data-type="float" data-sync-id="lblzRotSlider" style="width:50px; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white; text-align:right;">
+                    <span style="font-size:11px; color:var(--text-muted);">°</span>
+                </div>
+            </div>
         </div>
         <div>
             <label style="font-size:10px;">Opacity</label>
@@ -1124,7 +1129,13 @@ document.addEventListener('input', (e) => {
         const syncSuffix = e.target.dataset.syncSuffix || '';
         if (syncId) {
             const syncEl = document.getElementById(syncId);
-            if (syncEl) syncEl.innerText = val + syncSuffix;
+            if (syncEl) {
+                if (syncEl.tagName === 'INPUT') {
+                    syncEl.value = val;
+                } else {
+                    syncEl.innerText = val + syncSuffix;
+                }
+            }
         }
 
         if (e.target.dataset.type === 'float') val = parseFloat(val);
