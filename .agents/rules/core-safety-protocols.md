@@ -44,7 +44,7 @@ description: "Mission-critical constraints regarding Security, Version Control, 
 - **Immutable Root Whitelist:** You are STRICTLY FORBIDDEN from creating, writing, or outputting any loose diagnostic files, one-shot diagnostic scripts, text dumps, or scratchpads directly into the repository root. All temporary or development files MUST be written directly to `C:\Users\Chriviper\.gemini\antigravity-ide\brain\<conversation-id>/scratch/` or inside standard subfolders like `/scripts/` or `/diagnostics/`.
 - **Whitelisted Root Files:** The only files authorized to live in the root directory are:
   - Configuration & Config Specs: `.gitignore`, `.env.example`, `.env.local`, `.eslintrc.json`, `eslint.config.mjs`, `.hintrc`, `.htmlhintrc`, `.prettierignore`, `.prettierrc`, `jest.config.js`, `package.json`, `package-lock.json`
-  - Core Markup & Styling: `index.html`, `qa-dashboard.html`, `test_print.html`
-  - Documentation Assets: `README.md`, `CHANGELOG.md`, `nomenclature_dictionary.md`, `test_shared.md`, `diagram-1.svg`
+  - Core Markup & Styling: `index.html`, `qa-dashboard.html`
+  - Documentation Assets: `README.md`, `CHANGELOG.md`
 - **Hygiene Enforcement:** Every time you execute `/health_check` or `/wind_down`, you must scan the root directory. If any un-whitelisted file is detected, you must instantly queue a task to clean it up.
 

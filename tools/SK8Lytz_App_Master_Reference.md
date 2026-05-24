@@ -735,6 +735,21 @@ To preserve repository cleanliness, all one-shot Python/JS diagnostic utilities,
 
 ### Root Directory Isolation & Whitelisting Standard (CRITICAL)
 To maintain absolute workspace hygiene, a strict, programmatic root-level file whitelist is enforced globally. 
-* **Whitelisted Root Files:** The only authorized files permitted in the repository root are configuration assets (`.gitignore`, `.eslintrc.json`, `eslint.config.mjs`, `jest.config.js`, `.hintrc`, `.htmlhintrc`, `.prettierrc`, `.prettierignore`, `package.json`, `package-lock.json`, `.env.example`, `.env.local`), core markup templates (`index.html`, `qa-dashboard.html`, `test_print.html`), and standard documentation (`README.md`, `CHANGELOG.md`, `nomenclature_dictionary.md`, `test_shared.md`, `diagram-1.svg`).
+* **Whitelisted Root Files:** The only authorized files permitted in the repository root are configuration assets (`.gitignore`, `.eslintrc.json`, `eslint.config.mjs`, `jest.config.js`, `.hintrc`, `.htmlhintrc`, `.prettierrc`, `.prettierignore`, `package.json`, `package-lock.json`, `.env.example`, `.env.local`), core markup templates (`index.html`, `qa-dashboard.html`), and standard documentation (`README.md`, `CHANGELOG.md`).
 * **Interactive Diagnostic Output Rule:** Any diagnostic outputs, console logs, buttons dumps (such as `all_buttons.txt`, `modals_trace.txt`, `pane_orders.txt`), or scratchpads must be created either inside a dedicated `/diagnostics/` subfolder, or securely stored under the local developer sandbox `C:\Users\Chriviper\.gemini\antigravity-ide\brain\<conversation-id>/scratch/`.
 * **Programmatic Git Hook Guardrail:** Enforced via [.githooks/pre-commit](file:///d:/GitHub/neogleamz.github.io/.githooks/pre-commit) check, which automatically runs during any `git commit` to parse staged changes. If any unwhitelisted root-level file is detected, the hook aborts the commit transaction immediately.
+
+---
+
+## 📚 8. Supplementary Architectural Documentation
+
+To maintain deep topological and execution context for developer agents, the following dedicated architectural resources are maintained inside the `/docs/` directory:
+
+| Document / Asset | Absolute Path | Description / Core Structure | Key Contents |
+| :--- | :--- | :--- | :--- |
+| **Canonical Nomenclature Dictionary** | [nomenclature_dictionary.md](file:///d:/GitHub/neogleamz.github.io/docs/nomenclature_dictionary.md) | Standardizes the mapping between user-facing UI Tab Labels, legacy DOM IDs, Mandated Canonical Names, and their associated JavaScript Modules. | Includes a complete Mermaid-based Architectural Topology Blueprint of the entire application layout, button lists, and modal routes. |
+| **Global Architecture Blueprint** | [diagram-1.svg](file:///d:/GitHub/neogleamz.github.io/docs/diagram-1.svg) | A fully compiled high-resolution vector SVG blueprint rendering all Neogleamz hubs, modal triggers, and dynamic visual interactions. | Provides a high-resolution topological visual matching the core Nomenclature dictionary structure. |
+| **Task Engine Evolution** | [task_engine_evolution.md](file:///d:/GitHub/neogleamz.github.io/docs/task_engine_evolution.md) | Documents the Vanilla JS Kanban board and split-pane resizer architectures, contrasting feature sets with linear/agile tools. | Contains a detailed Database ERD mapping `PROJECTZ`, `CYCLEZ`, `SPRINTZ`, `TASKZ`, `TASK_DEPENDENCIES`, and `TASK_TEMPLATES` schemas. |
+| **Shared Archive Explorer Diagram** | [test_shared.md](file:///d:/GitHub/neogleamz.github.io/docs/test_shared.md) | A focused architectural map illustrating shared UI sub-modules. | Visualizes how the BATCHEZ pane (MAKERZ) and PACKERZ pane (FULFILLZ) seamlessly leverage a shared Archive Explorer. |
+
+All developers and subagents must consult these specialized documents to maintain system-wide architectural consistency.
