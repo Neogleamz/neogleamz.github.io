@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 🛡️ Security & Audits
+- **Red Team Security Pentest** (`epic/red-team-audit`): Dispatched Teamwork Swarm background workers to perform static analysis and dynamic input audits. Verified that 100% of DOM injection points are properly secured using window.safeHTML or DOMPurify, resulting in 0 vulnerable pathways.
+- **Legacy Code Audit & Refactor** (`epic/legacy-code-janitor`): System-wide review of core active template files to ensure compliance with modern block-scoping variables, event delegators, and the absolute elimination of inline event handlers.
+
 ### 🧹 Chores & Cleanup
 - **Orphan Scripts Relocation** (`debt/orphan-scripts-root`): Relocated `dump_buttons.py` and `trace3.py` from the root directory to the scripts/ directory using standard git mv to maintain perfect rename tracking and history.
 

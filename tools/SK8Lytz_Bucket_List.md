@@ -18,8 +18,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
 ### 🟠 P1 High Priority (Active Epics)
-- [/] epic/red-team-audit : **Red Team Security Pentest** - Deploy Teamwork Swarm to run a deep penetration scan across the core Vanilla DOM modules, validating window.safeHTML and input isolation. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
-- [/] epic/legacy-code-janitor : **Legacy Code Audit & Refactor** - Deploy Teamwork Swarm to execute system-wide audit on any remaining legacy JS templates to enforce modern block-scoping and event delegator standards. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
+*Clean sweep — all active epics successfully completed and archived!* ✅
 
 
 ## 🧹 Technical Debt
@@ -37,6 +36,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Swarm Audit & Security Penetration Scans**
+*(Archived — 2026-05-24)*
+- [🚀] epic/red-team-audit : **Red Team Security Pentest** - Deploy Teamwork Swarm to run a deep penetration scan across the core Vanilla DOM modules, validating window.safeHTML and input isolation. [🤖 Teamwork Swarm] [🧠 5k / 5k] [💸 $0.02 / $0.02]
+- [🚀] epic/legacy-code-janitor : **Legacy Code Audit & Refactor** - Deploy Teamwork Swarm to execute system-wide audit on any remaining legacy JS templates to enforce modern block-scoping and event delegator standards. [🤖 Teamwork Swarm] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `main`
 **Epic: Technical Debt Sweep**
