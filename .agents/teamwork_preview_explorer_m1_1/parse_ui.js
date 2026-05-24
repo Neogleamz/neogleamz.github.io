@@ -1,11 +1,9 @@
 const fs = require('fs');
 const html = fs.readFileSync('d:/GitHub/neogleamz.github.io/index.html', 'utf8');
 const idRegex = /id=["']([^"']+)["']/g;
-const classRegex = /class=["']([^"']+)["']/g;
 const dataTabRegex = /data-tab=["']([^"']+)["']/g;
 
 let ids = new Set();
-let classes = new Set();
 let dataTabs = new Set();
 let match;
 

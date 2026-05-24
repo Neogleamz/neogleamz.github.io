@@ -4,13 +4,16 @@ export default [
   js.configs.recommended,
   {
     ignores: [
-      "node_modules/",
-      "supabase/",
-      ".git/",
-      "scripts/",
-      ".agents/",
-      "docs/"
-    ],
+      "**/node_modules/**",
+      "**/supabase/**",
+      "**/.git/**",
+      "**/scripts/**",
+      "**/.agents/**",
+      "**/docs/**",
+      "**/coverage/**"
+    ]
+  },
+  {
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -79,6 +82,8 @@ export default [
         "applyTableInteractivity": "writable",
         "autofillNeoNames": "writable",
         "backfillFinancials": "writable",
+        "afterAll": "writable",
+        "afterEach": "writable",
         "beforeAll": "writable",
         "beforeEach": "writable",
         "billingTrace": "writable",
