@@ -28,6 +28,7 @@ trigger: always_on
 - **Topological Integrity:** You are strictly forbidden from creating, deleting, or moving any buttons, modals, or UI elements without simultaneously updating the Mermaid Architectural Blueprint in `@/tools/SK8Lytz_App_Master_Reference.md`.
 - **Contradiction Halt:** If the Reference file contradicts Live Code, HALT and request human clarification.
 - **Discovery Mode:** If charting undocumented protocols, explicitly declare "Discovery Mode" to authorize logical deduction sequences out-of-bounds from the Reference file.
+- **Nomenclature & Testing Fidelity:** You are STRICTLY FORBIDDEN from guessing or hallucinating UI tab labels, panel names, button texts, or workflow locations. Any time you generate manual testing guides or describe the application layout, you MUST explicitly map them to the canonical labels (`STOCKPILEZ`, `MAKERZ`, `FULFILLZ`, `REVENUEZ`, `SOCIALZ`, `NEXUZ`) and precise DOM targets defined in Section 0 of [SK8Lytz_App_Master_Reference.md](file:///d:/GitHub/neogleamz.github.io/tools/SK8Lytz_App_Master_Reference.md). If a component is modified, you must mathematically verify which Hub and Pane it belongs to before rendering instructions.
 
 ### 5. Continuous Trunk Hydration (The Concurrency Lock)
 - **Frequent Merging:** When operating on long-running feature or epic branches (`feat/*`, `epic/*`), you must frequently execute `git merge main` to absorb parallel completed tasks.
