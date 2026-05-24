@@ -28,14 +28,19 @@ This document acts as the permanent, living task tracker integrated directly wit
 *0 native system vulnerabilities globally found.* ✅
 
 ### 🟠 Stale Warnings & Orphaned Scripts
-- [🚀] debt/eslint-warnings-sweep : Resolve the 11 ESLint warnings (no-undef on updateLabelCanvasOrientation, showNexlPane, Image, and no-unused-vars) to achieve 100% warning-free lint output. [🤖 Antigravity] [🧠 4.5k / 5k] [💸 $0.02 / $0.02]
-- [🚀] debt/orphan-scripts-root : Relocate remaining 2 orphaned scripts (dump_buttons.py, trace3.py) from root to tools/ or scripts/ directories. [🤖 Antigravity] [🧠 1.5k / 1.5k] [💸 $0.01 / $0.01]
+*Clean sweep — all technical debt successfully resolved and archived!* ✅
 
 
 
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Technical Debt Sweep**
+*(Archived — 2026-05-24)*
+- [🚀] debt/eslint-warnings-sweep : Resolve the 11 ESLint warnings (no-undef on updateLabelCanvasOrientation, showNexlPane, Image, and no-unused-vars) to achieve 100% warning-free lint output. [🤖 Antigravity] [🧠 4.5k / 5k] [💸 $0.02 / $0.02]
+- [🚀] debt/orphan-scripts-root : Relocate remaining 2 orphaned scripts (dump_buttons.py, trace3.py) from root to tools/ or scripts/ directories. [🤖 Antigravity] [🧠 1.5k / 1.5k] [💸 $0.01 / $0.01]
 
 ### Target: `main`
 **Epic: Architecture and Task Engine Sweeps**
