@@ -1,14 +1,20 @@
 # SK8Lytz Application Changelog
 
 ## [Unreleased]
-- **Hub Hierarchy & Nomenclature Audit** (`chore/hub-hierarchy-nomenclature-audit`): Mapped a comprehensive hierarchy chart of all Hubz, Pagez, and Modalz, established official nomenclature, and refactored the entire repository to purge legacy references.
-- **Task Engine Competitive Analysis** (`research/task-engine-competitive-analysis`): Analyzed the Task Engine architecture against industry leaders and generated an improvement proposal.
-- **Recommission Avatar Engine** (`feat/unavatar-supabase-sync`): Re-enabled the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance.
-- **qa-dashboard.html innerHTML** (debt/security): Wrapped .innerHTML assignments with window.safeHTML() to enforce zero-trust UI.
-- **check_syntax.js orphan** (debt/cleanup): Relocated the orphan script check_syntax.js from root to the scripts/ directory.
-- **Avatar Upload Storage Fix** (`fix/socialz-avatar-upload`): Created the `avatars` Storage bucket with RLS policies and restored the missing upload UI text to repair the manual upload crash.
-- **Lightweight Bug Branching Rule** (`chore/core-safety-evolution`): Evolved the core safety protocols to permanently enforce mandatory isolated branching (`fix/...`) for all ad-hoc mid-session bug reports.
-- **Anti-Hallucination Formatting Lock** (`chore/coding-preferences-evolution`): Injected a strict format adherence rule into the persona mandates to explicitly ban non-compliant markdown alerts and enforce clickable hyperlink formatting.
+
+## [1.1.1] - 2026-05-24
+
+### ✨ Features & Bug Fixes
+- **Recommission Avatar Engine** (`feat/unavatar-supabase-sync`): Re-enabled the Avatar Migration Engine to fetch skater avatars from unavatar.io, upload them to Supabase, and resolve external reliance.
+- **Avatar Upload Storage Fix** (`fix/socialz-avatar-upload`): Restored `avatars` storage bucket constraints and manual upload form inputs to prevent profile save failures.
+- **ESLint Warnings Sweep & Bidirectional Rotation Sync** (`debt/eslint-warnings-sweep`): Resolved all static linter warnings, deployed a Canvas prototype baseline hotfix for Fabric.js CDN compatibility, and built inline slider-number input widgets with bidirectional binding for the FULFILLZ -> LABELZ Pane designer.
+
+### 🧹 Chores & Cleanup
+- **Hub Hierarchy & Nomenclature Audit** (`chore/hub-hierarchy-nomenclature-audit`): Mapped canonical schema boundaries and nomenclature across Hubz, Panes, and Modals, auditing the repository to align with SK8Lytz App standards.
+- **Task Engine Competitive Analysis** (`research/task-engine-competitive-analysis`): Conducted detailed competitive architectural studies against Monday/Asana to plan next-generation features.
+- **Orphan Scripts Relocation** (`debt/cleanup`): Pruned and organized loose root scripts, moving `check_syntax.js` to the `scripts/` directory.
+- **HTML DOM Hardening** (`debt/security`): Secured inline scripts and iframe parsing configurations inside `qa-dashboard.html` with safeHTML wrappers.
+- **Safety and Persona Protocols Evolved** (`chore/core-safety-evolution`, `chore/coding-preferences-evolution`): Codified strict bug-branching requirements, clickable hyperlinks, and standard alertPersonas.
 
 ## [1.1.0] - 2026-05-22
 ### ✨ Features & Bug Fixes
