@@ -18,8 +18,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
 ### 🟠 P1 High Priority (Active Epics)
-- [/] debt/legacy-audit-qa-dashboard : **Legacy QA Dashboard Refactor Swarm** - Dispatched Teamwork Swarm to execute full legacy audit and refactor on qa-dashboard.html. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
-- [/] debt/legacy-audit-test-print : **Legacy Test Print Refactor Swarm** - Dispatched Teamwork Swarm to execute full legacy audit and refactor on test_print.html. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]
+*Clean sweep — all active epics successfully completed and archived!* ✅
 
 
 ## 🧹 Technical Debt
@@ -33,14 +32,19 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all technical debt successfully resolved and archived!* ✅
 
 ### 🟡 Legacy HTML Audits
-- [ ] debt/legacy-audit-qa-dashboard : **qa-dashboard.html** - Execute /legacy_audit and refactor target to enforce Vanilla JS rules, removing any inline layout styles. [🤖 Antigravity] [🧠 1k / 1.5k] [💸 $0.01 / $0.01]
-- [ ] debt/legacy-audit-test-print : **test-print.html** - Execute /legacy_audit and refactor target to enforce Vanilla JS rules, removing any inline layout styles. [🤖 Antigravity] [🧠 0.5k / 1k] [💸 $0.01 / $0.01]
+*Clean sweep — all technical debt successfully resolved and archived!* ✅
 
 
 
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Swarm HTML Utility Audits**
+*(Archived — 2026-05-24)*
+- [🚀] debt/legacy-audit-qa-dashboard : **qa-dashboard.html** - Execute /legacy_audit and refactor target to enforce Vanilla JS rules, removing any inline layout styles. [🤖 Antigravity] [🧠 1k / 1.5k] [💸 $0.01 / $0.01]
+- [🚀] debt/legacy-audit-test-print : **test-print.html** - Execute /legacy_audit and refactor target to enforce Vanilla JS rules, removing any inline layout styles. [🤖 Antigravity] [🧠 0.5k / 1k] [💸 $0.01 / $0.01]
 
 ### Target: `main`
 **Epic: Swarm Audit & Security Penetration Scans**
