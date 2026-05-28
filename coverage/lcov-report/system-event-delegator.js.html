@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1472</span>
+                <span class='fraction'>0/1467</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1160</span>
+                <span class='fraction'>0/1158</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1199</span>
+                <span class='fraction'>0/1195</span>
             </div>
         
             
@@ -1915,11 +1915,7 @@
 <a name='L1850'></a><a href='#L1850'>1850</a>
 <a name='L1851'></a><a href='#L1851'>1851</a>
 <a name='L1852'></a><a href='#L1852'>1852</a>
-<a name='L1853'></a><a href='#L1853'>1853</a>
-<a name='L1854'></a><a href='#L1854'>1854</a>
-<a name='L1855'></a><a href='#L1855'>1855</a>
-<a name='L1856'></a><a href='#L1856'>1856</a>
-<a name='L1857'></a><a href='#L1857'>1857</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1853'></a><a href='#L1853'>1853</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2818,17 +2814,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2879,7 +2872,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -4674,20 +4666,14 @@
                     }
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_addDashboardSOPRow':
-                    {
-                        const area = <span class="cstat-no" title="statement not covered" >document.getElementById('sopMasterEditorArea');</span>
-<span class="cstat-no" title="statement not covered" >                        if (area) {</span>
-                            let newRow = <span class="cstat-no" title="statement not covered" >document.createElement('div');</span>
-                            const prodId = <span class="cstat-no" title="statement not covered" >el.getAttribute('data-prodid') || 'unknown';</span>
-                            const sopType = <span class="cstat-no" title="statement not covered" >el.getAttribute('data-soptype') || 'batches';</span>
-<span class="cstat-no" title="statement not covered" >                            newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, prodId, sopType));</span>
-                            let rowNode = <span class="cstat-no" title="statement not covered" >newRow.firstChild;</span>
-<span class="cstat-no" title="statement not covered" >                            if (rowNode) <span class="cstat-no" title="statement not covered" >area.appendChild(rowNode);</span></span>
-                        }
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.addSOPRow === 'function') {</span>
+<span class="cstat-no" title="statement not covered" >                        window.addSOPRow(el);</span>
                     }
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_addSOPRow_this':
-<span class="cstat-no" title="statement not covered" >                    addSOPRow(el);</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.addSOPRow === 'function') {</span>
+<span class="cstat-no" title="statement not covered" >                        window.addSOPRow(el);</span>
+                    }
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_window_closeArchiveExplorer':
 <span class="cstat-no" title="statement not covered" >                    window.closeArchiveExplorer();</span>
@@ -4735,7 +4721,9 @@
 <span class="cstat-no" title="statement not covered" >                    if(typeof toggleHorizontalPreview==='function') <span class="cstat-no" title="statement not covered" >toggleHorizontalPreview('packerzSopLeftPane', 'packerzSopPreviewCol', this);;</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_addPackerzSOPRow_this':
-<span class="cstat-no" title="statement not covered" >                    addPackerzSOPRow(el);</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.addPackerzSOPRow === 'function') {</span>
+<span class="cstat-no" title="statement not covered" >                        window.addPackerzSOPRow(el);</span>
+                    }
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_if_event_target_this_closeSOPM':
 <span class="cstat-no" title="statement not covered" >                    if(event.target===this)<span class="cstat-no" title="statement not covered" >closeSOPMediaPicker();</span></span>
@@ -5638,7 +5626,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-24T08:44:52.716Z
+                at 2026-05-28T06:23:08.126Z
             </div>
         <script src="prettify.js"></script>
         <script>

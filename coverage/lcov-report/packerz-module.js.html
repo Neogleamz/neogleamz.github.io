@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1314</span>
+                <span class='fraction'>0/1316</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/851</span>
+                <span class='fraction'>0/856</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1111</span>
+                <span class='fraction'>0/1113</span>
             </div>
         
             
@@ -2343,7 +2343,9 @@
 <a name='L2278'></a><a href='#L2278'>2278</a>
 <a name='L2279'></a><a href='#L2279'>2279</a>
 <a name='L2280'></a><a href='#L2280'>2280</a>
-<a name='L2281'></a><a href='#L2281'>2281</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L2281'></a><a href='#L2281'>2281</a>
+<a name='L2282'></a><a href='#L2282'>2282</a>
+<a name='L2283'></a><a href='#L2283'>2283</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3344,10 +3346,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -5620,14 +5624,16 @@ async function <span class="fstat-no" title="function not covered" >executePacke
     const sku = <span class="cstat-no" title="statement not covered" >btn ? (btn.getAttribute('data-prodid') || currentPackerzQaSku || 'unknown') : (currentPackerzQaSku || 'unknown');</span>
     const sopType = <span class="cstat-no" title="statement not covered" >btn ? (btn.getAttribute('data-soptype') || 'packerz') : 'packerz';</span>
 <span class="cstat-no" title="statement not covered" >    newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({text:""}, 999, sku, sopType));</span>
-    let rowNode = <span class="cstat-no" title="statement not covered" >newRow.firstChild;</span>
-<span class="cstat-no" title="statement not covered" >    if(btn &amp;&amp; btn.closest('.sop-step-row')) {</span>
+    let rowNode = <span class="cstat-no" title="statement not covered" >newRow.firstElementChild;</span>
+<span class="cstat-no" title="statement not covered" >    if (btn &amp;&amp; btn.closest) {</span>
         let currentRow = <span class="cstat-no" title="statement not covered" >btn.closest('.sop-step-row');</span>
-<span class="cstat-no" title="statement not covered" >        currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling);</span>
-    } else {
-        let wrapper = <span class="cstat-no" title="statement not covered" >document.getElementById('packerzLiveInlineRowsWrapper') || document.getElementById('packerzSopEditorRowsWrapper');</span>
-<span class="cstat-no" title="statement not covered" >        if(wrapper) <span class="cstat-no" title="statement not covered" >wrapper.appendChild(rowNode);</span></span>
+<span class="cstat-no" title="statement not covered" >        if (currentRow &amp;&amp; currentRow.parentNode) {</span>
+<span class="cstat-no" title="statement not covered" >            currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling);</span>
+<span class="cstat-no" title="statement not covered" >            return;</span>
+        }
     }
+    let wrapper = <span class="cstat-no" title="statement not covered" >document.getElementById('packerzLiveInlineRowsWrapper') || document.getElementById('packerzSopEditorRowsWrapper') || document.getElementById('packerzSopEditorArea');</span>
+<span class="cstat-no" title="statement not covered" >    if (wrapper) <span class="cstat-no" title="statement not covered" >wrapper.appendChild(rowNode);</span></span>
 }
 &nbsp;
 // API: Initialize Dropdown with Master Items
@@ -6910,7 +6916,7 @@ let sopSnapshotStream = <span class="cstat-no" title="statement not covered" >nu
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-24T08:44:52.716Z
+                at 2026-05-28T06:23:08.126Z
             </div>
         <script src="prettify.js"></script>
         <script>

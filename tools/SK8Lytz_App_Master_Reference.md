@@ -462,6 +462,13 @@ To prevent fluid cards (such as skater profile cards or team roster cards) insid
 2. **Card Grid Children**: Every direct grid child container (e.g., `.socialz-influencer-card`) MUST explicitly enforce `min-width: 0; width: 100%;`. Because browser-native grid and flex cell calculations default to minimum content size (`min-width: auto`), setting `min-width: 0` is mathematically required to unlock fluid shrink behavior.
 3. **Nested Flex Layouts**: Any inner flex sub-containers (e.g., social links row, button bars) within cards MUST also enforce `min-width: 0; width: 100%;` and utilize `flex-wrap: wrap` or overflow truncation (`.trunc-col`) to guarantee graceful content reflow without expanding the parent card boundaries.
 
+### Q. Login Theme Synchronization & Boot Progress
+To guarantee a mathematically unified, zero-glitch visual experience across active and unauthenticated states:
+1. **Dynamic Theme Inheritance**: The AUTHORITY ACCESS login screen dynamically inherits the saved operator theme from `localStorage` (`neogleamz_theme`). The `.login-container` background and `.login-card` consume standard CSS variables (`var(--bg-body)`, `var(--bg-glass)`, `var(--glass-border)`, and `var(--text-main)`) rather than hardcoded slate colors.
+2. **Dynamic Logo Asset Toggling**: The `.login-logo` asset MUST automatically swap using the CSS `content` property: serving the official orange Neogleamz logo (`neo_logo_orange.png`) in light mode and swapping to the white logo (`neo_logo_white.png`) inside dark theme states (`[data-theme="dark"]`).
+3. **Monospaced Boot Progress Area**: The `#bootProgressArea` structures (specifically `#bootStatusText`, monospaced substatus logs, and progress tracks) utilize transparent variables (`var(--bg-glass)`) and system text colors to ensure perfect, fluid readability across both dark and light modes.
+
+
 
 ## 🗄️ 3. Database Schemas (Supabase)
 

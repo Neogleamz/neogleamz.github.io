@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1835</span>
+                <span class='fraction'>0/1836</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1231</span>
+                <span class='fraction'>0/1243</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1438</span>
+                <span class='fraction'>0/1439</span>
             </div>
         
             
@@ -2660,7 +2660,11 @@
 <a name='L2595'></a><a href='#L2595'>2595</a>
 <a name='L2596'></a><a href='#L2596'>2596</a>
 <a name='L2597'></a><a href='#L2597'>2597</a>
-<a name='L2598'></a><a href='#L2598'>2598</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L2598'></a><a href='#L2598'>2598</a>
+<a name='L2599'></a><a href='#L2599'>2599</a>
+<a name='L2600'></a><a href='#L2600'>2600</a>
+<a name='L2601'></a><a href='#L2601'>2601</a>
+<a name='L2602'></a><a href='#L2602'>2602</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -5080,8 +5084,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -5091,6 +5097,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -7673,21 +7681,25 @@ function <span class="fstat-no" title="function not covered" >billingTrace(</spa
     const checklistHeader = <span class="cstat-no" title="statement not covered" >sopType === 'packerz' ? '3. CHECKLIST' : 'CHECKLIST';</span>
     const richTextHeader = <span class="cstat-no" title="statement not covered" >sopType === 'packerz' ? '4. Packing Instructions (Rich Text)' : '4. Rich Text Instructions';</span>
     
+    const qaTextareaId = <span class="cstat-no" title="statement not covered" >sopType === 'packerz' ? 'packerzAdminQA' : 'productionAdminQA';</span>
+    const qaPreviewId = <span class="cstat-no" title="statement not covered" >sopType === 'packerz' ? 'packerzAdminQAPreview' : 'productionAdminQAPreview';</span>
+    const rowsWrapperId = <span class="cstat-no" title="statement not covered" >sopType === 'packerz' ? 'packerzSopEditorArea' : 'sopMasterEditorArea';</span>
+    const addRowClickAttr = <span class="cstat-no" title="statement not covered" >sopType === 'packerz' ? 'data-click="click_addPackerzSOPRow"' : 'data-click="click_addDashboardSOPRow"';</span>
+&nbsp;
+    const cameraClickAction = <span class="cstat-no" title="statement not covered" >sopType === 'packerz' ? 'click_openSOPSnapshotCamera_packerz' : 'click_openSOPSnapshotCamera_production';</span>
+&nbsp;
     let printBtn = <span class="cstat-no" title="statement not covered" >`&lt;button class="sop-print-btn" data-click="click_printActiveSOP" style="background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981;"&gt;🖨️ Print&lt;/button&gt;`;</span>
-    let uploadBtn = <span class="cstat-no" title="statement not covered" >`&lt;button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="productionAdminQA" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase"&gt;☁️ Upload&lt;/button&gt;`;</span>
-    let photoBtn = <span class="cstat-no" title="statement not covered" >`&lt;button data-click="click_openSOPSnapshotCamera_dashboard" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;"&gt;📸 Photo&lt;/button&gt;`;</span>
+    let uploadBtn = <span class="cstat-no" title="statement not covered" >`&lt;button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="${qaTextareaId}" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase"&gt;☁️ Upload&lt;/button&gt;`;</span>
+    let photoBtn = <span class="cstat-no" title="statement not covered" >`&lt;button data-click="${cameraClickAction}" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;"&gt;📸 Photo&lt;/button&gt;`;</span>
     let guideBtn = <span class="cstat-no" title="statement not covered" >`&lt;button data-click="click_openSOPTokenGuide" style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B;"&gt;❓ Guide&lt;/button&gt;`;</span>
     let previewBtn = <span class="cstat-no" title="statement not covered" >`&lt;button data-click="click_toggleDashboardPreview" style="background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6;"&gt;👁️ Preview&lt;/button&gt;`;</span>
-&nbsp;
-    const qaTextareaId = <span class="cstat-no" title="statement not covered" >'productionAdminQA';</span>
-    const qaPreviewId = <span class="cstat-no" title="statement not covered" >'productionAdminQAPreview';</span>
-    const rowsWrapperId = <span class="cstat-no" title="statement not covered" >'sopMasterEditorArea';</span>
-    const addRowClickAttr = <span class="cstat-no" title="statement not covered" >'data-click="click_addDashboardSOPRow"';</span>
 &nbsp;
     const qaTextValue = <span class="cstat-no" title="statement not covered" >options.qaText || '';</span>
     const rowsHtml = <span class="cstat-no" title="statement not covered" >options.rowsHtml || '';</span>
     
-    const mainInputHandler = <span class="cstat-no" title="statement not covered" >'data-input="input_renderDashboardTelemetryPreview"';</span>
+    const mainInputHandler = <span class="cstat-no" title="statement not covered" >sopType === 'packerz'</span>
+        ? 'data-input="input_renderPackerzTelemetryPreview"'
+        : 'data-input="input_renderDashboardTelemetryPreview"';
 &nbsp;
     const rightPaneInner = <span class="cstat-no" title="statement not covered" >`&lt;div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;"&gt;</span>
                   &lt;div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"&gt;
@@ -7861,7 +7873,7 @@ function <span class="fstat-no" title="function not covered" >billingTrace(</spa
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-24T08:44:52.716Z
+                at 2026-05-28T06:23:08.126Z
             </div>
         <script src="prettify.js"></script>
         <script>
