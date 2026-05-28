@@ -1529,10 +1529,8 @@ window.startRemoteCycleCount = async function() {
 
     // 10. Broadcast wake-up event
     if (window.ccSyncChannel) {
-        window.ccSyncChannel.send({
-            type: 'broadcast',
-            event: 'LAUNCH_MOBILE_SCANNER',
-            payload: { timestamp: Date.now() }
+        window.ccSyncChannel.httpSend('LAUNCH_MOBILE_SCANNER', {
+            timestamp: Date.now()
         }).catch(() => {});
     }
 };
