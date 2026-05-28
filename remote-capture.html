@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEOGLEAMZ Remote Shutter</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS SDK CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #070b13;
+            --primary: #0ea5e9;
+            --primary-glow: rgba(14, 165, 233, 0.4);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --bg-glass: rgba(255, 255, 255, 0.03);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+
+        /* Ambient Glow Backgrounds */
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(40px);
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header {
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Pulsing Shutter Overlay Button */
+        .shutter-target {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(14, 165, 233, 0.05);
+            border: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 40px var(--primary-glow), inset 0 0 30px var(--primary-glow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse-ring 2s infinite ease-in-out;
+            position: relative;
+        }
+
+        .shutter-target:active {
+            transform: scale(0.92);
+            border-color: #fff;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.4), inset 0 0 40px rgba(255, 255, 255, 0.4);
+        }
+
+        .shutter-icon {
+            font-size: 64px;
+            filter: drop-shadow(0 0 10px var(--primary));
+            transition: transform 0.2s ease;
+        }
+
+        .shutter-target:active .shutter-icon {
+            transform: scale(0.85);
+        }
+
+        .shutter-label {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loading / Processing States */
+        .status-container {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 16px 24px;
+            width: 100%;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+        }
+
+        .status-text {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+
+        .status-subtext {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Dynamic Spinner */
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 8px;
+        }
+
+        /* Success & Error State Enhancements */
+        .success-checkmark {
+            display: none;
+            font-size: 40px;
+            color: var(--success);
+            animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            margin-bottom: 8px;
+        }
+
+        .error-cross {
+            display: none;
+            font-size: 40px;
+            color: var(--error);
+            animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            margin-bottom: 8px;
+        }
+
+        /* Shutter chirp sound emulator */
+        audio {
+            display: none;
+        }
+
+        /* Keyframes */
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 30px var(--primary-glow), inset 0 0 20px var(--primary-glow);
+                border-color: var(--primary);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(14, 165, 233, 0.6), inset 0 0 35px rgba(14, 165, 233, 0.6);
+                border-color: #38bdf8;
+            }
+            100% {
+                box-shadow: 0 0 30px var(--primary-glow), inset 0 0 20px var(--primary-glow);
+                border-color: var(--primary);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Touch interaction optimizations */
+        .btn-retry {
+            margin-top: 8px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--error);
+            color: #fca5a5;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Segmented Control Mode Switcher */
+        .mode-switcher {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 30px;
+            padding: 4px;
+            width: 100%;
+            max-width: 280px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin-top: 4px;
+            position: relative;
+            z-index: 15;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 10px 0;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-align: center;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+
+        .mode-tab.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 15px var(--primary-glow);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .mode-tab:not(.active):active {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+        
+        .mode-icon {
+            font-size: 14px;
+        }
+
+        /* Scrollable Phone Staged Thumbnails Container */
+        .phone-staged-thumbnails-container {
+            display: none;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 12px;
+            width: 100%;
+            max-width: 360px;
+            justify-content: start;
+            align-items: center;
+            scrollbar-width: thin;
+            min-height: 90px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin-top: 10px;
+        }
+
+        .phone-staged-thumbnail-card {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .phone-staged-thumbnail-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .phone-staged-thumbnail-delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(239, 68, 68, 0.95);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+
+        /* Full Size Expand Preview Overlay */
+        .preview-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .preview-overlay img {
+            max-width: 90%;
+            max-height: 75%;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .btn-preview-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-preview-close:active {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .phone-btn-discard:active {
+            transform: scale(0.95);
+            background: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+        }
+        .phone-btn-save:active {
+            transform: scale(0.95);
+            background: rgba(16, 185, 129, 0.25) !important;
+            border-color: #10b981 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>NEOGLEAMZ</h1>
+            <p>📱 REMOTE MOBILE SHUTTER</p>
+        </div>
+
+        <!-- Pulse Button Trigger -->
+        <div id="shutterBtn" class="shutter-target">
+            <span class="shutter-icon">📸</span>
+            <span class="shutter-label">TAP TO SNAP</span>
+        </div>
+
+        <!-- Segmented Control Mode Switcher -->
+        <div class="mode-switcher">
+            <div id="modeCamera" class="mode-tab active">
+                <span class="mode-icon">📸</span> CAMERA
+            </div>
+            <div id="modeGallery" class="mode-tab">
+                <span class="mode-icon">📁</span> GALLERY
+            </div>
+        </div>
+
+        <!-- Tactile Status Board -->
+        <div class="status-container">
+            <div id="statusSpinner" class="spinner"></div>
+            <div id="statusSuccess" class="success-checkmark">✓</div>
+            <div id="statusError" class="error-cross">⚠</div>
+            <div id="statusText" class="status-text">Connecting to session...</div>
+            <div id="statusSubtext" class="status-subtext">Waiting for real-time synchronization bridge.</div>
+            <button id="retryBtn" class="btn-retry">Retry Upload</button>
+        </div>
+
+        <!-- Scrollable Phone Staged Thumbnails container -->
+        <div id="phoneStagedThumbnailsContainer" class="phone-staged-thumbnails-container"></div>
+
+        <!-- Action Row for Discard and Save (Remote PC Controller) -->
+        <div id="phoneActionRow" style="display: none; gap: 12px; width: 100%; max-width: 360px; margin-top: 10px; z-index: 15;">
+            <button id="phoneDiscardBtn" class="phone-btn-discard" style="flex: 1; padding: 12px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.12); color: #fca5a5; cursor: pointer; transition: all 0.25s; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
+                ✕ Discard
+            </button>
+            <button id="phoneSaveBtn" class="phone-btn-save" style="flex: 1; padding: 12px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.12); color: #a7f3d0; cursor: pointer; transition: all 0.25s; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; gap: 6px; outline: none;">
+                ✓ Save & Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Full Size Expand Preview Overlay -->
+    <div id="fullSizePreviewOverlay" class="preview-overlay">
+        <img id="fullSizePreviewImg" src="" alt="Staged Photo Preview" />
+        <button id="closePreviewBtn" class="btn-preview-close">✕ Close Preview</button>
+    </div>
+
+    <!-- Session Finalized Premium Phone Overlay -->
+    <div id="phoneSuccessOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(7, 11, 19, 0.98); z-index: 99999; justify-content: center; align-items: center; flex-direction: column; gap: 16px; padding: 20px; text-align: center; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+        <div style="font-size: 64px; animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;">🎉</div>
+        <div style="font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #fff 30%, var(--success) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);">Session Saved!</div>
+        <div style="font-size: 13px; color: var(--text-muted); max-width: 280px; line-height: 1.6;">Your staged photo(s) have been successfully written to your PC document. You can safely close this browser tab now!</div>
+        <button onclick="window.close()" style="margin-top: 15px; padding: 12px 24px; border-radius: 30px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); color: #fff; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Close Portal</button>
+    </div>
+
+    <!-- Native Camera Anchor (Default capture="environment" for instant camera launch; toggleable via Mode Switcher) -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+
+    <script>
+        // Standard Supabase config mapped directly from core package client variables
+        const SUPABASE_URL = 'https://qefmeivpjyaukbwadgaz.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7';
+        const SOP_MEDIA_BUCKET = 'sop-media';
+
+        let supabaseClient = null;
+        let syncChannel = null;
+        let sessionId = null;
+        let uploadFolder = '';
+        let hasSession = false;
+
+        // UI Selectors
+        const shutterBtn = document.getElementById('shutterBtn');
+        const cameraInput = document.getElementById('cameraInput');
+        const statusText = document.getElementById('statusText');
+        const statusSubtext = document.getElementById('statusSubtext');
+        const statusSpinner = document.getElementById('statusSpinner');
+        const statusSuccess = document.getElementById('statusSuccess');
+        const statusError = document.getElementById('statusError');
+        const retryBtn = document.getElementById('retryBtn');
+
+        // Parse query params
+        function parseQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            sessionId = params.get('session');
+            uploadFolder = params.get('folder') || '';
+            
+            if (!sessionId) {
+                updateStatus('error', 'Session ID Missing', 'Please re-scan the QR code generated by your desktop screen.');
+                shutterBtn.style.opacity = '0.3';
+                shutterBtn.style.pointerEvents = 'none';
+                return false;
+            }
+            return true;
+        }
+
+        // Tactile Haptic Wrapper
+        function triggerHaptic(pattern) {
+            if (navigator.vibrate) {
+                try {
+                    navigator.vibrate(pattern);
+                } catch(e) {}
+            }
+        }
+
+        // Dynamic State Transitions
+        function updateStatus(state, title, subtitle) {
+            statusSpinner.style.display = 'none';
+            statusSuccess.style.display = 'none';
+            statusError.style.display = 'none';
+            retryBtn.style.display = 'none';
+            
+            statusText.innerText = title;
+            statusSubtext.innerText = subtitle;
+            
+            if (state === 'loading') {
+                statusSpinner.style.display = 'block';
+                statusText.style.color = 'var(--text-main)';
+            } else if (state === 'success') {
+                statusSuccess.style.display = 'block';
+                statusText.style.color = 'var(--success)';
+                triggerHaptic([100, 50, 100]);
+            } else if (state === 'error') {
+                statusError.style.display = 'block';
+                statusText.style.color = 'var(--error)';
+                triggerHaptic([300]);
+            } else if (state === 'ready') {
+                statusText.style.color = 'var(--primary)';
+            }
+        }
+
+        // Initialize Supabase & Sync Channel
+        function initRealtime() {
+            if (!parseQueryParams()) return;
+
+            try {
+                // Instantiate Supabase Client natively from global CDN script
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error('Supabase SDK failed to load from CDN. Please check your internet connection.');
+                }
+                
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const channelName = `neogleamz-camera-sync-${sessionId}`;
+                
+                updateStatus('loading', 'Connecting to Session...', 'Building real-time bridge to desktop...');
+                
+                syncChannel = supabaseClient.channel(channelName);
+                
+                // Set up session transfer listener
+                syncChannel.on('broadcast', { event: 'SESSION_TRANSFER' }, async (envelope) => {
+                    if (hasSession) return;
+                    try {
+                        const payload = envelope.payload;
+                        if (!payload || !payload.accessToken) {
+                            throw new Error('Auth session missing from PC handshake!');
+                        }
+                        hasSession = true;
+                        updateStatus('loading', 'Hydrating Session...', 'Applying secure operator credentials...');
+                        
+                        const { error } = await supabaseClient.auth.setSession({
+                            access_token: payload.accessToken,
+                            refresh_token: payload.refreshToken || ''
+                        });
+                        if (error) throw error;
+                        
+                        updateStatus('ready', 'Bridge Connected ✓', getModeSubtext());
+                        triggerHaptic(100);
+                    } catch (err) {
+                        hasSession = false;
+                        updateStatus('error', 'Auth Handshake Failed', err.message);
+                    }
+                });
+
+                // Listen for PC staged photo deletions
+                syncChannel.on('broadcast', { event: 'PC_PHOTO_DELETE' }, (envelope) => {
+                    const payload = envelope.payload;
+                    if (payload && payload.imageUrl) {
+                        removePhoneStagedThumbnail(payload.imageUrl, false);
+                    }
+                });
+
+                // Listen for PC save action
+                syncChannel.on('broadcast', { event: 'PC_SAVE_AND_CLOSE' }, () => {
+                    const overlay = document.getElementById('phoneSuccessOverlay');
+                    if (overlay) overlay.style.display = 'flex';
+                    triggerHaptic([100, 50, 100]);
+                });
+
+                // Listen for PC discard action
+                syncChannel.on('broadcast', { event: 'PC_DISCARD_AND_BACK' }, () => {
+                    stagedThumbnails.length = 0;
+                    const container = document.getElementById('phoneStagedThumbnailsContainer');
+                    if (container) {
+                        container.innerHTML = '';
+                        container.style.display = 'none';
+                    }
+                    const actionRow = document.getElementById('phoneActionRow');
+                    if (actionRow) actionRow.style.display = 'none';
+                    
+                    updateStatus('ready', 'Session Discarded ✓', 'Staged photos have been cleared. Ready to start again.');
+                    triggerHaptic(100);
+                });
+                
+                syncChannel.subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        updateStatus('loading', 'Securing Handshake...', 'Authorizing secure token transfer from PC...');
+                        
+                        // Handshake ping loop to self-heal and resolve timing races
+                        let handshakeAttempts = 0;
+                        const handshakeInterval = setInterval(() => {
+                            if (hasSession) {
+                                clearInterval(handshakeInterval);
+                                return;
+                            }
+                            
+                            handshakeAttempts++;
+                            if (handshakeAttempts > 15) { // Timeout after 22 seconds
+                                clearInterval(handshakeInterval);
+                                updateStatus('error', 'Handshake Timeout', 'Make sure your desktop capture modal is active and scan again.');
+                                return;
+                            }
+                            
+                            syncChannel.send({
+                                type: 'broadcast',
+                                event: 'MOBILE_CONNECT',
+                                payload: { timestamp: Date.now() }
+                            });
+                        }, 1500);
+                        
+                    } else if (status === 'CLOSED' || status === 'TIMED_OUT') {
+                        hasSession = false;
+                        updateStatus('error', 'Bridge Disconnected', 'Retrying connection in background...');
+                    }
+                });
+            } catch (err) {
+                updateStatus('error', 'Initialization Failed', err.message);
+            }
+        }
+
+        // Phone staged thumbnails state management
+        const stagedThumbnails = [];
+
+        function addPhoneStagedThumbnail(url) {
+            const container = document.getElementById('phoneStagedThumbnailsContainer');
+            if (!container) return;
+
+            // Make container visible
+            container.style.display = 'flex';
+            const actionRow = document.getElementById('phoneActionRow');
+            if (actionRow) actionRow.style.display = 'flex';
+
+            // Prevent duplicate renderings
+            if (stagedThumbnails.includes(url)) return;
+            stagedThumbnails.push(url);
+
+            const card = document.createElement('div');
+            card.className = 'phone-staged-thumbnail-card';
+            card.setAttribute('data-url', url);
+            card.innerHTML = `
+                <img src="${url}" alt="Thumbnail" />
+                <button class="phone-staged-thumbnail-delete-btn">✕</button>
+            `;
+
+            // Expand preview event binding
+            card.querySelector('img').addEventListener('click', () => {
+                const overlay = document.getElementById('fullSizePreviewOverlay');
+                const overlayImg = document.getElementById('fullSizePreviewImg');
+                if (overlay && overlayImg) {
+                    overlayImg.src = url;
+                    overlay.style.display = 'flex';
+                }
+            });
+
+            // Delete staged photo trigger
+            card.querySelector('.phone-staged-thumbnail-delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                removePhoneStagedThumbnail(url, true);
+            });
+
+            container.appendChild(card);
+        }
+
+        async function removePhoneStagedThumbnail(url, broadcast = true) {
+            const idx = stagedThumbnails.indexOf(url);
+            if (idx > -1) stagedThumbnails.splice(idx, 1);
+
+            const card = document.querySelector(`.phone-staged-thumbnail-card[data-url="${url}"]`);
+            if (card) card.remove();
+
+            const container = document.getElementById('phoneStagedThumbnailsContainer');
+            if (container && stagedThumbnails.length === 0) {
+                container.style.display = 'none';
+                const actionRow = document.getElementById('phoneActionRow');
+                if (actionRow) actionRow.style.display = 'none';
+            }
+
+            // Sync with PC monitor
+            if (broadcast && syncChannel) {
+                try {
+                    await syncChannel.send({
+                        type: 'broadcast',
+                        event: 'REMOTE_PHOTO_DELETE',
+                        payload: { imageUrl: url }
+                    });
+                } catch (err) {
+                    console.error("Failed to broadcast REMOTE_PHOTO_DELETE:", err);
+                }
+            }
+
+            // Delete from Supabase storage if deleted from the phone client
+            if (broadcast) {
+                try {
+                    if (supabaseClient) {
+                        const publicUrlPrefix = `${SUPABASE_URL}/storage/v1/object/public/${SOP_MEDIA_BUCKET}/`;
+                        let filePath = url;
+                        if (url.startsWith(publicUrlPrefix)) {
+                            filePath = url.substring(publicUrlPrefix.length);
+                        } else {
+                            const parts = url.split(`/storage/v1/object/public/${SOP_MEDIA_BUCKET}/`);
+                            if (parts.length > 1) filePath = parts[1];
+                        }
+                        filePath = decodeURIComponent(filePath);
+                        
+                        console.log("Deleting from Supabase storage:", filePath);
+                        await supabaseClient.storage.from(SOP_MEDIA_BUCKET).remove([filePath]);
+                    }
+                } catch (err) {
+                    console.error("Failed to delete from Supabase storage:", err);
+                }
+            }
+        }
+
+        // Preview Overlay bindings
+        document.getElementById('closePreviewBtn').addEventListener('click', () => {
+            document.getElementById('fullSizePreviewOverlay').style.display = 'none';
+        });
+        document.getElementById('fullSizePreviewOverlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('fullSizePreviewOverlay')) {
+                document.getElementById('fullSizePreviewOverlay').style.display = 'none';
+            }
+        });
+
+        // Perform upload & broadcast routine
+        async function handleImageCapture(file) {
+            if (!file || !supabaseClient) return;
+
+            updateStatus('loading', 'Uploading Snapshot...', 'Transferring image to Supabase storage...');
+
+            // Broadcast upload start to notify PC to show progress flash banner phase 1
+            if (syncChannel) {
+                try {
+                    syncChannel.send({
+                        type: 'broadcast',
+                        event: 'REMOTE_CAPTURE_START',
+                        payload: { timestamp: Date.now() }
+                    });
+                } catch (err) {
+                    console.warn("Could not broadcast REMOTE_CAPTURE_START:", err);
+                }
+            }
+
+            try {
+                const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const fileName = `remote-${Date.now()}-${safeName}`;
+                const path = uploadFolder ? `${uploadFolder}/${fileName}` : fileName;
+
+                // Upload direct to bucket
+                const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).upload(path, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+                if (error) throw error;
+
+                // Get public URL
+                const { data: urlData } = supabaseClient.storage.from(SOP_MEDIA_BUCKET).getPublicUrl(path);
+                const imageUrl = urlData.publicUrl;
+
+                // Broadcast SAVING to notify PC of transition to phase 2
+                if (syncChannel) {
+                    try {
+                        syncChannel.send({
+                            type: 'broadcast',
+                            event: 'REMOTE_CAPTURE_SAVING',
+                            payload: { imageUrl: imageUrl }
+                        });
+                    } catch (e) {
+                        console.warn("Could not broadcast REMOTE_CAPTURE_SAVING:", e);
+                    }
+                }
+
+                updateStatus('loading', 'Syncing with Desktop...', 'Staging the picture in your active document...');
+
+                // Send broadcast back to desktop channel for final phase 3
+                if (syncChannel) {
+                    await syncChannel.send({
+                        type: 'broadcast',
+                        event: 'REMOTE_CAPTURE_COMPLETE',
+                        payload: { imageUrl: imageUrl }
+                    });
+                    
+                    updateStatus('success', 'Photo Stage Synced ✓', 'Successfully sent back to PC! Ready for next photo.');
+                    
+                    // Staged locally on phone screen too
+                    addPhoneStagedThumbnail(imageUrl);
+                    
+                    // Auto-reset UI back to ready pulsing shutter target in 2.2 seconds for multi-snap flow
+                    setTimeout(() => {
+                        if (hasSession) {
+                            updateStatus('ready', 'Bridge Connected ✓', getModeSubtext());
+                            triggerHaptic(80);
+                        }
+                    }, 2200);
+                } else {
+                    throw new Error('Connection channel lost during sync.');
+                }
+
+                // Clear input so same photo can be taken again if requested
+                cameraInput.value = '';
+
+            } catch (e) {
+                updateStatus('error', 'Sync Failed', e.message);
+                retryBtn.style.display = 'block';
+                
+                // Allow direct retry mapping
+                retryBtn.onclick = () => {
+                    handleImageCapture(file);
+                };
+            }
+        }
+
+        // Mode Switcher State and Control
+        let activeCaptureMode = 'camera';
+        const modeCamera = document.getElementById('modeCamera');
+        const modeGallery = document.getElementById('modeGallery');
+        const shutterLabel = shutterBtn.querySelector('.shutter-label');
+        const shutterIcon = shutterBtn.querySelector('.shutter-icon');
+
+        function getModeSubtext() {
+            return activeCaptureMode === 'camera'
+                ? 'Tap the big camera target above to launch camera!'
+                : 'Tap the big folder target above to choose a photo or file!';
+        }
+
+        function setCaptureMode(mode) {
+            activeCaptureMode = mode;
+            if (mode === 'camera') {
+                modeCamera.classList.add('active');
+                modeGallery.classList.remove('active');
+                if (shutterLabel) shutterLabel.innerText = 'TAP TO SNAP';
+                if (shutterIcon) shutterIcon.innerText = '📸';
+                cameraInput.setAttribute('capture', 'environment');
+            } else {
+                modeGallery.classList.add('active');
+                modeCamera.classList.remove('active');
+                if (shutterLabel) shutterLabel.innerText = 'CHOOSE FILE';
+                if (shutterIcon) shutterIcon.innerText = '📁';
+                cameraInput.removeAttribute('capture');
+            }
+
+            // Dynamically adjust subtext if bridge is in active ready state
+            if (statusText.innerText.includes('Bridge Connected') || statusText.innerText.includes('Ready')) {
+                statusSubtext.innerText = getModeSubtext();
+            }
+
+            triggerHaptic(60);
+        }
+
+        if (modeCamera && modeGallery) {
+            modeCamera.addEventListener('click', () => setCaptureMode('camera'));
+            modeGallery.addEventListener('click', () => setCaptureMode('gallery'));
+        }
+
+        // Tap Shutter Target Event Bindings
+        shutterBtn.addEventListener('click', () => {
+            triggerHaptic(50);
+            // Ensure the input element has the correct capture attribute before clicking
+            if (activeCaptureMode === 'camera') {
+                cameraInput.setAttribute('capture', 'environment');
+            } else {
+                cameraInput.removeAttribute('capture');
+            }
+            cameraInput.click();
+        });
+
+        cameraInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleImageCapture(file);
+            }
+        });
+
+        // Phone remote controller discard & save bindings
+        const phoneDiscardBtn = document.getElementById('phoneDiscardBtn');
+        const phoneSaveBtn = document.getElementById('phoneSaveBtn');
+
+        if (phoneDiscardBtn) {
+            phoneDiscardBtn.addEventListener('click', async () => {
+                triggerHaptic([100, 50, 100]);
+                if (syncChannel) {
+                    try {
+                        await syncChannel.send({
+                            type: 'broadcast',
+                            event: 'MOBILE_DISCARD_AND_BACK',
+                            payload: { timestamp: Date.now() }
+                        });
+                    } catch (err) {
+                        console.error("Failed to broadcast MOBILE_DISCARD_AND_BACK:", err);
+                    }
+                }
+                
+                // Clear phone thumbnails locally
+                stagedThumbnails.length = 0;
+                const container = document.getElementById('phoneStagedThumbnailsContainer');
+                if (container) {
+                    container.innerHTML = '';
+                    container.style.display = 'none';
+                }
+                const actionRow = document.getElementById('phoneActionRow');
+                if (actionRow) actionRow.style.display = 'none';
+                
+                updateStatus('ready', 'Session Discarded ✓', 'Staged photos have been cleared. Ready to start again.');
+            });
+        }
+
+        if (phoneSaveBtn) {
+            phoneSaveBtn.addEventListener('click', async () => {
+                triggerHaptic([100, 50, 100]);
+                if (syncChannel) {
+                    try {
+                        await syncChannel.send({
+                            type: 'broadcast',
+                            event: 'MOBILE_SAVE_AND_CLOSE',
+                            payload: { timestamp: Date.now() }
+                        });
+                    } catch (err) {
+                        console.error("Failed to broadcast MOBILE_SAVE_AND_CLOSE:", err);
+                    }
+                }
+                
+                // Show success overlay on phone screen
+                const overlay = document.getElementById('phoneSuccessOverlay');
+                if (overlay) overlay.style.display = 'flex';
+            });
+        }
+
+        // Bootstrap on screen load
+        window.addEventListener('DOMContentLoaded', () => {
+            initRealtime();
+        });
+    </script>
+</body>
+</html>
