@@ -26,6 +26,9 @@
             --warning: #f59e0b;
             --error: #ef4444;
             --sky: #0ea5e9;
+            
+            /* Responsive Viewport Height Sizing Tokens */
+            --element-height: clamp(42px, 5.5vh, 48px);
         }
 
         * {
@@ -47,7 +50,7 @@
             justify-content: flex-start;
             overflow-x: hidden;
             overflow-y: auto;
-            padding: 8px 8px;
+            padding: clamp(6px, 1.2vh, 12px) 10px;
         }
 
         html {
@@ -77,7 +80,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: clamp(6px, 1.2vh, 12px);
         }
 
         .header {
@@ -104,8 +107,8 @@
 
         /* Scanner Frame Window Container */
         .scanner-window-container {
-            width: 220px;
-            height: 220px;
+            width: clamp(150px, 26vh, 260px);
+            height: clamp(150px, 26vh, 260px);
             border-radius: 16px;
             border: 3px solid var(--primary);
             position: relative;
@@ -119,6 +122,12 @@
             width: 100%;
             height: 100%;
             border: none !important;
+        }
+
+        #barcode-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
 
         /* Hide default library overlays inside scanner element */
@@ -317,12 +326,15 @@
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border-glass);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 0 12px;
+            height: var(--element-height, 44px);
             color: #fff;
             font-family: inherit;
             font-size: 16px;
             outline: none;
             transition: border-color 0.2s;
+            display: flex;
+            align-items: center;
         }
 
         .manual-input:focus {
@@ -334,13 +346,17 @@
             background: var(--primary);
             border: none;
             color: #fff;
-            padding: 8px 14px;
+            padding: 0 14px;
+            height: var(--element-height, 44px);
             border-radius: 8px;
             font-size: 11px;
             font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-submit:active {
@@ -370,7 +386,7 @@
 
         .phone-btn-action {
             flex: 1;
-            padding: 8px 4px;
+            height: var(--element-height, 44px);
             border-radius: 10px;
             font-size: 13px;
             font-weight: 800;
@@ -415,12 +431,12 @@
             background: var(--bg-glass);
             border: 1px solid var(--border-glass);
             border-radius: 14px;
-            padding: 10px 12px;
+            padding: clamp(6px, 1.2vh, 12px) clamp(8px, 1.5vh, 14px);
             width: 100%;
             max-width: 370px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: clamp(6px, 1vh, 10px);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             z-index: 15;
@@ -440,13 +456,13 @@
         .stock-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 5px;
+            gap: clamp(3px, 0.6vh, 6px);
             width: 100%;
         }
 
         .stock-badge {
             background: rgba(0, 0, 0, 0.2);
-            padding: 6px 2px;
+            padding: clamp(4px, 0.8vh, 8px) 2px;
             border-radius: 6px;
             text-align: center;
             border: 1px solid var(--border-glass);
@@ -472,7 +488,7 @@
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(245,158,11,0.25);
             border-radius: 6px;
-            padding: 6px 12px;
+            padding: clamp(4px, 0.8vh, 8px) 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -549,7 +565,7 @@
             <div class="cockpit-title">📋 Active Count Target</div>
             
             <!-- Dynamic Item Dropdown Select -->
-            <select id="ccMobileItemSelect" class="manual-input" style="width: 100%; border-color: rgba(16,185,129,0.3); font-weight: 800; cursor: pointer; background: rgba(0,0,0,0.4); color: #fff; height: 44px; padding: 6px 10px; font-size: 16px; border-radius: 8px;">
+            <select id="ccMobileItemSelect" class="manual-input" style="width: 100%; border-color: rgba(16,185,129,0.3); font-weight: 800; cursor: pointer; background: rgba(0,0,0,0.4); color: #fff; border-radius: 8px; padding: 0 10px;">
                 <option value="">-- Choose Item Natively --</option>
             </select>
             
@@ -586,18 +602,18 @@
             <!-- Qty Input Block -->
             <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
                 <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">New Physical Qty</label>
-                <input type="number" id="ccMobileQtyInput" placeholder="Enter Physical Qty" class="manual-input" style="width: 100%; font-size: 20px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); height: 44px; padding: 6px 10px; border-radius: 8px;">
+                <input type="number" id="ccMobileQtyInput" placeholder="Enter Physical Qty" class="manual-input" style="width: 100%; font-size: 20px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); border-radius: 8px;">
             </div>
 
             <!-- Action Controls Row -->
-            <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
-                <button id="phoneDiscardBtn" class="phone-btn-action phone-btn-discard" style="flex:1; border-radius: 10px; font-size: 13px; padding: 6px 4px; min-height: 44px;">
+            <div style="display: flex; gap: 8px; width: 100%; margin-top: clamp(2px, 0.5vh, 6px);">
+                <button id="phoneDiscardBtn" class="phone-btn-action phone-btn-discard" style="flex:1;">
                     ✕ Close
                 </button>
-                <button id="phoneSaveBtn" class="phone-btn-action phone-btn-save" style="flex:1.4; border-radius: 10px; font-size: 13px; padding: 6px 4px; min-height: 44px;">
+                <button id="phoneSaveBtn" class="phone-btn-action phone-btn-save" style="flex:1.4;">
                     ✓ Save & Next
                 </button>
-                <button id="phoneSaveCloseBtn" class="phone-btn-action phone-btn-save-close" style="flex:1.4; border-radius: 10px; font-size: 13px; padding: 6px 4px; min-height: 44px;">
+                <button id="phoneSaveCloseBtn" class="phone-btn-action phone-btn-save-close" style="flex:1.4;">
                     💾 Save & Close
                 </button>
             </div>
@@ -888,7 +904,15 @@
                 html5QrCode = new Html5Qrcode("barcode-reader");
                 await html5QrCode.start(
                     { facingMode: "environment" },
-                    { fps: 12, qrbox: { width: 180, height: 180 }, aspectRatio: 1.0 },
+                    { 
+                        fps: 12, 
+                        qrbox: (width, height) => {
+                            const size = Math.min(width, height);
+                            const qrSize = Math.floor(size * 0.82);
+                            return { width: qrSize, height: qrSize };
+                        }, 
+                        aspectRatio: 1.0 
+                    },
                     (decodedText) => {
                         handleBarcodeLock(decodedText);
                     },
