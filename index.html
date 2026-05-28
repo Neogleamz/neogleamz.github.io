@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.05.28.0110"></script>
+    <script src="assets/js/system-version.js?v=v.2026.05.28.0113"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.28.0110"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.28.0113"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.28.0110"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.28.0113"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.05.28.0110"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.05.28.0113"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -276,6 +276,14 @@
         .login-btn { width: 100%; background: #f97316; color: white; border: none; border-radius: 12px; padding: 16px; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); }
         .login-btn:hover { background: #ea580c; transform: translateY(-3px); box-shadow: 0 12px 24px rgba(249, 115, 22, 0.5); }
         .login-error { color: #ef4444; font-size: 12px; margin-bottom: 20px; display: none; font-weight: 700; }
+
+        /* BOOT PROGRESS CARD OVERLAY */
+        .boot-progress-area { display: none; text-align: center; margin-top: 10px; }
+        .boot-title { margin-bottom: 24px; font-weight: 900; letter-spacing: 3px; color: #f97316; font-size: clamp(16px, 4vw, 22px); text-transform: uppercase; text-shadow: 0 0 10px rgba(249, 115, 22, 0.4); }
+        .boot-track { width: 100%; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 9999px; height: 12px; margin-bottom: 24px; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5); }
+        .boot-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #f97316, #fb923c, #fbbf24); border-radius: 9999px; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 12px rgba(249, 115, 22, 0.8); }
+        .boot-status { font-size: 13px; color: #f8fafc; font-weight: 800; margin-bottom: 12px; min-height: 20px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Righteous', sans-serif; text-shadow: 0 0 8px rgba(255, 255, 255, 0.2); }
+        .boot-substatus { font-size: 11px; color: #94a3b8; font-family: 'Fira Code', 'Courier New', Courier, monospace; min-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 6px 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); }
 
         #appUI { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; }
 
@@ -1786,17 +1794,29 @@
 <div id="loginUI" class="login-container" style="display: flex;">
     <div class="login-card">
         <img class="login-logo" src="assets/images/neo_logo_white.png" alt="Neogleamz Logo" style="display:block; margin:0 auto 15px auto; height:120px; width:auto; max-width: 100%; object-fit: contain;">
-        <h1 style="margin-bottom: 30px; font-weight: 300; letter-spacing: 2px;">AUTHORITY ACCESS</h1>
-        <div class="login-field">
-            <label>Operator Email</label>
-            <input type="email" id="loginEmail" placeholder="operator@neogleamz.com">
+        
+        <div id="loginFormArea">
+            <h1 style="margin-bottom: 30px; font-weight: 300; letter-spacing: 2px;">AUTHORITY ACCESS</h1>
+            <div class="login-field">
+                <label>Operator Email</label>
+                <input type="email" id="loginEmail" placeholder="operator@neogleamz.com">
+            </div>
+            <div class="login-field">
+                <label>Master Password</label>
+                <input type="password" id="loginPass" placeholder="••••••••">
+            </div>
+            <div id="loginError" class="login-error">Invalid credentials. Access denied.</div>
+            <button id="loginBtn" class="login-btn">Authenticate to Command Center</button>
         </div>
-        <div class="login-field">
-            <label>Master Password</label>
-            <input type="password" id="loginPass" placeholder="••••••••">
+
+        <div id="bootProgressArea" class="boot-progress-area">
+            <h2 class="boot-title">INITIALIZING SYSTEM</h2>
+            <div class="boot-track">
+                <div id="bootProgressBar" class="boot-bar"></div>
+            </div>
+            <div id="bootStatusText" class="boot-status">Establishing Session...</div>
+            <div id="bootSubStatusText" class="boot-substatus">Preparing handshake...</div>
         </div>
-        <div id="loginError" class="login-error">Invalid credentials. Access denied.</div>
-        <button id="loginBtn" class="login-btn">Authenticate to Command Center</button>
     </div>
 </div>
 
@@ -4168,8 +4188,57 @@
         if (badge) badge.innerText = `🚪 ${capitalized}`;
     }
 
-    async function handleLogin() {
+    function setBootProgress(percent, statusText, substatusText) {
+        const bar = document.getElementById('bootProgressBar');
+        const status = document.getElementById('bootStatusText');
+        const substatus = document.getElementById('bootSubStatusText');
+        if (bar) bar.style.width = percent + '%';
+        if (status) status.innerText = statusText;
+        if (substatus) substatus.innerText = substatusText;
+        
+        sysLog(`[BOOT] ${percent}% - ${statusText} -> ${substatusText}`, false, null, true);
+    }
 
+    async function startBootSequence() {
+        const formArea = document.getElementById('loginFormArea');
+        const progressArea = document.getElementById('bootProgressArea');
+        
+        if (formArea) formArea.style.display = 'none';
+        if (progressArea) progressArea.style.display = 'block';
+        
+        document.getElementById('appUI').style.display = 'none';
+        document.getElementById('loginUI').style.display = 'flex';
+        
+        try {
+            setBootProgress(0, "Connecting to Service Handshake...", "Contacting secure core...");
+            await launchApp();
+            setBootProgress(100, "System Ready", "Welcome to Command Center.");
+            
+            // Graceful delay for visual finish
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            document.getElementById('loginUI').style.display = 'none';
+            document.getElementById('appUI').style.display = 'flex';
+            
+            // Restore login form in background in case of subsequent logout
+            if (formArea) formArea.style.display = 'block';
+            if (progressArea) progressArea.style.display = 'none';
+        } catch(e) {
+            setBootProgress(100, "System Boot Fail", e.message);
+            const errObj = document.getElementById('loginError');
+            if (errObj) {
+                errObj.innerText = "System boot fail: " + e.message;
+                errObj.style.display = 'block';
+            }
+            if (formArea) formArea.style.display = 'block';
+            if (progressArea) progressArea.style.display = 'none';
+            document.getElementById('loginUI').style.display = 'flex';
+            document.getElementById('appUI').style.display = 'none';
+            throw e;
+        }
+    }
+
+    async function handleLogin() {
         const email = document.getElementById('loginEmail').value.trim();
         const pass = document.getElementById('loginPass').value.trim();
         const errObj = document.getElementById('loginError');
@@ -4191,10 +4260,7 @@
             if (error) throw new Error(error.message);
             
             hydrateUserIdentity(data.user);
-            
-            document.getElementById('loginUI').style.display = 'none';
-            document.getElementById('appUI').style.display = 'flex';
-            await launchApp();
+            await startBootSequence();
             sysLog("Authenticated successfully.");
         } catch(e) {
             sysLog("Login error: " + e.message, true);
@@ -4227,7 +4293,7 @@
         }
     }
 
-    window.onload = async () => { try { const { data: { session } } = await supabaseClient.auth.getSession(); if (session) { hydrateUserIdentity(session.user); document.getElementById('loginUI').style.display = 'none'; document.getElementById('appUI').style.display = 'flex'; await launchApp(); } else { document.getElementById('loginUI').style.display = 'flex'; document.getElementById('appUI').style.display = 'none'; } } catch(e) { sysLog(e.message, true); } };
+    window.onload = async () => { try { const { data: { session } } = await supabaseClient.auth.getSession(); if (session) { hydrateUserIdentity(session.user); await startBootSequence(); } else { document.getElementById('loginUI').style.display = 'flex'; document.getElementById('appUI').style.display = 'none'; } } catch(e) { sysLog(e.message, true); } };
 
     async function loadCloudPrefs() { try { const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'ui_prefs_v2').single(); if (data && data.setting_value) { let p = data.setting_value; if (p.theme) { document.documentElement.setAttribute("data-theme", p.theme); document.getElementById("themeToggle").innerText = p.theme === "dark" ? "☀️ Light" : "🌙 Dark"; localStorage.setItem("theme", p.theme); } if (p.tables) window.cloudTablePrefs = p.tables; if (p.ceoBoard && typeof ceoActiveProducts !== 'undefined') ceoActiveProducts = p.ceoBoard; } } catch(e) { window.cloudTablePrefs = {}; } }
     async function saveCloudPrefs() { try { let theme = document.documentElement.getAttribute("data-theme"); let payload = { theme: theme, tables: window.cloudTablePrefs || {}, ceoBoard: typeof ceoActiveProducts !== 'undefined' ? ceoActiveProducts : [] }; await supabaseClient.from('app_settings').upsert({ setting_key: 'ui_prefs_v2', setting_value: payload }); } catch(e) {} }
@@ -4307,14 +4373,25 @@
     async function launchApp() { 
         sysLog("Booting System..."); 
         setMasterStatus("Fetching data...", "mod-working"); 
+        
+        setBootProgress(10, "Loading UI Preferences", "Checking local user settings and theme...");
         await loadCloudPrefs();
+        
+        setBootProgress(20, "Loading Paper Configurations", "Caching sizes, types, and print margins...");
         await loadPaperProfiles(); 
+        
+        setBootProgress(30, "Syncing Secure Ledgers", "Contacting database partitions in parallel...");
         await loadData(); 
+        
+        setBootProgress(90, "Assembling Interface Structure", "Configuring workspace resizers and columns...");
         initHorizontalResizer();
         
         if (typeof initTaskEngine === 'function') {
+            setBootProgress(95, "Initializing Task Engine", "Configuring real-time listeners and handlers...");
             await initTaskEngine();
         }
+        
+        setBootProgress(100, "System Initialization Complete", "Done.");
     }
 
     function initVerticalResizer() {
@@ -4420,6 +4497,7 @@
     async function loadData(silentUpdate = false) {
         try {
             setSysProgress(10, 'working');
+            if (!silentUpdate) setBootProgress(35, "Syncing Secure Ledgers", "Querying full landed costs, recipes, and storefront mappings...");
             const [lR, pR, cR, wR, sR, saleR, aliasR, socR] = await Promise.all([ 
                 supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), 
                 supabaseClient.from('product_recipes').select('*'), 
@@ -4431,6 +4509,7 @@
                 supabaseClient.from('socialz_audience').select('*')
             ]);
             
+            if (!silentUpdate) setBootProgress(50, "Parsing Ledger Payloads", "Validating schema integrity and mapping landed costs...");
             if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); 
             if (wR.error) throw new Error(wR.error.message); if (sR.error) throw new Error(sR.error.message);
             if (saleR.error) throw new Error(saleR.error.message); if (aliasR.error) throw new Error(aliasR.error.message);
@@ -4441,6 +4520,7 @@
             if (lR.data && lR.data.length > 0) { finalResults = mapToUI(lR.data); if (!simpleColsInitialized) { Object.keys(finalResults[0]).forEach(k => { if (k !== '_RowKey' && !defaultVisibleSimpleCols.has(k)) hiddenSimpleCols.add(k); }); simpleColsInitialized = true; } buildCatalogCache(); renderColToggles(); renderActiveTable(); setMasterStatus("Connected.", "mod-success"); document.getElementById('btnCalcWrapper').style.display = 'flex'; setTimeout(() => { const sm = document.getElementById('statusMaster'); if(sm) sm.style.display = 'none'; }, 3000); } else { setMasterStatus("Database empty.", "status-idle"); document.getElementById('results').innerHTML = window.safeHTML ? window.safeHTML("<p>No data.</p>") : "<p>No data.</p>"; document.getElementById('simpleResults').innerHTML = window.safeHTML ? window.safeHTML("<p>No data.</p>") : "<p>No data.</p>"; }
             
             setSysProgress(50, 'working'); inventoryDB = {}; 
+            if (!silentUpdate) setBootProgress(60, "Caching Inventory States", "Re-building local inventoryDB from consumption logs...");
             if (cR.data) { 
                 cR.data.forEach(r => inventoryDB[r.item_key] = { 
                     consumed_qty: parseFloat(r.consumed_qty) || 0, 
@@ -4458,6 +4538,7 @@
             }
 
             setSysProgress(70, 'working'); 
+            if (!silentUpdate) setBootProgress(70, "Compiling Formulas & COGS", "Structuring raw materials, labor, and subassemblies...");
             if (pR.data) { 
                 productsDB = {}; laborDB = {}; pricingDB = {}; isSubassemblyDB = {};
                 pR.data.forEach(r => { 
@@ -4485,6 +4566,7 @@
                 }); 
             }
             
+            if (!silentUpdate) setBootProgress(80, "Indexing Storefronts & SOPs", "Structuring storefront aliases and SOP version trees...");
             workOrdersDB = wR.sort_order ? wR.data : (wR.data || []); 
             if(window.cloudTablePrefs.woOrder && window.cloudTablePrefs.woOrder.length > 0) { 
                 workOrdersDB.sort((a,b) => { 
@@ -4524,6 +4606,7 @@
                 });
             }
 
+            if (!silentUpdate) setBootProgress(85, "Rendering Workspace Views", "Building stockpilez, makerz, fulfillz, and sales grids...");
             renderProductList(); populateDropdowns(); renderInventoryTable(); renderWOList(); renderActiveTable(); renderSalesTable(); renderAnalyticsDashboard(); renderAliasManager(); 
             if (typeof updateHubStats === 'function') updateHubStats();
             
@@ -5328,20 +5411,20 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/bom-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/production-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/sales-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/task-engine.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/print-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.05.28.0110"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.05.28.0110"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/bom-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/production-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/sales-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/task-engine.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/print-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.05.28.0113"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.05.28.0113"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5809,18 +5892,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.28.0110"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.28.0113"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.28.0110"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.28.0113"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.28.0110"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.28.0113"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.28.0110"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.28.0110"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.28.0110"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.28.0113"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.28.0113"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.28.0113"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.05.28.0110"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.05.28.0110"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.05.28.0113"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.05.28.0113"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
