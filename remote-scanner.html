@@ -410,6 +410,102 @@
             border-color: #10b981 !important;
         }
         
+        
+        /* Mobile Cockpit Cockpit Card & Stock Info Grid Styles */
+        .cockpit-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 14px 18px;
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 15;
+            transition: all 0.3s ease;
+        }
+
+        .cockpit-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-align: left;
+            margin-bottom: -4px;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            width: 100%;
+        }
+
+        .stock-badge {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px 2px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stock-label {
+            font-size: 8px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stock-val {
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        .net-stock-container {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(245,158,11,0.25);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .net-stock-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .net-stock-val {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--warning);
+            text-shadow: 0 0 8px rgba(245,158,11,0.3);
+        }
+
+        .phone-btn-save-close {
+            border: 1px solid rgba(14, 165, 233, 0.35);
+            background: rgba(14, 165, 233, 0.12);
+            color: #bae6fd;
+        }
+        .phone-btn-save-close:active {
+            transform: scale(0.95);
+            background: rgba(14, 165, 233, 0.25) !important;
+            border-color: #0ea5e9 !important;
+        }
+
         /* Audio and hidden items */
         #scanner-beep, canvas {
             display: none;
@@ -420,18 +516,12 @@
     <div class="ambient-glow"></div>
     
     <div class="container">
-        <div class="header">
-            <h1>NEOGLEAMZ</h1>
-            <p>📱 REMOTE CYCLE SCANNER</p>
+        <div class="header" style="display:flex; flex-direction:column; align-items:center;">
+            <img src="assets/images/neo_logo_white.png" alt="NEOGLEAMZ" style="height: 34px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(16,185,129,0.25)); margin-bottom: 4px;" />
+            <p style="font-size: 10px; font-weight: 800; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase;">📱 REMOTE CYCLE SCANNER</p>
         </div>
 
-        <!-- WebRTC Barcode Window Frame -->
-        <div class="scanner-window-container">
-            <div class="scan-laser"></div>
-            <div id="barcode-reader"></div>
-        </div>
-
-        <!-- Segmented Control Route Switcher -->
+        <!-- Segmented Control Route Switcher (Moved to Top) -->
         <div class="route-switcher">
             <div id="routePhone" class="route-tab active">
                 <span>📱</span> Phone Only
@@ -440,17 +530,82 @@
                 <span>💻</span> PC Only
             </div>
             <div id="routeBoth" class="route-tab">
-                <span>🔄</span> Both Screens
+                <span>🔄</span> Both
             </div>
         </div>
 
+        <!-- WebRTC Barcode Window Frame -->
+        <div class="scanner-window-container">
+            <div class="scan-laser"></div>
+            <div id="barcode-reader"></div>
+        </div>
+
         <!-- Tactile Status Board -->
-        <div class="status-container">
+        <div class="status-container" style="padding: 10px 16px; min-height: 60px;">
             <div id="statusSpinner" class="spinner"></div>
             <div id="statusSuccess" class="success-checkmark">✓</div>
             <div id="statusError" class="error-cross">⚠</div>
             <div id="statusText" class="status-text">Connecting to Session...</div>
             <div id="statusSubtext" class="status-subtext">Waiting for real-time synchronization bridge.</div>
+        </div>
+
+        <!-- Mobile Cockpit Form Card (Dynamic sync cockpit) -->
+        <div id="mobileCockpitCard" class="cockpit-card" style="display: none;">
+            <div class="cockpit-title">📋 Active Count Target</div>
+            
+            <!-- Dynamic Item Dropdown Select -->
+            <select id="ccMobileItemSelect" class="manual-input" style="width: 100%; border-color: rgba(16,185,129,0.3); font-weight: 800; cursor: pointer; background: rgba(0,0,0,0.4); color: #fff; height: 38px;">
+                <option value="">-- Choose Item Natively --</option>
+            </select>
+            
+            <!-- Stock Metrics Panel -->
+            <div id="mobileStockPanel" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                <div class="net-stock-container">
+                    <span class="net-stock-label">System Net Stock</span>
+                    <span id="ccMobileNetStockVal" class="net-stock-val">—</span>
+                </div>
+                <div class="stock-grid">
+                    <div class="stock-badge">
+                        <span class="stock-label">PROD</span>
+                        <span id="ccMobileProdVal" class="stock-val">—</span>
+                    </div>
+                    <div class="stock-badge">
+                        <span class="stock-label">PROTO</span>
+                        <span id="ccMobileProtoVal" class="stock-val">—</span>
+                    </div>
+                    <div class="stock-badge">
+                        <span class="stock-label">CONS</span>
+                        <span id="ccMobileConsVal" class="stock-val" style="color:#ef4444;">—</span>
+                    </div>
+                    <div class="stock-badge">
+                        <span class="stock-label">SCRAP</span>
+                        <span id="ccMobileScrapVal" class="stock-val" style="color:#ef4444;">—</span>
+                    </div>
+                    <div class="stock-badge">
+                        <span class="stock-label">ADJ</span>
+                        <span id="ccMobileAdjVal" class="stock-val" style="color:#3b82f6;">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qty Input Block -->
+            <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+                <label style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">New Physical Qty</label>
+                <input type="number" id="ccMobileQtyInput" placeholder="Enter Physical Qty" class="manual-input" style="width: 100%; font-size: 16px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); height: 38px;">
+            </div>
+
+            <!-- Action Controls Row -->
+            <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
+                <button id="phoneDiscardBtn" class="phone-btn-action phone-btn-discard" style="flex:1; border-radius: 12px; font-size: 9px; padding: 10px 4px;">
+                    ✕ Discard
+                </button>
+                <button id="phoneSaveBtn" class="phone-btn-action phone-btn-save" style="flex:1.4; border-radius: 12px; font-size: 9px; padding: 10px 4px;">
+                    ✓ Save & Next
+                </button>
+                <button id="phoneSaveCloseBtn" class="phone-btn-action phone-btn-save-close" style="flex:1.4; border-radius: 12px; font-size: 9px; padding: 10px 4px;">
+                    💾 Save & Close
+                </button>
+            </div>
         </div>
 
         <!-- Manual Input Drawer -->
@@ -465,16 +620,6 @@
                     <button id="manualSubmitBtn" class="btn-submit">Submit</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Phone-driven actions -->
-        <div style="display: flex; gap: 10px; width: 100%; max-width: 340px; z-index: 15; margin-top: 4px;">
-            <button id="phoneDiscardBtn" class="phone-btn-action phone-btn-discard">
-                ✕ Discard & Back
-            </button>
-            <button id="phoneSaveBtn" class="phone-btn-action phone-btn-save">
-                ✓ Save & Close
-            </button>
         </div>
     </div>
 
@@ -598,6 +743,9 @@
                         updateStatus('ready', 'Bridge Connected ✓', 'Rear camera active. Align barcode inside scanner frame.');
                         triggerHaptic(100);
                         
+                        const cockpit = document.getElementById('mobileCockpitCard');
+                        if (cockpit) cockpit.style.display = 'flex';
+                        
                         startCameraEngine();
                     } catch (err) {
                         hasSession = false;
@@ -611,6 +759,10 @@
                     isDesktopActive = true;
                     updateStatus('ready', 'Bridge Connected ✓', 'Scanner active. Align barcode inside frame.');
                     triggerHaptic([120, 60, 120]);
+                    
+                    const cockpit = document.getElementById('mobileCockpitCard');
+                    if (cockpit) cockpit.style.display = 'flex';
+                    
                     startCameraEngine();
                 });
 
@@ -642,6 +794,48 @@
                         }
                         updateCameraPreviewLayout();
                         triggerHaptic(50);
+                    }
+                });
+
+                // Listen for serialized PC item dropdown options list
+                syncChannel.on('broadcast', { event: 'ITEM_DIRECTORY' }, (envelope) => {
+                    const payload = envelope.payload;
+                    if (payload && payload.items) {
+                        const selectBox = document.getElementById('ccMobileItemSelect');
+                        if (selectBox) {
+                            selectBox.innerHTML = '<option value="">-- Choose Item Natively --</option>';
+                            payload.items.forEach(item => {
+                                const opt = document.createElement('option');
+                                opt.value = item.value;
+                                opt.text = item.text;
+                                selectBox.appendChild(opt);
+                            });
+                        }
+                    }
+                });
+
+                // Listen for PC-side dynamic stock balances updates
+                syncChannel.on('broadcast', { event: 'PC_STOCK_UPDATE' }, (envelope) => {
+                    const payload = envelope.payload;
+                    if (payload) {
+                        const netStock = document.getElementById('ccMobileNetStockVal');
+                        const prod = document.getElementById('ccMobileProdVal');
+                        const proto = document.getElementById('ccMobileProtoVal');
+                        const cons = document.getElementById('ccMobileConsVal');
+                        const scrap = document.getElementById('ccMobileScrapVal');
+                        const adj = document.getElementById('ccMobileAdjVal');
+                        const selectBox = document.getElementById('ccMobileItemSelect');
+
+                        if (netStock) netStock.innerText = payload.netStock || '—';
+                        if (prod) prod.innerText = payload.prod || '—';
+                        if (proto) proto.innerText = payload.proto || '—';
+                        if (cons) cons.innerText = payload.cons || '—';
+                        if (scrap) scrap.innerText = payload.scrap || '—';
+                        if (adj) adj.innerText = payload.adj || '—';
+                        
+                        if (selectBox && payload.itemKey && selectBox.value !== payload.itemKey) {
+                            selectBox.value = payload.itemKey;
+                        }
                     }
                 });
                 
@@ -883,6 +1077,19 @@
             }
         });
 
+        // Mobile Cockpit Dropdown Selection Change Broadcast
+        document.getElementById('ccMobileItemSelect').addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (syncChannel && isDesktopActive) {
+                syncChannel.send({
+                    type: 'broadcast',
+                    event: 'MOBILE_ITEM_SELECTED',
+                    payload: { value: val }
+                }).catch(() => {});
+            }
+            triggerHaptic(40);
+        });
+
         // Discard & Save controllers
         document.getElementById('phoneDiscardBtn').addEventListener('click', async () => {
             triggerHaptic([100, 50, 100]);
@@ -896,22 +1103,86 @@
                 } catch(e) {}
             }
             shutdownCameraEngine();
+            
+            // Hide cockpit card
+            const cockpit = document.getElementById('mobileCockpitCard');
+            if (cockpit) cockpit.style.display = 'none';
+            
             updateStatus('ready', 'Session Cancelled', 'Scan cleared. Waiting for PC modal activation...');
         });
 
+        // ✓ Save & Next (Multi-count workflow)
         document.getElementById('phoneSaveBtn').addEventListener('click', async () => {
+            const selectBox = document.getElementById('ccMobileItemSelect');
+            const qtyInput = document.getElementById('ccMobileQtyInput');
+            if (!selectBox || !selectBox.value) {
+                return alert("Please select or scan an item first.");
+            }
+            const qtyStr = qtyInput ? qtyInput.value.trim() : '';
+            if (qtyStr === '') {
+                return alert("Please enter the physical quantity.");
+            }
+            const qty = parseFloat(qtyStr);
+            if (isNaN(qty)) {
+                return alert("Please enter a valid numeric quantity.");
+            }
+            
             triggerHaptic([100, 50, 100]);
             if (syncChannel && isDesktopActive) {
                 try {
                     await syncChannel.send({
                         type: 'broadcast',
-                        event: 'MOBILE_SAVE_AND_CLOSE',
-                        payload: { timestamp: Date.now() }
+                        event: 'MOBILE_SAVE_COUNT',
+                        payload: { value: selectBox.value, qty: qty, close: false }
                     });
-                } catch(e) {}
+                    
+                    // Show momentary success overlay feedback
+                    updateStatus('success', 'Count Logged ✓', 'Adjustment recorded cleanly.');
+                    if (qtyInput) qtyInput.value = '';
+                    setTimeout(() => {
+                        updateStatus('ready', 'Bridge Connected ✓', 'Rear camera active. Align barcode inside scanner frame.');
+                    }, 1800);
+                } catch(e) {
+                    alert("Sync transmission failed: " + e.message);
+                }
+            } else {
+                alert("Cannot sync: PC bridge is not active.");
             }
-            shutdownCameraEngine();
-            document.getElementById('scannerSuccessOverlay').style.display = 'flex';
+        });
+
+        // 💾 Save & Close (Finalize count session)
+        document.getElementById('phoneSaveCloseBtn').addEventListener('click', async () => {
+            const selectBox = document.getElementById('ccMobileItemSelect');
+            const qtyInput = document.getElementById('ccMobileQtyInput');
+            if (!selectBox || !selectBox.value) {
+                return alert("Please select or scan an item first.");
+            }
+            const qtyStr = qtyInput ? qtyInput.value.trim() : '';
+            if (qtyStr === '') {
+                return alert("Please enter the physical quantity.");
+            }
+            const qty = parseFloat(qtyStr);
+            if (isNaN(qty)) {
+                return alert("Please enter a valid numeric quantity.");
+            }
+            
+            triggerHaptic([100, 50, 100]);
+            if (syncChannel && isDesktopActive) {
+                try {
+                    await syncChannel.send({
+                        type: 'broadcast',
+                        event: 'MOBILE_SAVE_COUNT',
+                        payload: { value: selectBox.value, qty: qty, close: true }
+                    });
+                    
+                    shutdownCameraEngine();
+                    document.getElementById('scannerSuccessOverlay').style.display = 'flex';
+                } catch(e) {
+                    alert("Sync transmission failed: " + e.message);
+                }
+            } else {
+                alert("Cannot sync: PC bridge is not active.");
+            }
         });
 
         // Page startup bootstrap
