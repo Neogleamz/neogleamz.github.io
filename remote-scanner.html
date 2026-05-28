@@ -702,7 +702,11 @@
                 startFrameStreaming();
             } catch(err) {
                 console.error("Camera engine failed:", err);
-                updateStatus('error', 'Camera Blocked', 'Allow camera access permission and reload.');
+                if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    updateStatus('error', 'Insecure Context (HTTP)', 'Mobile browsers block real-time WebRTC camera streams on non-secure HTTP. Use HTTPS, or enable "Insecure origins treated as secure" in Chrome flags (`chrome://flags/#unsafely-treat-insecure-origin-as-secure`) for this IP.');
+                } else {
+                    updateStatus('error', 'Camera Blocked', 'Allow camera access permission and reload.');
+                }
             }
         }
 

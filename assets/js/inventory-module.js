@@ -1278,11 +1278,140 @@ window.initializeCcSyncChannel = function() {
     });
 };
 
-window.startCycleCount = async function() {
+let ccLocalQrScanner = null;
+
+window.startLocalCycleCount = async function() {
+    // 1. Stop any active cycle counts cleanly (both local webcam and remote socket)
+    await window.stopCycleCount();
+    
+    // 2. Open inlineCycleScannerCard
+    let card = document.getElementById('inlineCycleScannerCard');
+    if (card) card.style.display = 'flex';
+    
+    // 3. Set header title
+    const headerTitle = document.getElementById('ccScannerHeaderTitle');
+    if (headerTitle) headerTitle.innerText = "📷 LOCAL CYCLE SCANNER";
+    
+    // 4. Toggle visibility of local vs remote areas
+    const localArea = document.getElementById('ccLocalScannerArea');
+    const remoteArea = document.getElementById('ccRemoteScannerArea');
+    if (localArea) localArea.style.display = 'flex';
+    if (remoteArea) remoteArea.style.display = 'none';
+    
+    // 5. Pull context from the Cycle Count Manager dropdown
+    let selectEl = document.getElementById('ccMngrItemSelect');
+    let titleEl = document.getElementById('inlineScannerItemName');
+    let subtitleEl = document.getElementById('inlineScannerExpected');
+    
+    if (selectEl && selectEl.value) {
+        let selectedOption = selectEl.options[selectEl.selectedIndex];
+        titleEl.innerText = "VERIFYING TARGET:";
+        titleEl.style.color = "#f59e0b"; // Orange matching the PC webcam style
+        subtitleEl.innerText = selectedOption.text;
+    } else {
+        titleEl.innerText = "Scan Any Item";
+        titleEl.style.color = "white";
+        subtitleEl.innerText = "No target filter applied";
+    }
+
+    // 6. Initialize local HTML5-QRCode instance
+    const readerEl = document.getElementById("barcode-reader");
+    if (readerEl) readerEl.innerHTML = window.safeHTML('');
+    
+    try {
+        if (typeof Html5Qrcode === 'undefined') {
+            throw new Error("Html5Qrcode engine is not loaded in window.");
+        }
+        
+        ccLocalQrScanner = new Html5Qrcode("barcode-reader");
+        
+        // Fetch available camera devices to populate dropdown
+        const devices = await Html5Qrcode.getCameras();
+        const selectContainer = document.getElementById('ccLocalDeviceSelectContainer');
+        const selectBox = document.getElementById('ccLocalDeviceSelect');
+        
+        if (devices && devices.length > 0 && selectBox && selectContainer) {
+            selectBox.innerHTML = '';
+            devices.forEach(device => {
+                const opt = document.createElement('option');
+                opt.value = device.id;
+                opt.text = device.label || `Camera ${selectBox.options.length + 1}`;
+                selectBox.appendChild(opt);
+            });
+            selectContainer.style.display = 'flex';
+            
+            // Start streaming with the first listed device
+            await window.startLocalScannerWithDevice(devices[0].id);
+        } else {
+            // Fallback starting with default environment constraint
+            if (selectContainer) selectContainer.style.display = 'none';
+            await ccLocalQrScanner.start(
+                { facingMode: "environment" },
+                { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                (decodedText) => {
+                    window.onScanSuccess(decodedText);
+                },
+                () => {}
+            );
+        }
+        
+        // Update connection pulse indicator to active orange for local webcam
+        const statusIndicator = document.getElementById('ccScannerStatusIndicator');
+        if (statusIndicator) {
+            statusIndicator.style.background = '#f59e0b';
+            statusIndicator.style.boxShadow = '0 0 10px #f59e0b';
+        }
+    } catch(err) {
+        sysLog(`Local Webcam initialization error: ${err.message || err}`, true);
+        alert("Webcam error: " + (err.message || err));
+        await window.stopCycleCount();
+    }
+};
+
+window.startLocalScannerWithDevice = async function(deviceId) {
+    if (!ccLocalQrScanner) return;
+    try {
+        if (ccLocalQrScanner.getState() === 2) { // 2 = SCANNING
+            await ccLocalQrScanner.stop();
+        }
+        await ccLocalQrScanner.start(
+            deviceId,
+            { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+            (decodedText) => {
+                window.onScanSuccess(decodedText);
+            },
+            () => {}
+        );
+    } catch(err) {
+        sysLog(`Local Webcam device start error: ${err.message || err}`, true);
+    }
+};
+
+window.change_handleCCLocalDeviceChange = function(event) {
+    if (event && event.target && event.target.value) {
+        window.startLocalScannerWithDevice(event.target.value);
+    }
+};
+
+window.startRemoteCycleCount = async function() {
+    // 1. Stop any active cycle counts cleanly
+    await window.stopCycleCount();
+    
+    // 2. Open inlineCycleScannerCard
     let card = document.getElementById('inlineCycleScannerCard');
     if(card) card.style.display = 'flex';
     
-    // Pull context from the Cycle Count Manager dropdown
+    // 3. Set header title
+    const headerTitle = document.getElementById('ccScannerHeaderTitle');
+    if (headerTitle) headerTitle.innerText = "📱 REMOTE CYCLE SCANNER";
+    
+    // 4. Toggle visibility of local vs remote areas
+    const localArea = document.getElementById('ccLocalScannerArea');
+    const remoteArea = document.getElementById('ccRemoteScannerArea');
+    if (localArea) localArea.style.display = 'none';
+    if (remoteArea) remoteArea.style.display = 'flex';
+    
+    // 5. Pull context from the Cycle Count Manager dropdown
     let selectEl = document.getElementById('ccMngrItemSelect');
     let titleEl = document.getElementById('inlineScannerItemName');
     let subtitleEl = document.getElementById('inlineScannerExpected');
@@ -1298,7 +1427,7 @@ window.startCycleCount = async function() {
         subtitleEl.innerText = "No target filter applied";
     }
 
-    // Reset UI bridge elements back to connecting state
+    // 6. Reset remote UI elements
     const statusCheck = document.getElementById('ccMobileBridgeStatus');
     const statusIndicator = document.getElementById('ccScannerStatusIndicator');
     const qrContainer = document.getElementById('ccScannerQRContainer');
@@ -1314,11 +1443,18 @@ window.startCycleCount = async function() {
     if (screenContainer) screenContainer.style.display = 'none';
     if (routeBar) routeBar.style.display = 'none';
 
-    // Build unique Realtime sync bridge session
+    // 7. Build unique Realtime sync bridge session
     window.initializeCcSyncChannel();
 
-    // Construct URL for remote phone portal
+    // 8. Construct URL for remote phone portal
     const savedIP = localStorage.getItem('neogleamz_pc_local_ip');
+    
+    // Pre-populate Local IP input for CC
+    const ipInput = document.getElementById('pcLocalIPInput_cc');
+    if (ipInput) {
+        ipInput.value = savedIP || '';
+    }
+
     let host = window.location.host;
     if (savedIP) {
         const port = window.location.port ? `:${window.location.port}` : '';
@@ -1327,18 +1463,13 @@ window.startCycleCount = async function() {
     const remoteUrl = `${window.location.protocol}//${host}/remote-scanner.html?session=${window.ccSessionId}`;
     sysLog(`[Realtime Scanner] Dynamic remote portal link: ${remoteUrl}`);
 
-    // Render Offline QR Code on canvas
-    const canvas = document.getElementById('ccScannerQRCodeCanvas');
-    if (canvas && typeof QRCode !== 'undefined') {
-        try {
-            QRCode.toCanvas(canvas, remoteUrl, { width: 140, margin: 1 });
-        } catch (err) {
-            console.error("Local QR generation failed, calling backup API:", err);
-            // fallback container img source update if any
-        }
+    // 9. Update the image source dynamically powered by api.qrserver.com to prevent canvas sizing race
+    const qrImg = document.getElementById('ccScannerQRCodeImg');
+    if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(remoteUrl)}`;
     }
 
-    // Wake up any existing phone listener automatically
+    // 10. Broadcast wake-up event
     if (window.ccSyncChannel) {
         window.ccSyncChannel.send({
             type: 'broadcast',
@@ -1348,11 +1479,45 @@ window.startCycleCount = async function() {
     }
 };
 
+window.click_updateLocalIPQRCode_cc = function() {
+    const input = document.getElementById('pcLocalIPInput_cc');
+    if (!input) return;
+    
+    let ip = input.value.trim();
+    if (!ip) {
+        localStorage.removeItem('neogleamz_pc_local_ip');
+    } else {
+        // Strip out protocol or port mapping to get clean IP/hostname
+        ip = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
+        localStorage.setItem('neogleamz_pc_local_ip', ip);
+    }
+    
+    // Re-trigger Remote Mode logic to regenerate the QR code
+    window.startRemoteCycleCount();
+};
+
+// Aliasing startCycleCount for backward compatibility
+window.startCycleCount = window.startRemoteCycleCount;
+
 window.stopCycleCount = async function() {
-    // Unsubscribe cleanly from Realtime channel to prevent memory leaks
+    // 1. Cleanly shutdown local HTML5-QRCode instance if active
+    if (ccLocalQrScanner) {
+        try {
+            if (ccLocalQrScanner.getState() === 2) {
+                await ccLocalQrScanner.stop();
+            }
+            ccLocalQrScanner.clear();
+        } catch(err) {
+            sysLog(`Local scanner shutdown warning: ${err.message || err}`, true);
+        }
+        ccLocalQrScanner = null;
+    }
+    const readerEl = document.getElementById("barcode-reader");
+    if (readerEl) readerEl.innerHTML = window.safeHTML('');
+
+    // 2. Unsubscribe cleanly from Supabase Realtime channel
     if (window.ccSyncChannel) {
         try {
-            // Broadcast teardown to the phone screen
             window.ccSyncChannel.send({
                 type: 'broadcast',
                 event: 'PC_DISCARD_AND_BACK',
@@ -1564,12 +1729,16 @@ window.openCycleCountManager = function() {
     // Seed the empty default option
     let baseSelectHtml = '<option value="">-- Choose Item Natively --</option>';
     
-    let allProds = Object.keys(productsDB).sort();
-    let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
-    let labelProds = allProds.filter(p => productsDB[p] && productsDB[p].is_label);
+    let safeProductsDB = (typeof productsDB !== 'undefined') ? productsDB : (window.productsDB || {});
+    let safeIsSubassemblyDB = (typeof isSubassemblyDB !== 'undefined') ? isSubassemblyDB : (window.isSubassemblyDB || {});
+    let safeCatalogCache = (typeof catalogCache !== 'undefined') ? catalogCache : (window.catalogCache || {});
+
+    let allProds = Object.keys(safeProductsDB).sort();
+    let printProds = allProds.filter(p => safeProductsDB[p] && safeProductsDB[p].is_3d_print);
+    let labelProds = allProds.filter(p => safeProductsDB[p] && safeProductsDB[p].is_label);
     
-    let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
-    let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let retailProds = allProds.filter(p => !safeIsSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let subProds = allProds.filter(p => safeIsSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
     
     let optGroups = {
@@ -1605,7 +1774,7 @@ window.openCycleCountManager = function() {
     labelProds.forEach(k => { optGroups.label += mkItem(`RECIPE:::${k}`, `🏷️ ${k}`); nativeGroups.label += mkOpt(`RECIPE:::${k}`, `🏷️ ${k}`); });
     
     // sort raw
-    let rawArr = Object.entries(catalogCache).sort((a,b) => {
+    let rawArr = Object.entries(safeCatalogCache).sort((a,b) => {
         let na = a[1].neoName || a[1].itemName || '';
         let nb = b[1].neoName || b[1].itemName || '';
         return na.localeCompare(nb);
