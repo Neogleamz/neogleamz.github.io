@@ -897,20 +897,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
                 case 'click_addDashboardSOPRow':
-                    {
-                        const area = document.getElementById('sopMasterEditorArea');
-                        if (area) {
-                            let newRow = document.createElement('div');
-                            const prodId = el.getAttribute('data-prodid') || 'unknown';
-                            const sopType = el.getAttribute('data-soptype') || 'batches';
-                            newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, prodId, sopType));
-                            let rowNode = newRow.firstChild;
-                            if (rowNode) area.appendChild(rowNode);
-                        }
+                    if (typeof window.addSOPRow === 'function') {
+                        window.addSOPRow(el);
                     }
                     break;
                 case 'click_addSOPRow_this':
-                    addSOPRow(el);
+                    if (typeof window.addSOPRow === 'function') {
+                        window.addSOPRow(el);
+                    }
                     break;
                 case 'click_window_closeArchiveExplorer':
                     window.closeArchiveExplorer();
@@ -958,7 +952,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('packerzSopLeftPane', 'packerzSopPreviewCol', this);;
                     break;
                 case 'click_addPackerzSOPRow_this':
-                    addPackerzSOPRow(el);
+                    if (typeof window.addPackerzSOPRow === 'function') {
+                        window.addPackerzSOPRow(el);
+                    }
                     break;
                 case 'click_if_event_target_this_closeSOPM':
                     if(event.target===this)closeSOPMediaPicker();

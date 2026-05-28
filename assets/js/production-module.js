@@ -299,7 +299,29 @@ async function renderMasterSOP() {
     } catch(e) { sysLog(e.message, true); }
 }
 
-function addSOPRow(btn) { try { let pId = btn ? btn.getAttribute('data-prodid') : 'unknown'; let sType = btn ? btn.getAttribute('data-soptype') : 'batches'; let newRow = document.createElement('div'); newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, pId, sType)); let rowNode = newRow.firstChild; if(btn && btn.closest) { let currentRow = btn.closest('.sop-step-row'); currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling); } else { let area = document.getElementById('sopMasterEditorArea'); if(area) area.appendChild(rowNode); } } catch(e) { sysLog("UI Error adding SOP step: " + e.message, true); } }
+function addSOPRow(btn) {
+    try {
+        let pId = btn ? btn.getAttribute('data-prodid') : 'unknown';
+        let sType = btn ? btn.getAttribute('data-soptype') : 'batches';
+        let newRow = document.createElement('div');
+        newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, pId, sType));
+        let rowNode = newRow.firstElementChild;
+        if (btn && btn.closest) {
+            let currentRow = btn.closest('.sop-step-row');
+            if (currentRow && currentRow.parentNode) {
+                currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling);
+                return;
+            }
+        }
+        let areaId = sType === 'packerz' ? 'packerzSopEditorArea' : 'sopMasterEditorArea';
+        let area = document.getElementById(areaId);
+        if (area) {
+            area.appendChild(rowNode);
+        }
+    } catch(e) {
+        sysLog("UI Error adding SOP step: " + e.message, true);
+    }
+}
 function removeSOPRow(btn) { try { btn.closest('.sop-step-row').remove(); } catch(e) { sysLog("UI Error removing SOP step: " + e.message, true); } }
 function moveSOPUp(btn) { try { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling && row.previousElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row, row.previousElementSibling); } } catch(e) { sysLog("UI Error moving SOP up: " + e.message, true); } }
 function moveSOPDown(btn) { try { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling && row.nextElementSibling.classList.contains('sop-step-row')) { row.parentNode.insertBefore(row.nextElementSibling, row); } } catch(e) { sysLog("UI Error moving SOP down: " + e.message, true); } }
@@ -419,7 +441,7 @@ function extractSOPDataFromUI(containerId) {
                 attachments.push({type: typeSel.value, url: urlInp.value});
             }
         });
-        if(t && t.innerHTML.trim()) { 
+        if(t && (t.innerHTML.trim() || attachments.length > 0)) { 
             steps.push({ text: t.innerHTML.trim(), attachments: attachments }); 
         } 
     }); 
@@ -431,7 +453,8 @@ window.saveMasterSOP = async function() {
     if(!p) return;
 
     await executeWithButtonAction('btnSaveMasterSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
-        let steps = extractSOPDataFromUI('sopMasterEditorArea');
+        const targetContainer = currentSopMode === 'packerz' ? 'packerzSopEditorArea' : 'sopMasterEditorArea';
+        let steps = extractSOPDataFromUI(targetContainer);
         let rawQa = document.getElementById('productionAdminQA')?.value || '';
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
         const payload = { qaChecks: qaLines, steps: steps };
