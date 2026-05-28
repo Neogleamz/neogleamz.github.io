@@ -904,7 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const prodId = el.getAttribute('data-prodid') || 'unknown';
                             const sopType = el.getAttribute('data-soptype') || 'batches';
                             newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({}, 999, prodId, sopType));
-                            let rowNode = newRow.firstChild;
+                            let rowNode = newRow.firstElementChild;
                             if (rowNode) area.appendChild(rowNode);
                         }
                     }

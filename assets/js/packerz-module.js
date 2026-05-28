@@ -995,12 +995,12 @@ window.addPackerzSOPRow = function(btn) {
     const sku = btn ? (btn.getAttribute('data-prodid') || currentPackerzQaSku || 'unknown') : (currentPackerzQaSku || 'unknown');
     const sopType = btn ? (btn.getAttribute('data-soptype') || 'packerz') : 'packerz';
     newRow.innerHTML = window.safeHTML(window.generateEditableSOPRow({text:""}, 999, sku, sopType));
-    let rowNode = newRow.firstChild;
+    let rowNode = newRow.firstElementChild;
     if(btn && btn.closest('.sop-step-row')) {
         let currentRow = btn.closest('.sop-step-row');
         currentRow.parentNode.insertBefore(rowNode, currentRow.nextSibling);
     } else {
-        let wrapper = document.getElementById('packerzLiveInlineRowsWrapper') || document.getElementById('packerzSopEditorRowsWrapper');
+        let wrapper = document.getElementById('packerzLiveInlineRowsWrapper') || document.getElementById('packerzSopEditorRowsWrapper') || document.getElementById('packerzSopEditorArea');
         if(wrapper) wrapper.appendChild(rowNode);
     }
 }
