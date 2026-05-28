@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.05.28.0119"></script>
+    <script src="assets/js/system-version.js?v=v.2026.05.28.0121"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.28.0119"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.28.0121"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.28.0119"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.28.0121"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.05.28.0119"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.05.28.0121"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -62,7 +62,8 @@
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Righteous', sans-serif; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        .login-logo { content: url('assets/images/neo_logo_white.png'); transition: all 0.3s ease; }
+        .login-logo { content: url('assets/images/neo_logo_orange.png'); transition: all 0.3s ease; }
+        [data-theme="dark"] .login-logo { content: url('assets/images/neo_logo_white.png'); }
         .neo-logo { content: url('assets/images/neo_logo_orange.png'); transition: all 0.3s ease; }
         [data-theme="dark"] .neo-logo { content: url('assets/images/neo_logo_white.png'); filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
 
@@ -265,25 +266,24 @@
         .sub-nav-btn.active { background: #F79320; color: white !important; box-shadow: 0 4px 12px rgba(247, 147, 32, 0.3); }
         .back-hub-btn { background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid #F79320; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin-right: 15px; transition: 0.2s; }
         .back-hub-btn:hover { background: #F79320; color: white; }
-        
-        /* AUTHORITY LOGIN OVERLAY */
-        .login-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999; background: #020617; display: flex; justify-content: center; align-items: center; font-family: 'Righteous', sans-serif; }
-        .login-card { background: rgba(30, 41, 59, 0.7); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: clamp(28px, 6vw, 60px); max-width: 450px; width: 90%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+              /* AUTHORITY LOGIN OVERLAY */
+        .login-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999; background: var(--bg-body); display: flex; justify-content: center; align-items: center; font-family: 'Righteous', sans-serif; color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+        .login-card { background: var(--bg-glass); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; padding: clamp(28px, 6vw, 60px); max-width: 450px; width: 90%; text-align: center; box-shadow: var(--glass-shadow); color: var(--text-main); transition: all 0.3s ease; }
         .login-field { margin-bottom: 20px; text-align: left; }
         .login-field label { display: block; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700; }
-        .login-field input { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 14px; color: white; font-size: 14px; outline: none; transition: all 0.3s; }
+        .login-field input { width: 100%; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 12px; padding: 14px; color: var(--text-main); font-size: 14px; outline: none; transition: all 0.3s; }
         .login-field input:focus { border-color: #f97316; box-shadow: 0 0 15px rgba(249, 115, 22, 0.3); }
         .login-btn { width: 100%; background: #f97316; color: white; border: none; border-radius: 12px; padding: 16px; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); }
         .login-btn:hover { background: #ea580c; transform: translateY(-3px); box-shadow: 0 12px 24px rgba(249, 115, 22, 0.5); }
         .login-error { color: #ef4444; font-size: 12px; margin-bottom: 20px; display: none; font-weight: 700; }
-
+ 
         /* BOOT PROGRESS CARD OVERLAY */
         .boot-progress-area { display: none; text-align: center; margin-top: 10px; }
         .boot-title { margin-bottom: 24px; font-weight: 900; letter-spacing: 3px; color: #f97316; font-size: clamp(16px, 4vw, 22px); text-transform: uppercase; text-shadow: 0 0 10px rgba(249, 115, 22, 0.4); }
-        .boot-track { width: 100%; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 9999px; height: 12px; margin-bottom: 24px; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5); }
+        .boot-track { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 9999px; height: 12px; margin-bottom: 24px; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); }
         .boot-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #f97316, #fb923c, #fbbf24); border-radius: 9999px; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 12px rgba(249, 115, 22, 0.8); }
-        .boot-status { font-size: 13px; color: #f8fafc; font-weight: 800; margin-bottom: 12px; min-height: 20px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Righteous', sans-serif; text-shadow: 0 0 8px rgba(255, 255, 255, 0.2); }
-        .boot-substatus { font-size: 11px; color: #94a3b8; font-family: 'Fira Code', 'Courier New', Courier, monospace; min-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 6px 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .boot-status { font-size: 13px; color: var(--text-main); font-weight: 800; margin-bottom: 12px; min-height: 20px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Righteous', sans-serif; text-shadow: 0 0 8px rgba(255, 255, 255, 0.1); }
+        .boot-substatus { font-size: 11px; color: var(--text-muted); font-family: 'Fira Code', 'Courier New', Courier, monospace; min-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 6px 12px; background: var(--bg-bar); border-radius: 8px; border: 1px solid var(--border-color); }
 
         #appUI { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; }
 
@@ -5411,20 +5411,20 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/bom-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/production-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/sales-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/task-engine.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/print-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.05.28.0119"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.05.28.0119"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/bom-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/production-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/sales-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/task-engine.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/print-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.05.28.0121"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.05.28.0121"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5892,18 +5892,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.28.0119"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.28.0121"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.28.0119"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.28.0121"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.28.0119"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.28.0121"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.28.0119"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.28.0119"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.28.0119"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.28.0121"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.28.0121"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.28.0121"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.05.28.0119"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.05.28.0119"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.05.28.0121"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.05.28.0121"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
