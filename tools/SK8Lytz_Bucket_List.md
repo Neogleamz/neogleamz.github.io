@@ -15,7 +15,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-- [ ] feat/cycle-count-dual-preview : **Cycle Count Dual-Preview Live Sync** - Add dynamic preview routing options (PC only, Phone only, or simultaneous Dual-Preview) to the Cycle Count Manager while preserving instantaneous barcode/QR scanning. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+*Clean sweep — all backlog sandbox tasks currently active!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
 *Clean sweep — all active epics successfully completed and archived!* ✅
@@ -39,6 +39,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `feat/cycle-count-dual-preview`
+**Epic: Cycle Count Dual-Preview Live Sync**
+*(Archived — 2026-05-28)*
+- [x] feat/cycle-count-dual-preview : **Cycle Count Dual-Preview Live Sync** - Add dynamic preview routing options (PC only, Phone only, or simultaneous Dual-Preview) to the Cycle Count Manager while preserving instantaneous barcode/QR scanning. [🤖 Antigravity] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `main`
 **Epic: Live Mobile Camera Preview & Physical Capture Sync**

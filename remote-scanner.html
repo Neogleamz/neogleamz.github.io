@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEOGLEAMZ Remote Scanner</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS SDK & Html5Qrcode CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #070b13;
+            --primary: #10b981; /* Emerald/Success primary theme for green scanner */
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --bg-glass: rgba(255, 255, 255, 0.03);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --sky: #0ea5e9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+
+        /* Ambient Glow Backgrounds */
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(40px);
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header {
+            margin-bottom: 4px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* Scanner Frame Window Container */
+        .scanner-window-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 20px;
+            border: 3px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 30px var(--primary-glow);
+            transition: all 0.3s ease;
+        }
+
+        #barcode-reader {
+            width: 100%;
+            height: 100%;
+            border: none !important;
+        }
+
+        /* Hide default library overlays inside scanner element */
+        #barcode-reader img {
+            display: none !important;
+        }
+        #barcode-reader button {
+            display: none !important;
+        }
+        #barcode-reader select {
+            display: none !important;
+        }
+
+        /* Custom pulsing scan line */
+        .scan-laser {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            box-shadow: 0 0 10px var(--primary);
+            z-index: 5;
+            animation: laser-pulse 2.2s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes laser-pulse {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+
+        /* Tactile Status Board */
+        .status-container {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 12px 20px;
+            width: 100%;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+        }
+
+        .status-text {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+
+        .status-subtext {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Spinner & Success animations */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 4px;
+        }
+
+        .success-checkmark {
+            display: none;
+            font-size: 32px;
+            color: var(--success);
+            animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            margin-bottom: 4px;
+        }
+
+        .error-cross {
+            display: none;
+            font-size: 32px;
+            color: var(--error);
+            animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            margin-bottom: 4px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Segmented Control Route Switcher */
+        .route-switcher {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 30px;
+            padding: 4px;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 15;
+        }
+
+        .route-tab {
+            flex: 1;
+            padding: 8px 0;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-align: center;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-transform: uppercase;
+        }
+
+        .route-tab.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 12px var(--primary-glow);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .route-tab:not(.active):active {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        /* Manual Input Collapsible Drawer */
+        .manual-drawer {
+            width: 100%;
+            max-width: 340px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+            z-index: 15;
+            transition: all 0.3s ease;
+        }
+
+        .manual-drawer-header {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .manual-drawer-content {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            animation: slide-down 0.25s ease-out;
+        }
+
+        @keyframes slide-down {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .manual-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .manual-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.95);
+            background: #059669;
+        }
+
+        /* Success Full Screen Closing Tab Card Overlay */
+        .overlay-success-full {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(7, 11, 19, 0.98);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .phone-btn-action {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.25s;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            outline: none;
+        }
+        
+        .phone-btn-discard {
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+        }
+        .phone-btn-discard:active {
+            transform: scale(0.95);
+            background: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+        }
+
+        .phone-btn-save {
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.12);
+            color: #a7f3d0;
+        }
+        .phone-btn-save:active {
+            transform: scale(0.95);
+            background: rgba(16, 185, 129, 0.25) !important;
+            border-color: #10b981 !important;
+        }
+        
+        /* Audio and hidden items */
+        #scanner-beep, canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>NEOGLEAMZ</h1>
+            <p>📱 REMOTE CYCLE SCANNER</p>
+        </div>
+
+        <!-- WebRTC Barcode Window Frame -->
+        <div class="scanner-window-container">
+            <div class="scan-laser"></div>
+            <div id="barcode-reader"></div>
+        </div>
+
+        <!-- Segmented Control Route Switcher -->
+        <div class="route-switcher">
+            <div id="routePhone" class="route-tab active">
+                <span>📱</span> Phone Only
+            </div>
+            <div id="routePC" class="route-tab">
+                <span>💻</span> PC Only
+            </div>
+            <div id="routeBoth" class="route-tab">
+                <span>🔄</span> Both Screens
+            </div>
+        </div>
+
+        <!-- Tactile Status Board -->
+        <div class="status-container">
+            <div id="statusSpinner" class="spinner"></div>
+            <div id="statusSuccess" class="success-checkmark">✓</div>
+            <div id="statusError" class="error-cross">⚠</div>
+            <div id="statusText" class="status-text">Connecting to Session...</div>
+            <div id="statusSubtext" class="status-subtext">Waiting for real-time synchronization bridge.</div>
+        </div>
+
+        <!-- Manual Input Drawer -->
+        <div class="manual-drawer">
+            <div id="manualDrawerHeader" class="manual-drawer-header">
+                <span>⌨ Manual Barcode Fallback</span>
+                <span id="drawerCaret">▼</span>
+            </div>
+            <div id="manualDrawerContent" class="manual-drawer-content">
+                <div class="input-group">
+                    <input type="text" id="manualBarcodeInput" class="manual-input" placeholder="Type Barcode or SKU..." autocomplete="off">
+                    <button id="manualSubmitBtn" class="btn-submit">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phone-driven actions -->
+        <div style="display: flex; gap: 10px; width: 100%; max-width: 340px; z-index: 15; margin-top: 4px;">
+            <button id="phoneDiscardBtn" class="phone-btn-action phone-btn-discard">
+                ✕ Discard & Back
+            </button>
+            <button id="phoneSaveBtn" class="phone-btn-action phone-btn-save">
+                ✓ Save & Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div id="scannerSuccessOverlay" class="overlay-success-full">
+        <div style="font-size: 64px; animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;">🎉</div>
+        <div style="font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #fff 30%, var(--success) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);">Count Synchronized!</div>
+        <div style="font-size: 13px; color: var(--text-muted); max-width: 280px; line-height: 1.6;">Your cycle count entries have been cleanly recorded. You can safely close this browser window now!</div>
+        <button onclick="window.close()" style="margin-top: 15px; padding: 12px 24px; border-radius: 30px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); color: #fff; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Close Portal</button>
+    </div>
+
+    <!-- Hidden audio chirp fallback -->
+    <audio id="scanner-beep" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" type="audio/wav">
+    </audio>
+
+    <!-- Hidden canvas for video compression -->
+    <canvas id="compress-canvas" width="240" height="240"></canvas>
+
+    <script>
+        const SUPABASE_URL = 'https://qefmeivpjyaukbwadgaz.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7';
+
+        let supabaseClient = null;
+        let syncChannel = null;
+        let sessionId = null;
+        let hasSession = false;
+        let isDesktopActive = false;
+        let activePreviewMode = 'phone'; // phone | pc | both
+        
+        let html5QrCode = null;
+        let frameGrabberTimer = null;
+        let isProcessingScan = false;
+
+        // UI Selectors
+        const statusText = document.getElementById('statusText');
+        const statusSubtext = document.getElementById('statusSubtext');
+        const statusSpinner = document.getElementById('statusSpinner');
+        const statusSuccess = document.getElementById('statusSuccess');
+        const statusError = document.getElementById('statusError');
+        
+        const routePhone = document.getElementById('routePhone');
+        const routePC = document.getElementById('routePC');
+        const routeBoth = document.getElementById('routeBoth');
+        
+        const manualDrawerHeader = document.getElementById('manualDrawerHeader');
+        const drawerCaret = document.getElementById('drawerCaret');
+        const manualDrawerContent = document.getElementById('manualDrawerContent');
+        const manualBarcodeInput = document.getElementById('manualBarcodeInput');
+        const manualSubmitBtn = document.getElementById('manualSubmitBtn');
+
+        // Tactile Haptics
+        function triggerHaptic(pattern) {
+            if (navigator.vibrate) {
+                try { navigator.vibrate(pattern); } catch(e) {}
+            }
+        }
+
+        function updateStatus(state, title, subtitle) {
+            statusSpinner.style.display = 'none';
+            statusSuccess.style.display = 'none';
+            statusError.style.display = 'none';
+            
+            statusText.innerText = title;
+            statusSubtext.innerText = subtitle;
+            
+            if (state === 'loading') {
+                statusSpinner.style.display = 'block';
+                statusText.style.color = 'var(--text-main)';
+            } else if (state === 'success') {
+                statusSuccess.style.display = 'block';
+                statusText.style.color = 'var(--success)';
+                triggerHaptic([100, 50, 100]);
+            } else if (state === 'error') {
+                statusError.style.display = 'block';
+                statusText.style.color = 'var(--error)';
+                triggerHaptic([300]);
+            } else if (state === 'ready') {
+                statusText.style.color = 'var(--primary)';
+            }
+        }
+
+        // Initialize Supabase & Sync Connection
+        function initSyncBridge() {
+            const params = new URLSearchParams(window.location.search);
+            sessionId = params.get('session');
+            
+            if (!sessionId) {
+                updateStatus('error', 'Session Missing', 'Invalid session URL. Please scan the QR code again.');
+                return;
+            }
+
+            try {
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error('Supabase SDK missing.');
+                }
+                
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const channelName = `neogleamz-cc-sync-${sessionId}`;
+                
+                updateStatus('loading', 'Building sync bridge...', 'Securing connection channel...');
+                
+                syncChannel = supabaseClient.channel(channelName);
+
+                // Listen for desktop auth session handshake
+                syncChannel.on('broadcast', { event: 'SESSION_TRANSFER' }, async (envelope) => {
+                    if (hasSession) return;
+                    try {
+                        const payload = envelope.payload;
+                        if (!payload || !payload.accessToken) {
+                            throw new Error('Session details missing.');
+                        }
+                        hasSession = true;
+                        isDesktopActive = true;
+                        
+                        await supabaseClient.auth.setSession({
+                            access_token: payload.accessToken,
+                            refresh_token: payload.refreshToken || ''
+                        });
+                        
+                        updateStatus('ready', 'Bridge Connected ✓', 'Rear camera active. Align barcode inside scanner frame.');
+                        triggerHaptic(100);
+                        
+                        startCameraEngine();
+                    } catch (err) {
+                        hasSession = false;
+                        isDesktopActive = false;
+                        updateStatus('error', 'Handshake Failed', err.message);
+                    }
+                });
+
+                // Listen for desktop shutter wake up
+                syncChannel.on('broadcast', { event: 'LAUNCH_MOBILE_SCANNER' }, () => {
+                    isDesktopActive = true;
+                    updateStatus('ready', 'Bridge Connected ✓', 'Scanner active. Align barcode inside frame.');
+                    triggerHaptic([120, 60, 120]);
+                    startCameraEngine();
+                });
+
+                // Listen for PC discard or save actions
+                syncChannel.on('broadcast', { event: 'PC_SAVE_AND_CLOSE' }, () => {
+                    shutdownCameraEngine();
+                    document.getElementById('scannerSuccessOverlay').style.display = 'flex';
+                });
+
+                syncChannel.on('broadcast', { event: 'PC_DISCARD_AND_BACK' }, () => {
+                    shutdownCameraEngine();
+                    updateStatus('ready', 'Session Reset ✓', 'Waiting for PC to open remote camera again...');
+                });
+
+                // Listen for PC preview mode changes
+                syncChannel.on('broadcast', { event: 'PC_PREVIEW_MODE_CHANGED' }, (envelope) => {
+                    const payload = envelope.payload;
+                    if (payload && payload.mode) {
+                        activePreviewMode = payload.mode;
+                        routePhone.classList.remove('active');
+                        routePC.classList.remove('active');
+                        routeBoth.classList.remove('active');
+                        if (activePreviewMode === 'phone') {
+                            routePhone.classList.add('active');
+                        } else if (activePreviewMode === 'pc') {
+                            routePC.classList.add('active');
+                        } else {
+                            routeBoth.classList.add('active');
+                        }
+                        updateCameraPreviewLayout();
+                        triggerHaptic(50);
+                    }
+                });
+                
+                syncChannel.subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        updateStatus('loading', 'Handshaking...', 'Establishing secure authorization transfer...');
+                        
+                        // Handshake ping loop
+                        let attempts = 0;
+                        const handshakeInterval = setInterval(() => {
+                            if (hasSession) {
+                                clearInterval(handshakeInterval);
+                                return;
+                            }
+                            
+                            attempts++;
+                            if (attempts > 15) {
+                                clearInterval(handshakeInterval);
+                                updateStatus('error', 'Connection Timeout', 'Open the Cycle Count modal on PC and scan QR code again.');
+                                return;
+                            }
+                            
+                            syncChannel.send({
+                                type: 'broadcast',
+                                event: 'MOBILE_CONNECT',
+                                payload: { timestamp: Date.now() }
+                            });
+                        }, 1500);
+                    }
+                });
+
+            } catch (err) {
+                updateStatus('error', 'Sync Bridge Error', err.message);
+            }
+        }
+
+        // Camera and Barcode Scanning Engine
+        async function startCameraEngine() {
+            if (html5QrCode) return;
+            
+            const readerEl = document.getElementById("barcode-reader");
+            if (readerEl) readerEl.innerHTML = '';
+            
+            try {
+                html5QrCode = new Html5Qrcode("barcode-reader");
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 12, qrbox: { width: 230, height: 230 }, aspectRatio: 1.0 },
+                    (decodedText) => {
+                        handleBarcodeLock(decodedText);
+                    },
+                    () => {
+                        // Suppress frame-by-frame exceptions
+                    }
+                );
+                
+                updateCameraPreviewLayout();
+                startFrameStreaming();
+            } catch(err) {
+                console.error("Camera engine failed:", err);
+                if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    updateStatus('error', 'Insecure Context (HTTP)', 'Mobile browsers block real-time WebRTC camera streams on non-secure HTTP. Use HTTPS, or enable "Insecure origins treated as secure" in Chrome flags (`chrome://flags/#unsafely-treat-insecure-origin-as-secure`) for this IP.');
+                } else {
+                    updateStatus('error', 'Camera Blocked', 'Allow camera access permission and reload.');
+                }
+            }
+        }
+
+        function shutdownCameraEngine() {
+            stopFrameStreaming();
+            if (html5QrCode) {
+                try {
+                    html5QrCode.stop();
+                    html5QrCode.clear();
+                } catch(e) {}
+                html5QrCode = null;
+            }
+            const readerEl = document.getElementById("barcode-reader");
+            if (readerEl) readerEl.innerHTML = '';
+        }
+
+        // Throttled canvas frame-grabber loop to send base64 preview frames to PC
+        function startFrameStreaming() {
+            stopFrameStreaming();
+            
+            frameGrabberTimer = setInterval(() => {
+                if (activePreviewMode === 'phone') return; // saves bandwidth
+                if (!syncChannel || !isDesktopActive) return;
+                
+                const video = document.querySelector("#barcode-reader video");
+                if (!video || video.paused || video.ended) return;
+                
+                const canvas = document.getElementById("compress-canvas");
+                const ctx = canvas.getContext("2d");
+                
+                // Draw crop centered square
+                const minSide = Math.min(video.videoWidth, video.videoHeight);
+                const sx = (video.videoWidth - minSide) / 2;
+                const sy = (video.videoHeight - minSide) / 2;
+                
+                ctx.drawImage(video, sx, sy, minSide, minSide, 0, 0, 240, 240);
+                
+                // High-performance light WebP or JPEG compression
+                const frameBase64 = canvas.toDataURL("image/jpeg", 0.35); // 35% JPEG compression is tiny (2-4KB)
+                
+                syncChannel.send({
+                    type: 'broadcast',
+                    event: 'REMOTE_FRAME_STREAM',
+                    payload: { frame: frameBase64 }
+                });
+            }, 180); // ~5.5 frames per second
+        }
+
+        function stopFrameStreaming() {
+            if (frameGrabberTimer) {
+                clearInterval(frameGrabberTimer);
+                frameGrabberTimer = null;
+            }
+        }
+
+        // Update Phone Scanner Preview Styles (PC-only mode turns off phone viewport)
+        function updateCameraPreviewLayout() {
+            const video = document.querySelector("#barcode-reader video");
+            if (!video) return;
+
+            if (activePreviewMode === 'pc') {
+                video.style.opacity = '0.05'; // keep active for decoding but dim screen
+                video.style.filter = 'blur(10px)';
+            } else {
+                video.style.opacity = '1';
+                video.style.filter = 'none';
+            }
+        }
+
+        // Instant barcode synchronization
+        async function handleBarcodeLock(text) {
+            if (isProcessingScan) return;
+            isProcessingScan = true;
+            
+            triggerHaptic([100]);
+            
+            // Audio chirp
+            const beep = document.getElementById('scanner-beep');
+            if (beep) {
+                beep.currentTime = 0;
+                beep.play().catch(() => {});
+            }
+
+            // Green overlay feedback
+            const borderEl = document.querySelector(".scanner-window-container");
+            borderEl.style.borderColor = "var(--success)";
+            borderEl.style.boxShadow = "0 0 40px var(--success)";
+            
+            updateStatus('success', 'Barcoded Decoded ✓', `Synced: ${text}`);
+
+            if (syncChannel && isDesktopActive) {
+                try {
+                    await syncChannel.send({
+                        type: 'broadcast',
+                        event: 'REMOTE_BARCODE_SCAN',
+                        payload: { barcode: text }
+                    });
+                } catch(e) {
+                    console.error("Barcode transmit failed:", e);
+                }
+            }
+
+            // Pause frame captures briefly to prevent multi-triggering
+            setTimeout(() => {
+                borderEl.style.borderColor = "var(--primary)";
+                borderEl.style.boxShadow = "0 0 30px var(--primary-glow)";
+                isProcessingScan = false;
+                if (hasSession) {
+                    updateStatus('ready', 'Bridge Connected ✓', 'Rear camera active. Align barcode inside scanner frame.');
+                }
+            }, 1500);
+        }
+
+        // Dynamic preview switcher tab click bindings
+        function setPreviewMode(mode) {
+            activePreviewMode = mode;
+            routePhone.classList.remove('active');
+            routePC.classList.remove('active');
+            routeBoth.classList.remove('active');
+            
+            if (mode === 'phone') {
+                routePhone.classList.add('active');
+            } else if (mode === 'pc') {
+                routePC.classList.add('active');
+            } else {
+                routeBoth.classList.add('active');
+            }
+            
+            updateCameraPreviewLayout();
+            triggerHaptic(50);
+            
+            // Notify PC about switcher change
+            if (syncChannel && isDesktopActive) {
+                syncChannel.send({
+                    type: 'broadcast',
+                    event: 'MOBILE_PREVIEW_MODE_CHANGED',
+                    payload: { mode: mode }
+                });
+            }
+        }
+
+        routePhone.addEventListener('click', () => setPreviewMode('phone'));
+        routePC.addEventListener('click', () => setPreviewMode('pc'));
+        routeBoth.addEventListener('click', () => setPreviewMode('both'));
+
+        // Collapsible manual drawer toggle
+        manualDrawerHeader.addEventListener('click', () => {
+            const isVisible = manualDrawerContent.style.display === 'flex';
+            if (isVisible) {
+                manualDrawerContent.style.display = 'none';
+                drawerCaret.innerText = '▼';
+            } else {
+                manualDrawerContent.style.display = 'flex';
+                drawerCaret.innerText = '▲';
+                manualBarcodeInput.focus();
+            }
+            triggerHaptic(40);
+        });
+
+        // Submit manual barcode
+        manualSubmitBtn.addEventListener('click', () => {
+            const val = manualBarcodeInput.value.trim();
+            if (val) {
+                handleBarcodeLock(val);
+                manualBarcodeInput.value = '';
+                manualDrawerContent.style.display = 'none';
+                drawerCaret.innerText = '▼';
+            }
+        });
+
+        manualBarcodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                manualSubmitBtn.click();
+            }
+        });
+
+        // Discard & Save controllers
+        document.getElementById('phoneDiscardBtn').addEventListener('click', async () => {
+            triggerHaptic([100, 50, 100]);
+            if (syncChannel && isDesktopActive) {
+                try {
+                    await syncChannel.send({
+                        type: 'broadcast',
+                        event: 'MOBILE_DISCARD_AND_BACK',
+                        payload: { timestamp: Date.now() }
+                    });
+                } catch(e) {}
+            }
+            shutdownCameraEngine();
+            updateStatus('ready', 'Session Cancelled', 'Scan cleared. Waiting for PC modal activation...');
+        });
+
+        document.getElementById('phoneSaveBtn').addEventListener('click', async () => {
+            triggerHaptic([100, 50, 100]);
+            if (syncChannel && isDesktopActive) {
+                try {
+                    await syncChannel.send({
+                        type: 'broadcast',
+                        event: 'MOBILE_SAVE_AND_CLOSE',
+                        payload: { timestamp: Date.now() }
+                    });
+                } catch(e) {}
+            }
+            shutdownCameraEngine();
+            document.getElementById('scannerSuccessOverlay').style.display = 'flex';
+        });
+
+        // Page startup bootstrap
+        window.addEventListener('DOMContentLoaded', () => {
+            initSyncBridge();
+        });
+    </script>
+</body>
+</html>

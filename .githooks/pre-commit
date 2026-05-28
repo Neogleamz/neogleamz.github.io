@@ -5,7 +5,7 @@ const whitelist = new Set([
   '.gitignore', '.env.example', '.env.local', '.eslintrc.json', 'eslint.config.mjs',
   '.hintrc', '.htmlhintrc', '.prettierignore', '.prettierrc', 'jest.config.js',
   'package.json', 'package-lock.json', 'index.html', 'qa-dashboard.html',
-  'test_print.html', 'README.md', 'CHANGELOG.md', 'diagram-1.svg', 'remote-capture.html'
+  'test_print.html', 'README.md', 'CHANGELOG.md', 'diagram-1.svg', 'remote-capture.html', 'remote-scanner.html'
 ]);
 
 try {

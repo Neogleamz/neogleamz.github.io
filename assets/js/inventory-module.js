@@ -1150,17 +1150,268 @@ window.runVelocityzExplosion = function() {
 };
 
 // ========================================================
-// WEBRTC CYCLE SCANNER LOGIC
+// REMOTE MOBILE BARCODE SCANNER BRIDGE
 // ========================================================
-let html5QrCode = null;
+window.ccSyncChannel = null;
+window.ccSessionId = null;
+let currentPreviewMode = 'phone'; // phone | pc | both
 let currentScanKey = null;
 let currentScanIsFgi = false;
 
-window.startCycleCount = async function() {
+window.initializeCcSyncChannel = function() {
+    if (!window.ccSessionId) {
+        window.ccSessionId = (window.currentUser ? window.currentUser.id : 'guest') + '-cc-' + Math.random().toString(36).substring(2, 6);
+    }
+    
+    if (window.ccSyncChannel) return;
+
+    const channelName = `neogleamz-cc-sync-${window.ccSessionId}`;
+    sysLog(`[Realtime Scanner] Spawning channel sync on: ${channelName}`);
+    
+    if (typeof supabaseClient === 'undefined') {
+        sysLog(`[Realtime Scanner] Error: Supabase client is not initialized yet.`, true);
+        return;
+    }
+
+    window.ccSyncChannel = supabaseClient.channel(channelName);
+
+    // Listen for mobile scanner connecting
+    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_CONNECT' }, () => {
+        sysLog(`[Realtime Scanner] Mobile client handshake ping received. Transmitting auth tokens...`);
+        
+        // Retrieve dynamic session token for secure phone storage RLS authorization
+        let sessionToken = '';
+        let refreshToken = '';
+        try {
+            const session = supabaseClient.auth.session ? supabaseClient.auth.session() : null;
+            if (session) {
+                sessionToken = session.access_token;
+                refreshToken = session.refresh_token;
+            } else {
+                supabaseClient.auth.getSession().then(({ data }) => {
+                    if (data && data.session) {
+                        window.ccSyncChannel.send({
+                            type: 'broadcast',
+                            event: 'SESSION_TRANSFER',
+                            payload: {
+                                accessToken: data.session.access_token,
+                                refreshToken: data.session.refresh_token || ''
+                            }
+                        }).catch(() => {});
+                    }
+                });
+            }
+        } catch (e) { console.warn(e); }
+
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'SESSION_TRANSFER',
+            payload: {
+                accessToken: sessionToken,
+                refreshToken: refreshToken
+            }
+        }).catch(err => {
+            sysLog(`[Realtime Scanner] SESSION_TRANSFER send failed: ${err.message}`, true);
+        });
+
+        // Update UI states to connected
+        const statusCheck = document.getElementById('ccMobileBridgeStatus');
+        const statusIndicator = document.getElementById('ccScannerStatusIndicator');
+        const qrContainer = document.getElementById('ccScannerQRContainer');
+        const screenContainer = document.getElementById('ccRemotePreviewScreenContainer');
+        const routeBar = document.getElementById('pcRouteBar');
+        
+        if (statusCheck) statusCheck.innerHTML = '🟢 📱 Phone Connected | Stream Active';
+        if (statusIndicator) {
+            statusIndicator.style.background = '#10b981';
+            statusIndicator.style.boxShadow = '0 0 10px #10b981';
+        }
+        if (qrContainer) qrContainer.style.display = 'none';
+        if (screenContainer) screenContainer.style.display = 'flex';
+        if (routeBar) routeBar.style.display = 'flex';
+        
+        window.updateCCRouteUI(currentPreviewMode);
+    });
+
+    // Listen for phone-side frame stream broadcasts
+    window.ccSyncChannel.on('broadcast', { event: 'REMOTE_FRAME_STREAM' }, (envelope) => {
+        const payload = envelope.payload;
+        if (payload && payload.frame) {
+            const screen = document.getElementById('ccRemotePreviewScreen');
+            if (screen) screen.src = payload.frame;
+        }
+    });
+
+    // Listen for phone-side mode switcher updates
+    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_PREVIEW_MODE_CHANGED' }, (envelope) => {
+        const payload = envelope.payload;
+        if (payload && payload.mode) {
+            currentPreviewMode = payload.mode;
+            window.updateCCRouteUI(currentPreviewMode);
+        }
+    });
+
+    // Listen for instantaneous phone barcode scan decodes
+    window.ccSyncChannel.on('broadcast', { event: 'REMOTE_BARCODE_SCAN' }, (envelope) => {
+        const payload = envelope.payload;
+        if (payload && payload.barcode) {
+            sysLog(`[Realtime Scanner] Received remote scan lock: ${payload.barcode}`);
+            window.onScanSuccess(payload.barcode);
+        }
+    });
+
+    // Listen for phone discard trigger
+    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_DISCARD_AND_BACK' }, () => {
+        sysLog(`[Realtime Scanner] Mobile shutter clicked Discard`);
+        window.stopCycleCount();
+    });
+
+    // Listen for phone save trigger
+    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_SAVE_AND_CLOSE' }, () => {
+        sysLog(`[Realtime Scanner] Mobile shutter clicked Save`);
+        const saveBtn = document.querySelector('[data-click="click_window_saveManualCycleCount"]');
+        if (saveBtn) saveBtn.click();
+    });
+
+    window.ccSyncChannel.subscribe((status) => {
+        sysLog(`[Realtime Scanner] Channel subscription: ${status}`);
+    });
+};
+
+let ccLocalQrScanner = null;
+
+window.startLocalCycleCount = async function() {
+    // 1. Stop any active cycle counts cleanly (both local webcam and remote socket)
+    await window.stopCycleCount();
+    
+    // 2. Open inlineCycleScannerCard
+    let card = document.getElementById('inlineCycleScannerCard');
+    if (card) card.style.display = 'flex';
+    
+    // 3. Set header title
+    const headerTitle = document.getElementById('ccScannerHeaderTitle');
+    if (headerTitle) headerTitle.innerText = "📷 LOCAL CYCLE SCANNER";
+    
+    // 4. Toggle visibility of local vs remote areas
+    const localArea = document.getElementById('ccLocalScannerArea');
+    const remoteArea = document.getElementById('ccRemoteScannerArea');
+    if (localArea) localArea.style.display = 'flex';
+    if (remoteArea) remoteArea.style.display = 'none';
+    
+    // 5. Pull context from the Cycle Count Manager dropdown
+    let selectEl = document.getElementById('ccMngrItemSelect');
+    let titleEl = document.getElementById('inlineScannerItemName');
+    let subtitleEl = document.getElementById('inlineScannerExpected');
+    
+    if (selectEl && selectEl.value) {
+        let selectedOption = selectEl.options[selectEl.selectedIndex];
+        titleEl.innerText = "VERIFYING TARGET:";
+        titleEl.style.color = "#f59e0b"; // Orange matching the PC webcam style
+        subtitleEl.innerText = selectedOption.text;
+    } else {
+        titleEl.innerText = "Scan Any Item";
+        titleEl.style.color = "white";
+        subtitleEl.innerText = "No target filter applied";
+    }
+
+    // 6. Initialize local HTML5-QRCode instance
+    const readerEl = document.getElementById("barcode-reader");
+    if (readerEl) readerEl.innerHTML = window.safeHTML('');
+    
+    try {
+        if (typeof Html5Qrcode === 'undefined') {
+            throw new Error("Html5Qrcode engine is not loaded in window.");
+        }
+        
+        ccLocalQrScanner = new Html5Qrcode("barcode-reader");
+        
+        // Fetch available camera devices to populate dropdown
+        const devices = await Html5Qrcode.getCameras();
+        const selectContainer = document.getElementById('ccLocalDeviceSelectContainer');
+        const selectBox = document.getElementById('ccLocalDeviceSelect');
+        
+        if (devices && devices.length > 0 && selectBox && selectContainer) {
+            selectBox.innerHTML = '';
+            devices.forEach(device => {
+                const opt = document.createElement('option');
+                opt.value = device.id;
+                opt.text = device.label || `Camera ${selectBox.options.length + 1}`;
+                selectBox.appendChild(opt);
+            });
+            selectContainer.style.display = 'flex';
+            
+            // Start streaming with the first listed device
+            await window.startLocalScannerWithDevice(devices[0].id);
+        } else {
+            // Fallback starting with default environment constraint
+            if (selectContainer) selectContainer.style.display = 'none';
+            await ccLocalQrScanner.start(
+                { facingMode: "environment" },
+                { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                (decodedText) => {
+                    window.onScanSuccess(decodedText);
+                },
+                () => {}
+            );
+        }
+        
+        // Update connection pulse indicator to active orange for local webcam
+        const statusIndicator = document.getElementById('ccScannerStatusIndicator');
+        if (statusIndicator) {
+            statusIndicator.style.background = '#f59e0b';
+            statusIndicator.style.boxShadow = '0 0 10px #f59e0b';
+        }
+    } catch(err) {
+        sysLog(`Local Webcam initialization error: ${err.message || err}`, true);
+        alert("Webcam error: " + (err.message || err));
+        await window.stopCycleCount();
+    }
+};
+
+window.startLocalScannerWithDevice = async function(deviceId) {
+    if (!ccLocalQrScanner) return;
+    try {
+        if (ccLocalQrScanner.getState() === 2) { // 2 = SCANNING
+            await ccLocalQrScanner.stop();
+        }
+        await ccLocalQrScanner.start(
+            deviceId,
+            { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+            (decodedText) => {
+                window.onScanSuccess(decodedText);
+            },
+            () => {}
+        );
+    } catch(err) {
+        sysLog(`Local Webcam device start error: ${err.message || err}`, true);
+    }
+};
+
+window.change_handleCCLocalDeviceChange = function(event) {
+    if (event && event.target && event.target.value) {
+        window.startLocalScannerWithDevice(event.target.value);
+    }
+};
+
+window.startRemoteCycleCount = async function() {
+    // 1. Stop any active cycle counts cleanly
+    await window.stopCycleCount();
+    
+    // 2. Open inlineCycleScannerCard
     let card = document.getElementById('inlineCycleScannerCard');
     if(card) card.style.display = 'flex';
     
-    // Pull context from the Cycle Count Manager dropdown
+    // 3. Set header title
+    const headerTitle = document.getElementById('ccScannerHeaderTitle');
+    if (headerTitle) headerTitle.innerText = "📱 REMOTE CYCLE SCANNER";
+    
+    // 4. Toggle visibility of local vs remote areas
+    const localArea = document.getElementById('ccLocalScannerArea');
+    const remoteArea = document.getElementById('ccRemoteScannerArea');
+    if (localArea) localArea.style.display = 'none';
+    if (remoteArea) remoteArea.style.display = 'flex';
+    
+    // 5. Pull context from the Cycle Count Manager dropdown
     let selectEl = document.getElementById('ccMngrItemSelect');
     let titleEl = document.getElementById('inlineScannerItemName');
     let subtitleEl = document.getElementById('inlineScannerExpected');
@@ -1175,57 +1426,115 @@ window.startCycleCount = async function() {
         titleEl.style.color = "white";
         subtitleEl.innerText = "No target filter applied";
     }
-    
-    // Completely destroy previous instance to prevent iOS Safari Promise locks
-    if (html5QrCode) {
-        try { await html5QrCode.stop(); } catch(e) { console.error(e); }
-        html5QrCode = null;
-    }
-    const readerEl = document.getElementById("barcode-reader");
-    if (readerEl) readerEl.innerHTML = window.safeHTML('');
 
-    try {
-        html5QrCode = new Html5Qrcode("barcode-reader");
-        await html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 12, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-            (decodedText, _decodedResult) => {
-                window.onScanSuccess(decodedText);
-            },
-            (_errorMessage) => {
-                // ignore per-frame scan errors
-            }
-        );
-    } catch(err) {
-        sysLog(`WebRTC Camera Error: ${err.message || err}`, true);
-        alert("Camera error: " + (err.message || err));
-        window.stopCycleCount();
+    // 6. Reset remote UI elements
+    const statusCheck = document.getElementById('ccMobileBridgeStatus');
+    const statusIndicator = document.getElementById('ccScannerStatusIndicator');
+    const qrContainer = document.getElementById('ccScannerQRContainer');
+    const screenContainer = document.getElementById('ccRemotePreviewScreenContainer');
+    const routeBar = document.getElementById('pcRouteBar');
+    
+    if (statusCheck) statusCheck.innerHTML = '🔴 Waiting for Phone Connection...';
+    if (statusIndicator) {
+        statusIndicator.style.background = '#ef4444';
+        statusIndicator.style.boxShadow = '0 0 10px #ef4444';
+    }
+    if (qrContainer) qrContainer.style.display = 'flex';
+    if (screenContainer) screenContainer.style.display = 'none';
+    if (routeBar) routeBar.style.display = 'none';
+
+    // 7. Build unique Realtime sync bridge session
+    window.initializeCcSyncChannel();
+
+    // 8. Construct URL for remote phone portal
+    const savedIP = localStorage.getItem('neogleamz_pc_local_ip');
+    
+    // Pre-populate Local IP input for CC
+    const ipInput = document.getElementById('pcLocalIPInput_cc');
+    if (ipInput) {
+        ipInput.value = savedIP || '';
+    }
+
+    let host = window.location.host;
+    if (savedIP) {
+        const port = window.location.port ? `:${window.location.port}` : '';
+        host = `${savedIP}${port}`;
+    }
+    const remoteUrl = `${window.location.protocol}//${host}/remote-scanner.html?session=${window.ccSessionId}`;
+    sysLog(`[Realtime Scanner] Dynamic remote portal link: ${remoteUrl}`);
+
+    // 9. Update the image source dynamically powered by api.qrserver.com to prevent canvas sizing race
+    const qrImg = document.getElementById('ccScannerQRCodeImg');
+    if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(remoteUrl)}`;
+    }
+
+    // 10. Broadcast wake-up event
+    if (window.ccSyncChannel) {
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'LAUNCH_MOBILE_SCANNER',
+            payload: { timestamp: Date.now() }
+        }).catch(() => {});
     }
 };
 
+window.click_updateLocalIPQRCode_cc = function() {
+    const input = document.getElementById('pcLocalIPInput_cc');
+    if (!input) return;
+    
+    let ip = input.value.trim();
+    if (!ip) {
+        localStorage.removeItem('neogleamz_pc_local_ip');
+    } else {
+        // Strip out protocol or port mapping to get clean IP/hostname
+        ip = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
+        localStorage.setItem('neogleamz_pc_local_ip', ip);
+    }
+    
+    // Re-trigger Remote Mode logic to regenerate the QR code
+    window.startRemoteCycleCount();
+};
+
+// Aliasing startCycleCount for backward compatibility
+window.startCycleCount = window.startRemoteCycleCount;
+
 window.stopCycleCount = async function() {
-    if(html5QrCode && html5QrCode.getState() !== 1) { // 1 = NOT_STARTED
+    // 1. Cleanly shutdown local HTML5-QRCode instance if active
+    if (ccLocalQrScanner) {
         try {
-            await html5QrCode.stop();
-            html5QrCode.clear();
+            if (ccLocalQrScanner.getState() === 2) {
+                await ccLocalQrScanner.stop();
+            }
+            ccLocalQrScanner.clear();
         } catch(err) {
-            sysLog(`Scanner clear error: ${err.message || err}`, true);
-            console.warn(err);
+            sysLog(`Local scanner shutdown warning: ${err.message || err}`, true);
         }
-        html5QrCode = null;
+        ccLocalQrScanner = null;
     }
     const readerEl = document.getElementById("barcode-reader");
     if (readerEl) readerEl.innerHTML = window.safeHTML('');
-    
+
+    // 2. Unsubscribe cleanly from Supabase Realtime channel
+    if (window.ccSyncChannel) {
+        try {
+            window.ccSyncChannel.send({
+                type: 'broadcast',
+                event: 'PC_DISCARD_AND_BACK',
+                payload: { timestamp: Date.now() }
+            }).catch(() => {});
+            
+            supabaseClient.removeChannel(window.ccSyncChannel);
+        } catch (err) { console.warn(err); }
+        window.ccSyncChannel = null;
+    }
+    window.ccSessionId = null;
+
     let card = document.getElementById('inlineCycleScannerCard');
     if(card) card.style.display = 'none';
 };
 
 window.onScanSuccess = function(decodedText) {
-    if(html5QrCode && html5QrCode.getState() === 2) { // 2 = SCANNING
-        html5QrCode.pause(true); // pause camera and scanning
-    }
-    
     let beep = document.getElementById('scanner-beep');
     if (beep) {
         beep.currentTime = 0;
@@ -1249,7 +1558,6 @@ window.onScanSuccess = function(decodedText) {
     } else {
         sysLog(`Barcode Error: Not recognized - ${decodedText}`, true);
         alert("Barcode not recognized in system: " + decodedText);
-        if(html5QrCode) html5QrCode.resume();
         return;
     }
     
@@ -1258,7 +1566,6 @@ window.onScanSuccess = function(decodedText) {
     if (selectEl) {
         selectEl.value = actualKey;
         
-        // If the value wasn't in the options (unlikely if the DBs match, but possible if unfiltered), try to inject it
         if(selectEl.value !== actualKey) {
             let n = pName;
             if(catalogCache[actualKey]) n = catalogCache[actualKey].neoName || catalogCache[actualKey].itemName;
@@ -1274,25 +1581,102 @@ window.onScanSuccess = function(decodedText) {
     // Trigger the stock update logic natively as if the user clicked the dropdown
     window.updateCcMngrStock();
     
-    // Shutdown the camera to save battery now that we have loaded the form
-    window.stopCycleCount();
-    
     // Focus the actual manager quantity input field
     setTimeout(() => {
         let input = document.getElementById('ccMngrQtyInput');
         if(input) {
             input.focus();
-            // scroll manager to view just in case
             input.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }, 100);
 };
 
-window.resumeCycleCount = function() {
-    // Deprecated for Dual-Card layout, left for compatibility stub
-    if(html5QrCode && html5QrCode.getState() === 3) {
-        html5QrCode.resume();
+// Bidirectional Swapping route logic
+window.updateCCRouteUI = function(mode) {
+    const btnPhone = document.getElementById('pcRoutePhone');
+    const btnPC = document.getElementById('pcRoutePC');
+    const btnBoth = document.getElementById('pcRouteBoth');
+    const screen = document.getElementById('ccRemotePreviewScreen');
+    const placeholder = document.getElementById('ccPhoneOnlyPlaceholder');
+    const statusCheck = document.getElementById('ccMobileBridgeStatus');
+
+    if (!btnPhone) return;
+
+    // Reset styles
+    [btnPhone, btnPC, btnBoth].forEach(btn => {
+        if (btn) {
+            btn.style.background = 'none';
+            btn.style.color = 'var(--text-muted)';
+            btn.style.boxShadow = 'none';
+        }
+    });
+
+    let activeBtn;
+    let sub;
+    if (mode === 'phone') {
+        activeBtn = btnPhone;
+        sub = 'Stream rendering on Phone only';
+        if (screen) screen.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'flex';
+    } else if (mode === 'pc') {
+        activeBtn = btnPC;
+        sub = 'Stream rendering on PC only';
+        if (screen) screen.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+    } else {
+        activeBtn = btnBoth;
+        sub = 'Stream rendering on Both screens';
+        if (screen) screen.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
     }
+
+    if (activeBtn) {
+        activeBtn.style.background = '#10b981';
+        activeBtn.style.color = '#fff';
+        activeBtn.style.boxShadow = '0 0 10px rgba(16,185,129,0.3)';
+    }
+
+    if (statusCheck) statusCheck.innerHTML = `🟢 📱 Phone Connected | ${sub}`;
+};
+
+window.click_setCCRoutePhone = function() {
+    currentPreviewMode = 'phone';
+    window.updateCCRouteUI(currentPreviewMode);
+    if (window.ccSyncChannel) {
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'PC_PREVIEW_MODE_CHANGED',
+            payload: { mode: currentPreviewMode }
+        }).catch(() => {});
+    }
+};
+
+window.click_setCCRoutePC = function() {
+    currentPreviewMode = 'pc';
+    window.updateCCRouteUI(currentPreviewMode);
+    if (window.ccSyncChannel) {
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'PC_PREVIEW_MODE_CHANGED',
+            payload: { mode: currentPreviewMode }
+        }).catch(() => {});
+    }
+};
+
+window.click_setCCRouteBoth = function() {
+    currentPreviewMode = 'both';
+    window.updateCCRouteUI(currentPreviewMode);
+    if (window.ccSyncChannel) {
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'PC_PREVIEW_MODE_CHANGED',
+            payload: { mode: currentPreviewMode }
+        }).catch(() => {});
+    }
+};
+
+window.resumeCycleCount = function() {
+    // compatibility stub
 };
 
 // ========================================================
@@ -1345,12 +1729,16 @@ window.openCycleCountManager = function() {
     // Seed the empty default option
     let baseSelectHtml = '<option value="">-- Choose Item Natively --</option>';
     
-    let allProds = Object.keys(productsDB).sort();
-    let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
-    let labelProds = allProds.filter(p => productsDB[p] && productsDB[p].is_label);
+    let safeProductsDB = (typeof productsDB !== 'undefined') ? productsDB : (window.productsDB || {});
+    let safeIsSubassemblyDB = (typeof isSubassemblyDB !== 'undefined') ? isSubassemblyDB : (window.isSubassemblyDB || {});
+    let safeCatalogCache = (typeof catalogCache !== 'undefined') ? catalogCache : (window.catalogCache || {});
+
+    let allProds = Object.keys(safeProductsDB).sort();
+    let printProds = allProds.filter(p => safeProductsDB[p] && safeProductsDB[p].is_3d_print);
+    let labelProds = allProds.filter(p => safeProductsDB[p] && safeProductsDB[p].is_label);
     
-    let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
-    let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let retailProds = allProds.filter(p => !safeIsSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
+    let subProds = allProds.filter(p => safeIsSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
     
     let optGroups = {
@@ -1386,7 +1774,7 @@ window.openCycleCountManager = function() {
     labelProds.forEach(k => { optGroups.label += mkItem(`RECIPE:::${k}`, `🏷️ ${k}`); nativeGroups.label += mkOpt(`RECIPE:::${k}`, `🏷️ ${k}`); });
     
     // sort raw
-    let rawArr = Object.entries(catalogCache).sort((a,b) => {
+    let rawArr = Object.entries(safeCatalogCache).sort((a,b) => {
         let na = a[1].neoName || a[1].itemName || '';
         let nb = b[1].neoName || b[1].itemName || '';
         return na.localeCompare(nb);

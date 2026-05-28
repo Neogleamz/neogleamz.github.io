@@ -241,6 +241,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openCycleCountManager':
                     window.openCycleCountManager();
                     break;
+                case 'click_updateLocalIPQRCode_cc':
+                    if (typeof window.click_updateLocalIPQRCode_cc === 'function') window.click_updateLocalIPQRCode_cc();
+                    break;
                 case 'click_window_openVelocityzModal':
                     window.openVelocityzModal();
                     break;
@@ -1113,6 +1116,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_startCycleCount':
                     window.startCycleCount();
                     break;
+                case 'click_startLocalCycleCount':
+                    if (typeof window.startLocalCycleCount === 'function') window.startLocalCycleCount();
+                    break;
+                case 'click_startRemoteCycleCount':
+                    if (typeof window.startRemoteCycleCount === 'function') window.startRemoteCycleCount();
+                    break;
                 case 'click_window_filterCcMngrItems':
                     window.filterCcMngrItems();
                     break;
@@ -1602,6 +1611,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleSOPWebcamDeviceChange':
                     if (typeof window.change_handleSOPWebcamDeviceChange === 'function') window.change_handleSOPWebcamDeviceChange(el);
+                    break;
+                case 'change_handleCCLocalDeviceChange':
+                    if (typeof window.change_handleCCLocalDeviceChange === 'function') window.change_handleCCLocalDeviceChange(event);
                     break;
                 case 'change_window_updateCcMngrStock':
                     window.updateCcMngrStock();
