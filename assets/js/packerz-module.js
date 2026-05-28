@@ -2234,6 +2234,8 @@ window.click_backToSOPCameraSelection = function() {
     if (remArea) remArea.style.display = 'none';
 };
 
+window.selectedSOPCameraId = null;
+
 window.startSOPWebcamMode = async function() {
     const selArea = document.getElementById('sopSnapshotSelectionArea');
     const webArea = document.getElementById('sopSnapshotWebcamArea');
@@ -2251,22 +2253,84 @@ window.startSOPWebcamMode = async function() {
     captureBtn.style.opacity = '0.5';
     captureBtn.style.cursor = 'not-allowed';
     
+    // Stop any existing stream before starting a new one
+    if (sopSnapshotStream) {
+        sopSnapshotStream.getTracks().forEach(track => track.stop());
+        sopSnapshotStream = null;
+    }
+    
     try {
-        sopSnapshotStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
-        });
+        const constraints = {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+        };
+        
+        if (window.selectedSOPCameraId) {
+            constraints.deviceId = { exact: window.selectedSOPCameraId };
+        } else {
+            constraints.facingMode = 'environment';
+        }
+        
+        sopSnapshotStream = await navigator.mediaDevices.getUserMedia({ video: constraints });
         video.srcObject = sopSnapshotStream;
         video.onloadedmetadata = () => {
             video.play();
             statusEl.innerText = "Live Stream Active. Ready to Capture.";
             captureBtn.style.opacity = '1';
             captureBtn.style.cursor = 'pointer';
+            
+            // Populate devices now that permission is granted
+            window.populateSOPWebcamDevices();
         };
     } catch(e) {
+        // If a specific camera ID failed, clear it and retry default
+        if (window.selectedSOPCameraId) {
+            window.selectedSOPCameraId = null;
+            window.startSOPWebcamMode();
+            return;
+        }
         statusEl.innerText = "Camera Access Denied or Unavailable: " + e.message;
         statusEl.style.color = '#ef4444';
         console.error(e);
     }
+};
+
+window.populateSOPWebcamDevices = async function() {
+    const selectContainer = document.getElementById('sopSnapshotDeviceSelectContainer');
+    const selectEl = document.getElementById('sopSnapshotDeviceSelect');
+    if (!selectEl) return;
+    
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        
+        selectEl.innerHTML = '';
+        
+        if (videoDevices.length > 1) {
+            videoDevices.forEach(device => {
+                const opt = document.createElement('option');
+                opt.value = device.deviceId;
+                opt.textContent = device.label || `Camera ${selectEl.children.length + 1}`;
+                if (window.selectedSOPCameraId && device.deviceId === window.selectedSOPCameraId) {
+                    opt.selected = true;
+                } else if (!window.selectedSOPCameraId && videoDevices[0].deviceId === device.deviceId) {
+                    opt.selected = true;
+                }
+                selectEl.appendChild(opt);
+            });
+            if (selectContainer) selectContainer.style.display = 'flex';
+        } else {
+            if (selectContainer) selectContainer.style.display = 'none';
+        }
+    } catch (err) {
+        console.warn("Could not list video devices:", err);
+    }
+};
+
+window.change_handleSOPWebcamDeviceChange = function(selectEl) {
+    if (!selectEl) return;
+    window.selectedSOPCameraId = selectEl.value;
+    window.startSOPWebcamMode();
 };
 
 window.click_captureSOPSnapshot = function() {
@@ -2344,9 +2408,73 @@ window.initializeCameraSyncChannel = function() {
             sysLog(`[Realtime Camera] Received remote camera request on phone`);
             window.showMobileRemoteShutterOverlay();
         })
-        .on('broadcast', { event: 'REMOTE_CAPTURE_COMPLETE' }, (payload) => {
+        .on('broadcast', { event: 'MOBILE_CONNECT' }, async () => {
+            sysLog(`[Realtime Camera] Mobile device connected. Initiating secure session token transfer...`);
+            
+            // Update PC Modal connection status
+            const remStatus = document.getElementById('sopSnapshotRemoteStatus');
+            if (remStatus) {
+                const count = window.remoteStagedPhotosCount || 0;
+                if (count > 0) {
+                    remStatus.innerText = `📱 Phone Linked ✓ Staged ${count} photo(s) successfully!`;
+                } else {
+                    remStatus.innerText = "📱 Phone Linked ✓ Ready to snap!";
+                }
+                remStatus.style.color = '#10b981';
+            }
+
+            try {
+                if (typeof supabaseClient !== 'undefined') {
+                    const { data } = await supabaseClient.auth.getSession();
+                    const session = data?.session;
+                    if (session && window.cameraSyncChannel) {
+                        window.cameraSyncChannel.send({
+                            type: 'broadcast',
+                            event: 'SESSION_TRANSFER',
+                            payload: {
+                                accessToken: session.access_token,
+                                refreshToken: session.refresh_token
+                            }
+                        });
+                        sysLog(`[Realtime Camera] Session token transferred successfully.`);
+                    }
+                }
+            } catch (err) {
+                console.error("[Realtime Camera] Failed to transfer session token:", err);
+                if (remStatus) {
+                    remStatus.innerText = "⚠ Handshake failed. Re-scan the QR code.";
+                    remStatus.style.color = '#ef4444';
+                }
+            }
+        })
+        .on('broadcast', { event: 'REMOTE_CAPTURE_START' }, () => {
+            sysLog(`[Realtime Camera] Phone initiated remote photo upload...`);
+            window.handleRemoteCaptureStartOnPC();
+        })
+        .on('broadcast', { event: 'REMOTE_CAPTURE_SAVING' }, (envelope) => {
+            const payload = envelope.payload;
+            sysLog(`[Realtime Camera] Phone uploaded photo, saving to active document...`);
+            window.handleRemoteCaptureSavingOnPC(payload.imageUrl);
+        })
+        .on('broadcast', { event: 'REMOTE_CAPTURE_COMPLETE' }, (envelope) => {
+            const payload = envelope.payload;
             sysLog(`[Realtime Camera] Received remote photo URL on PC: ${payload.imageUrl}`);
             window.handleRemoteCaptureCompleteOnPC(payload.imageUrl);
+        })
+        .on('broadcast', { event: 'REMOTE_PHOTO_DELETE' }, (envelope) => {
+            const payload = envelope.payload;
+            if (payload && payload.imageUrl) {
+                sysLog(`[Realtime Camera] Phone deleted photo: ${payload.imageUrl}`);
+                window.deleteRemoteStagedPhoto(payload.imageUrl, false);
+            }
+        })
+        .on('broadcast', { event: 'MOBILE_DISCARD_AND_BACK' }, () => {
+            sysLog(`[Realtime Camera] Phone requested discard & back session...`);
+            window.click_discardRemoteMobileStagedPhotos(false);
+        })
+        .on('broadcast', { event: 'MOBILE_SAVE_AND_CLOSE' }, () => {
+            sysLog(`[Realtime Camera] Phone requested save & close session...`);
+            window.click_saveRemoteMobileStagedPhotos(false);
         })
         .subscribe((status) => {
             sysLog(`[Realtime Camera] Subscription status: ${status}`);
@@ -2354,6 +2482,24 @@ window.initializeCameraSyncChannel = function() {
 };
 
 window.startSOPRemoteMobileMode = function() {
+    // Reset our session uploaded URLs tracker
+    window.remoteSessionUploadedUrls = [];
+
+    // Reset remote staged photos count
+    window.remoteStagedPhotosCount = 0;
+
+    // Reset staged thumbnails row & progress banner
+    const thumbnailsContainer = document.getElementById('sopSnapshotStagedThumbnails');
+    if (thumbnailsContainer) {
+        thumbnailsContainer.innerHTML = '';
+        thumbnailsContainer.style.display = 'none';
+    }
+    const banner = document.getElementById('sopSnapshotProgressBanner');
+    if (banner) {
+        banner.style.display = 'none';
+        banner.innerText = '';
+    }
+
     // Ensure the sync channel is active
     if (typeof window.initializeCameraSyncChannel === 'function') {
         window.initializeCameraSyncChannel();
@@ -2363,11 +2509,59 @@ window.startSOPRemoteMobileMode = function() {
     const webArea = document.getElementById('sopSnapshotWebcamArea');
     const remArea = document.getElementById('sopSnapshotRemoteArea');
     const remStatus = document.getElementById('sopSnapshotRemoteStatus');
+    const qrImg = document.getElementById('sopSnapshotQRCodeImg');
+    const ipInput = document.getElementById('pcLocalIPInput');
+    
+    // Toggle localhost IP override helper based on development environment
+    const ipHelper = document.getElementById('pcLocalIPOverrideContainer');
+    if (ipHelper) {
+        const isLocalDev = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' || 
+                           window.location.hostname.startsWith('192.168.') ||
+                           window.location.hostname.startsWith('10.');
+        ipHelper.style.display = isLocalDev ? 'flex' : 'none';
+    }
     
     if (selArea) selArea.style.display = 'none';
     if (webArea) webArea.style.display = 'none';
     if (remArea) remArea.style.display = 'flex';
-    if (remStatus) remStatus.innerText = "Vibrating phone to activate camera...";
+    if (remStatus) {
+        remStatus.innerText = "Generating pre-authenticated QR code...";
+        remStatus.style.color = 'rgba(255,255,255,0.7)'; // Reset to standard style
+    }
+    
+    // Scoped operator/session ID
+    const sessionId = window.currentUser ? window.currentUser.id : 'guest';
+    
+    // Load IP override from localStorage if any
+    const savedIP = localStorage.getItem('neogleamz_pc_local_ip');
+    if (ipInput) {
+        ipInput.value = savedIP || '';
+    }
+    
+    // Construct pre-authenticated guest landing page URL
+    let host = window.location.host;
+    if (savedIP) {
+        // Strip out existing host to map to saved PC IP over local Wi-Fi
+        const port = window.location.port ? `:${window.location.port}` : '';
+        host = `${savedIP}${port}`;
+    }
+    
+    const folderParam = typeof currentSOPMediaFolder !== 'undefined' && currentSOPMediaFolder ? `&folder=${encodeURIComponent(currentSOPMediaFolder)}` : '';
+    const remoteUrl = `${window.location.protocol}//${host}/remote-capture.html?session=${sessionId}${folderParam}`;
+    
+    sysLog(`[Realtime Camera] Dynamic remote guest URL: ${remoteUrl}`);
+    
+    // Set dynamic QR code using stable public API
+    if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=${encodeURIComponent(remoteUrl)}`;
+        qrImg.onload = () => {
+            if (remStatus) remStatus.innerText = "Scan the QR code below to launch remote capture!";
+        };
+        qrImg.onerror = () => {
+            if (remStatus) remStatus.innerText = "Failed to load QR code. Tap 'Back' and try again.";
+        };
+    }
     
     // Broadcast trigger payload to Mobile Shutter listener
     if (window.cameraSyncChannel) {
@@ -2377,6 +2571,23 @@ window.startSOPRemoteMobileMode = function() {
             payload: { timestamp: Date.now() }
         });
     }
+};
+
+window.click_updateLocalIPQRCode = function() {
+    const input = document.getElementById('pcLocalIPInput');
+    if (!input) return;
+    
+    let ip = input.value.trim();
+    if (!ip) {
+        localStorage.removeItem('neogleamz_pc_local_ip');
+    } else {
+        // Strip out protocol or port mapping to get clean IP/hostname
+        ip = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
+        localStorage.setItem('neogleamz_pc_local_ip', ip);
+    }
+    
+    // Re-trigger Remote Mode logic to regenerate the QR code
+    window.startSOPRemoteMobileMode();
 };
 
 window.showMobileRemoteShutterOverlay = function() {
@@ -2455,15 +2666,268 @@ window.change_handleNativeMobileCameraCapture = async function(event) {
     }
 };
 
+window.remoteStagedPhotosCount = 0;
+
+window.handleRemoteCaptureStartOnPC = function() {
+    const banner = document.getElementById('sopSnapshotProgressBanner');
+    if (banner) {
+        banner.style.display = 'block';
+        banner.style.background = 'rgba(245,158,11,0.15)';
+        banner.style.border = '1px solid #F59E0B';
+        banner.style.color = '#F59E0B';
+        banner.innerText = "📥 UPLOADING TO STORAGE...";
+        banner.style.animation = 'pulseRemoteTarget 1.5s infinite ease-in-out';
+    }
+    
+    // Update PC Modal connection status
+    const remStatus = document.getElementById('sopSnapshotRemoteStatus');
+    if (remStatus) {
+        remStatus.innerText = "📥 Phone is uploading snapshot...";
+        remStatus.style.color = '#F59E0B';
+    }
+};
+
+window.handleRemoteCaptureSavingOnPC = function(_imageUrl) {
+    const banner = document.getElementById('sopSnapshotProgressBanner');
+    if (banner) {
+        banner.style.display = 'block';
+        banner.style.background = 'rgba(14,165,233,0.15)';
+        banner.style.border = '1px solid #0ea5e9';
+        banner.style.color = '#0ea5e9';
+        banner.innerText = "💾 SAVING TO ACTIVE DOCUMENT...";
+        banner.style.animation = 'pulseRemoteTarget 1.5s infinite ease-in-out';
+    }
+    
+    // Update PC Modal connection status
+    const remStatus = document.getElementById('sopSnapshotRemoteStatus');
+    if (remStatus) {
+        remStatus.innerText = "💾 Saving photo to document...";
+        remStatus.style.color = '#0ea5e9';
+    }
+};
+
 window.handleRemoteCaptureCompleteOnPC = function(imageUrl) {
-    // Hide the PC-side loader / selections modal
-    window.click_closeSOPSnapshotCamera();
+    // Stage in session uploads tracking array
+    if (!window.remoteSessionUploadedUrls) window.remoteSessionUploadedUrls = [];
+    window.remoteSessionUploadedUrls.push(imageUrl);
+
+    // Increment staged count (do not close modal for multi-photo flow!)
+    window.remoteStagedPhotosCount = (window.remoteStagedPhotosCount || 0) + 1;
     
     // Insert token / stage the image just like click_captureSOPSnapshot does!
     if (typeof insertSOPToken === 'function') {
         insertSOPToken(`[IMG:${imageUrl}]`);
-        if (typeof showToast === 'function') {
-            showToast("📱 Remote Photo synced successfully!");
+    }
+    
+    // Play a brief shutter click sound on the PC for positive feedback
+    try {
+        let beep = document.getElementById('scanner-beep');
+        if (beep) {
+            beep.currentTime = 0;
+            beep.play().catch(() => {});
+        }
+    } catch (err) {
+        console.warn("PC shutter feedback audio failed:", err);
+    }
+    
+    // Update the live PC modal status count
+    const remStatus = document.getElementById('sopSnapshotRemoteStatus');
+    if (remStatus) {
+        remStatus.innerText = `📱 Phone Linked ✓ Staged ${window.remoteStagedPhotosCount} photo(s) successfully!`;
+        remStatus.style.color = '#10b981';
+    }
+    
+    // Update central progress banner as a gorgeous flash!
+    const banner = document.getElementById('sopSnapshotProgressBanner');
+    if (banner) {
+        banner.style.display = 'block';
+        banner.style.background = 'rgba(16,185,129,0.2)';
+        banner.style.border = '1px solid #10b981';
+        banner.style.color = '#10b981';
+        banner.innerText = "🎉 PHOTO SAVED AND STAGED!";
+        banner.style.animation = 'none'; // clear pulse
+        
+        // Dynamic border-flash / glow effect on the QR container
+        const qrContainer = document.getElementById('sopSnapshotQRCodeContainer');
+        if (qrContainer) {
+            qrContainer.style.borderColor = '#10b981';
+            qrContainer.style.boxShadow = '0 0 25px rgba(16,185,129,0.5)';
+            setTimeout(() => {
+                qrContainer.style.borderColor = '#0ea5e9';
+                qrContainer.style.boxShadow = '0 8px 32px rgba(14, 165, 233, 0.2)';
+            }, 1500);
+        }
+        
+        // Clear success flash banner after 2 seconds
+        setTimeout(() => {
+            if (banner.innerText === "🎉 PHOTO SAVED AND STAGED!") {
+                banner.style.display = 'none';
+            }
+        }, 2000);
+    }
+    
+    // Append Thumbnail Card to row
+    const container = document.getElementById('sopSnapshotStagedThumbnails');
+    if (container) {
+        container.style.display = 'flex';
+        
+        const card = document.createElement('div');
+        card.className = 'staged-thumbnail-card';
+        card.setAttribute('data-url', imageUrl);
+        card.style.cssText = "position:relative; width:64px; height:64px; border-radius:8px; border:2px solid #10b981; overflow:hidden; cursor:pointer; flex-shrink:0; transition: transform 0.2s;";
+        card.onmouseover = () => { card.style.transform = "scale(1.05)"; };
+        card.onmouseout = () => { card.style.transform = "scale(1.0)"; };
+        
+        card.innerHTML = `
+            <img src="${imageUrl}" style="width:100%; height:100%; object-fit:cover;" onclick="window.open('${imageUrl}', '_blank')" />
+            <button onclick="window.deleteRemoteStagedPhoto('${imageUrl}')" style="position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold; line-height:1; box-shadow:0 2px 4px rgba(0,0,0,0.5);">✕</button>
+        `;
+        container.appendChild(card);
+    }
+    
+    if (typeof showToast === 'function') {
+        showToast(`📱 Remote Photo #${window.remoteStagedPhotosCount} staged!`);
+    }
+};
+
+window.deleteRemoteStagedPhoto = async function(url, broadcast = true) {
+    // 1. Remove the thumbnail card from DOM
+    const card = document.querySelector(`.staged-thumbnail-card[data-url="${url}"]`);
+    if (card) card.remove();
+    
+    // 2. Decrement the count
+    window.remoteStagedPhotosCount = Math.max(0, (window.remoteStagedPhotosCount || 0) - 1);
+
+    // Remove from our session uploaded tracking array
+    if (window.remoteSessionUploadedUrls) {
+        const index = window.remoteSessionUploadedUrls.indexOf(url);
+        if (index > -1) {
+            window.remoteSessionUploadedUrls.splice(index, 1);
         }
     }
+
+    // Delete from Supabase Storage bucket to clean up wasted uploads
+    try {
+        if (typeof supabaseClient !== 'undefined') {
+            const bucketName = 'sop-media';
+            const publicUrlPrefix = `${supabaseClient.storageUrl}/object/public/${bucketName}/`;
+            let filePath = url;
+            if (url.startsWith(publicUrlPrefix)) {
+                filePath = url.substring(publicUrlPrefix.length);
+            } else {
+                const parts = url.split(`/storage/v1/object/public/${bucketName}/`);
+                if (parts.length > 1) filePath = parts[1];
+            }
+            filePath = decodeURIComponent(filePath);
+            
+            sysLog(`[Realtime Camera] Deleting file from Supabase storage: ${filePath}`);
+            const { error } = await supabaseClient.storage.from(bucketName).remove([filePath]);
+            if (error) {
+                console.error("[Realtime Camera] Failed to delete from Supabase storage:", error.message);
+            } else {
+                sysLog(`[Realtime Camera] Successfully deleted file from Supabase storage.`);
+            }
+        }
+    } catch (e) {
+        console.error("[Realtime Camera] Error deleting from Supabase storage:", e);
+    }
+    
+    // 3. Update the modal status label
+    const remStatus = document.getElementById('sopSnapshotRemoteStatus');
+    if (remStatus) {
+        if (window.remoteStagedPhotosCount > 0) {
+            remStatus.innerText = `📱 Phone Linked ✓ Staged ${window.remoteStagedPhotosCount} photo(s) successfully!`;
+            remStatus.style.color = '#10b981';
+        } else {
+            remStatus.innerText = "📱 Phone Linked ✓ Ready to snap!";
+            remStatus.style.color = '#10b981';
+            const container = document.getElementById('sopSnapshotStagedThumbnails');
+            if (container) container.style.display = 'none';
+        }
+    }
+    
+    // 4. Remove the IMG token from the active textarea!
+    const textarea = document.getElementById(window.activeSOPTextAreaId);
+    if (textarea) {
+        // Strip out the [IMG:url] token, including any trailing newlines/spaces
+        const token = `[IMG:${url}]`;
+        textarea.value = textarea.value.replace(token, '').trim();
+        // Trigger any custom change events if necessary
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        textarea.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    
+    // 5. Sync back to the phone guest portal if we are initiating from PC
+    if (broadcast && window.cameraSyncChannel) {
+        try {
+            window.cameraSyncChannel.send({
+                type: 'broadcast',
+                event: 'PC_PHOTO_DELETE',
+                payload: { imageUrl: url }
+            });
+        } catch (err) {
+            console.error("Failed to broadcast PC_PHOTO_DELETE:", err);
+        }
+    }
+    
+    if (typeof showToast === 'function') {
+        sysLog(`Staged photo removed: ${url}`);
+    }
+};
+
+window.click_discardRemoteMobileStagedPhotos = async function(broadcast = true) {
+    if (window.remoteSessionUploadedUrls && window.remoteSessionUploadedUrls.length > 0) {
+        const urls = [...window.remoteSessionUploadedUrls];
+        sysLog(`[Realtime Camera] Discarding ${urls.length} remote capture uploads...`);
+        if (typeof showToast === 'function') {
+            showToast(`Discarding ${urls.length} uploaded photo(s)...`);
+        }
+        for (const url of urls) {
+            // Delete from Supabase storage and strip from active textarea
+            await window.deleteRemoteStagedPhoto(url, true);
+        }
+    }
+    window.remoteSessionUploadedUrls = [];
+    
+    // Sync back to the phone guest portal if we are initiating from PC
+    if (broadcast && window.cameraSyncChannel) {
+        try {
+            window.cameraSyncChannel.send({
+                type: 'broadcast',
+                event: 'PC_DISCARD_AND_BACK',
+                payload: { timestamp: Date.now() }
+            });
+        } catch (err) {
+            console.error("Failed to broadcast PC_DISCARD_AND_BACK:", err);
+        }
+    }
+    
+    // Go back to the selection screen
+    window.click_backToSOPCameraSelection();
+};
+
+window.click_saveRemoteMobileStagedPhotos = function(broadcast = true) {
+    const count = window.remoteStagedPhotosCount || 0;
+    if (typeof showToast === 'function') {
+        showToast(`🎉 Staged ${count} remote photos successfully!`);
+    }
+    
+    // Reset session uploads array so they aren't deleted later
+    window.remoteSessionUploadedUrls = [];
+    
+    // Sync back to the phone guest portal if we are initiating from PC
+    if (broadcast && window.cameraSyncChannel) {
+        try {
+            window.cameraSyncChannel.send({
+                type: 'broadcast',
+                event: 'PC_SAVE_AND_CLOSE',
+                payload: { timestamp: Date.now() }
+            });
+        } catch (err) {
+            console.error("Failed to broadcast PC_SAVE_AND_CLOSE:", err);
+        }
+    }
+    
+    // Close the modal completely to return to the active page
+    window.click_closeSOPSnapshotCamera();
 };

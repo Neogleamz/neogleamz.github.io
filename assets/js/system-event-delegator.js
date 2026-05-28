@@ -980,8 +980,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_backToSOPCameraSelection':
                     if (typeof window.click_backToSOPCameraSelection === 'function') window.click_backToSOPCameraSelection();
                     break;
+                case 'click_discardRemoteMobileStagedPhotos':
+                    if (typeof window.click_discardRemoteMobileStagedPhotos === 'function') window.click_discardRemoteMobileStagedPhotos();
+                    break;
+                case 'click_saveRemoteMobileStagedPhotos':
+                    if (typeof window.click_saveRemoteMobileStagedPhotos === 'function') window.click_saveRemoteMobileStagedPhotos();
+                    break;
                 case 'click_handleMobileRemoteOverlayTap':
                     if (typeof window.click_handleMobileRemoteOverlayTap === 'function') window.click_handleMobileRemoteOverlayTap();
+                    break;
+                case 'click_updateLocalIPQRCode':
+                    if (typeof window.click_updateLocalIPQRCode === 'function') window.click_updateLocalIPQRCode();
                     break;
                 case 'click_captureSOPSnapshot':
                     if (typeof window.click_captureSOPSnapshot === 'function') window.click_captureSOPSnapshot();
@@ -1590,6 +1599,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_uploadSOPMedia_this_files_0':
                     uploadSOPMedia(el.files[0]);
+                    break;
+                case 'change_handleSOPWebcamDeviceChange':
+                    if (typeof window.change_handleSOPWebcamDeviceChange === 'function') window.change_handleSOPWebcamDeviceChange(el);
                     break;
                 case 'change_window_updateCcMngrStock':
                     window.updateCcMngrStock();
