@@ -44,7 +44,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Login Theme Synchronization & Persistence**
 *(Archived — 2026-05-28)*
-- [x] bug/login-theme-sync-issue : **Login Theme Synchronization & Persistence** - Resolve the issue where the login container is locked in dark mode upon load/logout even if the operator previously saved a light theme preference. Check and apply the stored theme state immediately at the start of window loading. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [🚀] bug/login-theme-sync-issue : **Login Theme Synchronization & Persistence** - Resolve the issue where the login container is locked in dark mode upon load/logout even if the operator previously saved a light theme preference. Check and apply the stored theme state immediately at the start of window loading. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### Target: `main`
 **Epic: Login Boot Progress Modal Integration**
