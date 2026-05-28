@@ -2,7 +2,16 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-28
+
 ### ✨ Features & Bug Fixes
+- **High-Fidelity Remote Mobile Camera Sync & Preview** (`feat/mobile-camera-sync`): Overhauled the remote camera framework to deliver direct camera and gallery fallback support for the SOP Editors and Cycle Count managers, resolving device-side capture timing bugs.
+  - **Dynamic Shutter & Selector Controls**: Segmented switchers between direct CAMERA (`capture="environment"`) and GALLERY fallback modes.
+  - **Phone Staging Queue**: Scrollable haptic thumbnail cards on the phone portal with preview popups and delete clicks.
+  - **Supabase Storage Deletes**: Initiator-driven garbage collection pipelines that purge discarded files from `sop-media` storage buckets.
+  - **Double-Lock Security & Reconnections**: Zero-rescan automatic reconnect wake-ups and clean PC socket tear-downs on modal close or dashboard initiator changes.
+  - **Startup Sound Suppression**: Robust DOM element inspection checks to completely silence start-up capture dings and beep notifications on dashboard loading.
+  - **Aesthetic Polishing**: Dynamic local IP override card hiding, redundant pulsing phone emoji removal, and load screen version telemetry.
 - **Login Theme Synchronization & Persistence** (`bug/login-theme-sync-issue`): Resolved the issue where the login card and progress overlay were locked in dark mode even if a light theme preference was saved. Transformed styles to consume dynamic CSS variables (`var(--bg-body)`, `var(--bg-glass)`, `var(--text-main)`) and updated the Neogleamz logo to dynamically swap orange/white vectors on theme change.
 - **Login Boot Progress Modal** (`feat/login-boot-progress-modal`): Prevented operators from interacting with the main dashboard during system boot sequences by introducing a gorgeous glassmorphism loading overlay inside the login card. Added dynamic linear track animations, monospaced micro-diagnostic logs reporting parallel ledger synces in real-time, and blocked raw view entry until assets are 100% computed.
 - **SOP Editor Checklist Photo & Add Step Fixes** (`bug/sop-editor-photo-checklist`): Resolved the non-functional photo buttons on the checklist side of all SOP editors (Batchez, Layerz, Packerz) by dynamically routing event delegators, fixed the broken bottom "+ ADD PROCEDURE STEP" button `TypeError` and `ReferenceError` crashes, and overhauled the step data extractor to cleanly save empty rich-text rows when valid media attachments are present.
