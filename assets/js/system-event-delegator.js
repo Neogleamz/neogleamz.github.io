@@ -1122,6 +1122,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_startRemoteCycleCount':
                     if (typeof window.startRemoteCycleCount === 'function') window.startRemoteCycleCount();
                     break;
+                case 'click_setCCRoutePhone':
+                    if (typeof window.click_setCCRoutePhone === 'function') window.click_setCCRoutePhone();
+                    break;
+                case 'click_setCCRoutePC':
+                    if (typeof window.click_setCCRoutePC === 'function') window.click_setCCRoutePC();
+                    break;
+                case 'click_setCCRouteBoth':
+                    if (typeof window.click_setCCRouteBoth === 'function') window.click_setCCRouteBoth();
+                    break;
                 case 'click_window_filterCcMngrItems':
                     window.filterCcMngrItems();
                     break;

@@ -1411,6 +1411,16 @@ window.startRemoteCycleCount = async function() {
     if (localArea) localArea.style.display = 'none';
     if (remoteArea) remoteArea.style.display = 'flex';
     
+    // Toggle localhost IP override helper based on development environment
+    const ipHelper = document.getElementById('ccLocalIPOverrideContainer');
+    if (ipHelper) {
+        const isLocalDev = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' || 
+                           window.location.hostname.startsWith('192.168.') ||
+                           window.location.hostname.startsWith('10.');
+        ipHelper.style.display = isLocalDev ? 'flex' : 'none';
+    }
+    
     // 5. Pull context from the Cycle Count Manager dropdown
     let selectEl = document.getElementById('ccMngrItemSelect');
     let titleEl = document.getElementById('inlineScannerItemName');
