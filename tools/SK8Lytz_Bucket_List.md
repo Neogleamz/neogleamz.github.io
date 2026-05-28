@@ -18,7 +18,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 
 ### Target: `main`
-- [ ] bug/sop-editor-photo-checklist : **SOP Editor Checklist Photo Bug** - Fix the photo button on the checklist side of all SOP editors which doesn't work, and ensure saving only occurs when there is text in the rich text instructions box on the Rich text side. [🤖 Gemini 3.5 Flash] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [ ] bug/sop-editor-photo-checklist : **SOP Editor Checklist Photo Bug** - Fix the photo button on the checklist side of all SOP editors which doesn't work, and ensure pictures can be saved even if there is no text in the rich text instructions box on the Rich text side. [🤖 Gemini 3.5 Flash] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### 🟠 P1 High Priority (Active Epics)
 *Clean sweep — all active epics successfully completed and archived!* ✅
