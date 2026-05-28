@@ -44,7 +44,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Login Boot Progress Modal Integration**
 *(Archived — 2026-05-28)*
-- [x] feat/login-boot-progress-modal : **Login Boot Progress Modal** - Prevent users from interacting with the app during the initial boot sequence by showing a gorgeous loading/progress modal on the login page, redirecting to the Stockpilez page only after successful initialization. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [🚀] feat/login-boot-progress-modal : **Login Boot Progress Modal** - Prevent users from interacting with the app during the initial boot sequence by showing a gorgeous loading/progress modal on the login page, redirecting to the Stockpilez page only after successful initialization. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### Target: `main`
 **Epic: Standalone Technical Debt Sweep**

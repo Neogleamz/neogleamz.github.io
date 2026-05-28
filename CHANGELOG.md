@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### ✨ Features & Bug Fixes
+- **Login Boot Progress Modal** (`feat/login-boot-progress-modal`): Prevented operators from interacting with the main dashboard during system boot sequences by introducing a gorgeous glassmorphism loading overlay inside the login card. Added dynamic linear track animations, monospaced micro-diagnostic logs reporting parallel ledger synces in real-time, and blocked raw view entry until assets are 100% computed.
 - **SOP Editor Checklist Photo & Add Step Fixes** (`bug/sop-editor-photo-checklist`): Resolved the non-functional photo buttons on the checklist side of all SOP editors (Batchez, Layerz, Packerz) by dynamically routing event delegators, fixed the broken bottom "+ ADD PROCEDURE STEP" button `TypeError` and `ReferenceError` crashes, and overhauled the step data extractor to cleanly save empty rich-text rows when valid media attachments are present.
 
 ## [1.1.2] - 2026-05-24
