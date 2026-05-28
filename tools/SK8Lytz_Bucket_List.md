@@ -18,10 +18,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all backlog sandbox tasks currently active!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
-
-### Target: `bug/labelz-dropdown-categorization`
-**Epic: Custom Label Dropdown Categorization**
-- [ ] `bug/labelz-dropdown-categorization` : **Custom Label Dropdown Categorization** - Refactor populateDropdowns() in index.html to group custom labels (is_label: true) under a dedicated 'Custom Labels' optgroup rather than falling through to Retail Products, and add them to secondary dropdowns like batch builds and aliases. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+*Clean sweep — all active epics successfully completed and archived!* ✅
 
 
 ## 🧹 Technical Debt
@@ -559,3 +556,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: SOP Editor Checklist Photo Bug**
 *(Archived — 2026-05-28)*
 - [🚀] bug/sop-editor-photo-checklist : **SOP Editor Checklist Photo & Add Step Fixes** - Fix the photo button on the checklist side of all SOP editors, resolve the broken bottom "+ ADD PROCEDURE STEP" button ReferenceError/TypeError regressions, and ensure step rows save successfully even with empty rich text instructions if media attachments exist. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
+
+### Target: `bug/labelz-dropdown-categorization`
+**Epic: Custom Label Dropdown Categorization**
+*(Archived — 2026-05-28)*
+- [🚀] `bug/labelz-dropdown-categorization` : **Custom Label Dropdown Categorization** - Refactor populateDropdowns() in index.html to group custom labels (is_label: true) under a dedicated 'Custom Labels' optgroup rather than falling through to Retail Products, and add them to secondary dropdowns like batch builds and aliases. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
