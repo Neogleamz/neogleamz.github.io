@@ -297,6 +297,8 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 ### I. WebRTC Scanner Layouts & iOS Compatibility
 * **Dual-Card Architecture:** When building inline hardware camera scanners (like the Cycle Count engine), you must NEVER use abrasive full-screen blackout modals. You must deploy a responsive `flex-wrap` layout (`align-items: stretch`) where the Primary Form and the Scanner Card lock into a rigid side-by-side array natively.
 * **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#barcode-reader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
+* **Mobile Viewport Optimization Guidelines (Fit to Screen):** To prevent vertical scrolling on tall mobile screens with active browser toolbars, the scanner frame container should be limited to `220px` square, `qrbox` to `180px`, input/button heights to `44px`, and layout gaps to `10px` or less.
+* **iOS Viewport Auto-Zoom Prevention (CRITICAL):** To prevent standard iOS Safari from automatically zooming into the page on element focus, dropdowns (`<select>`) and numeric inputs (`<input>`) MUST enforce a `font-size` of exactly `16px` or larger.
 
 ### L. Hardened Layout Patterns (Zero-Trust)
 * **The Stacking Pattern**: To eliminate `position: absolute` for layered UI (badges, overlays, buttons), use the project-standard `.grid-stack` architecture:
@@ -419,6 +421,8 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 ### I. WebRTC Scanner Layouts & iOS Compatibility
 * **Dual-Card Architecture:** When building inline hardware camera scanners (like the Cycle Count engine), you must NEVER use abrasive full-screen blackout modals. You must deploy a responsive `flex-wrap` layout (`align-items: stretch`) where the Primary Form and the Scanner Card lock into a rigid side-by-side array natively.
 * **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#barcode-reader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
+* **Mobile Viewport Optimization Guidelines (Fit to Screen):** To prevent vertical scrolling on tall mobile screens with active browser toolbars, the scanner frame container should be limited to `220px` square, `qrbox` to `180px`, input/button heights to `44px`, and layout gaps to `10px` or less.
+* **iOS Viewport Auto-Zoom Prevention (CRITICAL):** To prevent standard iOS Safari from automatically zooming into the page on element focus, dropdowns (`<select>`) and numeric inputs (`<input>`) MUST enforce a `font-size` of exactly `16px` or larger.
 
 ### L. Hardened Layout Patterns (Zero-Trust)
 * **The Stacking Pattern**: To eliminate `position: absolute` for layered UI (badges, overlays, buttons), use the project-standard `.grid-stack` architecture:
