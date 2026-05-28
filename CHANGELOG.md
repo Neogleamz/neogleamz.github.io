@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### ✨ Features & Bug Fixes
+- **SOP Editor Checklist Photo & Add Step Fixes** (`bug/sop-editor-photo-checklist`): Resolved the non-functional photo buttons on the checklist side of all SOP editors (Batchez, Layerz, Packerz) by dynamically routing event delegators, fixed the broken bottom "+ ADD PROCEDURE STEP" button `TypeError` and `ReferenceError` crashes, and overhauled the step data extractor to cleanly save empty rich-text rows when valid media attachments are present.
+
 ## [1.1.2] - 2026-05-24
 
 ### ✨ Features & Bug Fixes
