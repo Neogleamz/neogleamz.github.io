@@ -535,4 +535,4 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: SOP Editor Checklist Photo Bug**
 *(Archived — 2026-05-28)*
-- [x] bug/sop-editor-photo-checklist : **SOP Editor Checklist Photo Bug** - Fix the photo button on the checklist side of all SOP editors which doesn't work, and ensure pictures can be saved even if there is no text in the rich text instructions box on the Rich text side. [🤖 Gemini 3.5 Flash] [🧠 TBD / 5k] [💸 TBD / $0.02]
+- [x] bug/sop-editor-photo-checklist : **SOP Editor Checklist Photo & Add Step Fixes** - Fix the photo button on the checklist side of all SOP editors, resolve the broken bottom "+ ADD PROCEDURE STEP" button ReferenceError/TypeError regressions, and ensure step rows save successfully even with empty rich text instructions if media attachments exist. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
