@@ -16,7 +16,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-- [ ] feat/login-boot-progress-modal : **Login Boot Progress Modal** - Prevent users from interacting with the app during the initial boot sequence by showing a gorgeous loading/progress modal on the login page, redirecting to the Stockpilez page only after successful initialization. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 - [ ] feat/mobile-camera-sync : **Live Mobile Camera Preview & Physical Capture Sync** - Enable mobile WebRTC camera views in the SOP Editor and Cycle Count manager to show a live stream preview on the phone itself, and support physical device capture triggers rather than relying solely on Command Center button clicks. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### 🟠 P1 High Priority (Active Epics)
@@ -41,6 +40,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Login Boot Progress Modal Integration**
+*(Archived — 2026-05-28)*
+- [x] feat/login-boot-progress-modal : **Login Boot Progress Modal** - Prevent users from interacting with the app during the initial boot sequence by showing a gorgeous loading/progress modal on the login page, redirecting to the Stockpilez page only after successful initialization. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### Target: `main`
 **Epic: Standalone Technical Debt Sweep**
