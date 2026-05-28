@@ -2,7 +2,14 @@
 
 ## [Unreleased]
 
-## [1.3.0] - 2026-05-28
+## [1.3.1] - 2026-05-28
+
+### ✨ Features & Bug Fixes
+- **Custom Label Dropdown Categorization** (`bug/labelz-dropdown-categorization`):
+  - **Dedicated Optgroup**: Refactored the `populateDropdowns()` function in `index.html` to intercept recipes flagged with `is_label: true` and cleanly group them under a dedicated `🏷️ CUSTOM LABELS` optgroup.
+  - **Dynamic Emojis**: Mapped the custom emoji defined for the label (or a default `🏷️` tag) into the dropdown option, preventing them from using the standard box emoji `📦` and their fallback mapping to Retail Products.
+  - **Exposing in Secondary Selectors**: Segmented custom labels into their own category and successfully integrated them into secondary dropdowns (`batchProductSelect` for Batch builds and `aliasRecipeSelect` for SKU aliases) to allow custom batch runs and aliasing.
+
 
 ### ✨ Features & Bug Fixes
 - **Cycle Count Dual-Preview Live Sync & Mobile Cockpit** (`feat/cycle-count-dual-preview`):
