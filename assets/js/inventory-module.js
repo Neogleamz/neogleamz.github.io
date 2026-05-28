@@ -1231,6 +1231,26 @@ window.initializeCcSyncChannel = function() {
         if (routeBar) routeBar.style.display = 'flex';
         
         window.updateCCRouteUI(currentPreviewMode);
+        
+        // Broadcast the serialized grouped item dropdown directory list to the phone cockpit
+        const select = document.getElementById('ccMngrItemSelect');
+        const items = [];
+        if (select) {
+            for (let i = 0; i < select.options.length; i++) {
+                const opt = select.options[i];
+                if (opt.value) {
+                    items.push({ value: opt.value, text: opt.text });
+                }
+            }
+        }
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'ITEM_DIRECTORY',
+            payload: { items: items }
+        }).catch(() => {});
+        
+        // Push initial stock balances in case an item is already selected
+        window.updateCcMngrStock();
     });
 
     // Listen for phone-side frame stream broadcasts
@@ -1266,11 +1286,36 @@ window.initializeCcSyncChannel = function() {
         window.stopCycleCount();
     });
 
-    // Listen for phone save trigger
-    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_SAVE_AND_CLOSE' }, () => {
-        sysLog(`[Realtime Scanner] Mobile shutter clicked Save`);
-        const saveBtn = document.querySelector('[data-click="click_window_saveManualCycleCount"]');
-        if (saveBtn) saveBtn.click();
+    // Listen for phone-side item dropdown selection changes
+    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_ITEM_SELECTED' }, (envelope) => {
+        const payload = envelope.payload;
+        if (payload && typeof payload.value !== 'undefined') {
+            const select = document.getElementById('ccMngrItemSelect');
+            if (select) {
+                select.value = payload.value;
+                window.updateCcMngrStock();
+            }
+        }
+    });
+
+    // Listen for mobile cockpit counts saving (supporting both Next and Close)
+    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_SAVE_COUNT' }, async (envelope) => {
+        const payload = envelope.payload;
+        if (payload && typeof payload.value !== 'undefined' && typeof payload.qty !== 'undefined') {
+            const select = document.getElementById('ccMngrItemSelect');
+            const qtyInput = document.getElementById('ccMngrQtyInput');
+            if (select && qtyInput) {
+                select.value = payload.value;
+                qtyInput.value = payload.qty;
+                
+                // Execute the native PC save manual cycle count logic!
+                await window.saveManualCycleCount();
+                
+                if (payload.close) {
+                    window.closeCycleCountManager();
+                }
+            }
+        }
     });
 
     window.ccSyncChannel.subscribe((status) => {
@@ -1910,6 +1955,23 @@ window.updateCcMngrStock = function() {
     valEl.innerText = rounded;
     valEl.style.color = rounded <= 0 ? '#ef4444' : '#f97316';
     display.style.display = 'flex';
+    
+    // Realtime channel broadcast of the current stock balances back to the phone cockpit
+    if (window.ccSyncChannel) {
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'PC_STOCK_UPDATE',
+            payload: {
+                itemKey: key,
+                netStock: key ? valEl.innerText : '—',
+                prod: key ? elV1.innerText : '—',
+                proto: key ? elV2.innerText : '—',
+                cons: key ? elV3.innerText : '—',
+                scrap: key ? elV4.innerText : '—',
+                adj: key ? elV5.innerText : '—'
+            }
+        }).catch(() => {});
+    }
 };
 
 window.handleCcMngrTelemetryEdit = async function(el, colIndex) {
