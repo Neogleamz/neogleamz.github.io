@@ -14,9 +14,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟠 P1 High Priority:** Core application features, necessary infrastructure, and major business logic. 
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
-
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-*Clean sweep — all backlog sandbox tasks currently active!* ✅
+- [ ] feat/cycle-count-dual-preview : **Cycle Count Dual-Preview Live Sync** - Add dynamic preview routing options (PC only, Phone only, or simultaneous Dual-Preview) to the Cycle Count Manager while preserving instantaneous barcode/QR scanning. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### 🟠 P1 High Priority (Active Epics)
 *Clean sweep — all active epics successfully completed and archived!* ✅
