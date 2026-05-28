@@ -43,7 +43,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `feat/cycle-count-dual-preview`
 **Epic: Cycle Count Dual-Preview Live Sync**
 *(Archived — 2026-05-28)*
-- [x] feat/cycle-count-dual-preview : **Cycle Count Dual-Preview Live Sync** - Add dynamic preview routing options (PC only, Phone only, or simultaneous Dual-Preview) to the Cycle Count Manager while preserving instantaneous barcode/QR scanning. [🤖 Antigravity] [🧠 5k / 5k] [💸 $0.02 / $0.02]
+- [🚀] feat/cycle-count-dual-preview : **Cycle Count Dual-Preview Live Sync** - Add dynamic preview routing options (PC only, Phone only, or simultaneous Dual-Preview) to the Cycle Count Manager while preserving instantaneous barcode/QR scanning. [🤖 Antigravity] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `main`
 **Epic: Live Mobile Camera Preview & Physical Capture Sync**

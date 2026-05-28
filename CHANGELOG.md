@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-28
+
+### ✨ Features & Bug Fixes
+- **Cycle Count Dual-Preview Live Sync & Mobile Cockpit** (`feat/cycle-count-dual-preview`):
+  - **Dynamic Preview Routing Options**: Added support for PC only, Phone only, and simultaneous Dual-Preview configurations to sync views between devices in real-time.
+  - **High-Fidelity Mobile Cockpit**: Deployed a fully functional in-browser mobile dashboard inside [remote-scanner.html](file:///d:/GitHub/neogleamz.github.io/remote-scanner.html), allowing operators to select items natively, check stock balances (PROD, PROTO, CONS, SCRAP, ADJ), enter physical counts, and sync instantly to the PC.
+  - **Auto-Zoom Prevention standard**: Configured the `<select>` dropdown and numeric inputs to exactly `16px` and `22px` font-sizes to physically prevent standard iOS Safari viewport auto-zooming.
+  - **Single-Viewport Mobile Framing**: Streamlined the vertical layout parameters to exactly fit standard mobile viewport heights without forcing vertical scrolling—moderating the camera canvas to `220px` and active button heights to `44px`.
+  - **Bidirectional "Close" Portal Integration**: Replaced the "Discard" button with a robust `✕ Close` workflow, closing the camera stream, broadcasting channel teardowns to close the PC Cycle Count manager modal, and rendering a stylized full-screen `🚪 Session Closed` overlay.
+  - **Flicker-Free Real-Time Handshakes**: Implemented asynchronous session token guards on both the PC broadcaster and mobile listener to eliminate temporary red authorization warning flashes on initial websocket connections.
+  - **Supabase Realtime Telemetry**: Refactored the launch broadcast in [inventory-module.js](file:///d:/GitHub/neogleamz.github.io/assets/js/inventory-module.js) to explicitly call `.httpSend()` for stateless wakes, completely resolving future Realtime warning fallbacks.
+
 ## [1.2.0] - 2026-05-28
 
 ### ✨ Features & Bug Fixes
