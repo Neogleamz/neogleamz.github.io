@@ -180,7 +180,7 @@
         }
 
         .status-text {
-            font-size: 13px;
+            font-size: clamp(13px, 1.6vh, 15px);
             font-weight: 800;
             color: var(--text-main);
             letter-spacing: 0.5px;
@@ -388,7 +388,7 @@
             flex: 1;
             height: var(--element-height, 44px);
             border-radius: 10px;
-            font-size: 13px;
+            font-size: clamp(13px, 1.6vh, 14px);
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -444,7 +444,7 @@
         }
 
         .cockpit-title {
-            font-size: 11px;
+            font-size: clamp(11px, 1.4vh, 13px);
             font-weight: 800;
             color: var(--text-muted);
             letter-spacing: 1.5px;
@@ -456,30 +456,30 @@
         .stock-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: clamp(3px, 0.6vh, 6px);
+            gap: clamp(4px, 0.8vh, 8px);
             width: 100%;
         }
 
         .stock-badge {
             background: rgba(0, 0, 0, 0.2);
-            padding: clamp(4px, 0.8vh, 8px) 2px;
-            border-radius: 6px;
+            padding: clamp(6px, 1.2vh, 10px) 4px;
+            border-radius: 8px;
             text-align: center;
             border: 1px solid var(--border-glass);
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
         }
 
         .stock-label {
-            font-size: 9px;
+            font-size: clamp(9px, 1.2vh, 11px);
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
         }
 
         .stock-val {
-            font-size: 13px;
+            font-size: clamp(14px, 1.8vh, 18px);
             font-weight: 900;
             color: var(--text-main);
         }
@@ -487,8 +487,8 @@
         .net-stock-container {
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(245,158,11,0.25);
-            border-radius: 6px;
-            padding: clamp(4px, 0.8vh, 8px) 12px;
+            border-radius: 8px;
+            padding: clamp(6px, 1.2vh, 12px) 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -496,7 +496,7 @@
         }
 
         .net-stock-label {
-            font-size: 10px;
+            font-size: clamp(11px, 1.5vh, 13px);
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -504,7 +504,7 @@
         }
 
         .net-stock-val {
-            font-size: 18px;
+            font-size: clamp(20px, 2.5vh, 26px);
             font-weight: 900;
             color: var(--warning);
             text-shadow: 0 0 8px rgba(245,158,11,0.3);
@@ -601,7 +601,7 @@
 
             <!-- Qty Input Block -->
             <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
-                <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">New Physical Qty</label>
+                <label style="font-size: clamp(11px, 1.4vh, 13px); font-weight: 800; color: var(--text-muted); text-transform: uppercase;">New Physical Qty</label>
                 <input type="number" id="ccMobileQtyInput" placeholder="Enter Physical Qty" class="manual-input" style="width: 100%; font-size: 20px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); border-radius: 8px;">
             </div>
 
