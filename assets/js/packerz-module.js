@@ -2591,6 +2591,13 @@ window.click_updateLocalIPQRCode = function() {
 };
 
 window.showMobileRemoteShutterOverlay = function() {
+    // If the PC remote area is active, it means this client is the PC dashboard showing the QR code, not the mobile phone client!
+    const remArea = document.getElementById('sopSnapshotRemoteArea');
+    if (remArea && remArea.style.display === 'flex') {
+        sysLog(`[Realtime Camera] Suppressing mobile remote overlay on PC initiator`);
+        return;
+    }
+
     const overlay = document.getElementById('mobileRemoteCaptureOverlay');
     if (!overlay) return;
     
