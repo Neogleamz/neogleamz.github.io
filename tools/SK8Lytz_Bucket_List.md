@@ -16,10 +16,13 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-- [ ] feat/mobile-camera-sync : **Live Mobile Camera Preview & Physical Capture Sync** - Enable mobile WebRTC camera views in the SOP Editor and Cycle Count manager to show a live stream preview on the phone itself, and support physical device capture triggers rather than relying solely on Command Center button clicks. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+*Clean sweep — all backlog sandbox tasks currently active!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
-*Clean sweep — all active epics successfully completed and archived!* ✅
+
+### Target: `main`
+**Epic: Live Mobile Camera Preview & Physical Capture Sync**
+- [ ] feat/mobile-camera-sync : **Live Mobile Camera Preview & Physical Capture Sync** - Enable mobile WebRTC camera views in the SOP Editor and Cycle Count manager to show a live stream preview on the phone itself, and support physical device capture triggers rather than relying solely on Command Center button clicks. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 
 ## 🧹 Technical Debt
