@@ -2215,6 +2215,16 @@ window.click_closeSOPSnapshotCamera = function() {
     }
     if(video) video.srcObject = null;
     if(modal) modal.style.display = 'none';
+    
+    // Clean up/unsubscribe from the camera sync channel
+    if (window.cameraSyncChannel) {
+        try {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient.removeChannel) {
+                supabaseClient.removeChannel(window.cameraSyncChannel);
+            }
+        } catch (e) { console.error("Error removing channel:", e); }
+        window.cameraSyncChannel = null;
+    }
 };
 
 window.click_backToSOPCameraSelection = function() {
@@ -2232,6 +2242,16 @@ window.click_backToSOPCameraSelection = function() {
     if (selArea) selArea.style.display = 'flex';
     if (webArea) webArea.style.display = 'none';
     if (remArea) remArea.style.display = 'none';
+    
+    // Clean up/unsubscribe from the camera sync channel so we stop listening to any phone actions
+    if (window.cameraSyncChannel) {
+        try {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient.removeChannel) {
+                supabaseClient.removeChannel(window.cameraSyncChannel);
+            }
+        } catch (e) { console.error("Error removing channel:", e); }
+        window.cameraSyncChannel = null;
+    }
 };
 
 window.selectedSOPCameraId = null;
