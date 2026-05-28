@@ -1203,16 +1203,18 @@ window.initializeCcSyncChannel = function() {
             }
         } catch (e) { console.warn(e); }
 
-        window.ccSyncChannel.send({
-            type: 'broadcast',
-            event: 'SESSION_TRANSFER',
-            payload: {
-                accessToken: sessionToken,
-                refreshToken: refreshToken
-            }
-        }).catch(err => {
-            sysLog(`[Realtime Scanner] SESSION_TRANSFER send failed: ${err.message}`, true);
-        });
+        if (sessionToken) {
+            window.ccSyncChannel.send({
+                type: 'broadcast',
+                event: 'SESSION_TRANSFER',
+                payload: {
+                    accessToken: sessionToken,
+                    refreshToken: refreshToken
+                }
+            }).catch(err => {
+                sysLog(`[Realtime Scanner] SESSION_TRANSFER send failed: ${err.message}`, true);
+            });
+        }
 
         // Update UI states to connected
         const statusCheck = document.getElementById('ccMobileBridgeStatus');
@@ -1284,6 +1286,7 @@ window.initializeCcSyncChannel = function() {
     window.ccSyncChannel.on('broadcast', { event: 'MOBILE_DISCARD_AND_BACK' }, () => {
         sysLog(`[Realtime Scanner] Mobile shutter clicked Discard`);
         window.stopCycleCount();
+        window.closeCycleCountManager();
     });
 
     // Listen for phone-side item dropdown selection changes

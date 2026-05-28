@@ -620,9 +620,9 @@
 
     <!-- Success Overlay -->
     <div id="scannerSuccessOverlay" class="overlay-success-full">
-        <div style="font-size: 64px; animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;">🎉</div>
-        <div style="font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #fff 30%, var(--success) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);">Count Synchronized!</div>
-        <div style="font-size: 13px; color: var(--text-muted); max-width: 280px; line-height: 1.6;">Your cycle count entries have been cleanly recorded. You can safely close this browser window now!</div>
+        <div id="overlayEmoji" style="font-size: 64px; animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;">🎉</div>
+        <div id="overlayTitle" style="font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #fff 30%, var(--success) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);">Count Synchronized!</div>
+        <div id="overlayDesc" style="font-size: 13px; color: var(--text-muted); max-width: 280px; line-height: 1.6;">Your cycle count entries have been cleanly recorded. You can safely close this browser window now!</div>
         <button onclick="window.close()" style="margin-top: 15px; padding: 12px 24px; border-radius: 30px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); color: #fff; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Close Portal</button>
     </div>
 
@@ -725,7 +725,7 @@
                     try {
                         const payload = envelope.payload;
                         if (!payload || !payload.accessToken) {
-                            throw new Error('Session details missing.');
+                            return; // Silently ignore partial handshake attempts to prevent flashing errors
                         }
                         hasSession = true;
                         isDesktopActive = true;
@@ -763,13 +763,23 @@
 
                 // Listen for PC discard or save actions
                 syncChannel.on('broadcast', { event: 'PC_SAVE_AND_CLOSE' }, () => {
+                    // Reset overlay back to default success text
+                    document.getElementById('overlayEmoji').innerText = '🎉';
+                    document.getElementById('overlayTitle').innerText = 'Count Synchronized!';
+                    document.getElementById('overlayDesc').innerText = 'Your cycle count entries have been cleanly recorded. You can safely close this browser window now!';
+                    
                     shutdownCameraEngine();
                     document.getElementById('scannerSuccessOverlay').style.display = 'flex';
                 });
 
                 syncChannel.on('broadcast', { event: 'PC_DISCARD_AND_BACK' }, () => {
+                    // Set overlay to session closed text
+                    document.getElementById('overlayEmoji').innerText = '🚪';
+                    document.getElementById('overlayTitle').innerText = 'Session Closed';
+                    document.getElementById('overlayDesc').innerText = 'The cycle count session has been closed without saving. You can safely close this browser window now.';
+                    
                     shutdownCameraEngine();
-                    updateStatus('ready', 'Session Reset ✓', 'Waiting for PC to open remote camera again...');
+                    document.getElementById('scannerSuccessOverlay').style.display = 'flex';
                 });
 
                 // Listen for PC preview mode changes
@@ -1099,11 +1109,11 @@
             }
             shutdownCameraEngine();
             
-            // Hide cockpit card
-            const cockpit = document.getElementById('mobileCockpitCard');
-            if (cockpit) cockpit.style.display = 'none';
-            
-            updateStatus('ready', 'Session Cancelled', 'Scan cleared. Waiting for PC modal activation...');
+            // Show session closed overlay
+            document.getElementById('overlayEmoji').innerText = '🚪';
+            document.getElementById('overlayTitle').innerText = 'Session Closed';
+            document.getElementById('overlayDesc').innerText = 'The cycle count session has been closed without saving. You can safely close this browser window now.';
+            document.getElementById('scannerSuccessOverlay').style.display = 'flex';
         });
 
         // ✓ Save & Next (Multi-count workflow)
@@ -1169,6 +1179,11 @@
                         event: 'MOBILE_SAVE_COUNT',
                         payload: { value: selectBox.value, qty: qty, close: true }
                     });
+                    
+                    // Reset overlay back to default success text
+                    document.getElementById('overlayEmoji').innerText = '🎉';
+                    document.getElementById('overlayTitle').innerText = 'Count Synchronized!';
+                    document.getElementById('overlayDesc').innerText = 'Your cycle count entries have been cleanly recorded. You can safely close this browser window now!';
                     
                     shutdownCameraEngine();
                     document.getElementById('scannerSuccessOverlay').style.display = 'flex';
