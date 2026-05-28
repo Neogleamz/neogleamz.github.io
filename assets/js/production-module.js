@@ -419,7 +419,7 @@ function extractSOPDataFromUI(containerId) {
                 attachments.push({type: typeSel.value, url: urlInp.value});
             }
         });
-        if(t && t.innerHTML.trim()) { 
+        if(t && (t.innerHTML.trim() || attachments.length > 0)) { 
             steps.push({ text: t.innerHTML.trim(), attachments: attachments }); 
         } 
     }); 
@@ -431,7 +431,8 @@ window.saveMasterSOP = async function() {
     if(!p) return;
 
     await executeWithButtonAction('btnSaveMasterSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
-        let steps = extractSOPDataFromUI('sopMasterEditorArea');
+        const targetContainer = currentSopMode === 'packerz' ? 'packerzSopEditorArea' : 'sopMasterEditorArea';
+        let steps = extractSOPDataFromUI(targetContainer);
         let rawQa = document.getElementById('productionAdminQA')?.value || '';
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
         const payload = { qaChecks: qaLines, steps: steps };

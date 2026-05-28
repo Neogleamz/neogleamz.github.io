@@ -2414,21 +2414,25 @@ window.buildUnifiedSopLayoutHTML = function(options) {
     const checklistHeader = sopType === 'packerz' ? '3. CHECKLIST' : 'CHECKLIST';
     const richTextHeader = sopType === 'packerz' ? '4. Packing Instructions (Rich Text)' : '4. Rich Text Instructions';
     
+    const qaTextareaId = sopType === 'packerz' ? 'packerzAdminQA' : 'productionAdminQA';
+    const qaPreviewId = sopType === 'packerz' ? 'packerzAdminQAPreview' : 'productionAdminQAPreview';
+    const rowsWrapperId = sopType === 'packerz' ? 'packerzSopEditorArea' : 'sopMasterEditorArea';
+    const addRowClickAttr = sopType === 'packerz' ? 'data-click="click_addPackerzSOPRow"' : 'data-click="click_addDashboardSOPRow"';
+
+    const cameraClickAction = sopType === 'packerz' ? 'click_openSOPSnapshotCamera_packerz' : 'click_openSOPSnapshotCamera_production';
+
     let printBtn = `<button class="sop-print-btn" data-click="click_printActiveSOP" style="background:rgba(16,185,129,0.1); border:1px solid #10b981; color:#10b981;">🖨️ Print</button>`;
-    let uploadBtn = `<button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="productionAdminQA" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase">☁️ Upload</button>`;
-    let photoBtn = `<button data-click="click_openSOPSnapshotCamera_dashboard" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;">📸 Photo</button>`;
+    let uploadBtn = `<button data-mousedown="mousedown_sopDirectUpload" data-soptype="${sopType}" data-target-textarea="${qaTextareaId}" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#3b82f6;" title="Upload File to Supabase">☁️ Upload</button>`;
+    let photoBtn = `<button data-click="${cameraClickAction}" style="background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B;">📸 Photo</button>`;
     let guideBtn = `<button data-click="click_openSOPTokenGuide" style="background:rgba(245,158,11,0.1); border:1px solid #F59E0B; color:#F59E0B;">❓ Guide</button>`;
     let previewBtn = `<button data-click="click_toggleDashboardPreview" style="background:rgba(59,130,246,0.1); border:1px solid #3b82f6; color:#3b82f6;">👁️ Preview</button>`;
-
-    const qaTextareaId = 'productionAdminQA';
-    const qaPreviewId = 'productionAdminQAPreview';
-    const rowsWrapperId = 'sopMasterEditorArea';
-    const addRowClickAttr = 'data-click="click_addDashboardSOPRow"';
 
     const qaTextValue = options.qaText || '';
     const rowsHtml = options.rowsHtml || '';
     
-    const mainInputHandler = 'data-input="input_renderDashboardTelemetryPreview"';
+    const mainInputHandler = sopType === 'packerz'
+        ? 'data-input="input_renderPackerzTelemetryPreview"'
+        : 'data-input="input_renderDashboardTelemetryPreview"';
 
     const rightPaneInner = `<div style="background:var(--bg-container); border-radius:12px; padding:20px; border:1px solid var(--border-color); display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
