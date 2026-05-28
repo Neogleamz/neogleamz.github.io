@@ -971,6 +971,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_closeSOPSnapshotCamera':
                     if (typeof window.click_closeSOPSnapshotCamera === 'function') window.click_closeSOPSnapshotCamera();
                     break;
+                case 'click_startSOPWebcamMode':
+                    if (typeof window.startSOPWebcamMode === 'function') window.startSOPWebcamMode();
+                    break;
+                case 'click_startSOPRemoteMobileMode':
+                    if (typeof window.startSOPRemoteMobileMode === 'function') window.startSOPRemoteMobileMode();
+                    break;
+                case 'click_backToSOPCameraSelection':
+                    if (typeof window.click_backToSOPCameraSelection === 'function') window.click_backToSOPCameraSelection();
+                    break;
+                case 'click_handleMobileRemoteOverlayTap':
+                    if (typeof window.click_handleMobileRemoteOverlayTap === 'function') window.click_handleMobileRemoteOverlayTap();
+                    break;
                 case 'click_captureSOPSnapshot':
                     if (typeof window.click_captureSOPSnapshot === 'function') window.click_captureSOPSnapshot();
                     break;
@@ -1491,6 +1503,9 @@ document.addEventListener('DOMContentLoaded', () => {
             switch(action) {
                 case 'change_updateSaleType':
                     if (typeof window.updateSaleType === 'function') window.updateSaleType(el, el.getAttribute('data-order'), el.getAttribute('data-sku'));
+                    break;
+                case 'change_handleNativeMobileCameraCapture':
+                    if (typeof window.change_handleNativeMobileCameraCapture === 'function') window.change_handleNativeMobileCameraCapture(event);
                     break;
                 case 'change_window_onEditzBulkChange':
                     if (typeof window.change_window_onEditzBulkChange === 'function') window.change_window_onEditzBulkChange(el);

@@ -2186,14 +2186,68 @@ window.click_openSOPSnapshotCamera = function(_e) {
 
 window.openSOPSnapshotCamera = async function() {
     const modal = document.getElementById('sopSnapshotModal');
+    if(!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    // Show Selection Area, Hide Webcam and Remote Areas
+    const selArea = document.getElementById('sopSnapshotSelectionArea');
+    const webArea = document.getElementById('sopSnapshotWebcamArea');
+    const remArea = document.getElementById('sopSnapshotRemoteArea');
+    
+    if (selArea) selArea.style.display = 'flex';
+    if (webArea) webArea.style.display = 'none';
+    if (remArea) remArea.style.display = 'none';
+    
+    // Dynamically auto-initialize camera sync channel in background to ensure readiness
+    if (typeof window.initializeCameraSyncChannel === 'function') {
+        window.initializeCameraSyncChannel();
+    }
+};
+
+window.click_closeSOPSnapshotCamera = function() {
+    const modal = document.getElementById('sopSnapshotModal');
+    const video = document.getElementById('sopSnapshotVideo');
+    
+    if(sopSnapshotStream) {
+        sopSnapshotStream.getTracks().forEach(track => track.stop());
+        sopSnapshotStream = null;
+    }
+    if(video) video.srcObject = null;
+    if(modal) modal.style.display = 'none';
+};
+
+window.click_backToSOPCameraSelection = function() {
+    if(sopSnapshotStream) {
+        sopSnapshotStream.getTracks().forEach(track => track.stop());
+        sopSnapshotStream = null;
+    }
+    const video = document.getElementById('sopSnapshotVideo');
+    if(video) video.srcObject = null;
+    
+    const selArea = document.getElementById('sopSnapshotSelectionArea');
+    const webArea = document.getElementById('sopSnapshotWebcamArea');
+    const remArea = document.getElementById('sopSnapshotRemoteArea');
+    
+    if (selArea) selArea.style.display = 'flex';
+    if (webArea) webArea.style.display = 'none';
+    if (remArea) remArea.style.display = 'none';
+};
+
+window.startSOPWebcamMode = async function() {
+    const selArea = document.getElementById('sopSnapshotSelectionArea');
+    const webArea = document.getElementById('sopSnapshotWebcamArea');
     const video = document.getElementById('sopSnapshotVideo');
     const statusEl = document.getElementById('sopSnapshotStatus');
     const captureBtn = document.getElementById('btnSOPSnapshotCapture');
     
-    if(!modal || !video) return;
+    if (selArea) selArea.style.display = 'none';
+    if (webArea) webArea.style.display = 'flex';
     
-    modal.style.display = 'flex';
+    if(!video || !statusEl || !captureBtn) return;
+    
     statusEl.innerText = "Requesting camera access...";
+    statusEl.style.color = "rgba(255,255,255,0.7)";
     captureBtn.style.opacity = '0.5';
     captureBtn.style.cursor = 'not-allowed';
     
@@ -2213,18 +2267,6 @@ window.openSOPSnapshotCamera = async function() {
         statusEl.style.color = '#ef4444';
         console.error(e);
     }
-};
-
-window.click_closeSOPSnapshotCamera = function() {
-    const modal = document.getElementById('sopSnapshotModal');
-    const video = document.getElementById('sopSnapshotVideo');
-    
-    if(sopSnapshotStream) {
-        sopSnapshotStream.getTracks().forEach(track => track.stop());
-        sopSnapshotStream = null;
-    }
-    if(video) video.srcObject = null;
-    if(modal) modal.style.display = 'none';
 };
 
 window.click_captureSOPSnapshot = function() {
@@ -2279,4 +2321,149 @@ window.click_captureSOPSnapshot = function() {
             alert("Upload failed. Media uploader missing.");
         }
     }, 'image/jpeg', 0.85); // 85% quality JPEG
+};
+
+// ============================================================
+// ASYNCHRONOUS CROSS-DEVICE REMOTE SHUTTER LOOP
+// ============================================================
+window.cameraSyncChannel = null;
+
+window.initializeCameraSyncChannel = function() {
+    if (window.cameraSyncChannel) return;
+    if (!window.currentUser || typeof supabaseClient === 'undefined') return;
+
+    const operatorId = window.currentUser.id;
+    const channelName = `neogleamz-camera-sync-${operatorId}`;
+    
+    sysLog(`[Realtime Camera] Subscribing to sync channel: ${channelName}`);
+    
+    window.cameraSyncChannel = supabaseClient.channel(channelName);
+    
+    window.cameraSyncChannel
+        .on('broadcast', { event: 'LAUNCH_MOBILE_SHUTTER' }, (_payload) => {
+            sysLog(`[Realtime Camera] Received remote camera request on phone`);
+            window.showMobileRemoteShutterOverlay();
+        })
+        .on('broadcast', { event: 'REMOTE_CAPTURE_COMPLETE' }, (payload) => {
+            sysLog(`[Realtime Camera] Received remote photo URL on PC: ${payload.imageUrl}`);
+            window.handleRemoteCaptureCompleteOnPC(payload.imageUrl);
+        })
+        .subscribe((status) => {
+            sysLog(`[Realtime Camera] Subscription status: ${status}`);
+        });
+};
+
+window.startSOPRemoteMobileMode = function() {
+    // Ensure the sync channel is active
+    if (typeof window.initializeCameraSyncChannel === 'function') {
+        window.initializeCameraSyncChannel();
+    }
+    
+    const selArea = document.getElementById('sopSnapshotSelectionArea');
+    const webArea = document.getElementById('sopSnapshotWebcamArea');
+    const remArea = document.getElementById('sopSnapshotRemoteArea');
+    const remStatus = document.getElementById('sopSnapshotRemoteStatus');
+    
+    if (selArea) selArea.style.display = 'none';
+    if (webArea) webArea.style.display = 'none';
+    if (remArea) remArea.style.display = 'flex';
+    if (remStatus) remStatus.innerText = "Vibrating phone to activate camera...";
+    
+    // Broadcast trigger payload to Mobile Shutter listener
+    if (window.cameraSyncChannel) {
+        window.cameraSyncChannel.send({
+            type: 'broadcast',
+            event: 'LAUNCH_MOBILE_SHUTTER',
+            payload: { timestamp: Date.now() }
+        });
+    }
+};
+
+window.showMobileRemoteShutterOverlay = function() {
+    const overlay = document.getElementById('mobileRemoteCaptureOverlay');
+    if (!overlay) return;
+    
+    // Try to trigger tactile feedback
+    try {
+        let beep = document.getElementById('scanner-beep');
+        if (beep) {
+            beep.currentTime = 0;
+            beep.play().catch(() => {});
+        }
+        if (navigator.vibrate) {
+            navigator.vibrate([150, 80, 150]);
+        }
+    } catch (err) { console.warn(err); }
+    
+    overlay.style.display = 'flex';
+};
+
+window.click_handleMobileRemoteOverlayTap = function() {
+    const input = document.getElementById('nativeMobileCameraInput');
+    if (input) {
+        input.click();
+    }
+};
+
+window.change_handleNativeMobileCameraCapture = async function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const subtext = document.getElementById('mobileRemoteCaptureSubtext');
+    if (subtext) {
+        subtext.innerText = "⬆ Uploading snapshot to Supabase Storage...";
+        subtext.style.color = "#f59e0b";
+    }
+    
+    try {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fileName = `remote-${Date.now()}-${safeName}`;
+        const path = currentSOPMediaFolder ? `${currentSOPMediaFolder}/${fileName}` : fileName;
+        
+        const { error } = await supabaseClient.storage.from(SOP_MEDIA_BUCKET).upload(path, file, {
+            cacheControl: '3600', upsert: false
+        });
+        if (error) throw error;
+        
+        const { data: urlData } = supabaseClient.storage.from(SOP_MEDIA_BUCKET).getPublicUrl(path);
+        
+        // Hide overlay instantly
+        const overlay = document.getElementById('mobileRemoteCaptureOverlay');
+        if (overlay) overlay.style.display = 'none';
+        if (subtext) {
+            subtext.innerText = "Your desktop requested a photo. Tap anywhere to open your native camera, snap the shot, and send it back instantly!";
+            subtext.style.color = "rgba(255,255,255,0.75)";
+        }
+        
+        // Broadcast success to PC
+        if (window.cameraSyncChannel) {
+            window.cameraSyncChannel.send({
+                type: 'broadcast',
+                event: 'REMOTE_CAPTURE_COMPLETE',
+                payload: { imageUrl: urlData.publicUrl }
+            });
+        }
+        
+        // Clear input value so same file can be captured again if retaken
+        event.target.value = '';
+    } catch (e) {
+        if (subtext) {
+            subtext.innerText = `❌ Upload failed: ${e.message}\nTap overlay to try again.`;
+            subtext.style.color = "#ef4444";
+        }
+        console.error(e);
+    }
+};
+
+window.handleRemoteCaptureCompleteOnPC = function(imageUrl) {
+    // Hide the PC-side loader / selections modal
+    window.click_closeSOPSnapshotCamera();
+    
+    // Insert token / stage the image just like click_captureSOPSnapshot does!
+    if (typeof insertSOPToken === 'function') {
+        insertSOPToken(`[IMG:${imageUrl}]`);
+        if (typeof showToast === 'function') {
+            showToast("📱 Remote Photo synced successfully!");
+        }
+    }
 };
