@@ -738,6 +738,40 @@ o-duplicate-case ESLint errors in system-event-delegator.js, case label strings 
 * click_window_openPrintSOP_currentPri was ambiguous � the 3D Layerz print handler is now **click_window_openLayerzPrintSOP_currentPri** (calls window.openPrintSOP(currentPrintJob.part_name)).
 * click_printPackerzSOP existed at L275 (new openSopPrintModal routing) and L897 (legacy printPackerzSOP()). The legacy handler is now **click_printPackerzSOP_legacy**. New DOM elements must only ever reference the L275 case.
 
+## 13. Mobile Viewport Responsive Styling & WebRTC Camera Standards
+
+To guarantee a seamless mobile experience across varying smartphone dimensions (preventing critical cockpit elements from overflowing and avoiding empty vertical space on tall devices), all mobile views must adhere strictly to these architectural standards:
+
+### A. Viewport-Relative Height Scaling (vh/dvh)
+- **Clamp-Driven Dimensions**: Avoid static pixel heights or paddings for primary layout containers or inputs. Developers must use viewport-relative height units (`vh` or `dvh`) nested inside CSS `clamp()` functions to allow elements to contract on shorter viewports and expand on taller screens.
+- **Dynamic Tokens**: Centralize elements height into a custom token:
+  `--element-height: clamp(42px, 5.5vh, 48px);`
+  Apply this to all primary dropdowns, inputs, and button components to ensure finger-accessible tap targets (`>= 42px`) that scale with the device size.
+- **Responsive Padding & Gaps**: Scale body padding, main flex gaps, and cockpit container padding fluidly:
+  * Body Padding: `padding: clamp(6px, 1.2vh, 12px) 10px;`
+  * Container Gaps: `gap: clamp(6px, 1.2vh, 12px);`
+  * Cockpit Card Gaps: `gap: clamp(6px, 1vh, 10px);`
+  * Stock Grid Gaps: `gap: clamp(4px, 0.8vh, 8px);`
+
+### B. Distortion-Free Camera Views (object-fit: cover)
+To prevent real-time WebRTC camera feeds from skewing, stretching, or distorting inside custom-sized border containers (e.g. square scanner windows):
+- Developers must apply `object-fit: cover !important;` directly to the `<video>` element injected by the scanning engine. This crops and centers the active camera stream cleanly inside the border container without distorting its aspect ratio.
+
+### C. Dynamic qrbox Calculation Callback
+When initializing `html5-qrcode` inside responsive dynamic containers, passing static integer bounds for `qrbox` (e.g., `{ width: 180, height: 180 }`) is strictly forbidden, as it can cause the scan box to exceed the container boundaries on short screens.
+- Always implement a dynamic sizing callback that scales the active alignment frame proportionally to the active stream dimensions:
+  ```javascript
+  qrbox: (width, height) => {
+      const size = Math.min(width, height);
+      const qrSize = Math.floor(size * 0.82); // target 82% of the active camera stream
+      return { width: qrSize, height: qrSize };
+  }
+  ```
+
+### D. iOS Safari Auto-Zoom Prevention
+To maintain viewport position and prevent iOS Safari from triggering an automatic viewport zoom when focused:
+- Any form input, text area, or selection dropdown field in the mobile UI must be styled with a `font-size` of strictly **`>= 16px`** (e.g. `font-size: 16px` or `font-size: clamp(16px, 2vh, 20px)`).
+
 
 ## Serverless & Edge Functions
 

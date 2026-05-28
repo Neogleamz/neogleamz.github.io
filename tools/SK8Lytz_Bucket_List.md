@@ -18,7 +18,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all backlog sandbox tasks currently active!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
-*Clean sweep — all active epics successfully completed and archived!* ✅
+
+### Target: `bug/labelz-dropdown-categorization`
+**Epic: Custom Label Dropdown Categorization**
+- [ ] `bug/labelz-dropdown-categorization` : **Custom Label Dropdown Categorization** - Refactor populateDropdowns() in index.html to group custom labels (is_label: true) under a dedicated 'Custom Labels' optgroup rather than falling through to Retail Products, and add them to secondary dropdowns like batch builds and aliases. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 
 ## 🧹 Technical Debt
