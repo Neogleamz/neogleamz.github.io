@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-05-28
+
+### ✨ Features & Bug Fixes
+- **Unified Branding & Dynamic Loading Status**:
+  - **Refined Command Center Header Subtitle**: Simplified the application header subtitle to `"COMMAND CENTER"` with a premium, high-tracking uppercase aesthetic. Used `8px` letter-spacing, a matching `-8px` horizontal margin offset to ensure mathematical centering, and a fluid font-size range: `clamp(11px, 0.8vw, 13px)`. Added robust overflow overrides to completely block layout truncation and ellipsis issues.
+  - **Login & Loading Screen Alignment**: Replaced the white subtitle on the login and loading screen with the identical neon orange (`#f97316`) spaced header branding, utilizing a `-12px` negative margin to pull the elements tight and eliminate vertical transparent space.
+  - **Dynamic Green/Red Initialization states**: Upgraded the loading screen's progress bar and title (`INITIALIZING SYSTEM`) to default to glowing emerald green (`#10b981`) for a healthy status signal. Rewrote `setBootProgress()` to dynamically shift the entire overlay to caution red (`#ef4444`) and display `SYSTEM BOOT FAIL` on failed authentication or database sync blocks.
+  - **Operator Debug Delay**: Injected an asynchronous `2000ms` visual pause in the boot error catch handlers, allowing system diagnostics to be fully read before gracefully reverting back to input fields.
+
 ## [1.3.1] - 2026-05-28
 
 ### ✨ Features & Bug Fixes
