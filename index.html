@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.05.28.1547"></script>
+    <script src="assets/js/system-version.js?v=v.2026.05.28.2159"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.28.1547"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.05.28.2159"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.28.1547"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.05.28.2159"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.05.28.1547"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.05.28.2159"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -279,9 +279,9 @@
  
         /* BOOT PROGRESS CARD OVERLAY */
         .boot-progress-area { display: none; text-align: center; margin-top: 10px; }
-        .boot-title { margin-bottom: 24px; font-weight: 900; letter-spacing: 3px; color: #f97316; font-size: clamp(16px, 4vw, 22px); text-transform: uppercase; text-shadow: 0 0 10px rgba(249, 115, 22, 0.4); }
+        .boot-title { margin-bottom: 24px; font-weight: 900; letter-spacing: 3px; color: #10b981; font-size: clamp(16px, 4vw, 22px); text-transform: uppercase; text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
         .boot-track { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 9999px; height: 12px; margin-bottom: 24px; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); }
-        .boot-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #f97316, #fb923c, #fbbf24); border-radius: 9999px; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 12px rgba(249, 115, 22, 0.8); }
+        .boot-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7); border-radius: 9999px; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 12px rgba(16, 185, 129, 0.8); }
         .boot-status { font-size: 13px; color: var(--text-main); font-weight: 800; margin-bottom: 12px; min-height: 20px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Righteous', sans-serif; text-shadow: 0 0 8px rgba(255, 255, 255, 0.1); }
         .boot-substatus { font-size: 11px; color: var(--text-muted); font-family: 'Fira Code', 'Courier New', Courier, monospace; min-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 6px 12px; background: var(--bg-bar); border-radius: 8px; border: 1px solid var(--border-color); }
 
@@ -1793,7 +1793,10 @@
 
 <div id="loginUI" class="login-container" style="display: flex;">
     <div class="login-card">
-        <img class="login-logo" src="assets/images/neo_logo_white.png" alt="Neogleamz Logo" style="display:block; margin:0 auto 15px auto; height:120px; width:auto; max-width: 100%; object-fit: contain;">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px;">
+            <img class="login-logo" src="assets/images/neo_logo_white.png" alt="Neogleamz Logo" style="display:block; margin:0; height:120px; width:auto; max-width: 100%; object-fit: contain;">
+            <span class="subtitle" style="margin: 0; margin-top: -12px; margin-right: -8px; font-size: clamp(11px, 0.8vw, 13px); color: #f97316; font-weight: 900; white-space: nowrap; letter-spacing: 8px; text-transform: uppercase; overflow: visible !important; text-overflow: clip !important; max-width: none !important;">Command Center</span>
+        </div>
         
         <div id="loginFormArea">
             <h1 style="margin-bottom: 30px; font-weight: 300; letter-spacing: 2px;">AUTHORITY ACCESS</h1>
@@ -1824,8 +1827,10 @@
 <div id="appUI" class="container" style="display: none;">
     <div class="header-area">
         <div class="title-block" style="display: flex; flex-direction: column; justify-content: center; gap: 0px; flex-wrap: nowrap;">
-            <img class="neo-logo" src="assets/images/neo_logo_orange.png" alt="Neogleamz Logo" style="height: 48px; width: auto; transform: scale(1.35); transform-origin: center center;">
-            <span class="subtitle" style="margin: 0; margin-top: 4px; font-size: clamp(6px, 0.8vw, 10px); color: #f97316; font-weight: 800; white-space: nowrap; letter-spacing: 0.5px;">Cloud-Native Ledger & Command Center</span>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: 15px;">
+                <img class="neo-logo" src="assets/images/neo_logo_orange.png" alt="Neogleamz Logo" style="height: 48px; width: auto; transform: scale(1.35); transform-origin: center center;">
+                <span class="subtitle" style="margin: 0; margin-top: 8px; margin-right: -8px; font-size: clamp(11px, 0.8vw, 13px); color: #f97316; font-weight: 900; white-space: nowrap; letter-spacing: 8px; text-transform: uppercase; overflow: visible !important; text-overflow: clip !important; max-width: none !important;">Command Center</span>
+            </div>
         </div>
         <div class="tabs">
             <button class="tab-btn active" data-click="click_switchTab_stockpilez">📊 STOCKPILEZ</button>
@@ -4260,9 +4265,41 @@
         const bar = document.getElementById('bootProgressBar');
         const status = document.getElementById('bootStatusText');
         const substatus = document.getElementById('bootSubStatusText');
+        const bootTitle = document.querySelector('.boot-title');
+        
         if (bar) bar.style.width = percent + '%';
         if (status) status.innerText = statusText;
         if (substatus) substatus.innerText = substatusText;
+        
+        const isError = statusText && (
+            statusText.toLowerCase().includes("fail") || 
+            statusText.toLowerCase().includes("error") || 
+            statusText.toLowerCase().includes("denied")
+        );
+        
+        if (isError) {
+            if (bootTitle) {
+                bootTitle.innerText = "SYSTEM BOOT FAIL";
+                bootTitle.style.color = "#ef4444";
+                bootTitle.style.textShadow = "0 0 10px rgba(239, 68, 68, 0.4)";
+            }
+            if (bar) {
+                bar.style.background = "#ef4444";
+                bar.style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.8)";
+            }
+            if (status) status.style.color = "#ef4444";
+        } else {
+            if (bootTitle) {
+                bootTitle.innerText = "INITIALIZING SYSTEM";
+                bootTitle.style.color = "#10b981";
+                bootTitle.style.textShadow = "0 0 10px rgba(16, 185, 129, 0.4)";
+            }
+            if (bar) {
+                bar.style.background = "linear-gradient(90deg, #10b981, #34d399, #6ee7b7)";
+                bar.style.boxShadow = "0 0 12px rgba(16, 185, 129, 0.8)";
+            }
+            if (status) status.style.color = "";
+        }
         
         sysLog(`[BOOT] ${percent}% - ${statusText} -> ${substatusText}`, false, null, true);
     }
@@ -4299,6 +4336,10 @@
             if (progressArea) progressArea.style.display = 'none';
         } catch(e) {
             setBootProgress(100, "System Boot Fail", e.message);
+            
+            // Allow operator to digest the red error status before reverting login view
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
             const errObj = document.getElementById('loginError');
             if (errObj) {
                 errObj.innerText = "System boot fail: " + e.message;
@@ -5488,20 +5529,20 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/bom-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/production-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/sales-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/task-engine.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/print-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.05.28.1547"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.05.28.1547"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/bom-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/production-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/sales-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/task-engine.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/print-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.05.28.2159"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.05.28.2159"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -5969,18 +6010,18 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.28.1547"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.05.28.2159"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.28.1547"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.05.28.2159"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.28.1547"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.05.28.2159"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.28.1547"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.28.1547"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.28.1547"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.05.28.2159"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.05.28.2159"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.05.28.2159"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.05.28.1547"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.05.28.1547"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.05.28.2159"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.05.28.2159"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
