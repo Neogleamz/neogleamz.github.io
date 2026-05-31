@@ -104,7 +104,8 @@ async function fetchUnfulfilledOrders() {
                 sku: row.storefront_sku,
                 recipe: row.internal_recipe_name,
                 qty: row.qty_sold,
-                transaction_type: row.transaction_type || 'Standard'
+                transaction_type: row.transaction_type || 'Standard',
+                qa_cleared_at: row.qa_cleared_at
             });
         });
 
@@ -208,6 +209,22 @@ function openPackerzSopTerminal(orderGroup) {
     let itemsHtml = orderGroup.items.map(i => {
         let t = i.transaction_type || 'Standard';
         let safeRecipe = i.recipe.replace(/'/g,"\\'");
+        let isQaPassed = i.qa_cleared_at ? 'true' : 'false';
+
+        let rowStyle = '';
+        let qtyStyle = '';
+        let btnText = '&#128065; VIEW SOP';
+        let btnClass = 'btn-blue';
+        let btnStyle = 'flex-shrink:0; white-space:nowrap; padding: 6px 12px; font-weight: 800; font-size: 11px;';
+
+        if (i.qa_cleared_at) {
+            rowStyle = 'border-color: #10b981; background: rgba(16,185,129,0.05);';
+            qtyStyle = 'box-shadow: 0 0 10px rgba(16,185,129,0.5);';
+            btnText = 'QA PASSED ✓';
+            btnClass = 'btn-green-neon';
+            btnStyle += ' color: white;';
+        }
+
         let selectHtml = `
             <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; width:160px; max-width:100%;" 
                 data-app-change="updateItemType" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
@@ -221,13 +238,13 @@ function openPackerzSopTerminal(orderGroup) {
             </select>
         `;
         return `
-        <div id="qa-row-${orderGroup.order_id}-${i.sku}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:10px; padding:15px; display:flex; flex-direction:column; gap:12px;">
+        <div id="qa-row-${orderGroup.order_id}-${i.sku}" class="packerz-qa-row" data-order-id="${orderGroup.order_id}" data-qa-passed="${isQaPassed}" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:10px; padding:15px; display:flex; flex-direction:column; gap:12px; ${rowStyle}">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:15px;">
                 <div style="flex-grow:1; min-width:0;">
                     <span style="font-weight:900; color:var(--text-heading); font-size:14px; letter-spacing:0.5px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${i.recipe}</span>
                     <span style="font-size:11px; color:var(--text-muted); font-family:monospace; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px;">Alias: ${i.sku || 'N/A'}</span>
                 </div>
-                <div style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-weight:900; font-size:13px; padding:4px 12px; border-radius:6px; flex-shrink:0;">QTY: ${i.qty}</div>
+                <div style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-weight:900; font-size:13px; padding:4px 12px; border-radius:6px; flex-shrink:0; ${qtyStyle}">QTY: ${i.qty}</div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px; flex-wrap:wrap;">
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -235,10 +252,10 @@ function openPackerzSopTerminal(orderGroup) {
                     ${selectHtml}
                 </div>
                 <button id="qa-btn-${orderGroup.order_id}-${i.sku}"
-                    class="btn-blue"
-                    style="flex-shrink:0; white-space:nowrap; padding: 6px 12px; font-weight: 800; font-size: 11px;"
+                    class="${btnClass}"
+                    style="${btnStyle}"
                     data-app-click="loadActiveSOP" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
-                    &#128065; VIEW SOP
+                    ${btnText}
                 </button>
             </div>
         </div>
@@ -279,7 +296,7 @@ window.updatePackerzItemType = async function(orderId, sku, newVal, _safeRecipe)
 }
 
 function validatePackerzAssemblyButton(orderId) {
-    const rows = document.querySelectorAll(`[id^="qa-row-${orderId}-"]`);
+    const rows = document.querySelectorAll(`.packerz-qa-row[data-order-id="${orderId}"]`);
     let allPassed = true;
     rows.forEach(r => { if(r.getAttribute('data-qa-passed') !== 'true') allPassed = false; });
 
@@ -360,7 +377,7 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
         headerButtonsWrapper.innerHTML = window.safeHTML(
             `<button class="btn-ghost-base btn-ghost-blue" data-click="click_window_openSopPrintModal_pack" style="padding:10px 20px; font-size:14px;">🖨️ Print SOP</button>` +
             `<button class="btn-blue" id="btnPackerzLiveToggleEdit" data-click="click_openActiveSOPEditor" style="padding:10px 20px; font-size:14px; font-weight:900; border-radius:8px;">✏️ EDIT</button>` +
-            `<button class="btn-red" style="width:auto; padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_closePackerzSopViewer">Close</button>`
+            `<button class="btn-red" style="padding:10px 20px; font-size:14px; font-weight:bold; border-radius:8px;" data-click="click_closePackerzSopViewer">Close</button>`
         );
     }
 
@@ -399,6 +416,48 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
         let instructionJson = { steps: [], qaChecks: [] };
         let requiredBoxSku = '';
         let rowData = null;
+
+        // DB State Restoration lookup
+        let isCleared = false;
+        let archiveTelemetry = null;
+
+        try {
+            if (supabaseClient) {
+                if (type === 'packerz') {
+                    const { data: ledgerRows, error: ledgerErr } = await supabaseClient
+                        .from('sales_ledger')
+                        .select('qa_cleared_at')
+                        .eq('order_id', orderId)
+                        .eq('storefront_sku', sku);
+                    if (!ledgerErr && ledgerRows && ledgerRows.length > 0 && ledgerRows[0].qa_cleared_at) {
+                        isCleared = true;
+                    }
+                } else {
+                    const { data: woRows, error: woErr } = await supabaseClient
+                        .from('production_wos')
+                        .select('qa_cleared_at')
+                        .eq('wo_id', orderId);
+                    if (!woErr && woRows && woRows.length > 0 && woRows[0].qa_cleared_at) {
+                        isCleared = true;
+                    }
+                }
+
+                if (isCleared) {
+                    const { data: archiveRows, error: archiveErr } = await supabaseClient
+                        .from('sop_archives')
+                        .select('packer_telemetry, qa_passed_at')
+                        .eq('order_id', orderId)
+                        .eq('internal_recipe_name', recipe)
+                        .order('qa_passed_at', { ascending: false });
+                    
+                    if (!archiveErr && archiveRows && archiveRows.length > 0) {
+                        archiveTelemetry = archiveRows[0].packer_telemetry;
+                    }
+                }
+            }
+        } catch (dbErr) {
+            console.warn("DB QA clear check failed, falling back to dynamic UI: ", dbErr);
+        }
 
         if (type === 'packerz') {
             const { data: rows, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe);
@@ -479,8 +538,19 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
         } else {
             let html = '';
 
+            let inlineInputCounter = 0;
             function parseInputs(text) {
-                return text.replace(/\[INPUT\]/gi, `<input type="text" data-app-click="stopProp" class="packerz-qa-input" placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;" data-app-keyup="sopSignoffCheck">`);
+                return text.replace(/\[INPUT\]/gi, () => {
+                    let disabledAttr = isCleared ? 'disabled' : '';
+                    let valAttr = '';
+                    if (isCleared) {
+                        let inputTelemetry = archiveTelemetry ? archiveTelemetry.filter(t => t.type === 'input') : [];
+                        let match = inputTelemetry[inlineInputCounter++];
+                        let val = match ? match.value : 'OK';
+                        valAttr = `value="${val.replace(/"/g, '&quot;')}"`;
+                    }
+                    return `<input type="text" data-app-click="stopProp" class="packerz-qa-input" ${valAttr} ${disabledAttr} placeholder="..." style="padding:2px 6px; border-radius:4px; background:rgba(0,0,0,0.3); border:1px solid var(--border-input); color:#10b981; font-family:monospace; font-size:11px; width:100px; text-transform:uppercase; margin:0 6px;" data-app-keyup="sopSignoffCheck">`;
+                });
             }
 
             function parseInlineMedia(text) {
@@ -525,10 +595,19 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
                     const expected = getItemBarcodeValue(itemName);
                     const safeItem = itemName.replace(/"/g, '&quot;');
                     const rowId = `scan-${Math.random().toString(36).slice(2,8)}`;
-                    scanConfirmations.set(rowId, false);
+                    
+                    const scanConfirmed = isCleared;
+                    scanConfirmations.set(rowId, scanConfirmed);
+                    
+                    let scanStatusText = scanConfirmed ? '✓ Scanned' : '⏳ Unscan';
+                    let scanStatusColor = scanConfirmed ? '#10b981' : '#ef4444';
+                    let scanConfirmedAttr = scanConfirmed ? 'true' : 'false';
+                    let scanBtnDisabled = scanConfirmed ? 'disabled' : '';
+                    let scanBtnOpacity = scanConfirmed ? 'opacity:0.5; cursor:not-allowed;' : '';
+                    
                     html += `
-                        <div id="scanrow-${rowId}" class="packerz-scan-row" data-expected="${expected}" data-confirmed="false"
-                             style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px 12px; transition:border-color 0.3s;">
+                        <div id="scanrow-${rowId}" class="packerz-scan-row" data-expected="${expected}" data-confirmed="${scanConfirmedAttr}"
+                             style="background:var(--bg-panel); border:1px solid ${scanConfirmed ? '#10b981' : 'var(--border-color)'}; border-radius:8px; padding:10px 12px; transition:border-color 0.3s;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
                                 <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
                                     <canvas id="scan-qr-${rowId}" width="56" height="56" style="border-radius:4px; flex-shrink:0;"></canvas>
@@ -538,8 +617,8 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
                                     </div>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                                    <span id="scan-status-${rowId}" style="font-size:11px; color:#ef4444; font-weight:700;">⏳ Unscan</span>
-                                    <button id="scan-btn-${rowId}" data-app-click="openScanner" data-expected="${expected}" data-rowid="${rowId}" data-item="${safeItem}" style="padding:6px 10px; background:#0ea5e9; color:white; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; white-space:nowrap;">📷 SCAN</button>
+                                    <span id="scan-status-${rowId}" style="font-size:11px; color:${scanStatusColor}; font-weight:700;">${scanStatusText}</span>
+                                    <button id="scan-btn-${rowId}" data-app-click="openScanner" data-expected="${expected}" data-rowid="${rowId}" data-item="${safeItem}" ${scanBtnDisabled} style="padding:6px 10px; background:#0ea5e9; color:white; border:none; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer; white-space:nowrap; ${scanBtnOpacity}">📷 SCAN</button>
                                 </div>
                             </div>
                         </div>`;
@@ -549,10 +628,18 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
                 if (q.startsWith('[INPUT]') && q.match(/\[INPUT\]/gi).length === 1 && q.indexOf('[INPUT]') === 0) {
                     let label = q.replace(/\[INPUT\]/ig, '').trim();
                     let safeLabel = label.replace(/"/g, '&quot;');
+                    let valAttr = '';
+                    let disabledAttr = '';
+                    if (isCleared) {
+                        disabledAttr = 'disabled';
+                        let match = archiveTelemetry ? archiveTelemetry.find(t => t.type === 'input' && t.text === label) : null;
+                        let val = match ? match.value : 'OK';
+                        valAttr = `value="${val.replace(/"/g, '&quot;')}"`;
+                    }
                     html += `
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:2px; margin-bottom:2px; padding:4px 8px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:4px;">
                             <label style="font-size:10px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${label}</label>
-                            <input type="text" class="packerz-qa-input" data-label="${safeLabel}" placeholder="..." style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:11px;" data-app-keyup="sopSignoffCheck">
+                            <input type="text" class="packerz-qa-input" data-label="${safeLabel}" ${valAttr} ${disabledAttr} placeholder="..." style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#fff; font-family:monospace; font-size:11px;" data-app-keyup="sopSignoffCheck">
                         </div>
                     `;
                 } else if (q.startsWith('# ')) {
@@ -562,9 +649,18 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
                     let subQ = q.substring(2).trim();
                     let safeSubQ = subQ.replace(/"/g, '&quot;');
                     let content = parseInlineMedia(parseInputs(subQ));
+                    let checkedAttr = '';
+                    let disabledAttr = '';
+                    if (isCleared) {
+                        disabledAttr = 'disabled';
+                        let match = archiveTelemetry ? archiveTelemetry.find(t => t.type === 'check' && t.text === subQ) : null;
+                        if (!archiveTelemetry || (match && match.valid)) {
+                            checkedAttr = 'checked';
+                        }
+                    }
                     html += `
                         <label style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; padding:2px 8px 2px 28px; margin-bottom:0; border-radius:4px; transition:all 0.2s;" class="packerz-qa-hover-sub">
-                            <input type="checkbox" class="packerz-qa-check" data-label="${safeSubQ}" style="width:12px; height:12px; flex-shrink:0; cursor:pointer;" data-app-change="sopSignoffCheck">
+                            <input type="checkbox" class="packerz-qa-check" data-label="${safeSubQ}" ${checkedAttr} ${disabledAttr} style="width:12px; height:12px; flex-shrink:0; cursor:pointer;" data-app-change="sopSignoffCheck">
                             <span style="display:flex; align-items:center; flex-wrap:wrap;">${content}</span>
                         </label>
                     `;
@@ -572,9 +668,18 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
                     if(q.startsWith('- ')) q = q.substring(2).trim();
                     let safeQ = q.replace(/"/g, '&quot;');
                     let content = parseInlineMedia(parseInputs(q));
+                    let checkedAttr = '';
+                    let disabledAttr = '';
+                    if (isCleared) {
+                        disabledAttr = 'disabled';
+                        let match = archiveTelemetry ? archiveTelemetry.find(t => t.type === 'check' && t.text === safeQ) : null;
+                        if (!archiveTelemetry || (match && match.valid)) {
+                            checkedAttr = 'checked';
+                        }
+                    }
                     html += `
                         <label style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); cursor:pointer; padding:4px 8px; margin-bottom:0; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); transition:all 0.2s;" class="packerz-qa-hover-main">
-                            <input type="checkbox" class="packerz-qa-check" data-label="${safeQ}" style="width:14px; height:14px; flex-shrink:0; cursor:pointer;" data-app-change="sopSignoffCheck">
+                            <input type="checkbox" class="packerz-qa-check" data-label="${safeQ}" ${checkedAttr} ${disabledAttr} style="width:14px; height:14px; flex-shrink:0; cursor:pointer;" data-app-change="sopSignoffCheck">
                             <span style="display:flex; align-items:center; flex-wrap:wrap;">${content}</span>
                         </label>
                     `;
@@ -616,6 +721,16 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
             }
 
             checkPackerzSopSignoffState(); // Initial check
+        }
+
+        if (isCleared && btnSignoff) {
+            btnSignoff.innerText = 'QA COMPLETED ✓';
+            btnSignoff.className = 'btn-green-neon';
+            btnSignoff.style.opacity = '1';
+            btnSignoff.style.cursor = 'not-allowed';
+            btnSignoff.style.background = '#10b981';
+            btnSignoff.style.color = 'white';
+            btnSignoff.onclick = null;
         }
 
     } catch(err) {
@@ -741,6 +856,19 @@ function checkPackerzSopSignoffState() {
 
     const btnSignoff = document.getElementById('btnSopSignoff') || document.getElementById('btnPackerzSopSignoff');
     if(btnSignoff) {
+        const firstCheck = document.querySelector('.packerz-qa-check');
+        const firstInput = document.querySelector('.packerz-qa-input');
+        if ((firstCheck && firstCheck.disabled) || (firstInput && firstInput.disabled)) {
+            btnSignoff.innerText = 'QA COMPLETED ✓';
+            btnSignoff.className = 'btn-green-neon';
+            btnSignoff.style.opacity = '1';
+            btnSignoff.style.cursor = 'not-allowed';
+            btnSignoff.style.background = '#10b981';
+            btnSignoff.style.color = 'white';
+            btnSignoff.onclick = null;
+            return;
+        }
+
         if(allValid) {
             btnSignoff.style.opacity = '1';
             btnSignoff.style.cursor = 'pointer';
@@ -759,6 +887,20 @@ async function signoffPackerzQA() {
     const recipe = window.currentActiveSopRecipe || currentPackerzQaRecipe;
 
     if(!orderId || !sku) return;
+
+    // Zero-Trust checks validation gate
+    const checks = document.querySelectorAll('.packerz-qa-check');
+    let allValid = true;
+    checks.forEach(c => { if(!c.checked) allValid = false; });
+    const inputs = document.querySelectorAll('.packerz-qa-input');
+    inputs.forEach(i => { if(i.value.trim() === '') allValid = false; });
+    document.querySelectorAll('.packerz-scan-row').forEach(row => {
+        if (row.dataset.confirmed !== 'true') allValid = false;
+    });
+    if (!allValid) {
+        alert("Cannot complete QA: Please ensure all checklists are completed and all inputs are filled out!");
+        return;
+    }
 
     let telemetryData = [];
     document.querySelectorAll('.packerz-qa-check').forEach(c => {
@@ -825,8 +967,9 @@ async function signoffPackerzQA() {
     }
 
     const capturedOrderId = orderId;
+    const capturedSopType = window.currentActiveSopType;
     closePackerzSopViewer();
-    if (window.currentActiveSopType === 'packerz') {
+    if (capturedSopType === 'packerz') {
         validatePackerzAssemblyButton(capturedOrderId);
     } else {
         if (typeof window.renderActiveWO === 'function') window.renderActiveWO(capturedOrderId);
@@ -962,7 +1105,8 @@ window.unarchivePackerzOrder = async function(orderId) {
             .from('sales_ledger')
             .update({
                 internal_fulfillment_status: 'Awaiting Assembly',
-                assembly_completed_at: null
+                assembly_completed_at: null,
+                qa_cleared_at: null
             })
             .eq('order_id', orderId);
 
@@ -971,9 +1115,11 @@ window.unarchivePackerzOrder = async function(orderId) {
         // Immediately delete the snapshot from the archive so it re-enters the QA pipeline cleanly
         await supabaseClient.from('sop_archives').delete().eq('order_id', orderId);
 
-        // Re-Sync Live Queues
-        if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
-        loadSOPAuditLog();
+        // Re-Sync Live Queues (using a slight timeout to guarantee Supabase indexing propagation)
+        setTimeout(() => {
+            if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
+            loadSOPAuditLog();
+        }, 400);
 
     } catch(err) {
         console.error("Unarchive Error", err);
@@ -1066,7 +1212,7 @@ window.openPackerzAuditLog = function(sku, telemetryJsonString) {
     });
 
     h += `</div></div></div>`;
-    document.body.insertAdjacentHTML('beforeend', h);
+    document.body.insertAdjacentHTML('beforeend', window.safeHTML ? window.safeHTML(h) : h);
 }
 
 function renderPackerzTelemetryPreview() {
