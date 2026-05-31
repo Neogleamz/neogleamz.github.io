@@ -218,19 +218,102 @@ window.calculateDynamicROP = function(velocity, leadTimeDays) {
     return (velocity * leadTimeDays) * SAFETY_STOCK_MULTIPLIER;
 };
 
+let invColumnFilters = {};
+window.updateInvColumnFilter = function(col, val) {
+    invColumnFilters[col] = val;
+    renderInventoryTable();
+};
+
 function renderInventoryTable() {
     const wrap = document.getElementById('invTableWrap'); if(!wrap) return;
     renderFgiTable();
-    let ths = ` <th class="${currentInvSort.column==='nn'?'sorted-'+currentInvSort.direction:''}" data-app-click="sortInv" data-col="nn">Neogleamz Name</th> <th class="${currentInvSort.column==='n'?'sorted-'+currentInvSort.direction:''}" data-app-click="sortInv" data-col="n">Item Name</th> <th class="${currentInvSort.column==='p'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="p">Purchased</th> <th class="${currentInvSort.column==='c'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="c" style="border-bottom:2px solid #ef4444;">CONS</th> <th class="${currentInvSort.column==='pc'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="pc" style="border-bottom:2px solid #8b5cf6;">PROTO</th> <th class="${currentInvSort.column==='prc'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="prc" style="border-bottom:2px solid #3b82f6;">PROD</th> <th class="${currentInvSort.column==='sq'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="sq" style="border-bottom:2px solid #b91c1c;">SCRAP</th> <th class="${currentInvSort.column==='a'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="a" style="border-bottom:2px solid #0ea5e9;">ADJMT</th> <th class="${currentInvSort.column==='ms'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="ms" style="border-bottom:2px solid #f97316;">MIN</th> <th class="${currentInvSort.column==='ld'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="ld" style="border-bottom:2px solid #14b8a6;">LEAD</th> <th class="${currentInvSort.column==='s'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="s" style="border-bottom:2px solid #f59e0b;">STOCK</th> <th class="${currentInvSort.column==='tp'?'sorted-'+currentInvSort.direction:''} text-right" data-app-click="sortInv" data-col="tp">ASSETS</th> `;
-    let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody>`;
-    let a = Object.keys(catalogCache).map(k => { let c = catalogCache[k], _f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5}; let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment; let up=c.avgUnitCost||0; let tp=s*up; return { k:k, nn:c.neoName, n:c.itemName, p:c.totalQty, c:i.consumed_qty, sq:i.scrap_qty, a:i.manual_adjustment, ms:i.min_stock, ld:parseFloat(i.rop_lead_time_days)||SUPPLIER_LEAD_TIME_DAYS, s:s, up:up, tp:tp, pc: (i.prototype_consumed_qty||0), prc: (i.production_consumed_qty||0) }; });
-    if(a.length===0){ h += "<tr><td colspan='13' style='text-align:center;'>No raw inventory.</td></tr>"; }
+    let focusCol = document.activeElement ? document.activeElement.getAttribute('data-col') : null;
+    let qStr = "";
+    let searchEl = document.getElementById('rawInvSearch');
+    if (searchEl) qStr = searchEl.value.toLowerCase().trim();
+
+    const getTh = (col, label, isRight = false, borderBottom = "") => {
+        let sCls = (currentInvSort.column === col ? 'sorted-' + currentInvSort.direction : '');
+        if (isRight) sCls += " text-right";
+        let style = borderBottom ? `border-bottom: 2px solid ${borderBottom};` : '';
+        return `<th class="${sCls}" data-app-click="sortInv" data-col="${col}" style="${style}">${label}</th>`;
+    };
+
+    let ths = getTh('np', 'Neogleamz Product') +
+              getTh('nn', 'Neogleamz Name') +
+              getTh('n', 'Item Name') +
+              getTh('p', 'Purchased', true) +
+              getTh('c', 'CONS', true, '#ef4444') +
+              getTh('pc', 'PROTO', true, '#8b5cf6') +
+              getTh('prc', 'PROD', true, '#3b82f6') +
+              getTh('sq', 'SCRAP', true, '#b91c1c') +
+              getTh('a', 'ADJMT', true, '#0ea5e9') +
+              getTh('ms', 'MIN', true, '#f97316') +
+              getTh('ld', 'LEAD', true, '#14b8a6') +
+              getTh('s', 'STOCK', true, '#f59e0b') +
+              getTh('tp', 'ASSETS', true);
+
+    let keys = ['np', 'nn', 'n', 'p', 'c', 'pc', 'prc', 'sq', 'a', 'ms', 'ld', 's', 'tp'];
+    let filterRow = `<tr style="background: rgba(0,0,0,0.1);">` + keys.map(k => {
+        let val = invColumnFilters[k] || "";
+        return `<th style="position: sticky; z-index: 19; background: var(--bg-panel); box-shadow: inset 0 -1px 0 var(--border-color), inset -1px 0 0 var(--border-color); border: none;">
+            <input type="text" data-col="${k}" value="${val.replace(/"/g, '&quot;')}" placeholder="Filter..." data-keyup="keyup_window_updateInvColumnFilter" data-colkey="${k}" data-click="click_stopProp" style="width: 100%; padding: 4px; font-size: 11px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+        </th>`;
+    }).join('') + `</tr>`;
+
+    let h = `<table style="width:100%;"><thead><tr>${ths}</tr>${filterRow}</thead><tbody>`;
+    let a = Object.keys(catalogCache).map(k => {
+        let c = catalogCache[k], _f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5};
+        let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment;
+        let up=c.avgUnitCost||0;
+        let tp=s*up;
+        return {
+            k:k,
+            np:c.neoProd || "",
+            nn:c.neoName || "",
+            n:c.itemName || "",
+            p:c.totalQty,
+            c:i.consumed_qty,
+            sq:i.scrap_qty,
+            a:i.manual_adjustment,
+            ms:i.min_stock,
+            ld:parseFloat(i.rop_lead_time_days)||SUPPLIER_LEAD_TIME_DAYS,
+            s:s,
+            up:up,
+            tp:tp,
+            pc: (i.prototype_consumed_qty||0),
+            prc: (i.production_consumed_qty||0)
+        };
+    });
+
+    if (qStr !== "") {
+        a = a.filter(x => 
+            String(x.np).toLowerCase().includes(qStr) ||
+            String(x.nn).toLowerCase().includes(qStr) ||
+            String(x.n).toLowerCase().includes(qStr)
+        );
+    }
+
+    Object.keys(invColumnFilters).forEach(col => {
+        let fStr = (invColumnFilters[col] || "").toLowerCase().trim();
+        if (fStr !== "") {
+            a = a.filter(x => String(x[col] ?? "").toLowerCase().includes(fStr));
+        }
+    });
+
+    if(a.length===0){ h += "<tr><td colspan='13' style='text-align:center;'>No matching inventory.</td></tr>"; }
     else {
-        a.sort((x,y) => { let u = x[currentInvSort.column]; let v = y[currentInvSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentInvSort.direction==='asc'?-1:1; if(u>v) return currentInvSort.direction==='asc'?1:-1; return 0; });
+        a.sort((x,y) => {
+            let u = x[currentInvSort.column]; let v = y[currentInvSort.column];
+            if (typeof u === 'number' && typeof v === 'number') return currentInvSort.direction === 'asc' ? u - v : v - u;
+            u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase();
+            if(u<v) return currentInvSort.direction==='asc'?-1:1;
+            if(u>v) return currentInvSort.direction==='asc'?1:-1;
+            return 0;
+        });
         a.forEach(x => { 
             let vel = window.calculateTrailingVelocity(x.k, 30);
             let dynamicROP = window.calculateDynamicROP(vel, x.ld);
-            // Use MS as fallback, but if ROP is higher, that is critical baseline
             let finalTarget = Math.max(x.ms, dynamicROP);
             
             let isLow = finalTarget > 0 && x.s <= finalTarget; 
@@ -239,11 +322,32 @@ function renderInventoryTable() {
             
             let ropPill = (dynamicROP > 0 && isLow) ? `<span style="background:#ef4444; color:#fff; border-radius:12px; font-size:10px; padding:1px 6px; font-weight:bold; margin-left:8px; animation: ropPulse 1.5s infinite;">🚨 ROP: ${dynamicROP.toFixed(1).replace(/\.?0+$/,'')} (Lead: ${x.ld}d)</span>` : '';
             
-            h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn} ${ropPill}</td><td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td><td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="consumed_qty">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="prototype_consumed_qty">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="production_consumed_qty">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#b91c1c;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="scrap_qty">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="manual_adjustment">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td><td class="text-right editable" style="color:#f97316;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right editable" style="color:#14b8a6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="rop_lead_time_days">${x.ld}</td><td class="text-right editable ${sc}" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td><td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td></tr>`; 
-
+            h += `<tr>
+                <td tabindex="0" class="trunc-col" style="font-weight:bold; color:#0ea5e9;">${x.np}</td>
+                <td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn} ${ropPill}</td>
+                <td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td>
+                <td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="consumed_qty">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="prototype_consumed_qty">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="production_consumed_qty">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right editable" style="color:#b91c1c;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="scrap_qty">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="manual_adjustment">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td>
+                <td class="text-right editable" style="color:#f97316;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right editable" style="color:#14b8a6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="rop_lead_time_days">${x.ld}</td>
+                <td class="text-right editable ${sc}" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td>
+            </tr>`;
         });
     }
-    wrap.innerHTML = window.safeHTML(h + `</tbody></table>`); applyTableInteractivity('invTableWrap');
+    wrap.innerHTML = window.safeHTML(h + `</tbody></table>`);
+    applyTableInteractivity('invTableWrap');
+    if (focusCol) {
+        let inp = wrap.querySelector(`input[data-col="${focusCol}"]`);
+        if (inp) {
+            inp.focus();
+            inp.setSelectionRange(inp.value.length, inp.value.length);
+        }
+    }
 }
 
 async function handleInvEdit(cell, key, p, c, a, sq, mode) {

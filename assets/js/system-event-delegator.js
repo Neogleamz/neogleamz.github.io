@@ -1430,11 +1430,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'keyup_window_updateColumnFilter':
                     if (typeof window.keyup_window_updateColumnFilter === 'function') window.keyup_window_updateColumnFilter(el);
                     break;
+                case 'keyup_window_updateInvColumnFilter':
+                    if (typeof window.keyup_window_updateInvColumnFilter === 'function') window.keyup_window_updateInvColumnFilter(el);
+                    break;
                 case 'keyup_window_renderEditzBulkTable':
                     window.keyup_window_renderEditzBulkTable();
                     break;
                 case 'keyup_window_renderActiveTable':
                     window.renderActiveTable();
+                    break;
+                case 'keyup_window_renderInventoryTable':
+                    if (typeof window.renderInventoryTable === 'function') window.renderInventoryTable();
                     break;
                 case 'keyup_renderAliasManager':
                     renderAliasManager();
