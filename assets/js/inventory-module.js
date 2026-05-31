@@ -2258,6 +2258,7 @@ window.switchStockzAuditCameraRoute = async function(btn) {
     if (route === 'pc') {
         if (pcPanel) pcPanel.style.display = 'flex';
         if (phonePanel) phonePanel.style.display = 'none';
+        await window.startStockzAuditWebcam();
     } else {
         if (pcPanel) pcPanel.style.display = 'none';
         if (phonePanel) phonePanel.style.display = 'flex';
