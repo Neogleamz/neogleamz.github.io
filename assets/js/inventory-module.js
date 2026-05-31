@@ -1636,12 +1636,18 @@ window.startRemoteCycleCount = async function() {
         ipInput.value = savedIP || '';
     }
 
-    let host = window.location.host;
-    if (savedIP) {
-        const port = window.location.port ? `:${window.location.port}` : '';
-        host = `${savedIP}${port}`;
+    let remoteUrl;
+    if (savedIP && (savedIP.startsWith('http://') || savedIP.startsWith('https://'))) {
+        const base = savedIP.endsWith('/') ? savedIP.slice(0, -1) : savedIP;
+        remoteUrl = `${base}/tools/remote-scanner.html?session=${window.ccSessionId}`;
+    } else {
+        let host = window.location.host;
+        if (savedIP) {
+            const port = window.location.port ? `:${window.location.port}` : '';
+            host = `${savedIP}${port}`;
+        }
+        remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}`;
     }
-    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}`;
     sysLog(`[Realtime Scanner] Dynamic remote portal link: ${remoteUrl}`);
 
     // 9. Update the image source dynamically powered by api.qrserver.com to prevent canvas sizing race
@@ -1666,9 +1672,12 @@ window.click_updateLocalIPQRCode_cc = function() {
     if (!ip) {
         localStorage.removeItem('neogleamz_pc_local_ip');
     } else {
-        // Strip out protocol or port mapping to get clean IP/hostname
-        ip = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
-        localStorage.setItem('neogleamz_pc_local_ip', ip);
+        if (ip.startsWith('http://') || ip.startsWith('https://')) {
+            localStorage.setItem('neogleamz_pc_local_ip', ip);
+        } else {
+            ip = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
+            localStorage.setItem('neogleamz_pc_local_ip', ip);
+        }
     }
     
     // Re-trigger Remote Mode logic to regenerate the QR code
@@ -2023,6 +2032,30 @@ window.selectStockzAuditItem = function(itemKey) {
     let safeInventoryDB = (typeof inventoryDB !== 'undefined') ? inventoryDB : (window.inventoryDB || {});
     let safeCatalogCache = (typeof catalogCache !== 'undefined') ? catalogCache : (window.catalogCache || {});
 
+    const renderEmptyGrid = () => {
+        const grid = document.getElementById('stockzAuditBalancesGrid');
+        if (!grid) return;
+        grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        grid.innerHTML = window.safeHTML(`
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                <div style="font-size:9px; text-transform:uppercase; color:var(--text-muted); font-weight:800; letter-spacing:0.5px;">Purchased</div>
+                <div id="stockzAuditVal_purchased" style="font-size:16px; font-weight:900; color:var(--text-heading); margin-top:5px;">—</div>
+            </div>
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Consumed</div>
+                <div id="stockzAuditVal_consumed" style="font-size:16px; font-weight:900; color:#ef4444; margin-top:5px;">—</div>
+            </div>
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                <div style="font-size:9px; text-transform:uppercase; color:#b91c1c; font-weight:800; letter-spacing:0.5px;">Scrapped</div>
+                <div id="stockzAuditVal_scrapped" style="font-size:16px; font-weight:900; color:#b91c1c; margin-top:5px;">—</div>
+            </div>
+            <div style="background:rgba(245,158,11,0.05); border:2px solid #f59e0b; padding:10px 10px; border-radius:8px; text-align:center; box-shadow:0 0 10px rgba(245,158,11,0.1);">
+                <div style="font-size:9px; text-transform:uppercase; color:#f59e0b; font-weight:900; letter-spacing:0.5px;">Expected Stock</div>
+                <div id="stockzAuditVal_stock" style="font-size:18px; font-weight:900; color:#f59e0b; margin-top:5px;">—</div>
+            </div>
+        `);
+    };
+
     if (!itemKey) {
         window.currentAuditItemKey = null;
         window.currentAuditItemExpectedStock = 0;
@@ -2032,10 +2065,7 @@ window.selectStockzAuditItem = function(itemKey) {
         document.getElementById('stockzAuditSearch').value = '';
         document.getElementById('stockzAuditDropdown').style.display = 'none';
         
-        document.getElementById('stockzAuditVal_purchased').innerText = '—';
-        document.getElementById('stockzAuditVal_consumed').innerText = '—';
-        document.getElementById('stockzAuditVal_scrapped').innerText = '—';
-        document.getElementById('stockzAuditVal_stock').innerText = '—';
+        renderEmptyGrid();
         
         const countInput = document.getElementById('stockzAuditCountInput');
         const deltaInput = document.getElementById('stockzAuditDeltaInput');
@@ -2136,10 +2166,65 @@ window.selectStockzAuditItem = function(itemKey) {
     window.currentAuditItemExpectedStock = expectedStock;
     window.currentAuditItemAvgCost = avgCost;
     
-    document.getElementById('stockzAuditVal_purchased').innerText = purchasedOrProduced.toFixed(2).replace(/\.?0+$/,'');
-    document.getElementById('stockzAuditVal_consumed').innerText = consumed.toFixed(2).replace(/\.?0+$/,'');
-    document.getElementById('stockzAuditVal_scrapped').innerText = scrapped.toFixed(2).replace(/\.?0+$/,'');
-    document.getElementById('stockzAuditVal_stock').innerText = expectedStock.toFixed(2).replace(/\.?0+$/,'');
+    const grid = document.getElementById('stockzAuditBalancesGrid');
+    if (grid) {
+        if (itemKey.startsWith('RECIPE:::')) {
+            let b = parseFloat(i.produced_qty) || 0;
+            let pb = parseFloat(i.prototype_produced_qty) || 0;
+            let sold = parseFloat(i.sold_qty) || 0;
+            let c_prod = parseFloat(i.production_consumed_qty) || 0;
+            let c_proto = parseFloat(i.prototype_consumed_qty) || 0;
+            let scrap = parseFloat(i.scrap_qty) || 0;
+            
+            grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
+            grid.innerHTML = window.safeHTML(`
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:var(--text-muted); font-weight:800; letter-spacing:0.5px;">Prod Produced</div>
+                    <div id="stockzAuditVal_purchased" style="font-size:16px; font-weight:900; color:var(--text-heading); margin-top:5px;">${b.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#0ea5e9; font-weight:800; letter-spacing:0.5px;">Proto Produced</div>
+                    <div id="stockzAuditVal_proto_prod" style="font-size:16px; font-weight:900; color:#0ea5e9; margin-top:5px;">${pb.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Prod Consumed</div>
+                    <div id="stockzAuditVal_consumed" style="font-size:16px; font-weight:900; color:#ef4444; margin-top:5px;">${(sold + c_prod).toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#f43f5e; font-weight:800; letter-spacing:0.5px;">Proto Consumed</div>
+                    <div id="stockzAuditVal_proto_cons" style="font-size:16px; font-weight:900; color:#f43f5e; margin-top:5px;">${c_proto.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#b91c1c; font-weight:800; letter-spacing:0.5px;">Scrapped</div>
+                    <div id="stockzAuditVal_scrapped" style="font-size:16px; font-weight:900; color:#b91c1c; margin-top:5px;">${scrap.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:rgba(245,158,11,0.05); border:2px solid #f59e0b; padding:10px 10px; border-radius:8px; text-align:center; box-shadow:0 0 10px rgba(245,158,11,0.1);">
+                    <div style="font-size:9px; text-transform:uppercase; color:#f59e0b; font-weight:900; letter-spacing:0.5px;">Expected Stock</div>
+                    <div id="stockzAuditVal_stock" style="font-size:18px; font-weight:900; color:#f59e0b; margin-top:5px;">${expectedStock.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+            `);
+        } else {
+            grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            grid.innerHTML = window.safeHTML(`
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:var(--text-muted); font-weight:800; letter-spacing:0.5px;">Purchased</div>
+                    <div id="stockzAuditVal_purchased" style="font-size:16px; font-weight:900; color:var(--text-heading); margin-top:5px;">${purchasedOrProduced.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Consumed</div>
+                    <div id="stockzAuditVal_consumed" style="font-size:16px; font-weight:900; color:#ef4444; margin-top:5px;">${consumed.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#b91c1c; font-weight:800; letter-spacing:0.5px;">Scrapped</div>
+                    <div id="stockzAuditVal_scrapped" style="font-size:16px; font-weight:900; color:#b91c1c; margin-top:5px;">${scrapped.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:rgba(245,158,11,0.05); border:2px solid #f59e0b; padding:10px 10px; border-radius:8px; text-align:center; box-shadow:0 0 10px rgba(245,158,11,0.1);">
+                    <div style="font-size:9px; text-transform:uppercase; color:#f59e0b; font-weight:900; letter-spacing:0.5px;">Expected Stock</div>
+                    <div id="stockzAuditVal_stock" style="font-size:18px; font-weight:900; color:#f59e0b; margin-top:5px;">${expectedStock.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+            `);
+        }
+    }
     
     document.getElementById('stockzAuditScannerExpected').innerText = `Expected: ${expectedStock.toFixed(2).replace(/\.?0+$/,'')} units`;
     
@@ -2155,12 +2240,18 @@ window.selectStockzAuditItem = function(itemKey) {
     
     window.initializeCcSyncChannel();
     let savedIP = localStorage.getItem('neogleamz_pc_local_ip');
-    let host = window.location.host;
-    if (savedIP) {
-        const port = window.location.port ? `:${window.location.port}` : '';
-        host = `${savedIP}${port}`;
+    let remoteUrl;
+    if (savedIP && (savedIP.startsWith('http://') || savedIP.startsWith('https://'))) {
+        const base = savedIP.endsWith('/') ? savedIP.slice(0, -1) : savedIP;
+        remoteUrl = `${base}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
+    } else {
+        let host = window.location.host;
+        if (savedIP) {
+            const port = window.location.port ? `:${window.location.port}` : '';
+            host = `${savedIP}${port}`;
+        }
+        remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
     }
-    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
     document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
     document.getElementById('stockzAuditMobileSessionDetails').innerText = `Session Token: ${window.ccSessionId}`;
 };
@@ -2182,16 +2273,30 @@ window.updateLocalIPQRCode_audit = function() {
     const input = document.getElementById('pcLocalIPInput_audit');
     if (!input) return;
     const ip = input.value.trim();
-    if (!ip) return alert("Please enter a valid IP address.");
-    localStorage.setItem('neogleamz_pc_local_ip', ip);
+    if (!ip) return alert("Please enter a valid IP address or host URL.");
+    
+    let savedIP = ip;
+    if (ip.startsWith('http://') || ip.startsWith('https://')) {
+        localStorage.setItem('neogleamz_pc_local_ip', ip);
+    } else {
+        const cleanIp = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
+        localStorage.setItem('neogleamz_pc_local_ip', cleanIp);
+        savedIP = cleanIp;
+    }
     
     const itemKey = window.currentAuditItemKey || '';
-    const port = window.location.port ? `:${window.location.port}` : '';
-    const host = `${ip}${port}`;
-    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
+    let remoteUrl;
+    if (savedIP.startsWith('http://') || savedIP.startsWith('https://')) {
+        const base = savedIP.endsWith('/') ? savedIP.slice(0, -1) : savedIP;
+        remoteUrl = `${base}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
+    } else {
+        const port = window.location.port ? `:${window.location.port}` : '';
+        const host = `${savedIP}${port}`;
+        remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
+    }
     
     document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
-    alert("QR code updated with IP override: " + ip);
+    alert("QR code updated with host override: " + savedIP);
 };
 
 window.updateCcMngrStock = function() {
@@ -2638,7 +2743,8 @@ window.refreshStockzAuditHistory = async function() {
             query = query.eq('item_key', window.currentAuditItemKey);
         }
         
-        const { data, error } = await query.order('created_at', { ascending: false }).limit(50);
+        // Increase query limit to 100 to scale better with a long history
+        const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
         
         if (error) throw error;
         
@@ -2647,7 +2753,13 @@ window.refreshStockzAuditHistory = async function() {
             return;
         }
         
-        let h = '';
+        let h = `<style>
+            .stockz-audit-details::-webkit-details-marker { display: none !important; }
+            .stockz-audit-details summary { list-style: none !important; }
+            .stockz-audit-details summary::-webkit-details-marker { display: none !important; }
+            .stockz-audit-details[open] .details-arrow { transform: rotate(90deg); }
+        </style>`;
+        
         data.forEach(row => {
             const dateStr = new Date(row.created_at).toLocaleString('en-US', {
                 month: 'short',
@@ -2675,30 +2787,49 @@ window.refreshStockzAuditHistory = async function() {
             const valSign = valImpact >= 0 ? '+' : '';
             
             h += `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:15px; display:flex; flex-direction:column; gap:8px; backdrop-filter:blur(4px); transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='#0ea5e9'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='var(--border-color)'">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-                    <div>
-                        <span style="font-size:12px; font-weight:900; color:var(--text-heading);">${displayName}</span>
-                        <span style="font-size:10px; color:var(--text-muted); font-family:monospace; margin-left:8px; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px;">${isRecipe ? 'Product' : 'Raw'}</span>
+            <details class="stockz-audit-details" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:6px; margin-bottom:6px; overflow:hidden; backdrop-filter:blur(4px); transition:all 0.2s;">
+                <summary style="padding:8px 12px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12px; user-select:none; outline:none;" onmouseover="this.parentElement.style.borderColor='#0ea5e9'; this.parentElement.style.background='rgba(255,255,255,0.04)';" onmouseout="this.parentElement.style.borderColor='var(--border-color)'; this.parentElement.style.background='rgba(255,255,255,0.02)';">
+                    <!-- Left: Name and type with ellipsis to prevent vertical wrap layout explosion -->
+                    <div style="display:flex; align-items:center; gap:8px; overflow:hidden; min-width:0; flex:1;">
+                        <span style="color:var(--text-muted); font-size:9px; transition:transform 0.2s; display:inline-block;" class="details-arrow">▶</span>
+                        <span style="font-weight:800; color:var(--text-heading); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${displayName}">${displayName}</span>
+                        <span style="font-size:9px; color:var(--text-muted); font-family:monospace; background:rgba(0,0,0,0.3); padding:1px 4px; border-radius:3px; border:1px solid rgba(255,255,255,0.05); flex-shrink:0;">${isRecipe ? 'FG' : 'Raw'}</span>
                     </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <span style="background:${deltaBadgeColor}15; color:${deltaBadgeColor}; border:1px solid ${deltaBadgeColor}; border-radius:4px; font-size:11px; font-weight:900; padding:2px 8px; font-family:monospace;">${deltaSign}${deltaVal.toFixed(2).replace(/\.?0+$/,'')}</span>
-                        <span style="color:${valColor}; font-size:11px; font-weight:900; font-family:monospace;">${valSign}$${Math.abs(valImpact).toFixed(2)}</span>
+                    <!-- Right: Reason tag, Delta badge, and Valuation impact -->
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                        <span style="color:#0ea5e9; font-weight:800; font-size:9px; background:rgba(14,165,233,0.1); padding:2px 6px; border-radius:4px; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${row.reason_code}">${row.reason_code}</span>
+                        <span style="background:${deltaBadgeColor}15; color:${deltaBadgeColor}; border:1px solid ${deltaBadgeColor}40; border-radius:4px; font-size:10px; font-weight:900; padding:1px 6px; font-family:monospace; min-width:40px; text-align:center;">${deltaSign}${deltaVal.toFixed(2).replace(/\.?0+$/,'')}</span>
+                        <span style="color:${valColor}; font-size:10px; font-weight:900; font-family:monospace; min-width:65px; text-align:right;">${valSign}$${Math.abs(valImpact).toFixed(2)}</span>
                     </div>
+                </summary>
+                
+                <!-- Expanded Contents -->
+                <div style="padding:10px 12px 12px 30px; border-top:1px solid rgba(255,255,255,0.03); background:rgba(0,0,0,0.15); display:flex; flex-direction:column; gap:6px; font-size:11px; color:var(--text-main);">
+                    <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                        <div>
+                            <span style="color:var(--text-muted);">Operator:</span> <strong style="color:var(--text-heading);">${row.operator_email}</strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--text-muted);">Date & Time:</span> <span style="font-family:monospace; color:var(--text-heading);">${dateStr}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; border-top:1px dashed rgba(255,255,255,0.05); padding-top:6px; margin-top:2px;">
+                        <div>
+                            <span style="color:var(--text-muted);">System Stock Prior:</span> <strong style="font-family:monospace; color:var(--text-heading);">${parseFloat(row.previous_stock).toFixed(2).replace(/\.?0+$/,'')}</strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--text-muted);">Physical Counted:</span> <strong style="font-family:monospace; color:var(--text-heading);">${parseFloat(row.counted_stock).toFixed(2).replace(/\.?0+$/,'')}</strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--text-muted);">Avg Unit Cost:</span> <strong style="font-family:monospace; color:var(--text-heading);">$${parseFloat(row.avg_unit_cost || 0).toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    ${row.notes ? `
+                    <div style="background:rgba(14,165,233,0.05); border-left:3px solid #0ea5e9; padding:6px 10px; border-radius:0 4px 4px 0; font-style:italic; color:var(--text-heading); margin-top:4px; font-size:11px;">
+                        "${row.notes}"
+                    </div>` : ''}
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); border-top:1px dashed rgba(255,255,255,0.05); padding-top:6px; margin-top:2px;">
-                    <div>
-                        <span style="color:#0ea5e9; font-weight:800;">${row.reason_code}</span>
-                        <span style="margin:0 6px;">•</span>
-                        <span>by ${row.operator_email}</span>
-                    </div>
-                    <div style="font-family:monospace; font-size:10px;">${dateStr}</div>
-                </div>
-                ${row.notes ? `
-                <div style="background:rgba(0,0,0,0.15); border-left:3px solid #0ea5e9; padding:6px 10px; border-radius:0 4px 4px 0; font-size:11px; font-style:italic; color:var(--text-main); margin-top:2px;">
-                    "${row.notes}"
-                </div>` : ''}
-            </div>`;
+            </details>`;
         });
         
         historyContainer.innerHTML = h;
@@ -3013,9 +3144,17 @@ window.submitStockzAudit = async function() {
             setMasterStatus("Ready.", "status-idle");
         }, 2000);
         
-        await window.closeStockzAuditModal();
         window.renderInventoryTable();
         window.updateCcMngrStock();
+        
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
+        }
+        
+        if (typeof window.refreshStockzAuditHistory === 'function') {
+            await window.refreshStockzAuditHistory();
+        }
         
         if (typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') {
             renderAnalyticsDashboard();

@@ -909,6 +909,9 @@ async function signoffPackerzQA() {
     document.querySelectorAll('.packerz-qa-input').forEach(i => {
         telemetryData.push({ type: 'input', text: i.getAttribute('data-label'), value: i.value.trim() });
     });
+    let operator_email = window.currentUser ? window.currentUser.email : 'guest_operator';
+    let operator_id = window.currentUser ? window.currentUser.id : null;
+    telemetryData.push({ type: 'operator', email: operator_email, id: operator_id });
 
     try {
         if(supabaseClient) {
@@ -2070,6 +2073,8 @@ function renderSOPAuditLogRows(rows) {
             const telemetry = Array.isArray(item.packer_telemetry) ? item.packer_telemetry : [];
             const checks    = telemetry.filter(t => t.type === 'check');
             const inputs    = telemetry.filter(t => t.type === 'input');
+            const operator  = telemetry.find(t => t.type === 'operator');
+            const operatorEmail = operator ? operator.email : 'guest_operator';
             const passed    = checks.filter(c => c.valid).length;
             const total     = checks.length;
 
@@ -2079,7 +2084,7 @@ function renderSOPAuditLogRows(rows) {
 
             return `
             <div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
-                <div style="font-size:13px; font-weight:900; color:#0ea5e9; margin-bottom:10px;">📦 ${item.internal_recipe_name} <span style="font-size:10px; color:var(--text-muted); float:right;">Signed: ${item.qa_passed_at ? new Date(item.qa_passed_at).toLocaleTimeString() : 'N/A'}</span></div>
+                <div style="font-size:13px; font-weight:900; color:#0ea5e9; margin-bottom:10px;">📦 ${item.internal_recipe_name} <span style="font-size:10px; color:var(--text-muted); float:right;">Signed by ${operatorEmail} at ${item.qa_passed_at ? new Date(item.qa_passed_at).toLocaleTimeString() : 'N/A'}</span></div>
                 <div style="display:flex; flex-direction:column; gap:12px;">
                     <div>
                         <div style="font-size:11px; font-weight:900; color:#10b981; letter-spacing:1px; margin-bottom:8px;">TELEMETRY CHECKS</div>
@@ -2706,15 +2711,20 @@ window.startSOPRemoteMobileMode = function() {
     }
     
     // Construct pre-authenticated guest landing page URL
-    let host = window.location.host;
-    if (savedIP) {
-        // Strip out existing host to map to saved PC IP over local Wi-Fi
-        const port = window.location.port ? `:${window.location.port}` : '';
-        host = `${savedIP}${port}`;
-    }
-    
+    let remoteUrl;
     const folderParam = typeof currentSOPMediaFolder !== 'undefined' && currentSOPMediaFolder ? `&folder=${encodeURIComponent(currentSOPMediaFolder)}` : '';
-    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-capture.html?session=${sessionId}${folderParam}`;
+    
+    if (savedIP && (savedIP.startsWith('http://') || savedIP.startsWith('https://'))) {
+        const base = savedIP.endsWith('/') ? savedIP.slice(0, -1) : savedIP;
+        remoteUrl = `${base}/tools/remote-capture.html?session=${sessionId}${folderParam}`;
+    } else {
+        let host = window.location.host;
+        if (savedIP) {
+            const port = window.location.port ? `:${window.location.port}` : '';
+            host = `${savedIP}${port}`;
+        }
+        remoteUrl = `${window.location.protocol}//${host}/tools/remote-capture.html?session=${sessionId}${folderParam}`;
+    }
     
     sysLog(`[Realtime Camera] Dynamic remote guest URL: ${remoteUrl}`);
     
@@ -2747,9 +2757,12 @@ window.click_updateLocalIPQRCode = function() {
     if (!ip) {
         localStorage.removeItem('neogleamz_pc_local_ip');
     } else {
-        // Strip out protocol or port mapping to get clean IP/hostname
-        ip = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
-        localStorage.setItem('neogleamz_pc_local_ip', ip);
+        if (ip.startsWith('http://') || ip.startsWith('https://')) {
+            localStorage.setItem('neogleamz_pc_local_ip', ip);
+        } else {
+            ip = ip.replace(/^https?:\/\//i, '').split(':')[0].split('/')[0];
+            localStorage.setItem('neogleamz_pc_local_ip', ip);
+        }
     }
     
     // Re-trigger Remote Mode logic to regenerate the QR code

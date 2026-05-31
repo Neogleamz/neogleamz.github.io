@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/660</span>
+                <span class='fraction'>0/668</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/647</span>
+                <span class='fraction'>0/665</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/564</span>
+                <span class='fraction'>0/572</span>
             </div>
         
             
@@ -1063,7 +1063,19 @@
 <a name='L998'></a><a href='#L998'>998</a>
 <a name='L999'></a><a href='#L999'>999</a>
 <a name='L1000'></a><a href='#L1000'>1000</a>
-<a name='L1001'></a><a href='#L1001'>1001</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1001'></a><a href='#L1001'>1001</a>
+<a name='L1002'></a><a href='#L1002'>1002</a>
+<a name='L1003'></a><a href='#L1003'>1003</a>
+<a name='L1004'></a><a href='#L1004'>1004</a>
+<a name='L1005'></a><a href='#L1005'>1005</a>
+<a name='L1006'></a><a href='#L1006'>1006</a>
+<a name='L1007'></a><a href='#L1007'>1007</a>
+<a name='L1008'></a><a href='#L1008'>1008</a>
+<a name='L1009'></a><a href='#L1009'>1009</a>
+<a name='L1010'></a><a href='#L1010'>1010</a>
+<a name='L1011'></a><a href='#L1011'>1011</a>
+<a name='L1012'></a><a href='#L1012'>1012</a>
+<a name='L1013'></a><a href='#L1013'>1013</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1716,6 +1728,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1777,6 +1791,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1844,6 +1862,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2005,6 +2027,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2716,6 +2740,8 @@ async function <span class="fstat-no" title="function not covered" >advancePrint
 <span class="cstat-no" title="statement not covered" >            currentWip.is_paused = true;</span>
         } else <span class="cstat-no" title="statement not covered" >if (newStatus === 'Completed') {</span>
 <span class="cstat-no" title="statement not covered" >            currentWip.stage_start_time = null;</span>
+<span class="cstat-no" title="statement not covered" >            currentWip.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';</span>
+<span class="cstat-no" title="statement not covered" >            currentWip.completed_by_id = window.currentUser ? window.currentUser.id : null;</span>
         }
 <span class="cstat-no" title="statement not covered" >        updatePayload.wip_state = currentWip;</span>
 &nbsp;
@@ -2786,8 +2812,12 @@ async function <span class="fstat-no" title="function not covered" >archiveCurre
         let displayID = <span class="cstat-no" title="statement not covered" >(currentPrintJob.wo_id &amp;&amp; currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());</span>
 <span class="cstat-no" title="statement not covered" >        if(confirm(`Archive Print Job ${displayID}: ${displayName}?`)) {</span>
 <span class="cstat-no" title="statement not covered" >            sysLog(`Archiving Print ${currentPrintJob.id}`); <span class="cstat-no" title="statement not covered" ></span>setMasterStatus("Archiving...", "mod-working");</span>
-            const {error} = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('print_queue').update({status: 'Archived'}).eq('id', currentPrintJob.id);</span>
+            let w = <span class="cstat-no" title="statement not covered" >currentPrintJob.wip_state || {};</span>
+<span class="cstat-no" title="statement not covered" >            w.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';</span>
+<span class="cstat-no" title="statement not covered" >            w.completed_by_id = window.currentUser ? window.currentUser.id : null;</span>
+            const {error} = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('print_queue').update({status: 'Archived', wip_state: w}).eq('id', currentPrintJob.id);</span>
 <span class="cstat-no" title="statement not covered" >            if(error) <span class="cstat-no" title="statement not covered" >throw new Error(error.message);</span></span>
+<span class="cstat-no" title="statement not covered" >            currentPrintJob.wip_state = w;</span>
 <span class="cstat-no" title="statement not covered" >            currentPrintJob.status = 'Archived';</span>
 <span class="cstat-no" title="statement not covered" >            setMasterStatus("Archived!", "mod-success"); <span class="cstat-no" title="statement not covered" ></span>setTimeout(<span class="fstat-no" title="function not covered" >()</span>=&gt;<span class="cstat-no" title="statement not covered" >setMasterStatus("Ready.", "status-idle"),</span> 2000);</span>
 <span class="cstat-no" title="statement not covered" >            currentPrintJob = printQueueDB.find(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.status !== 'Archived')</span> || null;</span>
@@ -2842,7 +2872,11 @@ async function <span class="fstat-no" title="function not covered" >addPrintJob(
         status: 'Queued',
         wo_id: woId,
         label: label || null,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        wip_state: {
+            created_by_email: window.currentUser ? window.currentUser.email : 'guest_operator',
+            created_by_id: window.currentUser ? window.currentUser.id : null
+        }
     };
     const { error } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('print_queue').insert([payload]);</span>
 <span class="cstat-no" title="statement not covered" >    if (error) <span class="cstat-no" title="statement not covered" >sysLog("Add Print Job Error: " + error.message, true);</span></span>
@@ -3005,6 +3039,8 @@ async function <span class="fstat-no" title="function not covered" >submitManual
             let isScrapTicket = <span class="cstat-no" title="statement not covered" >currentPrintJob.label &amp;&amp; currentPrintJob.label.includes('[SCRAP REBUILD]');</span>
 <span class="cstat-no" title="statement not covered" >            await executePrintInventoryMath(currentPrintJob.part_name, success, scrap, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label, true);</span>
             
+<span class="cstat-no" title="statement not covered" >            w.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';</span>
+<span class="cstat-no" title="statement not covered" >            w.completed_by_id = window.currentUser ? window.currentUser.id : null;</span>
 <span class="cstat-no" title="statement not covered" >            w.runs.push(r);</span>
 <span class="cstat-no" title="statement not covered" >            w.active_run = null;</span>
             
@@ -3070,7 +3106,7 @@ function <span class="fstat-no" title="function not covered" >initPrintTimers(</
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-31T09:03:23.865Z
+                at 2026-05-31T09:31:29.476Z
             </div>
         <script src="prettify.js"></script>
         <script>

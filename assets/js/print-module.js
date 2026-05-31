@@ -651,6 +651,8 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
             currentWip.is_paused = true;
         } else if (newStatus === 'Completed') {
             currentWip.stage_start_time = null;
+            currentWip.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';
+            currentWip.completed_by_id = window.currentUser ? window.currentUser.id : null;
         }
         updatePayload.wip_state = currentWip;
 
@@ -721,8 +723,12 @@ async function archiveCurrentPrint() {
         let displayID = (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());
         if(confirm(`Archive Print Job ${displayID}: ${displayName}?`)) {
             sysLog(`Archiving Print ${currentPrintJob.id}`); setMasterStatus("Archiving...", "mod-working");
-            const {error} = await supabaseClient.from('print_queue').update({status: 'Archived'}).eq('id', currentPrintJob.id);
+            let w = currentPrintJob.wip_state || {};
+            w.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';
+            w.completed_by_id = window.currentUser ? window.currentUser.id : null;
+            const {error} = await supabaseClient.from('print_queue').update({status: 'Archived', wip_state: w}).eq('id', currentPrintJob.id);
             if(error) throw new Error(error.message);
+            currentPrintJob.wip_state = w;
             currentPrintJob.status = 'Archived';
             setMasterStatus("Archived!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
             currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
@@ -777,7 +783,11 @@ async function addPrintJob(partName, qty, woId = null, label = null) {
         status: 'Queued',
         wo_id: woId,
         label: label || null,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        wip_state: {
+            created_by_email: window.currentUser ? window.currentUser.email : 'guest_operator',
+            created_by_id: window.currentUser ? window.currentUser.id : null
+        }
     };
     const { error } = await supabaseClient.from('print_queue').insert([payload]);
     if (error) sysLog("Add Print Job Error: " + error.message, true);
@@ -940,6 +950,8 @@ async function submitManualPrint() {
             let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
             await executePrintInventoryMath(currentPrintJob.part_name, success, scrap, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label, true);
             
+            w.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';
+            w.completed_by_id = window.currentUser ? window.currentUser.id : null;
             w.runs.push(r);
             w.active_run = null;
             

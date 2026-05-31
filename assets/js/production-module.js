@@ -1096,7 +1096,9 @@ async function validateAndCreateWO() {
 
         let batchType = document.getElementById('batchTypeSelect') ? document.getElementById('batchTypeSelect').value : 'Production';
         let woId = "WO-" + Date.now().toString().slice(-6);
-        let wo = { wo_id: woId, product_name: p, qty: q, label: label, status: 'Queued', wip_state: { batch_type: batchType }, routing: routingMap };
+        let operator_email = window.currentUser ? window.currentUser.email : 'guest_operator';
+        let operator_id = window.currentUser ? window.currentUser.id : null;
+        let wo = { wo_id: woId, product_name: p, qty: q, label: label, status: 'Queued', wip_state: { batch_type: batchType, created_by_email: operator_email, created_by_id: operator_id }, routing: routingMap };
         sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
 
         const {error} = await supabaseClient.from('work_orders').insert({
@@ -1844,6 +1846,8 @@ async function advanceWO(newStatus, bypassModal = false) {
             targetWO.wip_state.stage_start_time = null;
             targetWO.wip_state.active_stage = null;
             targetWO.wip_state.is_paused = false;
+            targetWO.wip_state.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';
+            targetWO.wip_state.completed_by_id = window.currentUser ? window.currentUser.id : null;
         }
 
         const updateData = {status: newStatus, wip_state: targetWO.wip_state};
@@ -2063,6 +2067,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-detail-row"><span>Qty Target:</span><strong>${wo.qty} units</strong></div>
                     <div class="archive-card-detail-row"><span>Started:</span><strong>${dtC}</strong></div>
                     <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
+                    ${w.completed_by_email || w.created_by_email ? `<div class="archive-card-detail-row"><span>Operator:</span><strong>${w.completed_by_email || w.created_by_email}</strong></div>` : ''}
                     ${timeHtml}
                 </div>
             </div>`;
@@ -2102,6 +2107,7 @@ function _renderArchiveCards(items) {
                     <div class="archive-card-detail-row"><span>Source WO:</span><strong>${job.wo_id || 'Manual Entry'}</strong></div>
                     <div class="archive-card-detail-row"><span>Started:</span><strong>${dtC}</strong></div>
                     <div class="archive-card-detail-row"><span>Completed:</span><strong>${dtF || 'Manual Archive'}</strong></div>
+                    ${w.completed_by_email || w.created_by_email ? `<div class="archive-card-detail-row"><span>Operator:</span><strong>${w.completed_by_email || w.created_by_email}</strong></div>` : ''}
                     ${timeHtml}
                 </div>
             </div>`;
