@@ -1165,6 +1165,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_switchStockzAuditTab':
                     if (typeof window.switchStockzAuditTab === 'function') window.switchStockzAuditTab(el);
                     break;
+                case 'click_refreshStockzAuditHistory':
+                    if (typeof window.refreshStockzAuditHistory === 'function') window.refreshStockzAuditHistory();
+                    break;
+                case 'click_clearStockzAuditHistory':
+                    if (typeof window.clearStockzAuditHistory === 'function') window.clearStockzAuditHistory();
+                    break;
                 case 'click_submitStockzAudit':
                     if (typeof window.submitStockzAudit === 'function') window.submitStockzAudit();
                     break;
@@ -1179,6 +1185,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_stopStockzAuditWebcam':
                     if (typeof window.stopStockzAuditWebcam === 'function') window.stopStockzAuditWebcam();
+                    break;
+                case 'click_decrementStockzAuditDelta':
+                    if (typeof window.decrementStockzAuditDelta === 'function') window.decrementStockzAuditDelta();
+                    break;
+                case 'click_incrementStockzAuditDelta':
+                    if (typeof window.incrementStockzAuditDelta === 'function') window.incrementStockzAuditDelta();
+                    break;
+                case 'click_decrementStockzAuditCount':
+                    if (typeof window.decrementStockzAuditCount === 'function') window.decrementStockzAuditCount();
+                    break;
+                case 'click_incrementStockzAuditCount':
+                    if (typeof window.incrementStockzAuditCount === 'function') window.incrementStockzAuditCount();
                     break;
 
                 case 'click_document_getElementById_importBackupFile':
@@ -1675,6 +1693,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleStockzAuditDeviceChange':
                     if (typeof window.change_handleStockzAuditDeviceChange === 'function') window.change_handleStockzAuditDeviceChange(event);
+                    break;
+                case 'change_window_updateStockzAuditItem':
+                    if (typeof window.selectStockzAuditItem === 'function') window.selectStockzAuditItem(el.value);
                     break;
                 case 'change_window_updateCcMngrStock':
                     window.updateCcMngrStock();
