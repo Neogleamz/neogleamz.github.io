@@ -1,10 +1,17 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.3.4] - 2026-05-31
 
 ### ✨ Features & Bug Fixes
+- **Physical Audit Console Aesthetics & Unified Layout**:
+  - **Color Synchronization**: Synchronized the text and badge colors of the physical audit blocks to utilize matching hex codes from the main STOCKZ raw inventory page (e.g. purple `#8b5cf6` for prototypes, blue `#3b82f6` for production).
+  - **Unified 6-Column Balances**: Refactored the raw goods audit card grid to render in a complete 6-column metrics grid (Purchased, Proto Consumed, Prod Consumed, Total Consumed, Scrapped, Expected Stock) for total accounting parity across raw materials and recipes.
+- **Layerz Print-Queue Prototype Accounting Fix**:
+  - **Spawning & Math Sync**: Patched `addPrintJob` and `executePrintInventoryMath` in [print-module.js](file:///d:/GitHub/neogleamz.github.io/assets/js/print-module.js) to propagate and capture Prototype batch types. This ensures raw material consumption and completed printed yield are routed cleanly to prototype metrics instead of production metrics.
+- **STOCKZ Left FGI Pane Enhancements**:
+  - **3D Prints Column Alignment**: Appended the missing **`CONS`** (consumed) column to the **3D Prints** category table inside FGI in STOCKZ, aligning its layout perfectly with the other finished goods panels.
 - **Stockz Audit Planning Console & Calibration Adjustments** (`feat/stockz-audit-planning-console`):
-  - **Audit & Reconcile UI:** Deployed a glassmorphism Audit Console supporting both Physical Count Reconciliation (auto-calculating delta offsets) and Quick delta adjustments with Average COGS valuation calculations.
+  - **Audit & Reconcile UI:** Deployed a glassmorphism Audit Console supporting both Physical Count Reconciliation (auto-calculating delta offsets) and Quick delta adjustments with Average COGS financial impact calculations.
   - **Count & Offset Calibration:** Built interactive `+` and `-` calibration buttons to increment/decrement shelf counts and delta offsets for rapid, error-free physical stock updates.
   - **Stock Adjustment Logs:** Integrated an interactive, monospaced stock adjustments history panel displaying recent write-offs with live valuation impacts, reason codes, operator signatures, and note blocks.
   - **Velocityz Forecaster Grid Wrapping & Sanitization:** Resolved a grid wrapping bug inside the Velocityz Forecaster where finished goods rendered horizontally in a single wrapped row. Wrapped raw rows inside a parent `<table>` during DOMPurify sanitization to block HTML parser tag-stripping and nested flexbox elements to guarantee standard tabular column alignment.
