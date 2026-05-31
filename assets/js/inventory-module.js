@@ -1622,7 +1622,7 @@ window.startRemoteCycleCount = async function() {
         const port = window.location.port ? `:${window.location.port}` : '';
         host = `${savedIP}${port}`;
     }
-    const remoteUrl = `${window.location.protocol}//${host}/remote-scanner.html?session=${window.ccSessionId}`;
+    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}`;
     sysLog(`[Realtime Scanner] Dynamic remote portal link: ${remoteUrl}`);
 
     // 9. Update the image source dynamically powered by api.qrserver.com to prevent canvas sizing race

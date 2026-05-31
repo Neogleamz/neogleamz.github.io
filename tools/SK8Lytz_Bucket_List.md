@@ -30,7 +30,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `debt/security-insertAdjacentHTML` : Wrap dynamic checklist text inside safeHTML at [packerz-module.js:L1069](file:///d:/GitHub/neogleamz.github.io/assets/js/packerz-module.js#L1069) to eliminate dynamic XSS injection vectors. [🤖 Antigravity] [🧠 3k / 3k] [💸 $0.01 / $0.01]
 
 ### 🟠 Stale Warnings & Orphaned Scripts
-- [ ] `debt/orphan-root-files` : Relocate [remote-capture.html](file:///d:/GitHub/neogleamz.github.io/remote-capture.html) and [remote-scanner.html](file:///d:/GitHub/neogleamz.github.io/remote-scanner.html) from root to /tools/ or /docs/ subfolders to resolve Whitelist Violations. [🤖 Antigravity] [🧠 1.5k / 1.5k] [💸 $0.01 / $0.01]
+- [x] `debt/orphan-root-files` : Relocate [remote-capture.html](file:///d:/GitHub/neogleamz.github.io/remote-capture.html) and [remote-scanner.html](file:///d:/GitHub/neogleamz.github.io/remote-scanner.html) from root to /tools/ or /docs/ subfolders to resolve Whitelist Violations. [🤖 Antigravity] [🧠 1.5k / 1.5k] [💸 $0.01 / $0.01]
 
 ### 🟡 Legacy HTML Audits
 - [ ] `chore/dep-patch-updates` : Run npm update to safely bump `eslint` (10.4.0 -> 10.4.1) and `supabase` (2.101.0 -> 2.102.0) safe patch versions. [🤖 Antigravity] [🧠 1k / 1k] [💸 $0.01 / $0.01]
