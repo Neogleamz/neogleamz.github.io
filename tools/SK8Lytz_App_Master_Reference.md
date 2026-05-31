@@ -775,6 +775,23 @@ To maintain viewport position and prevent iOS Safari from triggering an automati
 - Any form input, text area, or selection dropdown field in the mobile UI must be styled with a `font-size` of strictly **`>= 16px`** (e.g. `font-size: 16px` or `font-size: clamp(16px, 2vh, 20px)`).
 
 
+## 14. Vanilla JS Focus-Range Preservation & Drag-Resizer Layouts
+
+To ensure flawless user interaction and scaling boundaries when building highly dynamic Vanilla JS pages:
+
+### A. Focus-Loss Mitigation on Dynamic innerHTML Overwrites
+Replacing a container's `innerHTML` while the user is actively typing inside a child input destroys the DOM focus and caret range. To seamlessly preserve input state:
+1. **Layout Isolation**: Position global search elements (e.g. `#rawInvSearch`) physically outside the target dynamic container (e.g. `rawTableContainer` housing the dynamic `#invTableWrap`).
+2. **Caret Selection & Focus Restoration**: For inline column-level filters that must be redrawn dynamically on `keyup`:
+   - Prior to redrawing the table, capture the currently focused element's custom descriptor attribute (e.g., `data-col`) along with its `selectionStart` and `selectionEnd` cursor range metrics.
+   - Immediately post-render, query the fresh DOM tree for the matching input, restore its `focus()`, and re-apply the caret range via `setSelectionRange(start, end)`.
+
+### B. Drag-Resizer Flex Pane Adaptability
+In horizontal/vertical split-pane layouts (such as the BOMS or STOCKPILEZ Raw Component split-pane layout separated by a draggable resizer):
+- Dynamic inner containers must never enforce rigid flex weights or absolute widths that overlap adjacent elements.
+- The resizing control (`initHorizontalResizer()` or equivalent) must directly target and adjust the width of the outer layout parent container (e.g. `rawTableContainer`), forcing the adjacent elements to absorb flex-shrink/grow distribution organically and cleanly.
+
+
 ## Serverless & Edge Functions
 
 ### Webhook Idempotency & Database Constraints
