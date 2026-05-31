@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.91% </span>
+                <span class="strong">5.88% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>118/1996</span>
+                <span class='fraction'>118/2005</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">2.24% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>35/1557</span>
+                <span class='fraction'>35/1561</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.04% </span>
+                <span class="strong">7% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>116/1646</span>
+                <span class='fraction'>116/1655</span>
             </div>
         
             
@@ -2907,7 +2907,19 @@
 <a name='L2842'></a><a href='#L2842'>2842</a>
 <a name='L2843'></a><a href='#L2843'>2843</a>
 <a name='L2844'></a><a href='#L2844'>2844</a>
-<a name='L2845'></a><a href='#L2845'>2845</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L2845'></a><a href='#L2845'>2845</a>
+<a name='L2846'></a><a href='#L2846'>2846</a>
+<a name='L2847'></a><a href='#L2847'>2847</a>
+<a name='L2848'></a><a href='#L2848'>2848</a>
+<a name='L2849'></a><a href='#L2849'>2849</a>
+<a name='L2850'></a><a href='#L2850'>2850</a>
+<a name='L2851'></a><a href='#L2851'>2851</a>
+<a name='L2852'></a><a href='#L2852'>2852</a>
+<a name='L2853'></a><a href='#L2853'>2853</a>
+<a name='L2854'></a><a href='#L2854'>2854</a>
+<a name='L2855'></a><a href='#L2855'>2855</a>
+<a name='L2856'></a><a href='#L2856'>2856</a>
+<a name='L2857'></a><a href='#L2857'>2857</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -4951,6 +4963,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -7795,6 +7819,18 @@ window.selectStockzAuditItem = <span class="fstat-no" title="function not covere
         
 <span class="cstat-no" title="statement not covered" >        document.getElementById('stockzAuditScannerItemName').innerText = 'Scan Any Item';</span>
 <span class="cstat-no" title="statement not covered" >        document.getElementById('stockzAuditScannerExpected').innerText = 'No active item selected';</span>
+        
+<span class="cstat-no" title="statement not covered" >        window.initializeCcSyncChannel();</span>
+        let savedIP = <span class="cstat-no" title="statement not covered" >localStorage.getItem('neogleamz_pc_local_ip');</span>
+        let host = <span class="cstat-no" title="statement not covered" >window.location.host;</span>
+<span class="cstat-no" title="statement not covered" >        if (savedIP) {</span>
+            const port = <span class="cstat-no" title="statement not covered" >window.location.port ? `:${window.location.port}` : '';</span>
+<span class="cstat-no" title="statement not covered" >            host = `${savedIP}${port}`;</span>
+        }
+        const remoteUrl = <span class="cstat-no" title="statement not covered" >`${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&amp;audit_target=`;</span>
+<span class="cstat-no" title="statement not covered" >        document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&amp;data=${encodeURIComponent(remoteUrl)}`;</span>
+<span class="cstat-no" title="statement not covered" >        document.getElementById('stockzAuditMobileSessionDetails').innerText = `Session Token: ${window.ccSessionId}`;</span>
+        
 <span class="cstat-no" title="statement not covered" >        return;</span>
     }
     
@@ -8602,7 +8638,7 @@ document.addEventListener('input', <span class="fstat-no" title="function not co
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-31T07:56:46.424Z
+                at 2026-05-31T07:58:14.755Z
             </div>
         <script src="prettify.js"></script>
         <script>

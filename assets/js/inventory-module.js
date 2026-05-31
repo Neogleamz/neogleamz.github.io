@@ -2042,6 +2042,18 @@ window.selectStockzAuditItem = function(itemKey) {
         
         document.getElementById('stockzAuditScannerItemName').innerText = 'Scan Any Item';
         document.getElementById('stockzAuditScannerExpected').innerText = 'No active item selected';
+        
+        window.initializeCcSyncChannel();
+        let savedIP = localStorage.getItem('neogleamz_pc_local_ip');
+        let host = window.location.host;
+        if (savedIP) {
+            const port = window.location.port ? `:${window.location.port}` : '';
+            host = `${savedIP}${port}`;
+        }
+        const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=`;
+        document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(remoteUrl)}`;
+        document.getElementById('stockzAuditMobileSessionDetails').innerText = `Session Token: ${window.ccSessionId}`;
+        
         return;
     }
     
