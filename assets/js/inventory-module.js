@@ -2300,8 +2300,49 @@ window.startStockzAuditWebcam = async function() {
         }
         
         window.stockzAuditWebcamScanner = new Html5Qrcode("stockzAuditLocalReader");
+        
+        const devices = await Html5Qrcode.getCameras();
+        const selectContainer = document.getElementById('stockzAuditDeviceSelectContainer');
+        const selectBox = document.getElementById('stockzAuditDeviceSelect');
+        
+        if (devices && devices.length > 0 && selectBox && selectContainer) {
+            selectBox.innerHTML = '';
+            devices.forEach(device => {
+                const opt = document.createElement('option');
+                opt.value = device.id;
+                opt.text = device.label || `Camera ${selectBox.options.length + 1}`;
+                selectBox.appendChild(opt);
+            });
+            selectContainer.style.display = 'flex';
+            
+            await window.startStockzAuditWebcamWithDevice(devices[0].id);
+        } else {
+            if (selectContainer) selectContainer.style.display = 'none';
+            await window.stockzAuditWebcamScanner.start(
+                { facingMode: "environment" },
+                { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                async (decodedText) => {
+                    await window.stopStockzAuditWebcam();
+                    window.onScanSuccess(decodedText);
+                },
+                () => {}
+            );
+        }
+    } catch(err) {
+        sysLog(`Audit Webcam initialization error: ${err.message || err}`, true);
+        alert("Webcam error: " + (err.message || err));
+        await window.stopStockzAuditWebcam();
+    }
+};
+
+window.startStockzAuditWebcamWithDevice = async function(deviceId) {
+    if (!window.stockzAuditWebcamScanner) return;
+    try {
+        if (window.stockzAuditWebcamScanner.getState() === 2) {
+            await window.stockzAuditWebcamScanner.stop();
+        }
         await window.stockzAuditWebcamScanner.start(
-            { facingMode: "environment" },
+            deviceId,
             { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
             async (decodedText) => {
                 await window.stopStockzAuditWebcam();
@@ -2310,18 +2351,24 @@ window.startStockzAuditWebcam = async function() {
             () => {}
         );
     } catch(err) {
-        sysLog(`Audit Webcam initialization error: ${err.message || err}`, true);
-        alert("Webcam error: " + (err.message || err));
-        await window.stopStockzAuditWebcam();
+        sysLog(`Audit Webcam device start error: ${err.message || err}`, true);
+    }
+};
+
+window.change_handleStockzAuditDeviceChange = function(event) {
+    if (event && event.target && event.target.value) {
+        window.startStockzAuditWebcamWithDevice(event.target.value);
     }
 };
 
 window.stopStockzAuditWebcam = async function() {
     const startBtn = document.getElementById('stockzAuditStartWebcamBtn');
     const stopBtn = document.getElementById('stockzAuditStopWebcamBtn');
+    const selectContainer = document.getElementById('stockzAuditDeviceSelectContainer');
     
     if (startBtn) startBtn.style.display = 'inline-block';
     if (stopBtn) stopBtn.style.display = 'none';
+    if (selectContainer) selectContainer.style.display = 'none';
     
     if (window.stockzAuditWebcamScanner) {
         try {

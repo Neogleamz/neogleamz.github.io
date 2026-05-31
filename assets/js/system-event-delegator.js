@@ -1673,6 +1673,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_handleCCLocalDeviceChange':
                     if (typeof window.change_handleCCLocalDeviceChange === 'function') window.change_handleCCLocalDeviceChange(event);
                     break;
+                case 'change_handleStockzAuditDeviceChange':
+                    if (typeof window.change_handleStockzAuditDeviceChange === 'function') window.change_handleStockzAuditDeviceChange(event);
+                    break;
                 case 'change_window_updateCcMngrStock':
                     window.updateCcMngrStock();
                     break;
