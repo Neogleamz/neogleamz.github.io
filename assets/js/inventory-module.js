@@ -172,6 +172,10 @@ window.editGlobalLeadTime = function() {
             SUPPLIER_LEAD_TIME_DAYS = val;
             localStorage.setItem('neogleamz_default_lead_time', val);
             if(typeof renderInventoryTable === 'function') renderInventoryTable();
+            const globalLeadEl = document.getElementById('stockzAuditGlobalLeadValPreview');
+            if (globalLeadEl) {
+                globalLeadEl.innerText = `Global Default: ${val} days`;
+            }
             alert(`Global fallback lead time seamlessly updated to ${val} days.`);
         } else {
             alert("Invalid number. Must be a positive numerical value.");
@@ -2402,6 +2406,11 @@ window.openStockzAuditModal = function(itemKey, preSelectTab = 'audit') {
     if (deltaInput) deltaInput.value = '';
     if (notesInput) notesInput.value = '';
     if (reasonSelect) reasonSelect.selectedIndex = 0;
+    
+    const globalLeadEl = document.getElementById('stockzAuditGlobalLeadValPreview');
+    if (globalLeadEl) {
+        globalLeadEl.innerText = `Global Default: ${SUPPLIER_LEAD_TIME_DAYS} days`;
+    }
     
     const reconPanel = document.getElementById('stockzAuditPanel_reconciliation');
     const deltaPanel = document.getElementById('stockzAuditPanel_delta');

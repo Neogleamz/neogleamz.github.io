@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.93% </span>
+                <span class="strong">5.91% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>118/1989</span>
+                <span class='fraction'>118/1995</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">2.25% </span>
+                <span class="strong">2.24% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>35/1553</span>
+                <span class='fraction'>35/1557</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.07% </span>
+                <span class="strong">7.05% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>116/1639</span>
+                <span class='fraction'>116/1645</span>
             </div>
         
             
@@ -2897,7 +2897,16 @@
 <a name='L2832'></a><a href='#L2832'>2832</a>
 <a name='L2833'></a><a href='#L2833'>2833</a>
 <a name='L2834'></a><a href='#L2834'>2834</a>
-<a name='L2835'></a><a href='#L2835'>2835</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L2835'></a><a href='#L2835'>2835</a>
+<a name='L2836'></a><a href='#L2836'>2836</a>
+<a name='L2837'></a><a href='#L2837'>2837</a>
+<a name='L2838'></a><a href='#L2838'>2838</a>
+<a name='L2839'></a><a href='#L2839'>2839</a>
+<a name='L2840'></a><a href='#L2840'>2840</a>
+<a name='L2841'></a><a href='#L2841'>2841</a>
+<a name='L2842'></a><a href='#L2842'>2842</a>
+<a name='L2843'></a><a href='#L2843'>2843</a>
+<a name='L2844'></a><a href='#L2844'>2844</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3071,6 +3080,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -5301,6 +5314,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -5905,6 +5923,10 @@ window.editGlobalLeadTime = <span class="fstat-no" title="function not covered" 
 <span class="cstat-no" title="statement not covered" >            SUPPLIER_LEAD_TIME_DAYS = val;</span>
 <span class="cstat-no" title="statement not covered" >            localStorage.setItem('neogleamz_default_lead_time', val);</span>
 <span class="cstat-no" title="statement not covered" >            if(typeof renderInventoryTable === 'function') <span class="cstat-no" title="statement not covered" >renderInventoryTable();</span></span>
+            const globalLeadEl = <span class="cstat-no" title="statement not covered" >document.getElementById('stockzAuditGlobalLeadValPreview');</span>
+<span class="cstat-no" title="statement not covered" >            if (globalLeadEl) {</span>
+<span class="cstat-no" title="statement not covered" >                globalLeadEl.innerText = `Global Default: ${val} days`;</span>
+            }
 <span class="cstat-no" title="statement not covered" >            alert(`Global fallback lead time seamlessly updated to ${val} days.`);</span>
         } else {
 <span class="cstat-no" title="statement not covered" >            alert("Invalid number. Must be a positive numerical value.");</span>
@@ -8136,6 +8158,11 @@ window.openStockzAuditModal = <span class="fstat-no" title="function not covered
 <span class="cstat-no" title="statement not covered" >    if (notesInput) <span class="cstat-no" title="statement not covered" >notesInput.value = '';</span></span>
 <span class="cstat-no" title="statement not covered" >    if (reasonSelect) <span class="cstat-no" title="statement not covered" >reasonSelect.selectedIndex = 0;</span></span>
     
+    const globalLeadEl = <span class="cstat-no" title="statement not covered" >document.getElementById('stockzAuditGlobalLeadValPreview');</span>
+<span class="cstat-no" title="statement not covered" >    if (globalLeadEl) {</span>
+<span class="cstat-no" title="statement not covered" >        globalLeadEl.innerText = `Global Default: ${SUPPLIER_LEAD_TIME_DAYS} days`;</span>
+    }
+    
     const reconPanel = <span class="cstat-no" title="statement not covered" >document.getElementById('stockzAuditPanel_reconciliation');</span>
     const deltaPanel = <span class="cstat-no" title="statement not covered" >document.getElementById('stockzAuditPanel_delta');</span>
 <span class="cstat-no" title="statement not covered" >    if (reconPanel) <span class="cstat-no" title="statement not covered" >reconPanel.style.display = 'none';</span></span>
@@ -8572,7 +8599,7 @@ document.addEventListener('input', <span class="fstat-no" title="function not co
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-31T07:52:59.648Z
+                at 2026-05-31T07:54:09.579Z
             </div>
         <script src="prettify.js"></script>
         <script>
