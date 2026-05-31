@@ -2714,7 +2714,7 @@ window.startSOPRemoteMobileMode = function() {
     }
     
     const folderParam = typeof currentSOPMediaFolder !== 'undefined' && currentSOPMediaFolder ? `&folder=${encodeURIComponent(currentSOPMediaFolder)}` : '';
-    const remoteUrl = `${window.location.protocol}//${host}/remote-capture.html?session=${sessionId}${folderParam}`;
+    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-capture.html?session=${sessionId}${folderParam}`;
     
     sysLog(`[Realtime Camera] Dynamic remote guest URL: ${remoteUrl}`);
     
