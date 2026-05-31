@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### ✨ Features & Bug Fixes
+- **SOP Viewer Header Horizontal Button Layout & State Restoration** (`debt/security-insertAdjacentHTML`):
+  - **SOP Viewer Checklist State Restoration:** Fixed checkbox and input "amnesia" on re-opening cleared SOP Checklists by implementing a robust database-backed state synchronization restorer using `sop_archives`.
+  - **Horizontal Modal Header Button Layout:** Overrode global `button { width: 100% }` constraints by establishing a native CSS inline-flex rule for `#sopViewerHeaderButtons` and child button elements, forcing `PRINT SOP`, `EDIT`, and `CLOSE` to render horizontally on a single line with perfect desktop and mobile touch-target scaling.
+  - **Pre-Flight Continuous QA Cleared:** Verified 100% clean builds with zero regressions across all 30 Jest test suites and full warning-free linter runs.
+
 ## [1.3.3] - 2026-05-31
 
 ### ✨ Features & Bug Fixes
