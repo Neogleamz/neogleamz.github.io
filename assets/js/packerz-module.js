@@ -221,7 +221,7 @@ function openPackerzSopTerminal(orderGroup) {
             </select>
         `;
         return `
-        <div id="qa-row-${orderGroup.order_id}-${i.sku}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:10px; padding:15px; display:flex; flex-direction:column; gap:12px;">
+        <div id="qa-row-${orderGroup.order_id}-${i.sku}" class="packerz-qa-row" data-order-id="${orderGroup.order_id}" data-qa-passed="false" style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:10px; padding:15px; display:flex; flex-direction:column; gap:12px;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:15px;">
                 <div style="flex-grow:1; min-width:0;">
                     <span style="font-weight:900; color:var(--text-heading); font-size:14px; letter-spacing:0.5px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${i.recipe}</span>
@@ -279,7 +279,7 @@ window.updatePackerzItemType = async function(orderId, sku, newVal, _safeRecipe)
 }
 
 function validatePackerzAssemblyButton(orderId) {
-    const rows = document.querySelectorAll(`[id^="qa-row-${orderId}-"]`);
+    const rows = document.querySelectorAll(`.packerz-qa-row[data-order-id="${orderId}"]`);
     let allPassed = true;
     rows.forEach(r => { if(r.getAttribute('data-qa-passed') !== 'true') allPassed = false; });
 
@@ -760,6 +760,20 @@ async function signoffPackerzQA() {
 
     if(!orderId || !sku) return;
 
+    // Zero-Trust checks validation gate
+    const checks = document.querySelectorAll('.packerz-qa-check');
+    let allValid = true;
+    checks.forEach(c => { if(!c.checked) allValid = false; });
+    const inputs = document.querySelectorAll('.packerz-qa-input');
+    inputs.forEach(i => { if(i.value.trim() === '') allValid = false; });
+    document.querySelectorAll('.packerz-scan-row').forEach(row => {
+        if (row.dataset.confirmed !== 'true') allValid = false;
+    });
+    if (!allValid) {
+        alert("Cannot complete QA: Please ensure all checklists are completed and all inputs are filled out!");
+        return;
+    }
+
     let telemetryData = [];
     document.querySelectorAll('.packerz-qa-check').forEach(c => {
         telemetryData.push({ type: 'check', text: c.getAttribute('data-label'), valid: c.checked });
@@ -825,8 +839,9 @@ async function signoffPackerzQA() {
     }
 
     const capturedOrderId = orderId;
+    const capturedSopType = window.currentActiveSopType;
     closePackerzSopViewer();
-    if (window.currentActiveSopType === 'packerz') {
+    if (capturedSopType === 'packerz') {
         validatePackerzAssemblyButton(capturedOrderId);
     } else {
         if (typeof window.renderActiveWO === 'function') window.renderActiveWO(capturedOrderId);
