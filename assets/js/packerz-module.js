@@ -1066,7 +1066,7 @@ window.openPackerzAuditLog = function(sku, telemetryJsonString) {
     });
 
     h += `</div></div></div>`;
-    document.body.insertAdjacentHTML('beforeend', h);
+    document.body.insertAdjacentHTML('beforeend', window.safeHTML ? window.safeHTML(h) : h);
 }
 
 function renderPackerzTelemetryPreview() {
