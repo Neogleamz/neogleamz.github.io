@@ -51,7 +51,7 @@ function renderFgiTable() {
     const schemas = {
         'cat-retail': `<tr>${getNameTh('cat-retail')} ${getTh('cat-retail','b','PROD','#3b82f6')} ${getTh('cat-retail','pb','PROTO','#8b5cf6')} ${getTh('cat-retail','sold','SOLD','#ef4444')} ${getTh('cat-retail','warranty','WRTY','#fbbf24')} ${getTh('cat-retail','s','STOCK','#10b981')} ${getTh('cat-retail','ms','MIN','#f97316')} ${getTh('cat-retail','tv','ASSETS')} ${getTh('cat-retail','net','NET')} ${getTh('cat-retail','msrpv','MSRP')}</tr>`,
         'cat-sub': `<tr>${getNameTh('cat-sub')} ${getTh('cat-sub','b','PROD','#3b82f6')} ${getTh('cat-sub','pb','PROTO','#8b5cf6')} ${getTh('cat-sub','c_prod','CONS','#ef4444')} ${getTh('cat-sub','yld','YLD %','#ec4899')} ${getTh('cat-sub','scrap','SCRAP','#ef4444')} ${getTh('cat-sub','warranty','WRTY','#fbbf24')} ${getTh('cat-sub','s','STOCK','#10b981')} ${getTh('cat-sub','ms','MIN','#f97316')} ${getTh('cat-sub','tv','ASSETS')}</tr>`,
-        'cat-print': `<tr>${getNameTh('cat-print')} ${getTh('cat-print','b','PROD','#3b82f6')} ${getTh('cat-print','pb','PROTO','#8b5cf6')} ${getTh('cat-print','yld','YLD %','#ec4899')} ${getTh('cat-print','scrap','SCRAP','#ef4444')} ${getTh('cat-print','s','STOCK','#10b981')} ${getTh('cat-print','ms','MIN','#f97316')} ${getTh('cat-print','tv','ASSETS')}</tr>`,
+        'cat-print': `<tr>${getNameTh('cat-print')} ${getTh('cat-print','b','PROD','#3b82f6')} ${getTh('cat-print','pb','PROTO','#8b5cf6')} ${getTh('cat-print','c_prod','CONS','#ef4444')} ${getTh('cat-print','yld','YLD %','#ec4899')} ${getTh('cat-print','scrap','SCRAP','#ef4444')} ${getTh('cat-print','s','STOCK','#10b981')} ${getTh('cat-print','ms','MIN','#f97316')} ${getTh('cat-print','tv','ASSETS')}</tr>`,
         'cat-label': `<tr>${getNameTh('cat-label')} ${getTh('cat-label','b','PROD','#3b82f6')} ${getTh('cat-label','c_prod','CONS','#ef4444')} ${getTh('cat-label','s','STOCK','#10b981')} ${getTh('cat-label','ms','MIN','#f97316')} ${getTh('cat-label','tv','ASSETS')}</tr>`
     };
 
@@ -137,6 +137,7 @@ function renderFgiTable() {
                     else if (g.id === 'cat-print') {
                         trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#8b5cf6;">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444;">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
                         trHtml += `<td class="text-right" style="color:#ef4444; font-weight:bold;">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right ${sc}" style="font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
@@ -2035,14 +2036,22 @@ window.selectStockzAuditItem = function(itemKey) {
     const renderEmptyGrid = () => {
         const grid = document.getElementById('stockzAuditBalancesGrid');
         if (!grid) return;
-        grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
         grid.innerHTML = window.safeHTML(`
             <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
                 <div style="font-size:9px; text-transform:uppercase; color:var(--text-muted); font-weight:800; letter-spacing:0.5px;">Purchased</div>
                 <div id="stockzAuditVal_purchased" style="font-size:16px; font-weight:900; color:var(--text-heading); margin-top:5px;">—</div>
             </div>
             <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
-                <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Consumed</div>
+                <div style="font-size:9px; text-transform:uppercase; color:#8b5cf6; font-weight:800; letter-spacing:0.5px;">Proto Consumed</div>
+                <div id="stockzAuditVal_proto_cons" style="font-size:16px; font-weight:900; color:#8b5cf6; margin-top:5px;">—</div>
+            </div>
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                <div style="font-size:9px; text-transform:uppercase; color:#3b82f6; font-weight:800; letter-spacing:0.5px;">Prod Consumed</div>
+                <div id="stockzAuditVal_prod_cons" style="font-size:16px; font-weight:900; color:#3b82f6; margin-top:5px;">—</div>
+            </div>
+            <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Total Consumed</div>
                 <div id="stockzAuditVal_consumed" style="font-size:16px; font-weight:900; color:#ef4444; margin-top:5px;">—</div>
             </div>
             <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
@@ -2179,20 +2188,20 @@ window.selectStockzAuditItem = function(itemKey) {
             grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
             grid.innerHTML = window.safeHTML(`
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
-                    <div style="font-size:9px; text-transform:uppercase; color:var(--text-muted); font-weight:800; letter-spacing:0.5px;">Prod Produced</div>
-                    <div id="stockzAuditVal_purchased" style="font-size:16px; font-weight:900; color:var(--text-heading); margin-top:5px;">${b.toFixed(2).replace(/\.?0+$/,'')}</div>
+                    <div style="font-size:9px; text-transform:uppercase; color:#3b82f6; font-weight:800; letter-spacing:0.5px;">Prod Produced</div>
+                    <div id="stockzAuditVal_purchased" style="font-size:16px; font-weight:900; color:#3b82f6; margin-top:5px;">${b.toFixed(2).replace(/\.?0+$/,'')}</div>
                 </div>
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
-                    <div style="font-size:9px; text-transform:uppercase; color:#0ea5e9; font-weight:800; letter-spacing:0.5px;">Proto Produced</div>
-                    <div id="stockzAuditVal_proto_prod" style="font-size:16px; font-weight:900; color:#0ea5e9; margin-top:5px;">${pb.toFixed(2).replace(/\.?0+$/,'')}</div>
+                    <div style="font-size:9px; text-transform:uppercase; color:#8b5cf6; font-weight:800; letter-spacing:0.5px;">Proto Produced</div>
+                    <div id="stockzAuditVal_proto_prod" style="font-size:16px; font-weight:900; color:#8b5cf6; margin-top:5px;">${pb.toFixed(2).replace(/\.?0+$/,'')}</div>
                 </div>
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
                     <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Prod Consumed</div>
                     <div id="stockzAuditVal_consumed" style="font-size:16px; font-weight:900; color:#ef4444; margin-top:5px;">${(sold + c_prod).toFixed(2).replace(/\.?0+$/,'')}</div>
                 </div>
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
-                    <div style="font-size:9px; text-transform:uppercase; color:#f43f5e; font-weight:800; letter-spacing:0.5px;">Proto Consumed</div>
-                    <div id="stockzAuditVal_proto_cons" style="font-size:16px; font-weight:900; color:#f43f5e; margin-top:5px;">${c_proto.toFixed(2).replace(/\.?0+$/,'')}</div>
+                    <div style="font-size:9px; text-transform:uppercase; color:#8b5cf6; font-weight:800; letter-spacing:0.5px;">Proto Consumed</div>
+                    <div id="stockzAuditVal_proto_cons" style="font-size:16px; font-weight:900; color:#8b5cf6; margin-top:5px;">${c_proto.toFixed(2).replace(/\.?0+$/,'')}</div>
                 </div>
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
                     <div style="font-size:9px; text-transform:uppercase; color:#b91c1c; font-weight:800; letter-spacing:0.5px;">Scrapped</div>
@@ -2204,14 +2213,24 @@ window.selectStockzAuditItem = function(itemKey) {
                 </div>
             `);
         } else {
-            grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            let c_proto = parseFloat(i.prototype_consumed_qty) || 0;
+            let c_prod = parseFloat(i.production_consumed_qty) || 0;
+            grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
             grid.innerHTML = window.safeHTML(`
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
                     <div style="font-size:9px; text-transform:uppercase; color:var(--text-muted); font-weight:800; letter-spacing:0.5px;">Purchased</div>
                     <div id="stockzAuditVal_purchased" style="font-size:16px; font-weight:900; color:var(--text-heading); margin-top:5px;">${purchasedOrProduced.toFixed(2).replace(/\.?0+$/,'')}</div>
                 </div>
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
-                    <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Consumed</div>
+                    <div style="font-size:9px; text-transform:uppercase; color:#8b5cf6; font-weight:800; letter-spacing:0.5px;">Proto Consumed</div>
+                    <div id="stockzAuditVal_proto_cons" style="font-size:16px; font-weight:900; color:#8b5cf6; margin-top:5px;">${c_proto.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#3b82f6; font-weight:800; letter-spacing:0.5px;">Prod Consumed</div>
+                    <div id="stockzAuditVal_prod_cons" style="font-size:16px; font-weight:900; color:#3b82f6; margin-top:5px;">${c_prod.toFixed(2).replace(/\.?0+$/,'')}</div>
+                </div>
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:9px; text-transform:uppercase; color:#ef4444; font-weight:800; letter-spacing:0.5px;">Total Consumed</div>
                     <div id="stockzAuditVal_consumed" style="font-size:16px; font-weight:900; color:#ef4444; margin-top:5px;">${consumed.toFixed(2).replace(/\.?0+$/,'')}</div>
                 </div>
                 <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:10px 10px; border-radius:8px; text-align:center;">

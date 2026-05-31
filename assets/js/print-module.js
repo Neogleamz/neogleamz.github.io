@@ -544,10 +544,37 @@ async function executeCleaningInventoryMath(partName, failedQ, wo_id, label) {
 async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTicket, wo_id, label, skipRecovery = false) {
     let manualUpserts = [];
     const k = partName;
-    if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
+    if (!inventoryDB[k]) inventoryDB[k] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
     
+    let bType = 'Production';
+    if (typeof currentPrintJob !== 'undefined' && currentPrintJob && currentPrintJob.wip_state && currentPrintJob.wip_state.batch_type) {
+        bType = currentPrintJob.wip_state.batch_type;
+    }
+    if (bType === 'Production' && typeof printQueueDB !== 'undefined' && printQueueDB) {
+        let matchingJob = printQueueDB.find(j => j.wo_id === wo_id || j.part_name === partName);
+        if (matchingJob && matchingJob.wip_state && matchingJob.wip_state.batch_type) {
+            bType = matchingJob.wip_state.batch_type;
+        }
+    }
+    if (bType === 'Production' && wo_id && wo_id !== 'Manual Entry') {
+        let parentWO = typeof workOrdersDB !== 'undefined' ? workOrdersDB.find(w => String(w.wo_id) === String(wo_id)) : null;
+        if (!parentWO) {
+            try {
+                const { data } = await supabaseClient.from('work_orders').select('*').eq('wo_id', wo_id).single();
+                parentWO = data;
+            } catch(e) { console.error(e); }
+        }
+        if (parentWO && parentWO.wip_state && parentWO.wip_state.batch_type) {
+            bType = parentWO.wip_state.batch_type;
+        }
+    }
+
     let totalAttempts = successQ + failedQ;
-    inventoryDB[k].produced_qty += totalAttempts;
+    if (bType === 'Prototype') {
+        inventoryDB[k].prototype_produced_qty = (inventoryDB[k].prototype_produced_qty || 0) + totalAttempts;
+    } else {
+        inventoryDB[k].produced_qty += totalAttempts;
+    }
     inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + failedQ;
 
     let cleanPartName = partName.startsWith('RECIPE:::') ? partName.replace('RECIPE:::', '') : partName.split(':::')[0];
@@ -555,9 +582,17 @@ async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTic
         let exactRaws = getDirectMaterials(cleanPartName, totalAttempts);
         Object.keys(exactRaws).forEach(rawK => {
             let req = exactRaws[rawK];
-            if(!inventoryDB[rawK]) inventoryDB[rawK] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0 };
-            if (isScrapTicket) inventoryDB[rawK].scrap_qty = (inventoryDB[rawK].scrap_qty || 0) + req;
-            else inventoryDB[rawK].consumed_qty += req;
+            if(!inventoryDB[rawK]) inventoryDB[rawK] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
+            if (isScrapTicket) {
+                inventoryDB[rawK].scrap_qty = (inventoryDB[rawK].scrap_qty || 0) + req;
+            } else {
+                inventoryDB[rawK].consumed_qty += req;
+                if (bType === 'Prototype') {
+                    inventoryDB[rawK].prototype_consumed_qty = (inventoryDB[rawK].prototype_consumed_qty || 0) + req;
+                } else {
+                    inventoryDB[rawK].production_consumed_qty = (inventoryDB[rawK].production_consumed_qty || 0) + req;
+                }
+            }
             
             manualUpserts.push({ item_key: rawK, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
         });
@@ -777,6 +812,14 @@ function openPrintSOP(pName) {
 }
 
 async function addPrintJob(partName, qty, woId = null, label = null) {
+    let bType = 'Production';
+    if (woId && woId !== 'Manual Entry') {
+        let parentWO = typeof workOrdersDB !== 'undefined' ? workOrdersDB.find(w => String(w.wo_id) === String(woId)) : null;
+        if (parentWO && parentWO.wip_state && parentWO.wip_state.batch_type) {
+            bType = parentWO.wip_state.batch_type;
+        }
+    }
+
     const payload = {
         part_name: partName,
         qty: qty,
@@ -786,7 +829,8 @@ async function addPrintJob(partName, qty, woId = null, label = null) {
         created_at: new Date().toISOString(),
         wip_state: {
             created_by_email: window.currentUser ? window.currentUser.email : 'guest_operator',
-            created_by_id: window.currentUser ? window.currentUser.id : null
+            created_by_id: window.currentUser ? window.currentUser.id : null,
+            batch_type: bType
         }
     };
     const { error } = await supabaseClient.from('print_queue').insert([payload]);
