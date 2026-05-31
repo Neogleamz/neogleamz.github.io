@@ -808,6 +808,13 @@ The system implements a continuous data integrity scanning protocol for storefro
    - Triggers the forensic accounting engine `window.runForensicAccounting` on sibling lines for all historical orders containing the unmapped SKU.
    - Automatically recalibrates the `cogs_at_sale`, `transaction_fees`, and `net_profit` fields, pushing updates to Supabase in parallel via `Promise.all`.
 
+### Dynamic Audit Metrics Grid & Secure Mobile Wi-Fi Tunneling
+
+The application integrates real-time physical inventory counting and remote capture tools over local Wi-Fi.
+1. **Dynamic Metrics Grid**: The Physical Audit card dynamically swaps layouts based on item classification. For finished good recipes (`RECIPE:::` prefix), it converts into a 6-column glassmorphism layout, providing granular visibility into **Prod Produced**, **Proto Produced**, **Prod Consumed**, **Proto Consumed**, **Scrapped**, and **Expected Stock** (recalculating the net stock in real-time). For raw materials, it maintains the standard 4-column **Purchased**, **Consumed**, **Scrapped**, and **Expected Stock** grid.
+2. **Secure Mobile WebRTC Tunnels**: Modern mobile WebRTC standards block camera/scanner access on non-secure `http:` connections. The local Wi-Fi IP override inputs support full `https://` protocol-aware overrides (e.g., from `ngrok` or `localtunnel`), preserving secure tunnels to bypass WebRTC blocks natively on handheld devices.
+3. **Cross-Archive Operator Auditing**: Operator identities (email and ID captured from `window.currentUser` or `'guest_operator'`) are recorded at creation, completion, and archiving across Batchez, Layerz, and Packerz logs without database alterations. This is done by storing the operator metadata in existing JSONB columns (`wip_state` and `packer_telemetry` arrays) and displaying them within the expanded card details of the Archive Explorer and SOP Audit Log modal.
+
 ### Diagnostic & Administration Scripts
 
 To preserve repository cleanliness, all one-shot Python/JS diagnostic utilities, trace scripts, and administrative hooks (such as dump_buttons.py, trace3.py, and database schema checkers) MUST be stored exclusively inside the scripts/ directory. No loose diagnostic or utility scripts are permitted to reside in the repository root.
