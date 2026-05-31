@@ -244,6 +244,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_updateLocalIPQRCode_cc':
                     if (typeof window.click_updateLocalIPQRCode_cc === 'function') window.click_updateLocalIPQRCode_cc();
                     break;
+                case 'click_toggleStockzAuditScanner':
+                    if (window.toggleStockzAuditScanner) window.toggleStockzAuditScanner();
+                    break;
+                case 'click_selectStockzAuditItem':
+                    if (window.selectStockzAuditItem) window.selectStockzAuditItem(el.getAttribute('data-val'));
+                    break;
+                case 'click_updateLocalIPQRCode_audit':
+                    if (window.updateLocalIPQRCode_audit) window.updateLocalIPQRCode_audit();
+                    break;
+                case 'click_window_filterStockzAuditItems':
+                    if (window.filterStockzAuditItems) window.filterStockzAuditItems();
+                    break;
                 case 'click_window_openVelocityzModal':
                     window.openVelocityzModal();
                     break;
@@ -1140,6 +1152,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_stopCycleCount':
                     stopCycleCount();
                     break;
+                case 'click_openStockzAuditModal':
+                    if (typeof window.openStockzAuditModal === 'function') {
+                        const key = el.getAttribute('data-key');
+                        const tab = el.getAttribute('data-tab') || 'audit';
+                        window.openStockzAuditModal(key, tab);
+                    }
+                    break;
+                case 'click_closeStockzAuditModal':
+                    if (typeof window.closeStockzAuditModal === 'function') window.closeStockzAuditModal();
+                    break;
+                case 'click_switchStockzAuditTab':
+                    if (typeof window.switchStockzAuditTab === 'function') window.switchStockzAuditTab(el);
+                    break;
+                case 'click_submitStockzAudit':
+                    if (typeof window.submitStockzAudit === 'function') window.submitStockzAudit();
+                    break;
+                case 'click_switchStockzAuditMode':
+                    if (typeof window.switchStockzAuditMode === 'function') window.switchStockzAuditMode(el);
+                    break;
+                case 'click_switchStockzAuditCameraRoute':
+                    if (typeof window.switchStockzAuditCameraRoute === 'function') window.switchStockzAuditCameraRoute(el);
+                    break;
+                case 'click_startStockzAuditWebcam':
+                    if (typeof window.startStockzAuditWebcam === 'function') window.startStockzAuditWebcam();
+                    break;
+                case 'click_stopStockzAuditWebcam':
+                    if (typeof window.stopStockzAuditWebcam === 'function') window.stopStockzAuditWebcam();
+                    break;
 
                 case 'click_document_getElementById_importBackupFile':
                     document.getElementById('importBackupFile').click();
@@ -1453,6 +1493,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'keyup_window_filterCcMngrItems':
                     window.filterCcMngrItems();
+                    break;
+                case 'keyup_window_filterStockzAuditItems':
+                    if (window.filterStockzAuditItems) window.filterStockzAuditItems();
                     break;
                 case 'keyup_sandboxSearch':
                     if (typeof window.sandboxSearchDict === 'function') {

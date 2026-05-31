@@ -483,6 +483,7 @@ Known verified tables currently in active use across the JavaScript modules:
 ### Core Ledgers
 - `sales_ledger`: Tracks order hashes, COGS, and sales mapping.
 - `inventory_consumption`: Tracks recipe components and stock levels. Fields: `item_key` (PK), `consumed_qty`, `produced_qty`, `sold_qty`, `scrap_qty`, `manual_adjustment`, `assembly_consumed_qty`, `production_consumed_qty`, `prototype_consumed_qty`, `prototype_produced_qty`, `rop_lead_time_days`, `min_stock`.
+- `inventory_adjustments_log`: Forensic audit transaction ledger. Fields: `id` (PK, UUID), `item_key` (TEXT), `operator_id` (UUID), `operator_email` (TEXT), `previous_stock` (NUMERIC), `counted_stock` (NUMERIC), `delta` (NUMERIC), `avg_unit_cost` (NUMERIC), `valuation_impact` (NUMERIC), `reason_code` (TEXT), `notes` (TEXT), `created_at` (TIMESTAMP).
 
 ### Products & Costs
 - `full_landed_costs`: Calculates absolute profitability (`parcel_no`, `di_item_id`, `neogleamz_product`, `quantity`, `lot_multiplier`).
@@ -562,7 +563,7 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 - **`paneSimple` (EDITZ)**:
   - Value adjuster matrix utilizing inline `.btn-orange` logic.
 - **`paneInventory` (STOCKZ)**:
-  - The real-time interactive lifecycle module. Triggers `cycleCountManagerModal` via standard scanner hardware, and integrates explicit `velocityzModal` charting.
+  - The real-time interactive lifecycle module. Triggers `cycleCountManagerModal` via standard scanner hardware, integrates explicit `velocityzModal` charting, and hosts the high-fidelity `stockzAuditModal` (Inventory Audit & Supply Chain Planning Console) which secures calculated adjustments with physical-count-driven math, sliders for ROP, and WebRTC real-time phone scans.
 
 #### 3. MAKERZ (Production Ecosystem)
 - **`paneProdBuilder` (RECIPEZ)**:

@@ -91,13 +91,13 @@ function renderFgiTable() {
             
             h += `<div class="neo-category-row" data-app-click="toggleFgiCat" data-cat="${g.id}">
                 <span style="font-weight:900; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
-                    <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">${chevron}</span> 
-                    <span>${g.icn} ${g.name}</span>
+                     <span class="cat-arrow" style="color:var(--text-muted); width:20px; text-align:center;">${chevron}</span> 
+                     <span>${g.icn} ${g.name}</span>
                 </span>
                 <span style="color:var(--text-muted); font-size:12px; font-weight:bold;">(${g.items.length})</span>
             </div>`;
 
-            
+
             if(isExp) {
                 h += `<table class="neo-table" style="width:100%; margin-bottom:0; background:rgba(0,0,0,0.1); border-top:none; border-radius: 0 0 6px 6px;">`;
                 h += `<thead>${schemas[g.id]}</thead><tbody>`;
@@ -113,41 +113,41 @@ function renderFgiTable() {
                     trHtml += `<td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-main); padding-left:25px;">${x.n}</td>`;
                     
                     if (g.id === 'cat-retail') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="prototype_produced_qty">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="sold_qty">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#8b5cf6;">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444;">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#fbbf24; font-weight:bold;">${x.warranty.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right ${sc}" style="font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#f97316; font-weight:bold; text-decoration: underline dotted; cursor: pointer;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="planning">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:${netColor};">$${x.net.toFixed(2)}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:var(--text-main);">$${(x.msrpv||0).toFixed(2)}</td>`;
                     }
                     else if (g.id === 'cat-sub') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="prototype_produced_qty">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="production_consumed_qty">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#8b5cf6;">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444;">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="scrap_qty">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444; font-weight:bold;">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#fbbf24; font-weight:bold;">${x.warranty.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right ${sc}" style="font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#f97316; font-weight:bold; text-decoration: underline dotted; cursor: pointer;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="planning">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                     }
                     else if (g.id === 'cat-print') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="prototype_produced_qty">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#8b5cf6;">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="scrap_qty">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444; font-weight:bold;">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right ${sc}" style="font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#f97316; font-weight:bold; text-decoration: underline dotted; cursor: pointer;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="planning">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                     }
                     else if (g.id === 'cat-label') {
-                        trHtml += `<td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="produced_qty">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="production_consumed_qty">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable ${sc}" style="font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="fgi_stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
-                        trHtml += `<td class="text-right editable" style="color:#f97316; font-weight:bold;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="0" data-c="0" data-a="0" data-sq="0" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444;">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right ${sc}" style="font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#f97316; font-weight:bold; text-decoration: underline dotted; cursor: pointer;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="planning">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tv.toFixed(2)}</td>`;
                     }
                     
@@ -327,14 +327,14 @@ function renderInventoryTable() {
                 <td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn} ${ropPill}</td>
                 <td tabindex="0" class="trunc-col" style="font-weight:bold; color:#64748b;">${x.n}</td>
                 <td class="text-right">${x.p.toFixed(2).replace(/\.?0+$/,'')}</td>
-                <td class="text-right editable" style="color:#ef4444;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="consumed_qty">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td>
-                <td class="text-right editable" style="color:#8b5cf6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="prototype_consumed_qty">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td>
-                <td class="text-right editable" style="color:#3b82f6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="production_consumed_qty">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td>
-                <td class="text-right editable" style="color:#b91c1c;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="scrap_qty">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td>
-                <td class="text-right editable" style="color:#0ea5e9;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="manual_adjustment">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td>
-                <td class="text-right editable" style="color:#f97316;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="min_stock">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>
-                <td class="text-right editable" style="color:#14b8a6;" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="rop_lead_time_days">${x.ld}</td>
-                <td class="text-right editable ${sc}" contenteditable="true" data-app-focus="storeOldValInv" data-app-blur="handleInvEdit" data-key="${sk}" data-p="${x.p}" data-c="${x.c}" data-a="${x.a}" data-sq="${x.sq}" data-mode="stock">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right" style="color:#ef4444;">${x.c.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right" style="color:#8b5cf6;">${x.pc.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right" style="color:#3b82f6;">${x.prc.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right" style="color:#b91c1c;">${x.sq.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right" style="color:#0ea5e9; text-decoration: underline dotted; cursor: pointer; font-weight: bold;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="audit">${x.a!==0?(x.a>0?'+':'')+x.a.toFixed(2).replace(/\.?0+$/,''):'0'}</td>
+                <td class="text-right" style="color:#f97316; text-decoration: underline dotted; cursor: pointer; font-weight: bold;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="planning">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>
+                <td class="text-right" style="color:#14b8a6; text-decoration: underline dotted; cursor: pointer; font-weight: bold;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="planning">${x.ld}</td>
+                <td class="text-right ${sc}" style="font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>
                 <td class="text-right" style="font-weight:bold; color:#10b981;">$${x.tp.toFixed(2)}</td>
             </tr>`;
         });
@@ -1259,8 +1259,6 @@ window.runVelocityzExplosion = function() {
 window.ccSyncChannel = null;
 window.ccSessionId = null;
 let currentPreviewMode = 'phone'; // phone | pc | both
-let currentScanKey = null;
-let currentScanIsFgi = false;
 
 window.initializeCcSyncChannel = function() {
     if (!window.ccSessionId) {
@@ -1409,17 +1407,28 @@ window.initializeCcSyncChannel = function() {
     window.ccSyncChannel.on('broadcast', { event: 'MOBILE_SAVE_COUNT' }, async (envelope) => {
         const payload = envelope.payload;
         if (payload && typeof payload.value !== 'undefined' && typeof payload.qty !== 'undefined') {
-            const select = document.getElementById('ccMngrItemSelect');
-            const qtyInput = document.getElementById('ccMngrQtyInput');
-            if (select && qtyInput) {
-                select.value = payload.value;
-                qtyInput.value = payload.qty;
-                
-                // Execute the native PC save manual cycle count logic!
-                await window.saveManualCycleCount();
-                
-                if (payload.close) {
-                    window.closeCycleCountManager();
+            const auditModal = document.getElementById('stockzAuditModal');
+            if (auditModal && auditModal.style.display === 'flex') {
+                if (payload.value === window.currentAuditItemKey) {
+                    const countInput = document.getElementById('stockzAuditCountInput');
+                    if (countInput) {
+                        countInput.value = payload.qty;
+                        window.updateStockzAuditDeltaValuation();
+                    }
+                }
+            } else {
+                const select = document.getElementById('ccMngrItemSelect');
+                const qtyInput = document.getElementById('ccMngrQtyInput');
+                if (select && qtyInput) {
+                    select.value = payload.value;
+                    qtyInput.value = payload.qty;
+                    
+                    // Execute the native PC save manual cycle count logic!
+                    await window.saveManualCycleCount();
+                    
+                    if (payload.close) {
+                        window.closeCycleCountManager();
+                    }
                 }
             }
         }
@@ -1721,14 +1730,14 @@ window.onScanSuccess = function(decodedText) {
         return;
     }
     
-    // Auto-select the item in the Cycle Count Manager dropdown
-    let selectEl = document.getElementById('ccMngrItemSelect');
+    // Select the item in the unified Stockz Audit dropdown
+    let selectEl = document.getElementById('stockzAuditItemSelect');
     if (selectEl) {
         selectEl.value = actualKey;
         
-        if(selectEl.value !== actualKey) {
+        if (selectEl.value !== actualKey) {
             let n = pName;
-            if(catalogCache[actualKey]) n = catalogCache[actualKey].neoName || catalogCache[actualKey].itemName;
+            if (catalogCache[actualKey]) n = catalogCache[actualKey].neoName || catalogCache[actualKey].itemName;
             sysLog(`Scanner parsed valid key ${actualKey} but it was not in select list natively. Forcing injection.`);
             let opt = document.createElement("option");
             opt.value = actualKey;
@@ -1738,15 +1747,21 @@ window.onScanSuccess = function(decodedText) {
         }
     }
     
-    // Trigger the stock update logic natively as if the user clicked the dropdown
-    window.updateCcMngrStock();
+    // Update the console views
+    window.selectStockzAuditItem(actualKey);
     
-    // Focus the actual manager quantity input field
+    // Focus the appropriate input field based on current mode
     setTimeout(() => {
-        let input = document.getElementById('ccMngrQtyInput');
-        if(input) {
+        let input = document.getElementById('stockzAuditCountInput');
+        if (input && window.currentAuditMode === 'reconciliation') {
             input.focus();
             input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            let deltaInput = document.getElementById('stockzAuditDeltaInput');
+            if (deltaInput) {
+                deltaInput.focus();
+                deltaInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     }, 100);
 };
@@ -1880,14 +1895,11 @@ window.selectCcMngrItem = function(val, text) {
     window.updateCcMngrStock();
 };
 
-/**
- * Opens the Cycle Count Manager modal and heavily initializes both 
- * the custom search dropdown overlay and the native fallback select.
- */
-window.openCycleCountManager = function() {
-    let select = document.getElementById('ccMngrItemSelect');
-    // Seed the empty default option
-    let baseSelectHtml = '<option value="">-- Choose Item Natively --</option>';
+window.populateStockzAuditDropdown = function() {
+    let select = document.getElementById('stockzAuditItemSelect');
+    if (!select) return;
+    
+    let baseSelectHtml = '<option value="">-- Choose Item --</option>';
     
     let safeProductsDB = (typeof productsDB !== 'undefined') ? productsDB : (window.productsDB || {});
     let safeIsSubassemblyDB = (typeof isSubassemblyDB !== 'undefined') ? isSubassemblyDB : (window.isSubassemblyDB || {});
@@ -1902,11 +1914,11 @@ window.openCycleCountManager = function() {
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
     
     let optGroups = {
-        retail: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">📦 RETAIL PRODUCTS</div>',
-        sub: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">⚙️ SUB-ASSEMBLIES</div>',
-        print: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🖨️ 3D PRINTS</div>',
-        label: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🏷️ CUSTOM LABELZ</div>',
-        raw: '<div class="cc-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🔩 RAW MATERIALS</div>'
+        retail: '<div class="stockz-audit-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">📦 RETAIL PRODUCTS</div>',
+        sub: '<div class="stockz-audit-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">⚙️ SUB-ASSEMBLIES</div>',
+        print: '<div class="stockz-audit-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🖨️ 3D PRINTS</div>',
+        label: '<div class="stockz-audit-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🏷️ CUSTOM LABELZ</div>',
+        raw: '<div class="stockz-audit-dropdown-header" style="padding:6px 10px; font-weight:bold; background:var(--bg-body); font-size:11px; color:#FF8C00;">🔩 RAW MATERIALS</div>'
     };
 
     let nativeGroups = {
@@ -1920,7 +1932,7 @@ window.openCycleCountManager = function() {
     let mkItem = (val, txt) => {
         let safeVal = String(val).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         let safeTxt = String(txt).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        return `<div class="cc-dropdown-item" style="padding:8px 10px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border-color);" class="cc-dropdown-item" data-app-click="selectCcItem" data-val="${safeVal}" data-txt="${safeTxt}">${txt}</div>`;
+        return `<div class="stockz-audit-dropdown-item" style="padding:8px 10px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border-color); color:var(--text-main);" data-click="click_selectStockzAuditItem" data-val="${safeVal}" data-txt="${safeTxt}">${txt}</div>`;
     };
 
     let mkOpt = (val, txt) => {
@@ -1933,7 +1945,6 @@ window.openCycleCountManager = function() {
     realPrintProds.forEach(k => { optGroups.print += mkItem(`RECIPE:::${k}`, `🖨️ ${k}`); nativeGroups.print += mkOpt(`RECIPE:::${k}`, `🖨️ ${k}`); });
     labelProds.forEach(k => { optGroups.label += mkItem(`RECIPE:::${k}`, `🏷️ ${k}`); nativeGroups.label += mkOpt(`RECIPE:::${k}`, `🏷️ ${k}`); });
     
-    // sort raw
     let rawArr = Object.entries(safeCatalogCache).sort((a,b) => {
         let na = a[1].neoName || a[1].itemName || '';
         let nb = b[1].neoName || b[1].itemName || '';
@@ -1960,273 +1971,773 @@ window.openCycleCountManager = function() {
     if (labelProds.length > 0) { finalHtml += optGroups.label; finalNativeHtml += nativeGroups.label; }
     if (rawArr.length > 0) { finalHtml += optGroups.raw; finalNativeHtml += nativeGroups.raw; }
     
-    document.getElementById('ccMngrDropdown').innerHTML = window.safeHTML(finalHtml);
+    const dropdownEl = document.getElementById('stockzAuditDropdown');
+    if (dropdownEl) dropdownEl.innerHTML = window.safeHTML(finalHtml);
     select.innerHTML = window.safeHTML(finalNativeHtml);
-    window.cachedCcMngrOptions = finalHtml;
-    
-    let searchEl = document.getElementById('ccMngrSearch');
-    if(searchEl) searchEl.value = '';
-    
-    document.getElementById('ccMngrQtyInput').value = '';
-    document.getElementById('cycleCountManagerModal').style.display = 'flex';
+    window.cachedStockzAuditOptions = finalHtml;
 };
 
-window.closeCycleCountManager = function() {
-    document.getElementById('cycleCountManagerModal').style.display = 'none';
+window.filterStockzAuditItems = function() {
+    let term = document.getElementById('stockzAuditSearch').value.toLowerCase().trim();
+    let dropdown = document.getElementById('stockzAuditDropdown');
+    if (!dropdown) return;
+    
+    if (!window.cachedStockzAuditOptions) return;
+    
+    if (term === '') {
+        dropdown.innerHTML = window.safeHTML(window.cachedStockzAuditOptions);
+        dropdown.style.display = 'none';
+        return;
+    }
+    
+    dropdown.innerHTML = window.safeHTML(window.cachedStockzAuditOptions);
+    
+    let items = dropdown.querySelectorAll('.stockz-audit-dropdown-item');
+    items.forEach(o => {
+        if (!o.innerText.toLowerCase().includes(term)) {
+            o.remove();
+        }
+    });
+    
+    if (dropdown.querySelectorAll('.stockz-audit-dropdown-item').length > 0) {
+        dropdown.style.display = 'block';
+    } else {
+        dropdown.innerHTML = window.safeHTML(
+            '<div style="padding:10px; color:var(--text-muted); text-align:center;">No items found.</div>');
+        dropdown.style.display = 'block';
+    }
+};
+
+window.selectStockzAuditItem = function(itemKey) {
+    if (!itemKey) {
+        window.currentAuditItemKey = null;
+        window.currentAuditItemExpectedStock = 0;
+        window.currentAuditItemAvgCost = 0;
+        
+        document.getElementById('stockzAuditItemSelect').value = '';
+        document.getElementById('stockzAuditSearch').value = '';
+        document.getElementById('stockzAuditDropdown').style.display = 'none';
+        
+        document.getElementById('stockzAuditVal_purchased').innerText = '—';
+        document.getElementById('stockzAuditVal_consumed').innerText = '—';
+        document.getElementById('stockzAuditVal_scrapped').innerText = '—';
+        document.getElementById('stockzAuditVal_stock').innerText = '—';
+        
+        const countInput = document.getElementById('stockzAuditCountInput');
+        const deltaInput = document.getElementById('stockzAuditDeltaInput');
+        const notesInput = document.getElementById('stockzAuditNotesInput');
+        if (countInput) countInput.value = '';
+        if (deltaInput) deltaInput.value = '';
+        if (notesInput) notesInput.value = '';
+        
+        document.getElementById('stockzAuditMinSlider').value = 0;
+        document.getElementById('stockzAuditLeadSlider').value = 5;
+        
+        window.updateStockzAuditDeltaValuation();
+        window.updateStockzAuditROPSimulator();
+        
+        document.getElementById('stockzAuditScannerItemName').innerText = 'Scan Any Item';
+        document.getElementById('stockzAuditScannerExpected').innerText = 'No active item selected';
+        return;
+    }
+    
+    window.currentAuditItemKey = itemKey;
+    
+    const select = document.getElementById('stockzAuditItemSelect');
+    if (select) {
+        select.value = itemKey;
+        const opt = select.options[select.selectedIndex];
+        if (opt) {
+            document.getElementById('stockzAuditSearch').value = opt.text;
+        }
+    }
+    document.getElementById('stockzAuditDropdown').style.display = 'none';
+    
+    let label = itemKey;
+    if (itemKey.startsWith('RECIPE:::')) {
+        let p = itemKey.replace('RECIPE:::', '');
+        if (productsDB[p]) {
+            label = `${p} (${productsDB[p].description || 'Finished Goods'})`;
+        }
+    } else {
+        if (catalogCache[itemKey]) {
+            label = `${itemKey} (${catalogCache[itemKey].neoName || catalogCache[itemKey].itemName})`;
+        }
+    }
+    
+    document.getElementById('stockzAuditScannerItemName').innerText = label;
+    
+    const countInput = document.getElementById('stockzAuditCountInput');
+    const deltaInput = document.getElementById('stockzAuditDeltaInput');
+    const notesInput = document.getElementById('stockzAuditNotesInput');
+    const reasonSelect = document.getElementById('stockzAuditReasonSelect');
+    
+    if (countInput) countInput.value = '';
+    if (deltaInput) deltaInput.value = '';
+    if (notesInput) notesInput.value = '';
+    if (reasonSelect) reasonSelect.selectedIndex = 0;
+    
+    let i = inventoryDB[itemKey] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5, produced_qty:0, sold_qty:0};
+    
+    let expectedStock;
+    let purchasedOrProduced;
+    let consumed;
+    let scrapped = parseFloat(i.scrap_qty) || 0;
+    let avgCost;
+
+    if (itemKey.startsWith('RECIPE:::')) {
+        let p = itemKey.replace('RECIPE:::', '');
+        let b = parseFloat(i.produced_qty) || 0;
+        let pb = parseFloat(i.prototype_produced_qty) || 0;
+        let sold = parseFloat(i.sold_qty) || 0;
+        let c_prod = parseFloat(i.production_consumed_qty) || 0;
+        let c_proto = parseFloat(i.prototype_consumed_qty) || 0;
+        let scrap = parseFloat(i.scrap_qty) || 0;
+        let adj = parseFloat(i.manual_adjustment) || 0;
+        expectedStock = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);
+        purchasedOrProduced = b;
+        consumed = sold + c_prod;
+        let breakdown = calculateProductBreakdown(p);
+        avgCost = breakdown.total || 0;
+    } else {
+        let c = catalogCache[itemKey] || {totalQty:0, avgUnitCost:0};
+        expectedStock = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
+        purchasedOrProduced = c.totalQty;
+        consumed = i.consumed_qty;
+        avgCost = c.avgUnitCost || 0;
+    }
+
+    window.currentAuditItemExpectedStock = expectedStock;
+    window.currentAuditItemAvgCost = avgCost;
+
+    document.getElementById('stockzAuditVal_purchased').innerText = purchasedOrProduced.toFixed(2).replace(/\.?0+$/,'');
+    document.getElementById('stockzAuditVal_consumed').innerText = consumed.toFixed(2).replace(/\.?0+$/,'');
+    document.getElementById('stockzAuditVal_scrapped').innerText = scrapped.toFixed(2).replace(/\.?0+$/,'');
+    document.getElementById('stockzAuditVal_stock').innerText = expectedStock.toFixed(2).replace(/\.?0+$/,'');
+    
+    document.getElementById('stockzAuditScannerExpected').innerText = `Expected: ${expectedStock.toFixed(2).replace(/\.?0+$/,'')} units`;
+    
+    window.updateStockzAuditDeltaValuation();
+    
+    let minStock = parseFloat(i.min_stock) || 0;
+    document.getElementById('stockzAuditMinSlider').value = minStock;
+    
+    let leadTime = parseFloat(i.rop_lead_time_days) || SUPPLIER_LEAD_TIME_DAYS;
+    document.getElementById('stockzAuditLeadSlider').value = leadTime;
+    
+    window.updateStockzAuditROPSimulator();
+    
+    window.initializeCcSyncChannel();
+    let savedIP = localStorage.getItem('neogleamz_pc_local_ip');
+    let host = window.location.host;
+    if (savedIP) {
+        const port = window.location.port ? `:${window.location.port}` : '';
+        host = `${savedIP}${port}`;
+    }
+    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
+    document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(remoteUrl)}`;
+    document.getElementById('stockzAuditMobileSessionDetails').innerText = `Session Token: ${window.ccSessionId}`;
+};
+
+window.toggleStockzAuditScanner = async function() {
+    const card = document.getElementById('stockzAuditScannerCard');
+    if (!card) return;
+    
+    if (card.style.display === 'none') {
+        card.style.display = 'flex';
+        await window.switchStockzAuditCameraRoute(document.getElementById('stockzAuditCameraRoute_pc'));
+    } else {
+        card.style.display = 'none';
+        await window.stopStockzAuditWebcam();
+    }
+};
+
+window.updateLocalIPQRCode_audit = function() {
+    const input = document.getElementById('pcLocalIPInput_audit');
+    if (!input) return;
+    const ip = input.value.trim();
+    if (!ip) return alert("Please enter a valid IP address.");
+    localStorage.setItem('neogleamz_pc_local_ip', ip);
+    
+    const itemKey = window.currentAuditItemKey || '';
+    const port = window.location.port ? `:${window.location.port}` : '';
+    const host = `${ip}${port}`;
+    const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
+    
+    document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(remoteUrl)}`;
+    alert("QR code updated with IP override: " + ip);
 };
 
 window.updateCcMngrStock = function() {
-    let key = document.getElementById('ccMngrItemSelect').value;
-    
-    // Sync the search input if changing from native select natively
-    let searchEl = document.getElementById('ccMngrSearch');
-    if (searchEl && key) {
-        let opt = document.querySelector(`#ccMngrItemSelect option[value="${key.replace(/"/g, '\\"')}"]`);
-        if (opt) searchEl.value = opt.text;
-    } else if (!key && searchEl) {
-        searchEl.value = '';
+    if (window.currentAuditItemKey) {
+        window.selectStockzAuditItem(window.currentAuditItemKey);
     }
+};
+
+window.openCycleCountManager = function() {
+    window.openStockzAuditModal('', 'audit');
+};
+
+window.closeCycleCountManager = function() {
+    window.closeStockzAuditModal();
+};
+
+window.resumeCycleCount = function() {
+    // compatibility stub
+};
+
+// ====== STOCKZ AUDIT & PLANNING CONSOLE MODAL LOGIC ======
+window.currentAuditItemKey = null;
+window.currentAuditItemExpectedStock = 0;
+window.currentAuditItemAvgCost = 0;
+window.currentAuditMode = 'reconciliation';
+window.currentCameraRoute = 'pc';
+window.stockzAuditWebcamScanner = null;
+
+window.switchStockzAuditMode = function(btn) {
+    const mode = btn.getAttribute('data-mode');
+    if (!mode) return;
     
-    let display = document.getElementById('ccMngrStockDisplay');
-    let valEl = document.getElementById('ccMngrStockVal');
+    window.currentAuditMode = mode;
     
-    let elL1 = document.getElementById('ccMngrL1'); let elV1 = document.getElementById('ccMngrV1');
-    let elL2 = document.getElementById('ccMngrL2'); let elV2 = document.getElementById('ccMngrV2');
-    let elL3 = document.getElementById('ccMngrL3'); let elV3 = document.getElementById('ccMngrV3');
-    let elV4 = document.getElementById('ccMngrV4'); let elV5 = document.getElementById('ccMngrV5');
+    const reconPanel = document.getElementById('stockzAuditPanel_reconciliation');
+    const deltaPanel = document.getElementById('stockzAuditPanel_delta');
     
-    if (!key) { 
-        elL1.innerText = "PROD"; elV1.innerText = "—"; elV1.contentEditable = "false"; elV1.className = "";
-        elL2.innerText = "PROTO"; elV2.innerText = "—"; elV2.parentElement.style.visibility = "visible";
-        elL3.innerText = "CONS"; elV3.innerText = "—"; elV3.contentEditable = "false"; elV3.className = "";
-        elV4.innerText = "—"; elV5.innerText = "—";
-        valEl.innerText = "—"; valEl.style.color = '#f97316';
-        display.style.display = 'flex';
-        return; 
-    }
-    
-    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'");
-    let inv = inventoryDB[rKey] || {};
-    let stock;
-    
-    if (rKey.startsWith('RECIPE:::')) {
-        let p    = parseFloat(inv.produced_qty) || 0;
-        let pb   = parseFloat(inv.prototype_produced_qty) || 0;
-        let sold = parseFloat(inv.sold_qty) || 0;
-        let cp   = parseFloat(inv.production_consumed_qty) || 0;
-        let cpr  = parseFloat(inv.prototype_consumed_qty) || 0;
-        let sq   = parseFloat(inv.scrap_qty) || 0;
-        let adj  = parseFloat(inv.manual_adjustment) || 0;
-        stock = p - sold - cp - sq - Math.max(0, cpr - pb) + adj;
-        
-        elL1.innerText = "PROD";
-        elV1.innerText = Math.round(p * 100) / 100;
-        elV1.contentEditable = "true"; elV1.className = "editable";
-        
-        elL2.innerText = "PROTO";
-        elV2.innerText = Math.round(pb * 100) / 100;
-        elV2.parentElement.style.visibility = "visible";
-        
-        elL3.innerText = "CONS";
-        elV3.innerText = Math.round(cp * 100) / 100;
-        elV3.contentEditable = "false"; elV3.className = "";
-        
-        elV4.innerText = Math.round(sq * 100) / 100;
-        elV5.innerText = Math.round(adj * 100) / 100;
+    if (mode === 'reconciliation') {
+        if (reconPanel) reconPanel.style.display = 'flex';
+        if (deltaPanel) deltaPanel.style.display = 'none';
     } else {
-        let c    = catalogCache[rKey] ? catalogCache[rKey].totalQty : 0;
-        let cq   = parseFloat(inv.consumed_qty) || 0;
-        let sq   = parseFloat(inv.scrap_qty) || 0;
-        let adj  = parseFloat(inv.manual_adjustment) || 0;
-        stock = c - cq - sq + adj;
-        
-        elL1.innerText = "PURCH";
-        elV1.innerText = Math.round(c * 100) / 100;
-        elV1.contentEditable = "false"; elV1.className = "";
-        
-        elL2.innerText = "-";
-        elV2.innerText = "-";
-        elV2.parentElement.style.visibility = "hidden";
-        
-        elL3.innerText = "CONS";
-        elV3.innerText = Math.round(cq * 100) / 100;
-        elV3.contentEditable = "true"; elV3.className = "editable";
-        
-        elV4.innerText = Math.round(sq * 100) / 100;
-        elV5.innerText = Math.round(adj * 100) / 100;
+        if (reconPanel) reconPanel.style.display = 'none';
+        if (deltaPanel) deltaPanel.style.display = 'flex';
     }
     
-    let rounded = Math.round(stock * 100) / 100;
-    valEl.innerText = rounded;
-    valEl.style.color = rounded <= 0 ? '#ef4444' : '#f97316';
-    display.style.display = 'flex';
+    const reconBtn = document.getElementById('stockzAuditModeBtn_reconciliation');
+    const deltaBtn = document.getElementById('stockzAuditModeBtn_delta');
     
-    // Realtime channel broadcast of the current stock balances back to the phone cockpit
-    if (window.ccSyncChannel) {
-        window.ccSyncChannel.send({
-            type: 'broadcast',
-            event: 'PC_STOCK_UPDATE',
-            payload: {
-                itemKey: key,
-                netStock: key ? valEl.innerText : '—',
-                prod: key ? elV1.innerText : '—',
-                proto: key ? elV2.innerText : '—',
-                cons: key ? elV3.innerText : '—',
-                scrap: key ? elV4.innerText : '—',
-                adj: key ? elV5.innerText : '—'
+    if (reconBtn && deltaBtn) {
+        if (mode === 'reconciliation') {
+            reconBtn.classList.add('active');
+            reconBtn.style.background = 'var(--bg-card)';
+            reconBtn.style.color = 'var(--text-heading)';
+            
+            deltaBtn.classList.remove('active');
+            deltaBtn.style.background = 'transparent';
+            deltaBtn.style.color = 'var(--text-muted)';
+        } else {
+            deltaBtn.classList.add('active');
+            deltaBtn.style.background = 'var(--bg-card)';
+            deltaBtn.style.color = 'var(--text-heading)';
+            
+            reconBtn.classList.remove('active');
+            reconBtn.style.background = 'transparent';
+            reconBtn.style.color = 'var(--text-muted)';
+        }
+    }
+    
+    const countInput = document.getElementById('stockzAuditCountInput');
+    const deltaInput = document.getElementById('stockzAuditDeltaInput');
+    if (countInput) countInput.value = '';
+    if (deltaInput) deltaInput.value = '';
+    
+    window.updateStockzAuditDeltaValuation();
+};
+
+window.switchStockzAuditCameraRoute = async function(btn) {
+    const route = btn.getAttribute('data-route');
+    if (!route) return;
+    
+    window.currentCameraRoute = route;
+    
+    const pcPanel = document.getElementById('stockzAuditCameraPanel_pc');
+    const phonePanel = document.getElementById('stockzAuditCameraPanel_phone');
+    
+    if (route === 'pc') {
+        if (pcPanel) pcPanel.style.display = 'flex';
+        if (phonePanel) phonePanel.style.display = 'none';
+    } else {
+        if (pcPanel) pcPanel.style.display = 'none';
+        if (phonePanel) phonePanel.style.display = 'flex';
+        
+        await window.stopStockzAuditWebcam();
+    }
+    
+    const pcBtn = document.getElementById('stockzAuditCameraRoute_pc');
+    const phoneBtn = document.getElementById('stockzAuditCameraRoute_phone');
+    
+    if (pcBtn && phoneBtn) {
+        if (route === 'pc') {
+            pcBtn.classList.add('active');
+            pcBtn.style.background = 'var(--bg-card)';
+            pcBtn.style.color = 'var(--text-heading)';
+            
+            phoneBtn.classList.remove('active');
+            phoneBtn.style.background = 'transparent';
+            phoneBtn.style.color = 'var(--text-muted)';
+        } else {
+            phoneBtn.classList.add('active');
+            phoneBtn.style.background = 'var(--bg-card)';
+            phoneBtn.style.color = 'var(--text-heading)';
+            
+            pcBtn.classList.remove('active');
+            pcBtn.style.background = 'transparent';
+            pcBtn.style.color = 'var(--text-muted)';
+        }
+    }
+};
+
+window.startStockzAuditWebcam = async function() {
+    if (window.stockzAuditWebcamScanner) return;
+    
+    const startBtn = document.getElementById('stockzAuditStartWebcamBtn');
+    const stopBtn = document.getElementById('stockzAuditStopWebcamBtn');
+    
+    if (startBtn) startBtn.style.display = 'none';
+    if (stopBtn) stopBtn.style.display = 'inline-block';
+    
+    try {
+        if (typeof Html5Qrcode === 'undefined') {
+            throw new Error("Html5Qrcode engine is not loaded in window.");
+        }
+        
+        window.stockzAuditWebcamScanner = new Html5Qrcode("stockzAuditLocalReader");
+        await window.stockzAuditWebcamScanner.start(
+            { facingMode: "environment" },
+            { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+            async (decodedText) => {
+                await window.stopStockzAuditWebcam();
+                window.onScanSuccess(decodedText);
+            },
+            () => {}
+        );
+    } catch(err) {
+        sysLog(`Audit Webcam initialization error: ${err.message || err}`, true);
+        alert("Webcam error: " + (err.message || err));
+        await window.stopStockzAuditWebcam();
+    }
+};
+
+window.stopStockzAuditWebcam = async function() {
+    const startBtn = document.getElementById('stockzAuditStartWebcamBtn');
+    const stopBtn = document.getElementById('stockzAuditStopWebcamBtn');
+    
+    if (startBtn) startBtn.style.display = 'inline-block';
+    if (stopBtn) stopBtn.style.display = 'none';
+    
+    if (window.stockzAuditWebcamScanner) {
+        try {
+            if (window.stockzAuditWebcamScanner.getState() === 2) {
+                await window.stockzAuditWebcamScanner.stop();
             }
-        }).catch(() => {});
+        } catch (e) {
+            console.error("Error stopping webcam scanner:", e);
+        }
+        window.stockzAuditWebcamScanner = null;
+    }
+    
+    const readerEl = document.getElementById('stockzAuditLocalReader');
+    if (readerEl) readerEl.innerHTML = window.safeHTML('');
+};
+
+window.openStockzAuditModal = function(itemKey, preSelectTab = 'audit') {
+    const modal = document.getElementById('stockzAuditModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    
+    window.currentAuditMode = 'delta';
+    window.currentCameraRoute = 'pc';
+    
+    const countInput = document.getElementById('stockzAuditCountInput');
+    const deltaInput = document.getElementById('stockzAuditDeltaInput');
+    const notesInput = document.getElementById('stockzAuditNotesInput');
+    const reasonSelect = document.getElementById('stockzAuditReasonSelect');
+    
+    if (countInput) countInput.value = '';
+    if (deltaInput) deltaInput.value = '';
+    if (notesInput) notesInput.value = '';
+    if (reasonSelect) reasonSelect.selectedIndex = 0;
+    
+    const reconPanel = document.getElementById('stockzAuditPanel_reconciliation');
+    const deltaPanel = document.getElementById('stockzAuditPanel_delta');
+    if (reconPanel) reconPanel.style.display = 'none';
+    if (deltaPanel) deltaPanel.style.display = 'flex';
+    
+    const pcPanel = document.getElementById('stockzAuditCameraPanel_pc');
+    const phonePanel = document.getElementById('stockzAuditCameraPanel_phone');
+    if (pcPanel) pcPanel.style.display = 'flex';
+    if (phonePanel) phonePanel.style.display = 'none';
+    
+    const reconBtn = document.getElementById('stockzAuditModeBtn_reconciliation');
+    const deltaBtn = document.getElementById('stockzAuditModeBtn_delta');
+    if (reconBtn && deltaBtn) {
+        deltaBtn.classList.add('active');
+        deltaBtn.style.background = 'var(--bg-card)';
+        deltaBtn.style.color = 'var(--text-heading)';
+        reconBtn.classList.remove('active');
+        reconBtn.style.background = 'transparent';
+        reconBtn.style.color = 'var(--text-muted)';
+    }
+    
+    const pcBtn = document.getElementById('stockzAuditCameraRoute_pc');
+    const phoneBtn = document.getElementById('stockzAuditCameraRoute_phone');
+    if (pcBtn && phoneBtn) {
+        pcBtn.classList.add('active');
+        pcBtn.style.background = 'var(--bg-card)';
+        pcBtn.style.color = 'var(--text-heading)';
+        phoneBtn.classList.remove('active');
+        phoneBtn.style.background = 'transparent';
+        phoneBtn.style.color = 'var(--text-muted)';
+    }
+    
+    const readerEl = document.getElementById('stockzAuditLocalReader');
+    if (readerEl) readerEl.innerHTML = window.safeHTML('');
+    const startBtn = document.getElementById('stockzAuditStartWebcamBtn');
+    const stopBtn = document.getElementById('stockzAuditStopWebcamBtn');
+    if (startBtn) startBtn.style.display = 'inline-block';
+    if (stopBtn) stopBtn.style.display = 'none';
+    
+    // Seed dropdown populations
+    window.populateStockzAuditDropdown();
+    
+    if (itemKey) {
+        window.selectStockzAuditItem(itemKey);
+    } else {
+        window.selectStockzAuditItem('');
+    }
+    
+    const preBtn = document.getElementById(`stockzAuditBtn_${preSelectTab}`);
+    if (preBtn) {
+        window.switchStockzAuditTab(preBtn);
     }
 };
 
-window.handleCcMngrTelemetryEdit = async function(el, colIndex) {
-    let key = document.getElementById('ccMngrItemSelect').value;
+window.closeStockzAuditModal = async function() {
+    await window.stopStockzAuditWebcam();
+    const modal = document.getElementById('stockzAuditModal');
+    if (modal) modal.style.display = 'none';
+    window.currentAuditItemKey = null;
+};
+
+window.switchStockzAuditTab = function(btn) {
+    const tabName = btn.getAttribute('data-tab');
+    if (!tabName) return;
+    
+    const tabAudit = document.getElementById('stockzAuditTab_audit');
+    const tabPlanning = document.getElementById('stockzAuditTab_planning');
+    
+    if (tabAudit) tabAudit.style.display = 'none';
+    if (tabPlanning) tabPlanning.style.display = 'none';
+    
+    const btnAudit = document.getElementById('stockzAuditBtn_audit');
+    const btnPlanning = document.getElementById('stockzAuditBtn_planning');
+    
+    if (btnAudit) {
+        btnAudit.classList.remove('active');
+        btnAudit.style.borderBottom = '3px solid transparent';
+        btnAudit.style.color = 'var(--text-muted)';
+    }
+    if (btnPlanning) {
+        btnPlanning.classList.remove('active');
+        btnPlanning.style.borderBottom = '3px solid transparent';
+        btnPlanning.style.color = 'var(--text-muted)';
+    }
+    
+    const activeTab = document.getElementById(`stockzAuditTab_${tabName}`);
+    if (activeTab) activeTab.style.display = 'flex';
+    
+    const activeBtn = document.getElementById(`stockzAuditBtn_${tabName}`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.borderBottom = '3px solid #0ea5e9';
+        activeBtn.style.color = 'var(--text-heading)';
+    }
+};
+
+window.updateStockzAuditDeltaValuation = function() {
+    const deltaRes = document.getElementById('stockzAuditDeltaResult');
+    const newStockRes = document.getElementById('stockzAuditNewStockResult');
+    const valRes = document.getElementById('stockzAuditValuationResult');
+    
+    if (!deltaRes || !newStockRes || !valRes) return;
+    
+    let delta = 0;
+    let newStock = window.currentAuditItemExpectedStock;
+    let hasValue = false;
+    
+    if (window.currentAuditMode === 'reconciliation') {
+        const countInput = document.getElementById('stockzAuditCountInput');
+        if (countInput) {
+            let countedStr = countInput.value.trim();
+            if (countedStr !== "") {
+                let counted = parseFloat(countedStr);
+                if (!isNaN(counted)) {
+                    delta = counted - window.currentAuditItemExpectedStock;
+                    newStock = counted;
+                    hasValue = true;
+                } else {
+                    deltaRes.innerText = "Error";
+                    deltaRes.style.color = "#ef4444";
+                    newStockRes.innerText = "Error";
+                    newStockRes.style.color = "#ef4444";
+                    valRes.innerText = "Error";
+                    valRes.style.color = "#ef4444";
+                    return;
+                }
+            }
+        }
+    } else {
+        const deltaInput = document.getElementById('stockzAuditDeltaInput');
+        if (deltaInput) {
+            let deltaStr = deltaInput.value.trim();
+            if (deltaStr !== "") {
+                let deltaVal = parseFloat(deltaStr);
+                if (!isNaN(deltaVal)) {
+                    delta = deltaVal;
+                    newStock = window.currentAuditItemExpectedStock + deltaVal;
+                    hasValue = true;
+                } else {
+                    deltaRes.innerText = "Error";
+                    deltaRes.style.color = "#ef4444";
+                    newStockRes.innerText = "Error";
+                    newStockRes.style.color = "#ef4444";
+                    valRes.innerText = "Error";
+                    valRes.style.color = "#ef4444";
+                    return;
+                }
+            }
+        }
+    }
+    
+    let cost = window.currentAuditItemAvgCost || 0;
+    let valuationImpact = delta * cost;
+    
+    if (!hasValue) {
+        deltaRes.innerText = "0.00";
+        deltaRes.style.color = "var(--text-muted)";
+        newStockRes.innerText = window.currentAuditItemExpectedStock.toFixed(2).replace(/\.?0+$/,'');
+        newStockRes.style.color = "var(--text-muted)";
+        valRes.innerText = "$0.00";
+        valRes.style.color = "var(--text-muted)";
+        return;
+    }
+    
+    if (delta > 0) {
+        deltaRes.innerText = `+${delta.toFixed(2)}`;
+        deltaRes.style.color = "#10b981";
+    } else if (delta < 0) {
+        deltaRes.innerText = `${delta.toFixed(2)}`;
+        deltaRes.style.color = "#ef4444";
+    } else {
+        deltaRes.innerText = "0.00";
+        deltaRes.style.color = "var(--text-muted)";
+    }
+    
+    newStockRes.innerText = newStock.toFixed(2).replace(/\.?0+$/,'');
+    newStockRes.style.color = "var(--text-heading)";
+    
+    if (valuationImpact > 0) {
+        valRes.innerText = `+$${valuationImpact.toFixed(2)}`;
+        valRes.style.color = "#10b981";
+    } else if (valuationImpact < 0) {
+        valRes.innerText = `-$${Math.abs(valuationImpact).toFixed(2)}`;
+        valRes.style.color = "#ef4444";
+    } else {
+        valRes.innerText = "$0.00";
+        valRes.style.color = "var(--text-muted)";
+    }
+};
+
+window.updateStockzAuditROPSimulator = function() {
+    const key = window.currentAuditItemKey;
     if (!key) return;
+    const minVal = parseFloat(document.getElementById('stockzAuditMinSlider').value) || 0;
+    const leadVal = parseFloat(document.getElementById('stockzAuditLeadSlider').value) || 0;
     
-    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'");
-    let isFgi = rKey.startsWith('RECIPE:::');
+    document.getElementById('stockzAuditMinValPreview').innerText = minVal.toFixed(2).replace(/\.?0+$/,'');
+    document.getElementById('stockzAuditLeadValPreview').innerText = `${leadVal} days`;
     
-    let oldValStr = el.dataset.oldVal || "0";
-    let newValStr = el.innerText.trim() || "0";
-    let newVal = parseFloat(newValStr) || 0;
+    const vel = window.calculateTrailingVelocity(key, 30);
+    const rop = (vel * leadVal) * 1.10;
     
-    if (newVal.toString() === oldValStr) return; // Unchanged
-    if (isNaN(newVal)) { el.innerText = oldValStr; return; }
+    document.getElementById('stockzAuditVelocityPreview').innerText = `${vel.toFixed(2)} / day`;
+    document.getElementById('stockzAuditROPValPreview').innerText = `${rop.toFixed(2)} units`;
     
-    if (!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
+    document.getElementById('stockzAuditROPFormulaPreview').innerText = `ROP = (${vel.toFixed(2)} * ${leadVal}) * 1.10 = ${rop.toFixed(2)} units`;
     
-    let field = "";
-    if (isFgi) {
-        if (colIndex === 1) field = "produced_qty";
-        if (colIndex === 2) field = "prototype_produced_qty";
-        if (colIndex === 4) field = "scrap_qty";
-        if (colIndex === 5) field = "manual_adjustment";
-    } else {
-        if (colIndex === 3) field = "consumed_qty";
-        if (colIndex === 4) field = "scrap_qty";
-        if (colIndex === 5) field = "manual_adjustment";
+    const expected = window.currentAuditItemExpectedStock || 0;
+    const target = Math.max(minVal, rop);
+    const badge = document.getElementById('stockzAuditAlertStatusBadge');
+    if (badge) {
+        if (expected <= target) {
+            badge.innerText = "🚨 REORDER ALERT";
+            badge.style.background = "#ef4444";
+        } else {
+            badge.innerText = "✅ Stock Healthy";
+            badge.style.background = "#10b981";
+        }
     }
-    
-    if (!field) return;
-    
-    let oldDbVal = inventoryDB[rKey][field];
-    inventoryDB[rKey][field] = newVal;
-    
-    let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0 };
-    
-    el.style.background = "rgba(16, 185, 129, 0.2)";
-    const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'});
-    if(error) { 
-        sysLog("DB Error: " + error.message, true);
-        alert("DB Error: " + error.message); 
-        inventoryDB[rKey][field] = oldDbVal; 
-        el.innerText = oldDbVal;
-        el.style.background = "rgba(239, 68, 68, 0.2)";
-        return; 
-    }
-    
-    setTimeout(() => { el.style.background = ""; }, 500);
-    window.updateCcMngrStock(); 
-    window.renderInventoryTable();
 };
 
-window.saveManualCycleCount = async function(event) {
-    let key = document.getElementById('ccMngrItemSelect').value;
-    if(!key) { sysLog("Validation Error: No item selected for count.", true); return alert("Please select an item first."); }
-    
-    let valInput = document.getElementById('ccMngrQtyInput').value;
-    if(valInput === "") { sysLog("Validation Error: Empty quantity entered.", true); return alert("Please enter the physical quantity."); }
-    let val = parseFloat(valInput);
-    if(isNaN(val)) { sysLog("Validation Error: Invalid number entered.", true); return alert("Please enter a valid number."); }
-    
-    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); 
-    let isFgi = rKey.startsWith('RECIPE:::');
-    
-    if(!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
-    
-    let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0 };
-    
-    if(isFgi) {
-        let p = parseFloat(inventoryDB[rKey].produced_qty) || 0;
-        let pb = parseFloat(inventoryDB[rKey].prototype_produced_qty) || 0;
-        let sold = parseFloat(inventoryDB[rKey].sold_qty) || 0;
-        let c_prod = parseFloat(inventoryDB[rKey].production_consumed_qty) || 0;
-        let c_proto = parseFloat(inventoryDB[rKey].prototype_consumed_qty) || 0;
-        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
-        payload.manual_adjustment = val - (p - sold - c_prod - sq - Math.max(0, c_proto - pb));
-    } else {
-        let c = catalogCache[rKey] ? catalogCache[rKey].totalQty : 0;
-        let cq = parseFloat(inventoryDB[rKey].consumed_qty) || 0;
-        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
-        payload.manual_adjustment = val - (c - cq - sq);    
+window.submitStockzAudit = async function() {
+    try {
+        const key = window.currentAuditItemKey;
+        if (!key) return alert("No active audit item key found.");
+        
+        let i = inventoryDB[key] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5, produced_qty:0, sold_qty:0};
+        
+        const minSlider = document.getElementById('stockzAuditMinSlider');
+        const leadSlider = document.getElementById('stockzAuditLeadSlider');
+        const reasonSelect = document.getElementById('stockzAuditReasonSelect');
+        const notesInput = document.getElementById('stockzAuditNotesInput');
+        const submitBtn = document.getElementById('stockzAuditSubmitBtn');
+        
+        const minVal = parseFloat(minSlider.value) || 0;
+        const leadVal = parseFloat(leadSlider.value) || 5;
+        
+        let countedIsValid = false;
+        let counted = 0;
+        let delta = 0;
+        
+        if (window.currentAuditMode === 'reconciliation') {
+            const countInput = document.getElementById('stockzAuditCountInput');
+            if (countInput) {
+                const countedStr = countInput.value.trim();
+                if (countedStr !== "") {
+                    counted = parseFloat(countedStr);
+                    if (isNaN(counted)) {
+                        return alert("Please enter a valid physical count quantity.");
+                    }
+                    delta = counted - window.currentAuditItemExpectedStock;
+                    countedIsValid = true;
+                }
+            }
+        } else {
+            const deltaInput = document.getElementById('stockzAuditDeltaInput');
+            if (deltaInput) {
+                const deltaStr = deltaInput.value.trim();
+                if (deltaStr !== "") {
+                    delta = parseFloat(deltaStr);
+                    if (isNaN(delta)) {
+                        return alert("Please enter a valid adjustment delta offset.");
+                    }
+                    counted = window.currentAuditItemExpectedStock + delta;
+                    countedIsValid = true;
+                }
+            }
+        }
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "⚡ COMMITTING...";
+        }
+        
+        setMasterStatus("Recording...", "mod-working");
+        
+        if (countedIsValid) {
+            const logPayload = {
+                item_key: key,
+                operator_id: window.currentUser ? window.currentUser.id : null,
+                operator_email: window.currentUser ? window.currentUser.email : 'guest_operator',
+                previous_stock: window.currentAuditItemExpectedStock,
+                counted_stock: counted,
+                delta: delta,
+                avg_unit_cost: window.currentAuditItemAvgCost || 0,
+                valuation_impact: delta * (window.currentAuditItemAvgCost || 0),
+                reason_code: reasonSelect.value,
+                notes: notesInput.value.trim()
+            };
+            
+            const { error: logErr } = await supabaseClient.from('inventory_adjustments_log').insert([logPayload]);
+            if (logErr) {
+                sysLog(`[Audit Log Error] ${logErr.message}`, true);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "💾 RECORD AUDIT";
+                }
+                setMasterStatus("Error", "mod-error");
+                return alert("Failed to save audit transaction log: " + logErr.message);
+            }
+        }
+        
+        let consumed_qty = parseFloat(i.consumed_qty) || 0;
+        let manual_adjustment = parseFloat(i.manual_adjustment) || 0;
+        let scrap_qty = parseFloat(i.scrap_qty) || 0;
+        let prototype_consumed_qty = parseFloat(i.prototype_consumed_qty) || 0;
+        let production_consumed_qty = parseFloat(i.production_consumed_qty) || 0;
+        
+        if (countedIsValid) {
+            if (delta < 0) {
+                let absDelta = Math.abs(delta);
+                let reason = reasonSelect.value;
+                if (reason === 'Damaged / Expired Goods') {
+                    scrap_qty += absDelta;
+                } else if (reason === 'Prototype Consumed') {
+                    prototype_consumed_qty += absDelta;
+                } else if (reason === 'Production Consumed') {
+                    if (key.startsWith('RECIPE:::')) {
+                        production_consumed_qty += absDelta;
+                    } else {
+                        consumed_qty += absDelta;
+                    }
+                } else {
+                    manual_adjustment += delta;
+                }
+            } else {
+                manual_adjustment += delta;
+            }
+        }
+        
+        let savePayload = {
+            item_key: key,
+            consumed_qty: consumed_qty,
+            manual_adjustment: manual_adjustment,
+            produced_qty: i.produced_qty || 0,
+            sold_qty: i.sold_qty || 0,
+            min_stock: minVal,
+            scrap_qty: scrap_qty,
+            prototype_consumed_qty: prototype_consumed_qty,
+            assembly_consumed_qty: i.assembly_consumed_qty || 0,
+            production_consumed_qty: production_consumed_qty,
+            prototype_produced_qty: i.prototype_produced_qty || 0,
+            rop_lead_time_days: leadVal
+        };
+        
+        const { error: saveErr } = await supabaseClient.from('inventory_consumption').upsert(savePayload, {onConflict:'item_key'});
+        if (saveErr) {
+            sysLog(`[Inventory Upsert Error] ${saveErr.message}`, true);
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "💾 RECORD AUDIT";
+            }
+            setMasterStatus("Error", "mod-error");
+            return alert("Failed to save inventory updates: " + saveErr.message);
+        }
+        
+        inventoryDB[key] = savePayload;
+        setMasterStatus("Reconciled!", "mod-success");
+        
+        setTimeout(() => {
+            setMasterStatus("Ready.", "status-idle");
+        }, 2000);
+        
+        await window.closeStockzAuditModal();
+        window.renderInventoryTable();
+        window.updateCcMngrStock();
+        
+        if (typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') {
+            renderAnalyticsDashboard();
+        }
+        
+    } catch(err) {
+        console.error("submitStockzAudit error:", err);
+        sysLog(`[Audit Submit Error] ${err.message || err}`, true);
+        const submitBtn = document.getElementById('stockzAuditSubmitBtn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "💾 RECORD AUDIT";
+        }
+        setMasterStatus("Error", "mod-error");
+        alert("Unexpected error committing audit: " + (err.message || err));
     }
-    
-    let btn = event ? event.target : document.querySelector('#cycleCountManagerModal .btn-green');
-    let oldTxt = "💾 Save Manual Count";
-    if(btn) {
-        oldTxt = btn.innerText;
-        btn.innerText = "⏳ Saving...";
-        btn.disabled = true;
-    }
-    
-    const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
-    
-    if(btn) {
-        btn.innerText = oldTxt;
-        btn.disabled = false;
-    }
-    
-    if(error) { sysLog("DB Error: " + error.message, true); alert("DB Error: " + error.message); return; }
-    
-    inventoryDB[rKey] = payload;
-    window.renderInventoryTable();
-    window.updateCcMngrStock();
-    
-    if(btn) {
-        btn.innerText = "✅ Count Saved!";
-        btn.style.background = "#059669";
-        setTimeout(() => { btn.innerText = "💾 Save Manual Count"; btn.style.background = ""; btn.disabled = false; }, 2500);
-    }
-    document.getElementById('ccMngrQtyInput').value = ''; // clear for next entry
-};
-
-window.saveCycleCount = async function() {
-    let valInput = document.getElementById('scanner-physical-count').value;
-    if(valInput === "") { window.resumeCycleCount(); return; } // just hit cancel effectively or enter empty
-    let val = parseFloat(valInput);
-    if(isNaN(val)) { sysLog("Validation Error: Invalid scanner number entered.", true); return alert("Please enter a valid number"); }
-    
-    let key = currentScanKey;
-    let rKey = key.replace(/"/g, '"').replace(/\\'/g, "'"); 
-    
-    if(!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
-    
-    let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0 };
-    
-    if(currentScanIsFgi) {
-        let p = parseFloat(inventoryDB[rKey].produced_qty) || 0;
-        let pb = parseFloat(inventoryDB[rKey].prototype_produced_qty) || 0;
-        let sold = parseFloat(inventoryDB[rKey].sold_qty) || 0;
-        let c_prod = parseFloat(inventoryDB[rKey].production_consumed_qty) || 0;
-        let c_proto = parseFloat(inventoryDB[rKey].prototype_consumed_qty) || 0;
-        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
-        payload.manual_adjustment = val - (p - sold - c_prod - sq - Math.max(0, c_proto - pb));
-    } else {
-        let c = catalogCache[rKey] ? catalogCache[rKey].totalQty : 0;
-        let cq = parseFloat(inventoryDB[rKey].consumed_qty) || 0;
-        let sq = parseFloat(inventoryDB[rKey].scrap_qty) || 0;
-        payload.manual_adjustment = val - (c - cq - sq);    
-    }
-    
-    document.getElementById('scanner-prompt-title').innerText = "Saving...";
-    
-    const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
-    if(error) { sysLog("DB Error: " + error.message, true); alert("DB Error: " + error.message); document.getElementById('scanner-prompt-title').innerText = currentScanKey; return; }
-    
-    inventoryDB[rKey] = payload;
-    window.renderInventoryTable(); window.updateCcMngrStock();
-    
-    window.resumeCycleCount();
 };
 
 // ====== GLOBAL BINDINGS ======
@@ -2266,5 +2777,11 @@ document.addEventListener('click', (e) => {
 document.addEventListener('input', (e) => {
     if (e.target.dataset.appInput === 'forecast') {
         if(typeof window.updateVelocityzForecast === 'function') window.updateVelocityzForecast(e.target.dataset.item, e.target.value);
+    }
+    if (e.target.id === 'stockzAuditCountInput' || e.target.id === 'stockzAuditDeltaInput') {
+        if(typeof window.updateStockzAuditDeltaValuation === 'function') window.updateStockzAuditDeltaValuation();
+    }
+    if (e.target.id === 'stockzAuditMinSlider' || e.target.id === 'stockzAuditLeadSlider') {
+        if(typeof window.updateStockzAuditROPSimulator === 'function') window.updateStockzAuditROPSimulator();
     }
 });
