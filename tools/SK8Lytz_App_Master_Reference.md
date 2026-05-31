@@ -196,9 +196,9 @@ graph LR
 * **In-Memory Caches**: Rather than triggering massive `fetch()` sweeps, real-time broadcasts inject or modify the targeted object directly inside the global state arrays (e.g., `taskEngineDB`, `productionDB`) before calling the contextual `render()` function.
 
 ### DOM Security & Injection (safeHTML)
-* **The safeHTML Protocol**: All dynamically generated HTML strings MUST be injected using `window.safeHTML(string)`. This relies on DOMPurify to strip away XSS vectors.
+* **The safeHTML Protocol**: All dynamically generated HTML strings injected via `.innerHTML`, `.insertAdjacentHTML()`, or iframe/window `document.write()` containing dynamic variables MUST be wrapped in `window.safeHTML(string)`. This relies on DOMPurify to strip away XSS vectors.
 * **Inline Handlers Scrubbed**: `DOMPurify` will violently scrub all inline JavaScript execution attributes (`onclick`, `onchange`, `ondragstart`, etc.) from HTML strings.
-* **The Solution**: When generating complex dynamic DOM elements (like lists or SOP groups), you MUST assign explicit CSS classes or `data-*` attributes within the template string. Immediately following the `innerHTML = window.safeHTML(html)` assignment, you MUST natively attach event handlers via `querySelectorAll` and `addEventListener()`. Relying on inline string execution will result in dead UI components.
+* **The Solution**: When generating complex dynamic DOM elements (like lists or SOP groups), you MUST assign explicit CSS classes or `data-*` attributes within the template string. Immediately following the dynamic element injection, you MUST natively attach event handlers via `querySelectorAll` and `addEventListener()`. Relying on inline string execution will result in dead UI components.
 
 ### Local State Caching Matrix
 * **Synchronous Speed Priority**: `localStorage` is used exclusively for global toggles, persistent states, and zero-latency configs.

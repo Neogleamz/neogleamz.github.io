@@ -48,3 +48,8 @@ description: "Mission-critical constraints regarding Security, Version Control, 
   - Documentation Assets: `README.md`, `CHANGELOG.md`
 - **Hygiene Enforcement:** Every time you execute `/health_check` or `/wind_down`, you must scan the root directory. If any un-whitelisted file is detected, you must instantly queue a task to clean it up.
 
+### 7. DOM Security & Dynamic XSS Prevention
+- **The Sanitization Mandate:** To mathematically eliminate Cross-Site Scripting (XSS) risks, you are STRICTLY FORBIDDEN from ever using dynamic injection mechanisms (`.innerHTML`, `.insertAdjacentHTML()`, or iframe/window `document.write()`) with unescaped variables or dynamic data payloads.
+- **The Execution Trap:** Standard `.insertAdjacentHTML` is a dangerous injection vector because it directly interprets strings as HTML code. You must wrap any dynamic markup payload in `window.safeHTML()` before rendering it to guarantee that DOMPurify scrubs malicious script execution or event listeners.
+- **Micro-Commit Safeguard:** During any code reviews or `/health_check` cycles, you must actively scan for dynamic DOM injection lines and immediately flag any unguarded assignments as Critical security vulnerabilities.
+
