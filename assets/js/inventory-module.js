@@ -2477,6 +2477,13 @@ window.openStockzAuditModal = function(itemKey, preSelectTab = 'audit') {
     if (!modal) return;
     modal.style.display = 'flex';
     
+    const submitBtn = document.getElementById('stockzAuditSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.display = 'inline-block';
+        submitBtn.innerText = "💾 RECORD AUDIT";
+    }
+    
     window.currentAuditMode = 'delta';
     window.currentCameraRoute = 'pc';
     
@@ -2574,6 +2581,8 @@ window.switchStockzAuditTab = function(btn) {
     const tabName = btn.getAttribute('data-tab');
     if (!tabName) return;
     
+    window.currentStockzAuditTab = tabName;
+    
     const tabs = ['audit', 'planning', 'history'];
     tabs.forEach(t => {
         const tabEl = document.getElementById(`stockzAuditTab_${t}`);
@@ -2597,6 +2606,18 @@ window.switchStockzAuditTab = function(btn) {
         activeBtn.classList.add('active');
         activeBtn.style.borderBottom = '3px solid #0ea5e9';
         activeBtn.style.color = 'var(--text-heading)';
+    }
+
+    // Dynamic submit button configuration based on active tab
+    const submitBtn = document.getElementById('stockzAuditSubmitBtn');
+    if (submitBtn) {
+        if (tabName === 'history') {
+            submitBtn.style.display = 'none';
+        } else {
+            submitBtn.style.display = 'inline-block';
+            submitBtn.disabled = false;
+            submitBtn.innerText = (tabName === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
+        }
     }
 
     if (tabName === 'history') {
@@ -2915,7 +2936,7 @@ window.submitStockzAudit = async function() {
                 sysLog(`[Audit Log Error] ${logErr.message}`, true);
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = "💾 RECORD AUDIT";
+                    submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
                 }
                 setMasterStatus("Error", "mod-error");
                 return alert("Failed to save audit transaction log: " + logErr.message);
@@ -2974,7 +2995,7 @@ window.submitStockzAudit = async function() {
             sysLog(`[Inventory Upsert Error] ${saveErr.message}`, true);
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerText = "💾 RECORD AUDIT";
+                submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
             }
             setMasterStatus("Error", "mod-error");
             return alert("Failed to save inventory updates: " + saveErr.message);
@@ -3006,7 +3027,7 @@ window.submitStockzAudit = async function() {
         const submitBtn = document.getElementById('stockzAuditSubmitBtn');
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = "💾 RECORD AUDIT";
+            submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
         }
         setMasterStatus("Error", "mod-error");
         alert("Unexpected error committing audit: " + (err.message || err));
