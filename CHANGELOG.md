@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-05-31
+
+### ✨ Features & Bug Fixes
+- **STOCKZ Raw Inventory Grid Upgrades** (`feat/stockz-raw-inventory-upgrades`):
+  - **Global Search Input:** Wrapped the right split pane with a vertical flex container and added a styled search bar (`rawInvSearch`) above the table.
+  - **Inline Column-Level Filters:** Added a sticky inputs row in the `<thead>` of the Raw Inventory grid to enable real-time filtering per column.
+  - **Neogleamz Product Column Integration:** Projected the Neogleamz Product (`c.neoProd`) column from the catalog cache projection into the grid as the leftmost column for enhanced categorizations.
+  - **Focus & Selection Preservation:** Built a Vanilla JS cursor focus-range restoration handler to ensure frictionless typing when using column filters.
+  - **Defensive Resizer Adaptability:** Upgraded horizontal draggable resizer logic to target the wrapper container, protecting vertical split scale ratios on viewport resize.
+
 ## [1.3.2] - 2026-05-28
 
 ### ✨ Features & Bug Fixes

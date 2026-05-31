@@ -561,3 +561,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Custom Label Dropdown Categorization**
 *(Archived — 2026-05-28)*
 - [🚀] `bug/labelz-dropdown-categorization` : **Custom Label Dropdown Categorization** - Refactor populateDropdowns() in index.html to group custom labels (is_label: true) under a dedicated 'Custom Labels' optgroup rather than falling through to Retail Products, and add them to secondary dropdowns like batch builds and aliases. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
+
+### Target: `feat/stockz-raw-inventory-upgrades`
+**Epic: STOCKZ Raw Inventory Grid Upgrades**
+*(Shipped v1.3.3 — 2026-05-31)*
+- [🚀] `feat/stockz-raw-inventory-upgrades` : **STOCKZ Raw Inventory Grid Upgrades** - Implement global search, inline column-level filtering, focus-range preservation, and a Neogleamz Product column mapping for the Raw Inventory grid. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
