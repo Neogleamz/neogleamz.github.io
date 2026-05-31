@@ -7,6 +7,10 @@
   - **SOP Viewer Checklist State Restoration:** Fixed checkbox and input "amnesia" on re-opening cleared SOP Checklists by implementing a robust database-backed state synchronization restorer using `sop_archives`.
   - **Horizontal Modal Header Button Layout:** Overrode global `button { width: 100% }` constraints by establishing a native CSS inline-flex rule for `#sopViewerHeaderButtons` and child button elements, forcing `PRINT SOP`, `EDIT`, and `CLOSE` to render horizontally on a single line with perfect desktop and mobile touch-target scaling.
   - **Pre-Flight Continuous QA Cleared:** Verified 100% clean builds with zero regressions across all 30 Jest test suites and full warning-free linter runs.
+- **Orphan Root Files Relocation & Whitelist Hardening** (`debt/orphan-root-files`):
+  - **Directory Relocation:** Relocated interactive remote utilities `remote-capture.html` and `remote-scanner.html` from the repository root to the `/tools/` subdirectory to resolve loose-file whitelist violations.
+  - **Dynamic Pathway Sync:** Standardized URL generators inside both `packerz-module.js` and `inventory-module.js` to point to `/tools/remote-capture.html` and `/tools/remote-scanner.html` dynamically over local Wi-Fi.
+  - **Pre-Commit Whitelist Hardening:** Tightened the git pre-commit hook to remove historical, obsolete root entries (`test_print.html`, `diagram-1.svg`), strictly keeping the root isolated for key configuration files.
 
 ## [1.3.3] - 2026-05-31
 
