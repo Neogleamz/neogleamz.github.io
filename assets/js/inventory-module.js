@@ -2051,7 +2051,7 @@ window.selectStockzAuditItem = function(itemKey) {
             host = `${savedIP}${port}`;
         }
         const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=`;
-        document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(remoteUrl)}`;
+        document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
         document.getElementById('stockzAuditMobileSessionDetails').innerText = `Session Token: ${window.ccSessionId}`;
         
         return;
@@ -2151,7 +2151,7 @@ window.selectStockzAuditItem = function(itemKey) {
         host = `${savedIP}${port}`;
     }
     const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
-    document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(remoteUrl)}`;
+    document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
     document.getElementById('stockzAuditMobileSessionDetails').innerText = `Session Token: ${window.ccSessionId}`;
 };
 
@@ -2180,7 +2180,7 @@ window.updateLocalIPQRCode_audit = function() {
     const host = `${ip}${port}`;
     const remoteUrl = `${window.location.protocol}//${host}/tools/remote-scanner.html?session=${window.ccSessionId}&audit_target=${encodeURIComponent(itemKey)}`;
     
-    document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(remoteUrl)}`;
+    document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
     alert("QR code updated with IP override: " + ip);
 };
 
