@@ -800,7 +800,16 @@ To prevent race conditions during simultaneous webhook transmissions (e.g. order
 1. **Payload Aggregation**: Edge functions pre-aggregate duplicate line items (by storefront_sku) natively before pushing to the DB. This prevents false-flags of legitimate multiple cart additions.
 2. **Database Constraints**: The sales_ledger table enforces a UNIQUE(order_id, storefront_sku) constraint. Simultaneous requests will trigger a Postgres constraint violation on the secondary payload, which causes the Edge Function to fail safely (HTTP 500). Shopify’s native retry algorithm then automatically delays and retries the webhook, which subsequently succeeds via an .update() bypass.
 
+### Boot-Time Storefront SKU Mapping Scanner & Real-Time Sync Recalculator
+The system implements a continuous data integrity scanning protocol for storefront (Shopify/Etsy) transaction logs.
+1. **Boot Scanner**: During initial application load, `window.scanOrphanStorefrontSKUs` automatically reviews the `sales_ledger` table (`salesDB` memory) against active mappings in `storefront_aliases` (`aliasDB`) and product records in `productsDB`. If storefront SKUs lack valid mappings or reference missing recipes, they are classified as orphans and trigger a pulsing flashing neon orange/red alert button (`#btnUnmappedSkuAlert`) in the header.
+2. **Interactive Mapping & Recalculation**: Clicking the alert navigates to the upgraded SKU Alias Manager panel card, which partitions mappings into `🔗 Active Mappings` and `⚠️ Unmapped / Orphans` tabs. Selecting a recipe and executing `MAP` fires `window.resolveOrphanSKUMapping`, which:
+   - Persists the mapping to `storefront_aliases` and updates local state.
+   - Triggers the forensic accounting engine `window.runForensicAccounting` on sibling lines for all historical orders containing the unmapped SKU.
+   - Automatically recalibrates the `cogs_at_sale`, `transaction_fees`, and `net_profit` fields, pushing updates to Supabase in parallel via `Promise.all`.
+
 ### Diagnostic & Administration Scripts
+
 To preserve repository cleanliness, all one-shot Python/JS diagnostic utilities, trace scripts, and administrative hooks (such as dump_buttons.py, trace3.py, and database schema checkers) MUST be stored exclusively inside the scripts/ directory. No loose diagnostic or utility scripts are permitted to reside in the repository root.
 
 ### Root Directory Isolation & Whitelisting Standard (CRITICAL)
