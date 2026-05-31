@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### ✨ Features & Bug Fixes
+- **Stockz Audit Planning Console & Calibration Adjustments** (`feat/stockz-audit-planning-console`):
+  - **Audit & Reconcile UI:** Deployed a glassmorphism Audit Console supporting both Physical Count Reconciliation (auto-calculating delta offsets) and Quick delta adjustments with Average COGS valuation calculations.
+  - **Count & Offset Calibration:** Built interactive `+` and `-` calibration buttons to increment/decrement shelf counts and delta offsets for rapid, error-free physical stock updates.
+  - **Stock Adjustment Logs:** Integrated an interactive, monospaced stock adjustments history panel displaying recent write-offs with live valuation impacts, reason codes, operator signatures, and note blocks.
+  - **Velocityz Forecaster Grid Wrapping & Sanitization:** Resolved a grid wrapping bug inside the Velocityz Forecaster where finished goods rendered horizontally in a single wrapped row. Wrapped raw rows inside a parent `<table>` during DOMPurify sanitization to block HTML parser tag-stripping and nested flexbox elements to guarantee standard tabular column alignment.
 - **SOP Viewer Header Horizontal Button Layout & State Restoration** (`debt/security-insertAdjacentHTML`):
   - **SOP Viewer Checklist State Restoration:** Fixed checkbox and input "amnesia" on re-opening cleared SOP Checklists by implementing a robust database-backed state synchronization restorer using `sop_archives`.
   - **Horizontal Modal Header Button Layout:** Overrode global `button { width: 100% }` constraints by establishing a native CSS inline-flex rule for `#sopViewerHeaderButtons` and child button elements, forcing `PRINT SOP`, `EDIT`, and `CLOSE` to render horizontally on a single line with perfect desktop and mobile touch-target scaling.

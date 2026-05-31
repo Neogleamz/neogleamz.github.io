@@ -15,9 +15,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-### Target: `feat/stockz-audit-planning-console`
-**Epic: Stockz Bulletproof Audit & Planning Console**
-- [x] `feat/stockz-audit-planning-console` : Implement a high-fidelity glassmorphism Audit Console modal supporting both Physical Count Reconciliation (auto-calculating delta offsets) and Quick delta adjustments with forensic transaction logging, average COGS financial impact calculations, an interactive ROP Planning Config simulator, and mobile QR-code handheld scanning sync. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+*No active items in Sandbox backlog.*
 
 ### 🟠 P1 High Priority (Active Epics)
 *Clean sweep — all active epics successfully completed and archived!* ✅
@@ -43,6 +41,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `feat/stockz-audit-planning-console`
+**Epic: Stockz Bulletproof Audit & Planning Console**
+*(Archived — 2026-05-31)*
+- [🚀] `feat/stockz-audit-planning-console` : Implement a high-fidelity glassmorphism Audit Console modal supporting both Physical Count Reconciliation (auto-calculating delta offsets) and Quick delta adjustments with forensic transaction logging, average COGS financial impact calculations, an interactive ROP Planning Config simulator, and mobile QR-code handheld scanning sync. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### Target: `feat/cycle-count-dual-preview`
 **Epic: Cycle Count Dual-Preview Live Sync**
