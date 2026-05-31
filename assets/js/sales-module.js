@@ -344,6 +344,148 @@ async function saveAliasMapping() {
     });
 }
 
+window.scanOrphanStorefrontSKUs = function() {
+    if (typeof salesDB === 'undefined' || typeof productsDB === 'undefined') return;
+    
+    let orphans = new Set();
+    salesDB.forEach(s => {
+        let sku = s.storefront_sku;
+        if (!sku) return;
+        
+        // Ignore manual entries and ignore placeholders
+        if (sku.startsWith("MANUAL_ENTRY_") || sku === "IGNORE") return;
+        
+        // The active recipe name is the alias mapping, or fallback to storefront SKU name itself
+        let recipeName = (typeof aliasDB !== 'undefined' && aliasDB[sku]) ? aliasDB[sku] : sku;
+        
+        // If the recipe doesn't exist in productsDB, this is an orphan storefront SKU
+        if (!productsDB[recipeName]) {
+            orphans.add(sku);
+        }
+    });
+    
+    window.orphanSKUs = Array.from(orphans).sort();
+    
+    // Update the warning badge in UI if element exists
+    let btnAlert = document.getElementById('btnUnmappedSkuAlert');
+    if (btnAlert) {
+        if (window.orphanSKUs.length > 0) {
+            btnAlert.innerText = `⚠️ ${window.orphanSKUs.length} UNMAPPED SKU${window.orphanSKUs.length > 1 ? 'S' : ''}`;
+            btnAlert.style.setProperty('display', 'inline-flex', 'important');
+        } else {
+            btnAlert.style.setProperty('display', 'none', 'important');
+        }
+    }
+};
+
+window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
+    if (!targetRecipe) {
+        alert("Please select a target internal recipe first.");
+        return;
+    }
+    
+    setMasterStatus("Saving Alias...", "mod-working");
+    sysLog(`Resolving orphan SKU: ${sku} -> ${targetRecipe}`);
+    
+    try {
+        // 1. Insert/upsert into storefront_aliases table in Supabase
+        const { error: aliasError } = await supabaseClient.from('storefront_aliases').upsert({ 
+            storefront_sku: sku, 
+            internal_recipe_name: targetRecipe, 
+            platform: 'Auto Scanner' 
+        });
+        
+        if (aliasError) throw new Error("DB Error saving alias: " + aliasError.message);
+        
+        // 2. Update local aliasDB cache
+        if (typeof aliasDB !== 'undefined') {
+            aliasDB[sku] = targetRecipe;
+        }
+        
+        // 3. Find all matching rows in salesDB for this storefront SKU
+        let affectedSales = salesDB.filter(s => s.storefront_sku === sku);
+        if (affectedSales.length > 0) {
+            sysLog(`Recalculating financials for ${affectedSales.length} historical sales records...`);
+            
+            // First update the internal recipe name in local memory so that runForensicAccounting reads the correct recipe cost!
+            affectedSales.forEach(s => {
+                s.internal_recipe_name = targetRecipe;
+            });
+            
+            // Identify unique order IDs that are affected
+            let affectedOrderIds = Array.from(new Set(affectedSales.map(s => s.order_id)));
+            
+            // We'll queue up the updates to run in parallel
+            let updatePromises = [];
+            
+            affectedOrderIds.forEach(orderId => {
+                // Get all lines belonging to this order from the main salesDB
+                let orderLines = salesDB.filter(s => s.order_id == orderId);
+                
+                // Run forensic accounting on these order lines
+                let forensicResults = window.runForensicAccounting(orderLines);
+                
+                // For each line in forensicResults, build update query for Supabase and update local salesDB memory
+                forensicResults.forEach(fLine => {
+                    let mainRow = salesDB.find(s => String(s.order_id) === String(fLine.order_id) && String(s.storefront_sku) === String(fLine.storefront_sku));
+                    if (mainRow) {
+                        // Recalculated values
+                        mainRow.cogs_at_sale = fLine.cogs;
+                        mainRow.transaction_fees = fLine.fee;
+                        mainRow.net_profit = fLine.net;
+                        mainRow.internal_recipe_name = (fLine.storefront_sku === sku) ? targetRecipe : mainRow.internal_recipe_name;
+                        
+                        let dbPayload = {
+                            internal_recipe_name: mainRow.internal_recipe_name,
+                            cogs_at_sale: fLine.cogs,
+                            transaction_fees: fLine.fee,
+                            net_profit: fLine.net
+                        };
+                        
+                        // Push update promise to array
+                        let p = supabaseClient.from('sales_ledger')
+                            .update(dbPayload)
+                            .eq('order_id', orderId)
+                            .eq('storefront_sku', fLine.storefront_sku);
+                        updatePromises.push(p);
+                    }
+                });
+            });
+            
+            // Execute all database updates in parallel
+            const results = await Promise.all(updatePromises);
+            
+            // Check for errors in the updates
+            const failedUpdate = results.find(res => res.error);
+            if (failedUpdate) {
+                throw new Error("Failed to update one or more sales ledger rows: " + failedUpdate.error.message);
+            }
+            
+            sysLog(`Successfully recalculated COGS and Net Profit for ${affectedOrderIds.length} orders.`);
+        }
+        
+        // 4. Re-run scan to update cache & header badge state
+        window.scanOrphanStorefrontSKUs();
+        
+        // 5. Update UI
+        setMasterStatus("Resolved!", "mod-success");
+        if (typeof renderAliasManager === 'function') renderAliasManager();
+        if (typeof renderSalesTable === 'function') renderSalesTable();
+        if (typeof renderInventoryTable === 'function') renderInventoryTable();
+        if (typeof renderAnalyticsDashboard === 'function') renderAnalyticsDashboard();
+        
+        setTimeout(() => {
+            setMasterStatus("Ready.", "status-idle");
+        }, 2000);
+        
+    } catch (e) {
+        sysLog(e.message, true);
+        setMasterStatus("Error", "mod-error");
+        alert("Error resolving orphan SKU:\n" + e.message);
+    }
+};
+
+
 async function executeSalesSync(isTestMode = false) {
     try {
         syncTrace(`Mapping verified. Preparing Database Payload structure for ${pendingSalesRows.length} internal components...`);

@@ -1444,6 +1444,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_removeAliasMapping':
                     if(window.removeAliasMapping) window.removeAliasMapping(el.getAttribute('data-sku'));
                     break;
+                case 'click_openAliasManagerWithUnmapped':
+                    if (typeof window.switchTab === 'function') window.switchTab('nexuz');
+                    if (typeof window.showNexlPane === 'function') window.showNexlPane('salez');
+
+                    window.activeAliasManagerTab = 'orphans';
+                    if (typeof renderAliasManager === 'function') renderAliasManager();
+                    setTimeout(() => {
+                        let aliasSearch = document.getElementById('skuAliasSearch');
+                        let aliasCard = aliasSearch ? aliasSearch.closest('.panel-card') : null;
+                        if (aliasCard) {
+                            aliasCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            aliasCard.style.outline = '2px dashed #ef4444';
+                            aliasCard.style.transition = 'outline 0.3s ease';
+                            setTimeout(() => { aliasCard.style.outline = 'none'; }, 2000);
+                        }
+                    }, 100);
+                    break;
+                case 'click_aliasTabActive':
+                    window.activeAliasManagerTab = 'active';
+                    if (typeof renderAliasManager === 'function') renderAliasManager();
+                    break;
+                case 'click_aliasTabOrphans':
+                    window.activeAliasManagerTab = 'orphans';
+                    if (typeof renderAliasManager === 'function') renderAliasManager();
+                    break;
+                case 'click_resolveOrphanSKUMapping': {
+                    let sku = el.getAttribute('data-sku');
+                    let selectId = el.getAttribute('data-select-id');
+                    let selectEl = document.getElementById(selectId);
+                    let selectedRecipe = selectEl ? selectEl.value : "";
+                    if (window.resolveOrphanSKUMapping) {
+                        window.resolveOrphanSKUMapping(sku, selectedRecipe);
+                    }
+                    break;
+                }
+
                 case 'click_toggleSimpleCol':
                     if(window.toggleSimpleCol) window.toggleSimpleCol(el.getAttribute('data-key'));
                     break;
