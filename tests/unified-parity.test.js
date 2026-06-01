@@ -63,6 +63,30 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
         expect(sku).toBe("NG-1234-WHEEL-CORE");
     });
 
+    test("window.getItemSKUValue and getItemBarcodeValue prioritize Shopify-synced SKU and barcode when multiple aliases map to the same recipe name", () => {
+        // Mock multiple aliases mapped to "Haloz":
+        // 1. eBay alias (not synced to Shopify, no barcode)
+        window.aliasDB["EBAY-HALOZ-listing-123"] = "Haloz";
+        window.aliasMetadataDB["EBAY-HALOZ-listing-123"] = {
+            barcode_value: null,
+            is_shopify_synced: false
+        };
+
+        // 2. Shopify-synced alias (which has the correct SKU and barcode)
+        window.aliasDB["NG-0360-Rechargeable"] = "Haloz";
+        window.aliasMetadataDB["NG-0360-Rechargeable"] = {
+            barcode_value: "552701078",
+            is_shopify_synced: true
+        };
+
+        const resolvedSku = window.getItemSKUValue("Haloz");
+        const resolvedBarcode = window.getItemBarcodeValue("Haloz");
+
+        // The system must prioritize the Shopify-synced mapping
+        expect(resolvedSku).toBe("NG-0360-Rechargeable");
+        expect(resolvedBarcode).toBe("552701078");
+    });
+
     test("window.getItemSKUValue generates a deterministic emulated SKU matching standard format if absent", () => {
         const sku = window.getItemSKUValue("Filament Roll Black");
         

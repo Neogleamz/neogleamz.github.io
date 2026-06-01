@@ -188,7 +188,17 @@ window.getDeterministic9DigitHash = function(str) {
 window.getItemBarcodeValue = function(itemName) {
     if (!itemName) return '';
     
-    // 1. If we have mapped metadata database, try to resolve the barcode
+    // 1. Check if the item has a mapped Shopify-synced SKU with a barcode
+    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
+        const shopifySku = Object.keys(window.aliasMetadataDB).find(sku => {
+            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_shopify_synced && window.aliasMetadataDB[sku].barcode_value;
+        });
+        if (shopifySku) {
+            return window.aliasMetadataDB[shopifySku].barcode_value;
+        }
+    }
+    
+    // 2. Fallback: check if the item has any mapped storefront SKU with a barcode (e.g. eBay or un-synced)
     if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
         const foundSku = Object.keys(window.aliasMetadataDB).find(sku => {
             return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].barcode_value;
@@ -198,20 +208,28 @@ window.getItemBarcodeValue = function(itemName) {
         }
     }
     
-    // 2. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
+    // 3. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
     return window.getDeterministic9DigitHash(itemName);
 };
 
 window.getItemSKUValue = function(itemName) {
     if (!itemName) return '';
     
-    // 1. Check if the item already has a mapped Shopify SKU
+    // 1. Check if the item has a mapped Shopify-synced SKU
+    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
+        const shopifySku = Object.keys(window.aliasMetadataDB).find(sku => {
+            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_shopify_synced;
+        });
+        if (shopifySku) return shopifySku;
+    }
+    
+    // 2. Fallback: check if the item has any mapped storefront SKU (e.g. eBay or un-synced)
     if (typeof aliasDB !== 'undefined') {
         const foundSku = Object.keys(aliasDB).find(sku => aliasDB[sku] === itemName);
         if (foundSku) return foundSku;
     }
     
-    // 2. Otherwise, construct a deterministic emulated SKU pattern
+    // 3. Otherwise, construct a deterministic emulated SKU pattern
     const hash4 = String(1000 + (Math.abs(parseInt(window.getDeterministic9DigitHash(itemName), 10)) % 9000));
     const nameChunk = itemName.trim().substring(0, 13).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
     return `NG-${hash4}-${nameChunk || 'ITEM'}`;
