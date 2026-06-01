@@ -169,7 +169,7 @@ async function processParsedSales(rows, isTestMode = false) {
 
     for (const r of rows) {
         let orderId = r['Name'] || r['Order Name'] || r['Order ID'] || r['Order Number'] || r['Order'] || '';
-        let skuName = r['Lineitem name'] || r['Item Name'] || r['Title'] || r['Product Name'] || '';
+        let skuName = r['Lineitem sku'] || r['SKU'] || r['Lineitem name'] || r['Item Name'] || r['Title'] || r['Product Name'] || '';
         let qty = parseFloat(r['Lineitem quantity'] || r['Quantity'] || r['Qty'] || 0);
         let price = parseFloat(r['Lineitem price'] || r['Price'] || r['Item Price'] || 0);
         let rawDate = r['Created at'] || r['Date'] || r['Sale Date'] || new Date().toISOString();

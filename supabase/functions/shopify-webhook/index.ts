@@ -91,6 +91,7 @@ serve(async (req: Request) => {
 
       const ledgerRows: any[] = [];
       const invUpdates: any[] = []; // Initialize invUpdates here
+      const aliasUpsertPromises: any[] = []; // Track background alias upserts
 
       const orderIdStr = order.name || String(order.id); // Define orderIdStr here
 
@@ -133,11 +134,25 @@ serve(async (req: Request) => {
 
       if(order.line_items) {
         order.line_items.forEach((item: any, index: any) => {
-          const skuName = item.name || item.title;
+          const skuName = item.sku || item.name || item.title;
           const qty = parseInt(item.quantity) || 1;
           const price = parseFloat(item.price) || 0;
-          const internalName = aliasMap[skuName] || skuName;
+          
+          // Map to internal recipe name by checking SKU first, then full item name, then product title
+          const internalName = aliasMap[item.sku] || aliasMap[item.name] || aliasMap[item.title] || item.name || item.title;
           console.log(` -> Mapping SKU: [${skuName}] to Internal Recipe: [${internalName}]`);
+
+          // Auto-upsert/register storefront alias mapping using official variant SKU and barcode
+          if (item.sku) {
+              const aliasPromise = supabase.from('storefront_aliases').upsert({
+                  storefront_sku: item.sku,
+                  internal_recipe_name: internalName,
+                  barcode_value: item.barcode || null,
+                  is_shopify_synced: true,
+                  platform: 'Shopify Webhook'
+              });
+              aliasUpsertPromises.push(aliasPromise);
+          }
 
           // Sum accurate discount allocations for this specific line item to avoid cart-level double-counting
           let lineDiscount = 0;
@@ -343,6 +358,13 @@ serve(async (req: Request) => {
         console.error("Update Error", firstError.error);
         return new Response(JSON.stringify({ error: firstError.error.message }), { status: 500 });
       }
+    }
+    
+    // Await all background storefront alias upserts
+    if (aliasUpsertPromises.length > 0) {
+        await Promise.all(aliasUpsertPromises).catch(err => {
+            console.error("Failed to auto-sync storefront aliases in background:", err);
+        });
     }
 
     // NOTE: Inventory updates via API edge function would require reading current qty and adding to it,

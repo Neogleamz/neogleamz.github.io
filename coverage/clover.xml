@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1780356708571" clover="3.2.0">
-  <project timestamp="1780356708571" name="All files">
-    <metrics statements="14487" coveredstatements="523" conditionals="14315" coveredconditionals="279" methods="1924" coveredmethods="31" elements="30726" coveredelements="833" complexity="0" loc="14487" ncloc="14487" packages="1" files="18" classes="18"/>
+<coverage generated="1780357594620" clover="3.2.0">
+  <project timestamp="1780357594620" name="All files">
+    <metrics statements="14487" coveredstatements="523" conditionals="14317" coveredconditionals="279" methods="1924" coveredmethods="31" elements="30728" coveredelements="833" complexity="0" loc="14487" ncloc="14487" packages="1" files="18" classes="18"/>
     <file name="analytics-module.js" path="D:\GitHub\neogleamz.github.io\assets\js\analytics-module.js">
       <metrics statements="145" coveredstatements="0" conditionals="136" coveredconditionals="0" methods="22" coveredmethods="0"/>
       <line num="12" count="0" type="stmt"/>
@@ -8357,7 +8357,7 @@
       <line num="3049" count="1" type="cond" truecount="1" falsecount="1"/>
     </file>
     <file name="sales-module.js" path="D:\GitHub\neogleamz.github.io\assets\js\sales-module.js">
-      <metrics statements="943" coveredstatements="0" conditionals="1065" coveredconditionals="0" methods="138" coveredmethods="0"/>
+      <metrics statements="943" coveredstatements="0" conditionals="1067" coveredconditionals="0" methods="138" coveredmethods="0"/>
       <line num="31" count="0" type="stmt"/>
       <line num="32" count="0" type="cond" truecount="0" falsecount="4"/>
       <line num="33" count="0" type="stmt"/>
@@ -8446,7 +8446,7 @@
       <line num="168" count="0" type="stmt"/>
       <line num="170" count="0" type="stmt"/>
       <line num="171" count="0" type="cond" truecount="0" falsecount="6"/>
-      <line num="172" count="0" type="cond" truecount="0" falsecount="5"/>
+      <line num="172" count="0" type="cond" truecount="0" falsecount="7"/>
       <line num="173" count="0" type="cond" truecount="0" falsecount="4"/>
       <line num="174" count="0" type="cond" truecount="0" falsecount="4"/>
       <line num="175" count="0" type="cond" truecount="0" falsecount="4"/>
