@@ -1444,6 +1444,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_removeAliasMapping':
                     if(window.removeAliasMapping) window.removeAliasMapping(el.getAttribute('data-sku'));
                     break;
+                case 'click_togglePrimaryAliasMapping':
+                    if(window.togglePrimaryAliasMapping) window.togglePrimaryAliasMapping(el.getAttribute('data-sku'));
+                    break;
                 case 'click_openAliasManagerWithUnmapped':
                     if (typeof window.switchTab === 'function') window.switchTab('nexuz');
                     if (typeof window.showNexlPane === 'function') window.showNexlPane('salez');

@@ -188,7 +188,17 @@ window.getDeterministic9DigitHash = function(str) {
 window.getItemBarcodeValue = function(itemName) {
     if (!itemName) return '';
     
-    // 1. Check if the item has a mapped Shopify-synced SKU with a barcode
+    // 1. Check if the item has an alias designated as PRIMARY and has a barcode value
+    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
+        const primarySku = Object.keys(window.aliasMetadataDB).find(sku => {
+            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_primary && window.aliasMetadataDB[sku].barcode_value;
+        });
+        if (primarySku) {
+            return window.aliasMetadataDB[primarySku].barcode_value;
+        }
+    }
+    
+    // 2. Check if the item has a mapped Shopify-synced SKU with a barcode
     if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
         const shopifySku = Object.keys(window.aliasMetadataDB).find(sku => {
             return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_shopify_synced && window.aliasMetadataDB[sku].barcode_value;
@@ -198,7 +208,7 @@ window.getItemBarcodeValue = function(itemName) {
         }
     }
     
-    // 2. Fallback: check if the item has any mapped storefront SKU with a barcode (e.g. eBay or un-synced)
+    // 3. Fallback: check if the item has any mapped storefront SKU with a barcode (e.g. eBay or un-synced)
     if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
         const foundSku = Object.keys(window.aliasMetadataDB).find(sku => {
             return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].barcode_value;
@@ -208,14 +218,22 @@ window.getItemBarcodeValue = function(itemName) {
         }
     }
     
-    // 3. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
+    // 4. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
     return window.getDeterministic9DigitHash(itemName);
 };
 
 window.getItemSKUValue = function(itemName) {
     if (!itemName) return '';
     
-    // 1. Check if the item has a mapped Shopify-synced SKU
+    // 1. Check if the item has an alias designated as PRIMARY
+    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
+        const primarySku = Object.keys(window.aliasMetadataDB).find(sku => {
+            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_primary;
+        });
+        if (primarySku) return primarySku;
+    }
+    
+    // 2. Check if the item has a mapped Shopify-synced SKU
     if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
         const shopifySku = Object.keys(window.aliasMetadataDB).find(sku => {
             return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_shopify_synced;
@@ -223,13 +241,13 @@ window.getItemSKUValue = function(itemName) {
         if (shopifySku) return shopifySku;
     }
     
-    // 2. Fallback: check if the item has any mapped storefront SKU (e.g. eBay or un-synced)
+    // 3. Fallback: check if the item has any mapped storefront SKU (e.g. eBay or un-synced)
     if (typeof aliasDB !== 'undefined') {
         const foundSku = Object.keys(aliasDB).find(sku => aliasDB[sku] === itemName);
         if (foundSku) return foundSku;
     }
     
-    // 3. Otherwise, construct a deterministic emulated SKU pattern
+    // 4. Otherwise, construct a deterministic emulated SKU pattern
     const hash4 = String(1000 + (Math.abs(parseInt(window.getDeterministic9DigitHash(itemName), 10)) % 9000));
     const nameChunk = itemName.trim().substring(0, 13).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
     return `NG-${hash4}-${nameChunk || 'ITEM'}`;

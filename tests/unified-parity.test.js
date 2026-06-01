@@ -69,22 +69,38 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
         window.aliasDB["EBAY-HALOZ-listing-123"] = "Haloz";
         window.aliasMetadataDB["EBAY-HALOZ-listing-123"] = {
             barcode_value: null,
-            is_shopify_synced: false
+            is_shopify_synced: false,
+            is_primary: false
         };
 
         // 2. Shopify-synced alias (which has the correct SKU and barcode)
         window.aliasDB["NG-0360-Rechargeable"] = "Haloz";
         window.aliasMetadataDB["NG-0360-Rechargeable"] = {
             barcode_value: "552701078",
-            is_shopify_synced: true
+            is_shopify_synced: true,
+            is_primary: false
         };
 
-        const resolvedSku = window.getItemSKUValue("Haloz");
-        const resolvedBarcode = window.getItemBarcodeValue("Haloz");
+        let resolvedSku = window.getItemSKUValue("Haloz");
+        let resolvedBarcode = window.getItemBarcodeValue("Haloz");
 
         // The system must prioritize the Shopify-synced mapping
         expect(resolvedSku).toBe("NG-0360-Rechargeable");
         expect(resolvedBarcode).toBe("552701078");
+
+        // 3. Add a primary designated Shopify-synced alias (which should override option 2)
+        window.aliasDB["NG-3090-SK8Lytz HALOZ"] = "Haloz";
+        window.aliasMetadataDB["NG-3090-SK8Lytz HALOZ"] = {
+            barcode_value: "954170281",
+            is_shopify_synced: true,
+            is_primary: true
+        };
+
+        resolvedSku = window.getItemSKUValue("Haloz");
+        resolvedBarcode = window.getItemBarcodeValue("Haloz");
+
+        expect(resolvedSku).toBe("NG-3090-SK8Lytz HALOZ");
+        expect(resolvedBarcode).toBe("954170281");
     });
 
     test("window.getItemSKUValue generates a deterministic emulated SKU matching standard format if absent", () => {

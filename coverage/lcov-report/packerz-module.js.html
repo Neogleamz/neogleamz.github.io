@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">6.08% </span>
+                <span class="strong">6.58% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>114/1873</span>
+                <span class='fraction'>124/1883</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">2.4% </span>
+                <span class="strong">3.56% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>30/1247</span>
+                <span class='fraction'>45/1264</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">3.08% </span>
+                <span class="strong">3.93% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>7/227</span>
+                <span class='fraction'>9/229</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">6.79% </span>
+                <span class="strong">7.31% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>110/1618</span>
+                <span class='fraction'>119/1627</span>
             </div>
         
             
@@ -3236,7 +3236,25 @@
 <a name='L3171'></a><a href='#L3171'>3171</a>
 <a name='L3172'></a><a href='#L3172'>3172</a>
 <a name='L3173'></a><a href='#L3173'>3173</a>
-<a name='L3174'></a><a href='#L3174'>3174</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L3174'></a><a href='#L3174'>3174</a>
+<a name='L3175'></a><a href='#L3175'>3175</a>
+<a name='L3176'></a><a href='#L3176'>3176</a>
+<a name='L3177'></a><a href='#L3177'>3177</a>
+<a name='L3178'></a><a href='#L3178'>3178</a>
+<a name='L3179'></a><a href='#L3179'>3179</a>
+<a name='L3180'></a><a href='#L3180'>3180</a>
+<a name='L3181'></a><a href='#L3181'>3181</a>
+<a name='L3182'></a><a href='#L3182'>3182</a>
+<a name='L3183'></a><a href='#L3183'>3183</a>
+<a name='L3184'></a><a href='#L3184'>3184</a>
+<a name='L3185'></a><a href='#L3185'>3185</a>
+<a name='L3186'></a><a href='#L3186'>3186</a>
+<a name='L3187'></a><a href='#L3187'>3187</a>
+<a name='L3188'></a><a href='#L3188'>3188</a>
+<a name='L3189'></a><a href='#L3189'>3189</a>
+<a name='L3190'></a><a href='#L3190'>3190</a>
+<a name='L3191'></a><a href='#L3191'>3191</a>
+<a name='L3192'></a><a href='#L3192'>3192</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3424,7 +3442,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -3451,7 +3479,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
@@ -6599,7 +6635,17 @@ window.getDeterministic9DigitHash = function(str) {
 window.getItemBarcodeValue = function(itemName) {
     <span class="missing-if-branch" title="if path not taken" >I</span>if (!itemName) <span class="cstat-no" title="statement not covered" >return '';</span>
     
-    // 1. Check if the item has a mapped Shopify-synced SKU with a barcode
+    // 1. Check if the item has an alias designated as PRIMARY and has a barcode value
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof window.aliasMetadataDB !== 'undefined' &amp;&amp; typeof aliasDB !== 'undefined') {
+        const primarySku = Object.keys(window.aliasMetadataDB).find(sku =&gt; {
+            return aliasDB[sku] === itemName &amp;&amp; window.aliasMetadataDB[sku].is_primary &amp;&amp; window.aliasMetadataDB[sku].barcode_value;
+        });
+        if (primarySku) {
+            return window.aliasMetadataDB[primarySku].barcode_value;
+        }
+    }
+    
+    // 2. Check if the item has a mapped Shopify-synced SKU with a barcode
     <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof window.aliasMetadataDB !== 'undefined' &amp;&amp; typeof aliasDB !== 'undefined') {
         const shopifySku = Object.keys(window.aliasMetadataDB).find(sku =&gt; {
             return aliasDB[sku] === itemName &amp;&amp; window.aliasMetadataDB[sku].is_shopify_synced &amp;&amp; window.aliasMetadataDB[sku].barcode_value;
@@ -6609,7 +6655,7 @@ window.getItemBarcodeValue = function(itemName) {
         }
     }
     
-    // 2. Fallback: check if the item has any mapped storefront SKU with a barcode (e.g. eBay or un-synced)
+    // 3. Fallback: check if the item has any mapped storefront SKU with a barcode (e.g. eBay or un-synced)
     <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof window.aliasMetadataDB !== 'undefined' &amp;&amp; typeof aliasDB !== 'undefined') {
         const foundSku = Object.keys(window.aliasMetadataDB).find(<span class="fstat-no" title="function not covered" >sk</span>u =&gt; {
 <span class="cstat-no" title="statement not covered" >            return aliasDB[sku] === itemName &amp;&amp; window.aliasMetadataDB[sku].barcode_value;</span>
@@ -6619,14 +6665,22 @@ window.getItemBarcodeValue = function(itemName) {
         }
     }
     
-    // 3. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
+    // 4. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
     return window.getDeterministic9DigitHash(itemName);
 };
 &nbsp;
 window.getItemSKUValue = function(itemName) {
     <span class="missing-if-branch" title="if path not taken" >I</span>if (!itemName) <span class="cstat-no" title="statement not covered" >return '';</span>
     
-    // 1. Check if the item has a mapped Shopify-synced SKU
+    // 1. Check if the item has an alias designated as PRIMARY
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof window.aliasMetadataDB !== 'undefined' &amp;&amp; typeof aliasDB !== 'undefined') {
+        const primarySku = Object.keys(window.aliasMetadataDB).find(sku =&gt; {
+            return aliasDB[sku] === itemName &amp;&amp; window.aliasMetadataDB[sku].is_primary;
+        });
+        if (primarySku) return primarySku;
+    }
+    
+    // 2. Check if the item has a mapped Shopify-synced SKU
     <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof window.aliasMetadataDB !== 'undefined' &amp;&amp; typeof aliasDB !== 'undefined') {
         const shopifySku = Object.keys(window.aliasMetadataDB).find(sku =&gt; {
             return aliasDB[sku] === itemName &amp;&amp; window.aliasMetadataDB[sku].is_shopify_synced;
@@ -6634,13 +6688,13 @@ window.getItemSKUValue = function(itemName) {
         if (shopifySku) return shopifySku;
     }
     
-    // 2. Fallback: check if the item has any mapped storefront SKU (e.g. eBay or un-synced)
+    // 3. Fallback: check if the item has any mapped storefront SKU (e.g. eBay or un-synced)
     <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof aliasDB !== 'undefined') {
         const foundSku = Object.keys(aliasDB).find(sku =&gt; aliasDB[sku] === itemName);
         if (foundSku) return foundSku;
     }
     
-    // 3. Otherwise, construct a deterministic emulated SKU pattern
+    // 4. Otherwise, construct a deterministic emulated SKU pattern
     const hash4 = String(1000 + (Math.abs(parseInt(window.getDeterministic9DigitHash(itemName), 10)) % 9000));
     const nameChunk = itemName.trim().substring(0, 13).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
     return `NG-${hash4}-${nameChunk || <span class="branch-1 cbranch-no" title="branch not covered" >'ITEM'}</span>`;
@@ -9589,7 +9643,7 @@ window.click_saveRemoteMobileStagedPhotos = <span class="fstat-no" title="functi
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-01T23:54:37.923Z
+                at 2026-06-01T23:59:37.886Z
             </div>
         <script src="prettify.js"></script>
         <script>

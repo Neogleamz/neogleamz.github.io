@@ -301,6 +301,7 @@ export default [
         "toggleSortDirection": "writable",
         "toggleTerminal": "writable",
         "toggleTheme": "writable",
+        "togglePrimaryAliasMapping": "writable",
         "toggleViewMode": "writable",
         "updateBOMQty": "writable",
         "updateBulkQty": "writable",
