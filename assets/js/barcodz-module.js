@@ -157,7 +157,8 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
                         <!-- Content -->
                         <div style="padding-top:4px; border-top:1px solid var(--border-color); text-align:center;">
                             <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word;">${item.name}</div>
-                            <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0; word-break:break-all;">${item.slug}</div>
+                            <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0 0 0; word-break:break-all;">SKU: ${getItemSKUValue(item.name)}</div>
+                            <div style="font-size:8px; font-family:monospace; color:var(--text-muted); opacity:0.7; padding-bottom:2px;">Barcode: ${item.slug}</div>
                             ${item.desc ? `<div style="font-size:10px; color:var(--text-muted); margin-top:2px; font-style:italic; line-height:1.2;">${item.desc}</div>` : ''}
                         </div>
                     </div>
@@ -288,7 +289,7 @@ function renderBarcodzSpool() {
                     
                     <div style="overflow:hidden;">
                         <div style="font-size:11px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
-                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.slug}</div>
+                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${getItemSKUValue(item.name)}">${getItemSKUValue(item.name)}</div>
                     </div>
                     
                     <input type="number" min="0" value="${item.qty}" class="spool-qty-input" data-slug="${item.slug}" style="width:100%; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 2px;" />
@@ -374,8 +375,8 @@ window.executeBatchPrint = function() {
             if (pW >= 4 && pH >= 6) {
                 wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.25in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 wrapper.innerHTML = window.safeHTML ? window.safeHTML(
-                    `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`
-                ) : `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace;">${item.slug}</div>`;
+                    `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace; font-weight:bold;">SKU: ${getItemSKUValue(item.name)}</div><div style="font-size:11pt; margin-top:4px; font-family:monospace; opacity:0.8;">[Barcode: ${item.slug}]</div>`
+                ) : `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace; font-weight:bold;">SKU: ${getItemSKUValue(item.name)}</div><div style="font-size:11pt; margin-top:4px; font-family:monospace; opacity:0.8;">[Barcode: ${item.slug}]</div>`;
             } else {
                 wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
                 wrapper.innerHTML = window.safeHTML ? window.safeHTML(

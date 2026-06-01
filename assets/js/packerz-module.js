@@ -172,13 +172,50 @@ async function fetchUnfulfilledOrders() {
 
 
 // ============================================================
-// BARCODE UTILITIES — deterministic NGZ-slug from item name
+// BARCODE UTILITIES — Shopify MS Barcodes Unified Parity
 // ============================================================
 
-function getItemBarcodeValue(itemName) {
-    // e.g. 'SK8Lytz Unit' → 'NGZ-SK8LYTZ-UNIT'
-    return 'NGZ-' + String(itemName).toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
+window.getDeterministic9DigitHash = function(str) {
+    if (!str) return '100000000';
+    let hash = 0;
+    const cleanStr = String(str).trim().toLowerCase();
+    for (let i = 0; i < cleanStr.length; i++) {
+        hash = (hash * 31 + cleanStr.charCodeAt(i)) % 900000000;
+    }
+    return String(100000000 + Math.abs(hash));
+};
+
+window.getItemBarcodeValue = function(itemName) {
+    if (!itemName) return '';
+    
+    // 1. If we have mapped metadata database, try to resolve the barcode
+    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
+        const foundSku = Object.keys(window.aliasMetadataDB).find(sku => {
+            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].barcode_value;
+        });
+        if (foundSku) {
+            return window.aliasMetadataDB[foundSku].barcode_value;
+        }
+    }
+    
+    // 2. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
+    return window.getDeterministic9DigitHash(itemName);
+};
+
+window.getItemSKUValue = function(itemName) {
+    if (!itemName) return '';
+    
+    // 1. Check if the item already has a mapped Shopify SKU
+    if (typeof aliasDB !== 'undefined') {
+        const foundSku = Object.keys(aliasDB).find(sku => aliasDB[sku] === itemName);
+        if (foundSku) return foundSku;
+    }
+    
+    // 2. Otherwise, construct a deterministic emulated SKU pattern
+    const hash4 = String(1000 + (Math.abs(parseInt(window.getDeterministic9DigitHash(itemName), 10)) % 9000));
+    const nameChunk = itemName.trim().substring(0, 13).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return `NG-${hash4}-${nameChunk || 'ITEM'}`;
+};
 
 // Track scan confirmations per session (reset on modal open)
 const scanConfirmations = new Map(); // rowId → true/false

@@ -783,7 +783,8 @@ window.searchLabelzCatalog = function() {
             Object.keys(catalogCache).forEach(k => {
                 let c = catalogCache[k];
                 if ((c.neoName||"").toLowerCase().includes(q) || (c.itemName||"").toLowerCase().includes(q)) {
-                    results.push({ name: c.neoName||c.itemName, spec: c.spec||'Raw Mat', source: 'Catalog', val: k, cogs: c.avgUnitCost||0 });
+                    const labelName = c.neoName && c.neoName !== '-' ? c.neoName : c.itemName;
+                    results.push({ name: labelName, spec: c.spec||'Raw Mat', source: 'Catalog', val: getItemBarcodeValue(labelName), cogs: c.avgUnitCost||0 });
                 }
             });
         }

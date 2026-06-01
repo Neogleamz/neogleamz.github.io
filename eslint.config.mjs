@@ -155,6 +155,7 @@ export default [
         "getEnginePredictiveMetrics": "writable",
         "getEngineTrueCogs": "writable",
         "getItemBarcodeValue": "writable",
+        "getItemSKUValue": "writable",
         "getLabelzForBarcodz": "writable",
         "getPrintTime": "writable",
         "getRawMaterials": "writable",

@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1159</span>
+                <span class='fraction'>0/1167</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1061</span>
+                <span class='fraction'>0/1065</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/937</span>
+                <span class='fraction'>0/943</span>
             </div>
         
             
@@ -1900,7 +1900,23 @@
 <a name='L1835'></a><a href='#L1835'>1835</a>
 <a name='L1836'></a><a href='#L1836'>1836</a>
 <a name='L1837'></a><a href='#L1837'>1837</a>
-<a name='L1838'></a><a href='#L1838'>1838</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1838'></a><a href='#L1838'>1838</a>
+<a name='L1839'></a><a href='#L1839'>1839</a>
+<a name='L1840'></a><a href='#L1840'>1840</a>
+<a name='L1841'></a><a href='#L1841'>1841</a>
+<a name='L1842'></a><a href='#L1842'>1842</a>
+<a name='L1843'></a><a href='#L1843'>1843</a>
+<a name='L1844'></a><a href='#L1844'>1844</a>
+<a name='L1845'></a><a href='#L1845'>1845</a>
+<a name='L1846'></a><a href='#L1846'>1846</a>
+<a name='L1847'></a><a href='#L1847'>1847</a>
+<a name='L1848'></a><a href='#L1848'>1848</a>
+<a name='L1849'></a><a href='#L1849'>1849</a>
+<a name='L1850'></a><a href='#L1850'>1850</a>
+<a name='L1851'></a><a href='#L1851'>1851</a>
+<a name='L1852'></a><a href='#L1852'>1852</a>
+<a name='L1853'></a><a href='#L1853'>1853</a>
+<a name='L1854'></a><a href='#L1854'>1854</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2227,8 +2243,18 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2287,11 +2313,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -4062,7 +4094,17 @@ async function <span class="fstat-no" title="function not covered" >saveAliasMap
 <span class="cstat-no" title="statement not covered" >        sysLog(`Mapping ${sku} -&gt; ${recipe}`); <span class="cstat-no" title="statement not covered" ></span>setMasterStatus("Saving Alias...", "mod-working");</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        aliasDB[sku] = recipe;</span>
-        const { error } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('storefront_aliases').upsert({ storefront_sku: sku, internal_recipe_name: recipe, platform: 'CSV Import' });</span>
+        const mappedBarcode = <span class="cstat-no" title="statement not covered" >getItemBarcodeValue(recipe);</span>
+<span class="cstat-no" title="statement not covered" >        if (typeof window.aliasMetadataDB === 'undefined') <span class="cstat-no" title="statement not covered" >window.aliasMetadataDB = {};</span></span>
+<span class="cstat-no" title="statement not covered" >        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };</span>
+        
+        const { error } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('storefront_aliases').upsert({ </span>
+            storefront_sku: sku, 
+            internal_recipe_name: recipe, 
+            barcode_value: mappedBarcode,
+            is_shopify_synced: false,
+            platform: 'CSV Import' 
+        });
 <span class="cstat-no" title="statement not covered" >        if(error) { <span class="cstat-no" title="statement not covered" >throw new Error(error.message); </span>}</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        document.getElementById('aliasModal').style.display = 'none'; <span class="cstat-no" title="statement not covered" ></span>setMasterStatus("Mapped!", "mod-success");</span>
@@ -4128,9 +4170,15 @@ async function <span class="fstat-no" title="function not covered" >saveAliasMap
     
 <span class="cstat-no" title="statement not covered" >    try {</span>
         // 1. Insert/upsert into storefront_aliases table in Supabase
+        const mappedBarcode = <span class="cstat-no" title="statement not covered" >getItemBarcodeValue(targetRecipe);</span>
+<span class="cstat-no" title="statement not covered" >        if (typeof window.aliasMetadataDB === 'undefined') <span class="cstat-no" title="statement not covered" >window.aliasMetadataDB = {};</span></span>
+<span class="cstat-no" title="statement not covered" >        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };</span>
+        
         const { error: aliasError } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('storefront_aliases').upsert({ </span>
             storefront_sku: sku, 
             internal_recipe_name: targetRecipe, 
+            barcode_value: mappedBarcode,
+            is_shopify_synced: false,
             platform: 'Auto Scanner' 
         });
         
@@ -5581,7 +5629,7 @@ function <span class="fstat-no" title="function not covered" >renderActualNetLis
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-31T09:59:50.336Z
+                at 2026-06-01T23:31:48.190Z
             </div>
         <script src="prettify.js"></script>
         <script>

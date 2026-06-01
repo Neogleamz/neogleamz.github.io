@@ -620,7 +620,8 @@
 <a name='L555'></a><a href='#L555'>555</a>
 <a name='L556'></a><a href='#L556'>556</a>
 <a name='L557'></a><a href='#L557'>557</a>
-<a name='L558'></a><a href='#L558'>558</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L558'></a><a href='#L558'>558</a>
+<a name='L559'></a><a href='#L559'>559</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -761,6 +762,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1336,7 +1338,8 @@ function <span class="fstat-no" title="function not covered" >buildBarcodzCache(
                         &lt;!-- Content --&gt;
                         &lt;div style="padding-top:4px; border-top:1px solid var(--border-color); text-align:center;"&gt;
                             &lt;div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word;"&gt;${item.name}&lt;/div&gt;
-                            &lt;div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0; word-break:break-all;"&gt;${item.slug}&lt;/div&gt;
+                            &lt;div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0 0 0; word-break:break-all;"&gt;SKU: ${getItemSKUValue(item.name)}&lt;/div&gt;
+                            &lt;div style="font-size:8px; font-family:monospace; color:var(--text-muted); opacity:0.7; padding-bottom:2px;"&gt;Barcode: ${item.slug}&lt;/div&gt;
                             ${item.desc ? `&lt;div style="font-size:10px; color:var(--text-muted); margin-top:2px; font-style:italic; line-height:1.2;"&gt;${item.desc}&lt;/div&gt;` : ''}
                         &lt;/div&gt;
                     &lt;/div&gt;
@@ -1467,7 +1470,7 @@ function <span class="fstat-no" title="function not covered" >renderBarcodzSpool
                     
                     &lt;div style="overflow:hidden;"&gt;
                         &lt;div style="font-size:11px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}"&gt;${item.name}&lt;/div&gt;
-                        &lt;div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"&gt;${item.slug}&lt;/div&gt;
+                        &lt;div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${getItemSKUValue(item.name)}"&gt;${getItemSKUValue(item.name)}&lt;/div&gt;
                     &lt;/div&gt;
                     
                     &lt;input type="number" min="0" value="${item.qty}" class="spool-qty-input" data-slug="${item.slug}" style="width:100%; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 2px;" /&gt;
@@ -1553,8 +1556,8 @@ function <span class="fstat-no" title="function not covered" >renderBarcodzSpool
 <span class="cstat-no" title="statement not covered" >            if (pW &gt;= 4 &amp;&amp; pH &gt;= 6) {</span>
 <span class="cstat-no" title="statement not covered" >                wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.25in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;</span>
 <span class="cstat-no" title="statement not covered" >                wrapper.innerHTML = window.safeHTML ? window.safeHTML(</span>
-                    `&lt;div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;"&gt;${item.name}&lt;/div&gt;${isQR ? '&lt;img' : '&lt;svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}"&gt;${isQR ? '' : '&lt;/svg&gt;'}&lt;div style="font-size:14pt; margin-top:20px; font-family:monospace;"&gt;${item.slug}&lt;/div&gt;`
-                ) : `&lt;div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;"&gt;${item.name}&lt;/div&gt;${isQR ? '&lt;img' : '&lt;svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}"&gt;${isQR ? '' : '&lt;/svg&gt;'}&lt;div style="font-size:14pt; margin-top:20px; font-family:monospace;"&gt;${item.slug}&lt;/div&gt;`;
+                    `&lt;div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;"&gt;${item.name}&lt;/div&gt;${isQR ? '&lt;img' : '&lt;svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}"&gt;${isQR ? '' : '&lt;/svg&gt;'}&lt;div style="font-size:14pt; margin-top:20px; font-family:monospace; font-weight:bold;"&gt;SKU: ${getItemSKUValue(item.name)}&lt;/div&gt;&lt;div style="font-size:11pt; margin-top:4px; font-family:monospace; opacity:0.8;"&gt;[Barcode: ${item.slug}]&lt;/div&gt;`
+                ) : `&lt;div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;"&gt;${item.name}&lt;/div&gt;${isQR ? '&lt;img' : '&lt;svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}"&gt;${isQR ? '' : '&lt;/svg&gt;'}&lt;div style="font-size:14pt; margin-top:20px; font-family:monospace; font-weight:bold;"&gt;SKU: ${getItemSKUValue(item.name)}&lt;/div&gt;&lt;div style="font-size:11pt; margin-top:4px; font-family:monospace; opacity:0.8;"&gt;[Barcode: ${item.slug}]&lt;/div&gt;`;
             } else {
 <span class="cstat-no" title="statement not covered" >                wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;</span>
 <span class="cstat-no" title="statement not covered" >                wrapper.innerHTML = window.safeHTML ? window.safeHTML(</span>
@@ -1741,7 +1744,7 @@ async function <span class="fstat-no" title="function not covered" >consumeTherm
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-31T09:59:50.336Z
+                at 2026-06-01T23:31:48.190Z
             </div>
         <script src="prettify.js"></script>
         <script>

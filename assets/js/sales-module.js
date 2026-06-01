@@ -323,7 +323,17 @@ async function saveAliasMapping() {
         sysLog(`Mapping ${sku} -> ${recipe}`); setMasterStatus("Saving Alias...", "mod-working");
 
         aliasDB[sku] = recipe;
-        const { error } = await supabaseClient.from('storefront_aliases').upsert({ storefront_sku: sku, internal_recipe_name: recipe, platform: 'CSV Import' });
+        const mappedBarcode = getItemBarcodeValue(recipe);
+        if (typeof window.aliasMetadataDB === 'undefined') window.aliasMetadataDB = {};
+        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };
+        
+        const { error } = await supabaseClient.from('storefront_aliases').upsert({ 
+            storefront_sku: sku, 
+            internal_recipe_name: recipe, 
+            barcode_value: mappedBarcode,
+            is_shopify_synced: false,
+            platform: 'CSV Import' 
+        });
         if(error) { throw new Error(error.message); }
 
         document.getElementById('aliasModal').style.display = 'none'; setMasterStatus("Mapped!", "mod-success");
@@ -389,9 +399,15 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
     
     try {
         // 1. Insert/upsert into storefront_aliases table in Supabase
+        const mappedBarcode = getItemBarcodeValue(targetRecipe);
+        if (typeof window.aliasMetadataDB === 'undefined') window.aliasMetadataDB = {};
+        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };
+        
         const { error: aliasError } = await supabaseClient.from('storefront_aliases').upsert({ 
             storefront_sku: sku, 
             internal_recipe_name: targetRecipe, 
+            barcode_value: mappedBarcode,
+            is_shopify_synced: false,
             platform: 'Auto Scanner' 
         });
         
