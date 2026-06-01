@@ -15,7 +15,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-*No active items in Sandbox backlog.*
+- [ ] `feat/unified-sku-barcode-parity` : **Unified SKU & Barcode Parity Engine** - Establish a Unified Hybrid Identification Architecture (UHIA) that emulates the Shopify MS Barcodes settings (9-digit random numbers in Code 128 format and 'NG-XXXX-' SKUs) for all internal raw goods, sub-assemblies, and finished goods, backed by a self-healing conflict resolution protocol that always defers to Shopify records upon sync detection. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
 
 ### 🟠 P1 High Priority (Active Epics)
 *Clean sweep — all active epics successfully completed and archived!* ✅
