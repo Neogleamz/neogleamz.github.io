@@ -137,7 +137,12 @@ function renderLabelzGrid() {
 
             const cleanName = label.product_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
             const safeEmoji = label.emoji || '🏷️';
-            const safeSize  = label.label_size || '2.25x1.25';
+            let parsedSize = label.label_size || '2.25x1.25';
+            try {
+                let obj = JSON.parse(label.label_size);
+                if(obj && obj.W && obj.H) parsedSize = `${obj.W}x${obj.H}`;
+            } catch (_e) { /* ignore parse error */ }
+            const safeSize = String(parsedSize).replace(/'/g,"\\'").replace(/"/g,'&quot;');
 
             html += `
                 <div class="hover-border-primary" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;">
