@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+
+### 🧹 Chores & Cleanup
+- **Token Tracking Metadata Purge** (`chore/rules`): Removed all legacy AI token tracking requirements (`[🤖 AI Model] [🧠 TBD] [💸 TBD]`) globally from the Bucket List and all automated intake workflows (`idea_intake`, `intake`, `product_alignment`, `tech-debt-janitor`, `teamwork_preview`).
+- **NPM Package Security Updates** (`chore/dep-patch-updates`): Executed `npm update` to safely bump development dependencies: `eslint` (10.4.0 -> 10.4.1) and `supabase` (2.101.0 -> 2.102.0) safe patch versions.
 ## [1.3.6] - 2026-06-02
 
 ### ✨ Features & Bug Fixes
