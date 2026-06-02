@@ -10,7 +10,8 @@ export default [
       "**/scripts/**",
       "**/.agents/**",
       "**/docs/**",
-      "**/coverage/**"
+      "**/coverage/**",
+      "**/scratch/**"
     ]
   },
   {

@@ -190,6 +190,7 @@ window.getDeterministic9DigitHash = function(str) {
 };
 
 // Helper to find an unmapped Shopify-synced variant that dynamically matches the recipe or its mapped aliases
+// eslint-disable-next-line no-unused-vars
 function findDynamicShopifyVariant(recipeName) {
     if (typeof aliasDB === 'undefined' || typeof window.aliasMetadataDB === 'undefined') return null;
     

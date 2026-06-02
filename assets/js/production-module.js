@@ -2262,6 +2262,7 @@ async function deleteAllArchive() {
             printQueueDB = printQueueDB.filter(p => p.status !== 'Archived');
             await supabaseClient.from('taskz').delete().eq('metadata->>type', 'layerz').eq('status', 'Done');
         }
+        // eslint-disable-next-line no-undef
         if (typeof teFetchAllData === 'function') await teFetchAllData();
         setMasterStatus("Archive Cleared!", "mod-success");
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
