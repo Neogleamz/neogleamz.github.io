@@ -10,7 +10,7 @@ When the user requests to log an idea or task for later, you must execute the fo
 
 1. **The Intercept**: Acknowledge the request by stating: *"Logging idea to the Bucket List..."*
 2. **Mandatory Pre-Planning Gate**:
-   - Before logging the task, you MUST check if a High-Level Architectural Document was generated during a preceding `/whiteboard_mode` session.
+   - Before logging the task, you MUST check if a High-Level Architectural Document was generated during a preceding `/whiteboard_mode` session (e.g., at `docs/architecture/<slug>.md`).
    - If it exists, use that documentation to generate a highly detailed, fully documented Implementation Plan artifact. The plan must translate the high-level hierarchy and agent validations into strict technical approaches (covering security, flexbox UI, performance, and Vanilla JS standards). If no architectural doc exists, build the Implementation Plan from scratch based on the user's prompt.
    - Write this Implementation Plan to `docs/plans/<slug>.md`.
 3. **Triaging & Injection**: 
@@ -19,7 +19,7 @@ When the user requests to log an idea or task for later, you must execute the fo
    - **Crucial Linkage**: The new task line MUST explicitly reference the pre-compiled plan (e.g., `- [ ] feat/xxx : **Feature Name** - Description. (Plan: [docs/plans/feat/xxx.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/xxx.md))`).
 
 4. **The Background Sync**:
-   - Immediately execute `git add tools/SK8Lytz_Bucket_List.md docs/plans/<slug>.md`
+   - Immediately execute `git add tools/SK8Lytz_Bucket_List.md docs/plans/ docs/architecture/`
    - Execute `git commit -m "chore(ledger): [/idea_intake] log new task and implementation plan"`
    - This safely tracks the new idea and its plan within their active branch history.
 5. **Hard Stop (Context Preservation)**:
