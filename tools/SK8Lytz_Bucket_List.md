@@ -18,7 +18,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
-*Clean sweep — all active epics successfully completed and archived!* ✅
+- [ ] fix/recipe-quotes : **Escape Double Quotes in DOM Interpolation** - Fix the UI breaking bug when rendering product names with double quotes in the Recipez pane. (Plan: [docs/plans/fix/recipe-quotes.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/fix/recipe-quotes.md))
 
 
 ## 🧹 Technical Debt
