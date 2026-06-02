@@ -21,7 +21,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### Target: `main`
 **Epic: Dynamic Label Tracking & Designer**
-- [ ] `feat/label-print-tracking-and-designer` : **Label Print Tracking & Visual Designer** - Bridge Barcodz and the BOM by injecting dynamically tracked `BARCODE_LABEL:::` components to track produced SKU stickers, and introduce a Vanilla JS physical-unit visual template designer. (Plan: [docs/plans/feat-label-print-tracking-and-designer.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat-label-print-tracking-and-designer.md))
+- [x] `feat/label-print-tracking-and-designer` : **Label Print Tracking & Visual Designer** - Bridge Barcodz and the BOM by injecting dynamically tracked `BARCODE_LABEL:::` components to track produced SKU stickers, and introduce a Vanilla JS physical-unit visual template designer. (Plan: [docs/plans/feat-label-print-tracking-and-designer.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat-label-print-tracking-and-designer.md))
 
 
 ## 🧹 Technical Debt

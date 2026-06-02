@@ -329,6 +329,11 @@ function renderBarcodzSpool() {
 window.executeBatchPrint = function() {
     if (window.barcodzSpoolQueue.length === 0) return alert("Print Spool is empty!");
     
+    if (window.ldState && window.ldState.activeTemplateId && typeof window.click_ldPrintState === 'function') {
+        window.click_ldPrintState();
+        return;
+    }
+    
     let activeSizeSelect = 'barcodzSizeSelect';
     const labelzPane = document.getElementById('paneFulfillzLabelz');
     if (labelzPane && labelzPane.style.display !== 'none') {
@@ -448,26 +453,69 @@ window.executeBatchPrint = function() {
 
     // Force browser print overlay async so engines can run
     setTimeout(() => {
+        let printFired = false;
+        const afterPrintHandler = () => {
+            if (printFired) return;
+            printFired = true;
+            window.removeEventListener('afterprint', afterPrintHandler);
+            
+            const modalEl = document.createElement('div');
+            modalEl.id = 'printConfirmModal';
+            modalEl.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:99999; display:flex; align-items:center; justify-content:center; flex-direction:column; color:white; font-family:sans-serif;';
+            const innerHtml = `
+                <div style="background:var(--bg-panel); border:1px solid var(--border-color); padding:30px; border-radius:12px; text-align:center; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+                    <div style="font-size:48px; margin-bottom:10px;">🖨️</div>
+                    <h2 style="margin:0 0 10px 0; color:var(--text-heading);">Print Verification</h2>
+                    <p style="color:var(--text-main); margin-bottom:20px;">Did the ${totalInjected} label(s) print successfully?</p>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button class="btn-green" data-click="click_confirmPrintSuccess" data-total="${totalInjected}" data-size="${activeSizeSelect}" style="padding:10px 20px; font-weight:bold; font-size:16px; cursor:pointer;">✅ Yes</button>
+                        <button class="btn-red" data-click="click_cancelPrintSuccess" style="padding:10px 20px; font-weight:bold; font-size:16px; cursor:pointer;">❌ No</button>
+                    </div>
+                </div>
+            `;
+            modalEl.innerHTML = innerHtml;
+            document.body.appendChild(modalEl);
+        };
+        window.addEventListener('afterprint', afterPrintHandler);
+        
+        // Fallback if afterprint doesn't fire (some browsers like old Safari)
+        setTimeout(() => { if (!printFired) afterPrintHandler(); }, 3000);
+        
         window.print();
         
-        // Execute Inventory Consumption API call right after print action triggers
-        consumeThermalMedia(totalInjected, activeSizeSelect);
-        
-        setTimeout(() => {
-            printArea.innerHTML = window.safeHTML ? window.safeHTML('') : '';
-            // Auto Clear Queue as defined in standard operating logic
-            clearBarcodzSpool();
-        }, 1500); // cleanup delay allowing OS to snapshot
     }, 750); // Increased DOM paint delay to guarantee async QR canvas finishes generating before Print Snapshot!
 }
+
+window.click_confirmPrintSuccess = function(btn) {
+    let t = parseInt(btn.getAttribute('data-total'), 10);
+    let s = btn.getAttribute('data-size');
+    const m = document.getElementById('printConfirmModal');
+    if (m) m.remove();
+    consumeThermalMedia(t, s);
+    setTimeout(() => {
+        const printArea = document.getElementById('printableBarcodeArea');
+        if (printArea) printArea.innerHTML = '';
+        clearBarcodzSpool();
+    }, 500);
+};
+
+window.click_cancelPrintSuccess = function(_btn) {
+    const m = document.getElementById('printConfirmModal');
+    if (m) m.remove();
+    const printArea = document.getElementById('printableBarcodeArea');
+    if (printArea) printArea.innerHTML = '';
+    if(typeof sysLog === 'function') sysLog("Print job cancelled by user. Inventory not deducted.", true);
+};
 
 async function consumeThermalMedia(qty, activeSizeSelectId) {
     if(typeof inventoryDB === 'undefined' || typeof supabaseClient === 'undefined') return;
     
     try {
+        let sizeText = activeSizeSelectId;
         const selectEl = document.getElementById(activeSizeSelectId);
-        if(!selectEl) return;
-        const sizeText = selectEl.options[selectEl.selectedIndex].text;
+        if(selectEl && selectEl.options && selectEl.options.length > 0) {
+            sizeText = selectEl.options[selectEl.selectedIndex].text;
+        }
         
         let activeKey = sizeText;
         if(typeof catalogCache !== 'undefined') {
@@ -514,6 +562,26 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
                         inventoryDB[labelKey] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
                     }
                     // Add produced quantity from the spool
+                    inventoryDB[labelKey].produced_qty += item.qty;
+                    
+                    payloads.push({
+                         item_key: labelKey,
+                         consumed_qty: inventoryDB[labelKey].consumed_qty,
+                         manual_adjustment: inventoryDB[labelKey].manual_adjustment,
+                         produced_qty: inventoryDB[labelKey].produced_qty,
+                         sold_qty: inventoryDB[labelKey].sold_qty,
+                         min_stock: inventoryDB[labelKey].min_stock,
+                         scrap_qty: inventoryDB[labelKey].scrap_qty,
+                         prototype_consumed_qty: inventoryDB[labelKey].prototype_consumed_qty,
+                         assembly_consumed_qty: inventoryDB[labelKey].assembly_consumed_qty,
+                         production_consumed_qty: inventoryDB[labelKey].production_consumed_qty,
+                         prototype_produced_qty: inventoryDB[labelKey].prototype_produced_qty
+                    });
+                } else if (typeof productsDB !== 'undefined' && productsDB[item.name]) {
+                    let labelKey = `BARCODE_LABEL:::${item.name}`;
+                    if (!inventoryDB[labelKey]) {
+                        inventoryDB[labelKey] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
+                    }
                     inventoryDB[labelKey].produced_qty += item.qty;
                     
                     payloads.push({

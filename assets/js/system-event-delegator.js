@@ -1526,6 +1526,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_deleteAllArchive':
                     if(window.deleteAllArchive) window.deleteAllArchive();
                     break;
+                    
+                // Label Designer / Whiteboard Mode Actions
+                case 'click_openWhiteboardDesigner':
+                    if(typeof window.click_openWhiteboardDesigner === 'function') window.click_openWhiteboardDesigner();
+                    break;
+                case 'click_closeWhiteboardDesigner':
+                    if(typeof window.click_closeWhiteboardDesigner === 'function') window.click_closeWhiteboardDesigner();
+                    break;
+                case 'click_ldAddProductName':
+                    if(typeof window.click_ldAddProductName === 'function') window.click_ldAddProductName();
+                    break;
+                case 'click_ldAddSku':
+                    if(typeof window.click_ldAddSku === 'function') window.click_ldAddSku();
+                    break;
+                case 'click_ldAddBarcode':
+                    if(typeof window.click_ldAddBarcode === 'function') window.click_ldAddBarcode();
+                    break;
+                case 'click_ldUpdateSize':
+                    if(typeof window.click_ldUpdateSize === 'function') window.click_ldUpdateSize();
+                    break;
+                case 'click_ldPrintState':
+                    if(typeof window.click_ldPrintState === 'function') window.click_ldPrintState();
+                    break;
+                case 'click_ldSaveTemplate':
+                    if(typeof window.click_ldSaveTemplate === 'function') window.click_ldSaveTemplate();
+                    break;
+                case 'click_ldDeleteTemplate':
+                    if(typeof window.click_ldDeleteTemplate === 'function') window.click_ldDeleteTemplate();
+                    break;
+                case 'click_confirmPrintSuccess':
+                    if(typeof window.click_confirmPrintSuccess === 'function') window.click_confirmPrintSuccess(el);
+                    break;
+                case 'click_cancelPrintSuccess':
+                    if(typeof window.click_cancelPrintSuccess === 'function') window.click_cancelPrintSuccess();
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);

@@ -137,12 +137,9 @@ function renderLabelzGrid() {
 
             const cleanName = label.product_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
             const safeEmoji = label.emoji || '🏷️';
-            let parsedSize = label.label_size || '2.25x1.25';
-            try {
-                let obj = JSON.parse(label.label_size);
-                if(obj && obj.W && obj.H) parsedSize = `${obj.W}x${obj.H}`;
-            } catch (_e) { /* ignore parse error */ }
-            const safeSize = String(parsedSize).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            // We don't need to display the size JSON in the pill, it's too long and causes overflow.
+            // We will just use 'CUSTOM LABEL' to match the barcodz style.
+            const pillText = 'CUSTOM LABEL';
 
             html += `
                 <div class="hover-border-primary" style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:10px; display:flex; flex-direction:column; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:border-color 0.2s;">
@@ -153,7 +150,7 @@ function renderLabelzGrid() {
                         
                         <!-- Type Pills Centered -->
                         <div style="display:flex; justify-content:center; align-items:center; height:100%; gap:4px;">
-                            <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${safeSize}"</span>
+                            <span style="display:inline-block; font-size:8px; font-weight:800; background:rgba(14,165,233,0.1); color:#0ea5e9; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">${pillText}</span>
                             <span style="display:inline-block; font-size:8px; font-weight:800; background:${stockBg}; color:${stockColor}; padding:2px 6px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">STOCK: ${stockQty}</span>
                         </div>
                         
@@ -163,7 +160,9 @@ function renderLabelzGrid() {
                     
                     <!-- Content & Edit Base -->
                     <div style="padding-top:6px; border-top:1px solid var(--border-color); text-align:center; display:flex; flex-direction:column; flex:1;">
-                        <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:8px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
+                        <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word; min-height:15px; display:flex; justify-content:center; align-items:center; flex:1;">${label.product_name}</div>
+                        <div style="font-size:11px; font-family:monospace; color:var(--text-main); padding:2px 0 0 0; word-break:break-all;">SKU: <span style="color:#38bdf8; font-weight:bold;">${typeof window.getItemSKUValue === 'function' ? window.getItemSKUValue(label.product_name) : ''}</span></div>
+                        <div style="font-size:10px; font-family:monospace; color:var(--text-muted); padding-bottom:8px;">Barcode: <span style="color:#f97316; font-weight:bold;">${typeof window.getItemBarcodeValue === 'function' ? window.getItemBarcodeValue(label.product_name) : ''}</span></div>
                         
                         <button class="btn-orange" data-click="click_openEditLabelModal" data-name="${cleanName}" style="width:100%; padding:4px 0; font-size:10px; display:flex; justify-content:center; align-items:center;"><i style="margin-right:4px; font-style:normal;">✏️</i> Edit Label</button>
                     </div>
@@ -1019,6 +1018,19 @@ window.exportLabelzPDF = function() {
         return;
     }
 
+    if (window.ldState && window.ldState.activeTemplateId && typeof window.click_ldPrintState === 'function') {
+        const name = document.getElementById('labelzDesignerName').value.trim() || 'Labelz Preview';
+        const slug = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30);
+        
+        const oldSpool = window.barcodzSpoolQueue ? [...window.barcodzSpoolQueue] : [];
+        window.barcodzSpoolQueue = [{ name: name, slug: slug, qty: 1, type: 'Custom Labelz' }];
+        
+        window.click_ldPrintState();
+        
+        setTimeout(() => { window.barcodzSpoolQueue = oldSpool; }, 200);
+        return;
+    }
+
     fCanvas.discardActiveObject();
     fCanvas.renderAll();
 
@@ -1073,7 +1085,7 @@ window.exportLabelzPDF = function() {
 window.getLabelzForBarcodz = function() {
     return labelzDB.map(l => ({
         name: l.product_name,
-        slug: l.product_name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30),
+        slug: typeof window.getItemBarcodeValue === 'function' ? window.getItemBarcodeValue(l.product_name) : l.product_name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30),
         type: 'Custom Labelz',
         icon: l.emoji || '🏷️',
         isCatalog: false,
@@ -1096,7 +1108,7 @@ setTimeout(() => { if(typeof supabaseClient !== 'undefined') loadLabelzData(); }
 // ============================================================
 window.addLabelzToSpool = function(name, emoji) {
     if(typeof addBarcodzToSpool === 'function') {
-        const slug = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30);
+        const slug = typeof window.getItemBarcodeValue === 'function' ? window.getItemBarcodeValue(name) : name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase().substring(0, 30);
         addBarcodzToSpool(name, slug, emoji || '🏷️', 'Custom Labelz');
     } else {
         alert('Barcodz subsystem not loaded yet. Try again.');

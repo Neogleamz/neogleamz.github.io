@@ -27,6 +27,7 @@ description: "Strict Vanilla architecture, State Handling, UI paradigms, and act
 - **Fluid Layout Topology:** Strict prohibition on rigid CSS `position: absolute` or structural negative margins. Architecture must flow naturally via 100% responsive Flexbox logic (`vh`, `vw`, `%`, `calc`).
 - **Proportional 8-Point Grids:** Instead of arbitrary fixed pixels, align whitespace to 8-point multiples utilizing CSS scaling clamps (e.g., `clamp(16px, 2vw, 24px)`) ensuring minimum `48px` tap zones for extreme contexts.
 - **Context Awareness:** Execute *Mobile-First* mapping on hardware controllers (heavy contrast, single-column bottoms), and *Desktop-First* on interior Executive dashboards (widescreen modular rows).
+- **Strict Iconography Ban (Close Actions):** You are STRICTLY FORBIDDEN from using "X" or `&times;` icons for close buttons, modals, or dismiss actions. You must exclusively use the word "CLOSE" for all such interactions to maintain explicit clarity.
 
 ### 3. Continuous Hygiene & Archiving
 - **The Boy Scout Mandate:** While touching code files (exclusively in `/feat` or `/refactor` paths), you must hunt down and eradicate *exactly one* piece of existing debt (orphaned vars, missing JSDoc logic, ghost listeners). Ban this sweep entirely during Bug Fix sequences.
@@ -71,3 +72,6 @@ description: "Strict Vanilla architecture, State Handling, UI paradigms, and act
 - **Mathematical / Physical Proof:** If resolving layout or rendering issues, write scripts to parse the DOM/SVG coordinates. If resolving code logic, execute local Node/Python scripts to verify the data structures. You must physically test your theories.
 - **Provide Receipts:** Always show the user the mathematical or programmatic output of your verification as proof before concluding the interaction.
 - **Direct Links Mandate:** You MUST ALWAYS provide direct, clickable markdown links to any file you modify or reference (e.g., `[filename.md](file:///d:/GitHub/neogleamz.github.io/tools/SK8Lytz_Bucket_List.md)`) in every single response where that file is relevant, ensuring the user never has to hunt for the file.
+
+## UI Design Standards
+- ALL 'CLOSE' buttons or modal exit buttons must be styled strictly as red buttons (e.g., using the 'btn-red' class) to maintain site-wide consistency.
