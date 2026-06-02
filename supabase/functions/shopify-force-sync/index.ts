@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
-import { encode as hexEncode } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
@@ -27,20 +27,22 @@ serve(async (req) => {
     }
 
     try {
-        const { order_id } = await req.json();
-        if (!order_id) throw new Error("Missing order_id");
+        const body = await req.json().catch(() => ({}));
+        const { order_id, sync_catalog } = body;
 
         const SHOPIFY_CLIENT_ID = Deno.env.get('SHOPIFY_CLIENT_ID');
         const SHOPIFY_CLIENT_SECRET = Deno.env.get('SHOPIFY_CLIENT_SECRET');
         const SHOPIFY_WEBHOOK_SECRET = Deno.env.get('SHOPIFY_WEBHOOK_SECRET');
         const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || Deno.env.get('VITE_SUPABASE_URL');
+        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
         const SHOPIFY_DOMAIN = Deno.env.get('SHOPIFY_DOMAIN') || 'neogleamz.myshopify.com';
 
-        if (!SHOPIFY_CLIENT_ID || !SHOPIFY_CLIENT_SECRET || !SHOPIFY_WEBHOOK_SECRET) {
+        if (!SHOPIFY_CLIENT_ID || !SHOPIFY_CLIENT_SECRET) {
             throw new Error("Missing Shopify credentials in Edge Function environment.");
         }
 
-        console.log(`[FORCE SYNC] Authenticating with Shopify for order_id: ${order_id}`);
+        // Authenticate with Shopify
+        console.log(`[SHOPIFY SYNC] Authenticating with Shopify...`);
         const authRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/oauth/access_token`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -57,6 +59,117 @@ serve(async (req) => {
         }
 
         const token = authData.access_token;
+
+        if (sync_catalog) {
+            // Pull all variants/products from Shopify catalog and upsert into storefront_aliases
+            if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+                throw new Error("Missing Supabase credentials in Edge Function environment.");
+            }
+            const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+            
+            // Fetch all existing storefront_aliases to preserve manual/previously defined mappings
+            const { data: existingAliases } = await supabase
+                .from('storefront_aliases')
+                .select('product_sku, internal_recipe_name, is_primary');
+            
+            const existingMap = new Map();
+            if (existingAliases) {
+                existingAliases.forEach((row: any) => {
+                    existingMap.set(row.product_sku, {
+                        internal_recipe_name: row.internal_recipe_name,
+                        is_primary: !!row.is_primary
+                    });
+                });
+            }
+
+            let importedCount = 0;
+            let matchedCount = 0;
+            let nextPageUrl = `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json?limit=250`;
+            let pageCount = 0;
+
+            while (nextPageUrl && pageCount < 10) {
+                console.log(`[SHOPIFY CATALOG SYNC] Fetching: ${nextPageUrl}`);
+                const productsRes = await fetch(nextPageUrl, {
+                    headers: { 'X-Shopify-Access-Token': token }
+                });
+                if (!productsRes.ok) {
+                    throw new Error(`Failed to fetch products from Shopify: ${productsRes.statusText}`);
+                }
+                const productsData = await productsRes.json();
+                const products = productsData.products || [];
+                
+                const upsertRows: any[] = [];
+                
+                for (const product of products) {
+                    for (const variant of (product.variants || [])) {
+                        const sku = (variant.sku || "").trim();
+                        const barcode = String(variant.barcode || "").trim();
+                        
+                        if (sku) {
+                            const variantTitle = (variant.title && variant.title !== "Default Title") ? ` - ${variant.title}` : "";
+                            const fullTitle = `${product.title}${variantTitle}`.trim();
+                            
+                            const existingSkuEntry = existingMap.get(sku);
+                            const existingTitleEntry = fullTitle ? existingMap.get(fullTitle) : null;
+                            let existingRecipe = (existingSkuEntry && existingSkuEntry.internal_recipe_name)
+                                || (existingTitleEntry && existingTitleEntry.internal_recipe_name)
+                                || null;
+                            const existingPrimary = (existingSkuEntry && existingSkuEntry.is_primary)
+                                || (existingTitleEntry && existingTitleEntry.is_primary)
+                                || false;
+
+                            const targetSku = fullTitle || sku;
+                            upsertRows.push({
+                                product_sku: targetSku,
+                                internal_recipe_name: existingRecipe,
+                                barcode_value: barcode || null,
+                                is_shopify_synced: true,
+                                platform: 'Shopify Webhook', // Match standard webhook platform value
+                                is_primary: existingPrimary, // Preserve primary state
+                                shopify_sku: sku || null
+                            });
+                            
+                            importedCount++;
+                            if (existingRecipe) matchedCount++;
+                        }
+                    }
+                }
+                
+                if (upsertRows.length > 0) {
+                    const { error: upsertErr } = await supabase
+                        .from('storefront_aliases')
+                        .upsert(upsertRows, { onConflict: 'product_sku' });
+                    if (upsertErr) throw upsertErr;
+                }
+                
+                // Pagination Link Header parsing
+                const linkHeader = productsRes.headers.get('Link');
+                nextPageUrl = "";
+                if (linkHeader) {
+                    const nextMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                    if (nextMatch && nextMatch[1]) {
+                        nextPageUrl = nextMatch[1];
+                    }
+                }
+                pageCount++;
+            }
+
+            return new Response(JSON.stringify({ 
+                success: true, 
+                message: `Successfully synced Shopify catalog.`, 
+                importedCount, 
+                matchedCount 
+            }), { 
+                status: 200, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            });
+        }
+
+        // Default: sync specific order
+        if (!order_id) throw new Error("Missing order_id or sync_catalog parameter.");
+        if (!SHOPIFY_WEBHOOK_SECRET) {
+            throw new Error("Missing SHOPIFY_WEBHOOK_SECRET in Edge Function environment.");
+        }
 
         console.log(`[FORCE SYNC] Fetching ID for order: #${order_id.replace('#', '')}`);
         const cleanOrderId = order_id.toString().replace('#', '');

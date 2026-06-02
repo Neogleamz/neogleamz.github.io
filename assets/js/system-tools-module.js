@@ -1953,32 +1953,113 @@ function renderPaperProfileTable() {
     let h = '';
     window.activePaperProfiles.forEach((p, idx) => {
         if (editingPaperIdx === idx) {
-             h += `<tr>`;
-             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"><input type="text" id="inlineEditN_${idx}" value="${p.n.replace(/"/g, '&quot;')}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;"></td>`;
-             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"><input type="number" id="inlineEditW_${idx}" value="${p.w}" style="width:60px; padding:4px; font-size:12px; text-align:right; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;"></td>`;
-             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"><input type="number" id="inlineEditH_${idx}" value="${p.h}" style="width:60px; padding:4px; font-size:12px; text-align:right; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;"></td>`;
-             h += `<td style="padding:10px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1);">
-                      <div style="display:flex; justify-content:center; gap:6px;">
-                          <button class="btn-green btn-action-dense" style="display:flex; justify-content:center; align-items:center;" data-app-click="save-paper-inline" data-idx="${idx}">SAVE</button>
+             h += `<tr data-app-dragover="paperDragOver" data-app-drop="paperDragDrop" data-idx="${idx}" style="display: table-row !important;">`;
+             h += `<td style="width: 45% !important; display: table-cell !important; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;"><input type="text" id="inlineEditN_${idx}" value="${p.n.replace(/"/g, '&quot;')}" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; display: block !important; padding: 6px; font-size: 12px; background: var(--bg-input); color: white; border: 1px solid var(--border-color); border-radius: 4px;"></td>`;
+             h += `<td style="width: 18% !important; display: table-cell !important; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;"><input type="number" step="any" id="inlineEditW_${idx}" value="${p.w}" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; display: block !important; padding: 6px; font-size: 12px; text-align: right; background: var(--bg-input); color: white; border: 1px solid var(--border-color); border-radius: 4px;"></td>`;
+             h += `<td style="width: 18% !important; display: table-cell !important; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;"><input type="number" step="any" id="inlineEditH_${idx}" value="${p.h}" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; display: block !important; padding: 6px; font-size: 12px; text-align: right; background: var(--bg-input); color: white; border: 1px solid var(--border-color); border-radius: 4px;"></td>`;
+             h += `<td style="width: 19% !important; display: table-cell !important; padding: 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">
+                      <div style="display: flex; justify-content: center; gap: 6px;">
+                          <button class="btn-green btn-action-dense" style="width: auto !important; min-width: auto !important; height: 28px !important; min-height: auto !important; padding: 4px 10px !important; font-size: 11px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; font-family: 'Righteous', sans-serif;" data-app-click="save-paper-inline" data-idx="${idx}">SAVE</button>
                       </div>
                    </td>`;
              h += `</tr>`;
         } else {
-             h += `<tr>`;
-             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1); font-weight:bold;">${p.n}</td>`;
-             h += `<td style="padding:10px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.1);">${p.w}"</td>`;
-             h += `<td style="padding:10px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.1);">${p.h}"</td>`;
-             h += `<td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);">
-                      <div style="display:flex; justify-content:center; gap:6px;">
-                          <button class="btn-ghost-base btn-ghost-brand btn-action-dense" style="display:flex; justify-content:center; align-items:center;" data-app-click="edit-paper-profile" data-idx="${idx}">✏️</button>
-                          <button class="btn-red-muted btn-action-dense" style="display:flex; justify-content:center; align-items:center;" data-app-click="delete-paper-profile" data-idx="${idx}">🗑️</button>
+             h += `<tr draggable="true" data-app-dragstart="paperDragStart" data-app-dragover="paperDragOver" data-app-drop="paperDragDrop" data-app-dragend="paperDragEnd" data-idx="${idx}" style="display: table-row !important; cursor: grab; user-select: none;">`;
+             h += `<td style="width: 45% !important; display: table-cell !important; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; white-space: normal; word-break: break-word; vertical-align: middle;"><span style="cursor: grab; margin-right: 8px; opacity: 0.5;">☰</span>${p.n}</td>`;
+             h += `<td style="width: 18% !important; display: table-cell !important; padding: 10px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">${p.w}"</td>`;
+             h += `<td style="width: 18% !important; display: table-cell !important; padding: 10px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">${p.h}"</td>`;
+             h += `<td style="width: 19% !important; display: table-cell !important; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">
+                      <div style="display: flex; justify-content: center; gap: 6px;">
+                          <button class="btn-ghost-base btn-ghost-brand btn-action-dense" style="width: 28px !important; min-width: 28px !important; height: 28px !important; min-height: 28px !important; padding: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; font-size: 12px !important;" data-app-click="edit-paper-profile" data-idx="${idx}">✏️</button>
+                          <button class="btn-red-muted btn-action-dense" style="width: 28px !important; min-width: 28px !important; height: 28px !important; min-height: 28px !important; padding: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; font-size: 12px !important;" data-app-click="delete-paper-profile" data-idx="${idx}">🗑️</button>
                       </div>
                    </td>`;
              h += `</tr>`;
         }
     });
-    tbody.innerHTML = window.safeHTML(h);
+    if (window.safeHTML) {
+        const wrapped = `<table><tbody>${h}</tbody></table>`;
+        const sanitized = window.safeHTML(wrapped);
+        const temp = document.createElement('div');
+        temp.innerHTML = sanitized;
+        const tbodySanitized = temp.querySelector('tbody');
+        tbody.innerHTML = tbodySanitized ? tbodySanitized.innerHTML : sanitized;
+    } else {
+        tbody.innerHTML = h;
+    }
 }
+
+let paperDraggedIdx = null;
+
+window.paperDragStart = function(e, idx) {
+    paperDraggedIdx = idx;
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+    }
+    const tr = e.target.closest('tr');
+    if (tr) {
+        tr.style.opacity = '0.4';
+    }
+};
+
+window.paperDragOver = function(e) {
+    e.preventDefault();
+    if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+    }
+};
+
+window.paperDragDrop = function(e, targetIdx) {
+    e.preventDefault();
+    if (paperDraggedIdx !== null && paperDraggedIdx !== targetIdx) {
+        const draggedItem = window.activePaperProfiles[paperDraggedIdx];
+        window.activePaperProfiles.splice(paperDraggedIdx, 1);
+        window.activePaperProfiles.splice(targetIdx, 0, draggedItem);
+        
+        renderPaperProfileTable();
+        savePaperProfiles(false);
+    }
+    paperDraggedIdx = null;
+};
+
+window.paperDragEnd = function(e) {
+    const tr = e.target.closest('tr');
+    if (tr) {
+        tr.style.opacity = '1';
+    }
+    paperDraggedIdx = null;
+};
+
+// Delegate drag events globally
+document.addEventListener('dragstart', (e) => {
+    const el = e.target.closest('[data-app-dragstart]');
+    if (el && el.dataset.appDragstart === 'paperDragStart') {
+        const idx = parseInt(el.getAttribute('data-idx'));
+        if (!isNaN(idx)) window.paperDragStart(e, idx);
+    }
+});
+
+document.addEventListener('dragover', (e) => {
+    const el = e.target.closest('[data-app-dragover]');
+    if (el && el.dataset.appDragover === 'paperDragOver') {
+        window.paperDragOver(e);
+    }
+});
+
+document.addEventListener('drop', (e) => {
+    const el = e.target.closest('[data-app-drop]');
+    if (el && el.dataset.appDrop === 'paperDragDrop') {
+        const idx = parseInt(el.getAttribute('data-idx'));
+        if (!isNaN(idx)) window.paperDragDrop(e, idx);
+    }
+});
+
+document.addEventListener('dragend', (e) => {
+    const el = e.target.closest('[data-app-dragend]');
+    if (el && el.dataset.appDragend === 'paperDragEnd') {
+        window.paperDragEnd(e);
+    }
+});
 
 function editPaperProfile(idx) {
     editingPaperIdx = idx;

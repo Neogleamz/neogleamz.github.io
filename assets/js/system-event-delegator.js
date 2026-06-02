@@ -1444,6 +1444,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_removeAliasMapping':
                     if(window.removeAliasMapping) window.removeAliasMapping(el.getAttribute('data-sku'));
                     break;
+                case 'click_togglePrimaryAliasMapping':
+                    if(window.togglePrimaryAliasMapping) window.togglePrimaryAliasMapping(el.getAttribute('data-sku'));
+                    break;
+                case 'click_toggleAliasCardExpand':
+                    if(window.toggleAliasCardExpand) window.toggleAliasCardExpand(el.getAttribute('data-sku'));
+                    break;
+                case 'click_saveAliasBarcode': {
+                    const sku = el.getAttribute('data-sku');
+                    const input = document.getElementById(`aliasBarcodeVal_${sku.replace(/[^a-zA-Z0-9_-]/g, '_')}`);
+                    if (window.saveAliasBarcode && input) window.saveAliasBarcode(sku, input.value);
+                    break;
+                }
+                case 'click_triggerShopifyCatalogSync': {
+                    if (window.triggerShopifyCatalogSync) window.triggerShopifyCatalogSync();
+                    break;
+                }
+                case 'click_closeCatalogSyncTerminal': {
+                    const term = document.getElementById('catalogSyncTerminalContainer');
+                    if (term) term.style.display = 'none';
+                    break;
+                }
                 case 'click_openAliasManagerWithUnmapped':
                     if (typeof window.switchTab === 'function') window.switchTab('nexuz');
                     if (typeof window.showNexlPane === 'function') window.showNexlPane('salez');
@@ -1676,6 +1697,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_handleShopifyBillingUpload':
                     if (typeof window.change_handleShopifyBillingUpload === 'function') window.change_handleShopifyBillingUpload(event);
                     break;
+
                 case 'change_handleFileSelect_this':
                     if (typeof handleFileSelect === 'function') handleFileSelect(el, false);
                     break;

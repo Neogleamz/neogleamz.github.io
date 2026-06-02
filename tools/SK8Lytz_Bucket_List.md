@@ -15,7 +15,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-- [ ] `feat/unified-sku-barcode-parity` : **Unified SKU & Barcode Parity Engine** - Establish a Unified Hybrid Identification Architecture (UHIA) that emulates the Shopify MS Barcodes settings (9-digit random numbers in Code 128 format and 'NG-XXXX-' SKUs) for all internal raw goods, sub-assemblies, and finished goods, backed by a self-healing conflict resolution protocol that always defers to Shopify records upon sync detection. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+*Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
 *Clean sweep — all active epics successfully completed and archived!* ✅
@@ -41,6 +41,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `feat/unified-sku-barcode-parity`
+**Epic: Unified SKU & Barcode Parity Engine**
+*(Archived — 2026-06-01)*
+- [🚀] `feat/unified-sku-barcode-parity` : **Unified SKU & Barcode Parity Engine** - Establish a Unified Hybrid Identification Architecture (UHIA) that emulates the Shopify MS Barcodes settings (9-digit random numbers in Code 128 format and 'NG-XXXX-' SKUs) for all internal raw goods, sub-assemblies, and finished goods, backed by a self-healing conflict resolution protocol that always defers to Shopify records upon sync detection. [🤖 Antigravity] [🧠 5k / 5k] [💸 $0.02 / $0.02]
 
 ### Target: `main`
 **Epic: Technical Debt Sweep**
