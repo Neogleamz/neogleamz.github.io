@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1780378645947" clover="3.2.0">
-  <project timestamp="1780378645947" name="All files">
-    <metrics statements="15302" coveredstatements="1338" conditionals="15334" coveredconditionals="819" methods="1980" coveredmethods="120" elements="32616" coveredelements="2277" complexity="0" loc="15302" ncloc="15302" packages="1" files="18" classes="18"/>
+<coverage generated="1780379084089" clover="3.2.0">
+  <project timestamp="1780379084089" name="All files">
+    <metrics statements="15299" coveredstatements="1336" conditionals="15334" coveredconditionals="819" methods="1980" coveredmethods="120" elements="32613" coveredelements="2275" complexity="0" loc="15299" ncloc="15299" packages="1" files="18" classes="18"/>
     <file name="analytics-module.js" path="D:\GitHub\neogleamz.github.io\assets\js\analytics-module.js">
       <metrics statements="145" coveredstatements="0" conditionals="136" coveredconditionals="0" methods="22" coveredmethods="0"/>
       <line num="12" count="0" type="stmt"/>
@@ -6709,7 +6709,7 @@
       <line num="1133" count="1" type="cond" truecount="1" falsecount="1"/>
     </file>
     <file name="production-module.js" path="D:\GitHub\neogleamz.github.io\assets\js\production-module.js">
-      <metrics statements="1898" coveredstatements="336" conditionals="2197" coveredconditionals="224" methods="271" coveredmethods="28"/>
+      <metrics statements="1896" coveredstatements="334" conditionals="2197" coveredconditionals="224" methods="271" coveredmethods="28"/>
       <line num="26" count="0" type="cond" truecount="0" falsecount="2"/>
       <line num="27" count="0" type="stmt"/>
       <line num="28" count="0" type="cond" truecount="0" falsecount="2"/>
@@ -8528,7 +8528,6 @@
       <line num="3130" count="3" type="cond" truecount="2" falsecount="0"/>
       <line num="3131" count="3" type="stmt"/>
       <line num="3132" count="3" type="stmt"/>
-      <line num="3135" count="2" type="stmt"/>
       <line num="3136" count="2" type="cond" truecount="1" falsecount="1"/>
       <line num="3137" count="3" type="stmt"/>
       <line num="3139" count="0" type="stmt"/>
@@ -8577,7 +8576,6 @@
       <line num="3207" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="3208" count="1" type="stmt"/>
       <line num="3209" count="1" type="stmt"/>
-      <line num="3211" count="1" type="stmt"/>
       <line num="3212" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="3213" count="1" type="stmt"/>
       <line num="3215" count="0" type="stmt"/>
@@ -13517,7 +13515,7 @@
       <line num="1" count="0" type="stmt"/>
     </file>
     <file name="task-engine.js" path="D:\GitHub\neogleamz.github.io\assets\js\task-engine.js">
-      <metrics statements="1839" coveredstatements="194" conditionals="1670" coveredconditionals="59" methods="255" coveredmethods="17"/>
+      <metrics statements="1838" coveredstatements="194" conditionals="1670" coveredconditionals="59" methods="255" coveredmethods="17"/>
       <line num="7" count="1" type="stmt"/>
       <line num="8" count="31" type="cond" truecount="2" falsecount="0"/>
       <line num="9" count="31" type="stmt"/>
@@ -14278,7 +14276,6 @@
       <line num="1349" count="0" type="stmt"/>
       <line num="1350" count="0" type="cond" truecount="0" falsecount="2"/>
       <line num="1352" count="0" type="cond" truecount="0" falsecount="2"/>
-      <line num="1353" count="0" type="stmt"/>
       <line num="1355" count="0" type="cond" truecount="0" falsecount="4"/>
       <line num="1356" count="0" type="stmt"/>
       <line num="1357" count="0" type="stmt"/>
