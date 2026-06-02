@@ -552,8 +552,9 @@ function renderUnifiedBuilderTable() {
 
     // 1. Session Test Items (Highest priority)
     window.ceoSessionTestItems.forEach((p, _idx) => {
+        let safeName = (p.name || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
         html += `<tr class="u-builder-row" style="border-bottom:1px solid var(--border-color); background:rgba(139, 92, 246, 0.05);">
-            <td style="padding:8px;"><input type="number" class="u-qty" data-name="${p.name}" data-cogs="${p.cogs}" data-msrp="${p.msrp}" min="0" step="1" value="0" style="width:50px; padding:4px;"></td>
+            <td style="padding:8px;"><input type="number" class="u-qty" data-name="${safeName}" data-cogs="${p.cogs}" data-msrp="${p.msrp}" min="0" step="1" value="0" style="width:50px; padding:4px;"></td>
             <td class="u-name" style="padding:8px; color:#a78bfa; font-weight:bold;">${p.name}</td>
             <td style="padding:8px;">${ceoFmt.format(p.cogs)}</td>
             <td style="padding:8px;">${ceoFmt.format(p.msrp)}</td>
@@ -563,8 +564,9 @@ function renderUnifiedBuilderTable() {
     // 2. Catalog Products
     availableRetail.forEach(k => {
         let c = getEngineTrueCogs(k); let m = getEngineLiveMsrp(k);
+        let safeK = (k || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
         html += `<tr class="u-builder-row" style="border-bottom:1px solid var(--border-color);">
-            <td style="padding:8px;"><input type="number" class="u-qty" data-name="${k}" data-cogs="${c}" data-msrp="${m}" min="0" step="1" value="0" style="width:50px; padding:4px;"></td>
+            <td style="padding:8px;"><input type="number" class="u-qty" data-name="${safeK}" data-cogs="${c}" data-msrp="${m}" min="0" step="1" value="0" style="width:50px; padding:4px;"></td>
             <td class="u-name" style="padding:8px;">${k}</td>
             <td style="padding:8px;">${ceoFmt.format(c)}</td>
             <td style="padding:8px;">${ceoFmt.format(m)}</td>

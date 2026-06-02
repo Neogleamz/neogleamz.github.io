@@ -211,7 +211,7 @@ window.renderProductList = function() {
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
 
     function buildItem(n) {
-        let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'");
+        let sel = n === currentProduct ? 'selected' : ''; let safeName = String(n).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         return `<li class="${sel}"
             draggable="true"
             data-app-dragstart="prodDragStart" data-name="${safeName}"
