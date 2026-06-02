@@ -1,5 +1,8 @@
 # Implementation Plan: Label Print Tracking & Visual Designer
 
+### Design Decisions & Rationale
+We chose a **State-Driven DOM Architecture** using CSS physical units over an HTML5 `<canvas>` approach to guarantee crisp, infinite-scaling vector barcode printing at 300dpi natively through the browser's print engine. For print tracking, we chose the **Confirmation Dialog** as a pure-web fallback because native Vanilla JS cannot read OS print queues, allowing us to accurately track physical media consumption without requiring third-party companion apps. We bridge Barcodz to the BOM using **Dynamic Injection**, dynamically rendering Product SKUs as `BARCODE_LABEL:::` keys in the BOM to enable adding labels to sub-assemblies without duplicate data entry.
+
 ## Context & Objectives
 Implement the "Dynamic Barcodz BOM Injection" and "Visual Template Designer" to allow tracking of Barcodz product labels exactly like Custom Labelz, while providing a pure Vanilla JS UI for creating custom label dimensions.
 

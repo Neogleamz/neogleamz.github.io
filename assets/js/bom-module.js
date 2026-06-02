@@ -16,6 +16,7 @@ window.openBulkAddModal = function() {
         let iconStr = pData.is_3d_print ? "🖨️ " : (pData.is_label ? (pData.label_emoji ? pData.label_emoji + " " : "🏷️ ") : (isSubassemblyDB[p] ? "⚙️ " : "📦 ")); 
         let typeStr = pData.is_label ? "Custom Labelz" : (pData.is_3d_print ? "3D Print" : (isSubassemblyDB[p] ? "Sub-Assembly" : "Retail Product"));
         bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: iconStr + p, np: typeStr, n: "", sp: "(Nested Recipe)", uc: getEngineTrueCogs(p), q: "" }); 
+        bulkAddData.push({ k: `BARCODE_LABEL:::${p}`, isSub: false, nn: "🏷️ [Barcode] " + p, np: "Product Barcode", n: p, sp: "Standard Thermal", uc: 0, q: "" });
     });
     Object.keys(catalogCache).forEach(k => { let c = catalogCache[k]; bulkAddData.push({ k: k, isSub: false, nn: "🔩 " + (c.neoName || c.itemName || ""), np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "" }); });
     document.getElementById('bulkSearch').value = ""; document.getElementById('bulkAddModal').style.display = 'flex'; window.renderBulkAddBody();
@@ -379,6 +380,13 @@ window.renderProductBOM = function() {
                 n=""; 
                 sp=""; 
                 uc=getEngineTrueCogs(s); 
+            } else if (k.startsWith('BARCODE_LABEL:::')) {
+                let s = k.replace('BARCODE_LABEL:::', '');
+                nn = "🏷️ [Barcode] " + s;
+                np = "Product Barcode";
+                n = s;
+                sp = "Standard Thermal";
+                uc = 0;
             } else { 
                 let c = catalogCache[k];
 
