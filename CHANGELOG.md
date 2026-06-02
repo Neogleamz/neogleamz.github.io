@@ -5,6 +5,8 @@
 ### 🧹 Chores & Cleanup
 - **Token Tracking Metadata Purge** (`chore/rules`): Removed all legacy AI token tracking requirements (`[🤖 AI Model] [🧠 TBD] [💸 TBD]`) globally from the Bucket List and all automated intake workflows (`idea_intake`, `intake`, `product_alignment`, `tech-debt-janitor`, `teamwork_preview`).
 - **NPM Package Security Updates** (`chore/dep-patch-updates`): Executed `npm update` to safely bump development dependencies: `eslint` (10.4.0 -> 10.4.1) and `supabase` (2.101.0 -> 2.102.0) safe patch versions.
+- **Escape Double Quotes in DOM Interpolation** (`fix/recipe-quotes`): Fix the UI breaking bug when rendering product names with double quotes in the Recipez pane.
+- **ESLint Warnings Sweep 2** (`debt/eslint-warnings-sweep-2`): Resolve the 13 ESLint warnings across packerz, production-module, and system-realtime-sync to achieve a completely silent terminal.
 ## [1.3.6] - 2026-06-02
 
 ### ✨ Features & Bug Fixes
