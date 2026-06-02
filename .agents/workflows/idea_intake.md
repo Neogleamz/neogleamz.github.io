@@ -10,8 +10,9 @@ When the user requests to log an idea or task for later, you must execute the fo
 
 1. **The Intercept**: Acknowledge the request by stating: *"Logging idea to the Bucket List..."*
 2. **Mandatory Pre-Planning Gate**:
-   - Before logging the task, you MUST generate a highly detailed, fully documented Implementation Plan artifact outlining the technical approach (covering security, flexbox UI, performance, and Vanilla JS standards).
-   - Write this plan to `docs/plans/<slug>.md`.
+   - Before logging the task, you MUST check if a High-Level Architectural Document was generated during a preceding `/whiteboard_mode` session.
+   - If it exists, use that documentation to generate a highly detailed, fully documented Implementation Plan artifact. The plan must translate the high-level hierarchy and agent validations into strict technical approaches (covering security, flexbox UI, performance, and Vanilla JS standards). If no architectural doc exists, build the Implementation Plan from scratch based on the user's prompt.
+   - Write this Implementation Plan to `docs/plans/<slug>.md`.
 3. **Triaging & Injection**: 
    - Analyze the request. If it relates to an active Epic, assign it there. Otherwise, assign it to `### Target: main`.
    - Inject the task as a `- [ ]` markdown item into @/tools/SK8Lytz_Bucket_List.md.
