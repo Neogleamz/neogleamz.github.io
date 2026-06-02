@@ -18,7 +18,10 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
-*Clean sweep — all active epics successfully completed and archived!* ✅
+
+### Target: `main`
+**Epic: Dynamic Label Tracking & Designer**
+- [ ] `feat/label-print-tracking-and-designer` : **Label Print Tracking & Visual Designer** - Bridge Barcodz and the BOM by injecting dynamically tracked `BARCODE_LABEL:::` components to track produced SKU stickers, and introduce a Vanilla JS physical-unit visual template designer. (Plan: [docs/plans/feat-label-print-tracking-and-designer.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat-label-print-tracking-and-designer.md))
 
 
 ## 🧹 Technical Debt
@@ -591,3 +594,5 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Escape Double Quotes in DOM Interpolation**
 *(Archived — 2026-06-02)*
 - [x] fix/recipe-quotes : **Escape Double Quotes in DOM Interpolation** - Fix the UI breaking bug when rendering product names with double quotes in the Recipez pane. (Plan: [docs/plans/fix/recipe-quotes.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/fix/recipe-quotes.md))
+-   [ x ]   \ d e b t / e s l i n t - w a r n i n g s - s w e e p - 2 \   :   R e s o l v e   t h e   1 3   E S L i n t   w a r n i n g s   a c r o s s   p a c k e r z ,   p r o d u c t i o n - m o d u l e ,   a n d   s y s t e m - r e a l t i m e - s y n c   t o   a c h i e v e   a   c o m p l e t e l y   s i l e n t   t e r m i n a l .  
+ 
