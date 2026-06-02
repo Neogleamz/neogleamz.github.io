@@ -800,6 +800,12 @@ To prevent race conditions during simultaneous webhook transmissions (e.g. order
 1. **Payload Aggregation**: Edge functions pre-aggregate duplicate line items (by storefront_sku) natively before pushing to the DB. This prevents false-flags of legitimate multiple cart additions.
 2. **Database Constraints**: The sales_ledger table enforces a UNIQUE(order_id, storefront_sku) constraint. Simultaneous requests will trigger a Postgres constraint violation on the secondary payload, which causes the Edge Function to fail safely (HTTP 500). Shopify’s native retry algorithm then automatically delays and retries the webhook, which subsequently succeeds via an .update() bypass.
 
+### Storefront Aliases Schema (`public.storefront_aliases`)
+To support Shopify and Etsy multi-channel variant mapping, the `storefront_aliases` table maintains storefront SKU mapping constraints:
+* **`product_sku` (text, Primary Key / Foreign Key)**: References the internal product recipe SKU code (originally named `alias_sku`).
+* **`shopify_sku` (text, Nullable)**: Stores the actual Shopify SKU code associated with the storefront alias, matching Shopify catalog sync variant SKU mappings.
+* **`is_primary` (boolean, Default false)**: Designates whether the alias is the primary mapping source when multiple storefront channels map to the same internal recipe, overriding emulated fallbacks.
+
 ### Boot-Time Storefront SKU Mapping Scanner & Real-Time Sync Recalculator
 The system implements a continuous data integrity scanning protocol for storefront (Shopify/Etsy) transaction logs.
 1. **Boot Scanner**: During initial application load, `window.scanOrphanStorefrontSKUs` automatically reviews the `sales_ledger` table (`salesDB` memory) against active mappings in `storefront_aliases` (`aliasDB`) and product records in `productsDB`. If storefront SKUs lack valid mappings or reference missing recipes, they are classified as orphans and trigger a pulsing flashing neon orange/red alert button (`#btnUnmappedSkuAlert`) in the header.
