@@ -15,7 +15,7 @@ When the user requests to actively pivot their session and drop everything to fi
 3. **Triaging & Injection**: 
    - Analyze the request. Generate a short slug for the task (e.g. `fix/auth-crash`).
    - Inject the task as a `- [ ]` markdown item into the top of the `## 🔴 P0 Critical (Blockers & Hotfixes)` section in @/tools/SK8Lytz_Bucket_List.md.
-   - Append the token tracking tag (e.g., `[🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]`).
+
 4. **Environment Reset & Execution**:
    - Execute `git checkout main`
    - Execute `git pull origin main` (if remote exists)

@@ -13,7 +13,7 @@ When the user invokes `[/teamwork-preview]`, you are acting as the Lead Orchestr
 Before you invoke any subagents using the `invoke_subagent` tool, you **MUST** physically write them into the Bucket List.
 - Open `@/tools/SK8Lytz_Bucket_List.md`.
 - Inject the exact swarm names and their goals under the `🟠 P1 High Priority` queue.
-- Use the `[/]` (In Progress) token. E.g., `- [/] feat/feature-name : **Feature Name** - Description. [🤖 Teamwork Swarm] [🧠 TBD] [💸 TBD]`
+- Use the `[/]` (In Progress) token. E.g., `- [/] feat/feature-name : **Feature Name** - Description.`
 - **HALT CHECK:** If you have not successfully modified the Markdown file and verified the changes, you are STRICTLY FORBIDDEN from calling the `invoke_subagent` tool.
 
 ### 2. Dispatch
