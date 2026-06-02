@@ -325,16 +325,21 @@ async function saveAliasMapping() {
         aliasDB[sku] = recipe;
         const mappedBarcode = getItemBarcodeValue(recipe);
         if (typeof window.aliasMetadataDB === 'undefined') window.aliasMetadataDB = {};
-        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };
+        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false, is_primary: false };
         
         const { error } = await supabaseClient.from('storefront_aliases').upsert({ 
             storefront_sku: sku, 
             internal_recipe_name: recipe, 
             barcode_value: mappedBarcode,
             is_shopify_synced: false,
+            is_primary: false,
             platform: 'CSV Import' 
         });
         if(error) { throw new Error(error.message); }
+
+        // Rebuild and refresh print spooler cache
+        if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
+        if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
 
         document.getElementById('aliasModal').style.display = 'none'; setMasterStatus("Mapped!", "mod-success");
         pendingSalesRows.forEach(r => { if(r.storefront_sku === sku) r.internal_recipe_name = recipe; });
@@ -401,13 +406,14 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
         // 1. Insert/upsert into storefront_aliases table in Supabase
         const mappedBarcode = getItemBarcodeValue(targetRecipe);
         if (typeof window.aliasMetadataDB === 'undefined') window.aliasMetadataDB = {};
-        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };
+        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false, is_primary: false };
         
         const { error: aliasError } = await supabaseClient.from('storefront_aliases').upsert({ 
             storefront_sku: sku, 
             internal_recipe_name: targetRecipe, 
             barcode_value: mappedBarcode,
             is_shopify_synced: false,
+            is_primary: false,
             platform: 'Auto Scanner' 
         });
         
@@ -417,6 +423,10 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
         if (typeof aliasDB !== 'undefined') {
             aliasDB[sku] = targetRecipe;
         }
+
+        // Rebuild and refresh print spooler cache
+        if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
+        if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
         
         // 3. Find all matching rows in salesDB for this storefront SKU
         let affectedSales = salesDB.filter(s => s.storefront_sku === sku);

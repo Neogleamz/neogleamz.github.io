@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1167</span>
+                <span class='fraction'>0/1175</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1067</span>
+                <span class='fraction'>0/1075</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/943</span>
+                <span class='fraction'>0/947</span>
             </div>
         
             
@@ -1916,7 +1916,17 @@
 <a name='L1851'></a><a href='#L1851'>1851</a>
 <a name='L1852'></a><a href='#L1852'>1852</a>
 <a name='L1853'></a><a href='#L1853'>1853</a>
-<a name='L1854'></a><a href='#L1854'>1854</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1854'></a><a href='#L1854'>1854</a>
+<a name='L1855'></a><a href='#L1855'>1855</a>
+<a name='L1856'></a><a href='#L1856'>1856</a>
+<a name='L1857'></a><a href='#L1857'>1857</a>
+<a name='L1858'></a><a href='#L1858'>1858</a>
+<a name='L1859'></a><a href='#L1859'>1859</a>
+<a name='L1860'></a><a href='#L1860'>1860</a>
+<a name='L1861'></a><a href='#L1861'>1861</a>
+<a name='L1862'></a><a href='#L1862'>1862</a>
+<a name='L1863'></a><a href='#L1863'>1863</a>
+<a name='L1864'></a><a href='#L1864'>1864</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2252,6 +2262,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2329,12 +2344,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -4096,16 +4116,21 @@ async function <span class="fstat-no" title="function not covered" >saveAliasMap
 <span class="cstat-no" title="statement not covered" >        aliasDB[sku] = recipe;</span>
         const mappedBarcode = <span class="cstat-no" title="statement not covered" >getItemBarcodeValue(recipe);</span>
 <span class="cstat-no" title="statement not covered" >        if (typeof window.aliasMetadataDB === 'undefined') <span class="cstat-no" title="statement not covered" >window.aliasMetadataDB = {};</span></span>
-<span class="cstat-no" title="statement not covered" >        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };</span>
+<span class="cstat-no" title="statement not covered" >        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false, is_primary: false };</span>
         
         const { error } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('storefront_aliases').upsert({ </span>
             storefront_sku: sku, 
             internal_recipe_name: recipe, 
             barcode_value: mappedBarcode,
             is_shopify_synced: false,
+            is_primary: false,
             platform: 'CSV Import' 
         });
 <span class="cstat-no" title="statement not covered" >        if(error) { <span class="cstat-no" title="statement not covered" >throw new Error(error.message); </span>}</span>
+&nbsp;
+        // Rebuild and refresh print spooler cache
+<span class="cstat-no" title="statement not covered" >        if (typeof buildBarcodzCache === 'function') <span class="cstat-no" title="statement not covered" >buildBarcodzCache();</span></span>
+<span class="cstat-no" title="statement not covered" >        if (typeof renderBarcodzGrid === 'function') <span class="cstat-no" title="statement not covered" >renderBarcodzGrid(true);</span></span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        document.getElementById('aliasModal').style.display = 'none'; <span class="cstat-no" title="statement not covered" ></span>setMasterStatus("Mapped!", "mod-success");</span>
 <span class="cstat-no" title="statement not covered" >        pendingSalesRows.forEach(<span class="fstat-no" title="function not covered" >r </span>=&gt; { <span class="cstat-no" title="statement not covered" >if(r.storefront_sku === sku) <span class="cstat-no" title="statement not covered" >r.internal_recipe_name = recipe; </span></span>});</span>
@@ -4172,13 +4197,14 @@ async function <span class="fstat-no" title="function not covered" >saveAliasMap
         // 1. Insert/upsert into storefront_aliases table in Supabase
         const mappedBarcode = <span class="cstat-no" title="statement not covered" >getItemBarcodeValue(targetRecipe);</span>
 <span class="cstat-no" title="statement not covered" >        if (typeof window.aliasMetadataDB === 'undefined') <span class="cstat-no" title="statement not covered" >window.aliasMetadataDB = {};</span></span>
-<span class="cstat-no" title="statement not covered" >        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false };</span>
+<span class="cstat-no" title="statement not covered" >        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false, is_primary: false };</span>
         
         const { error: aliasError } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('storefront_aliases').upsert({ </span>
             storefront_sku: sku, 
             internal_recipe_name: targetRecipe, 
             barcode_value: mappedBarcode,
             is_shopify_synced: false,
+            is_primary: false,
             platform: 'Auto Scanner' 
         });
         
@@ -4188,6 +4214,10 @@ async function <span class="fstat-no" title="function not covered" >saveAliasMap
 <span class="cstat-no" title="statement not covered" >        if (typeof aliasDB !== 'undefined') {</span>
 <span class="cstat-no" title="statement not covered" >            aliasDB[sku] = targetRecipe;</span>
         }
+&nbsp;
+        // Rebuild and refresh print spooler cache
+<span class="cstat-no" title="statement not covered" >        if (typeof buildBarcodzCache === 'function') <span class="cstat-no" title="statement not covered" >buildBarcodzCache();</span></span>
+<span class="cstat-no" title="statement not covered" >        if (typeof renderBarcodzGrid === 'function') <span class="cstat-no" title="statement not covered" >renderBarcodzGrid(true);</span></span>
         
         // 3. Find all matching rows in salesDB for this storefront SKU
         let affectedSales = <span class="cstat-no" title="statement not covered" >salesDB.filter(<span class="fstat-no" title="function not covered" >s </span>=&gt; <span class="cstat-no" title="statement not covered" >s.storefront_sku === sku)</span>;</span>
@@ -5629,7 +5659,7 @@ function <span class="fstat-no" title="function not covered" >renderActualNetLis
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-01T23:59:37.886Z
+                at 2026-06-02T00:05:40.879Z
             </div>
         <script src="prettify.js"></script>
         <script>
