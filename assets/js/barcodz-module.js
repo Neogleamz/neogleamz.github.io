@@ -157,8 +157,8 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
                         <!-- Content -->
                         <div style="padding-top:4px; border-top:1px solid var(--border-color); text-align:center;">
                             <div style="font-size:13px; font-weight:900; color:var(--text-heading); margin-bottom:2px; line-height:1.2; word-break:break-word;">${item.name}</div>
-                            <div style="font-size:9px; font-family:monospace; color:var(--text-muted); padding:2px 0 0 0; word-break:break-all;">SKU: ${getItemSKUValue(item.name)}</div>
-                            <div style="font-size:8px; font-family:monospace; color:var(--text-muted); opacity:0.7; padding-bottom:2px;">Barcode: ${item.slug}</div>
+                            <div style="font-size:11px; font-family:monospace; color:var(--text-main); padding:2px 0 0 0; word-break:break-all;">SKU: <span style="color:#38bdf8; font-weight:bold;">${getItemSKUValue(item.name)}</span></div>
+                            <div style="font-size:10px; font-family:monospace; color:var(--text-muted); padding-bottom:2px;">Barcode: <span style="color:#f97316; font-weight:bold;">${item.slug}</span></div>
                             ${item.desc ? `<div style="font-size:10px; color:var(--text-muted); margin-top:2px; font-style:italic; line-height:1.2;">${item.desc}</div>` : ''}
                         </div>
                     </div>
@@ -289,7 +289,7 @@ function renderBarcodzSpool() {
                     
                     <div style="overflow:hidden;">
                         <div style="font-size:11px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
-                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${getItemSKUValue(item.name)}">${getItemSKUValue(item.name)}</div>
+                        <div style="font-size:10px; font-family:monospace; color:#38bdf8; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${getItemSKUValue(item.name)}">${getItemSKUValue(item.name)}</div>
                     </div>
                     
                     <input type="number" min="0" value="${item.qty}" class="spool-qty-input" data-slug="${item.slug}" style="width:100%; height:24px; text-align:center; font-size:12px; font-weight:bold; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-panel); color:var(--text-main); box-sizing:border-box; padding:0 2px;" />

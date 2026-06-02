@@ -185,72 +185,149 @@ window.getDeterministic9DigitHash = function(str) {
     return String(100000000 + Math.abs(hash));
 };
 
+// Helper to find an unmapped Shopify-synced variant that dynamically matches the recipe or its mapped aliases
+function findDynamicShopifyVariant(recipeName) {
+    if (typeof aliasDB === 'undefined' || typeof window.aliasMetadataDB === 'undefined') return null;
+    
+    // Find all aliases currently mapped to this recipeName
+    const mappedAliases = Object.keys(aliasDB).filter(sku => aliasDB[sku] === recipeName);
+    
+    // Check all unmapped Shopify-synced variants
+    for (const sku of Object.keys(window.aliasMetadataDB)) {
+        const meta = window.aliasMetadataDB[sku];
+        if (!meta || !meta.is_shopify_synced || aliasDB[sku]) continue; // skip mapped
+        
+        const cleanSku = sku.toLowerCase();
+        
+        // 1. Compare with recipeName
+        const cleanRecipe = recipeName.toLowerCase();
+        const recipeWords = cleanRecipe.split(/[^a-z0-9]/).filter(w => w.length > 2);
+        const recipeMatch = cleanSku.includes(cleanRecipe) || 
+                            cleanRecipe.includes(cleanSku) ||
+                            (recipeWords.length > 0 && recipeWords.every(w => cleanSku.includes(w)));
+                            
+        if (recipeMatch) {
+            return { sku, barcode: meta.barcode_value };
+        }
+        
+        // 2. Compare with any mapped aliases
+        for (const alias of mappedAliases) {
+            const cleanAlias = alias.toLowerCase();
+            const aliasWords = cleanAlias.split(/[^a-z0-9]/).filter(w => w.length > 2);
+            const aliasMatch = cleanSku.includes(cleanAlias) || 
+                               cleanAlias.includes(cleanSku) ||
+                               (aliasWords.length > 0 && aliasWords.every(w => cleanSku.includes(w)));
+            if (aliasMatch) {
+                return { sku, barcode: meta.barcode_value };
+            }
+        }
+    }
+    return null;
+}
+
 window.getItemBarcodeValue = function(itemName) {
     if (!itemName) return '';
     
-    // 1. Check if the item has an alias designated as PRIMARY and has a barcode value
-    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
-        const primarySku = Object.keys(window.aliasMetadataDB).find(sku => {
-            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_primary && window.aliasMetadataDB[sku].barcode_value;
-        });
-        if (primarySku) {
-            return window.aliasMetadataDB[primarySku].barcode_value;
-        }
-    }
+    // Check if the query is a storefront SKU (maps to an internal recipe)
+    const isStorefrontSku = typeof window.aliasDB !== 'undefined' && window.aliasDB[itemName] !== undefined;
     
-    // 2. Check if the item has a mapped Shopify-synced SKU with a barcode
-    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
-        const shopifySku = Object.keys(window.aliasMetadataDB).find(sku => {
-            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_shopify_synced && window.aliasMetadataDB[sku].barcode_value;
-        });
-        if (shopifySku) {
-            return window.aliasMetadataDB[shopifySku].barcode_value;
+    if (isStorefrontSku) {
+        // Resolve storefront SKU's own barcode
+        // 0. Direct Shopify variant match for the specific storefront SKU
+        if (typeof window.findShopifyVariantForAlias === 'function') {
+            const match = window.findShopifyVariantForAlias(itemName);
+            if (match && match.barcode && match.barcode !== 'None') {
+                return match.barcode;
+            }
         }
-    }
-    
-    // 3. Fallback: check if the item has any mapped storefront SKU with a barcode (e.g. eBay or un-synced)
-    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
-        const foundSku = Object.keys(window.aliasMetadataDB).find(sku => {
-            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].barcode_value;
-        });
-        if (foundSku) {
-            return window.aliasMetadataDB[foundSku].barcode_value;
+        
+        // 1. Metadata barcode directly stored for this storefront SKU
+        if (typeof window.aliasMetadataDB !== 'undefined' && window.aliasMetadataDB[itemName]) {
+            const meta = window.aliasMetadataDB[itemName];
+            if (meta.barcode_value) return meta.barcode_value;
         }
+        
+        // 2. Fallback: use storefront SKU's own deterministic hash (itemName)
+        return typeof window.getDeterministic9DigitHash === 'function' ? window.getDeterministic9DigitHash(itemName) : '';
+    } else {
+        // Query is a recipe name (or raw material)
+        const recipeName = itemName;
+        const fallbackHash = typeof window.getDeterministic9DigitHash === 'function' ? window.getDeterministic9DigitHash(recipeName) : '';
+        
+        // Check if there is an alias mapped to this recipe that is marked as PRIMARY
+        if (typeof window.aliasMetadataDB !== 'undefined' && typeof window.aliasDB !== 'undefined') {
+            const primarySku = Object.keys(window.aliasMetadataDB).find(sku => {
+                return window.aliasDB[sku] === recipeName && window.aliasMetadataDB[sku].is_primary;
+            });
+            if (primarySku) {
+                const meta = window.aliasMetadataDB[primarySku];
+                return meta.barcode_value || (typeof window.getDeterministic9DigitHash === 'function' ? window.getDeterministic9DigitHash(primarySku) : fallbackHash);
+            }
+        }
+        
+        // If no alias is marked as primary, we MUST fall back to the deterministic hash
+        return fallbackHash;
     }
-    
-    // 4. Otherwise, fall back to our deterministic 9-digit hash (emulating standard numeric barcode)
-    return window.getDeterministic9DigitHash(itemName);
 };
 
 window.getItemSKUValue = function(itemName) {
     if (!itemName) return '';
     
-    // 1. Check if the item has an alias designated as PRIMARY
-    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
-        const primarySku = Object.keys(window.aliasMetadataDB).find(sku => {
-            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_primary;
-        });
-        if (primarySku) return primarySku;
-    }
+    // Check if the query is a storefront SKU (maps to an internal recipe)
+    const isStorefrontSku = typeof window.aliasDB !== 'undefined' && window.aliasDB[itemName] !== undefined;
     
-    // 2. Check if the item has a mapped Shopify-synced SKU
-    if (typeof window.aliasMetadataDB !== 'undefined' && typeof aliasDB !== 'undefined') {
-        const shopifySku = Object.keys(window.aliasMetadataDB).find(sku => {
-            return aliasDB[sku] === itemName && window.aliasMetadataDB[sku].is_shopify_synced;
-        });
-        if (shopifySku) return shopifySku;
-    }
+    const isFormattedSku = (str) => {
+        if (!str) return false;
+        const clean = str.trim();
+        return clean.startsWith('NG-') || clean.startsWith('NGZ-') || (clean.length > 3 && !clean.includes(' ') && clean.includes('-'));
+    };
     
-    // 3. Fallback: check if the item has any mapped storefront SKU (e.g. eBay or un-synced)
-    if (typeof aliasDB !== 'undefined') {
-        const foundSku = Object.keys(aliasDB).find(sku => aliasDB[sku] === itemName);
-        if (foundSku) return foundSku;
+    if (isStorefrontSku) {
+        // Resolve storefront SKU's own SKU name
+        // 0. Direct Shopify variant match for this storefront SKU
+        if (typeof window.findShopifyVariantForAlias === 'function') {
+            const match = window.findShopifyVariantForAlias(itemName);
+            if (match && match.sku) {
+                return match.sku;
+            }
+        }
+        
+        // 1. Check if we have a Shopify SKU stored in metadata
+        if (typeof window.aliasMetadataDB !== 'undefined' && window.aliasMetadataDB[itemName]) {
+            const meta = window.aliasMetadataDB[itemName];
+            if (meta.shopify_sku) return meta.shopify_sku;
+        }
+        
+        // 2. If the storefront SKU name itself is already a formatted SKU, return it
+        if (isFormattedSku(itemName)) {
+            return itemName;
+        }
+
+        // 3. Fallback: construct a deterministic emulated SKU pattern based on the storefront SKU itself
+        const aliasBC = typeof window.getItemBarcodeValue === 'function' ? window.getItemBarcodeValue(itemName) : '';
+        const hash4 = String(1000 + (Math.abs(parseInt(aliasBC, 10)) % 9000));
+        const nameChunk = itemName.trim().substring(0, 13).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+        return `NG-${hash4}-${nameChunk || 'ITEM'}`;
+    } else {
+        // Query is a recipe name (or raw material)
+        const recipeName = itemName;
+        
+        // Check if there is an alias mapped to this recipe that is marked as PRIMARY
+        if (typeof window.aliasMetadataDB !== 'undefined' && typeof window.aliasDB !== 'undefined') {
+            const primarySku = Object.keys(window.aliasMetadataDB).find(sku => {
+                return window.aliasDB[sku] === recipeName && window.aliasMetadataDB[sku].is_primary;
+            });
+            if (primarySku) {
+                const meta = window.aliasMetadataDB[primarySku];
+                return meta.shopify_sku || window.getItemSKUValue(primarySku);
+            }
+        }
+        
+        // If no alias is marked as primary, construct a deterministic emulated SKU pattern
+        const hash4 = String(1000 + (Math.abs(parseInt(window.getDeterministic9DigitHash(recipeName), 10)) % 9000));
+        const nameChunk = recipeName.trim().substring(0, 13).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+        return `NG-${hash4}-${nameChunk || 'ITEM'}`;
     }
-    
-    // 4. Otherwise, construct a deterministic emulated SKU pattern
-    const hash4 = String(1000 + (Math.abs(parseInt(window.getDeterministic9DigitHash(itemName), 10)) % 9000));
-    const nameChunk = itemName.trim().substring(0, 13).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
-    return `NG-${hash4}-${nameChunk || 'ITEM'}`;
 };
 
 // Track scan confirmations per session (reset on modal open)

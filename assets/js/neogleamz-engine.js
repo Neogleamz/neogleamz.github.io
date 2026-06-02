@@ -642,30 +642,51 @@ function syncStockzStats() {
             simStock[k] = (i.produced_qty || 0) - (i.sold_qty || 0);
         });
 
-        function simCanBuild(recipeName, stockTracker) {
-            let tempStock = {...stockTracker};
+        function simCanBuild(recipeName, stockTracker, undoLog = []) {
             if (!productsDB[recipeName] || productsDB[recipeName].length === 0) return false;
+            
+            let localUndo = [];
             for (let comp of productsDB[recipeName]) {
                 let compKey = comp.item_key || comp.di_item_id || comp.name;
                 let reqQty = parseFloat(comp.quantity) || 1;
                 if (String(compKey).startsWith('RECIPE:::')) {
                     let subName = String(compKey).replace('RECIPE:::', '');
-                    let availablePrebuilt = tempStock[compKey] || 0;
+                    let availablePrebuilt = stockTracker[compKey] || 0;
                     if (availablePrebuilt >= reqQty) {
-                        tempStock[compKey] -= reqQty;
+                        localUndo.push({ key: compKey, prev: availablePrebuilt });
+                        stockTracker[compKey] -= reqQty;
                     } else {
                         let needed = reqQty - availablePrebuilt;
-                        tempStock[compKey] = 0;
+                        localUndo.push({ key: compKey, prev: availablePrebuilt });
+                        stockTracker[compKey] = 0;
+                        
+                        let possible = true;
                         for (let i = 0; i < needed; i++) {
-                            if (!simCanBuild(subName, tempStock)) return false;
+                            if (!simCanBuild(subName, stockTracker, localUndo)) {
+                                possible = false;
+                                break;
+                            }
+                        }
+                        if (!possible) {
+                            for (let j = localUndo.length - 1; j >= 0; j--) {
+                                stockTracker[localUndo[j].key] = localUndo[j].prev;
+                            }
+                            return false;
                         }
                     }
                 } else {
-                    if ((tempStock[compKey] || 0) < reqQty) return false;
-                    tempStock[compKey] -= reqQty;
+                    let avail = stockTracker[compKey] || 0;
+                    if (avail < reqQty) {
+                        for (let j = localUndo.length - 1; j >= 0; j--) {
+                            stockTracker[localUndo[j].key] = localUndo[j].prev;
+                        }
+                        return false;
+                    }
+                    localUndo.push({ key: compKey, prev: avail });
+                    stockTracker[compKey] -= reqQty;
                 }
             }
-            Object.keys(tempStock).forEach(k => stockTracker[k] = tempStock[k]);
+            undoLog.push(...localUndo);
             return true;
         }
 

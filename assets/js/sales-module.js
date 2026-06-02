@@ -323,17 +323,36 @@ async function saveAliasMapping() {
         sysLog(`Mapping ${sku} -> ${recipe}`); setMasterStatus("Saving Alias...", "mod-working");
 
         aliasDB[sku] = recipe;
-        const mappedBarcode = getItemBarcodeValue(recipe);
+        
+        let shopifySku = null;
+        let mappedBarcode = null;
+        if (typeof window.findShopifyVariantForAlias === 'function') {
+            const match = window.findShopifyVariantForAlias(sku);
+            if (match) {
+                shopifySku = match.sku;
+                mappedBarcode = match.barcode !== 'None' ? match.barcode : null;
+            }
+        }
+        if (!mappedBarcode) {
+            mappedBarcode = getItemBarcodeValue(sku);
+        }
+
         if (typeof window.aliasMetadataDB === 'undefined') window.aliasMetadataDB = {};
-        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false, is_primary: false };
+        window.aliasMetadataDB[sku] = { 
+            barcode_value: mappedBarcode, 
+            is_shopify_synced: false, 
+            is_primary: false,
+            shopify_sku: shopifySku 
+        };
         
         const { error } = await supabaseClient.from('storefront_aliases').upsert({ 
-            storefront_sku: sku, 
+            product_sku: sku, 
             internal_recipe_name: recipe, 
             barcode_value: mappedBarcode,
             is_shopify_synced: false,
             is_primary: false,
-            platform: 'CSV Import' 
+            platform: 'CSV Import',
+            shopify_sku: shopifySku
         });
         if(error) { throw new Error(error.message); }
 
@@ -363,6 +382,7 @@ window.scanOrphanStorefrontSKUs = function() {
     if (typeof salesDB === 'undefined' || typeof productsDB === 'undefined') return;
     
     let orphans = new Set();
+
     salesDB.forEach(s => {
         let sku = s.storefront_sku;
         if (!sku) return;
@@ -404,17 +424,44 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
     
     try {
         // 1. Insert/upsert into storefront_aliases table in Supabase
-        const mappedBarcode = getItemBarcodeValue(targetRecipe);
+        const existingMeta = (window.aliasMetadataDB && window.aliasMetadataDB[sku]) || {};
+        const isShopifySynced = !!existingMeta.is_shopify_synced;
+        
+        // Match shopify_sku if not already present
+        let shopifySku = existingMeta.shopify_sku || null;
+        let barcodeVal = existingMeta.barcode_value || null;
+        if (!shopifySku && typeof window.findShopifyVariantForAlias === 'function') {
+            const match = window.findShopifyVariantForAlias(sku);
+            if (match) {
+                shopifySku = match.sku;
+                barcodeVal = match.barcode !== 'None' ? match.barcode : barcodeVal;
+            }
+        }
+        
+        if (!barcodeVal) {
+            barcodeVal = getItemBarcodeValue(sku);
+        }
+
+        const platform = existingMeta.platform || (isShopifySynced ? 'Shopify Webhook' : 'Auto Scanner');
+        const isPrimary = !!existingMeta.is_primary;
+
         if (typeof window.aliasMetadataDB === 'undefined') window.aliasMetadataDB = {};
-        window.aliasMetadataDB[sku] = { barcode_value: mappedBarcode, is_shopify_synced: false, is_primary: false };
+        window.aliasMetadataDB[sku] = { 
+            barcode_value: barcodeVal, 
+            is_shopify_synced: isShopifySynced, 
+            is_primary: isPrimary,
+            platform: platform,
+            shopify_sku: shopifySku
+        };
         
         const { error: aliasError } = await supabaseClient.from('storefront_aliases').upsert({ 
-            storefront_sku: sku, 
+            product_sku: sku, 
             internal_recipe_name: targetRecipe, 
-            barcode_value: mappedBarcode,
-            is_shopify_synced: false,
-            is_primary: false,
-            platform: 'Auto Scanner' 
+            barcode_value: barcodeVal,
+            is_shopify_synced: isShopifySynced,
+            is_primary: isPrimary,
+            platform: platform,
+            shopify_sku: shopifySku
         });
         
         if (aliasError) throw new Error("DB Error saving alias: " + aliasError.message);
@@ -422,6 +469,22 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
         // 2. Update local aliasDB cache
         if (typeof aliasDB !== 'undefined') {
             aliasDB[sku] = targetRecipe;
+            if (shopifySku && shopifySku !== sku) {
+                aliasDB[shopifySku] = targetRecipe;
+                window.aliasMetadataDB[shopifySku] = {
+                    barcode_value: barcodeVal,
+                    is_shopify_synced: isShopifySynced,
+                    is_primary: isPrimary,
+                    platform: platform,
+                    shopify_sku: shopifySku,
+                    is_memory_only: true
+                };
+            }
+        }
+
+        // Run auto-healing for barcodes
+        if (typeof window.autoHealAllRecipes === 'function') {
+            await window.autoHealAllRecipes();
         }
 
         // Rebuild and refresh print spooler cache
@@ -509,6 +572,102 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
         setMasterStatus("Error", "mod-error");
         alert("Error resolving orphan SKU:\n" + e.message);
     }
+};
+
+window.findShopifyCatalogVariantsForRecipe = function(recipeName) {
+    const results = [];
+    if (typeof aliasDB === 'undefined' || typeof window.aliasMetadataDB === 'undefined') return results;
+    
+    Object.keys(window.aliasMetadataDB).forEach(sku => {
+        const meta = window.aliasMetadataDB[sku];
+        if (!meta || !meta.is_shopify_synced) return;
+        
+        const mappedRecipe = aliasDB[sku];
+        if (mappedRecipe === recipeName) {
+            results.push({ sku, barcode: meta.barcode_value || 'None', mapped: true });
+        } else if (!mappedRecipe) {
+            const cleanSku = sku.toLowerCase();
+            const cleanRecipe = recipeName.toLowerCase();
+            
+            const recipeWords = cleanRecipe.split(/[^a-z0-9]/).filter(w => w.length > 2);
+            let isMatch = cleanSku.includes(cleanRecipe) || 
+                          cleanRecipe.includes(cleanSku) ||
+                          (recipeWords.length > 0 && recipeWords.every(w => cleanSku.includes(w)));
+                          
+            if (!isMatch) {
+                const skuWords = cleanSku.split(/[^a-z0-9]/).filter(w => w.length > 2 && w !== 'ng' && !/^\d+$/.test(w));
+                if (skuWords.length > 0) {
+                    if (skuWords.every(w => cleanRecipe.includes(w))) {
+                        isMatch = true;
+                    } else {
+                        const mappedAliases = Object.keys(aliasDB).filter(a => aliasDB[a] === recipeName);
+                        for (const alias of mappedAliases) {
+                            const cleanAlias = alias.toLowerCase();
+                            const aliasWords = cleanAlias.split(/[^a-z0-9]/).filter(w => w.length > 2);
+                            if (skuWords.every(w => aliasWords.includes(w))) {
+                                isMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+                            
+            if (isMatch) {
+                results.push({ sku, barcode: meta.barcode_value || 'None', mapped: false });
+            }
+        }
+    });
+    return results;
+};
+
+window.findShopifyVariantForAlias = function(aliasSku) {
+    if (typeof window.aliasMetadataDB === 'undefined') return null;
+    
+    // 1. Check if we have a direct shopify_sku mapped in metadata
+    const meta = window.aliasMetadataDB[aliasSku];
+    if (meta) {
+        if (meta.is_shopify_synced) {
+            return { sku: aliasSku, barcode: meta.barcode_value || 'None' };
+        }
+        if (meta.shopify_sku && window.aliasMetadataDB[meta.shopify_sku]) {
+            const targetMeta = window.aliasMetadataDB[meta.shopify_sku];
+            return { sku: meta.shopify_sku, barcode: targetMeta.barcode_value || 'None' };
+        }
+    }
+    
+    const cleanAlias = aliasSku.toLowerCase();
+    const aliasWords = cleanAlias.split(/[^a-z0-9]/).filter(w => w.length > 2);
+    
+    let bestMatch = null;
+    let bestScore = -1;
+    
+    Object.keys(window.aliasMetadataDB).forEach(sku => {
+        const m = window.aliasMetadataDB[sku];
+        if (!m || !m.is_shopify_synced) return;
+        
+        const cleanSku = sku.toLowerCase();
+        const skuWords = cleanSku.split(/[^a-z0-9]/).filter(w => w.length > 2 && w !== 'ng' && !/^\d+$/.test(w));
+        if (skuWords.length === 0) return;
+        
+        const allWordsMatch = skuWords.every(w => aliasWords.includes(w));
+        if (allWordsMatch) {
+            let score = skuWords.length;
+            if (aliasWords.includes('rechargeable') && skuWords.includes('rechargeable')) {
+                score += 10;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = { sku, barcode: m.barcode_value || 'None' };
+            }
+        }
+    });
+    return bestMatch;
+};
+
+window.autoHealAllRecipes = async function() {
+    // Disabled auto-healing database writes as per user request to maintain raw data/column values
+    return;
 };
 
 
@@ -1859,5 +2018,84 @@ window.triggerForceSync = async function() {
         btn.innerHTML = window.safeHTML('🚀 SYNC NOW');
         btn.style.opacity = '1';
         btn.disabled = false;
+    }
+};
+
+function catalogSyncTrace(msg, isErr = false) {
+    const t = document.getElementById('catalogSyncProgressTerminal');
+    if (t) {
+        const line = document.createElement('div');
+        line.style.color = isErr ? '#ef4444' : '#38bdf8';
+        line.style.paddingBottom = '3px';
+        line.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        line.innerText = `> ${msg}`;
+        t.appendChild(line);
+        const container = document.getElementById('catalogSyncTerminalContainer');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+}
+
+window.triggerShopifyCatalogSync = async function() {
+    // Reset terminal and display it
+    const term = document.getElementById('catalogSyncTerminalContainer');
+    const termBody = document.getElementById('catalogSyncProgressTerminal');
+    if (term) term.style.display = 'flex';
+    if (termBody) termBody.innerHTML = '';
+
+    catalogSyncTrace("INITIALIZING SHOPIFY CATALOG SYNC...");
+    setMasterStatus("Syncing Shopify...", "mod-working");
+
+    try {
+        catalogSyncTrace("🔑 Retrieving Supabase authentication session...");
+        const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError || !sessionData.session) {
+            throw new Error("Authentication session failed or active session not found. Please reload or login.");
+        }
+        
+        catalogSyncTrace("📡 Session acquired. Dispatching Shopify sync request to Edge Function...");
+        const functionUrl = `${supabaseClient.supabaseUrl}/functions/v1/shopify-force-sync`;
+        
+        catalogSyncTrace("⏳ Shopify variant processing began. Scanning current Shopify listings (this may take up to 30 seconds)...");
+        const res = await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({ sync_catalog: true })
+        });
+        
+        const text = await res.text();
+        let json;
+        try { json = JSON.parse(text); } catch(e) { json = { error: text }; }
+        
+        if (!res.ok) {
+            throw new Error(json.error || `HTTP ${res.status}`);
+        }
+        
+        catalogSyncTrace("✅ Shopify Sync Completed Successfully!");
+        catalogSyncTrace(`📊 Imported Count: ${json.importedCount || 0} variants`);
+        catalogSyncTrace(`📊 Matched/Updated Count: ${json.matchedCount || 0} variants`);
+        setMasterStatus("Sync Success!", "mod-success");
+        sysLog(`Catalog synced successfully: ${json.importedCount || 0} imported, ${json.matchedCount || 0} matched.`);
+        
+        catalogSyncTrace("🔄 Refreshing local ledger maps and rendering tables...");
+        // Refresh the ledger
+        if (typeof fetchSalesData === 'function') {
+            await fetchSalesData(true);
+            catalogSyncTrace("✅ Local database state successfully reloaded.");
+        }
+        
+    } catch (err) {
+        console.error(err);
+        catalogSyncTrace(`❌ Error: ${err.message}`, true);
+        setMasterStatus("Error", "mod-error");
+    } finally {
+        setTimeout(() => {
+            const sm = document.getElementById('statusMaster');
+            if(sm) setMasterStatus("Ready.", "status-idle");
+        }, 2000);
     }
 };

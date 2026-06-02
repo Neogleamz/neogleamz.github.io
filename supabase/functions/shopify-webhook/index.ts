@@ -76,7 +76,7 @@ serve(async (req: Request) => {
     const { data: aliases } = await supabase.from('storefront_aliases').select('*')
     const aliasMap: Record<string, string> = {}
     if (aliases) {
-        aliases.forEach((a: any) => { aliasMap[a.storefront_sku] = a.internal_recipe_name })
+        aliases.forEach((a: any) => { aliasMap[a.product_sku] = a.internal_recipe_name })
     }
 
     // 2. Map Shopify Data to Neogleamz `sales_ledger` format
@@ -142,14 +142,19 @@ serve(async (req: Request) => {
           const internalName = aliasMap[item.sku] || aliasMap[item.name] || aliasMap[item.title] || item.name || item.title;
           console.log(` -> Mapping SKU: [${skuName}] to Internal Recipe: [${internalName}]`);
 
-          // Auto-upsert/register storefront alias mapping using official variant SKU and barcode
+          // Auto-upsert/register storefront alias mapping using variant name as product_sku and official variant SKU
           if (item.sku) {
+              const cleanItemSku = String(item.sku).trim();
+              const cleanItemName = String(item.name || item.title || "").trim();
+              const targetSku = cleanItemName || cleanItemSku;
+
               const aliasPromise = supabase.from('storefront_aliases').upsert({
-                  storefront_sku: item.sku,
+                  product_sku: targetSku,
                   internal_recipe_name: internalName,
                   barcode_value: item.barcode || null,
                   is_shopify_synced: true,
-                  platform: 'Shopify Webhook'
+                  platform: 'Shopify Webhook',
+                  shopify_sku: cleanItemSku || null
               });
               aliasUpsertPromises.push(aliasPromise);
           }
