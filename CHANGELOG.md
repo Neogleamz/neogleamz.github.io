@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [1.3.6] - 2026-06-02
+
+### ✨ Features & Bug Fixes
+- **BOM Manager Sub-Recipe Navigation** (`feat/ui-bom-manager-sub-recipes`): Enhanced the main BOM Manager table and the Bulk Add Modal to natively support clickable sub-assembly, 3D print, and custom label nested recipes. Clicking a sub-recipe instantly loads it into the active viewer, eliminating manual catalog searches.
 ## [1.3.5] - 2026-06-01
 
 ### ✨ Features & Bug Fixes
