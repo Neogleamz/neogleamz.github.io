@@ -184,6 +184,8 @@ graph LR
 ### ESLint & Global Namespace Boundary
 * **No-Undef Rule:** Because we use a `<script>` tag-based architecture, any functions or variables declared in the global scope of a `.js` file become implicitly available on the `window` object.
 * **The Registration Mandate:** To maintain a strict boundary and prevent `no-undef` warnings, **ANY new cross-file global function or variable created must be manually registered in `eslint.config.mjs` under the `languageOptions.globals` object.** ESLint parses each file independently, so it requires this explicit dictionary to understand our architecture.
+* **Inline Global Blocks:** For files that import or rely heavily on global functions but don't want to pollute `eslint.config.mjs`, you MUST declare a `/* global ... */` block at the absolute top of the specific `.js` file.
+* **Zero-Warning Protocol:** ESLint warnings (unlike errors) DO NOT trigger a non-zero exit code during `npm test` or `/ship_it`. Therefore, you are strictly mandated to maintain a 0-warning output across the entire codebase to guarantee pristine CI/CD outputs.
 
 ### Dynamic Event Delegation
 * **Global Interaction Controller**: Rather than inline DOM handlers (`onclick="..."`) scattered throughout the HTML, the application utilizes a centralized, native `system-event-delegator.js`.
