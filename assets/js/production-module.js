@@ -1089,7 +1089,12 @@ async function validateAndCreateWO() {
             let req = exactDeductions.pulls[k]; let i = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
             let c_prod = parseFloat(i.production_consumed_qty)||0; let c_proto = parseFloat(i.prototype_consumed_qty)||0; let pb = parseFloat(i.prototype_produced_qty)||0;
             let onHand = (i.produced_qty||0) - (i.sold_qty||0) - c_prod - (i.scrap_qty||0) + (i.manual_adjustment||0) - Math.max(0, c_proto - pb);
-            if(req > onHand) { let name = k.replace('RECIPE:::', ''); shortfalls.push(`<li><strong>⚙️ ${name}</strong>: Need to pull ${req.toFixed(2)}, Shelf has ${onHand.toFixed(2)}</li>`); }
+            if(req > onHand) { 
+                let name = k.replace('RECIPE:::', ''); 
+                let pData = productsDB[name] || {};
+                let emo = pData.is_3d_print ? "🖨️" : (pData.is_label ? (pData.label_emoji || "🏷️") : "⚙️");
+                shortfalls.push(`<li><strong>${emo} ${name}</strong>: Need to pull ${req.toFixed(2)}, Shelf has ${onHand.toFixed(2)}</li>`); 
+            }
         });
 
         if(shortfalls.length > 0) { document.getElementById('woShortfallList').innerHTML = window.safeHTML(shortfalls.join('')); document.getElementById('woErrorBox').style.display = 'block'; return; }
@@ -1106,6 +1111,15 @@ async function validateAndCreateWO() {
             wip_state: wo.wip_state, routing: wo.routing
         });
         if(error) throw new Error(error.message);
+
+        if (typeof window.teSyncTask === 'function') {
+            await window.teSyncTask('batchez', wo.wo_id, 'create', {
+                title: `📦 Batchez: Work Order ${wo.wo_id} - ${wo.product_name} (Qty: ${wo.qty})`,
+                linked_module: 'work_orders',
+                description: `${wo.product_name} (Qty: ${wo.qty})`,
+                metadata: { linked_wo_id: wo.wo_id }
+            });
+        }
 
         // 🖨️ AUTO-SPAWN 3D PRINT JOBS
         const printsToSpawn = find3DPrintedComponents(p, q, routingMap);
@@ -1224,8 +1238,78 @@ window.woDrop = function(e) {
 }
 function selectWO(id) { try { currentWO = workOrdersDB.find(w => w.wo_id === id); isSOPLocked = true; renderWOList(); } catch(e) { sysLog(e.message, true); } }
 
-async function toggleWIPCheckbox(chk, key) { try { if(!currentWO) return; let isChecked = chk.checked; if(isChecked) chk.parentElement.classList.add('done'); else chk.parentElement.classList.remove('done'); if(!currentWO.wip_state) currentWO.wip_state = {}; currentWO.wip_state[key] = isChecked; await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } catch(_e) { sysLog("Failed to save checkbox state.", true); } }
-async function checkAllInGroup(grpId) { try { if(!currentWO) return; let chks = document.querySelectorAll(`.${grpId}-chk`); let changed = false; if(!currentWO.wip_state) currentWO.wip_state = {}; chks.forEach(chk => { if(!chk.checked) { chk.checked = true; chk.parentElement.classList.add('done'); let k = chk.getAttribute('data-key'); currentWO.wip_state[k] = true; changed = true; } }); if(changed) { sysLog(`Checked group in WO ${currentWO.wo_id}`); await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id); } } catch(_e) { sysLog("Failed to save group check.", true); } }
+async function toggleWIPCheckbox(chk, key) {
+    try {
+        if (!currentWO) return;
+        let isChecked = chk.checked;
+        if (isChecked) chk.parentElement.classList.add('done');
+        else chk.parentElement.classList.remove('done');
+        
+        if (!currentWO.wip_state) currentWO.wip_state = {};
+        currentWO.wip_state[key] = isChecked;
+        
+        await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id);
+        
+        if (typeof window.teSyncTask === 'function') {
+            let stepName = "";
+            if (chk.parentElement) {
+                let chkTextEl = chk.parentElement.querySelector('.chk-text');
+                stepName = chkTextEl ? chkTextEl.innerText : chk.parentElement.innerText;
+            }
+            stepName = (stepName || "").replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+            if (!stepName) {
+                stepName = key.replace(/^wip_chk_/i, '').replace(/_/g, ' ');
+            }
+            
+            let emoji = isChecked ? '☑️' : '⚠️';
+            let statusText = isChecked ? 'Completed' : 'reverted to Incomplete';
+            await window.teSyncTask('batchez', currentWO.wo_id, 'comment', {
+                content: `${emoji} Step "${stepName}" marked as ${statusText}.`
+            });
+        }
+    } catch(e) {
+        sysLog("Failed to save checkbox state: " + e.message, true);
+    }
+}
+
+async function checkAllInGroup(grpId) {
+    try {
+        if (!currentWO) return;
+        let chks = document.querySelectorAll(`.${grpId}-chk`);
+        let changed = false;
+        if (!currentWO.wip_state) currentWO.wip_state = {};
+        chks.forEach(chk => {
+            if (!chk.checked) {
+                chk.checked = true;
+                chk.parentElement.classList.add('done');
+                let k = chk.getAttribute('data-key');
+                currentWO.wip_state[k] = true;
+                changed = true;
+            }
+        });
+        if (changed) {
+            sysLog(`Checked group in WO ${currentWO.wo_id}`);
+            await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id);
+            
+            if (typeof window.teSyncTask === 'function') {
+                let groupName = "";
+                let btn = document.querySelector(`.btn-check-all[data-grp-id="${grpId}"]`);
+                if (btn && btn.parentElement) {
+                    groupName = (btn.parentElement.innerText || btn.parentElement.textContent || "").replace(/✓\s*All/i, '').trim();
+                }
+                groupName = (groupName || "").replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                if (!groupName) {
+                    groupName = grpId.replace(/_/g, ' ');
+                }
+                await window.teSyncTask('batchez', currentWO.wo_id, 'comment', {
+                    content: `☑️ Completed all tasks in checklist group "${groupName}".`
+                });
+            }
+        }
+    } catch(e) {
+        sysLog("Failed to save group check: " + e.message, true);
+    }
+}
 
 function formatWOTime(ms) {
     if (!ms || ms < 0) return "0m 0s";
@@ -1422,13 +1506,15 @@ function renderActiveWO(id) {
 
                 let isTopSub = typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[wo.product_name];
                 let isTop3D = typeof productsDB !== 'undefined' && productsDB[wo.product_name] && productsDB[wo.product_name].is_3d_print;
-                let topLevelTitle = isTop3D ? `🟠 Build: 🖨️ ${wo.product_name} (x${wo.qty})` : (isTopSub ? `🟠 Build: ⚙️ ${wo.product_name} (x${wo.qty})` : `📦 Direct Raw Materials`);
+                let isTopLabel = typeof productsDB !== 'undefined' && productsDB[wo.product_name] && productsDB[wo.product_name].is_label;
+                let topLevelTitle = isTop3D ? `🟠 Build: 🖨️ ${wo.product_name} (x${wo.qty})` : (isTopLabel ? `🟠 Build: ${productsDB[wo.product_name].label_emoji || '🏷️'} ${wo.product_name} (x${wo.qty})` : (isTopSub ? `🟠 Build: ⚙️ ${wo.product_name} (x${wo.qty})` : `📦 Direct Raw Materials`));
 
                 html += `<div class="kitting-card"><h4>${topLevelTitle} <button class="btn-blue btn-check-all" data-grp-id="${currentGrpId}" style="float:right; width:auto; padding:2px 8px; font-size:10px;">✓ All</button></h4>`;
                 Object.keys(directRaws).forEach(k => {
                     let req = directRaws[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                     let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
-                    let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
+                    let isPartLabel = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_label;
+                    let emojiPrefix = isPart3D ? '🖨️' : (isPartLabel ? (productsDB[cleanName].label_emoji || '🏷️') : (isRecipe ? '⚙️' : '🔩'));
                     let name = `${emojiPrefix} ${cleanName}`.trim();
                     let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
 
@@ -1443,7 +1529,8 @@ function renderActiveWO(id) {
             Object.keys(exactDeds.pulls).forEach(k => {
                 let cleanName = k.replace('RECIPE:::', '');
                 let isPart3D = productsDB[cleanName] && productsDB[cleanName].is_3d_print;
-                let emojiPrefix = isPart3D ? '🖨️' : '⚙️';
+                let isPartLabel = productsDB[cleanName] && productsDB[cleanName].is_label;
+                let emojiPrefix = isPart3D ? '🖨️' : (isPartLabel ? (productsDB[cleanName].label_emoji || '🏷️') : '⚙️');
                 shelfPulls.push({name: `${emojiPrefix} ${cleanName}`, q: exactDeds.pulls[k]});
             });
             if(shelfPulls.length > 0) {
@@ -1461,8 +1548,8 @@ function renderActiveWO(id) {
                     let qty = exactDeds.built_subs[subK];
                     if(qty > 0) {
                         let cleanSubName = subK.replace('RECIPE:::', '');
-                        let isTop3D = productsDB[cleanSubName] && productsDB[cleanSubName].is_3d_print;
-                        let titleEmoji = isTop3D ? '🖨️' : '⚙️';
+                        let pData = productsDB[cleanSubName] || {};
+                        let titleEmoji = pData.is_3d_print ? '🖨️' : (pData.is_label ? (pData.label_emoji || '🏷️') : '⚙️');
 
                         let subDirect = getDirectMaterials(cleanSubName, qty);
                         if(Object.keys(subDirect).length > 0) {
@@ -1471,7 +1558,8 @@ function renderActiveWO(id) {
                             Object.keys(subDirect).forEach(k => {
                                 let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                                 let isPart3D = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
-                                let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
+                                let isPartLabel = isRecipe && productsDB[cleanName] && productsDB[cleanName].is_label;
+                                let emojiPrefix = isPart3D ? '🖨️' : (isPartLabel ? (productsDB[cleanName].label_emoji || '🏷️') : (isRecipe ? '⚙️' : '🔩'));
                                 let name = `${emojiPrefix} ${cleanName}`.trim();
                                 let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
 
@@ -1871,6 +1959,22 @@ async function advanceWO(newStatus, bypassModal = false) {
             throw new Error(error.message);
         }
 
+        if (typeof window.teSyncTask === 'function') {
+            if (newStatus === 'Picking') {
+                await window.teSyncTask('batchez', targetWO.wo_id, 'start');
+                await window.teSyncTask('batchez', targetWO.wo_id, 'comment', {
+                    content: `📋 Work Order moved to Picking stage.`
+                });
+            } else if (newStatus === 'In Production') {
+                await window.teSyncTask('batchez', targetWO.wo_id, 'start');
+                await window.teSyncTask('batchez', targetWO.wo_id, 'comment', {
+                    content: `⚙️ Work Order moved to In Production stage.`
+                });
+            } else if (newStatus === 'Completed' || newStatus === 'Archived') {
+                await window.teSyncTask('batchez', targetWO.wo_id, 'complete');
+            }
+        }
+
         // Auto-spawn 3D Print Jobs (Raw Goods based)
         try {
             const { data: existingPrints } = await supabaseClient.from('print_queue').select('id').eq('wo_id', targetWO.wo_id);
@@ -2129,6 +2233,9 @@ async function hardDeleteArchive(type, id) {
             await supabaseClient.from('print_queue').delete().eq('id', id);
             printQueueDB = printQueueDB.filter(p => p.id !== id);
         }
+        if (typeof window.teSyncTask === 'function') {
+            await window.teSyncTask(type, id, 'delete');
+        }
         setMasterStatus("Deleted!", "mod-success");
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
         renderArchiveList();
@@ -2148,11 +2255,14 @@ async function deleteAllArchive() {
             const {error} = await supabaseClient.from('work_orders').delete().eq('status', 'Archived');
             if (error) throw new Error(error.message);
             workOrdersDB = workOrdersDB.filter(w => w.status !== 'Archived');
+            await supabaseClient.from('taskz').delete().eq('metadata->>type', 'batchez').eq('status', 'Done');
         } else {
             const {error} = await supabaseClient.from('print_queue').delete().eq('status', 'Archived');
             if (error) throw new Error(error.message);
             printQueueDB = printQueueDB.filter(p => p.status !== 'Archived');
+            await supabaseClient.from('taskz').delete().eq('metadata->>type', 'layerz').eq('status', 'Done');
         }
+        if (typeof teFetchAllData === 'function') await teFetchAllData();
         setMasterStatus("Archive Cleared!", "mod-success");
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
         renderArchiveList();
@@ -2173,7 +2283,21 @@ function printPickList() {
         let directRaws = getDirectMaterials(currentWO.product_name, currentWO.qty);
         if(Object.keys(directRaws).length > 0) {
             html += `<tr><td colspan="4" class="group-header">📦 Direct Raw Materials</td></tr>`;
-            Object.keys(directRaws).forEach(k => { let req = directRaws[k]; let c = catalogCache[k] || {}; let is3D = k.startsWith('RECIPE:::'); let f = fmtKey(k); let name = is3D ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); let sp = is3D ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || "")); html += `<tr><td>[   ]</td><td>${is3D ? '🖨️ ' : ''}${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; });
+            Object.keys(directRaws).forEach(k => { 
+                let req = directRaws[k]; 
+                let c = catalogCache[k] || {}; 
+                let isRecipe = k.startsWith('RECIPE:::'); 
+                let f = fmtKey(k); 
+                let name = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); 
+                let sp = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || "")); 
+                let emojiPrefix = "";
+                if (isRecipe) {
+                    let clean = k.replace('RECIPE:::', '');
+                    let pData = productsDB[clean] || {};
+                    emojiPrefix = pData.is_3d_print ? "🖨️ " : (pData.is_label ? (pData.label_emoji ? pData.label_emoji + " " : "🏷️ ") : (isSubassemblyDB[clean] ? "⚙️ " : "📦 "));
+                }
+                html += `<tr><td>[   ]</td><td>${emojiPrefix}${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; 
+            });
         }
         let exactDeds = calculateExactWODeductions(currentWO);
         if(Object.keys(exactDeds.pulls).length > 0) {
@@ -2181,7 +2305,11 @@ function printPickList() {
             Object.keys(exactDeds.pulls).forEach(k => pulls.push({name: k.replace('RECIPE:::', ''), q: exactDeds.pulls[k]}));
             if(pulls.length > 0) {
                 html += `<tr><td colspan="4" class="group-header" style="background:#d1fae5; color:#15803d;">🟢 Pull Pre-Built from Shelf</td></tr>`;
-                pulls.forEach(sub => { html += `<tr><td>[   ]</td><td colspan="2">⚙️ ${sub.name}</td><td><strong>${sub.q.toFixed(2)}</strong></td></tr>`; });
+                pulls.forEach(sub => { 
+                    let pData = productsDB[sub.name] || {};
+                    let emo = pData.is_3d_print ? "🖨️" : (pData.is_label ? (pData.label_emoji || "🏷️") : (isSubassemblyDB[sub.name] ? "⚙️" : "📦"));
+                    html += `<tr><td>[   ]</td><td colspan="2">${emo} ${sub.name}</td><td><strong>${sub.q.toFixed(2)}</strong></td></tr>`; 
+                });
             }
         }
         if(currentWO.routing) {
@@ -2189,10 +2317,24 @@ function printPickList() {
                 if(currentWO.routing[sub].build > 0) {
                     let subDirect = getDirectMaterials(sub, currentWO.routing[sub].build);
                     if(Object.keys(subDirect).length > 0) {
-                        let isT3D = typeof productsDB !== 'undefined' && productsDB[sub] && productsDB[sub].is_3d_print;
-                        let tEmo = isT3D ? '🖨️' : '⚙️';
+                        let pData = productsDB[sub] || {};
+                        let tEmo = pData.is_3d_print ? '🖨️' : (pData.is_label ? (pData.label_emoji || '🏷️') : '⚙️');
                         html += `<tr><td colspan="4" class="group-header" style="background:#fef3c7; color:#b45309;">🟠 Build: ${tEmo} ${sub} (x${currentWO.routing[sub].build})</td></tr>`;
-                        Object.keys(subDirect).forEach(k => { let req = subDirect[k]; let c = catalogCache[k] || {}; let is3D = k.startsWith('RECIPE:::'); let f = fmtKey(k); let name = is3D ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); let sp = is3D ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || "")); html += `<tr><td>[   ]</td><td>${is3D ? '🖨️ ' : ''}${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; });
+                        Object.keys(subDirect).forEach(k => { 
+                            let req = subDirect[k]; 
+                            let c = catalogCache[k] || {}; 
+                            let isRecipe = k.startsWith('RECIPE:::'); 
+                            let f = fmtKey(k); 
+                            let name = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); 
+                            let sp = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec || "")); 
+                            let emojiPrefix = "";
+                            if (isRecipe) {
+                                let clean = k.replace('RECIPE:::', '');
+                                let pDataSub = productsDB[clean] || {};
+                                emojiPrefix = pDataSub.is_3d_print ? "🖨️ " : (pDataSub.is_label ? (pDataSub.label_emoji ? pDataSub.label_emoji + " " : "🏷️ ") : (isSubassemblyDB[clean] ? "⚙️ " : "📦 "));
+                            }
+                            html += `<tr><td>[   ]</td><td>${emojiPrefix}${name}</td><td>${sp}</td><td><strong>${req.toFixed(2)}</strong></td></tr>`; 
+                        });
                     }
                 }
             });
@@ -2719,7 +2861,12 @@ function buildDraftModalHtml(wo, drafts) {
     if(Object.keys(directRaws).length > 0) {
         ht += `<div class="kitting-card" style="box-sizing:border-box; flex: 1 1 400px;"><h4>📦 Direct Raw Materials</h4>`;
         Object.keys(directRaws).forEach(k => {
-            let req = directRaws[k]; let c = catalogCache[k] || {}; let is3D = k.startsWith('RECIPE:::'); let f = fmtKey(k); let name = is3D ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in)); let displaySpec = is3D ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec ? `⚙️ ${c.spec}` : ""));
+            let req = directRaws[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
+            let isPart3D = isRecipe && typeof productsDB !== 'undefined' && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
+            let isPartLabel = isRecipe && typeof productsDB !== 'undefined' && productsDB[cleanName] && productsDB[cleanName].is_label;
+            let emojiPrefix = isPart3D ? '🖨️' : (isPartLabel ? (productsDB[cleanName].label_emoji || '🏷️') : (isRecipe ? '⚙️' : '🔩'));
+            let name = `${emojiPrefix} ${cleanName}`.trim();
+            let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : (c.spec ? `⚙️ ${c.spec}` : ""));
             let curVal = drafts[k] ? drafts[k] : '';
             ht += `<div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05);">
                 <div class="chk-text" style="font-size:14px; flex-grow:1; font-weight:bold;">${name} <div style="color:var(--text-muted); font-size:11px; font-weight:normal; margin-top:2px;">${displaySpec}</div></div>
@@ -2747,8 +2894,8 @@ function buildDraftModalHtml(wo, drafts) {
     if(shelfPulls.length > 0) {
         ht += `<div class="kitting-card route-card-pull" style="box-sizing:border-box; flex: 1 1 400px;"><h4>🟢 Pull Pre-Built from Shelf</h4>`;
         shelfPulls.forEach(sub => {
-            let is3D = typeof productsDB !== 'undefined' && productsDB[sub.name] && productsDB[sub.name].is_3d_print;
-            let icon = is3D ? '🖨️' : '⚙️';
+            let pData = productsDB[sub.name] || {};
+            let icon = pData.is_3d_print ? '🖨️' : (pData.is_label ? (pData.label_emoji || '🏷️') : '⚙️');
             let k = `RECIPE:::${sub.name}`;
             let curVal = drafts[k] ? drafts[k] : '';
             ht += `<div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -2783,8 +2930,8 @@ function buildDraftModalHtml(wo, drafts) {
             let qty = exactDeds.built_subs[subK];
             if(qty > 0) {
                 let cleanSubName = subK.replace('RECIPE:::', '');
-                let isTop3D = typeof productsDB !== 'undefined' && productsDB[cleanSubName] && productsDB[cleanSubName].is_3d_print;
-                let titleEmoji = isTop3D ? '🖨️' : '⚙️';
+                let pData = productsDB[cleanSubName] || {};
+                let titleEmoji = pData.is_3d_print ? '🖨️' : (pData.is_label ? (pData.label_emoji || '🏷️') : '⚙️');
 
                 let subDirect = getDirectMaterials(cleanSubName, qty);
                 if(Object.keys(subDirect).length > 0) {
@@ -2806,7 +2953,8 @@ function buildDraftModalHtml(wo, drafts) {
                     Object.keys(subDirect).forEach(k => {
                         let req = subDirect[k]; let c = catalogCache[k] || {}; let isRecipe = k.startsWith('RECIPE:::'); let f = fmtKey(k); let cleanName = isRecipe ? k.replace('RECIPE:::', '') : (f.nn ? f.nn : (c.itemName || f.in));
                         let isPart3D = isRecipe && typeof productsDB !== 'undefined' && productsDB[cleanName] && productsDB[cleanName].is_3d_print;
-                        let emojiPrefix = isPart3D ? '🖨️' : (isRecipe ? '⚙️' : '');
+                        let isPartLabel = isRecipe && typeof productsDB !== 'undefined' && productsDB[cleanName] && productsDB[cleanName].is_label;
+                        let emojiPrefix = isPart3D ? '🖨️' : (isPartLabel ? (productsDB[cleanName].label_emoji || '🏷️') : (isRecipe ? '⚙️' : '🔩'));
                         let name = `${emojiPrefix} ${cleanName}`.trim();
                         let displaySpec = isRecipe ? "" : (c.spec === "(Mixed Specs)" ? " (Mixed Specs)" : (c.spec ? `${c.spec}` : ""));
                         let curVal = drafts[k] ? drafts[k] : '';
@@ -2933,6 +3081,18 @@ window.submitFinalizeWo = async function() {
 
                 spawnedScrapWOs.forEach(s => workOrdersDB.unshift(s));
 
+                // Create tasks in Task Engine for these spawned recovery work orders
+                for (let s of spawnedScrapWOs) {
+                    if (typeof window.teSyncTask === 'function') {
+                        await window.teSyncTask('batchez', s.wo_id, 'create', {
+                            title: `📦 Batchez: Work Order ${s.wo_id} - ${s.product_name} (Qty: ${s.qty})`,
+                            linked_module: 'work_orders',
+                            description: `${s.product_name} (Qty: ${s.qty})`,
+                            metadata: { linked_wo_id: s.wo_id }
+                        });
+                    }
+                }
+
                 // Queue any nested 3D prints required by these auto-recovery tickets
                 for (let s of spawnedScrapWOs) {
                     if (productsDB[s.product_name] && productsDB[s.product_name].is_3d_print) {
@@ -2962,6 +3122,28 @@ window.submitFinalizeWo = async function() {
             document.getElementById('finalizeWoModal').style.display = 'none';
         }, 800);
         sysLog(`Batch verified. ${totalScrapEntries} scrap line(s) logged.`);
+
+        if (typeof window.teSyncTask === 'function') {
+            let scrapSummary = [];
+            Object.keys(directUpserts).forEach(k => {
+                let v = directUpserts[k];
+                let actualK = k.endsWith('__BUILD') ? k.replace('__BUILD', '') : k;
+                let cleanKey = actualK.replace('RECIPE:::', '');
+                scrapSummary.push(`${cleanKey}: ${v}`);
+            });
+            
+            let scrapText;
+            if (scrapSummary.length > 0) {
+                scrapText = `\n\nRaw Material Scrap Logged:\n` + scrapSummary.map(item => `- ${item}`).join('\n');
+            } else {
+                scrapText = `\n\nNo raw material scrap logged.`;
+            }
+            
+            let commentContent = `🏁 Batch Finalized: Yielded ${currentWO.qty} of ${currentWO.product_name}.${scrapText}`;
+            await window.teSyncTask('batchez', currentWO.wo_id, 'comment', {
+                content: commentContent
+            });
+        }
 
         // Push payload forward into actual completion
         await advanceWO('Completed', true);
@@ -3018,6 +3200,25 @@ window.saveDraftScrap = async function() {
         let { error } = await supabaseClient.from('work_orders').update({ wip_state: currentWO.wip_state }).eq('wo_id', currentWO.wo_id);
         if (error) throw error;
 
+        if (typeof window.teSyncTask === 'function') {
+            let scrapSummary = [];
+            Object.keys(drafts).forEach(k => {
+                let v = drafts[k];
+                let actualK = k.endsWith('__BUILD') ? k.replace('__BUILD', '') : k;
+                let cleanKey = actualK.replace('RECIPE:::', '');
+                scrapSummary.push(`${cleanKey}: ${v}`);
+            });
+            let scrapText;
+            if (scrapSummary.length > 0) {
+                scrapText = `\n\nDraft Raw Material Scrap:\n` + scrapSummary.map(item => `- ${item}`).join('\n');
+            } else {
+                scrapText = `\n\nNo draft raw material scrap recorded.`;
+            }
+            await window.teSyncTask('batchez', currentWO.wo_id, 'comment', {
+                content: `📝 Scrap Tally Draft Updated:${scrapText}`
+            });
+        }
+
         setTimeout(() => {
             document.getElementById('finalizeWoModal').style.display = 'none';
         }, 800);
@@ -3047,4 +3248,6 @@ if (typeof window !== 'undefined') {
     window.submitFinalizeWo = typeof submitFinalizeWo !== 'undefined' ? submitFinalizeWo : undefined;
     window.openDraftScrapModal = typeof openDraftScrapModal !== 'undefined' ? openDraftScrapModal : undefined;
     window.validateAndCreateWO = typeof validateAndCreateWO !== 'undefined' ? validateAndCreateWO : undefined;
+    window.toggleWIPCheckbox = typeof toggleWIPCheckbox !== 'undefined' ? toggleWIPCheckbox : undefined;
+    window.checkAllInGroup = typeof checkAllInGroup !== 'undefined' ? checkAllInGroup : undefined;
 }

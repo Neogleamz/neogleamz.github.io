@@ -701,10 +701,37 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
                 let failedQ = finalFailed !== null ? finalFailed : 0;
                 let isScrapTicket = currentPrintJob.label && currentPrintJob.label.includes('[SCRAP REBUILD]');
                 await executePrintInventoryMath(currentPrintJob.part_name, successQ, failedQ, isScrapTicket, currentPrintJob.wo_id, currentPrintJob.label);
+                
+                if (typeof window.teSyncTask === 'function') {
+                    await window.teSyncTask('layerz', currentPrintJob.id, 'comment', {
+                        content: `🧼 Print Job Finalized: ${successQ} parts successful, ${failedQ} parts failed/scrapped.`
+                    });
+                    if (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) {
+                        let cleanPart = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+                        await window.teSyncTask('batchez', currentPrintJob.wo_id, 'comment', {
+                            content: `🧼 Print Job Finalized (Part: ${cleanPart}): ${successQ} parts successful, ${failedQ} parts failed/scrapped.`
+                        });
+                    }
+                }
             } else {
                 let failedQ = finalFailed !== null ? finalFailed : 0;
+                let totalSuccessFromRuns = currentWip.runs.reduce((sum, r) => sum + (parseFloat(r.success_qty) || 0), 0);
+                let successQ = finalSuccess !== null ? finalSuccess : Math.max(0, totalSuccessFromRuns - failedQ);
+                
                 if (failedQ > 0) {
                     await executeCleaningInventoryMath(currentPrintJob.part_name, failedQ, currentPrintJob.wo_id, currentPrintJob.label);
+                }
+                
+                if (typeof window.teSyncTask === 'function') {
+                    await window.teSyncTask('layerz', currentPrintJob.id, 'comment', {
+                        content: `🧼 Cleaning Stage Completed: ${successQ} parts cleaned successfully, ${failedQ} parts scrapped during cleaning.`
+                    });
+                    if (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) {
+                        let cleanPart = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+                        await window.teSyncTask('batchez', currentPrintJob.wo_id, 'comment', {
+                            content: `🧼 Cleaning Stage Completed (Part: ${cleanPart}): ${successQ} parts cleaned successfully, ${failedQ} parts scrapped during cleaning.`
+                        });
+                    }
                 }
             }
         }
@@ -712,12 +739,21 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
         const { error } = await supabaseClient.from('print_queue').update(updatePayload).eq('id', currentPrintJob.id);
         if (error) throw error;
         
+        let oldJobId = currentPrintJob.id;
         currentPrintJob.status = updatePayload.status || newStatus;
         if(currentPrintJob.status === 'Archived') {
             currentPrintJob = printQueueDB.find(j => j.status !== 'Archived') || null;
         }
 
         setMasterStatus("Job Updated!", "mod-success");
+        
+        if (typeof window.teSyncTask === 'function') {
+            if (newStatus === 'Printing' || newStatus === 'Cleaned') {
+                await window.teSyncTask('layerz', oldJobId, 'start');
+            } else if (newStatus === 'Completed') {
+                await window.teSyncTask('layerz', oldJobId, 'complete');
+            }
+        }
         await refreshPrintQueue();
     } catch (e) {
         sysLog(e.message, true);
@@ -728,6 +764,7 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
 async function deletePrintJob() {
     try {
         if (!currentPrintJob) return;
+        let oldJobId = currentPrintJob.id;
         let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
         const catalogItem = catalogByName[cleanPartName];
         const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
@@ -738,6 +775,10 @@ async function deletePrintJob() {
 
         const { error } = await supabaseClient.from('print_queue').delete().eq('id', currentPrintJob.id);
         if (error) throw new Error(error.message);
+
+        if (typeof window.teSyncTask === 'function') {
+            await window.teSyncTask('layerz', oldJobId, 'delete');
+        }
 
         printQueueDB = printQueueDB.filter(p => p.id !== currentPrintJob.id);
         currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
@@ -833,9 +874,22 @@ async function addPrintJob(partName, qty, woId = null, label = null) {
             batch_type: bType
         }
     };
-    const { error } = await supabaseClient.from('print_queue').insert([payload]);
-    if (error) sysLog("Add Print Job Error: " + error.message, true);
-    else refreshPrintQueue();
+    const { data, error } = await supabaseClient.from('print_queue').insert([payload]).select();
+    if (error) {
+        sysLog("Add Print Job Error: " + error.message, true);
+    } else {
+        if (data && data.length > 0 && typeof window.teSyncTask === 'function') {
+            let printJobId = data[0].id;
+            let cleanPart = partName.startsWith('RECIPE:::') ? partName.replace('RECIPE:::', '') : partName.split(':::')[0];
+            await window.teSyncTask('layerz', printJobId, 'create', {
+                title: `🖨️ Layerz: Print ${cleanPart} (Qty: ${qty}) [${woId || 'Manual'}]`,
+                linked_module: 'inventory',
+                description: `${cleanPart} (Qty: ${qty})`,
+                metadata: { linked_print_id: printJobId }
+            });
+        }
+        refreshPrintQueue();
+    }
 }
 
 function openManualPrintModal() {
@@ -1002,6 +1056,19 @@ async function submitManualPrint() {
             const { error } = await supabaseClient.from('print_queue').update({ wip_state: w }).eq('id', currentPrintJob.id);
             if (error) throw error;
             
+            if (typeof window.teSyncTask === 'function') {
+                let runNum = w.runs.length;
+                await window.teSyncTask('layerz', currentPrintJob.id, 'comment', {
+                    content: `⚙️ Print Run #${runNum} Completed: ${success} parts successful, ${scrap} parts scrapped.`
+                });
+                if (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) {
+                    let cleanPart = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+                    await window.teSyncTask('batchez', currentPrintJob.wo_id, 'comment', {
+                        content: `⚙️ Print Run #${runNum} Completed (Part: ${cleanPart}): ${success} parts successful, ${scrap} parts scrapped.`
+                    });
+                }
+            }
+            
             setMasterStatus("Yield Recorded!", "mod-success");
             setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
             renderActivePrintJob(currentPrintJob.id);
@@ -1054,3 +1121,14 @@ function initPrintTimers() {
     }, 1000);
 }
 initPrintTimers();
+
+if (typeof window !== 'undefined') {
+    window.deletePrintJob = typeof deletePrintJob !== 'undefined' ? deletePrintJob : undefined;
+    window.selectPrintJob = typeof selectPrintJob !== 'undefined' ? selectPrintJob : undefined;
+    window.togglePrintTimerPause = typeof togglePrintTimerPause !== 'undefined' ? togglePrintTimerPause : undefined;
+    window.startLayerzRun = typeof startLayerzRun !== 'undefined' ? startLayerzRun : undefined;
+    window.toggleLayerzRunPause = typeof toggleLayerzRunPause !== 'undefined' ? toggleLayerzRunPause : undefined;
+    window.openLayerzRunCompleteModal = typeof openLayerzRunCompleteModal !== 'undefined' ? openLayerzRunCompleteModal : undefined;
+    window.closeLayerzRunCompleteModal = typeof closeLayerzRunCompleteModal !== 'undefined' ? closeLayerzRunCompleteModal : undefined;
+    window.submitLayerzRun = typeof submitLayerzRun !== 'undefined' ? submitLayerzRun : undefined;
+}

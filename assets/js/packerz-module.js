@@ -159,6 +159,10 @@ async function fetchUnfulfilledOrders() {
         window.currentPackerzGroupedOrders = groupedOrders;
         queueContainer.appendChild(fragment);
 
+        if (typeof window.teEnsureFulfillmentTasks === 'function') {
+            await window.teEnsureFulfillmentTasks(Object.values(groupedOrders));
+        }
+
         loadSOPAuditLog();
 
     } catch (err) {
@@ -343,6 +347,10 @@ const scanConfirmations = new Map(); // rowId → true/false
 function openPackerzSopTerminal(orderGroup) {
     const activeQueue = document.getElementById('packerzActiveQueue');
     if (!activeQueue) return;
+
+    if (typeof window.teSyncTask === 'function') {
+        window.teSyncTask('packerz', orderGroup.order_id, 'start');
+    }
 
     // Remove orange selection styling from all cards, and apply full outline to the newly active one
     document.querySelectorAll('.packerz-order-card').forEach(c => {
@@ -1205,6 +1213,10 @@ async function executePackerzCompletion(orderId) {
             document.getElementById('packerzActiveQueue').innerHTML = window.safeHTML(
                 '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>'
             );
+
+            if (typeof window.teSyncTask === 'function') {
+                await window.teSyncTask('packerz', orderId, 'complete');
+            }
 
             // 3. Re-Sync Live Queue
             fetchUnfulfilledOrders();

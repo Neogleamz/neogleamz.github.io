@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.32% </span>
+                <span class="strong">7.3% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>141/1925</span>
+                <span class='fraction'>141/1931</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.11% </span>
+                <span class="strong">5.08% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>67/1311</span>
+                <span class='fraction'>67/1317</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">8.34% </span>
+                <span class="strong">8.31% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>139/1665</span>
+                <span class='fraction'>139/1671</span>
             </div>
         
             
@@ -3331,7 +3331,19 @@
 <a name='L3266'></a><a href='#L3266'>3266</a>
 <a name='L3267'></a><a href='#L3267'>3267</a>
 <a name='L3268'></a><a href='#L3268'>3268</a>
-<a name='L3269'></a><a href='#L3269'>3269</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L3269'></a><a href='#L3269'>3269</a>
+<a name='L3270'></a><a href='#L3270'>3270</a>
+<a name='L3271'></a><a href='#L3271'>3271</a>
+<a name='L3272'></a><a href='#L3272'>3272</a>
+<a name='L3273'></a><a href='#L3273'>3273</a>
+<a name='L3274'></a><a href='#L3274'>3274</a>
+<a name='L3275'></a><a href='#L3275'>3275</a>
+<a name='L3276'></a><a href='#L3276'>3276</a>
+<a name='L3277'></a><a href='#L3277'>3277</a>
+<a name='L3278'></a><a href='#L3278'>3278</a>
+<a name='L3279'></a><a href='#L3279'>3279</a>
+<a name='L3280'></a><a href='#L3280'>3280</a>
+<a name='L3281'></a><a href='#L3281'>3281</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3491,6 +3503,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3677,6 +3693,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -4537,6 +4557,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -6760,6 +6784,10 @@ async function <span class="fstat-no" title="function not covered" >fetchUnfulfi
 <span class="cstat-no" title="statement not covered" >        window.currentPackerzGroupedOrders = groupedOrders;</span>
 <span class="cstat-no" title="statement not covered" >        queueContainer.appendChild(fragment);</span>
 &nbsp;
+<span class="cstat-no" title="statement not covered" >        if (typeof window.teEnsureFulfillmentTasks === 'function') {</span>
+<span class="cstat-no" title="statement not covered" >            await window.teEnsureFulfillmentTasks(Object.values(groupedOrders));</span>
+        }
+&nbsp;
 <span class="cstat-no" title="statement not covered" >        loadSOPAuditLog();</span>
 &nbsp;
     } catch (err) {
@@ -6944,6 +6972,10 @@ const scanConfirmations = new Map(); // rowId → true/false
 function <span class="fstat-no" title="function not covered" >openPackerzSopTerminal(</span>orderGroup) {
     const activeQueue = <span class="cstat-no" title="statement not covered" >document.getElementById('packerzActiveQueue');</span>
 <span class="cstat-no" title="statement not covered" >    if (!activeQueue) <span class="cstat-no" title="statement not covered" >return;</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (typeof window.teSyncTask === 'function') {</span>
+<span class="cstat-no" title="statement not covered" >        window.teSyncTask('packerz', orderGroup.order_id, 'start');</span>
+    }
 &nbsp;
     // Remove orange selection styling from all cards, and apply full outline to the newly active one
 <span class="cstat-no" title="statement not covered" >    document.querySelectorAll('.packerz-order-card').forEach(<span class="fstat-no" title="function not covered" >c </span>=&gt; {</span>
@@ -7806,6 +7838,10 @@ async function <span class="fstat-no" title="function not covered" >executePacke
 <span class="cstat-no" title="statement not covered" >            document.getElementById('packerzActiveQueue').innerHTML = window.safeHTML(</span>
                 '&lt;div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;"&gt;Select an order from the queue to functionally open the SOP terminal.&lt;/div&gt;'
             );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            if (typeof window.teSyncTask === 'function') {</span>
+<span class="cstat-no" title="statement not covered" >                await window.teSyncTask('packerz', orderId, 'complete');</span>
+            }
 &nbsp;
             // 3. Re-Sync Live Queue
 <span class="cstat-no" title="statement not covered" >            fetchUnfulfilledOrders();</span>
@@ -9874,7 +9910,7 @@ window.click_saveRemoteMobileStagedPhotos = <span class="fstat-no" title="functi
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-02T03:48:00.826Z
+                at 2026-06-02T05:37:25.432Z
             </div>
         <script src="prettify.js"></script>
         <script>

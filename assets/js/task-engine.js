@@ -13,8 +13,27 @@ function generateUUID() {
 let isTaskPlannerOpen = false;
 
 let taskEngineDB = { taskz: [], cyclez: [], projectz: [], teams: [], comments: [], activity: [], tagz: [] };
+window.taskEngineDB = taskEngineDB;
 window.teCurrentSort = { col: null, dir: 'asc' };
 window.teActiveProjectId = null;
+
+const TE_OFFICIAL_USERS = {
+    'ef25fcf4-3521-45ef-990f-6361d416a53b': { name: 'Chris', email: 'chrisl@neogleamz.com' },
+    'd806e985-3ba1-4b8c-9d2d-3197eb60e416': { name: 'Andy', email: 'andyl@neogleamz.com' },
+    'a1b627d4-78ca-4039-8029-384eeeb13542': { name: 'Tyson', email: 'tysonl@neogleamz.com' }
+};
+
+function isUserInTeam(team, userId) {
+    if (!team || !team.members) return false;
+    if (team.members.includes(userId)) return true;
+    let userObj = TE_OFFICIAL_USERS[userId];
+    if (userObj) {
+        if (team.members.includes(userObj.name)) return true;
+        let alias = userObj.email.split('@')[0];
+        if (team.members.includes(alias)) return true;
+    }
+    return false;
+}
 
 window.initTaskEngine = async function() {
     console.log('[TaskEngine] Initialization check complete.');
@@ -131,15 +150,23 @@ function teRenderSidebar() {
     if (teamsList) {
         let teamsHTML = '';
         taskEngineDB.teams.filter(t => !t.is_archived).forEach(t => {
-            let membersList = (t.members || []).map(m => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
-                    <div style="display: flex; align-items: center; gap: 4px;">
-                        <div style="width: 14px; height: 14px; border-radius: 50%; background: ${window.teGetStringColor(m)}; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: white;">${m.substring(0,1).toUpperCase()}</div>
-                        <span style="font-size: 11px; color: #ccc;">${m}</span>
+            let membersList = (t.members || []).map(m => {
+                let displayName = m;
+                let avatarSeed = m;
+                if (TE_OFFICIAL_USERS[m]) {
+                    displayName = TE_OFFICIAL_USERS[m].name;
+                    avatarSeed = displayName;
+                }
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <div style="width: 14px; height: 14px; border-radius: 50%; background: ${window.teGetStringColor(avatarSeed)}; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: white;">${displayName.substring(0,1).toUpperCase()}</div>
+                            <span style="font-size: 11px; color: #ccc;">${displayName}</span>
+                        </div>
+                        <span data-click="click_teRemoveTeamMember" data-team-id="${t.id}" data-member-name="${m}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
                     </div>
-                    <span data-click="click_teRemoveTeamMember" data-team-id="${t.id}" data-member-name="${m}" style="color: var(--text-muted); font-size: 10px; cursor: pointer; padding: 2px;">✖</span>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             teamsHTML += `
                 <div style="display: flex; flex-direction: column;">
@@ -219,7 +246,7 @@ function teRenderTaskGrid(filter = null) {
             if (assignee === 'UNASSIGNED' || assignee.trim() === '') {
                 if (meta.assigned_team_id) {
                     let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
-                    if (team && team.members && team.members.includes(currentUser)) return true;
+                    if (team && isUserInTeam(team, currentUser)) return true;
                     return false; // unassigned but belongs to another team
                 }
                 return true; // globally unassigned
@@ -237,7 +264,7 @@ function teRenderTaskGrid(filter = null) {
             if (meta.assigned_team_id) {
                 let team = taskEngineDB.teams.find(tm => tm.id === meta.assigned_team_id);
                 // If it is assigned to my team, it belongs in My Tasks regardless of individual claim status.
-                if (team && team.members && team.members.includes(currentUser)) return true;
+                if (team && isUserInTeam(team, currentUser)) return true;
             }
             return false;
         }
@@ -337,8 +364,11 @@ function teRenderTaskGrid(filter = null) {
         if (!isPersonalView) {
             return c.project_id === window.teActiveProjectId;
         } else {
-            // Include personal cycles
-            if (!c.project_id && c.assigned_to_id === currentUserId) return true;
+            // Include personal/shared cycles if they belong to the user, OR if they contain tasks in the current personal view!
+            if (!c.project_id) {
+                if (c.assigned_to_id === currentUserId) return true;
+                return displayTasks.some(t => !t.parent_task_id && (t.personal_cycle_id === c.id || t.cycle_id === c.id));
+            }
             // Include project cycles ONLY if they contain tasks in the current personal view
             if (c.project_id) {
                 return displayTasks.some(t => !t.parent_task_id && !t.personal_cycle_id && t.cycle_id === c.id);
@@ -362,7 +392,7 @@ function teRenderTaskGrid(filter = null) {
                 title = `${p.title} ➔ ${c.title}`;
                 if (!cColor || cColor === '#10b981') cColor = p.color_hex;
             }
-        } else if (isPersonalView && !c.project_id) {
+        } else if (isPersonalView && !c.project_id && c.assigned_to_id) {
             badgeHtml = `<span style="background: #a855f720; color: #a855f7; padding: 2px 6px; border-radius: 4px; border: 1px solid #a855f740; font-size: 10px; font-weight: bold; margin-bottom: 0px; display: inline-block;">PRIVATE</span>`;
             if (!cColor || cColor === '#10b981') cColor = '#a855f7';
         }
@@ -676,6 +706,11 @@ function teBuildTaskRowHTML(t, depth = 0, hasChildren = false) {
             ownerBg = team.color_hex || '#8b5cf6';
             ownerTitle = team.name;
         }
+    } else if (t.assigned_to_id && TE_OFFICIAL_USERS[t.assigned_to_id]) {
+        let u = TE_OFFICIAL_USERS[t.assigned_to_id];
+        ownerInitials = u.name.substring(0,2).toUpperCase();
+        ownerBg = window.teGetStringColor(u.name);
+        ownerTitle = u.name;
     } else if (meta.spoofed_assignee) {
         ownerInitials = meta.spoofed_assignee.substring(0,2).toUpperCase();
         ownerBg = window.teGetStringColor(meta.spoofed_assignee);
@@ -783,7 +818,9 @@ window.teOpenTaskContext = function(taskId) {
             if (assigneeSelect) {
                 let opts = '<option value="">Unassigned</option>';
                 opts += '<optgroup label="Users">';
-                opts += '<option value="Chris">Chris</option><option value="Andy">Andy</option><option value="Tyson">Tyson</option>';
+                Object.entries(TE_OFFICIAL_USERS).forEach(([id, user]) => {
+                    opts += `<option value="${id}">${user.name}</option>`;
+                });
                 opts += '</optgroup>';
                 
                 if (taskEngineDB.teams && taskEngineDB.teams.length > 0) {
@@ -799,7 +836,7 @@ window.teOpenTaskContext = function(taskId) {
                 if (meta.assigned_team_id) {
                     assigneeSelect.value = 'team_' + meta.assigned_team_id;
                 } else {
-                    assigneeSelect.value = meta.spoofed_assignee || '';
+                    assigneeSelect.value = task.assigned_to_id || meta.spoofed_assignee || '';
                 }
             }
             
@@ -939,7 +976,10 @@ window.teRenderActivityFeed = function(taskId) {
     let html = '';
     relevantEvents.forEach(ev => {
         if (ev.type === 'comment') {
-            let displayAuthor = ev.data.author_id || 'System';
+            let displayAuthor = 'System';
+            if (ev.data.author_id) {
+                displayAuthor = TE_OFFICIAL_USERS[ev.data.author_id] ? TE_OFFICIAL_USERS[ev.data.author_id].name : ev.data.author_id;
+            }
             let displayContent = ev.data.content || '';
             if (displayContent.startsWith('SPOOF:')) {
                 let parts = displayContent.split('|||');
@@ -953,7 +993,7 @@ window.teRenderActivityFeed = function(taskId) {
                     <strong style="font-size: 11px; color: var(--text-muted);">${displayAuthor}</strong>
                     <span style="font-size: 10px; color: var(--text-muted);">${new Date(ev.data.created_at).toLocaleString()}</span>
                 </div>
-                <div style="font-size: 13px; color: white;">${displayContent}</div>
+                <div style="font-size: 13px; color: white; white-space: pre-wrap;">${displayContent}</div>
             </div>`;
         } else {
             html += `
@@ -1073,10 +1113,19 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
         
         let meta = JSON.parse(JSON.stringify(task.metadata || {}));
         let timerUpdate = false;
-        if (status === 'In Progress' && !meta.timer_start_time) {
-            meta.timer_start_time = Date.now().toString();
+        let dueDate = task.due_date;
+        let dueDateUpdate = false;
+        
+        if (status === 'In Progress') {
+            if (!meta.start_date) {
+                meta.start_date = new Date().toISOString();
+                timerUpdate = true;
+            }
+            if (!meta.timer_start_time) {
+                meta.timer_start_time = Date.now().toString();
+                timerUpdate = true;
+            }
             task.metadata = meta;
-            timerUpdate = true;
         } else if ((status === 'Done' || status === 'Todo') && meta.timer_start_time) {
             let startTime = parseInt(meta.timer_start_time);
             let elapsedMs = Date.now() - startTime;
@@ -1087,7 +1136,25 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
             timerUpdate = true;
         }
         
-        updatedTasks.push({ id: id, timerUpdate: timerUpdate, meta: meta, actual: task.actual_minutes });
+        if (status === 'Done' || isArchived) {
+            dueDate = new Date().toISOString();
+            task.due_date = dueDate;
+            dueDateUpdate = true;
+            if (!meta.start_date) {
+                meta.start_date = dueDate;
+                task.metadata = meta;
+                timerUpdate = true;
+            }
+        }
+        
+        updatedTasks.push({ 
+            id: id, 
+            timerUpdate: timerUpdate, 
+            meta: meta, 
+            actual: task.actual_minutes,
+            dueDateUpdate: dueDateUpdate,
+            dueDate: dueDate
+        });
         
         const newAct = {
             task_id: id,
@@ -1108,6 +1175,9 @@ window.teSetStatus = async function(status, directTaskId = null, ignoreBulk = fa
             let payload = { is_archived: isArchived };
             if (status !== 'Archived') {
                 payload.status = status;
+            }
+            if (tData.dueDateUpdate) {
+                payload.due_date = tData.dueDate;
             }
             if (tData.timerUpdate) {
                 payload.metadata = tData.meta;
@@ -1280,18 +1350,28 @@ window.teUpdateTaskAssignee = async function(taskId, assignee) {
         if (!task) continue;
         
         let meta = JSON.parse(JSON.stringify(task.metadata || {}));
+        let payload;
         
         if (assignee && assignee.startsWith('team_')) {
             let teamId = assignee.replace('team_', '');
             meta.assigned_team_id = teamId;
             delete meta.spoofed_assignee;
+            task.assigned_to_id = null;
+            payload = { metadata: meta, assigned_to_id: null };
+        } else if (assignee && TE_OFFICIAL_USERS[assignee]) {
+            delete meta.assigned_team_id;
+            delete meta.spoofed_assignee;
+            task.assigned_to_id = assignee;
+            payload = { metadata: meta, assigned_to_id: assignee };
         } else {
             delete meta.assigned_team_id;
-            meta.spoofed_assignee = assignee;
+            delete meta.spoofed_assignee;
+            task.assigned_to_id = null;
+            payload = { metadata: meta, assigned_to_id: null };
         }
         
         task.metadata = meta;
-        updatePromises.push(supabaseClient.from('taskz').update({ metadata: meta }).eq('id', id));
+        updatePromises.push(supabaseClient.from('taskz').update(payload).eq('id', id));
     }
     
     if (updatePromises.length === 0) return;
@@ -1697,17 +1777,27 @@ window.teDeleteTeam = async function(teamId) {
 };
 
 window.teAddTeamMember = async function(teamId) {
-    let name = prompt("Enter member name (e.g. Chris):");
+    let name = prompt("Enter member name (e.g. Chris, Andy, Tyson):");
     if (!name || !name.trim()) return;
     name = name.trim();
+    
+    let matchedUserId = null;
+    let lowerName = name.toLowerCase();
+    Object.entries(TE_OFFICIAL_USERS).forEach(([id, user]) => {
+        if (user.name.toLowerCase() === lowerName || user.email.toLowerCase().startsWith(lowerName)) {
+            matchedUserId = id;
+        }
+    });
+    
+    let memberVal = matchedUserId || name;
     
     let team = taskEngineDB.teams.find(t => t.id === teamId);
     if (!team) return;
     
     let members = team.members || [];
-    if (members.includes(name)) return;
+    if (members.includes(memberVal)) return;
     
-    members.push(name);
+    members.push(memberVal);
     team.members = members;
     
     teRenderSidebar();
@@ -1885,7 +1975,48 @@ window.teSwitchView = function(view, btnEl) {
                             }
                             
                             try {
-                                await supabaseClient.from('taskz').update({ status: newStatus }).eq('id', taskId);
+                                let payload = { status: newStatus };
+                                
+                                if (task) {
+                                    let meta = Object.assign({}, task.metadata || {});
+                                    let timerUpdate = false;
+                                    
+                                    if (newStatus === 'In Progress') {
+                                        if (!meta.start_date) {
+                                            meta.start_date = new Date().toISOString();
+                                            timerUpdate = true;
+                                        }
+                                        if (!meta.timer_start_time) {
+                                            meta.timer_start_time = Date.now().toString();
+                                            timerUpdate = true;
+                                        }
+                                    } else if ((newStatus === 'Done' || newStatus === 'Todo') && meta.timer_start_time) {
+                                        let startTime = parseInt(meta.timer_start_time);
+                                        let elapsedMs = Date.now() - startTime;
+                                        let elapsedMinutes = Math.floor(elapsedMs / 60000);
+                                        task.actual_minutes = (task.actual_minutes || 0) + Math.max(1, elapsedMinutes);
+                                        payload.actual_minutes = task.actual_minutes;
+                                        delete meta.timer_start_time;
+                                        timerUpdate = true;
+                                    }
+                                    
+                                    if (newStatus === 'Done') {
+                                        let dueDate = new Date().toISOString();
+                                        task.due_date = dueDate;
+                                        payload.due_date = dueDate;
+                                        if (!meta.start_date) {
+                                            meta.start_date = dueDate;
+                                            timerUpdate = true;
+                                        }
+                                    }
+                                    
+                                    if (timerUpdate) {
+                                        task.metadata = meta;
+                                        payload.metadata = meta;
+                                    }
+                                }
+
+                                await supabaseClient.from('taskz').update(payload).eq('id', taskId);
                                 await supabaseClient.from('task_activity').insert([{
                                     task_id: taskId,
                                     actor_type: 'System',
@@ -2212,17 +2343,22 @@ window.teRenderArchiveView = function() {
         return;
     }
     
-    const renderRow = (id, title, type) => `
+    const renderRow = (id, title, type) => {
+        const isTask = type === 'task';
+        const clickAttr = isTask ? `data-click="click_teOpenTaskContext" data-task-id="${id}"` : '';
+        const cursorStyle = isTask ? 'cursor: pointer; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.3); text-underline-offset: 3px;' : '';
+        return `
         <div class="task-row te-archive-row" style="display: flex; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 4px;">
             <input type="checkbox" class="te-archive-checkbox" data-id="${id}" data-type="${type}" style="cursor: pointer; width:16px; height:16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); accent-color: var(--neon-green); margin-right: 15px; flex-shrink: 0;" data-change="change_teUpdateArchiveSelection">
             <span style="font-weight: bold; color: var(--text-muted); width: 80px; text-transform: uppercase; font-size: 10px;">${type}</span>
-            <span style="flex-grow: 1; color: white;">${title}</span>
+            <span ${clickAttr} style="flex-grow: 1; color: white; ${cursorStyle}">${title}</span>
             <div style="display: flex; gap: 8px;">
                 <button class="btn-slate" data-click="click_teRestoreEntity" data-id="${id}" data-type="${type}" style="padding: 4px 8px; font-size: 11px;">Restore</button>
                 <button class="btn-red" data-click="click_teHardDeleteEntity" data-id="${id}" data-type="${type}" style="padding: 4px 8px; font-size: 11px; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;">Delete</button>
             </div>
         </div>
-    `;
+        `;
+    };
     
     archivedProjects.forEach(p => html += renderRow(p.id, p.title, 'project'));
     archivedCycles.forEach(c => html += renderRow(c.id, c.title, 'cycle'));
@@ -2791,4 +2927,255 @@ window.stopFlyoutResize = function(_e) {
     document.body.style.cursor = '';
     document.removeEventListener('mousemove', window.doFlyoutResize);
     document.removeEventListener('mouseup', window.stopFlyoutResize);
+};
+
+let teInFlightSections = {};
+window.teGetOrCreateSectionId = async function(title) {
+    if (typeof supabaseClient === 'undefined') return null;
+    
+    let cleanTitle = title.trim();
+    let lowerTitle = cleanTitle.toLowerCase();
+    
+    // 1. Check local cache
+    let section = taskEngineDB.cyclez.find(c => c.title.toLowerCase() === lowerTitle);
+    if (section) {
+        return section.id;
+    }
+    
+    // 2. Check if there is already an in-flight creation request for this title
+    if (teInFlightSections[lowerTitle]) {
+        return teInFlightSections[lowerTitle];
+    }
+    
+    // 3. Create the section
+    let colorMap = {
+        'batchez': '#ec4899', // Pink-ish
+        'layerz': '#06b6d4',  // Cyan-ish
+        'packerz': '#f59e0b'  // Amber/Orange-ish
+    };
+    let color = colorMap[lowerTitle] || '#10b981';
+    
+    let payload = {
+        id: generateUUID(),
+        title: cleanTitle,
+        color_hex: color,
+        assigned_to_id: null,
+        assigned_team_id: null
+    };
+    
+    teInFlightSections[lowerTitle] = (async () => {
+        try {
+            // Double check local cache inside the promise in case it resolved while waiting
+            let doubleCheck = taskEngineDB.cyclez.find(c => c.title.toLowerCase() === lowerTitle);
+            if (doubleCheck) return doubleCheck.id;
+
+            const { data, error } = await supabaseClient.from('cyclez').insert([payload]).select();
+            if (error) throw error;
+            if (data && data.length > 0) {
+                taskEngineDB.cyclez.push(data[0]);
+                if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
+                return data[0].id;
+            }
+        } catch(e) {
+            console.error(`[TaskEngine] Failed to auto-create section ${cleanTitle}:`, e);
+        } finally {
+            delete teInFlightSections[lowerTitle];
+        }
+        return null;
+    })();
+    
+    return teInFlightSections[lowerTitle];
+};
+
+window.teSyncTask = async function(type, entityId, action, params = {}) {
+    if (typeof supabaseClient === 'undefined') return;
+    let currentUser = window.currentUser ? window.currentUser.id : null;
+    
+    if (action === 'create') {
+        let sectionTitle = null;
+        if (type === 'batchez') sectionTitle = 'Batchez';
+        else if (type === 'layerz') sectionTitle = 'Layerz';
+        else if (type === 'packerz') sectionTitle = 'Packerz';
+
+        let cycleId = null;
+        if (sectionTitle) {
+            cycleId = await window.teGetOrCreateSectionId(sectionTitle);
+        }
+
+        let payload = {
+            id: generateUUID(),
+            title: params.title || `Task for ${type} ${entityId}`,
+            status: 'Todo',
+            linked_module: params.linked_module || 'general',
+            metadata: Object.assign({ type: type }, params.metadata || {}),
+            assigned_to_id: null,
+            cycle_id: cycleId,
+            description: params.description || null
+        };
+        try {
+            await supabaseClient.from('taskz').insert([payload]);
+            taskEngineDB.taskz.unshift(payload);
+        } catch(e) { console.error('[TaskEngine] Sync Create failed:', e); }
+    } else if (action === 'start') {
+        try {
+            let selectQuery = supabaseClient.from('taskz').select('id, metadata');
+            if (type === 'batchez') selectQuery = selectQuery.filter('metadata->>linked_wo_id', 'eq', entityId);
+            else if (type === 'layerz') selectQuery = selectQuery.filter('metadata->>linked_print_id', 'eq', entityId);
+            else if (type === 'packerz') selectQuery = selectQuery.filter('metadata->>linked_order_id', 'eq', entityId);
+            
+            const { data: tasks } = await selectQuery;
+            if (tasks && tasks.length > 0) {
+                const nowStr = new Date().toISOString();
+                for (let t of tasks) {
+                    let newMeta = Object.assign({}, t.metadata || {});
+                    if (!newMeta.start_date) {
+                        newMeta.start_date = nowStr;
+                    }
+                    if (!newMeta.timer_start_time) {
+                        newMeta.timer_start_time = Date.now().toString();
+                    }
+                    let updatePayload = { status: 'In Progress', metadata: newMeta };
+                    if (currentUser) updatePayload.assigned_to_id = currentUser;
+                    await supabaseClient.from('taskz').update(updatePayload).eq('id', t.id);
+                }
+            }
+        } catch(e) { console.error('[TaskEngine] Sync Start failed:', e); }
+    } else if (action === 'complete') {
+        try {
+            let selectQuery = supabaseClient.from('taskz').select('id, metadata, actual_minutes');
+            if (type === 'batchez') selectQuery = selectQuery.filter('metadata->>linked_wo_id', 'eq', entityId);
+            else if (type === 'layerz') selectQuery = selectQuery.filter('metadata->>linked_print_id', 'eq', entityId);
+            else if (type === 'packerz') selectQuery = selectQuery.filter('metadata->>linked_order_id', 'eq', entityId);
+            
+            const { data: tasks } = await selectQuery;
+            if (tasks && tasks.length > 0) {
+                const nowStr = new Date().toISOString();
+                for (let t of tasks) {
+                    let newMeta = Object.assign({}, t.metadata || {});
+                    let actualMins = t.actual_minutes || 0;
+                    if (!newMeta.start_date) {
+                        newMeta.start_date = nowStr;
+                    }
+                    if (newMeta.timer_start_time) {
+                        let startTime = parseInt(newMeta.timer_start_time);
+                        let elapsedMs = Date.now() - startTime;
+                        let elapsedMinutes = Math.floor(elapsedMs / 60000);
+                        actualMins += Math.max(1, elapsedMinutes);
+                        delete newMeta.timer_start_time;
+                    }
+                    let updatePayload = { 
+                        status: 'Done', 
+                        is_archived: true, 
+                        due_date: nowStr, 
+                        metadata: newMeta,
+                        actual_minutes: actualMins 
+                    };
+                    if (currentUser) updatePayload.assigned_to_id = currentUser;
+                    await supabaseClient.from('taskz').update(updatePayload).eq('id', t.id);
+                }
+            }
+        } catch(e) { console.error('[TaskEngine] Sync Complete failed:', e); }
+    } else if (action === 'delete') {
+        try {
+            let query = supabaseClient.from('taskz').delete();
+            if (type === 'batchez') query = query.filter('metadata->>linked_wo_id', 'eq', entityId);
+            else if (type === 'layerz') query = query.filter('metadata->>linked_print_id', 'eq', entityId);
+            else if (type === 'packerz') query = query.filter('metadata->>linked_order_id', 'eq', entityId);
+            await query;
+        } catch(e) { console.error('[TaskEngine] Sync Delete failed:', e); }
+    } else if (action === 'comment') {
+        try {
+            let selectQuery = supabaseClient.from('taskz').select('id');
+            if (type === 'batchez') selectQuery = selectQuery.filter('metadata->>linked_wo_id', 'eq', entityId);
+            else if (type === 'layerz') selectQuery = selectQuery.filter('metadata->>linked_print_id', 'eq', entityId);
+            else if (type === 'packerz') selectQuery = selectQuery.filter('metadata->>linked_order_id', 'eq', entityId);
+            
+            const { data: tasks } = await selectQuery;
+            if (tasks && tasks.length > 0) {
+                let authorName = 'System';
+                if (window.currentUser) {
+                    let uid = window.currentUser.id;
+                    if (TE_OFFICIAL_USERS[uid]) {
+                        authorName = TE_OFFICIAL_USERS[uid].name;
+                    } else if (window.currentUser.email) {
+                        authorName = window.currentUser.email.split('@')[0];
+                    } else {
+                        authorName = uid;
+                    }
+                }
+                for (let t of tasks) {
+                    let commentPayload = {
+                        id: generateUUID(),
+                        task_id: t.id,
+                        author_id: null,
+                        content: `SPOOF:${authorName}|||${params.content}`,
+                        created_at: new Date().toISOString()
+                    };
+                    await supabaseClient.from('task_comments').insert([commentPayload]);
+                }
+            }
+        } catch(e) { console.error('[TaskEngine] Sync Comment failed:', e); }
+    }
+    // Re-fetch all task engine data to sync UI
+    await teFetchAllData();
+};
+
+window.teEnsureFulfillmentTasks = async function(orders) {
+    if (!orders || orders.length === 0 || typeof supabaseClient === 'undefined') return;
+    
+    try {
+        let orderIds = orders.map(o => typeof o === 'object' ? String(o.order_id) : String(o));
+        
+        const { data: dbTasks, error } = await supabaseClient
+            .from('taskz')
+            .select('metadata')
+            .in('metadata->>linked_order_id', orderIds);
+            
+        if (error) throw error;
+        
+        let existingOrderIds = new Set();
+        if (dbTasks) {
+            dbTasks.forEach(t => {
+                if (t.metadata && t.metadata.linked_order_id) {
+                    existingOrderIds.add(String(t.metadata.linked_order_id));
+                }
+            });
+        }
+        
+        let packerzSectionId = await window.teGetOrCreateSectionId('Packerz');
+        
+        let promises = [];
+        for (let order of orders) {
+            let orderId = typeof order === 'object' ? String(order.order_id) : String(order);
+            if (!existingOrderIds.has(orderId)) {
+                let description = '';
+                if (typeof order === 'object' && Array.isArray(order.items)) {
+                    description = order.items.map(i => `${i.recipe} (Qty: ${i.qty})`).join(', ');
+                }
+                
+                let payload = {
+                    id: generateUUID(),
+                    title: `🚚 Packerz: Order ${orderId.startsWith('#') ? orderId : '#' + orderId} - Assemble and Pack`,
+                    status: 'Todo',
+                    linked_module: 'sales',
+                    metadata: { linked_order_id: orderId, type: 'packerz' },
+                    assigned_to_id: null,
+                    cycle_id: packerzSectionId,
+                    description: description || `Order #${orderId} Fulfillment`
+                };
+                promises.push(
+                    supabaseClient.from('taskz').insert([payload]).then(() => {
+                        taskEngineDB.taskz.push(payload);
+                    })
+                );
+            }
+        }
+        
+        if (promises.length > 0) {
+            await Promise.all(promises);
+            teRenderTaskGrid();
+        }
+    } catch(e) {
+        console.error('[TaskEngine] Ensure packerz tasks failed:', e);
+    }
 };
