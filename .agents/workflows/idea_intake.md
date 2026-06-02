@@ -13,7 +13,7 @@ When the user requests to log an idea or task for later, you must execute the fo
    - Analyze the request. If it relates to an active Epic, assign it there. Otherwise, assign it to `### Target: main`.
    - Generate a short slug for the task.
    - Inject the task as a `- [ ]` markdown item into @/tools/SK8Lytz_Bucket_List.md.
-   - **CRITICAL TELEMETRY RULE**: You MUST append the token tracking tag to the end of the new task line (e.g., `[🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]`).
+
 3. **The Background Sync**:
    - Immediately execute `git add tools/SK8Lytz_Bucket_List.md`
    - Execute `git commit -m "chore(ledger): [/idea_intake] log new task"`

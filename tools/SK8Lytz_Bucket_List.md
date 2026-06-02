@@ -32,7 +32,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all stale warnings and root files successfully cleaned!* ✅
 
 ### 🟡 Legacy HTML Audits
-- [ ] `chore/dep-patch-updates` : Run npm update to safely bump `eslint` (10.4.0 -> 10.4.1) and `supabase` (2.101.0 -> 2.102.0) safe patch versions. [🤖 Antigravity] [🧠 1k / 1k] [💸 $0.01 / $0.01]
+- [ ] `chore/dep-patch-updates` : Run npm update to safely bump `eslint` (10.4.0 -> 10.4.1) and `supabase` (2.101.0 -> 2.102.0) safe patch versions.
 
 
 
