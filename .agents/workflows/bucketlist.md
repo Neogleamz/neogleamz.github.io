@@ -24,11 +24,14 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - Determine if you have 100% of the information required to build a perfect Vanilla JS / Supabase implementation plan.
    - If requirements are ambiguous, **HALT ALL ACTION.** Output a numbered list of clarifying questions for the user (e.g., *"1. What specific flexbox layout do you want for this UI?", "2. Should this Supabase query be cached in localStorage?"*). Wait for answers before proceeding.
 
-4. **Planning & Mandatory Review Gate (HALT)**:
-   - Generate a detailed Implementation Plan using your **Native Antigravity Artifact Generator** (so it visually renders in the UI) AND simultaneously copy that exact same syntax to a physical markdown file located at `docs/plans/<extracted-branch-slug>.md` for permanent storage.
-   - **Crucial:** Your plan MUST start with `### Design Decisions & Rationale`. Provide a brief summary (2-3 sentences max) explaining *why* you chose the specific Vanilla JS approach or Web Bluetooth architecture.
+4. **Plan Retrieval & Mandatory Review Gate (HALT)**:
+   - First, check if a pre-compiled plan exists in the Bucket List entry (e.g., `docs/plans/<extracted-branch-slug>.md`). If it exists, read it.
+   - If a plan does NOT exist, you MUST generate a highly detailed, fully documented Implementation Plan from scratch. This plan must cover security considerations, flexbox UI structure, performance impacts, and strict Vanilla JS standards. Save this new plan to `docs/plans/<extracted-branch-slug>.md` for permanent storage.
+   - Use your **Native Antigravity Artifact Generator** to present the plan (either retrieved or newly generated) in the UI.
+   - **Crucial:** Ensure the plan starts with `### Design Decisions & Rationale`, explaining *why* specific Vanilla JS or Web Bluetooth approaches were chosen.
    - Set the `RequestFeedback` parameter in the Artifact generator to `true`.
-   - **HALT ALL ACTION.** Explicitly ask: *"I have generated the dual-synced plan artifact. Review the plan in the UI panel. Type 'proceed' to execute, or provide feedback."* Do not write code until approved.
+   - **HALT ALL ACTION.** Explicitly ask: *"I have loaded the dual-synced plan artifact. Review the plan in the UI panel. Type 'proceed' to execute, or provide feedback."* Do not write code until approved.
+
 
 5. **Execute Work**: 
    - Once the user types "proceed", use your code-editing tools to implement the module exactly as outlined in the approved plan.
