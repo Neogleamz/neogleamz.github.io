@@ -1540,7 +1540,7 @@ window.openPackerzAuditLog = function(sku, telemetryJsonString) {
     document.body.insertAdjacentHTML('beforeend', window.safeHTML ? window.safeHTML(h) : h);
 }
 
-function renderPackerzTelemetryPreview() {
+window.renderPackerzTelemetryPreview = function renderPackerzTelemetryPreview() {
     const rawText = document.getElementById('packerzAdminQA')?.value || '';
     const previewContainer = document.getElementById('packerzAdminQAPreview');
     if(!previewContainer) return;
