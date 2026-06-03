@@ -595,23 +595,18 @@ function syncDatazStats() {
     if (typeof finalResults === 'undefined') return;
     let parcels = new Set(), totalWt = 0;
     let absoluteRawSpend = 0, pureGoodsCost = 0;
-    let totalLogisticsSpend = 0;
     let processedOrdersForPureGoods = new Set();
-    
     finalResults.forEach(s => {
         let pno = s['Parcel No'];
         if (pno && String(pno).trim().toUpperCase() !== 'MANUAL') {
             if (!parcels.has(pno)) {
                 parcels.add(pno);
                 totalWt += parseFloat(s['Actual Chargeable Weight (g)']) || 0;
-                totalLogisticsSpend += parseFloat(s['Actual Paid (Parcel)'] || s.actual_paid) || 0;
             }
         }
         
         absoluteRawSpend += parseFloat(s['Total Landed Cost ($)']) || 0;
         
-        // Goods cost is computed just for potential backend parity or later reporting,
-        // though it is no longer subtracting to find Logistics Spend.
         let uCost = parseFloat(s['Order Unit Price']) || parseFloat(s.order_unit_price) || 0;
         let qVal = parseFloat(s['Quantity']) || parseFloat(s.quantity) || 1;
         let goodsCost = 0;
@@ -626,6 +621,9 @@ function syncDatazStats() {
         }
         pureGoodsCost += goodsCost;
     });
+    
+    let totalLogisticsSpend = absoluteRawSpend - pureGoodsCost;
+    if (totalLogisticsSpend < 0) totalLogisticsSpend = 0; // Safeguard
     
     setStat('statDatazRecords', fmtNum(finalResults.length));
     setStat('statDatazParcels', fmtNum(parcels.size));
