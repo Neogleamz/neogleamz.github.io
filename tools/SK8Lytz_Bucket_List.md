@@ -15,12 +15,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-*Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
+### Target: main
+- [ ] feat/packerz-assembly-modal : **Packerz Assembly Modal** - Replace native confirm dialog with rich Vanilla JS verification modal. (Plan: [docs/plans/packerz_assembly_modal.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/packerz_assembly_modal.md))
 
 ### 🟠 P1 High Priority (Active Epics)
 
-**Epic: Barcode Engine Hardening**
-- [ ] `fix/cycle-count-camera` : **Dynamic WebRTC Scan Bounds** - Refactor the HTML5-QRCode instantiation parameters inside Inventory and Packerz modules to dynamically calculate the `qrbox` targeting matrix based on active viewport scale, preventing catastrophic scanner dropouts on mobile screens. (Plan: [docs/plans/fix/cycle-count-camera.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/fix/cycle-count-camera.md))
+*Clean sweep — all active epics successfully completed and archived!* ✅
 
 ## 🧹 Technical Debt
 
@@ -603,3 +603,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 *(Archived — 2026-06-02)*
 - [🚀] `fix/recipe-quotes` : **Escape Double Quotes in DOM Interpolation** - Fix the UI breaking bug when rendering product names with double quotes in the Recipez pane.
 - [🚀] `debt/eslint-warnings-sweep-2` : Resolve the 13 ESLint warnings across packerz, production-module, and system-realtime-sync to achieve a completely silent terminal.
+
+### Target: `main`
+**Epic: Barcode Engine Hardening**
+*(Archived — 2026-06-02)*
+- [x] `fix/cycle-count-camera` : **Dynamic WebRTC Scan Bounds** - Refactor the HTML5-QRCode instantiation parameters inside Inventory and Packerz modules to dynamically calculate the `qrbox` targeting matrix based on active viewport scale, preventing catastrophic scanner dropouts on mobile screens. (Plan: [docs/plans/fix/cycle-count-camera.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/fix/cycle-count-camera.md))
