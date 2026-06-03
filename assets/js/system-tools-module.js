@@ -2267,9 +2267,11 @@ window.change_handleShopifyBillingUpload = async function(e) {
                 let orderTag = row['Order'] || "";
                 let amt = parseFloat(row['Amount']);
                 
-                if (cType.toString().toLowerCase().trim() === 'shipping_fee' && orderTag.toString().trim().startsWith('#') && !isNaN(amt)) {
+                let isShipCharge = cType.toString().toLowerCase().trim().includes('shipping') || cType.toString().toLowerCase().trim().includes('label') || cType.toString().toLowerCase().trim() === 'return';
+                if (isShipCharge && orderTag.toString().trim().startsWith('#') && !isNaN(amt)) {
+                    let baseTag = orderTag.toString().trim().split('-')[0];
                     matchedCosts.push({
-                        parsed_order_id: orderTag.toString().trim(),
+                        parsed_order_id: baseTag,
                         parsed_shipping_cost: amt
                     });
                 }
@@ -2297,16 +2299,39 @@ window.change_handleShopifyBillingUpload = async function(e) {
             if(ledgerError) throw new Error("Failed to fetch target orders from the database: " + ledgerError.message);
             
             let updatesToApply = [];
-            
+            let orderToCostQueue = {};
             matchedCosts.forEach(cost => {
-                let targetRow = ledgerRows.find(lr => lr.order_id === cost.parsed_order_id);
-                if (targetRow) {
+                if (!orderToCostQueue[cost.parsed_order_id]) orderToCostQueue[cost.parsed_order_id] = [];
+                orderToCostQueue[cost.parsed_order_id].push(cost.parsed_shipping_cost);
+            });
+
+            // Distribute labels natively to rows, or pool them into the first row if there are more labels than rows
+            ledgerRows.forEach(lr => {
+                if (orderToCostQueue[lr.order_id] && orderToCostQueue[lr.order_id].length > 0) {
+                    let costToApply = orderToCostQueue[lr.order_id].shift();
                     updatesToApply.push({
-                        id: targetRow.id,
-                        order_id: targetRow.order_id,
-                        actual_shipping_cost: cost.parsed_shipping_cost,
-                        old_shipping_cost: targetRow.actual_shipping_cost || 0
+                        id: lr.id,
+                        order_id: lr.order_id,
+                        actual_shipping_cost: costToApply,
+                        old_shipping_cost: lr.actual_shipping_cost || 0
                     });
+                } else if (orderToCostQueue[lr.order_id]) {
+                    // This row doesn't have a distinct label. Set it to 0 to prevent legacy duplication.
+                    updatesToApply.push({
+                        id: lr.id,
+                        order_id: lr.order_id,
+                        actual_shipping_cost: 0,
+                        old_shipping_cost: lr.actual_shipping_cost || 0
+                    });
+                }
+            });
+
+            // Dump any remaining un-assigned labels into the FIRST row of that order
+            Object.keys(orderToCostQueue).forEach(orderId => {
+                if (orderToCostQueue[orderId].length > 0) {
+                    let remainingSum = orderToCostQueue[orderId].reduce((a, b) => a + b, 0);
+                    let firstUpdateObj = updatesToApply.find(u => u.order_id === orderId);
+                    if (firstUpdateObj) firstUpdateObj.actual_shipping_cost += remainingSum;
                 }
             });
             

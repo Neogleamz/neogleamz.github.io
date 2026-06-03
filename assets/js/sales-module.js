@@ -865,9 +865,9 @@ function renderSalesTable() {
         let trueLineCaptured = (p * q) + s + t - d;
         x.localDerivedTotal = trueLineCaptured; // Store for the UI rendering below
 
-        totals.gross += isCostOnly ? 0 : (p * q);
-        totals.discounts += isCostOnly ? 0 : d;
-        totals.captured += isCostOnly ? 0 : (trueLineCaptured + (x.exchAdj || 0));
+        totals.gross += (x.rawItemRevenue > 0 || (x.revenueDerivation && x.revenueDerivation.includes('Replacement Funded'))) ? (x.rawItemRevenue + d) : 0;
+        totals.discounts += (x.rawItemRevenue > 0 || (x.revenueDerivation && x.revenueDerivation.includes('Replacement Funded'))) ? d : 0;
+        totals.captured += x.engineGrossCaptured || 0;
         totals.cogs += x.liveCogs;
         totals.shipping += x.actualShipCost || 0;
         totals.stripe += x.stripeFee;
@@ -911,17 +911,7 @@ function renderSalesTable() {
             <td class="trunc-col">${x.storefront_sku}</td>
             <td class="editable trunc-col" contenteditable="true" data-focus="focus_storeOldVal" data-blur="blur_updateSaleCell" data-order="${x.order_id}" data-sku="${safeSku}" data-col="internal_recipe_name" data-isnum="false" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
             <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" data-change="change_updateSaleType" data-order="${x.order_id}" data-sku="${safeSku}">
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Scrapped Exchange" ${x.transaction_type==='Scrapped Exchange'?'selected':''}>Scrapped Exchange</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${x.transaction_type==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${x.transaction_type==='IGNORE'?'selected':''}>IGNORE</option>
-                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Partial Refund" ${x.transaction_type==='Partial Refund'?'selected':''}>Partial Refund</option>
-                <option style="background:var(--bg-panel); color:#ef4444;" value="Cancelled" ${x.transaction_type==='Cancelled'?'selected':''}>Cancelled</option>
-                <option style="background:var(--bg-panel); color:#ef4444; font-weight:bold;" value="NEEDS ATTENTION" ${x.transaction_type==='NEEDS ATTENTION'?'selected':''}>NEEDS ATTENTION</option>
+                ${window.getTransactionTypeOptions(x.transaction_type)}
             </select></td>
 
             <td class="text-right" style="font-weight:bold;">${x.qty_sold}</td>
@@ -1207,8 +1197,7 @@ function renderSimulatorOrder(orderId) {
     
     let html = '';
     window.currentSimPayload.forEach((row, i) => {
-        let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Scrapped Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Partial Refund', 'Cancelled', 'NEEDS ATTENTION'];
-        let typeHtml = typeOpts.map(t => `<option value="${t}" ${row.transaction_type === t ? 'selected' : ''}>${t}</option>`).join('');
+        let typeHtml = window.getTransactionTypeOptions(row.transaction_type);
         
         let src = row['Source'] || 'web';
         

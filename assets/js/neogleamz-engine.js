@@ -152,6 +152,29 @@ window.getEngineStripeFee = function(amt, source) {
     return (parsedAmt * window.NEOGLEAMZ_CONFIG.STRIPE_PERCENTAGE) + window.NEOGLEAMZ_CONFIG.STRIPE_FLAT_FEE; 
 };
 
+window.getTransactionTypeOptions = function(selectedValue) {
+    const opts = [
+        { val: 'Standard', color: 'var(--text-main)' },
+        { val: 'Pre-Ship Exchange', color: 'var(--text-main)' },
+        { val: 'Post-Ship Exchange', color: 'var(--text-main)' },
+        { val: 'Scrapped Exchange', color: 'var(--text-main)' },
+        { val: 'Exchange Replacement', color: 'var(--text-main)' },
+        { val: 'Warranty', color: 'var(--text-main)' },
+        { val: 'Gift', color: 'var(--text-main)' },
+        { val: 'IGNORE', color: 'var(--text-main)' },
+        { val: 'Partial Refund', color: '#8b5cf6' },
+        { val: 'Cancelled', color: '#ef4444' },
+        { val: 'Refunded - Restocked', color: '#f59e0b' },
+        { val: 'Refunded - Scrapped', color: '#f59e0b' },
+        { val: 'NEEDS ATTENTION', color: '#ef4444', weight: 'bold' }
+    ];
+    return opts.map(o => {
+        let style = `background:var(--bg-panel); color:${o.color};`;
+        if (o.weight) style += ` font-weight:${o.weight};`;
+        return `<option style="${style}" value="${o.val}" ${selectedValue === o.val ? 'selected' : ''}>${o.val}</option>`;
+    }).join('');
+};
+
 window.getEngineLiveMsrp = function(pName) { return typeof pricingDB !== 'undefined' && pricingDB[pName] ? parseFloat(pricingDB[pName]?.msrp) || 0 : 0; };
 
 /**
@@ -198,19 +221,28 @@ window.runForensicAccounting = function(rows) {
     // 1. RAW DATA HARVESTING
     let totalOrderCaptured = 0; // Inflated CSV total
     let exactPayoutTotal = 0;
-    let exactShipTotal = 0;
+    let hasDbCosts = false;
+    let maxCsvShipCost = 0;
+    let firstRowWithMaxShipCostIndex = -1;
     let orderRefundTotal = 0;
     let totalOrderOutstanding = 0;
     let totalShipping = 0;
     let totalTaxes = 0;
     let donorCreditPool = 0;
     
-    rows.forEach(r => {
+    rows.forEach((r, i) => {
         let t = parseFloat(r.total || 0);
         if (t > totalOrderCaptured) totalOrderCaptured = t;
         
         if (parseFloat(r.dbActualPayout) > 0) exactPayoutTotal += parseFloat(r.dbActualPayout);
-        if (parseFloat(r.dbActualShipCost) > 0) exactShipTotal += parseFloat(r.dbActualShipCost);
+        
+        let sc = parseFloat(r.actual_shipping_cost || r.actualShipCost || 0);
+        if (sc > 0) hasDbCosts = true;
+        
+        if (sc > maxCsvShipCost) {
+            maxCsvShipCost = sc;
+            firstRowWithMaxShipCostIndex = i;
+        }
         
         let refAmt = parseFloat(r.refunded_amount) || 0;
         if (refAmt > orderRefundTotal) orderRefundTotal = refAmt;
@@ -261,9 +293,9 @@ window.runForensicAccounting = function(rows) {
         let isAbandonedPartial = (status !== 'pending' && status !== 'unfulfilled') && (lStatus === 'pending' || lStatus === 'unfulfilled');
         
         if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || isAbandonedPartial) { 
-            cogs = 0; actShipCost = 0; 
+            cogs = 0; 
         }
-        if (type === 'Post-Ship Exchange') {
+        if (type === 'Post-Ship Exchange' || type === 'Refunded - Restocked') {
             cogs = 0;
         }
         if (type === 'Scrapped Exchange') {
@@ -308,16 +340,20 @@ window.runForensicAccounting = function(rows) {
         let src = r['Source'] || 'web';
         let fee = 0;
 
-        if (exactShipTotal > 0) {
-            actShipCost = (i === firstShippableIndex) ? exactShipTotal : 0;
+        if (hasDbCosts) {
+            actShipCost = parseFloat(r.actual_shipping_cost || r.actualShipCost || 0);
         } else {
-            actShipCost = (i === firstShippableIndex) ? actShipCost : 0;
+            actShipCost = (i === firstRowWithMaxShipCostIndex) ? maxCsvShipCost : 0;
+        }
+
+        if (!hasDbCosts && (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || isAbandonedPartial || type === 'Scrapped Exchange')) {
+            actShipCost = 0;
         }
 
         let net = lineRevenue - fee - actShipCost - cogs;
         if (isVoided) net = 0;
 
-        let isCostOnlyItem = (type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund');
+        let isCostOnlyItem = (type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund' || type === 'Refunded - Restocked' || type === 'Refunded - Scrapped');
 
         return { 
             ...r, 
@@ -362,10 +398,19 @@ window.runForensicAccounting = function(rows) {
 
         if (!isVoided && !isDonor) {
             r.net = r._tempLineRevenue - r.fee - r.actShipCost - r.cogs;
+            if (i === firstShippableIndex && exchangeBalanceCredit > 0) {
+                r.net += exchangeBalanceCredit;
+            }
+        }
+
+        r.engineGrossCaptured = (isVoided || isDonor || r.isCostOnlyItem) ? 0 : r.trueLineCaptured;
+        if (i === firstShippableIndex && exchangeBalanceCredit > 0 && !isVoided && !isDonor && !r.isCostOnlyItem) {
+            r.engineGrossCaptured += exchangeBalanceCredit;
         }
 
         if (i === firstShippableIndex && trueConcessionRefund > 0) {
             r.net -= trueConcessionRefund;
+            r.engineGrossCaptured -= trueConcessionRefund;
             r.applied_order_refund = trueConcessionRefund;
         }
 
@@ -590,22 +635,41 @@ function syncDatazStats() {
 function syncEditzStats() {
     if (typeof catalogCache === 'undefined') return;
     let cKeys = Object.keys(catalogCache);
-    let prints = 0, usedSet = new Set(), assigned = 0;
+    let usedSet = new Set(), assigned = 0;
+    let subAssyCount = 0;
+    let retailCount = 0;
+    let printsCount = 0;
+    let labelCount = 0;
     
     if(typeof productsDB !== 'undefined'){
-        Object.values(productsDB).forEach(pArr => {
+        Object.keys(productsDB).forEach(pName => {
+            let pArr = productsDB[pName];
             pArr.forEach(c => usedSet.add(c.item_key || c.di_item_id || c.name));
+            
+            let isSub = typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName];
+            let isPrint = !!(pArr.is_3d_print);
+            let isLabel = !!(pArr.is_label);
+            
+            if (isLabel) {
+                labelCount++;
+            } else if (isSub) {
+                subAssyCount++;
+            } else if (isPrint) {
+                printsCount++;
+            } else {
+                retailCount++;
+            }
         });
     }
     
     cKeys.forEach(k => { 
-        if (catalogCache[k].is_3d_print) prints++; 
         if (usedSet.has(k)) assigned++;
     });
-    setStat('statEditzComps', fmtNum(cKeys.length));
-    setStat('statEditzPrints', fmtNum(prints));
-    setStat('statEditzRaw', fmtNum(cKeys.length - prints));
-    setStat('statEditzAssigned', fmtNum(assigned));
+
+    setStat('statEditzRetail', fmtNum(retailCount));
+    setStat('statEditzPrints', fmtNum(printsCount));
+    setStat('statEditzSubAssy', fmtNum(subAssyCount));
+    setStat('statEditzRaw', fmtNum(cKeys.length));
     setStat('statEditzOrphan', fmtNum(cKeys.length - assigned));
 }
 
@@ -821,8 +885,10 @@ function syncOrderzStats() {
         
         let validAonOrders = new Set(pArray.filter(x => 
             !x.isCostOnlyItem && 
-            !x.isRevenueTransfer && 
-            x.transaction_type !== 'Pre-Ship Exchange'
+            x.transaction_type !== 'Pre-Ship Exchange' &&
+            x.transaction_type !== 'Post-Ship Exchange' &&
+            x.transaction_type !== 'Scrapped Exchange' &&
+            x.transaction_type !== 'Exchange Replacement'
         ).map(x => x.order_id)).size;
         let aon = validAonOrders > 0 ? (pTotals.net / validAonOrders) : 0;
         setStat('statOrderzUnits', fmtNum(pTotals.units || 0));

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.06.03.0149"></script>
+    <script src="assets/js/system-version.js?v=v.2026.06.03.0353"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.03.0149"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.03.0353"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.03.0149"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.03.0353"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.06.03.0149"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.06.03.0353"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -1917,11 +1917,11 @@
                 <h2>DATAZ</h2>
                 <p>Full database access, raw entry, and parcel syncing.</p>
                 <div class="hub-kpi-grid">
-                    <div class="kpi-row"><span>Log Recordz</span><strong id="statDatazRecords">--</strong></div>
-                    <div class="kpi-row"><span>Logged Parcelz</span><strong id="statDatazParcels">--</strong></div>
-                    <div class="kpi-row"><span>Total Shipping Paid</span><strong id="statDatazPaid">--</strong></div>
-                    <div class="kpi-row"><span>Total Shipped Vol (g)</span><strong id="statDatazWt">--</strong></div>
-                    <div class="kpi-row"><span>TOTAL RAW GOODS COST</span><strong id="statDatazTotalCost">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statDatazRecords" style="cursor: pointer;"><span>Log Recordz</span><strong id="statDatazRecords">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statDatazParcels" style="cursor: pointer;"><span>Logged Parcelz</span><strong id="statDatazParcels">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statDatazPaid" style="cursor: pointer;"><span>Total Shipping Paid</span><strong id="statDatazPaid">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statDatazWt" style="cursor: pointer;"><span>Total Shipped Vol (g)</span><strong id="statDatazWt">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statDatazTotalCost" style="cursor: pointer;"><span>TOTAL RAW GOODS COST</span><strong id="statDatazTotalCost">--</strong></div>
                 </div>
             </div>
             <div class="hub-card" data-click="click_showInventoryPane_simple">
@@ -1929,11 +1929,11 @@
                 <h2>EDITZ</h2>
                 <p>Fast editing for Neo Productz and 3D Printed itemz.</p>
                 <div class="hub-kpi-grid">
-                    <div class="kpi-row"><span>Active Componentz</span><strong id="statEditzComps">--</strong></div>
-                    <div class="kpi-row"><span>3D Printed Partz</span><strong id="statEditzPrints">--</strong></div>
-                    <div class="kpi-row"><span>Raw Materialz</span><strong id="statEditzRaw">--</strong></div>
-                    <div class="kpi-row"><span>Allocated / Assigned</span><strong id="statEditzAssigned">--</strong></div>
-                    <div class="kpi-row"><span>Orphan Componentz</span><strong id="statEditzOrphan">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statEditzRetail" style="cursor: pointer;"><span>Retail Productz</span><strong id="statEditzRetail">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statEditzPrints" style="cursor: pointer;"><span>3D Printed Partz</span><strong id="statEditzPrints">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statEditzSubAssy" style="cursor: pointer;"><span>Sub-Assemblies</span><strong id="statEditzSubAssy">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statEditzRaw" style="cursor: pointer;"><span>Raw Materialz</span><strong id="statEditzRaw">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statEditzOrphan" style="cursor: pointer;"><span>Orphan Componentz</span><strong id="statEditzOrphan">--</strong></div>
                 </div>
             </div>
             <div class="hub-card" data-click="click_showInventoryPane_inventory">
@@ -1941,11 +1941,11 @@
                 <h2>STOCKZ</h2>
                 <p>Real-time stock levelz, reorder pointz, and value tracking.</p>
                 <div class="hub-kpi-grid">
-                    <div class="kpi-row"><span>Current Yield</span><strong id="statStockzUnits">--</strong></div>
-                    <div class="kpi-row"><span>Low Stock Warningz</span><strong id="statStockzAlerts">--</strong></div>
-                    <div class="kpi-row"><span>Product Valuation</span><strong id="statStockzFgiVal">--</strong></div>
-                    <div class="kpi-row"><span>Max Potential Yield</span><strong id="statStockzMaxYield">--</strong></div>
-                    <div class="kpi-row"><span>Total Components in Bins</span><strong id="statStockzRawCount">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statStockzUnits" style="cursor: pointer;"><span>Current Yield</span><strong id="statStockzUnits">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statStockzAlerts" style="cursor: pointer;"><span>Low Stock Warningz</span><strong id="statStockzAlerts">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statStockzFgiVal" style="cursor: pointer;"><span>Product Valuation</span><strong id="statStockzFgiVal">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statStockzMaxYield" style="cursor: pointer;"><span>Max Potential Yield</span><strong id="statStockzMaxYield">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statStockzRawCount" style="cursor: pointer;"><span>Total Components in Bins</span><strong id="statStockzRawCount">--</strong></div>
                 </div>
             </div>
         </div>
@@ -2371,11 +2371,11 @@
                 <h2>STATZ</h2>
                 <p>Visual Profit Derivation, Trendz, and Insightz.</p>
                 <div class="hub-kpi-grid">
-                    <div class="kpi-row"><span>Gross Revenue</span><strong id="statStatzRev">--</strong></div>
-                    <div class="kpi-row"><span>Pure Net Margin</span><strong id="statStatzNet">--</strong></div>
-                    <div class="kpi-row"><span>Global Trailing ROI</span><strong id="statStatzRoi">--</strong></div>
-                    <div class="kpi-row"><span>Net Yield Per Unit</span><strong id="statStatzAvgProf">--</strong></div>
-                    <div class="kpi-row"><span>Raw Component Exp</span><strong id="statStatzRawExp">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statRevenuezGross" style="cursor: pointer;"><span>Gross Revenue</span><strong id="statStatzRev">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statRevenuezNet" style="cursor: pointer;"><span>Pure Net Margin</span><strong id="statStatzNet">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statRevenuezROI" style="cursor: pointer;"><span>Global Trailing ROI</span><strong id="statStatzRoi">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statRevenuezYield" style="cursor: pointer;"><span>Net Yield Per Unit</span><strong id="statStatzAvgProf">--</strong></div>
+                    <div class="kpi-row" data-click="click_openKPIReport" data-kpi-id="statRevenuezRaw" style="cursor: pointer;"><span>Raw Component Exp</span><strong id="statStatzRawExp">--</strong></div>
                 </div>
             </div>
             <div class="hub-card" data-click="click_showSalezPane_commandz">
@@ -2422,19 +2422,19 @@
                 <div class="bom-layout" style="flex-grow:1; min-height:0; overflow: hidden;">
                     <div class="bom-main" id="analyticsContent" style="display:flex; flex-direction:column; height: 100%; overflow-x: hidden; overflow-y: auto;">
                         <div class="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px; margin-bottom: 25px; flex-shrink:0;">
-                            <div class="kpi-card kpi-rev" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                            <div class="kpi-card kpi-rev" data-click="click_openKPIReport" data-kpi-id="statRevenuezGross" style="cursor: pointer; background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
                                 <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">All-Time Captured (Gross)</div>
                                 <div class="kpi-value" id="kpiTotalRev" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
                             </div>
-                            <div class="kpi-card kpi-profit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                            <div class="kpi-card kpi-profit" data-click="click_openKPIReport" data-kpi-id="statRevenuezNet" style="cursor: pointer; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
                                 <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Estimated Profit (Net)</div>
                                 <div class="kpi-value" id="kpiTotalProfit" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
                             </div>
-                            <div class="kpi-card kpi-raw" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                            <div class="kpi-card kpi-raw" data-click="click_openKPIReport" data-kpi-id="statRevenuezRaw" style="cursor: pointer; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
                                 <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Raw Component Value</div>
                                 <div class="kpi-value" id="kpiRawInv" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
                             </div>
-                            <div class="kpi-card kpi-built" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+                            <div class="kpi-card kpi-built" data-click="click_openKPIReport" data-kpi-id="statRevenuezBuilt" style="cursor: pointer; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; border: none; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
                                 <div class="kpi-title" style="color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">Built Product Assets</div>
                                 <div class="kpi-value" id="kpiBuiltInv" style="font-size: 22px; font-weight: 900; margin: 5px 0;">$0.00</div>
                             </div>
@@ -3720,6 +3720,22 @@
         </div>
 
         <!-- MIGRATION MODAL -->
+        <!-- KPI Report Modal -->
+        <div id="kpiReportModal" class="modal-overlay" style="display: none; z-index: 10000; align-items: flex-start; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body);">
+            <div class="modal-content" style="max-width: none; width: 100vw; height: 100vh; background: var(--bg-container); border: none; border-radius: 0; display: flex; flex-direction: column;">
+                <div class="modal-header" style="padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; background: var(--bg-panel);">
+                    <h2 style="margin: 0; font-size: 24px; color: var(--text-heading); text-transform: uppercase; font-family: 'Space Grotesk', sans-serif;"><span id="kpiReportTitle">KPI Report</span></h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-green" data-click="click_printKPIReport" style="padding: 8px 16px; font-size: 14px; font-weight: bold;">🖨️ PRINT</button>
+                        <button class="btn-close" data-click="click_closeKPIReport" style="background: none; border: none; color: var(--text-muted); font-size: 28px; cursor: pointer; padding: 0 10px;">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body" id="kpiReportContent" style="padding: 30px 40px; flex-grow: 1; overflow-y: auto; background: var(--bg-body);">
+                    <!-- Dynamically populated via JS -->
+                </div>
+            </div>
+        </div>
+
         <div id="migration-modal" class="modal-overlay" style="display: none; z-index: 1000;">
             <div style="position: absolute; inset: 0;" data-click="click_closeMigrationModal"></div>
             <div style="background:var(--bg-container); border:1px solid var(--brand); border-radius:12px; width:95%; max-width:600px; padding: 24px; box-shadow: 0 10px 40px rgba(168, 85, 247, 0.4); position:relative; z-index: 10;">
@@ -6044,20 +6060,21 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/bom-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/production-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/sales-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/task-engine.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/print-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.06.03.0149"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.06.03.0149"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/kpi-reports-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/bom-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/production-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/sales-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/task-engine.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/print-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.06.03.0353"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.06.03.0353"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -6831,19 +6848,19 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.03.0149"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.03.0353"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.03.0149"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.03.0353"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.03.0149"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.03.0353"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.03.0149"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.03.0149"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.03.0149"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.03.0353"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.03.0353"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.03.0353"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.06.03.0149"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.06.03.0353"></script>
     <script src="assets/js/label-designer.js?v=1"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.06.03.0149"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.06.03.0353"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">

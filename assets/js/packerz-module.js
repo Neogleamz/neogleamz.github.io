@@ -119,6 +119,15 @@ async function fetchUnfulfilledOrders() {
         const kpiTracker = document.getElementById('kpiUnfulfilledCount');
         if(kpiTracker) kpiTracker.innerText = distinctOrderIds.length.toString();
 
+        const { data: compData } = await supabaseClient
+            .from('sales_ledger')
+            .select('order_id')
+            .eq('internal_fulfillment_status', 'Completed');
+        if (compData) {
+            const statCompleted = document.getElementById('statPackerzCompleted');
+            if (statCompleted) statCompleted.innerText = new Set(compData.map(c => c.order_id)).size.toString();
+        }
+
         if (distinctOrderIds.length === 0) {
             queueContainer.innerHTML = window.safeHTML(
                 '<div style="text-align:center; padding:60px; color:#10b981; font-size:14px; font-weight:900; font-style:italic; opacity:0.9;">ALL ACTIVE QUEUES CLEARED!</div>'
@@ -390,17 +399,7 @@ function openPackerzSopTerminal(orderGroup) {
         let selectHtml = `
             <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; width:160px; max-width:100%;" 
                 data-app-change="updateItemType" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Scrapped Exchange" ${t==='Scrapped Exchange'?'selected':''}>Scrapped Exchange</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${t==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${t==='Warranty'?'selected':''}>Warranty</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${t==='Gift'?'selected':''}>Gift</option>
-                <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${t==='IGNORE'?'selected':''}>IGNORE</option>
-                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Partial Refund" ${t==='Partial Refund'?'selected':''}>Partial Refund</option>
-                <option style="background:var(--bg-panel); color:#ef4444;" value="Cancelled" ${t==='Cancelled'?'selected':''}>Cancelled</option>
-                <option style="background:var(--bg-panel); color:#ef4444; font-weight:bold;" value="NEEDS ATTENTION" ${t==='NEEDS ATTENTION'?'selected':''}>NEEDS ATTENTION</option>
+                ${window.getTransactionTypeOptions(t)}
             </select>
         `;
         return `
