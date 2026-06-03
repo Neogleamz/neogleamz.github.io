@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.3.10] - 2026-06-03
+
+### ✨ Features & Bug Fixes
+- **Forensic Engine Scrapped Exchange Tracking**: Restructured the mathematical revenue core of the sandbox and sales engine. `runForensicAccounting` now explicitly separates donor exchanges (`Pre-Ship`, `Post-Ship`, `Scrapped Exchange`) into a dynamic `donorCreditPool` to avoid Shopify CSV inflation, and rigidly tracks actual concession refunds vs. balance credits. Added `Scrapped Exchange` to the UI dropdowns across Packerz and Sales ledgers to enforce true COGS retention on abandoned items.
+
 ## [1.3.9] - 2026-06-02
 
 ### ✨ Features & Bug Fixes
