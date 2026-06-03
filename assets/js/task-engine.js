@@ -3083,6 +3083,25 @@ window.teSyncTask = async function(type, entityId, action, params = {}) {
             else if (type === 'packerz') query = query.filter('metadata->>linked_order_id', 'eq', entityId);
             await query;
         } catch(e) { console.error('[TaskEngine] Sync Delete failed:', e); }
+    } else if (action === 'restore') {
+        try {
+            let selectQuery = supabaseClient.from('taskz').select('id, metadata');
+            if (type === 'batchez') selectQuery = selectQuery.filter('metadata->>linked_wo_id', 'eq', entityId);
+            else if (type === 'layerz') selectQuery = selectQuery.filter('metadata->>linked_print_id', 'eq', entityId);
+            else if (type === 'packerz') selectQuery = selectQuery.filter('metadata->>linked_order_id', 'eq', entityId);
+            
+            const { data: tasks } = await selectQuery;
+            if (tasks && tasks.length > 0) {
+                for (let t of tasks) {
+                    let updatePayload = { 
+                        status: 'Todo', 
+                        is_archived: false, 
+                        due_date: null
+                    };
+                    await supabaseClient.from('taskz').update(updatePayload).eq('id', t.id);
+                }
+            }
+        } catch(e) { console.error('[TaskEngine] Sync Restore failed:', e); }
     } else if (action === 'comment') {
         try {
             let selectQuery = supabaseClient.from('taskz').select('id');

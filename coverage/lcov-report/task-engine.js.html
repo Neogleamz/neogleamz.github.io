@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.56% </span>
+                <span class="strong">9.54% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>210/2195</span>
+                <span class='fraction'>211/2210</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">3.53% </span>
+                <span class="strong">3.56% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>59/1670</span>
+                <span class='fraction'>60/1682</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">10.55% </span>
+                <span class="strong">10.54% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>194/1838</span>
+                <span class='fraction'>195/1850</span>
             </div>
         
             
@@ -3244,7 +3244,26 @@
 <a name='L3179'></a><a href='#L3179'>3179</a>
 <a name='L3180'></a><a href='#L3180'>3180</a>
 <a name='L3181'></a><a href='#L3181'>3181</a>
-<a name='L3182'></a><a href='#L3182'>3182</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L3182'></a><a href='#L3182'>3182</a>
+<a name='L3183'></a><a href='#L3183'>3183</a>
+<a name='L3184'></a><a href='#L3184'>3184</a>
+<a name='L3185'></a><a href='#L3185'>3185</a>
+<a name='L3186'></a><a href='#L3186'>3186</a>
+<a name='L3187'></a><a href='#L3187'>3187</a>
+<a name='L3188'></a><a href='#L3188'>3188</a>
+<a name='L3189'></a><a href='#L3189'>3189</a>
+<a name='L3190'></a><a href='#L3190'>3190</a>
+<a name='L3191'></a><a href='#L3191'>3191</a>
+<a name='L3192'></a><a href='#L3192'>3192</a>
+<a name='L3193'></a><a href='#L3193'>3193</a>
+<a name='L3194'></a><a href='#L3194'>3194</a>
+<a name='L3195'></a><a href='#L3195'>3195</a>
+<a name='L3196'></a><a href='#L3196'>3196</a>
+<a name='L3197'></a><a href='#L3197'>3197</a>
+<a name='L3198'></a><a href='#L3198'>3198</a>
+<a name='L3199'></a><a href='#L3199'>3199</a>
+<a name='L3200'></a><a href='#L3200'>3200</a>
+<a name='L3201'></a><a href='#L3201'>3201</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -6328,6 +6347,25 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -9510,6 +9548,25 @@ window.teSyncTask = async function(type, entityId, action, params = <span class=
             else <span class="cstat-no" title="statement not covered" >if (type === 'packerz') <span class="cstat-no" title="statement not covered" >query = query.filter('metadata-&gt;&gt;linked_order_id', 'eq', entityId);</span></span>
 <span class="cstat-no" title="statement not covered" >            await query;</span>
         } catch(e) { <span class="cstat-no" title="statement not covered" >console.error('[TaskEngine] Sync Delete failed:', e); </span>}
+    } else <span class="missing-if-branch" title="if path not taken" >I</span>if (action === 'restore') {
+<span class="cstat-no" title="statement not covered" >        try {</span>
+            let selectQuery = <span class="cstat-no" title="statement not covered" >supabaseClient.from('taskz').select('id, metadata');</span>
+<span class="cstat-no" title="statement not covered" >            if (type === 'batchez') <span class="cstat-no" title="statement not covered" >selectQuery = selectQuery.filter('metadata-&gt;&gt;linked_wo_id', 'eq', entityId);</span></span>
+            else <span class="cstat-no" title="statement not covered" >if (type === 'layerz') <span class="cstat-no" title="statement not covered" >selectQuery = selectQuery.filter('metadata-&gt;&gt;linked_print_id', 'eq', entityId);</span></span>
+            else <span class="cstat-no" title="statement not covered" >if (type === 'packerz') <span class="cstat-no" title="statement not covered" >selectQuery = selectQuery.filter('metadata-&gt;&gt;linked_order_id', 'eq', entityId);</span></span>
+            
+            const { data: tasks } = <span class="cstat-no" title="statement not covered" >await selectQuery;</span>
+<span class="cstat-no" title="statement not covered" >            if (tasks &amp;&amp; tasks.length &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >                for (let t of tasks) {</span>
+                    let updatePayload = <span class="cstat-no" title="statement not covered" >{ </span>
+                        status: 'Todo', 
+                        is_archived: false, 
+                        due_date: null
+                    };
+<span class="cstat-no" title="statement not covered" >                    await supabaseClient.from('taskz').update(updatePayload).eq('id', t.id);</span>
+                }
+            }
+        } catch(e) { <span class="cstat-no" title="statement not covered" >console.error('[TaskEngine] Sync Restore failed:', e); </span>}
     } else <span class="missing-if-branch" title="else path not taken" >E</span>if (action === 'comment') {
         try {
             let selectQuery = supabaseClient.from('taskz').select('id');
@@ -9613,7 +9670,7 @@ window.teEnsureFulfillmentTasks = <span class="fstat-no" title="function not cov
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-03T04:27:36.903Z
+                at 2026-06-03T05:59:18.428Z
             </div>
         <script src="prettify.js"></script>
         <script>

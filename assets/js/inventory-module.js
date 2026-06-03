@@ -50,9 +50,9 @@ function renderFgiTable() {
 
     const schemas = {
         'cat-retail': `<tr>${getNameTh('cat-retail')} ${getTh('cat-retail','b','PROD','#3b82f6')} ${getTh('cat-retail','pb','PROTO','#8b5cf6')} ${getTh('cat-retail','sold','SOLD','#ef4444')} ${getTh('cat-retail','warranty','WRTY','#fbbf24')} ${getTh('cat-retail','s','STOCK','#10b981')} ${getTh('cat-retail','ms','MIN','#f97316')} ${getTh('cat-retail','tv','ASSETS')} ${getTh('cat-retail','net','NET')} ${getTh('cat-retail','msrpv','MSRP')}</tr>`,
-        'cat-sub': `<tr>${getNameTh('cat-sub')} ${getTh('cat-sub','b','PROD','#3b82f6')} ${getTh('cat-sub','pb','PROTO','#8b5cf6')} ${getTh('cat-sub','c_prod','CONS','#ef4444')} ${getTh('cat-sub','yld','YLD %','#ec4899')} ${getTh('cat-sub','scrap','SCRAP','#ef4444')} ${getTh('cat-sub','warranty','WRTY','#fbbf24')} ${getTh('cat-sub','s','STOCK','#10b981')} ${getTh('cat-sub','ms','MIN','#f97316')} ${getTh('cat-sub','tv','ASSETS')}</tr>`,
-        'cat-print': `<tr>${getNameTh('cat-print')} ${getTh('cat-print','b','PROD','#3b82f6')} ${getTh('cat-print','pb','PROTO','#8b5cf6')} ${getTh('cat-print','c_prod','CONS','#ef4444')} ${getTh('cat-print','yld','YLD %','#ec4899')} ${getTh('cat-print','scrap','SCRAP','#ef4444')} ${getTh('cat-print','s','STOCK','#10b981')} ${getTh('cat-print','ms','MIN','#f97316')} ${getTh('cat-print','tv','ASSETS')}</tr>`,
-        'cat-label': `<tr>${getNameTh('cat-label')} ${getTh('cat-label','b','PROD','#3b82f6')} ${getTh('cat-label','c_prod','CONS','#ef4444')} ${getTh('cat-label','s','STOCK','#10b981')} ${getTh('cat-label','ms','MIN','#f97316')} ${getTh('cat-label','tv','ASSETS')}</tr>`
+        'cat-sub': `<tr>${getNameTh('cat-sub')} ${getTh('cat-sub','b','PROD','#3b82f6')} ${getTh('cat-sub','pb','PROTO','#8b5cf6')} ${getTh('cat-sub','sold','SOLD','#ef4444')} ${getTh('cat-sub','c_prod','CONS','#ef4444')} ${getTh('cat-sub','yld','YLD %','#ec4899')} ${getTh('cat-sub','scrap','SCRAP','#ef4444')} ${getTh('cat-sub','warranty','WRTY','#fbbf24')} ${getTh('cat-sub','s','STOCK','#10b981')} ${getTh('cat-sub','ms','MIN','#f97316')} ${getTh('cat-sub','tv','ASSETS')}</tr>`,
+        'cat-print': `<tr>${getNameTh('cat-print')} ${getTh('cat-print','b','PROD','#3b82f6')} ${getTh('cat-print','pb','PROTO','#8b5cf6')} ${getTh('cat-print','sold','SOLD','#ef4444')} ${getTh('cat-print','c_prod','CONS','#ef4444')} ${getTh('cat-print','yld','YLD %','#ec4899')} ${getTh('cat-print','scrap','SCRAP','#ef4444')} ${getTh('cat-print','s','STOCK','#10b981')} ${getTh('cat-print','ms','MIN','#f97316')} ${getTh('cat-print','tv','ASSETS')}</tr>`,
+        'cat-label': `<tr>${getNameTh('cat-label')} ${getTh('cat-label','b','PROD','#3b82f6')} ${getTh('cat-label','sold','SOLD','#ef4444')} ${getTh('cat-label','c_prod','CONS','#ef4444')} ${getTh('cat-label','s','STOCK','#10b981')} ${getTh('cat-label','ms','MIN','#f97316')} ${getTh('cat-label','tv','ASSETS')}</tr>`
     };
 
     let h = ``;
@@ -126,6 +126,7 @@ function renderFgiTable() {
                     else if (g.id === 'cat-sub') {
                         trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#8b5cf6;">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444;">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#ef4444;">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
                         trHtml += `<td class="text-right" style="color:#ef4444; font-weight:bold;">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
@@ -137,6 +138,7 @@ function renderFgiTable() {
                     else if (g.id === 'cat-print') {
                         trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#8b5cf6;">${x.pb.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444;">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#ef4444;">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:${yldColor}; font-weight:bold;">${x.yld.toFixed(1)}%</td>`;
                         trHtml += `<td class="text-right" style="color:#ef4444; font-weight:bold;">${x.scrap.toFixed(2).replace(/\.?0+$/,'')}</td>`;
@@ -146,6 +148,7 @@ function renderFgiTable() {
                     }
                     else if (g.id === 'cat-label') {
                         trHtml += `<td class="text-right" style="color:#3b82f6;">${x.b.toFixed(2).replace(/\.?0+$/,'')}</td>`;
+                        trHtml += `<td class="text-right" style="color:#ef4444;">${x.sold.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#ef4444;">${x.c_prod.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right ${sc}" style="font-weight:bold;">${x.s.toFixed(2).replace(/\.?0+$/,'')}</td>`;
                         trHtml += `<td class="text-right" style="color:#f97316; font-weight:bold; text-decoration: underline dotted; cursor: pointer;" data-click="click_openStockzAuditModal" data-key="${sk}" data-tab="planning">${x.ms.toFixed(2).replace(/\.?0+$/,'')}</td>`;

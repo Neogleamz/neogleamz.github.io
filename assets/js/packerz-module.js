@@ -1288,11 +1288,25 @@ function showPackerzCompletionModal(orderId, lineItems, isBulk = false) {
  */
 async function executePackerzCompletion(orderId) {
     try {
+        const btn = document.getElementById(`btnCompleteAssembly_${orderId}`);
+        const originalText = btn ? btn.innerText : 'ASSEMBLY COMPLETE';
+        if (btn) {
+            btn.innerText = 'LOADING...';
+            btn.style.opacity = '0.7';
+            btn.style.cursor = 'wait';
+        }
+
         // 1. Fetch line items BEFORE confirming, so we can display them in the modal
         const { data: lineItems, error: itemsError } = await supabaseClient
             .from('sales_ledger')
             .select('internal_recipe_name, qty_sold, transaction_type')
             .eq('order_id', orderId);
+
+        if (btn) {
+            btn.innerText = originalText;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        }
 
         if (itemsError) throw itemsError;
 
@@ -1311,18 +1325,35 @@ async function executePackerzCompletion(orderId) {
                 .eq('order_id', orderId);
 
             if(error) throw error;
+            if (typeof window.teSyncTask === 'function') { await window.teSyncTask('packerz', orderId, 'complete'); }
 
             // 4. Structurally deduct (upsert) the Inventory ledger
             let invMap = {};
             lineItems.forEach(r => {
                 if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
+                
+                let isFGI = false;
+                if (typeof productsDB !== 'undefined' && productsDB[r.internal_recipe_name]) isFGI = true;
+                if (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[r.internal_recipe_name]) isFGI = true;
+
                 let k = `RECIPE:::${r.internal_recipe_name}`;
-                if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
-                invMap[k] += r.qty_sold;
+                if(!invMap[k]) {
+                    invMap[k] = { 
+                        sold_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].sold_qty) || 0 : 0),
+                        consumed_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].consumed_qty) || 0 : 0)
+                    };
+                }
+                
+                if (isFGI) {
+                    invMap[k].sold_qty += r.qty_sold;
+                } else {
+                    invMap[k].consumed_qty += r.qty_sold;
+                }
             });
             let invPayload = Object.keys(invMap).map(k => {
                 if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-                inventoryDB[k].sold_qty = invMap[k];
+                inventoryDB[k].sold_qty = invMap[k].sold_qty;
+                inventoryDB[k].consumed_qty = invMap[k].consumed_qty;
                 return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
             });
 
@@ -1402,6 +1433,7 @@ window.unarchivePackerzOrder = async function(orderId, skipConfirm = false, skip
             .eq('order_id', orderId);
 
         if(error) throw error;
+        if (typeof window.teSyncTask === 'function') { await window.teSyncTask('packerz', orderId, 'restore'); }
 
         // Immediately delete the snapshot from the archive so it re-enters the QA pipeline cleanly
         await supabaseClient.from('sop_archives').delete().eq('order_id', orderId);
@@ -1723,17 +1755,17 @@ async function loadPackerzSopFromDB() {
         if(data) {
             const instructionJson = JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}');
             steps = instructionJson.steps && instructionJson.steps.length > 0 ? instructionJson.steps : [{}];
-            const packerzAdminQA = document.getElementById('packerzAdminQA');
-            if (packerzAdminQA) {
-                packerzAdminQA.value = (instructionJson.qaChecks || []).join('\n');
+            const productionAdminQA = document.getElementById('productionAdminQA');
+            if (productionAdminQA) {
+                productionAdminQA.value = (instructionJson.qaChecks || []).join('\n');
             }
-            if(typeof renderPackerzTelemetryPreview === 'function') renderPackerzTelemetryPreview();
+            if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
         } else {
-            const packerzAdminQA = document.getElementById('packerzAdminQA');
-            if (packerzAdminQA) {
-                packerzAdminQA.value = '';
+            const productionAdminQA = document.getElementById('productionAdminQA');
+            if (productionAdminQA) {
+                productionAdminQA.value = '';
             }
-            if(typeof renderPackerzTelemetryPreview === 'function') renderPackerzTelemetryPreview();
+            if(typeof renderProductionTelemetryPreview === 'function') renderProductionTelemetryPreview();
         }
 
         let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">`;
@@ -1746,8 +1778,8 @@ async function loadPackerzSopFromDB() {
         console.error("SOP Fetch Bound Error:", e);
         if(typeof sysLog === 'function') sysLog(`Packerz SOP Load Error: ${e.message}`, true);
         if(e.code === 'PGRST116') {
-            const packerzAdminQA = document.getElementById('packerzAdminQA');
-            if (packerzAdminQA) packerzAdminQA.value = '';
+            const productionAdminQA = document.getElementById('productionAdminQA');
+            if (productionAdminQA) productionAdminQA.value = '';
             let h = `<div id="packerzSopEditorRowsWrapper" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">` + window.generateEditableSOPRow({}, 0, sku, 'packerz') + `</div>`;
             if (area) area.innerHTML = window.safeHTML(h);
         } else {
@@ -1783,7 +1815,7 @@ window.savePackerzSOPToDB = async function() {
             });
         });
 
-        let rawQa = document.getElementById('packerzAdminQA').value;
+        let rawQa = document.getElementById('productionAdminQA').value;
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
 
         const payload = {
@@ -1810,9 +1842,9 @@ window.savePackerzSOPToDB = async function() {
 
 const SOP_MEDIA_BUCKET = 'sop-media';
 let currentSOPMediaFolder = '';   // '' = bucket root
-window.activeSOPTextAreaId = window.activeSOPTextAreaId || 'packerzAdminQA'; // Memory for multi-module targeting
+window.activeSOPTextAreaId = window.activeSOPTextAreaId || 'productionAdminQA'; // Memory for multi-module targeting
 
-async function openSOPMediaPicker(taId = 'packerzAdminQA') {
+async function openSOPMediaPicker(taId = 'productionAdminQA') {
     window.activeSOPTextAreaId = taId;
     currentSOPMediaFolder = '';
     const modal = document.getElementById('sopMediaPickerModal');
@@ -2032,9 +2064,7 @@ function insertSOPToken(token) {
     ta.value = before + (needsNewlineBefore ? '\n' : '') + token + (needsNewlineAfter ? '\n' : '') + after;
     ta.focus();
 
-    if (window.activeSOPTextAreaId === 'packerzAdminQA' && typeof renderPackerzTelemetryPreview === 'function') {
-        renderPackerzTelemetryPreview();
-    } else if (window.activeSOPTextAreaId === 'productionAdminQA' && typeof renderProductionTelemetryPreview === 'function') {
+    if (window.activeSOPTextAreaId === 'productionAdminQA' && typeof renderProductionTelemetryPreview === 'function') {
         renderProductionTelemetryPreview();
     } else if (window.activeSOPTextAreaId === 'packerzLiveInlineQA' && typeof renderPackerzLiveInlineTelemetryPreview === 'function') {
         renderPackerzLiveInlineTelemetryPreview();
@@ -2379,9 +2409,19 @@ function renderSOPAuditLogRows(rows) {
                     <div>
                         <div style="font-size:11px; font-weight:900; color:#10b981; letter-spacing:1px; margin-bottom:8px;">TELEMETRY CHECKS</div>
                         ${checks.length === 0 ? '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None recorded</div>' :
-                          checks.map(c => `<div style="font-size:12px; padding:3px 0; color:${c.valid ? '#10b981' : '#ef4444'};">${c.valid ? '✅' : '❌'} ${c.text || ''}</div>`).join('')}
+                          checks.map(c => `
+                            <div style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:8px; font-size:12px; font-weight:700; color:var(--text-heading); padding:4px 8px; margin-bottom:4px; border:1px solid ${c.valid ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}; border-radius:4px; background:var(--bg-panel);">
+                                <span style="font-size:14px; line-height:1; flex-shrink:0;">${c.valid ? '✅' : '❌'}</span>
+                                <span style="display:flex; align-items:flex-start; flex-wrap:wrap; flex:1; margin-top:1px; color:${c.valid ? '#10b981' : '#ef4444'};">${c.text || ''}</span>
+                            </div>
+                          `).join('')}
                         ${inputs.length > 0 ? `<div style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:1px; margin:10px 0 6px;">INPUT VALUES</div>
-                        ${inputs.map(inp => `<div style="font-size:12px; padding:3px 0; color:var(--text-muted);">📝 ${inp.text}: <b style="color:var(--text-main); font-family:monospace;">${inp.value || '(blank)'}</b></div>`).join('')}` : ''}
+                        ${inputs.map(inp => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:4px; padding:4px 8px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:4px;">
+                                <label style="font-size:10px; font-weight:900; color:#F59E0B; text-transform:uppercase; flex-shrink:0;">${inp.text}</label>
+                                <input type="text" disabled value="${inp.value || ''}" style="flex:1; padding:4px; border-radius:4px; background:var(--bg-input); border:1px solid var(--border-color); color:#10b981; font-family:monospace; font-size:11px;">
+                            </div>
+                        `).join('')}` : ''}
                     </div>
                     <div>
                         <button class="packerz-blueprint-btn" data-click="click_toggleOriginalBlueprint" style="background:transparent; border:1px solid #0ea5e9; color:#0ea5e9; padding:6px 12px; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer;">View Original Blueprint</button>
@@ -2671,19 +2711,41 @@ window.click_bulkAdminFulfillPackerzOrders = async function() {
                 assembly_completed_at: new Date().toISOString()
             })
             .eq('order_id', orderId)
+            .then(res => {
+                if (!res.error && typeof window.teSyncTask === 'function') {
+                    return window.teSyncTask('packerz', orderId, 'complete').then(() => res);
+                }
+                return res;
+            })
         );
         await Promise.all(updatePromises);
 
         let invMap = {};
         lineItems.forEach(r => {
             if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
+            
+            let isFGI = false;
+            if (typeof productsDB !== 'undefined' && productsDB[r.internal_recipe_name]) isFGI = true;
+            if (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[r.internal_recipe_name]) isFGI = true;
+
             let k = `RECIPE:::${r.internal_recipe_name}`;
-            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
-            invMap[k] += r.qty_sold;
+            if(!invMap[k]) {
+                invMap[k] = { 
+                    sold_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].sold_qty) || 0 : 0),
+                    consumed_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].consumed_qty) || 0 : 0)
+                };
+            }
+            
+            if (isFGI) {
+                invMap[k].sold_qty += r.qty_sold;
+            } else {
+                invMap[k].consumed_qty += r.qty_sold;
+            }
         });
         let invPayload = Object.keys(invMap).map(k => {
             if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-            inventoryDB[k].sold_qty = invMap[k];
+            inventoryDB[k].sold_qty = invMap[k].sold_qty;
+            inventoryDB[k].consumed_qty = invMap[k].consumed_qty;
             return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
         });
 
@@ -2725,7 +2787,7 @@ window.click_openSOPSnapshotCameraInline = function(_e) {
 
 window.click_openSOPSnapshotCamera_packerz = function(e) {
     if (typeof e !== 'undefined' && e) e.preventDefault();
-    window.activeSOPTextAreaId = 'packerzAdminQA';
+    window.activeSOPTextAreaId = 'productionAdminQA';
     openSOPSnapshotCamera();
 };
 

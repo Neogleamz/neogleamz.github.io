@@ -5546,13 +5546,13 @@
 <span class="cstat-no" title="statement not covered" >                    if(window.selectPrintJob) <span class="cstat-no" title="statement not covered" >window.selectPrintJob(el.getAttribute('data-id'));</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_startLayerzRun':
-<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'STARTING...', '✅ STARTED', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof startLayerzRun === 'function') <span class="cstat-no" title="statement not covered" >await startLayerzRun(); </span></span>});</span>
+<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'STARTING...', '✅ STARTED', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof window.startLayerzRun === 'function') <span class="cstat-no" title="statement not covered" >await window.startLayerzRun(); </span></span>});</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_toggleLayerzRunPause':
-<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof toggleLayerzRunPause === 'function') <span class="cstat-no" title="statement not covered" >await toggleLayerzRunPause(); </span></span>});</span>
+<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof window.toggleLayerzRunPause === 'function') <span class="cstat-no" title="statement not covered" >await window.toggleLayerzRunPause(); </span></span>});</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_togglePrintTimerPause':
-<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof togglePrintTimerPause === 'function') <span class="cstat-no" title="statement not covered" >await togglePrintTimerPause(); </span></span>});</span>
+<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof window.togglePrintTimerPause === 'function') <span class="cstat-no" title="statement not covered" >await window.togglePrintTimerPause(); </span></span>});</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_openLayerzRunCompleteModal':
 <span class="cstat-no" title="statement not covered" >                    if(window.openLayerzRunCompleteModal) <span class="cstat-no" title="statement not covered" >window.openLayerzRunCompleteModal();</span></span>
@@ -5561,7 +5561,7 @@
 <span class="cstat-no" title="statement not covered" >                    if(window.closeLayerzRunCompleteModal) <span class="cstat-no" title="statement not covered" >window.closeLayerzRunCompleteModal();</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_submitLayerzRun':
-<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'RECORDING...', '✅ RECORDED', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof submitLayerzRun === 'function') <span class="cstat-no" title="statement not covered" >await submitLayerzRun(); </span></span>});</span>
+<span class="cstat-no" title="statement not covered" >                    window.executeWithButtonAction(el, 'RECORDING...', '✅ RECORDED', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof window.submitLayerzRun === 'function') <span class="cstat-no" title="statement not covered" >await window.submitLayerzRun(); </span></span>});</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_stopPropagation':
 <span class="cstat-no" title="statement not covered" >                    event.stopPropagation();</span>
@@ -6331,7 +6331,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-03T04:27:36.903Z
+                at 2026-06-03T05:59:18.428Z
             </div>
         <script src="prettify.js"></script>
         <script>
