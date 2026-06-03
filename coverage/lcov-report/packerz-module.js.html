@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.29% </span>
+                <span class="strong">7.28% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>142/1946</span>
+                <span class='fraction'>142/1950</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">2.97% </span>
+                <span class="strong">2.95% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>7/235</span>
+                <span class='fraction'>7/237</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">8.3% </span>
+                <span class="strong">8.28% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>140/1685</span>
+                <span class='fraction'>140/1689</span>
             </div>
         
             
@@ -3364,7 +3364,20 @@
 <a name='L3299'></a><a href='#L3299'>3299</a>
 <a name='L3300'></a><a href='#L3300'>3300</a>
 <a name='L3301'></a><a href='#L3301'>3301</a>
-<a name='L3302'></a><a href='#L3302'>3302</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L3302'></a><a href='#L3302'>3302</a>
+<a name='L3303'></a><a href='#L3303'>3303</a>
+<a name='L3304'></a><a href='#L3304'>3304</a>
+<a name='L3305'></a><a href='#L3305'>3305</a>
+<a name='L3306'></a><a href='#L3306'>3306</a>
+<a name='L3307'></a><a href='#L3307'>3307</a>
+<a name='L3308'></a><a href='#L3308'>3308</a>
+<a name='L3309'></a><a href='#L3309'>3309</a>
+<a name='L3310'></a><a href='#L3310'>3310</a>
+<a name='L3311'></a><a href='#L3311'>3311</a>
+<a name='L3312'></a><a href='#L3312'>3312</a>
+<a name='L3313'></a><a href='#L3313'>3313</a>
+<a name='L3314'></a><a href='#L3314'>3314</a>
+<a name='L3315'></a><a href='#L3315'>3315</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -5733,6 +5746,19 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -9035,7 +9061,20 @@ async function <span class="fstat-no" title="function not covered" >openCameraSc
 <span class="cstat-no" title="statement not covered" >        _html5QrScanner = new Html5Qrcode('sopCameraReader');</span>
 <span class="cstat-no" title="statement not covered" >        await _html5QrScanner.start(</span>
             { facingMode: 'environment' },   // rear camera
-            { fps: 12, qrbox: { width: 200, height: 200 }, aspectRatio: 1.0 },
+            { 
+                fps: 30,
+                    disableFlip: true,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
+                    aspectRatio: 1.0,
+                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(viewfinderWidth, viewfinderHeight) {
+                    var w = <span class="cstat-no" title="statement not covered" >Math.floor(viewfinderWidth * 0.85);</span>
+                    var h = <span class="cstat-no" title="statement not covered" >Math.floor(w * 0.4);</span>
+<span class="cstat-no" title="statement not covered" >                    return { width: w, height: h };</span>
+                }, 
+                    
+                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+            },
 <span class="fstat-no" title="function not covered" >            (d</span>ecodedText) =&gt; <span class="cstat-no" title="statement not covered" >handleScanResult(decodedText, expectedValue, rowId),</span>
 <span class="fstat-no" title="function not covered" >            ()</span> =&gt; {}  // suppress per-frame errors
         );
@@ -9973,7 +10012,7 @@ window.click_saveRemoteMobileStagedPhotos = <span class="fstat-no" title="functi
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-03T01:04:52.589Z
+                at 2026-06-03T02:05:50.438Z
             </div>
         <script src="prettify.js"></script>
         <script>

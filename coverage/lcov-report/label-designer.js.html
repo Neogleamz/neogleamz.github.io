@@ -1815,17 +1815,17 @@ function <span class="fstat-no" title="function not covered" >ldRenderProperties
 <span class="cstat-no" title="statement not covered" >    props.innerHTML = window.safeHTML ? window.safeHTML(html) : html;</span>
     
     // Attach Event Listeners dynamically to avoid DOMPurify stripping inline handlers
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropX')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('x'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropY')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('y'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropW')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('width'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropH')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('height'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropVal')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('value'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropVal')?.addEventListener('keyup', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('value'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropF')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('fontSize'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropF')?.addEventListener('keyup', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('fontSize'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropAlign')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldUpdateProp('textAlign'))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldCenterBtn')?.addEventListener('click', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldCenterElement(el.id))</span>;</span>
-<span class="cstat-no" title="statement not covered" >    document.getElementById('ldDeleteBtn')?.addEventListener('click', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >ldDeleteElement(el.id))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropX')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('x'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropY')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('y'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropW')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('width'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropH')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('height'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropVal')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('value'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropVal')?.addEventListener('keyup', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('value'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropF')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('fontSize'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropF')?.addEventListener('keyup', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('fontSize'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldPropAlign')?.addEventListener('change', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldUpdateProp('textAlign'))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldCenterBtn')?.addEventListener('click', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldCenterElement(el.id))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    document.getElementById('ldDeleteBtn')?.addEventListener('click', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.ldDeleteElement(el.id))</span>;</span>
 }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >window.ldUpdateProp = <span class="fstat-no" title="function not covered" >fu</span>nction(key) {</span>
@@ -1915,7 +1915,7 @@ function <span class="fstat-no" title="function not covered" >ldPointerMove(</sp
     }
 }
 &nbsp;
-function <span class="fstat-no" title="function not covered" >ldPointerUp(</span>e) {
+function <span class="fstat-no" title="function not covered" >ldPointerUp(</span>_e) {
 <span class="cstat-no" title="statement not covered" >    window.ldState.dragging = null;</span>
 <span class="cstat-no" title="statement not covered" >    window.ldState.resizing = null;</span>
 }
@@ -2056,7 +2056,7 @@ function <span class="fstat-no" title="function not covered" >ldPointerUp(</span
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-03T01:04:52.589Z
+                at 2026-06-03T02:05:50.438Z
             </div>
         <script src="prettify.js"></script>
         <script>

@@ -38,7 +38,7 @@ graph LR
         Stockpilez -.-> SP_Simple[EDITZ Pane<br>DOM: paneSimple]
         
         SP_Inventory --> SnapshotManagerModal[Snapshot Manager Modal<br>Btn: 🗂️ SNAPSHOTS]
-        SP_Inventory --> CycleCountManagerModal[Cycle Count Manager Modal<br>Btn: 🔄 CYCLE COUNTS]
+        SP_Inventory --> InventoryAuditConsoleModal[Inventory Audit & Planning Console Modal<br>Btn: 📦 CYCLE COUNTS]
         SP_Inventory --> VelocityzModal[Map Unknown SKU Modal<br>Btn: ⏳ VELOCITYZ]
         SP_Inventory --> GlobalLeadModal[Global Lead Editor Modal<br>Btn: ✏️ EDIT GLOBAL LEAD]
         SP_Inventory --> LowStockzReport[Low Stockz Report Trigger<br>Btn: 📉 LOW STOCKZ REPORT]

@@ -60,4 +60,4 @@ Render a Markdown table with every gate from above, its result (✅ PASS, ❌ FA
 If a Boy Scout cleanup was performed during the pre-flight, render a `> [!NOTE]` block describing exactly what was fixed. If none was applicable, state why using a `> [!TIP]` block.
 
 ### Workflow Suggestions
-After the table, render a `> [!TIP]` block suggesting the next most logical workflow (e.g., `/release`, `/wind_down`, `/status_update`). Briefly explain why.
+After the table, render a `> [!TIP]` block suggesting the next most logical workflow. **CRITICAL:** If you just shipped code into `main`, you MUST suggest either `/release` (for formal version bumps) or `/release_silent` (for changelog logging without a version bump) as the immediate next step. Briefly explain why.
