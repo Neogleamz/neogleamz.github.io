@@ -75,3 +75,8 @@ description: "Strict Vanilla architecture, State Handling, UI paradigms, and act
 
 ## UI Design Standards
 - ALL 'CLOSE' buttons or modal exit buttons must be styled strictly as red buttons (e.g., using the 'btn-red' class) to maintain site-wide consistency.
+
+### 12. Strict UI Concurrency Locks & Anti-Spam Protection
+- **No Unprotected Mutations:** You are STRICTLY FORBIDDEN from creating or modifying any button, form, or `data-click` interaction that triggers an asynchronous database mutation (e.g., Supabase insert, update, delete) without wrapping the execution in a strict UI mutex lock.
+- **The Wrapper Protocol:** All data-mutating UI actions MUST utilize `window.executeWithButtonAction('btnId', 'LOADING...', '✅ SAVED', async () => { ... })` or an equivalent manual lock that instantly disables the button (`btn.disabled = true;`), updates the inner text to visually indicate progress, and completely prevents secondary clicks until the server resolves the transaction.
+- **Fail-Safe Validation:** A button must NEVER allow a user to spam-click and double-commit data. You must architect UI components to actively defend against latency-induced double-submissions.

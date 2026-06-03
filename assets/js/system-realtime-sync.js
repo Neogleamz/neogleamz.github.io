@@ -26,6 +26,17 @@
             if (name === 'renderInventoryTable') return typeof renderInventoryTable === 'function' ? renderInventoryTable : null;
             if (name === 'renderFgiTable') return typeof renderFgiTable === 'function' ? renderFgiTable : null;
             if (name === 'renderWOList') return typeof renderWOList === 'function' ? renderWOList : null;
+            if (name === 'renderActiveWO') return () => { 
+                if (typeof renderActiveWO === 'function' && typeof currentWO !== 'undefined' && currentWO) renderActiveWO(currentWO.wo_id);
+            };
+            if (name === 'printQueueDB') return typeof printQueueDB !== 'undefined' ? printQueueDB : null;
+            if (name === 'renderPrintQueue') return typeof renderPrintQueue === 'function' ? renderPrintQueue : null;
+            if (name === 'renderActivePrintJob') return () => {
+                if (typeof renderActivePrintJob === 'function' && typeof currentPrintJob !== 'undefined' && currentPrintJob) renderActivePrintJob(currentPrintJob.id);
+            };
+            if (name === 'teOpenTaskContext') return () => {
+                if (typeof window.teOpenTaskContext === 'function' && window.currentOpenTaskId) window.teOpenTaskContext(window.currentOpenTaskId);
+            };
             if (name === 'renderSalesTable') return typeof renderSalesTable === 'function' ? renderSalesTable : null;
             if (name === 'renderAliasManager') return typeof renderAliasManager === 'function' ? renderAliasManager : null;
             if (name === 'scanOrphanStorefrontSKUs') return typeof window.scanOrphanStorefrontSKUs === 'function' ? window.scanOrphanStorefrontSKUs : null;
@@ -41,6 +52,7 @@
             if (name === 'renderActiveTable') return typeof renderActiveTable === 'function' ? renderActiveTable : null;
             if (name === 'renderSkaters') return typeof renderSkaters === 'function' ? renderSkaters : null;
             if (name === 'updateFilterDropdownOptions') return typeof updateFilterDropdownOptions === 'function' ? updateFilterDropdownOptions : null;
+            if (name === 'fetchUnfulfilledOrders') return typeof fetchUnfulfilledOrders === 'function' ? fetchUnfulfilledOrders : null;
             
             return null;
         } catch (_e) {
@@ -57,6 +69,7 @@
     
     let pendingRenders = new Set();
     let isBlurListenerAttached = false;
+    let debounceTimers = {};
 
     // ACTIVE FOCUS GUARD
     // Prevents UI focus stealing if a user is currently typing in a grid or pane
@@ -87,10 +100,13 @@
                 isBlurListenerAttached = true;
             }
         } else {
-            const renderFn = getGlobal(renderFnStr);
-            if (typeof renderFn === 'function') {
-                renderFn();
-            }
+            if (debounceTimers[renderFnStr]) clearTimeout(debounceTimers[renderFnStr]);
+            debounceTimers[renderFnStr] = setTimeout(() => {
+                const renderFn = getGlobal(renderFnStr);
+                if (typeof renderFn === 'function') {
+                    renderFn();
+                }
+            }, 50);
         }
     }
 
@@ -124,6 +140,7 @@
                 if (idx !== -1) dbArray.splice(idx, 1);
             }
             queueRender('teRenderTaskGrid');
+            queueRender('teOpenTaskContext');
         }
 
         // 2. Inventory Cache Updates
@@ -149,6 +166,23 @@
                 if (idx !== -1) workOrdersDB.splice(idx, 1);
             }
             queueRender('renderWOList');
+            queueRender('renderActiveWO');
+        }
+
+        // 3b. Print Queue Cache
+        const printQueueDB = getGlobal('printQueueDB');
+        if (table === 'print_queue' && printQueueDB) {
+            if (eventType === 'INSERT') {
+                if (!printQueueDB.some(r => r.id === newRecord.id)) printQueueDB.unshift(newRecord);
+            } else if (eventType === 'UPDATE') {
+                const idx = printQueueDB.findIndex(r => r.id === newRecord.id);
+                if (idx !== -1) printQueueDB[idx] = newRecord;
+            } else if (eventType === 'DELETE') {
+                const idx = printQueueDB.findIndex(r => r.id === oldRecord.id);
+                if (idx !== -1) printQueueDB.splice(idx, 1);
+            }
+            queueRender('renderPrintQueue');
+            queueRender('renderActivePrintJob');
         }
 
         // 4. Sales Ledger Cache
@@ -163,6 +197,7 @@
                 if (idx !== -1) salesDB.splice(idx, 1);
             }
             queueRender('renderSalesTable');
+            queueRender('fetchUnfulfilledOrders');
         }
 
         // 5. Storefront Aliases Cache

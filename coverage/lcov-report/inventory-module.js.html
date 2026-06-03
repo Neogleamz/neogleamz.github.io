@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">6.7% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>124/1849</span>
+                <span class='fraction'>124/1848</span>
             </div>
         
             
@@ -3358,9 +3358,7 @@
 <a name='L3293'></a><a href='#L3293'>3293</a>
 <a name='L3294'></a><a href='#L3294'>3294</a>
 <a name='L3295'></a><a href='#L3295'>3295</a>
-<a name='L3296'></a><a href='#L3296'>3296</a>
-<a name='L3297'></a><a href='#L3297'>3297</a>
-<a name='L3298'></a><a href='#L3298'>3298</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L3296'></a><a href='#L3296'>3296</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3924,13 +3922,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -7221,13 +7217,11 @@ window.restoreInventorySnapshot = <span class="fstat-no" title="function not cov
 &nbsp;
         // 4. Update Local State &amp; UI
         // Refresh the global inventoryDB object from Supabase
-<span class="cstat-no" title="statement not covered" >        if (window.resetInventoryConsumptionLocally) {</span>
-<span class="cstat-no" title="statement not covered" >            await window.resetInventoryConsumptionLocally(); </span>
-        } else {
-            // Fallback: manually fetch if local reset helper is missing
-            const { data: freshData } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('inventory_consumption').select('*');</span>
-<span class="cstat-no" title="statement not covered" >            inventoryDB = freshData.reduce(<span class="fstat-no" title="function not covered" >(a</span>cc, row) =&gt; (<span class="cstat-no" title="statement not covered" >{ ...acc, [row.item_key]: row })</span>, {});</span>
-        }
+        // 4. Update Local State &amp; UI
+        // Refresh the global inventoryDB object from Supabase
+        const { data: freshData, error: fetchFreshErr } = <span class="cstat-no" title="statement not covered" >await supabaseClient.from('inventory_consumption').select('*');</span>
+<span class="cstat-no" title="statement not covered" >        if (fetchFreshErr) <span class="cstat-no" title="statement not covered" >throw fetchFreshErr;</span></span>
+<span class="cstat-no" title="statement not covered" >        inventoryDB = freshData.reduce(<span class="fstat-no" title="function not covered" >(a</span>cc, row) =&gt; (<span class="cstat-no" title="statement not covered" >{ ...acc, [row.item_key]: row })</span>, {});</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        window.renderInventoryTable();</span>
 <span class="cstat-no" title="statement not covered" >        window.updateCcMngrStock();</span>
@@ -8182,7 +8176,7 @@ window.startLocalCycleCount = <span class="fstat-no" title="function not covered
                     fps: 30,
                     disableFlip: true,
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
+                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, _vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
                     aspectRatio: 1.0,
                     formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
                 },
@@ -8218,7 +8212,7 @@ window.startLocalScannerWithDevice = <span class="fstat-no" title="function not 
                 fps: 30,
                     disableFlip: true,
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
+                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, _vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
                     aspectRatio: 1.0,
                     formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
             },
@@ -9240,7 +9234,7 @@ window.startStockzAuditWebcam = <span class="fstat-no" title="function not cover
                     fps: 30,
                     disableFlip: true,
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
+                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, _vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
                     aspectRatio: 1.0,
                     formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
                 },
@@ -9269,7 +9263,7 @@ window.startStockzAuditWebcamWithDevice = <span class="fstat-no" title="function
                 fps: 30,
                     disableFlip: true,
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
+                    qrbox: <span class="fstat-no" title="function not covered" >fu</span>nction(vw, _vh) { <span class="cstat-no" title="statement not covered" >return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; </span>},
                     aspectRatio: 1.0,
                     formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
             },
@@ -9961,7 +9955,7 @@ document.addEventListener('input', <span class="fstat-no" title="function not co
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-03T02:05:50.438Z
+                at 2026-06-03T04:27:36.903Z
             </div>
         <script src="prettify.js"></script>
         <script>

@@ -27,7 +27,7 @@ async function refreshPrintQueue() {
     try {
         sysLog("Refreshing 3D Print Queue...");
         setMasterStatus("Fetching Queue...", "mod-working");
-        const { data, error } = await supabaseClient.from('print_queue').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('print_queue').select('*').order('created_at', { ascending: false }).order('id', { ascending: true });
         if (error) throw error;
         printQueueDB = data;
         renderPrintQueue();
@@ -491,11 +491,20 @@ function renderActivePrintJob(id) {
     }
 }
 
-window.submitFinalizePrint = function() {
+window.submitFinalizePrint = async function() {
+    let btn = document.querySelector('[data-click="click_submitFinalizePrint"]');
+    if (btn && btn.disabled) return;
+    if (btn) { btn.disabled = true; btn.innerText = "Logging..."; }
+
     let success = parseFloat(document.getElementById('finalizePrintSuccess').value) || 0;
     let failed = parseFloat(document.getElementById('finalizePrintFailed').value) || 0;
-    document.getElementById('finalizePrintModal').style.display = 'none';
-    advancePrintStatus('Completed', true, success, failed);
+    
+    try {
+        await advancePrintStatus('Completed', true, success, failed);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerText = "Complete & Log"; }
+        document.getElementById('finalizePrintModal').style.display = 'none';
+    }
 };
 
 async function executeCleaningInventoryMath(partName, failedQ, wo_id, label) {
@@ -644,22 +653,47 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
             document.getElementById('finalizePrintName').value = currentPrintJob.part_name;
             document.getElementById('finalizePrintJobId').value = currentPrintJob.id;
             
-            let qty = parseFloat(currentPrintJob.qty) || 0;
-            if (hasRuns) {
-                qty = currentWip.runs.reduce((sum, r) => sum + (parseFloat(r.success_qty) || 0), 0);
+            let isAlreadyDone = currentPrintJob.status === 'Archived' || currentPrintJob.status === 'Completed' || currentPrintJob.completed;
+            let btn = document.querySelector('[data-click="click_submitFinalizePrint"]');
+
+            if (isAlreadyDone) {
+                let successQ = 0; let failedQ = 0;
+                if (currentWip.final_yield) {
+                    successQ = currentWip.final_yield.success;
+                    failedQ = currentWip.final_yield.failed;
+                }
+                document.getElementById('finalizePrintSuccess').value = successQ;
+                document.getElementById('finalizePrintFailed').value = failedQ;
+                document.getElementById('finalizePrintSuccess').disabled = true;
+                document.getElementById('finalizePrintFailed').disabled = true;
+                if (btn) {
+                    btn.innerText = "Already Logged";
+                    btn.disabled = true;
+                }
+            } else {
+                let qty = parseFloat(currentPrintJob.qty) || 0;
+                if (hasRuns) {
+                    qty = currentWip.runs.reduce((sum, r) => sum + (parseFloat(r.success_qty) || 0), 0);
+                }
+                
+                document.getElementById('finalizePrintSuccess').value = qty;
+                document.getElementById('finalizePrintFailed').value = 0;
+                document.getElementById('finalizePrintSuccess').disabled = false;
+                document.getElementById('finalizePrintFailed').disabled = false;
+                if (btn) {
+                    btn.innerText = "Complete & Log";
+                    btn.disabled = false;
+                }
+                
+                document.getElementById('finalizePrintSuccess').oninput = function() {
+                    let v = parseFloat(this.value)||0;
+                    document.getElementById('finalizePrintFailed').value = Math.max(0, qty - v);
+                };
+                document.getElementById('finalizePrintFailed').oninput = function() {
+                    let v = parseFloat(this.value)||0;
+                    document.getElementById('finalizePrintSuccess').value = Math.max(0, qty - v);
+                };
             }
-            
-            document.getElementById('finalizePrintSuccess').value = qty;
-            document.getElementById('finalizePrintFailed').value = 0;
-            
-            document.getElementById('finalizePrintSuccess').oninput = function() {
-                let v = parseFloat(this.value)||0;
-                document.getElementById('finalizePrintFailed').value = Math.max(0, qty - v);
-            };
-            document.getElementById('finalizePrintFailed').oninput = function() {
-                let v = parseFloat(this.value)||0;
-                document.getElementById('finalizePrintSuccess').value = Math.max(0, qty - v);
-            };
             
             document.getElementById('finalizePrintModal').style.display = 'flex';
             return;
@@ -688,6 +722,13 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
             currentWip.stage_start_time = null;
             currentWip.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';
             currentWip.completed_by_id = window.currentUser ? window.currentUser.id : null;
+            
+            if (finalSuccess !== null || finalFailed !== null) {
+                currentWip.final_yield = {
+                    success: finalSuccess !== null ? finalSuccess : 0,
+                    failed: finalFailed !== null ? finalFailed : 0
+                };
+            }
         }
         updatePayload.wip_state = currentWip;
 

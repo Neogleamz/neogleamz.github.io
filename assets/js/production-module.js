@@ -781,6 +781,11 @@ function find3DPrintedComponents(rootProduct, rootQty, routingMap) {
     let prints = {};
     const recipe = productsDB[rootProduct] || [];
 
+    // Check if the root product itself is a 3D print
+    if (productsDB[rootProduct] && productsDB[rootProduct].is_3d_print) {
+        prints[rootProduct] = rootQty;
+    }
+
     recipe.forEach(part => {
         let k = String(part.item_key || part.di_item_id || part.name || "");
         let q = (parseFloat(part.quantity || part.qty) || 1) * rootQty;
@@ -1794,30 +1799,46 @@ async function advanceWO(newStatus, bypassModal = false) {
         if (typeof targetWO.wip_state === 'string') targetWO.wip_state = JSON.parse(targetWO.wip_state || '{}');
         if (typeof targetWO.routing === 'string') targetWO.routing = JSON.parse(targetWO.routing || '{}');
 
-        if(targetWO.status === 'Archived' || targetWO.status === 'Completed') return showToast('This Work Order is already finalized.', 'error');
-
+        let isAlreadyDone = targetWO.status === 'Archived' || targetWO.status === 'Completed';
+        if (isAlreadyDone && newStatus !== 'Completed') {
+            return showToast('This Work Order is already finalized.', 'error');
+        }
         if ((targetWO.wip_state && targetWO.wip_state.materials_pulled) && (newStatus === 'Queued' || newStatus === 'Picking')) {
             return alert("Materials have already been pulled for this Work Order. You cannot revert to previous planning stages.");
         }
 
         if (newStatus === 'Completed' && !bypassModal) {
             let w = targetWO.wip_state || {};
-            let drafts = w.scrap_draft || {};
+            let drafts = isAlreadyDone ? (w.final_scrap_yield || {}) : (w.scrap_draft || {});
             let tableHtml = buildDraftModalHtml(targetWO, drafts);
 
             document.getElementById('finalizeWoHeaderBg').style.background = 'rgba(16, 185, 129, 0.1)';
             document.getElementById('finalizeWoHeaderBg').style.borderBottomColor = 'rgba(255,255,255,0.1)';
-            document.getElementById('finalizeWoTitle').innerHTML = window.safeHTML('✅ Verify Batch Finalization');
+            document.getElementById('finalizeWoTitle').innerHTML = window.safeHTML(isAlreadyDone ? '✅ Finalized Scrap Log' : '✅ Verify Batch Finalization');
             document.getElementById('finalizeWoTitle').style.color = '#10b981';
 
             let btn = document.getElementById('finalizeWoActionBtn');
-            btn.className = 'btn-green';
-            btn.innerHTML = window.safeHTML('Finalize & Deduct');
-            btn.onclick = window.submitFinalizeWo;
+            if (isAlreadyDone) {
+                btn.className = 'btn-ghost-base btn-ghost-slate';
+                btn.innerHTML = window.safeHTML('Already Logged');
+                btn.onclick = null;
+                btn.disabled = true;
+            } else {
+                btn.className = 'btn-green';
+                btn.innerHTML = window.safeHTML('Finalize & Deduct');
+                btn.onclick = window.submitFinalizeWo;
+                btn.disabled = false;
+            }
 
             let m = document.getElementById('finalizeWoItemsList');
             if (m) {
                 m.innerHTML = window.safeHTML(tableHtml);
+                if (isAlreadyDone) {
+                    m.querySelectorAll('.wo-scrap-input').forEach(inp => {
+                        inp.disabled = true;
+                        inp.style.opacity = '0.7';
+                    });
+                }
                 document.getElementById('finalizeWoModal').style.display = 'flex';
             }
             return;
@@ -3147,6 +3168,9 @@ window.submitFinalizeWo = async function() {
         }
 
         // Push payload forward into actual completion
+        if (!currentWO.wip_state) currentWO.wip_state = {};
+        currentWO.wip_state.final_scrap_yield = directUpserts;
+        
         await advanceWO('Completed', true);
         });
 

@@ -143,7 +143,10 @@ async function fetchUnfulfilledOrders() {
 
             card.innerHTML = window.safeHTML(`
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:4px;">
-                    <strong style="color:var(--text-heading); font-size:15px; font-weight:900;">ORDER ${order.order_id}</strong>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" class="packerz-queue-cb" data-order-id="${order.order_id}" style="width:16px; height:16px; cursor:pointer;" data-app-click="stopProp" onclick="event.stopPropagation()">
+                        <strong style="color:var(--text-heading); font-size:15px; font-weight:900;">ORDER ${order.order_id}</strong>
+                    </div>
                     <span style="font-size:11px; color:#F59E0B; font-weight:900; background:rgba(245,158,11,0.1); padding:4px 10px; border-radius:6px; letter-spacing:0.5px;">${shortDate}</span>
                 </div>
                 <div style="font-size:12px; color:var(--text-main); font-weight:700; background:var(--bg-bar); padding:10px; border-radius:8px;">
@@ -387,13 +390,16 @@ function openPackerzSopTerminal(orderGroup) {
         let selectHtml = `
             <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; width:160px; max-width:100%;" 
                 data-app-change="updateItemType" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
-                <option value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
-                <option value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
-                <option value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
-                <option value="Replacement / Warranty" ${t==='Replacement / Warranty'?'selected':''}>Exchange Replacement</option>
-                <option value="Warranty" ${t==='Warranty'?'selected':''}>Warranty</option>
-                <option value="Gift" ${t==='Gift'?'selected':''}>Gift</option>
-                <option value="IGNORE" ${t==='IGNORE'?'selected':''}>IGNORE</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${t==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${t==='Warranty'?'selected':''}>Warranty</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${t==='Gift'?'selected':''}>Gift</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${t==='IGNORE'?'selected':''}>IGNORE</option>
+                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Partial Refund" ${t==='Partial Refund'?'selected':''}>Partial Refund</option>
+                <option style="background:var(--bg-panel); color:#ef4444;" value="Cancelled" ${t==='Cancelled'?'selected':''}>Cancelled</option>
+                <option style="background:var(--bg-panel); color:#ef4444; font-weight:bold;" value="NEEDS ATTENTION" ${t==='NEEDS ATTENTION'?'selected':''}>NEEDS ATTENTION</option>
             </select>
         `;
         return `
@@ -1178,6 +1184,100 @@ window.closePackerzSopViewer = function() {
     }
 };
 
+function showPackerzCompletionModal(orderId, lineItems, isBulk = false) {
+    return new Promise((resolve) => {
+        let standardItems = [];
+        let ignoredItems = [];
+
+        lineItems.forEach(r => {
+            const isIgnored = r.transaction_type === 'IGNORE' || 
+                              r.transaction_type === 'Pre-Ship Exchange' || 
+                              r.transaction_type === 'Post-Ship Exchange';
+            if (isIgnored) {
+                ignoredItems.push(r);
+            } else {
+                standardItems.push(r);
+            }
+        });
+
+        // Group items for display if bulk
+        const groupItems = (items) => {
+            if (!isBulk) return items;
+            let grouped = {};
+            items.forEach(i => {
+                let key = `${i.internal_recipe_name}|${i.transaction_type || ''}`;
+                if (!grouped[key]) grouped[key] = { ...i, qty_sold: 0 };
+                grouped[key].qty_sold += i.qty_sold;
+            });
+            return Object.values(grouped);
+        };
+
+        const displayStandard = groupItems(standardItems);
+        const displayIgnored = groupItems(ignoredItems);
+        
+        let orderIdDisplay = isBulk ? `${orderId.length} ORDERS SELECTED` : `ORDER ID: ${orderId}`;
+
+        let html = `
+            <div style="background:var(--bg-container); border:1px solid #10b981; border-radius:12px; box-shadow:0 10px 40px rgba(16,185,129,0.2); width:clamp(320px, 90vw, 500px); max-height:90vh; padding:25px; display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:10px; margin-bottom:15px;">
+                    <h3 style="margin:0; font-size:16px; color:#10b981; font-weight:900;">CONFIRM ASSEMBLY</h3>
+                    <button id="btnCancelModalTop" class="icon-btn" style="color:var(--text-muted); font-size:16px; font-weight:bold; border:1px solid var(--border-color); cursor:pointer; background:transparent;">✕</button>
+                </div>
+                <div style="font-size:16px; font-weight:900; margin-bottom:10px; color:#0ea5e9; font-family:monospace; letter-spacing:1px; background:rgba(14,165,233,0.1); border:1px solid rgba(14,165,233,0.3); padding:6px 12px; border-radius:6px; align-self:flex-start;">${orderIdDisplay}</div>
+                <p style="color:var(--text-muted); font-size:13px; margin:0 0 15px 0;">Please review the inventory actions below.</p>
+                
+                <div style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; padding-right:5px; margin-bottom:15px;">
+                    <strong style="color:var(--text-heading); font-size:12px; font-weight:800; text-transform:uppercase;">Standard Items (Deducting):</strong>
+                    ${displayStandard.map(i => `
+                        <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-heading); background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
+                            <span style="color:#10b981; font-size:14px; margin-top:-1px;">✅</span>
+                            <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
+                                <span style="font-weight:bold; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                                <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">${i.item_type || 'Standard Item'}</span>
+                            </div>
+                            <span style="background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:2px 6px; border-radius:4px; font-size:10px; font-weight:900;">DEDUCTING</span>
+                        </div>
+                    `).join('') || '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None</div>'}
+
+                    <strong style="color:#F59E0B; margin-top:10px; font-size:12px; font-weight:800; text-transform:uppercase;">Ignored / Exchange:</strong>
+                    ${displayIgnored.map(i => `
+                        <div style="background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.2); border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div style="display:flex; flex-direction:column; gap:3px;">
+                                <span style="color:white; font-family:monospace; font-weight:700; font-size:13px; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                                <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">${i.item_type || 'Special Item'}</span>
+                            </div>
+                            <span style="font-size:10px; color:#F59E0B; font-weight:900; text-transform:uppercase; margin-top:2px;">${i.transaction_type}</span>
+                        </div>
+                    `).join('') || '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None</div>'}
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid rgba(16,185,129,0.3); padding-top:15px;">
+                    <button id="btnCancelModal" class="btn-secondary" style="padding:8px 16px;">Cancel</button>
+                    <button id="btnConfirmModal" class="btn-green-neon" style="padding:8px 16px;">Confirm & Complete</button>
+                </div>
+            </div>
+        `;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay active';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.innerHTML = window.safeHTML(html);
+
+        document.body.appendChild(overlay);
+
+        const cleanup = (result) => {
+            overlay.remove(); 
+            resolve(result);
+        };
+
+        overlay.querySelector('#btnCancelModalTop').addEventListener('click', () => cleanup(false));
+        overlay.querySelector('#btnCancelModal').addEventListener('click', () => cleanup(false));
+        overlay.querySelector('#btnConfirmModal').addEventListener('click', () => cleanup(true));
+    });
+}
+
 /**
  * Executes the final order assembly completion, updating the internal fulfillment status to "Completed"
  * and setting the timestamp in the Supabase sales ledger.
@@ -1187,11 +1287,21 @@ window.closePackerzSopViewer = function() {
  * @returns {Promise<void>} Resolves when the completion update is fully synced with the remote database.
  */
 async function executePackerzCompletion(orderId) {
-    if(!confirm(`Are you absolutely sure you want to officially mark Order ${orderId} as completely assembled?`)) return;
-
     try {
+        // 1. Fetch line items BEFORE confirming, so we can display them in the modal
+        const { data: lineItems, error: itemsError } = await supabaseClient
+            .from('sales_ledger')
+            .select('internal_recipe_name, qty_sold, transaction_type')
+            .eq('order_id', orderId);
+
+        if (itemsError) throw itemsError;
+
+        // 2. Display dynamic custom modal and await user action
+        const isConfirmed = await showPackerzCompletionModal(orderId, lineItems);
+        if (!isConfirmed) return;
+
         await window.executeWithButtonAction(`btnCompleteAssembly_${orderId}`, '📦 SYNCING...', '✅ QA PASSED ✓', async () => {
-            // 1. Mutate the status flag to Completed globally across all grouped rows & timestamp it
+            // 3. Mutate the status flag to Completed globally across all grouped rows & timestamp it
             const { error } = await supabaseClient
                 .from('sales_ledger')
                 .update({
@@ -1202,14 +1312,7 @@ async function executePackerzCompletion(orderId) {
 
             if(error) throw error;
 
-            // 2. Fetch specific line items for this order and structurally deduct (upsert) the Inventory ledger
-            const { data: lineItems, error: itemsError } = await supabaseClient
-                .from('sales_ledger')
-                .select('internal_recipe_name, qty_sold, transaction_type')
-                .eq('order_id', orderId);
-
-            if (itemsError) throw itemsError;
-
+            // 4. Structurally deduct (upsert) the Inventory ledger
             let invMap = {};
             lineItems.forEach(r => {
                 if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
@@ -1253,10 +1356,12 @@ async function executePackerzCompletion(orderId) {
  * @async
  * @function unarchivePackerzOrder
  * @param {string|number} orderId - The target Order ID.
+ * @param {boolean} [skipConfirm=false] - Skip the confirmation prompt.
+ * @param {boolean} [skipSync=false] - Skip the UI reload.
  * @returns {Promise<void>} Resolves when the order unarchival process is complete.
  */
-window.unarchivePackerzOrder = async function(orderId) {
-    if(!confirm(`Are you absolutely sure you want to UNARCHIVE Order ${orderId} and return it to the active queue?`)) return;
+window.unarchivePackerzOrder = async function(orderId, skipConfirm = false, skipSync = false) {
+    if(!skipConfirm && !confirm(`Are you absolutely sure you want to UNARCHIVE Order ${orderId} and return it to the active queue?`)) return;
 
     try {
         // 1. Fetch specific line items for this order and structurally refund (upsert) the Inventory ledger
@@ -1302,10 +1407,12 @@ window.unarchivePackerzOrder = async function(orderId) {
         await supabaseClient.from('sop_archives').delete().eq('order_id', orderId);
 
         // Re-Sync Live Queues (using a slight timeout to guarantee Supabase indexing propagation)
-        setTimeout(() => {
-            if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
-            loadSOPAuditLog();
-        }, 400);
+        if (!skipSync) {
+            setTimeout(() => {
+                if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
+                loadSOPAuditLog();
+            }, 400);
+        }
 
     } catch(err) {
         console.error("Unarchive Error", err);
@@ -2296,6 +2403,7 @@ function renderSOPAuditLogRows(rows) {
             <!-- Row header —— always visible -->
             <div class="packerz-audit-row" style="display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer;"
                  data-click="click_toggleSOPAuditDetail" data-target="sop-audit-detail-${i}">
+                <input type="checkbox" class="packerz-archive-cb" data-order-id="${order.order_id}" style="width:16px; height:16px; cursor:pointer;" data-app-click="stopProp" onclick="event.stopPropagation()">
                 <div style="background:#10b981; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; flex-shrink:0;">✓ QA PASSED</div>
                 <div style="font-weight:900; color:var(--text-heading); font-size:13px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:0;">${order.order_id || '—'}</div>
                 <div style="font-size:12px; color:#0ea5e9; font-weight:700; flex:1;">${sumRecipes} <span style="color:var(--text-muted); font-size:10px;">(${(order.items || []).length} items)</span></div>
@@ -2500,6 +2608,109 @@ if (!window.isPackerzListenerBound) {
 
     window.isPackerzListenerBound = true;
 }
+
+window.click_checkAllArchive = function() {
+    document.querySelectorAll('.packerz-archive-cb').forEach(cb => cb.checked = true);
+};
+
+window.click_uncheckAllArchive = function() {
+    document.querySelectorAll('.packerz-archive-cb').forEach(cb => cb.checked = false);
+};
+
+window.click_unarchiveSelectedArchive = async function() {
+    const checked = Array.from(document.querySelectorAll('.packerz-archive-cb:checked'));
+    if (checked.length === 0) {
+        alert("Please select at least one order to unarchive.");
+        return;
+    }
+    if (!confirm(`Are you absolutely sure you want to UNARCHIVE ${checked.length} orders and return them to the active queue?`)) return;
+
+    for (const cb of checked) {
+        const id = cb.dataset.orderId;
+        if (id) await window.unarchivePackerzOrder(id, true, true);
+    }
+    
+    setTimeout(() => {
+        if (typeof fetchUnfulfilledOrders === 'function') fetchUnfulfilledOrders();
+        loadSOPAuditLog();
+    }, 400);
+};
+
+window.click_checkAllQueue = function() {
+    document.querySelectorAll('.packerz-queue-cb').forEach(cb => cb.checked = true);
+};
+
+window.click_uncheckAllQueue = function() {
+    document.querySelectorAll('.packerz-queue-cb').forEach(cb => cb.checked = false);
+};
+
+window.click_bulkAdminFulfillPackerzOrders = async function() {
+    const checked = Array.from(document.querySelectorAll('.packerz-queue-cb:checked'));
+    if (checked.length === 0) {
+        alert("Please select at least one order to bulk fulfill.");
+        return;
+    }
+
+    const orderIds = checked.map(cb => cb.dataset.orderId);
+    
+    try {
+        const { data: lineItems, error: itemsError } = await supabaseClient
+            .from('sales_ledger')
+            .select('order_id, internal_recipe_name, qty_sold, transaction_type')
+            .in('order_id', orderIds);
+
+        if (itemsError) throw itemsError;
+
+        const isConfirmed = await showPackerzCompletionModal(orderIds, lineItems, true);
+        if (!isConfirmed) return;
+
+        const updatePromises = orderIds.map(orderId => supabaseClient
+            .from('sales_ledger')
+            .update({
+                internal_fulfillment_status: 'Completed',
+                assembly_completed_at: new Date().toISOString()
+            })
+            .eq('order_id', orderId)
+        );
+        await Promise.all(updatePromises);
+
+        let invMap = {};
+        lineItems.forEach(r => {
+            if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
+            let k = `RECIPE:::${r.internal_recipe_name}`;
+            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
+            invMap[k] += r.qty_sold;
+        });
+        let invPayload = Object.keys(invMap).map(k => {
+            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+            inventoryDB[k].sold_qty = invMap[k];
+            return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
+        });
+
+        if (invPayload.length > 0) {
+            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
+            if (invError) throw new Error("Inventory Deduction Error: " + invError.message);
+        }
+
+        if (typeof renderInventoryTable === 'function') renderInventoryTable();
+
+        document.getElementById('packerzActiveQueue').innerHTML = window.safeHTML(
+            '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-style:italic; opacity:0.6;">Select an order from the queue to functionally open the SOP terminal.</div>'
+        );
+
+        if (typeof window.teSyncTask === 'function') {
+            for (const orderId of orderIds) {
+                await window.teSyncTask('packerz', orderId, 'complete');
+            }
+        }
+
+        fetchUnfulfilledOrders();
+        
+    } catch(err) {
+        console.error("Bulk Completion Error", err);
+        alert("CRITICAL ERROR: Failed to execute bulk fulfillment. \n" + err.message);
+    }
+};
 
 // ============================================================
 // SOP WEBRTC CAMERA SNAPSHOT (AUTHORING)
