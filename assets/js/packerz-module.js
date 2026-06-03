@@ -387,13 +387,16 @@ function openPackerzSopTerminal(orderGroup) {
         let selectHtml = `
             <select class="type-sel" style="background:#1e293b; color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; width:160px; max-width:100%;" 
                 data-app-change="updateItemType" data-order-id="${orderGroup.order_id}" data-sku="${i.sku}" data-recipe="${safeRecipe}">
-                <option value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
-                <option value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Unshipped (Keep Rev)</option>
-                <option value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
-                <option value="Replacement / Warranty" ${t==='Replacement / Warranty'?'selected':''}>Exchange Replacement</option>
-                <option value="Warranty" ${t==='Warranty'?'selected':''}>Warranty</option>
-                <option value="Gift" ${t==='Gift'?'selected':''}>Gift</option>
-                <option value="IGNORE" ${t==='IGNORE'?'selected':''}>IGNORE</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${t==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${t==='Warranty'?'selected':''}>Warranty</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${t==='Gift'?'selected':''}>Gift</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="IGNORE" ${t==='IGNORE'?'selected':''}>IGNORE</option>
+                <option style="background:var(--bg-panel); color:#8b5cf6;" value="Partial Refund" ${t==='Partial Refund'?'selected':''}>Partial Refund</option>
+                <option style="background:var(--bg-panel); color:#ef4444;" value="Cancelled" ${t==='Cancelled'?'selected':''}>Cancelled</option>
+                <option style="background:var(--bg-panel); color:#ef4444; font-weight:bold;" value="NEEDS ATTENTION" ${t==='NEEDS ATTENTION'?'selected':''}>NEEDS ATTENTION</option>
             </select>
         `;
         return `
