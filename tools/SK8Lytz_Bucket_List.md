@@ -19,10 +19,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 P1 High Priority (Active Epics)
 
-### Target: `main`
-**Epic: Packerz SOP Improvements**
-- [ ] `feat/packerz-check-all` : **Check All QA Automation** - Introduce a "Check All" utility within the Packerz SOP Viewer Modal specifically for the Mandatory Quality Checklist section, allowing operators to bulk-clear standard textual QA checks. (Plan: [docs/plans/feat/packerz-check-all.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/packerz-check-all.md))
-
 **Epic: Barcode Engine Hardening**
 - [ ] `fix/cycle-count-camera` : **Dynamic WebRTC Scan Bounds** - Refactor the HTML5-QRCode instantiation parameters inside Inventory and Packerz modules to dynamically calculate the `qrbox` targeting matrix based on active viewport scale, preventing catastrophic scanner dropouts on mobile screens. (Plan: [docs/plans/fix/cycle-count-camera.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/fix/cycle-count-camera.md))
 
@@ -45,6 +41,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Packerz SOP Improvements**
+*(Archived — 2026-06-02)*
+- [x] `feat/packerz-check-all` : **Check All QA Automation** - Introduce a "Check All" utility within the Packerz SOP Viewer Modal specifically for the Mandatory Quality Checklist section, allowing operators to bulk-clear standard textual QA checks. (Plan: [docs/plans/feat/packerz-check-all.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/packerz-check-all.md))
 
 ### Target: `main`
 **Epic: Dynamic Label Tracking & Designer**
