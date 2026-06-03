@@ -914,6 +914,7 @@ function renderSalesTable() {
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${x.transaction_type==='Standard'?'selected':''}>Standard</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${x.transaction_type==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${x.transaction_type==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Scrapped Exchange" ${x.transaction_type==='Scrapped Exchange'?'selected':''}>Scrapped Exchange</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${x.transaction_type==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${x.transaction_type==='Warranty'?'selected':''}>Warranty</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${x.transaction_type==='Gift'?'selected':''}>Gift</option>
@@ -1206,7 +1207,7 @@ function renderSimulatorOrder(orderId) {
     
     let html = '';
     window.currentSimPayload.forEach((row, i) => {
-        let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Partial Refund', 'Cancelled', 'NEEDS ATTENTION'];
+        let typeOpts = ['Standard', 'Pre-Ship Exchange', 'Post-Ship Exchange', 'Scrapped Exchange', 'Exchange Replacement', 'Warranty', 'Gift', 'IGNORE', 'Partial Refund', 'Cancelled', 'NEEDS ATTENTION'];
         let typeHtml = typeOpts.map(t => `<option value="${t}" ${row.transaction_type === t ? 'selected' : ''}>${t}</option>`).join('');
         
         let src = row['Source'] || 'web';

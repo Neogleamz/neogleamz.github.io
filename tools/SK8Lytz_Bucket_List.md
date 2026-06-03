@@ -612,3 +612,209 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Packerz Assembly Verification Modal**
 *(Archived — 2026-06-02)*
 - [x] feat/packerz-assembly-modal : **Packerz Assembly Modal** - Replace native confirm dialog with rich Vanilla JS verification modal. (Plan: [docs/plans/packerz_assembly_modal.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/packerz_assembly_modal.md))
+- [🚀] `feat/velocity-filters` : Add filters to slice and analyze velocity by day, week, and month.
+- [🚀] `feat/sandbox-manipulation` : Enable "sandbox" manipulation where users can overwrite sold amounts to forecast hypothetical demand spikes, while strictly retaining the raw real sold velocity data unharmed.
+
+### Target: `epic/cfo-waterfall`
+*(Shipped Pre-v1.0.21)*
+- [🚀] `feat/cfo-waterfall-chart` : In `ceo-module.js` (Chart.js block), build a Waterfall Chart.
+- [🚀] `feat/cfo-waterfall-mapping` : Map Gross Sales → minus COGS → minus Gateway Fees (Shopify takes 2.9% + 30c) → minus Shipping Costs → minus Social Ads.
+
+### Target: `epic/agentic-skills-evaluation`
+*(Shipped Pre-v1.0.21)*
+- [🚀] `chore/audit-to-skills` : Go back through all .md files and decide if any need to be migrated to `.agents/skills/`.
+- [🚀] `feat/frontend-skills` : Investigate and create new .md skill files specifically tailored to a desktop-first browser-based HTML/JS application environment.
+
+### Target: `epic/system-dependency-audit`
+- [🚀] `chore/parse-dependencies` : Scan all 41 rule/workflow/skill `.md` files for references to uncreated files or folders (e.g., Cross-Reference TXTs, Master References).
+- [🚀] `feat/bootstrap-missing-files` : Create the missing dependencies with as much actual payload data as expected (DB schemas, button UI tokens, etc.) to securely strap the agent to the current app state.
+
+### Target: `epic/legacy-data-migration`
+- [🚀] `chore/git-history-scan` : Search git history to recover contents of `ui_dev_stds.md` and `roadmap.md`.
+- [🚀] `feat/legacy-data-integration` : Integrate recovered UI tokens into `tools/SK8Lytz_App_Master_Reference.md` and migrate roadmap ideas into `tools/SK8Lytz_Bucket_List.md`.
+
+### Target: `epic/redundant-tools-cleanup`
+- [🚀] `chore/audit-agents-tools` : Inspect `.agents/tools/` for outdated duplicates.
+- [🚀] `feat/consolidate-tools` : Compare files with root `tools/` directory to resolve data divergence, delete the redundant folder, and update pointers.
+
+### Target: `main`
+*(Epic: Master Reference Compliance Audit)*
+- [🚀] `chore/master-reference-compliance` : Do a complete pass of the entire running application (all modules, modals, and pages) and audit them against every rule defined in `tools/SK8Lytz_App_Master_Reference.md` — flag every divergence, document them, and produce a prioritized fix list.
+
+### Target: `main`
+*(Epic: Competitive Feature Benchmarking)*
+- [🚀] `research/competitive-analysis` : Research industry-leading inventory, manufacturing, and DTC ops platforms (e.g. Cin7, Shopify, Fishbowl, inFlow, Katana MRP) — map their key features against our current STOCKPILEZ/MAKERZ/REVENUEZ capabilities and produce a prioritized list of ideas we could implement to meaningfully improve the platform.
+
+### Target: `main`
+*(Epic: Sitewide Security Audit)*
+- [🚀] `chore/security-audit` : Full sitewide security audit — review Supabase RLS policies on all active tables, verify no secrets or keys are exposed client-side, audit all user-input paths for injection risks, confirm auth gate integrity, and check the public GitHub repo for any accidentally committed sensitive data.
+
+### Target: `main`
+*(Epic: Supabase CLI Repair)*
+- [🚀] `chore/supabase-cli-repair` : Repair the local Supabase migration history tracking to re-sync `npx supabase db push` functionality with the remote database without destroying data, resolving the "Remote migration versions not found" tracked mismatches.
+
+### Target: `main`
+*(Epic: Sitewide Performance Optimization)*
+- [🚀] `perf/global-performance-audit` : Perform a core-level performance audit and implement optimizations (e.g. DOM update batching, lazy-loading heavy modules, optimizing Supabase query counts) to ensure the webapp stays running as fast as possible.
+
+### Target: `main`
+*(Epic: Sitewide Button UI & Mobile Responsiveness)*
+- [🚀] `style/global-button-spacing-mobile` : Review and refactor global button spacing on all pages and modals to ensure visual balance, utilizing flexible and dynamic CSS styling so buttons adapt perfectly for mobile environments.
+
+### Target: `epic/agentic-workflow-tooling`
+*(Epic: Agentic Workflow Tooling & QA Automation)*
+- [🚀] `chore/prettier-eslint-initialization` : Setup a strict `.prettierrc` and `.eslintrc.json` in the root optimized for Vanilla ES6+ Javascript. Add NPM scrips `lint` and `format` so the AI can algorithmically sanitize the codebase and catch syntax errors pre-execution.
+- [🚀] `feat/strict-jsdoc-typing` : Do a systematic pass over the core database sync modules (`sales-module.js`, `inventory-module.js`) and inject strict JSDoc typing (`/** @type {...} */`) for core data structures to mathematically prevent AI hallucination of payload shapes.
+- [🚀] `feat/automated-test-suite` : Initialize a lightweight, native JavaScript automated testing suite (e.g. Jest or Playwright) that runs against the local `.js` algorithms. Provide the AI with an `npm test` script to autonomously verify complex math (like CFO waterfall algorithms) without bothering the user for manual QA.
+
+### Target: `main`
+*(Epic: Agentic Hygiene & Workflow Refactoring)*
+- [🚀] `chore/agentic-rule-refactor` : Identified and repaired 5 core logical paradoxes across the agent environment. Granted `main` branch exemptions for `/release` and `/wind_down` tagging; normalized the 8-point pixel grid system to `clamp()` scaling via `modern-ui-ux.md`; fully exempted Bucket Lists and Master References from the 24/7 continuous micro-commit stream to enable graceful batch syncing; restricted the Boy Scout rule to explicit `feat/` cycles to isolate bug deployments; and officially excised the redundant `/idea_intake` workflow.
+
+### Target: `epic/revenuez-fulfillment-expansion`
+*(Epic: Revenuez Fulfillment & Cost Tracking)*
+- [🚀] `feat/revenuez-fulfillment-expansion` : Intercept Shopify webhooks (orders/updated and fulfillments/create) and execute GraphQL fetches to extract tracking numbers, carriers, and exact label costs. Update the Supabase `sales_ledger` schema and modify the Revenuez UI data grid to surface this operational data directly with clickable tracking links and high-cost warnings. [🤖 AI Model] [🧠 40k / 25k] [💸 $0.15 / $0.08]
+
+### Target: `epic/historical-data-sync`
+*(Epic: Shopify Historical Backfill Engine)*
+*(Shipped v1.0.30 — 2026-05-07)*
+- [🚀] `feat/historical-shopify-backfill` : Architect a historical data sync engine using Shopify Custom Dev App (Admin API) to securely extract past operational data (tracking numbers, exact label costs, and carrier details) without fragile screen scraping, integrating it idempotently into the Supabase `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [🚀] `feat/billing-csv-importer` : Build a frontend CSV importer on the CEO dashboard to ingest manual Shopify Billing exports (Billing -> Charges -> Shipping fees) and automatically match label costs to historical orders in the `sales_ledger`. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [🚀] `feat/shopify-tag-parser` : Develop a forward-looking Webhook/Sync module to automatically extract "order type" and "shipping label cost" directly from Shopify Order Tags as they are generated, eliminating the need for future manual CSV imports. [🤖 Gemini 3.1 Pro] [🧠 15k / 25k] [💸 $0.05 / $0.08]
+- [🚀] `fix/shopify-webhook-missing-data` : The active Shopify App/Webhook pipeline is missing critical data columns compared to the legacy CSV importer. Missing data includes PII hashes (`customer_email_hash`, `shipping_name_hash`), `fulfillment_status`, and `financial_status`. Must audit the Edge Function deployment versus local code, deploy the fix, and establish a backfill mechanism for missing historical data. [🤖 AI Model] [🧠 30k / 15k] [💸 $0.10 / $0.05]
+
+### Target: `main`
+*(Epic: UI Enhancements)*
+*(Shipped v1.0.21 — 2026-04-29)*
+- [🚀] `feat/salez-card-30d-metrics` : Change the SALEZ hub card to remove 'Unmapped Etsy' and 'Unmapped Shopify', replacing them with 'Orders (30D)' and 'Actual Net (30D)'. [🤖 AI Model] [🧠 TBD / 5k] [💸 TBD / $0.02]
+
+### Target: `main`
+*(Epic: Orderz Financial Visibility)*
+- [🚀] `feat/actual-net-modal` : Build an "Actual Net" button in Orderz that launches a new modal displaying the full mathematical breakdown per order (COGS, Shipping, Taxes, Fees, Net). The modal must support expanding/collapsing line items, sorting, and live searching. [🤖 AI Model] [🧠 TBD / 10k] [💸 TBD / $0.05]
+
+### Target: `main`
+*(Epic: Shopify Flow Automation)*
+*(Shipped v1.0.22 — 2026-04-29)*
+- [🚀] `research/shopify-flow-auto-tag` : Investigate building a Shopify Flow that automatically tags orders with the `Label: <price>` format when a shipping label is purchased or printed, feeding natively into the webhook parser. (Finding: Impossible, relying on CSV) [🤖 Gemini 3.1 Pro] [🧠 10k / 5k] [💸 $0.03 / $0.02]
+
+### Target: `main`
+*(Epic: The Task Engine)*
+*(Shipped v1.0.24 — 2026-05-02)*
+- [🚀] `feat/task-engine-p1` : **Phase 1 (Multi-User Identity)** - Integrated Supabase Auth for Chris, Andy, and Tyson, and natively built the identity capture logic and UI header rendering. *(Shipped in v.2026.05.02.2013)*
+- [🚀] `feat/task-engine-p2` : **Phase 2 (Database Schema)** - Execute SQL migrations for `taskz`, `cyclez`, `task_templates`, and `task_activity` tables. [🤖 Gemini 3.1 Pro] [🧠 20k / 10k] [💸 $0.05 / $0.02]
+
+**Epic: Architecture Polish (Tier 3)**
+*(Generated by `/legacy_audit` — 2026-05-03)*
+- [🚀] `refactor/absolute-position-purge` : **Purge position:absolute from JS Templates** - Replace inline `position: absolute` styles in 7 modules (task-engine, system-tools, socialz, scraper, production, packerz, inventory) with flex-based CSS class alternatives. [🤖 AI Model] [🧠 45k / 15k] [💸 $0.15 / $0.05]
+- [🚀] `chore/orphan-script-cleanup` : **Relocate Orphan Root Scripts** - Move 6 loose utility scripts (check_openapi.js, check_schema.js, check_ids.js, test-fetchall.js, test-supabase.js, test.js) from the project root into `tools/` or `scripts/` directories. [🤖 AI Model] [🧠 8k / 3k] [💸 $0.03 / $0.01]
+
+### Target: `main`
+*(Epic: Orderz Sandbox & Financial Logic Verification)*
+*(Shipped v1.0.30 - 1.0.31 — 2026-05-07)*
+- [🚀] `fix/orderz-math-parity-audit` : **Orderz Mathematical Parity Audit** - Centralized authoritative math into `neogleamz-engine.js` and verified parity across modules via `Math_Validator.js`.
+- [🚀] `chore/unify-math-engine` : **Strict Mathematical Unification Mandate** - Eradicated local math engines in `sales-module.js` and `analytics-module.js`.
+- [🚀] `feat/sandbox-nomenclature-audit` : **Sandbox UI Transformation Audit** - Refactored the Sandbox UI into a strict 4-Tier matrix mapping literal DB schema columns to their CSV origin headers. Eliminated "ghost value" data stripping bugs to accurately map raw shipping metrics, successfully restoring exact conditional pass logic for complex exchanges.
+- [🚀] `style/sandbox-typography-spacing` : **Sandbox UI Typography & Layout Refactor** - Applied a uniform sizing structure to the numbers in the raw database snapshot and CSV row to improve readability, and shrank the vertical height of the main header to reclaim screen space.
+- [🚀] `feat/live-staging-diff-highlighting` : **Live Staging DB Diff Highlighting** - Implement visual highlighting in the CSV Live Staging Sandbox for fields/totals that differ from existing database records.
+
+### Target: `feat/editz-bulk-edit-modal`
+*(Epic: EDITZ Bulk Edit System)*
+*(Shipped v1.0.32 — 2026-05-16)*
+- [🚀] `feat/editz-bulk-edit-modal` : **EDITZ Bulk Edit Modal** - Create a "Bulk Edit" button in the EDITZ tab that opens a fullscreen modal, letting the user search and mass edit all items. It should function like the sandbox staging environments for imports in NEXUZ, allowing the user to view and verify all changes before committing and approving the final upload. [🤖 AI Model] [🧠 4k / 20k] [💸 $0.02 / $0.05]
+
+### Target: `main`
+**Epic: Maintenance & Debt Sweep (May 17)**
+*(Shipped v1.0.39 — 2026-05-17)*
+- [🚀] `debt/orphan-scripts` : Clean up orphaned utility scripts and tests (Python scripts in `tools/`, `test-dompurify.js` in root, `test_supabase.js` and `Whydidthishappen.md` in `tools/`). Relocate or purge them to maintain project hygiene. [🤖 Gemini 3.1 Pro] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+- [🚀] `debt/npm-update` : Execute `npm update` to safely bump `dompurify`, `eslint`, `jest`, and `supabase` to their latest patch/minor versions. [🤖 Gemini 3.1 Pro] [🧠 3k / 3k] [💸 $0.01 / $0.01]
+
+
+
+**Epic: SOP Media & Print Enhancements**
+*(Shipped v1.0.36 - 1.0.38 — 2026-05-17)*
+- [🚀] `chore/root-structure-cleanup` : **Project Structure Cleanup & Organization** - Clean up and organize the whole project structure. Ensure that leftover/test files in the root are either deleted or moved to proper directories, and establish a clear folder structure for everything to prevent random files accumulating in the root. [🤖 AI Model] [🧠 5k / 5k] [💸 $0.02 / $0.02]
+- [🚀] `feat/sop-camera-integration` : **WebRTC Camera Integration for SOPs** - Integrate the WebRTC camera functionality (currently used for cycle counts) into the SOP editor and active SOP worker views. Allow users to natively take physical photos of their work in progress, automatically upload the image assets to Supabase Storage, and inject the direct image link into the active SOP document/step. [🤖 AI Model] [🧠 TBD / 25k] [💸 TBD / $0.08]
+- [🚀] `fix/sop-legacy-media-regression` : **SOP Legacy Media Regression** - Only the new photo functionality works; old documents, images, and videos in SOPs are broken. [🤖 AI Model] [🧠 10k / 10k] [💸 $0.05 / $0.05]
+- [🚀] `feat/sop-direct-file-upload` : **SOP Direct File Upload** - Implement direct file uploading to Supabase Storage for both checklist items and rich text attachments. Also repair/replace the non-functional "MEDIA" button in the checklist to utilize this new upload flow. [🤖 AI Model] [🧠 15k / 15k] [💸 $0.06 / $0.06]
+- [🚀] `feat/sop-print-formatting-options` : **SOP Print Formatting Options** - Replaced the static "Print SOP" button with a 3-mode print modal (Checklist / Rich Text / Full SOP). Applied proper print styling to checklists (`#Headers` → section headings, `> Subtexts` → styled callouts). Standardized all 4 SOP button bars (Master Production, Master Packerz, Inline Packerz, Inline Batchez) into compact responsive pill rows. Fixed Rich Text toolbar flex overflow — `rt-toolbar` now wraps gracefully, font-size select is clamped, PHOTO/UPLOAD/NEW URL row uses `flex-wrap:wrap`. Eliminated 2 duplicate `no-duplicate-case` ESLint errors in `system-event-delegator.js` via Boy Scout protocol. [🤖 Gemini 2.5 Pro] [🧠 ~180k / 15k] [💸 ~$0.54 / $0.05]
+
+### Target: `main`
+**Epic: Theme Engine Polish (May 17)**
+*(Shipped v1.0.41 — 2026-05-17)*
+- [🚀] `fix/light-dark-mode-button` : **Fix Light/Dark Mode Button & Tasks UI** - Removed duplicate toggleTheme function that broke the dark mode button, and restyled the Tasks button/badge to purple to distinguish from Logout red. [🤖 Gemini 3.1 Pro (High)] [🧠 6k / 5k] [💸 0.02 / $0.02]
+### Target: `main`
+**Epic: XSS Security Audit (May 17)**
+*(Shipped v1.0.42 — 2026-05-17)*
+- [🚀] `debt/xss-vulnerabilities` : **Unguarded innerHTML Assignments** - Wrapped all dynamic `error.message` injections in `index.html` with `window.safeHTML()` protocol to prevent XSS payloads. [🤖 Gemini 3.1 Pro] [🧠 8k / 5k] [💸 $0.03 / $0.02]
+
+### Target: `main`
+**Epic: Global ESLint Hardening**
+*(Shipped v1.0.42 — 2026-05-17)*
+- [🚀] `debt/eslint-sweep` : **Resolve Legacy no-undef Warnings** - Systematically audited and resolved the ~2,131 `no-undef` ESLint warnings globally across the Vanilla JS codebase to harden module architectures and enforce strict browser-sandbox scoping. [🤖 Gemini 3.1 Pro] [🧠 25k / 25k] [💸 $0.05 / $0.05]
+
+### Target: `main`
+**Epic: Webhook Idempotency & Race Condition Fix**
+*(Shipped v1.0.40 — 2026-05-17)*
+- [🚀] `fix/webhook-idempotency` : **Webhook Idempotency Race Condition Fix** - Refactored the Shopify orders/create Edge Function to aggregate identical line items organically, and implemented a strict UNIQUE(order_id, storefront_sku) constraint to the PostgreSQL sales_ledger to guarantee mathematical parity during simultaneous webhook triggers. [🤖 Gemini 3.1 Pro] [🧠 20k / 20k] [💸 .05 / .05]
+
+### Target: `main`
+**Epic: Task Engine Routing Bugs**
+*(Shipped v.2026.05.17.2248 — 2026-05-17)*
+- [🚀] `fix/task-modal-routing` : **Fix Task Modal Inbox Routing** - When using CTRL+K to open the global task modal, clicking the "go to inbox and create new task" button fails to route the user, while the "manage tags" button routes correctly. Needs DOM routing repair. [🤖 Gemini] [🧠 4.5k / 5k] [💸 $0.01 / $0.02]
+
+### Target: `main`
+**Epic: Task Engine Project Section Colors**
+*(Shipped v1.0.43 — 2026-05-18)*
+- [🚀] `feat/task-engine-project-section-colors` : **Task Engine Project Section Colors** - Update the task engine UI so that when viewing a project, the sections are the same color as the color picked for that project. [🤖 Gemini 3.1 Pro (High)] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+
+### Target: `main`
+**Epic: Recommission Avatar Engine**
+*(Completed — 2026-05-22)*
+- [🚀] `feat/unavatar-supabase-sync` : **Recommission Avatar Engine** - Re-enable the Avatar Migration Engine to fetch missing skater avatars from unavatar.io, permanently upload the image blob to Supabase Storage, and update the DB URL to completely remove external API reliance. [🤖 Antigravity] [🧠 4k / 5k] [💸 $0.01 / $0.02]
+
+### Target: `main`
+**Epic: Socialz Cards Flex & Scaling Fix**
+*(Shipped v1.1.2 — 2026-05-24)*
+- [🚀] style/socialz-cards-flex-scaling : **Socialz Cards Flex & Scaling Fix** - Fix the issue where the Socialz tab cards do not flex or scale correctly (the right side gets chopped off) when scaled down before snapping to 2 cards. [🤖 Antigravity] [🧠 TBD / 5k] [💸 TBD / $0.02]
+
+### Target: `main`
+**Epic: SOP Editor Checklist Photo Bug**
+*(Archived — 2026-05-28)*
+- [🚀] bug/sop-editor-photo-checklist : **SOP Editor Checklist Photo & Add Step Fixes** - Fix the photo button on the checklist side of all SOP editors, resolve the broken bottom "+ ADD PROCEDURE STEP" button ReferenceError/TypeError regressions, and ensure step rows save successfully even with empty rich text instructions if media attachments exist. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
+
+### Target: `bug/labelz-dropdown-categorization`
+**Epic: Custom Label Dropdown Categorization**
+*(Archived — 2026-05-28)*
+- [🚀] `bug/labelz-dropdown-categorization` : **Custom Label Dropdown Categorization** - Refactor populateDropdowns() in index.html to group custom labels (is_label: true) under a dedicated 'Custom Labels' optgroup rather than falling through to Retail Products, and add them to secondary dropdowns like batch builds and aliases. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
+
+### Target: `feat/stockz-raw-inventory-upgrades`
+**Epic: STOCKZ Raw Inventory Grid Upgrades**
+*(Shipped v1.3.3 — 2026-05-31)*
+- [🚀] `feat/stockz-raw-inventory-upgrades` : **STOCKZ Raw Inventory Grid Upgrades** - Implement global search, inline column-level filtering, focus-range preservation, and a Neogleamz Product column mapping for the Raw Inventory grid. [🤖 Antigravity] [🟢 COMPLETE] [✅ Passed]
+
+### Target: `main`
+**Epic: Escape Double Quotes in DOM Interpolation**
+*(Archived — 2026-06-02)*
+- [🚀] `fix/recipe-quotes` : **Escape Double Quotes in DOM Interpolation** - Fix the UI breaking bug when rendering product names with double quotes in the Recipez pane.
+- [🚀] `debt/eslint-warnings-sweep-2` : Resolve the 13 ESLint warnings across packerz, production-module, and system-realtime-sync to achieve a completely silent terminal.
+
+### Target: `main`
+**Epic: Barcode Engine Hardening**
+*(Archived — 2026-06-02)*
+- [x] `fix/cycle-count-camera` : **Dynamic WebRTC Scan Bounds** - Refactor the HTML5-QRCode instantiation parameters inside Inventory and Packerz modules to dynamically calculate the `qrbox` targeting matrix based on active viewport scale, preventing catastrophic scanner dropouts on mobile screens. (Plan: [docs/plans/fix/cycle-count-camera.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/fix/cycle-count-camera.md))
+
+### Target: `main`
+**Epic: Packerz Assembly Verification Modal**
+*(Archived — 2026-06-02)*
+- [x] feat/packerz-assembly-modal : **Packerz Assembly Modal** - Replace native confirm dialog with rich Vanilla JS verification modal. (Plan: [docs/plans/packerz_assembly_modal.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/packerz_assembly_modal.md))
+
+## 🧹 Technical Debt
+
+*(Generated by `/health_check` — 2026-06-03)*
+
+### 🔴 Security & DOM Risk
+- [ ] `debt/security` : **Unguarded innerHTML** - `modalEl.innerHTML = innerHtml;` is currently used in `assets/js/barcodz-module.js` (Line 476) without `window.safeHTML()` wrapper. This poses an XSS risk.
+- [ ] `debt/security` : **Unguarded insertAdjacentHTML** - `b.insertAdjacentHTML(...)` is currently used in `index.html` (Line 4268) without `window.safeHTML()` wrapper.
+
+### 🟡 Dependencies
+- [ ] `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).

@@ -393,6 +393,7 @@ function openPackerzSopTerminal(orderGroup) {
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Standard" ${t==='Standard'?'selected':''}>Standard</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Pre-Ship Exchange" ${t==='Pre-Ship Exchange'?'selected':''}>Pre-Ship Exchange</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Post-Ship Exchange" ${t==='Post-Ship Exchange'?'selected':''}>Post-Ship Exchange</option>
+                <option style="background:var(--bg-panel); color:var(--text-main);" value="Scrapped Exchange" ${t==='Scrapped Exchange'?'selected':''}>Scrapped Exchange</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Exchange Replacement" ${t==='Exchange Replacement'?'selected':''}>Exchange Replacement</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Warranty" ${t==='Warranty'?'selected':''}>Warranty</option>
                 <option style="background:var(--bg-panel); color:var(--text-main);" value="Gift" ${t==='Gift'?'selected':''}>Gift</option>

@@ -195,12 +195,15 @@ window.getEnginePredictiveMetrics = function(msrp, cogs, fsThreshold, cac, aff, 
 window.runForensicAccounting = function(rows) {
     if (!rows || rows.length === 0) return [];
     
-    // 1. RAW DATA HARVESTING (Start with CSV 'Total Captured')
-    let totalOrderCaptured = 0;
+    // 1. RAW DATA HARVESTING
+    let totalOrderCaptured = 0; // Inflated CSV total
     let exactPayoutTotal = 0;
     let exactShipTotal = 0;
     let orderRefundTotal = 0;
     let totalOrderOutstanding = 0;
+    let totalShipping = 0;
+    let totalTaxes = 0;
+    let donorCreditPool = 0;
     
     rows.forEach(r => {
         let t = parseFloat(r.total || 0);
@@ -214,54 +217,61 @@ window.runForensicAccounting = function(rows) {
         
         let outBal = parseFloat(r['Outstanding Balance']) || 0;
         if (outBal > totalOrderOutstanding) totalOrderOutstanding = outBal;
+
+        let s = parseFloat(r.shipping || 0);
+        if (s > totalShipping) totalShipping = s;
+        
+        let tx = parseFloat(r.taxes || 0);
+        if (tx > totalTaxes) totalTaxes = tx;
+
+        let type = r.transaction_type || 'Standard';
+        if (type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange' || type === 'Scrapped Exchange') {
+            let val = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+            donorCreditPool += val;
+        }
     });
 
-    // 2. Identify the "Inflation" (Replacement lines that artificially swell the CSV 'Total')
-    let totalLineNetPrice = 0;
     rows.forEach(r => {
-        totalLineNetPrice += (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+        let type = r.transaction_type || 'Standard';
+        if (type === 'Exchange Replacement') {
+            let val = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+            donorCreditPool -= val;
+        }
     });
 
-    // Find the first line item that will actually ship (used to attribute order-level flat fees)
+    let exchangeBalanceCredit = Math.max(0, donorCreditPool);
+    let trueConcessionRefund = Math.max(0, orderRefundTotal - exchangeBalanceCredit);
+
     let firstShippableIndex = rows.findIndex(r => {
         let t = r.transaction_type || 'Standard';
         let st = (r.fulfillment_status || '').toLowerCase();
         let lst = (r.lineitem_fulfillment_status || '').toLowerCase();
-        return ((st === 'fulfilled' || lst === 'fulfilled') && (t !== 'Pre-Ship Exchange') && (t !== 'IGNORE') && (t !== 'Cancelled'));
+        return ((st === 'fulfilled' || lst === 'fulfilled') && t !== 'Pre-Ship Exchange' && t !== 'IGNORE' && t !== 'Cancelled' && t !== 'Scrapped Exchange' && t !== 'Post-Ship Exchange');
     });
     if (firstShippableIndex === -1) firstShippableIndex = 0;
 
-    // 3. Process Lines with Column Inheritance
     let processed = rows.map((r, i) => {
         let type = r.transaction_type || 'Standard';
         let status = (r.fulfillment_status || '').toLowerCase();
         let lStatus = (r.lineitem_fulfillment_status || '').toLowerCase();
         
-        // --- INHERITANCE LOGIC ---
-        // If I am a Replacement, I take the numbers from ANY Exchange row (Pre or Post).
-        let sourceRow = r;
-        if (type === 'Exchange Replacement') {
-            const donor = rows.find(d => d.transaction_type === 'Pre-Ship Exchange' || d.transaction_type === 'Post-Ship Exchange');
-            if (donor) {
-                sourceRow = donor; 
-            }
-        }
-        
-        // Physical Cost Suppression
         let cogs = (window.getEngineTrueCogs(r.internal_recipe_name) || 0) * (parseFloat(r.qty_sold) || 1);
-        let actShipCost = parseFloat(sourceRow.actual_shipping_cost || sourceRow.actualShipCost || 0);
+        let actShipCost = parseFloat(r.actual_shipping_cost || r.actualShipCost || 0);
         
-        // Only suppress COGS if this specific item was abandoned/refunded while the rest of the order shipped.
         let isAbandonedPartial = (status !== 'pending' && status !== 'unfulfilled') && (lStatus === 'pending' || lStatus === 'unfulfilled');
+        
         if (type === 'Pre-Ship Exchange' || type === 'IGNORE' || type === 'Cancelled' || isAbandonedPartial) { 
             cogs = 0; actShipCost = 0; 
         }
         if (type === 'Post-Ship Exchange') {
-            cogs = 0; // Item returned to stock
+            cogs = 0;
+        }
+        if (type === 'Scrapped Exchange') {
+            // cogs is preserved strictly for scraped returns
+            actShipCost = 0; 
         }
 
-        // RAW ATTRIBUTION
-        let lineRevenue;
+        let lineRevenue = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
         let work;
         let revenueDerivation;
         
@@ -273,55 +283,35 @@ window.runForensicAccounting = function(rows) {
         let newSalePrice = r.actual_sale_price;
         let newOutBal = r['Outstanding Balance'];
         
-        const isExchangeDonor = type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange';
+        const isExchangeDonor = type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange' || type === 'Scrapped Exchange';
         const isVoided = type === 'Cancelled' || type === 'IGNORE' || type === 'Partial Refund';
         
         if (isExchangeDonor || isVoided) {
+            let surrenderedVal = lineRevenue;
             lineRevenue = 0;
-            cogs = 0; // Item never left the warehouse or was returned, so we didn't lose the physical asset
-            work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})` : `[Voided] (Surrendered $${parseFloat(sourceRow.total).toFixed(2)})`;
-            revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${parseFloat(sourceRow.total).toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
-            newSubtotal = 0; newDiscount = 0; newShipping = 0; newTaxes = 0; newTotal = 0; newSalePrice = 0; newOutBal = 0;
+            work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${surrenderedVal.toFixed(2)})` : `[Voided] (Surrendered $${surrenderedVal.toFixed(2)})`;
+            revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${surrenderedVal.toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
+        } else if (type === 'Exchange Replacement') {
+            work = `[Replacement Funded]`;
+            revenueDerivation = `True Line Value: $${lineRevenue.toFixed(2)}`;
+            newTotal = lineRevenue;
         } else {
-            // AUTHORITATIVE REVENUE AGGREGATION
-            // If I am a replacement, I look at the donor first, but fall back to my own data if the donor is hollow
-            let ob = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
-            let tot = Math.max(parseFloat(r.total || 0), parseFloat(sourceRow.total || 0));
+            let ob = parseFloat(r['Outstanding Balance'] || 0);
+            let tot = parseFloat(r.total || 0);
+            if (ob > 0) lineRevenue = ob;
+            else if (tot > 0 && lineRevenue === 0) lineRevenue = tot;
             
-            lineRevenue = ob > 0 ? ob : tot;
-            work = ob > 0 ? `[Resolved Out. Bal: $${ob.toFixed(2)}]` : `[Resolved Total: $${tot.toFixed(2)}]`;
-            
-            if (ob > 0) {
-                revenueDerivation = `Outstanding Balance: $${ob.toFixed(2)}`;
-            } else {
-                revenueDerivation = `total: $${tot.toFixed(2)}`;
-            }
-
-            if (type === 'Exchange Replacement' && sourceRow !== r) {
-                revenueDerivation = `Inherited from Donor: $${lineRevenue.toFixed(2)}`;
-                newSubtotal = Math.max(parseFloat(r.subtotal || 0), parseFloat(sourceRow.subtotal || 0));
-                newDiscount = Math.max(parseFloat(r.discount_amount || 0), parseFloat(sourceRow.discount_amount || 0));
-                newShipping = Math.max(parseFloat(r.shipping || 0), parseFloat(sourceRow.shipping || 0));
-                newTaxes = Math.max(parseFloat(r.taxes || 0), parseFloat(sourceRow.taxes || 0));
-                newTotal = Math.max(parseFloat(r.total || 0), parseFloat(sourceRow.total || 0));
-                newSalePrice = Math.max(parseFloat(r.actual_sale_price || 0), parseFloat(sourceRow.actual_sale_price || 0));
-                newOutBal = Math.max(parseFloat(r['Outstanding Balance'] || 0), parseFloat(sourceRow['Outstanding Balance'] || 0));
-            }
+            work = `[Standard Line: $${lineRevenue.toFixed(2)}]`;
+            revenueDerivation = `Calculated: $${lineRevenue.toFixed(2)}`;
         }
 
-
         let src = r['Source'] || 'web';
-        let fee = (isVoided) ? 0 : window.getEngineStripeFee(lineRevenue, src);
+        let fee = 0;
 
         if (exactShipTotal > 0) {
             actShipCost = (i === firstShippableIndex) ? exactShipTotal : 0;
         } else {
             actShipCost = (i === firstShippableIndex) ? actShipCost : 0;
-        }
-
-        if (exactPayoutTotal > 0) {
-            let orderStripeFee = Math.max(0, totalOrderCaptured - exactPayoutTotal);
-            fee = (i === firstShippableIndex) ? orderStripeFee : 0;
         }
 
         let net = lineRevenue - fee - actShipCost - cogs;
@@ -345,24 +335,43 @@ window.runForensicAccounting = function(rows) {
             revenueDerivation: revenueDerivation,
             work: work,
             rawOrderTotal: totalOrderCaptured,
-            rawItemRevenue: totalLineNetPrice,
-            liveCogs: cogs, stripeFee: fee, actualShipCost: actShipCost 
+            rawItemRevenue: lineRevenue,
+            liveCogs: cogs, stripeFee: fee, actualShipCost: actShipCost,
+            _tempLineRevenue: lineRevenue,
+            _src: src
         };
     });
 
-    // 4. Apply Refund Deductions (Last Layer)
-    if (orderRefundTotal > 0) {
-        let refundApplied = false;
-        processed.forEach(r => {
-            let isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange';
-            let isVoided = r.transaction_type === 'Cancelled' || r.transaction_type === 'IGNORE' || r.transaction_type === 'Partial Refund';
-            if (!refundApplied && !isVoided && !isDonor) {
-                r.net -= orderRefundTotal;
-                r.applied_order_refund = orderRefundTotal;
-                refundApplied = true;
-            }
-        });
+    let activeLineRevenueSum = processed.reduce((sum, r) => sum + r._tempLineRevenue, 0);
+    let trueOrderCaptured = activeLineRevenueSum + totalShipping + totalTaxes + exchangeBalanceCredit;
+    
+    let orderStripeFee = 0;
+    if (exactPayoutTotal > 0) {
+        orderStripeFee = Math.max(0, trueOrderCaptured - exactPayoutTotal);
+    } else {
+        let src = processed[0] ? processed[0]._src : 'web';
+        orderStripeFee = window.getEngineStripeFee(trueOrderCaptured, src);
     }
+
+    processed.forEach((r, i) => {
+        let isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange' || r.transaction_type === 'Scrapped Exchange';
+        let isVoided = r.transaction_type === 'Cancelled' || r.transaction_type === 'IGNORE' || r.transaction_type === 'Partial Refund';
+        
+        r.fee = (i === firstShippableIndex) ? orderStripeFee : 0;
+        r.stripeFee = r.fee;
+
+        if (!isVoided && !isDonor) {
+            r.net = r._tempLineRevenue - r.fee - r.actShipCost - r.cogs;
+        }
+
+        if (i === firstShippableIndex && trueConcessionRefund > 0) {
+            r.net -= trueConcessionRefund;
+            r.applied_order_refund = trueConcessionRefund;
+        }
+
+        delete r._tempLineRevenue;
+        delete r._src;
+    });
 
     return processed;
 };
