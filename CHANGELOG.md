@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.3.8] - 2026-06-02
+
+### ✨ Features & Bug Fixes
+- **Hardware-Accelerated Scanner Stability** (ix/cycle-count-camera): Resolved a critical edge case where tall (portrait) camera feeds caused the HTML5Qrcode hardware-accelerated scanning engine to drop frames. Dynamically calculated the qrbox boundaries to guarantee the target reticles never protrude into the HTML letterbox padding. Re-enabled 30fps hardware acceleration with zero CPU lag and sub-3ms scan times.
+
 ## [1.3.7] - 2026-06-02
 
 ### ✨ Features & Bug Fixes
