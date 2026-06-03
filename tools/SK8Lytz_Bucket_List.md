@@ -19,7 +19,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 P1 High Priority (Active Epics)
 
-*Clean sweep — all active epics successfully completed and archived!* ✅
+### Target: `main`
+**Epic: UUID Inventory Architecture Migration**
+- [ ] `feat/uuid-inventory-migration` : **UUID Inventory Architecture Migration** - Migrate `full_landed_costs` and all 9 downstream relational tables from mutable string keys to permanent `item_uuid` foreign keys to ensure stable historical reporting. Implement UI data-binding refactors to handle `data-uuid` safely across modules. (Plan: [docs/plans/feat-uuid-inventory-migration.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat-uuid-inventory-migration.md))
 
 ## 🧹 Technical Debt
 
