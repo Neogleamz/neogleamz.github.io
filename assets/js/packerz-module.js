@@ -1195,29 +1195,34 @@ function showPackerzCompletionModal(orderId, lineItems) {
         });
 
         let html = `
-            <div class="glass-panel" style="width:clamp(320px, 90vw, 500px); max-height:90vh; padding:25px; display:flex; flex-direction:column; gap:10px;">
-                <h3 style="margin-top:0; color:var(--text-heading); border-bottom:1px solid var(--border-color); padding-bottom:10px;">Confirm Assembly: Order ${orderId}</h3>
-                <p style="color:var(--text-muted); font-size:13px;">Please review the inventory actions below.</p>
+            <div style="background:var(--bg-container); border:1px solid #10b981; border-radius:12px; box-shadow:0 10px 40px rgba(16,185,129,0.2); width:clamp(320px, 90vw, 500px); max-height:90vh; padding:25px; display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:10px; margin-bottom:15px;">
+                    <h3 style="margin:0; font-size:16px; color:#10b981; font-weight:900;">CONFIRM ASSEMBLY</h3>
+                    <button id="btnCancelModalTop" class="icon-btn" style="color:var(--text-muted); font-size:16px; font-weight:bold; border:1px solid var(--border-color); cursor:pointer; background:transparent;">✕</button>
+                </div>
+                <div style="font-size:11px; margin-bottom:5px; color:var(--text-muted); font-family:monospace;">Order ID: #${orderId}</div>
+                <p style="color:var(--text-muted); font-size:13px; margin:0 0 15px 0;">Please review the inventory actions below.</p>
                 
-                <div style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; margin-bottom:15px;">
-                    <strong style="color:var(--text-heading);">Standard Items (Deducting Inventory):</strong>
+                <div style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; padding-right:5px; margin-bottom:15px;">
+                    <strong style="color:var(--text-heading); font-size:12px; font-weight:800; text-transform:uppercase;">Standard Items (Deducting):</strong>
                     ${standardItems.map(i => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:8px; border-radius:6px;">
-                            <span style="font-weight:bold;">${i.qty_sold}x ${i.internal_recipe_name}</span>
-                            <span class="status-badge st-completed">DEDUCTING</span>
+                        <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-heading); background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
+                            <span style="color:#10b981; font-size:14px; margin-top:-1px;">✅</span>
+                            <span style="flex:1; font-weight:bold;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                            <span style="background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:2px 6px; border-radius:4px; font-size:10px; font-weight:900;">DEDUCTING</span>
                         </div>
-                    `).join('') || '<div style="color:var(--text-muted); font-size:12px;">None</div>'}
+                    `).join('') || '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None</div>'}
 
-                    <strong style="color:#F59E0B; margin-top:10px;">Ignored / Exchange (No Deduction):</strong>
+                    <strong style="color:#F59E0B; margin-top:10px; font-size:12px; font-weight:800; text-transform:uppercase;">Ignored / Exchange:</strong>
                     ${ignoredItems.map(i => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:8px; border-radius:6px;">
-                            <span style="color:var(--text-muted);">${i.qty_sold}x ${i.internal_recipe_name}</span>
-                            <span class="status-badge st-queued">${i.transaction_type}</span>
+                        <div style="background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.2); border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:white; font-family:monospace; font-weight:700; font-size:13px;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                            <span style="font-size:10px; color:#F59E0B; font-weight:900; text-transform:uppercase;">${i.transaction_type}</span>
                         </div>
-                    `).join('') || '<div style="color:var(--text-muted); font-size:12px;">None</div>'}
+                    `).join('') || '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None</div>'}
                 </div>
 
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid rgba(16,185,129,0.3); padding-top:15px;">
                     <button id="btnCancelModal" class="btn-secondary" style="padding:8px 16px;">Cancel</button>
                     <button id="btnConfirmModal" class="btn-green-neon" style="padding:8px 16px;">Confirm & Complete</button>
                 </div>
@@ -1238,6 +1243,7 @@ function showPackerzCompletionModal(orderId, lineItems) {
             resolve(result);
         };
 
+        overlay.querySelector('#btnCancelModalTop').addEventListener('click', () => cleanup(false));
         overlay.querySelector('#btnCancelModal').addEventListener('click', () => cleanup(false));
         overlay.querySelector('#btnConfirmModal').addEventListener('click', () => cleanup(true));
     });
