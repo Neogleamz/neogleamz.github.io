@@ -1,5 +1,15 @@
 # SK8Lytz Application Changelog
 
+## [1.3.9] - 2026-06-02
+
+### ✨ Features & Bug Fixes
+- **Global Concurrency Button Locking**: Upgraded the universal `executeWithButtonAction` locking mechanism to natively accept DOM elements, and deployed it across Stockz, Packerz, Print-Queue, and Batchez data-mutating buttons to physically block spam-clicking and duplicate database entries. 
+- **Packerz UI Harmonization**: Increased the padding and typography sizing of the Packerz `CHECK ALL`, `UNCHECK`, and `ADMIN FULFILL` buttons to perfectly match the heft of the standard `batchez` production layouts. Upgraded the Archive `UNARCHIVE` button to a glowing neon green solid state.
+- **Realtime Snapshot Rendering Lockup Fix**: Patched a massive UI thread lockup bug triggered during full database Snapshot Restorations. Injected a 50ms Javascript `setTimeout` debounce buffer into the Supabase Realtime synchronization loop in `system-realtime-sync.js`, forcing the application to batch the thousands of database updates before re-drawing the DOM once.
+
+### 🧹 Chores & Cleanup
+- **Realtime Linter Warnings**: Fixed the remaining 6 `no-undef` ESLint warnings in `system-event-delegator.js` and `system-realtime-sync.js` by explicitly prepending global `window.` namespaces.
+
 ## [1.3.8] - 2026-06-02
 
 ### ✨ Features & Bug Fixes
