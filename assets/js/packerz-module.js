@@ -1212,7 +1212,7 @@ async function executePackerzCompletion(orderId) {
 
             let invMap = {};
             lineItems.forEach(r => {
-                if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
+                if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
                 let k = `RECIPE:::${r.internal_recipe_name}`;
                 if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
                 invMap[k] += r.qty_sold;
@@ -1269,7 +1269,7 @@ window.unarchivePackerzOrder = async function(orderId) {
 
         let invMap = {};
         lineItems.forEach(r => {
-            if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange') return;
+            if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
             let k = `RECIPE:::${r.internal_recipe_name}`;
             if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
             invMap[k] -= r.qty_sold;
