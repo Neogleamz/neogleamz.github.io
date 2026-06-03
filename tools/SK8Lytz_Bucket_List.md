@@ -15,8 +15,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🟢 P3 Backlog (Ideas & Sandbox)
-### Target: main
-- [ ] feat/packerz-assembly-modal : **Packerz Assembly Modal** - Replace native confirm dialog with rich Vanilla JS verification modal. (Plan: [docs/plans/packerz_assembly_modal.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/packerz_assembly_modal.md))
+*Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
 
 ### 🟠 P1 High Priority (Active Epics)
 
@@ -608,3 +607,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Barcode Engine Hardening**
 *(Archived — 2026-06-02)*
 - [x] `fix/cycle-count-camera` : **Dynamic WebRTC Scan Bounds** - Refactor the HTML5-QRCode instantiation parameters inside Inventory and Packerz modules to dynamically calculate the `qrbox` targeting matrix based on active viewport scale, preventing catastrophic scanner dropouts on mobile screens. (Plan: [docs/plans/fix/cycle-count-camera.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/fix/cycle-count-camera.md))
+
+### Target: `main`
+**Epic: Packerz Assembly Verification Modal**
+*(Archived — 2026-06-02)*
+- [x] feat/packerz-assembly-modal : **Packerz Assembly Modal** - Replace native confirm dialog with rich Vanilla JS verification modal. (Plan: [docs/plans/packerz_assembly_modal.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/packerz_assembly_modal.md))

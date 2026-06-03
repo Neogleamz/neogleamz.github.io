@@ -69,6 +69,7 @@
     
     let pendingRenders = new Set();
     let isBlurListenerAttached = false;
+    let debounceTimers = {};
 
     // ACTIVE FOCUS GUARD
     // Prevents UI focus stealing if a user is currently typing in a grid or pane
@@ -99,10 +100,13 @@
                 isBlurListenerAttached = true;
             }
         } else {
-            const renderFn = getGlobal(renderFnStr);
-            if (typeof renderFn === 'function') {
-                renderFn();
-            }
+            if (debounceTimers[renderFnStr]) clearTimeout(debounceTimers[renderFnStr]);
+            debounceTimers[renderFnStr] = setTimeout(() => {
+                const renderFn = getGlobal(renderFnStr);
+                if (typeof renderFn === 'function') {
+                    renderFn();
+                }
+            }, 50);
         }
     }
 

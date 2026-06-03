@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.openVelocityzModal();
                     break;
                 case 'click_window_editGlobalLeadTime':
-                    window.editGlobalLeadTime();
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof window.editGlobalLeadTime === 'function') await window.editGlobalLeadTime(); });
                     break;
                 case 'click_printReorderReport':
                     printReorderReport();
@@ -305,19 +305,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.openArchiveExplorer('batchez');
                     break;
                 case 'click_window_deleteWorkOrder':
-                    window.deleteWorkOrder();
+                    window.executeWithButtonAction(el, 'DELETING...', '✅ DELETED', async () => { if(typeof window.deleteWorkOrder === 'function') await window.deleteWorkOrder(); });
                     break;
                 case 'click_window_advanceWO_Queued':
-                    window.advanceWO('Queued');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof window.advanceWO === 'function') await window.advanceWO('Queued'); });
                     break;
                 case 'click_window_advanceWO_Picking':
-                    window.advanceWO('Picking');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof window.advanceWO === 'function') await window.advanceWO('Picking'); });
                     break;
                 case 'click_window_advanceWO_In_Production':
-                    window.advanceWO('In Production');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof window.advanceWO === 'function') await window.advanceWO('In Production'); });
                     break;
                 case 'click_window_advanceWO_Completed':
-                    window.advanceWO('Completed');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof window.advanceWO === 'function') await window.advanceWO('Completed'); });
                     break;
                 case 'click_window_printPickList':
                     window.printPickList();
@@ -556,19 +556,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.openArchiveExplorer('layerz');
                     break;
                 case 'click_deletePrintJob':
-                    deletePrintJob();
+                    window.executeWithButtonAction(el, 'DELETING...', '✅ DELETED', async () => { if(typeof deletePrintJob === 'function') await deletePrintJob(); });
                     break;
                 case 'click_advancePrintStatus_Queued':
-                    advancePrintStatus('Queued');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof advancePrintStatus === 'function') await advancePrintStatus('Queued'); });
                     break;
                 case 'click_advancePrintStatus_Printing':
-                    advancePrintStatus('Printing');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof advancePrintStatus === 'function') await advancePrintStatus('Printing'); });
                     break;
                 case 'click_advancePrintStatus_Cleaned':
-                    advancePrintStatus('Cleaned');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof advancePrintStatus === 'function') await advancePrintStatus('Cleaned'); });
                     break;
                 case 'click_advancePrintStatus_Completed':
-                    advancePrintStatus('Completed');
+                    window.executeWithButtonAction(el, 'UPDATING...', '✅ DONE', async () => { if(typeof advancePrintStatus === 'function') await advancePrintStatus('Completed'); });
                     break;
                 case 'click_window_openLayerzPrintSOP_currentPri':
                     if(window.openSopPrintModal && typeof currentPrintJob !== 'undefined' && currentPrintJob) {
@@ -1055,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     closeManualPrintModal();
                     break;
                 case 'click_submitManualPrint':
-                    submitManualPrint();
+                    window.executeWithButtonAction(el, '🚀 SENDING...', '✅ QUEUED', async () => { if(typeof submitManualPrint === 'function') await submitManualPrint(); });
                     break;
                 case 'click_submitTipzSuggestion':
                     submitTipzSuggestion();
@@ -1083,6 +1083,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_printPackerzSOP_legacy':
                     printPackerzSOP();
+                    break;
+                case 'click_checkAllQueue':
+                    if (typeof window.click_checkAllQueue === 'function') window.click_checkAllQueue();
+                    break;
+                case 'click_uncheckAllQueue':
+                    if (typeof window.click_uncheckAllQueue === 'function') window.click_uncheckAllQueue();
+                    break;
+                case 'click_bulkAdminFulfillPackerzOrders':
+                    window.executeWithButtonAction(el, 'PROCESSING...', '✅ DONE', async () => { if(typeof window.click_bulkAdminFulfillPackerzOrders === 'function') await window.click_bulkAdminFulfillPackerzOrders(); });
+                    break;
+                case 'click_checkAllArchive':
+                    if (typeof window.click_checkAllArchive === 'function') window.click_checkAllArchive();
+                    break;
+                case 'click_uncheckAllArchive':
+                    if (typeof window.click_uncheckAllArchive === 'function') window.click_uncheckAllArchive();
+                    break;
+                case 'click_unarchiveSelectedArchive':
+                    window.executeWithButtonAction(el, 'UNARCHIVING...', '✅ DONE', async () => { if(typeof window.click_unarchiveSelectedArchive === 'function') await window.click_unarchiveSelectedArchive(); });
                     break;
 
                 case 'click_closePackerzSopViewer':
@@ -1150,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.filterCcMngrItems();
                     break;
                 case 'click_window_saveManualCycleCount':
-                    window.saveManualCycleCount();
+                    window.executeWithButtonAction(el, 'SAVING...', '✅ SAVED', async () => { if(typeof window.saveManualCycleCount === 'function') await window.saveManualCycleCount(); });
                     break;
                 case 'click_stopCycleCount':
                     stopCycleCount();
@@ -1289,13 +1307,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(window.selectPrintJob) window.selectPrintJob(el.getAttribute('data-id'));
                     break;
                 case 'click_startLayerzRun':
-                    if(window.startLayerzRun) window.startLayerzRun();
+                    window.executeWithButtonAction(el, 'STARTING...', '✅ STARTED', async () => { if(typeof startLayerzRun === 'function') await startLayerzRun(); });
                     break;
                 case 'click_toggleLayerzRunPause':
-                    if(window.toggleLayerzRunPause) window.toggleLayerzRunPause();
+                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', async () => { if(typeof toggleLayerzRunPause === 'function') await toggleLayerzRunPause(); });
                     break;
                 case 'click_togglePrintTimerPause':
-                    if(window.togglePrintTimerPause) window.togglePrintTimerPause();
+                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', async () => { if(typeof togglePrintTimerPause === 'function') await togglePrintTimerPause(); });
                     break;
                 case 'click_openLayerzRunCompleteModal':
                     if(window.openLayerzRunCompleteModal) window.openLayerzRunCompleteModal();
@@ -1304,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(window.closeLayerzRunCompleteModal) window.closeLayerzRunCompleteModal();
                     break;
                 case 'click_submitLayerzRun':
-                    if(window.submitLayerzRun) window.submitLayerzRun();
+                    window.executeWithButtonAction(el, 'RECORDING...', '✅ RECORDED', async () => { if(typeof submitLayerzRun === 'function') await submitLayerzRun(); });
                     break;
                 case 'click_stopPropagation':
                     event.stopPropagation();

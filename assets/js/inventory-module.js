@@ -562,13 +562,11 @@ window.restoreInventorySnapshot = async function(snapshotId) {
 
         // 4. Update Local State & UI
         // Refresh the global inventoryDB object from Supabase
-        if (window.resetInventoryConsumptionLocally) {
-            await window.resetInventoryConsumptionLocally(); 
-        } else {
-            // Fallback: manually fetch if local reset helper is missing
-            const { data: freshData } = await supabaseClient.from('inventory_consumption').select('*');
-            inventoryDB = freshData.reduce((acc, row) => ({ ...acc, [row.item_key]: row }), {});
-        }
+        // 4. Update Local State & UI
+        // Refresh the global inventoryDB object from Supabase
+        const { data: freshData, error: fetchFreshErr } = await supabaseClient.from('inventory_consumption').select('*');
+        if (fetchFreshErr) throw fetchFreshErr;
+        inventoryDB = freshData.reduce((acc, row) => ({ ...acc, [row.item_key]: row }), {});
 
         window.renderInventoryTable();
         window.updateCcMngrStock();
