@@ -2368,7 +2368,16 @@ async function openCameraScanner(expectedValue, rowId, itemName) {
         _html5QrScanner = new Html5Qrcode('sopCameraReader');
         await _html5QrScanner.start(
             { facingMode: 'environment' },   // rear camera
-            { fps: 12, qrbox: { width: 200, height: 200 }, aspectRatio: 1.0 },
+            { 
+                fps: 12, 
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+                    var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                    var qrboxSize = Math.floor(minEdgeSize * 0.75);
+                    return { width: qrboxSize, height: qrboxSize };
+                }, 
+                aspectRatio: 1.0,
+                formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+            },
             (decodedText) => handleScanResult(decodedText, expectedValue, rowId),
             () => {}  // suppress per-frame errors
         );

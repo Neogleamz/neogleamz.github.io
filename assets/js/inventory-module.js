@@ -1519,7 +1519,16 @@ window.startLocalCycleCount = async function() {
             if (selectContainer) selectContainer.style.display = 'none';
             await ccLocalQrScanner.start(
                 { facingMode: "environment" },
-                { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                { 
+                    fps: 12, 
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                        var qrboxSize = Math.floor(minEdgeSize * 0.75);
+                        return { width: qrboxSize, height: qrboxSize };
+                    }, 
+                    aspectRatio: 1.0,
+                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+                },
                 (decodedText) => {
                     window.onScanSuccess(decodedText);
                 },
@@ -1548,7 +1557,16 @@ window.startLocalScannerWithDevice = async function(deviceId) {
         }
         await ccLocalQrScanner.start(
             deviceId,
-            { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+            { 
+                fps: 12, 
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+                    var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                    var qrboxSize = Math.floor(minEdgeSize * 0.75);
+                    return { width: qrboxSize, height: qrboxSize };
+                }, 
+                aspectRatio: 1.0,
+                formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+            },
             (decodedText) => {
                 window.onScanSuccess(decodedText);
             },
@@ -2531,7 +2549,16 @@ window.startStockzAuditWebcam = async function() {
             if (selectContainer) selectContainer.style.display = 'none';
             await window.stockzAuditWebcamScanner.start(
                 { facingMode: "environment" },
-                { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                { 
+                    fps: 12, 
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                        var qrboxSize = Math.floor(minEdgeSize * 0.75);
+                        return { width: qrboxSize, height: qrboxSize };
+                    }, 
+                    aspectRatio: 1.0,
+                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+                },
                 async (decodedText) => {
                     await window.stopStockzAuditWebcam();
                     window.onScanSuccess(decodedText);
@@ -2554,7 +2581,16 @@ window.startStockzAuditWebcamWithDevice = async function(deviceId) {
         }
         await window.stockzAuditWebcamScanner.start(
             deviceId,
-            { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+            { 
+                fps: 12, 
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+                    var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                    var qrboxSize = Math.floor(minEdgeSize * 0.75);
+                    return { width: qrboxSize, height: qrboxSize };
+                }, 
+                aspectRatio: 1.0,
+                formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+            },
             async (decodedText) => {
                 await window.stopStockzAuditWebcam();
                 window.onScanSuccess(decodedText);
