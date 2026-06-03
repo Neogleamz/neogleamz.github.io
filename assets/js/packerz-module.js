@@ -1208,16 +1208,22 @@ function showPackerzCompletionModal(orderId, lineItems) {
                     ${standardItems.map(i => `
                         <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-heading); background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
                             <span style="color:#10b981; font-size:14px; margin-top:-1px;">✅</span>
-                            <span style="flex:1; font-weight:bold;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                            <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
+                                <span style="font-weight:bold; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                                <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">${i.item_type || 'Standard Item'}</span>
+                            </div>
                             <span style="background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:2px 6px; border-radius:4px; font-size:10px; font-weight:900;">DEDUCTING</span>
                         </div>
                     `).join('') || '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None</div>'}
 
                     <strong style="color:#F59E0B; margin-top:10px; font-size:12px; font-weight:800; text-transform:uppercase;">Ignored / Exchange:</strong>
                     ${ignoredItems.map(i => `
-                        <div style="background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.2); border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="color:white; font-family:monospace; font-weight:700; font-size:13px;">${i.qty_sold}x ${i.internal_recipe_name}</span>
-                            <span style="font-size:10px; color:#F59E0B; font-weight:900; text-transform:uppercase;">${i.transaction_type}</span>
+                        <div style="background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.2); border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div style="display:flex; flex-direction:column; gap:3px;">
+                                <span style="color:white; font-family:monospace; font-weight:700; font-size:13px; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                                <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">${i.item_type || 'Special Item'}</span>
+                            </div>
+                            <span style="font-size:10px; color:#F59E0B; font-weight:900; text-transform:uppercase; margin-top:2px;">${i.transaction_type}</span>
                         </div>
                     `).join('') || '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">None</div>'}
                 </div>
