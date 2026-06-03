@@ -1,4 +1,4 @@
-/* global supabaseClient, teRenderTaskGrid, finalResults, sopsDB, socialzSkaters, renderInventoryTable, renderFgiTable, renderWOList, renderSalesTable, renderAliasManager, buildBarcodzCache, renderBarcodzGrid, renderProductList, populateDropdowns, renderAnalyticsDashboard, updateHubStats, mapToUI, buildCatalogCache, renderColToggles, renderActiveTable, renderSkaters, updateFilterDropdownOptions */
+/* global supabaseClient, teRenderTaskGrid, finalResults, sopsDB, socialzSkaters, renderInventoryTable, renderFgiTable, renderWOList, renderSalesTable, renderAliasManager, buildBarcodzCache, renderBarcodzGrid, renderProductList, populateDropdowns, renderAnalyticsDashboard, updateHubStats, mapToUI, buildCatalogCache, renderColToggles, renderActiveTable, renderSkaters, updateFilterDropdownOptions, renderActiveWO, renderPrintQueue */
 // system-realtime-sync.js
 // Centralized WebSocket listener for global real-time synchronization
 

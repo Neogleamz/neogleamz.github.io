@@ -1307,13 +1307,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(window.selectPrintJob) window.selectPrintJob(el.getAttribute('data-id'));
                     break;
                 case 'click_startLayerzRun':
-                    window.executeWithButtonAction(el, 'STARTING...', '✅ STARTED', async () => { if(typeof startLayerzRun === 'function') await startLayerzRun(); });
+                    window.executeWithButtonAction(el, 'STARTING...', '✅ STARTED', async () => { if(typeof window.startLayerzRun === 'function') await window.startLayerzRun(); });
                     break;
                 case 'click_toggleLayerzRunPause':
-                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', async () => { if(typeof toggleLayerzRunPause === 'function') await toggleLayerzRunPause(); });
+                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', async () => { if(typeof window.toggleLayerzRunPause === 'function') await window.toggleLayerzRunPause(); });
                     break;
                 case 'click_togglePrintTimerPause':
-                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', async () => { if(typeof togglePrintTimerPause === 'function') await togglePrintTimerPause(); });
+                    window.executeWithButtonAction(el, 'TOGGLING...', '✅ DONE', async () => { if(typeof window.togglePrintTimerPause === 'function') await window.togglePrintTimerPause(); });
                     break;
                 case 'click_openLayerzRunCompleteModal':
                     if(window.openLayerzRunCompleteModal) window.openLayerzRunCompleteModal();
@@ -1322,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(window.closeLayerzRunCompleteModal) window.closeLayerzRunCompleteModal();
                     break;
                 case 'click_submitLayerzRun':
-                    window.executeWithButtonAction(el, 'RECORDING...', '✅ RECORDED', async () => { if(typeof submitLayerzRun === 'function') await submitLayerzRun(); });
+                    window.executeWithButtonAction(el, 'RECORDING...', '✅ RECORDED', async () => { if(typeof window.submitLayerzRun === 'function') await window.submitLayerzRun(); });
                     break;
                 case 'click_stopPropagation':
                     event.stopPropagation();
