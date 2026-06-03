@@ -2369,14 +2369,13 @@ async function openCameraScanner(expectedValue, rowId, itemName) {
         await _html5QrScanner.start(
             { facingMode: 'environment' },   // rear camera
             { 
-                fps: 12, 
-                qrbox: function(viewfinderWidth, viewfinderHeight) {
-                    var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                    var qrboxSize = Math.floor(minEdgeSize * 0.75);
-                    return { width: qrboxSize, height: qrboxSize };
-                }, 
-                aspectRatio: 1.0,
-                formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+                fps: 30,
+                    disableFlip: true,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    qrbox: function(vw, _vh) { return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; },
+                    aspectRatio: 1.0, 
+                    
+                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
             },
             (decodedText) => handleScanResult(decodedText, expectedValue, rowId),
             () => {}  // suppress per-frame errors

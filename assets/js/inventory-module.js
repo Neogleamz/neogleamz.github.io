@@ -1520,12 +1520,10 @@ window.startLocalCycleCount = async function() {
             await ccLocalQrScanner.start(
                 { facingMode: "environment" },
                 { 
-                    fps: 12, 
-                    qrbox: function(viewfinderWidth, viewfinderHeight) {
-                        var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                        var qrboxSize = Math.floor(minEdgeSize * 0.75);
-                        return { width: qrboxSize, height: qrboxSize };
-                    }, 
+                    fps: 30,
+                    disableFlip: true,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    qrbox: function(vw, _vh) { return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; },
                     aspectRatio: 1.0,
                     formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
                 },
@@ -1558,14 +1556,12 @@ window.startLocalScannerWithDevice = async function(deviceId) {
         await ccLocalQrScanner.start(
             deviceId,
             { 
-                fps: 12, 
-                qrbox: function(viewfinderWidth, viewfinderHeight) {
-                    var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                    var qrboxSize = Math.floor(minEdgeSize * 0.75);
-                    return { width: qrboxSize, height: qrboxSize };
-                }, 
-                aspectRatio: 1.0,
-                formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+                fps: 30,
+                    disableFlip: true,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    qrbox: function(vw, _vh) { return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; },
+                    aspectRatio: 1.0,
+                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
             },
             (decodedText) => {
                 window.onScanSuccess(decodedText);
@@ -1741,7 +1737,16 @@ window.stopCycleCount = async function() {
     if(card) card.style.display = 'none';
 };
 
+window._lastScannedBarcode = null;
+window._lastScannedTime = 0;
+
 window.onScanSuccess = function(decodedText) {
+    let now = Date.now();
+    if (window._lastScannedBarcode === decodedText && (now - window._lastScannedTime) < 3000) {
+        return;
+    }
+    window._lastScannedBarcode = decodedText;
+    window._lastScannedTime = now;
     let beep = document.getElementById('scanner-beep');
     if (beep) {
         beep.currentTime = 0;
@@ -1763,9 +1768,32 @@ window.onScanSuccess = function(decodedText) {
     } else if(catalogCache[decodedText] || (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[pName])) {
         actualKey = decodedText;
     } else {
-        sysLog(`Barcode Error: Not recognized - ${decodedText}`, true);
-        alert("Barcode not recognized in system: " + decodedText);
-        return;
+        // Attempt reverse lookup for 9-digit physical barcodes
+        if (typeof window.getItemBarcodeValue === 'function') {
+            if (typeof productsDB !== 'undefined') {
+                for (let k in productsDB) {
+                    if (window.getItemBarcodeValue(k) === decodedText) {
+                        actualKey = `RECIPE:::${k}`;
+                        break;
+                    }
+                }
+            }
+            if (!actualKey && typeof catalogCache !== 'undefined') {
+                for (let k in catalogCache) {
+                    let checkName = k.replace('RECIPE:::', '');
+                    if (window.getItemBarcodeValue(checkName) === decodedText) {
+                        actualKey = k;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (!actualKey) {
+            sysLog(`Barcode Error: Not recognized - ${decodedText}`, true);
+            alert("Barcode not recognized in system: " + decodedText);
+            return;
+        }
     }
     
     // Select the item in the unified Stockz Audit dropdown
@@ -2550,17 +2578,14 @@ window.startStockzAuditWebcam = async function() {
             await window.stockzAuditWebcamScanner.start(
                 { facingMode: "environment" },
                 { 
-                    fps: 12, 
-                    qrbox: function(viewfinderWidth, viewfinderHeight) {
-                        var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                        var qrboxSize = Math.floor(minEdgeSize * 0.75);
-                        return { width: qrboxSize, height: qrboxSize };
-                    }, 
+                    fps: 30,
+                    disableFlip: true,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    qrbox: function(vw, _vh) { return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; },
                     aspectRatio: 1.0,
                     formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
                 },
                 async (decodedText) => {
-                    await window.stopStockzAuditWebcam();
                     window.onScanSuccess(decodedText);
                 },
                 () => {}
@@ -2582,17 +2607,14 @@ window.startStockzAuditWebcamWithDevice = async function(deviceId) {
         await window.stockzAuditWebcamScanner.start(
             deviceId,
             { 
-                fps: 12, 
-                qrbox: function(viewfinderWidth, viewfinderHeight) {
-                    var minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                    var qrboxSize = Math.floor(minEdgeSize * 0.75);
-                    return { width: qrboxSize, height: qrboxSize };
-                }, 
-                aspectRatio: 1.0,
-                formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+                fps: 30,
+                    disableFlip: true,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    qrbox: function(vw, _vh) { return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; },
+                    aspectRatio: 1.0,
+                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
             },
             async (decodedText) => {
-                await window.stopStockzAuditWebcam();
                 window.onScanSuccess(decodedText);
             },
             () => {}
