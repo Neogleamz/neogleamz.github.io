@@ -212,12 +212,25 @@ window.generateReport_statDatazParcels = function() {
 
 window.generateReport_statDatazPaid = function() { 
     if (typeof finalResults === 'undefined') return `<p>System not loaded.</p>`;
-    let parcels = getUniqueParcels();
-    let total = parcels.reduce((sum, p) => sum + p.shippingFee, 0);
-    let html = `<p>Identified Parcel Shipping Fees: <strong style="color:var(--text-main); font-size:16px;">$${total.toFixed(2)}</strong> across ${parcels.length} parcels.</p>
-    <table><thead><tr><th>Parcel No</th><th>Order No</th><th>Date</th><th>Shipping Fee</th></tr></thead><tbody>`;
+    
+    let parcelMap = new Map();
+
+    finalResults.forEach(s => {
+        let pno = s['Parcel No'] || 'Unknown';
+        
+        if (!parcelMap.has(pno)) {
+            parcelMap.set(pno, { pno: pno, orderNo: s['Order No'], date: s['Order Date'], logistics: parseFloat(s['Actual Paid (Parcel)'] || s.actual_paid) || 0 });
+        }
+    });
+
+    let parcels = Array.from(parcelMap.values());
+    let totalLogisticsSpend = parcels.reduce((sum, p) => sum + p.logistics, 0);
+
+    let html = `<p>Identified Total Logistics Spend: <strong style="color:var(--text-main); font-size:16px;">$${totalLogisticsSpend.toFixed(2)}</strong> across ${parcels.length} parcels.</p>
+    <table><thead><tr><th>Parcel No</th><th>Order No</th><th>Date</th><th>Logistics Spend</th></tr></thead><tbody>`;
     parcels.sort((a,b)=> new Date(b.date || 0) - new Date(a.date || 0)).forEach(p => {
-        html += `<tr><td>${p.pno}</td><td>${p.orderNo || ''}</td><td>${p.date || ''}</td><td class="text-right">$${p.shippingFee.toFixed(2)}</td></tr>`;
+        let val = p.logistics < 0 ? 0 : p.logistics;
+        html += `<tr><td>${p.pno}</td><td>${p.orderNo || ''}</td><td>${p.date || ''}</td><td class="text-right">$${val.toFixed(2)}</td></tr>`;
     });
     html += `</tbody></table>`;
     return html;
