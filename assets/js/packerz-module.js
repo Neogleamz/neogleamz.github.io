@@ -1001,6 +1001,26 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
 
 window.executePackerzSopPrint = window.executeSopPrint;
 
+window.checkAllPackerzQA = function(btnElement) {
+    const checkboxes = document.querySelectorAll('#sopViewerQAList .packerz-qa-check:not([disabled])');
+    let changed = false;
+    checkboxes.forEach(cb => {
+        if (!cb.checked) {
+            cb.checked = true;
+            changed = true;
+        }
+    });
+    if (changed && typeof window.checkPackerzSopSignoffState === 'function') {
+        window.checkPackerzSopSignoffState();
+    } else if (changed && typeof checkPackerzSopSignoffState === 'function') {
+        checkPackerzSopSignoffState();
+    }
+    if (btnElement) {
+        btnElement.innerText = '✅ Checked!';
+        setTimeout(() => btnElement.innerText = '☑️ Check All', 1500);
+    }
+};
+
 function checkPackerzSopSignoffState() {
     const checks = document.querySelectorAll('.packerz-qa-check');
     let allValid = true;

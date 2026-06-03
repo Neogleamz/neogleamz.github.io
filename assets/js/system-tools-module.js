@@ -2470,7 +2470,10 @@ window.buildUnifiedSopLayoutHTML = function(options) {
         return `
             <div id="${leftPaneId}" style="flex:0 0 50%; display:flex; flex-direction:column; background:var(--bg-container); min-width:300px;">
                 <div style="padding:25px; display:flex; flex-direction:column; flex-grow:1; overflow-y:auto;">
-                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px;">MANDATORY QUALITY ASSURANCE CHECKS</div>
+                    <div style="font-size:11px; font-weight:900; color:#F59E0B; margin-bottom:15px; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>MANDATORY QUALITY ASSURANCE CHECKS</span>
+                        ${sopType === 'packerz' ? '<button data-click="click_checkAllPackerzQA" class="btn-ghost-green" style="padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid #10b981; color: #10b981; background: transparent; cursor: pointer;">☑️ Check All</button>' : ''}
+                    </div>
                     <div id="sopViewerQAList" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;">
                         ${qaChecksHtml}
                     </div>

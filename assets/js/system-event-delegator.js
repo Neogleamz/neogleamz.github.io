@@ -344,6 +344,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.openSopPrintModal('packerz');
                     }
                     break;
+                case 'click_checkAllPackerzQA':
+                    if (typeof window.checkAllPackerzQA === 'function') window.checkAllPackerzQA(el);
+                    break;
                 case 'click_window_closeSopPrintModal':
                     if (typeof window.closeSopPrintModal === 'function') window.closeSopPrintModal();
                     break;
