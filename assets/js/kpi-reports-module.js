@@ -189,7 +189,7 @@ function getUniqueParcels() {
                         orderNo: r['Order No'],
                         date: r['Order Date'],
                         weight: parseFloat(r['Actual Chargeable Weight (g)'] || r['Total Dist Weight (g)'] || 0),
-                        shippingFee: parseFloat(r['Actual Shipping Fee'] || r['Order Postage'] || 0)
+                        shippingFee: parseFloat(r['Actual Paid (Parcel)'] || r['actual_paid'] || r['Actual Shipping Fee'] || r['Order Postage'] || 0)
                     });
                 }
             }
