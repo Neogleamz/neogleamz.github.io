@@ -1,11 +1,15 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
+## [1.3.7] - 2026-06-02
 
 ### ✨ Features & Bug Fixes
+- **Check All QA Automation** (`feat/packerz-check-all`): Introduce a "Check All" utility within the Packerz SOP Viewer Modal specifically for the Mandatory Quality Checklist section, allowing operators to bulk-clear standard textual QA checks.
+- **Packerz Post-Ship Exchange Fix**: Bypassed physical inventory deduction for `Post-Ship Exchange` items to harmonize packerz execution logic with strict forensic accounting ledger calculations.
 - **Label Print Tracking & Visual Designer** (`feat/label-print-tracking-and-designer`): Bridge Barcodz and the BOM by injecting dynamically tracked `BARCODE_LABEL:::` components to track produced SKU stickers, and introduce a Vanilla JS physical-unit visual template designer.
+
 ### 🧹 Chores & Cleanup
-- **Token Tracking Metadata Purge** (`chore/rules`): Removed all legacy AI token tracking requirements (`[🤖 AI Model] [🧠 TBD] [💸 TBD]`) globally from the Bucket List and all automated intake workflows (`idea_intake`, `intake`, `product_alignment`, `tech-debt-janitor`, `teamwork_preview`).
+- **Label Designer Global Scoping** (`chore/lint`): Fixed `no-undef` warnings by explicitly scoping designer functions to the `window.` global scope inside event handlers.
+- **Token Tracking Metadata Purge** (`chore/rules`): Removed all legacy AI token tracking requirements globally from the Bucket List and all automated intake workflows.
 - **NPM Package Security Updates** (`chore/dep-patch-updates`): Executed `npm update` to safely bump development dependencies: `eslint` (10.4.0 -> 10.4.1) and `supabase` (2.101.0 -> 2.102.0) safe patch versions.
 - **Escape Double Quotes in DOM Interpolation** (`fix/recipe-quotes`): Fix the UI breaking bug when rendering product names with double quotes in the Recipez pane.
 - **ESLint Warnings Sweep 2** (`debt/eslint-warnings-sweep-2`): Resolve the 13 ESLint warnings across packerz, production-module, and system-realtime-sync to achieve a completely silent terminal.

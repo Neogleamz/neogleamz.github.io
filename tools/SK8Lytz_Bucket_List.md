@@ -45,7 +45,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Packerz SOP Improvements**
 *(Archived — 2026-06-02)*
-- [x] `feat/packerz-check-all` : **Check All QA Automation** - Introduce a "Check All" utility within the Packerz SOP Viewer Modal specifically for the Mandatory Quality Checklist section, allowing operators to bulk-clear standard textual QA checks. (Plan: [docs/plans/feat/packerz-check-all.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/packerz-check-all.md))
+- [🚀] `feat/packerz-check-all` : **Check All QA Automation** - Introduce a "Check All" utility within the Packerz SOP Viewer Modal specifically for the Mandatory Quality Checklist section, allowing operators to bulk-clear standard textual QA checks. (Plan: [docs/plans/feat/packerz-check-all.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/packerz-check-all.md))
 
 ### Target: `main`
 **Epic: Dynamic Label Tracking & Designer**
