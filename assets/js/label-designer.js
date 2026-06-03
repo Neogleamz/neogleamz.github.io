@@ -426,17 +426,17 @@ function ldRenderProperties() {
     props.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
     
     // Attach Event Listeners dynamically to avoid DOMPurify stripping inline handlers
-    document.getElementById('ldPropX')?.addEventListener('change', () => ldUpdateProp('x'));
-    document.getElementById('ldPropY')?.addEventListener('change', () => ldUpdateProp('y'));
-    document.getElementById('ldPropW')?.addEventListener('change', () => ldUpdateProp('width'));
-    document.getElementById('ldPropH')?.addEventListener('change', () => ldUpdateProp('height'));
-    document.getElementById('ldPropVal')?.addEventListener('change', () => ldUpdateProp('value'));
-    document.getElementById('ldPropVal')?.addEventListener('keyup', () => ldUpdateProp('value'));
-    document.getElementById('ldPropF')?.addEventListener('change', () => ldUpdateProp('fontSize'));
-    document.getElementById('ldPropF')?.addEventListener('keyup', () => ldUpdateProp('fontSize'));
-    document.getElementById('ldPropAlign')?.addEventListener('change', () => ldUpdateProp('textAlign'));
-    document.getElementById('ldCenterBtn')?.addEventListener('click', () => ldCenterElement(el.id));
-    document.getElementById('ldDeleteBtn')?.addEventListener('click', () => ldDeleteElement(el.id));
+    document.getElementById('ldPropX')?.addEventListener('change', () => window.ldUpdateProp('x'));
+    document.getElementById('ldPropY')?.addEventListener('change', () => window.ldUpdateProp('y'));
+    document.getElementById('ldPropW')?.addEventListener('change', () => window.ldUpdateProp('width'));
+    document.getElementById('ldPropH')?.addEventListener('change', () => window.ldUpdateProp('height'));
+    document.getElementById('ldPropVal')?.addEventListener('change', () => window.ldUpdateProp('value'));
+    document.getElementById('ldPropVal')?.addEventListener('keyup', () => window.ldUpdateProp('value'));
+    document.getElementById('ldPropF')?.addEventListener('change', () => window.ldUpdateProp('fontSize'));
+    document.getElementById('ldPropF')?.addEventListener('keyup', () => window.ldUpdateProp('fontSize'));
+    document.getElementById('ldPropAlign')?.addEventListener('change', () => window.ldUpdateProp('textAlign'));
+    document.getElementById('ldCenterBtn')?.addEventListener('click', () => window.ldCenterElement(el.id));
+    document.getElementById('ldDeleteBtn')?.addEventListener('click', () => window.ldDeleteElement(el.id));
 }
 
 window.ldUpdateProp = function(key) {
@@ -526,7 +526,7 @@ function ldPointerMove(e) {
     }
 }
 
-function ldPointerUp(e) {
+function ldPointerUp(_e) {
     window.ldState.dragging = null;
     window.ldState.resizing = null;
 }
