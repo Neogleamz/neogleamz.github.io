@@ -1200,7 +1200,7 @@ function showPackerzCompletionModal(orderId, lineItems) {
                     <h3 style="margin:0; font-size:16px; color:#10b981; font-weight:900;">CONFIRM ASSEMBLY</h3>
                     <button id="btnCancelModalTop" class="icon-btn" style="color:var(--text-muted); font-size:16px; font-weight:bold; border:1px solid var(--border-color); cursor:pointer; background:transparent;">✕</button>
                 </div>
-                <div style="font-size:11px; margin-bottom:5px; color:var(--text-muted); font-family:monospace;">Order ID: #${orderId}</div>
+                <div style="font-size:16px; font-weight:900; margin-bottom:10px; color:#0ea5e9; font-family:monospace; letter-spacing:1px; background:rgba(14,165,233,0.1); border:1px solid rgba(14,165,233,0.3); padding:6px 12px; border-radius:6px; align-self:flex-start;">ORDER ID: ${orderId}</div>
                 <p style="color:var(--text-muted); font-size:13px; margin:0 0 15px 0;">Please review the inventory actions below.</p>
                 
                 <div style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; padding-right:5px; margin-bottom:15px;">
