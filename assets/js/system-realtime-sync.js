@@ -41,6 +41,7 @@
             if (name === 'renderActiveTable') return typeof renderActiveTable === 'function' ? renderActiveTable : null;
             if (name === 'renderSkaters') return typeof renderSkaters === 'function' ? renderSkaters : null;
             if (name === 'updateFilterDropdownOptions') return typeof updateFilterDropdownOptions === 'function' ? updateFilterDropdownOptions : null;
+            if (name === 'fetchUnfulfilledOrders') return typeof fetchUnfulfilledOrders === 'function' ? fetchUnfulfilledOrders : null;
             
             return null;
         } catch (_e) {
@@ -163,6 +164,7 @@
                 if (idx !== -1) salesDB.splice(idx, 1);
             }
             queueRender('renderSalesTable');
+            queueRender('fetchUnfulfilledOrders');
         }
 
         // 5. Storefront Aliases Cache
