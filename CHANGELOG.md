@@ -1,5 +1,12 @@
 # SK8Lytz Application Changelog
 
+## [1.3.13] - 2026-06-04
+
+### ✨ Features & Bug Fixes
+- **Fail-Safe Backup Pipeline Guardrail**: Created a strict schema integrity guardrail for `executeExport`. It dynamically queries all base tables in the `public` schema via a new `SECURITY DEFINER` RPC (`get_active_schema_tables`), comparing them against `APP_TABLES` and `IGNORED_TABLES`. Any unmapped base tables trigger an immediate UI alert and abort the export, ensuring developers never accidentally forget to map new tables.
+- **Automated Export Extraction Fix**: Hardened the `executeExport` and `commitLiveRestore` pipeline to utilize dynamic iteration from `APP_TABLES`, preserving complex JSON-parsing extraction logic (like `product_recipes` and `work_orders`) without breaking older features or triggering manual maintenance pain points.
+- **Testing Regression Fixes**: Replaced outdated `internal_recipe_name` assertions with `recipe_item_uuid` inside `unified-parity.test.js`, restoring 100% parity CI checks. Also fixed the missing `layerzRunCompleteModal` DOM element in `comment-sync.test.js` which previously caused mock test timeouts.
+
 ## [1.3.12] - 2026-06-03
 
 ### ✨ Features & Bug Fixes
