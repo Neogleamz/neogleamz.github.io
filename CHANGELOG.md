@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.3.14] - 2026-06-04
+
+### ✨ Features & Bug Fixes
+- **Mobile Audit Console Sync & Fullscreen Modal** (`feat/mobile-audit-console`): Expand PC cycle count modal to fullscreen overlay. Upgrade mobile scanner to 1:1 functional clone with Bottom-Sheet UI. Fix WebRTC Base64 sync via Supabase channels, auto-trigger PC Audit Modal on scan.
+
 ## [1.3.13] - 2026-06-04
 
 ### ✨ Features & Bug Fixes
