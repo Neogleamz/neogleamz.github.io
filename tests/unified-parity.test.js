@@ -7,6 +7,7 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
         // Setup initial global mocks
         window.aliasDB = {};
         window.aliasMetadataDB = {};
+        window.uuidMap = { 'RECIPE:::Haloz': 'mock-uuid-haloz' };
         window.sysLog = jest.fn();
         window.setMasterStatus = jest.fn();
         window.runForensicAccounting = jest.fn().mockImplementation((lines) => lines.map(l => ({ ...l, cogs: 0, fee: 0, net: 0 })));
@@ -261,7 +262,7 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
         // Verify upsert arguments
         expect(upsertMock).toHaveBeenCalledWith({
             product_sku: "NG-3090-SK8Lytz HALOZ",
-            internal_recipe_name: "Haloz",
+            recipe_item_uuid: "mock-uuid-haloz",
             barcode_value: "954170281",
             is_shopify_synced: true,
             is_primary: false,
@@ -285,7 +286,7 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
         const expectedEmulatedBarcode = window.getItemBarcodeValue("LOCAL-MANUAL-SKU");
         expect(upsertMock).toHaveBeenCalledWith({
             product_sku: "LOCAL-MANUAL-SKU",
-            internal_recipe_name: "Haloz",
+            recipe_item_uuid: "mock-uuid-haloz",
             barcode_value: expectedEmulatedBarcode,
             is_shopify_synced: false,
             is_primary: false,

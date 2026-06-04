@@ -1469,18 +1469,67 @@ window.openBackupModal = function() {
 
 window.closeBackupModal = function() { document.getElementById('backupModal').style.display = 'none'; }
 
+const APP_TABLES = [
+    { tableName: 'app_settings', sheetName: 'App_Settings', conflictKey: 'setting_key' },
+    { tableName: 'cyclez', sheetName: 'Cyclez', conflictKey: 'id' },
+    { tableName: 'full_landed_costs', sheetName: 'Master_Ledger', conflictKey: 'parcel_no, di_item_id' },
+    { tableName: 'inventory_adjustments_log', sheetName: 'Inventory_Adjustments_Log', conflictKey: 'id' },
+    { tableName: 'inventory_consumption', sheetName: 'Inventory', conflictKey: 'item_uuid' },
+    { tableName: 'inventory_snapshots', sheetName: 'Inventory_Snapshots', conflictKey: 'id' },
+    { tableName: 'label_designs', sheetName: 'Label_Designs', conflictKey: 'id' },
+    { tableName: 'label_templates', sheetName: 'Label_Templates', conflictKey: 'id' },
+    { tableName: 'pack_ship_sops', sheetName: 'Pack_Ship_SOPs', conflictKey: 'recipe_item_uuid' },
+    { tableName: 'print_queue', sheetName: 'Print_Queue', conflictKey: 'id' },
+    { tableName: 'product_recipes', sheetName: 'Recipes', conflictKey: 'product_item_uuid' },
+    { tableName: 'production_sops', sheetName: 'SOPs', conflictKey: 'product_item_uuid' },
+    { tableName: 'projectz', sheetName: 'Projectz', conflictKey: 'id' },
+    { tableName: 'raw_orders', sheetName: 'Raw_Orders', conflictKey: 'di_item_id' },
+    { tableName: 'raw_parcel_items', sheetName: 'Raw_Parcel_Items', conflictKey: 'parcel_no, di_item_id' },
+    { tableName: 'raw_parcel_summary', sheetName: 'Raw_Parcel_Summary', conflictKey: 'parcel_no' },
+    { tableName: 'sales_ledger', sheetName: 'Sales_Ledger', conflictKey: 'id' },
+    { tableName: 'socialz_audience', sheetName: 'Socialz_Users', conflictKey: 'name' },
+    { tableName: 'sop_archives', sheetName: 'SOP_Archives', conflictKey: 'id' },
+    { tableName: 'storefront_aliases', sheetName: 'Storefront_Aliases', conflictKey: 'storefront_sku' },
+    { tableName: 'tagz', sheetName: 'Tagz', conflictKey: 'id' },
+    { tableName: 'task_activity', sheetName: 'Task_Activity', conflictKey: 'id' },
+    { tableName: 'task_comments', sheetName: 'Task_Comments', conflictKey: 'id' },
+    { tableName: 'taskz', sheetName: 'Taskz', conflictKey: 'id' },
+    { tableName: 'teams', sheetName: 'Teams', conflictKey: 'id' },
+    { tableName: 'tipz', sheetName: 'Tipz', conflictKey: 'id' },
+    { tableName: 'work_orders', sheetName: 'Work_Orders', conflictKey: 'wo_id' }
+];
+
+const IGNORED_TABLES = [
+    'registered_groups', 'shared_scenes', 'sk8lytz_app_settings', 'parsed_session_stats', 'crew_members', 'crew_memberships', 'user_profiles', 'crew_sessions', 'push_tokens', 'crews', 'admin_audit_logs', 'user_saved_presets', 'daemon_status', 'registered_devices', 'custom_builder_presets', 'led_diagnostics', 'sk8lytz_picks', 'remote_debug_logs', 'skate_sessions', 'product_catalog', 'telemetry_errors', 'spatial_ref_sys', 'telemetry_snapshots', 'discovered_devices_telemetry', 'skate_spots', 'hardware_blacklist', 'feature_flags', 'user_lifetime_stats', 'device_group_members', 'production_wos', 'team_members', 'task_dependencies', 'task_templates', 'template_subtasks'
+];
+
 window.executeExport = async function() {
     await executeWithButtonAction('btnExportBackup', '⏳ EXPORTING...', '✅ EXPORTED!', async () => {
         setMasterStatus("Exporting...", "mod-working"); sysLog("Exporting full system backup...");
+        
+        const { data: activeTables, error: rpcError } = await supabaseClient.rpc('get_active_schema_tables');
+        if (rpcError) throw rpcError;
+        
+        const validAppTables = APP_TABLES.map(t => t.tableName);
+        const activeTableNames = activeTables.map(t => t.table_name);
+        
+        const unhandledTables = activeTableNames.filter(t => !validAppTables.includes(t) && !IGNORED_TABLES.includes(t));
+        
+        if (unhandledTables.length > 0) {
+            const msg = `FATAL EXPORT ERROR: Unhandled active tables found: ${unhandledTables.join(', ')}. Please update APP_TABLES or IGNORED_TABLES.`;
+            alert(msg);
+            throw new Error(msg);
+        }
+
         const wb = XLSX.utils.book_new();
         async function addSheet(tableName, sheetName) {
             const { data, error } = await supabaseClient.from(tableName).select('*');
             if (error) throw error;
             let exportData = data;
             if (tableName === 'product_recipes') {
-                exportData = data.map(r => ({ product_name: r.product_name, components: JSON.stringify(r.components), labor_time_mins: r.labor_time_mins, labor_rate_hr: r.labor_rate_hr, msrp: r.msrp, wholesale_price: r.wholesale_price, is_subassembly: r.is_subassembly }));
+                exportData = data.map(r => ({ product_item_uuid: r.product_item_uuid, components: JSON.stringify(r.components), labor_time_mins: r.labor_time_mins, labor_rate_hr: r.labor_rate_hr, msrp: r.msrp, wholesale_price: r.wholesale_price, is_subassembly: r.is_subassembly }));
             } else if (tableName === 'production_sops') {
-                exportData = data.map(r => ({ product_name: r.product_name, steps: JSON.stringify(r.steps) }));
+                exportData = data.map(r => ({ product_item_uuid: r.product_item_uuid, steps: JSON.stringify(r.steps) }));
             } else if (tableName === 'work_orders') {
                 exportData = data.map(r => ({ ...r, wip_state: JSON.stringify(r.wip_state), routing: JSON.stringify(r.routing || {}) }));
             } else if (tableName === 'pack_ship_sops') {
@@ -1490,21 +1539,11 @@ window.executeExport = async function() {
             }
             const ws = XLSX.utils.json_to_sheet(exportData); XLSX.utils.book_append_sheet(wb, ws, sheetName);
         }
-        await addSheet('full_landed_costs', 'Master_Ledger');
-        await addSheet('product_recipes', 'Recipes');
-        await addSheet('inventory_consumption', 'Inventory');
-        await addSheet('work_orders', 'Work_Orders');
-        await addSheet('production_sops', 'SOPs');
-        await addSheet('sales_ledger', 'Sales_Ledger');
-        await addSheet('storefront_aliases', 'Storefront_Aliases');
-        await addSheet('print_queue', 'Print_Queue');
-        await addSheet('app_settings', 'App_Settings');
-        await addSheet('socialz_audience', 'Socialz_Users');
-        await addSheet('pack_ship_sops', 'Pack_Ship_SOPs');
-        await addSheet('sop_archives', 'SOP_Archives');
-        await addSheet('raw_orders', 'Raw_Orders');
-        await addSheet('raw_parcel_summary', 'Raw_Parcel_Summary');
-        await addSheet('raw_parcel_items', 'Raw_Parcel_Items');
+        
+        for (const tbl of APP_TABLES) {
+            await addSheet(tbl.tableName, tbl.sheetName);
+        }
+        
         const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
         XLSX.writeFile(wb, `Neogleamz_Full_Backup_${dateStr}_${timeStr}.xlsx`);
         setMasterStatus("Export Complete!", "mod-success"); 
@@ -1623,21 +1662,18 @@ async function commitLiveRestore(dataDict) {
             sysLog(`Restoring sheet: ${sheetName}`);
             
             let tableName = ''; let conflictKey = ''; let parsedData = rawData;
-            if (sheetName === 'Master_Ledger') { tableName = 'full_landed_costs'; conflictKey = 'parcel_no, di_item_id'; } 
-            else if (sheetName === 'Recipes') { tableName = 'product_recipes'; conflictKey = 'product_name'; parsedData = rawData.map(r => ({ ...r, components: JSON.parse(r.components || '[]') })); } 
-            else if (sheetName === 'Inventory') { tableName = 'inventory_consumption'; conflictKey = 'item_key'; } 
-            else if (sheetName === 'Work_Orders') { tableName = 'work_orders'; conflictKey = 'wo_id'; parsedData = rawData.map(r => ({ ...r, wip_state: JSON.parse(r.wip_state || '{}'), routing: JSON.parse(r.routing || '{}') })); } 
-            else if (sheetName === 'SOPs') { tableName = 'production_sops'; conflictKey = 'product_name'; parsedData = rawData.map(r => ({ ...r, steps: JSON.parse(r.steps || '[]') })); }
-            else if (sheetName === 'Sales_Ledger') { tableName = 'sales_ledger'; conflictKey = 'id'; }
-            else if (sheetName === 'Storefront_Aliases') { tableName = 'storefront_aliases'; conflictKey = 'storefront_sku'; }
-            else if (sheetName === 'Print_Queue') { tableName = 'print_queue'; conflictKey = 'id'; }
-            else if (sheetName === 'App_Settings') { tableName = 'app_settings'; conflictKey = 'id'; }
-            else if (sheetName === 'Socialz_Users') { tableName = 'socialz_audience'; conflictKey = 'name'; }
-            else if (sheetName === 'Pack_Ship_SOPs') { tableName = 'pack_ship_sops'; conflictKey = 'internal_recipe_name'; parsedData = rawData.map(r => ({ ...r, instruction_json: typeof r.instruction_json === 'string' && r.instruction_json.startsWith('{') ? JSON.parse(r.instruction_json) : r.instruction_json })); }
-            else if (sheetName === 'SOP_Archives') { tableName = 'sop_archives'; conflictKey = 'id'; parsedData = rawData.map(r => ({ ...r, telemetry_json: typeof r.telemetry_json === 'string' && r.telemetry_json.startsWith('[') ? JSON.parse(r.telemetry_json) : r.telemetry_json })); }
-            else if (sheetName === 'Raw_Orders') { tableName = 'raw_orders'; conflictKey = 'di_item_id'; }
-            else if (sheetName === 'Raw_Parcel_Summary') { tableName = 'raw_parcel_summary'; conflictKey = 'parcel_no'; }
-            else if (sheetName === 'Raw_Parcel_Items') { tableName = 'raw_parcel_items'; conflictKey = 'parcel_no, di_item_id'; }
+            
+            const appTbl = APP_TABLES.find(t => t.sheetName === sheetName);
+            if (appTbl) {
+                tableName = appTbl.tableName;
+                conflictKey = appTbl.conflictKey;
+            }
+            
+            if (sheetName === 'Recipes') { parsedData = rawData.map(r => ({ ...r, components: JSON.parse(r.components || '[]') })); } 
+            else if (sheetName === 'Work_Orders') { parsedData = rawData.map(r => ({ ...r, wip_state: JSON.parse(r.wip_state || '{}'), routing: JSON.parse(r.routing || '{}') })); } 
+            else if (sheetName === 'SOPs') { parsedData = rawData.map(r => ({ ...r, steps: JSON.parse(r.steps || '[]') })); }
+            else if (sheetName === 'Pack_Ship_SOPs') { parsedData = rawData.map(r => ({ ...r, instruction_json: typeof r.instruction_json === 'string' && r.instruction_json.startsWith('{') ? JSON.parse(r.instruction_json) : r.instruction_json })); }
+            else if (sheetName === 'SOP_Archives') { parsedData = rawData.map(r => ({ ...r, telemetry_json: typeof r.telemetry_json === 'string' && r.telemetry_json.startsWith('[') ? JSON.parse(r.telemetry_json) : r.telemetry_json })); }
             
             if (tableName) {
                 importTrace(`▶ Upserting ${parsedData.length} records into [${tableName}]... (${iterIdx}/${ttlChecks})`, false, termId);

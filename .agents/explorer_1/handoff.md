@@ -1,25 +1,25 @@
-# Observation
-- **M1 (ViewBox Scaling):** The scaling logic resides in `assets/js/labelz-module.js` around line 258 (`zoomLabelzCanvas()`). It currently applies `transform: scale(${currentZoom})` to the `#labelzCanvasContainer` DOM element. Because the internal canvas is generated at 300 PPI (e.g., a 4x6 label is 1200x1800 physical pixels), the unscaled flexbox dimensions heavily overflow the parent wrapper, causing flexbox's `justify-content: center` to clip the top and left of the canvas once scaled.
-- **M2 (Print CSS & Phantom Elements):** The global print CSS is defined in `index.html` line 550. It effectively hides the app via `body > *:not(#printableBarcodeArea) { display: none !important; }`. However, `#printableBarcodeArea` is used heavily by the Batch Spooler (`executeBatchPrint()`), which injects raw `JsBarcode` SVGs and `bwipjs` Canvases. If `innerHTML` is not strictly managed before/after print events, previous print jobs persist as "phantom" QR/Barcodes. Furthermore, there is no dynamic `@page` sizing implemented in the PDF Preview workflow.
-- **M3 (Orientation Rotation):** There is currently no UI element for orientation. The optimal insertion point is `index.html` line 2689, adjacent to the existing `labelzDesignerSize` dropdown inside the `labelzDesignerModal` top nav bar.
-- **M4 (PDF Preview):** The "PDF PREVIEW" button is located in `index.html` at line 2744, utilizing the `data-click="click_exportLabelzPDF"` delegate. The `exportLabelzPDF()` function in `labelz-module.js` line 939 currently relies on the external `jsPDF` library to generate a blob and opens it in a new popup window, entirely bypassing the native OS print spooler.
+# Handoff Report: Backup Pipeline Analysis
 
-# Logic Chain
-1. **Resolving M1:** To properly decouple the physical layout scaling from the internal Canvas PPI, we must abandon CSS `transform: scale()`. Fabric.js supports direct CSS dimension decoupling. By replacing the transform with `fCanvas.setDimensions({ width: fCanvas.width * currentZoom + 'px', height: fCanvas.height * currentZoom + 'px' }, { cssOnly: true });`, the canvas container will physically shrink in the DOM layout without altering internal 300 PPI coordinates, allowing flexbox to center it perfectly.
-2. **Resolving M4 & M2:** We must deprecate `jsPDF` in `exportLabelzPDF()`. We will extract `fCanvas.toDataURL()`, target `#printableBarcodeArea`, and inject both the image and a dynamic `<style>@page { size: ${w}in ${h}in; margin: 0; }</style>` block. This forces the browser's native print spooler to default to exact thermal dimensions. Calling `window.print()` natively handles the PDF generation.
-3. **Addressing Phantom Elements (M2):** We must proactively clear `#printableBarcodeArea.innerHTML = ''` both immediately before injecting the preview image and 1.5 seconds after `window.print()` fires to guarantee destruction of any leftover DOM elements.
-4. **Resolving M3:** By injecting a `<select id="labelzOrientation">` toggle in `index.html` (Portrait/Landscape), we can read its state during `exportLabelzPDF()`. Thermal hardware expects fixed paper feeds (e.g. 4x6). To rotate, we maintain the strict `@page` size but dynamically append `transform: rotate(90deg); transform-origin: center;` to the injected `<img />` payload.
+## 1. Observation
+- Inspected `d:\GitHub\neogleamz.github.io\assets\js\system-tools-module.js`.
+- `executeExport` uses 15 consecutive `await addSheet()` calls for exporting tables (lines 1493-1507).
+- `commitLiveRestore` uses a heavily chained `if/else` block mapping Excel sheet names to target Supabase table names and resolution conflict keys (lines 1625-1640).
+- Both pipelines tightly couple metadata mappings and processing rules, preventing dynamic schema tracking.
 
-# Caveats
-- `setTimeout` delays around `window.print()` vary by browser. A 500ms delay before print ensures the base64 image paints to the DOM, and a 1500ms cleanup delay ensures the OS has captured the spooler snapshot before we wipe `#printableBarcodeArea`.
-- The rotation assumes the thermal printer hardware feed is strictly vertical (Portrait). A 90-degree CSS rotation forces the image sideways to fit a Landscape design onto a Portrait physical feed.
+## 2. Logic Chain
+- Moving configuration data out of execution blocks into centralized `APP_TABLES` and `IGNORED_TABLES` arrays will make the system much easier to maintain.
+- Iterating via a programmatic RPC (`get_active_schema_tables`) combined with `APP_TABLES` metadata provides dynamic export discovery without hardcoding new components.
+- The `get_active_schema_tables` RPC should cleanly pull entries from `pg_catalog.pg_class` where `relkind = 'r'` within the `public` schema.
+- Parsing logic for specific tables (like `product_recipes`) is decoupled gracefully by checking properties matched via the `APP_TABLES` map.
 
-# Conclusion
-The Labelz Module requires precise architectural rewrites to `zoomLabelzCanvas()` and `exportLabelzPDF()` in `assets/js/labelz-module.js`. We must swap CSS transform scaling for Fabric's native `{cssOnly: true}` dimensioning. The PDF Preview workflow must shift from `jsPDF` blobs to native `window.print()` injections utilizing the `#printableBarcodeArea` and dynamic `@page` CSS. We will introduce a new HTML `<select>` orientation toggle to control the CSS `transform: rotate(90deg)` logic on the injected print image.
+## 3. Caveats
+- `IGNORED_TABLES` currently demonstrates ignoring `spatial_ref_sys` — other extensions or internal views could populate the `public` schema and may require filtering based on future context.
+- The SQL query utilizes `SECURITY DEFINER` meaning the RPC executes with the privileges of its creator, bypassing Row Level Security. However, since it only returns table names from metadata catalogs, the security risk is functionally zero.
 
-# Verification Method
-1. Modify `zoomLabelzCanvas` in `assets/js/labelz-module.js`. Launch the web app, open a 4x6 Label in the Designer, and rapidly click `+` and `-` zoom toggles. Verify the canvas remains perfectly centered without left/top clipping.
-2. Open the Labelz Designer, add a barcode, and click the "PDF PREVIEW" button.
-3. Verify the native browser Print Dialog opens instead of a blocked popup.
-4. Verify the default paper size in the print dialog dynamically matches the selected dropdown size (e.g., 2.25x1.25).
-5. Toggle "Landscape" on the new UI element, re-click PDF Preview, and verify the image is rotated 90 degrees in the print preview window.
+## 4. Conclusion
+The implementation of `APP_TABLES`, `IGNORED_TABLES`, and the dynamically powered database scan is fully architected. The necessary arrays, modified loop structure, simplified mapping logic, and migration SQL have been fully detailed in the `analysis.md` report.
+
+## 5. Verification Method
+- Code Review: Confirm changes implemented directly reflect `d:\GitHub\neogleamz.github.io\.agents\explorer_1\analysis.md`.
+- Test `executeExport` and ensure the downloaded backup spreadsheet contains the correct tabs and formats JSON correctly for complex objects.
+- Validate `get_active_schema_tables` deployment on Supabase returns a text array of expected table names.

@@ -11,7 +11,8 @@ beforeAll(() => {
     window.printQueueDB = [];
     window.catalogByName = {};
     window.sopsDB = {};
-    window.sysLog = jest.fn();
+    window.uuidMap = {};
+    window.sysLog = jest.fn((msg) => console.log("sysLog:", msg));
     window.setMasterStatus = jest.fn();
     window.showToast = jest.fn();
     window.safeHTML = jest.fn(val => val);
@@ -33,7 +34,8 @@ beforeAll(() => {
             },
             setAttribute: jest.fn(),
             getAttribute: jest.fn(),
-            innerHTML: ''
+            innerHTML: '',
+            value: ''
         };
     });
 
@@ -43,7 +45,12 @@ beforeAll(() => {
         delete: jest.fn().mockReturnThis(),
         eq: jest.fn().mockResolvedValue({ error: null }),
         insert: jest.fn().mockResolvedValue({ error: null }),
-        upsert: jest.fn().mockResolvedValue({ error: null })
+        upsert: jest.fn().mockResolvedValue({ error: null }),
+        select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({ data: { product_name: 'RECIPE:::Mock', wip_state: {} }, error: null })
+            })
+        })
     };
     window.supabaseClient = {
         from: jest.fn().mockReturnValue(mockSupabaseQuery)
@@ -68,6 +75,7 @@ beforeAll(() => {
         <div id="finalizeWoModal"></div>
         <div id="finalizeWoActionBtn"></div>
         <div id="printMainArea"></div>
+        <div id="layerzRunCompleteModal"></div>
     `;
 
     require('../assets/js/production-module.js');
@@ -84,6 +92,7 @@ describe("Comment Sync and Task Engine Integration", () => {
             <div id="finalizeWoActionBtn"></div>
             <div id="printMainArea"></div>
             <ul id="printListUI"></ul>
+            <div id="layerzRunCompleteModal"></div>
         `;
     });
 
