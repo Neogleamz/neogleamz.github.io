@@ -613,9 +613,9 @@
         <div id="mobileCockpitCard" class="cockpit-card" style="display: none; height: auto; overflow-y: visible; padding-top: 0; margin-top: 10px;">
             <!-- Tabs Header -->
             <div style="display: flex; gap: 4px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; background: rgba(7, 11, 19, 0.95); z-index: 10;">
-                <div class="audit-tab active">📦 Physical Audit</div>
-                <div class="audit-tab inactive">📈 Planning</div>
-                <div class="audit-tab inactive">📜 History</div>
+                <div id="mobileTab_audit" class="audit-tab active" onclick="switchMobileTab('audit')">📦 Physical Audit</div>
+                <div id="mobileTab_planning" class="audit-tab inactive" onclick="switchMobileTab('planning')">📈 Planning</div>
+                <div id="mobileTab_history" class="audit-tab inactive" onclick="switchMobileTab('history')">📜 History</div>
             </div>
 
             <div style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
@@ -654,7 +654,7 @@
                     </div>
                 </div>
             </div>
-
+            <div id="mobileWrapper_audit" style="display:flex; flex-direction:column;">
             <!-- Audit Mode Switcher -->
             <div style="margin-top: 15px;">
                 <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Select Audit Mode:</div>
@@ -724,7 +724,7 @@
             </div>
 
             <!-- Reason Code & Notes -->
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <div id="mobilePanel_reason" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
                 <div style="display: flex; gap: 8px;">
                     <div style="flex: 1;">
                         <label style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Reason Code:</label>
@@ -743,6 +743,54 @@
                     <input type="text" id="ccMobileNotesInput" class="manual-input" placeholder="Add specific count notes..." style="width: 100%; margin-top: 4px; font-size: 13px;">
                 </div>
             </div>
+            
+            </div> <!-- End Physical Audit Wrapper -->
+            
+            <!-- Mobile Planning Panel -->
+            <div id="mobileWrapper_planning" style="display: none; flex-direction: column; gap: 15px; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                <div style="font-size:12px; font-weight:800; color:var(--text-main); text-transform:uppercase; margin-bottom: 5px;">Reorder Point (ROP) Settings</div>
+                
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase;">Safety Stock (Min Target):</span>
+                        <span id="mobileMinValPreview" style="font-family:monospace; font-size:14px; font-weight:900; color:#f97316;">0.00</span>
+                    </div>
+                    <input type="range" min="0" max="250" step="1" id="mobileMinSlider" style="width:100%; accent-color:#f97316; margin-bottom:8px;" oninput="updateMobileRopPreview()">
+                </div>
+                
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; font-weight:bold; color:var(--text-muted); text-transform:uppercase;">Lead Time (Days):</span>
+                        <span id="mobileLeadValPreview" style="font-family:monospace; font-size:14px; font-weight:900; color:#14b8a6;">0 days</span>
+                    </div>
+                    <input type="range" min="1" max="60" step="1" id="mobileLeadSlider" style="width:100%; accent-color:#14b8a6; margin-bottom:8px;" oninput="updateMobileRopPreview()">
+                </div>
+                
+                <div style="background:rgba(0,0,0,0.4); border:1px solid var(--border-glass); border-radius:8px; padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center;">
+                    <div>
+                        <div style="font-size:9px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Sales Velocity</div>
+                        <div id="mobileVelocityPreview" style="font-size:14px; font-weight:900; color:#fff; font-family:monospace;">0.00/d</div>
+                    </div>
+                    <div>
+                        <div style="font-size:9px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Reorder Point</div>
+                        <div id="mobileROPValPreview" style="font-size:14px; font-weight:900; color:#0ea5e9; font-family:monospace;">0.00</div>
+                    </div>
+                </div>
+                
+                <div style="text-align:center;">
+                    <div id="mobileAlertStatusBadge" style="background:#10b981; color:white; font-size:11px; font-weight:900; text-transform:uppercase; padding:6px 15px; border-radius:20px; display:inline-block;">✅ Stock Healthy</div>
+                </div>
+            </div>
+
+            <!-- Mobile History Panel -->
+            <div id="mobileWrapper_history" style="display: none; flex-direction: column; gap: 15px; margin-top: 15px;">
+                <div id="mobileHistoryContent" style="display:flex; flex-direction:column; gap:8px; max-height:400px; overflow-y:auto;">
+                    <!-- JS Injected -->
+                    <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Syncing history from PC...</div>
+                </div>
+            </div>
+            
+            <div id="mobileWrapper_audit">
 
             <!-- Action Controls Row -->
             <div style="display: flex; gap: 8px; width: 100%; margin-top: 25px; padding-bottom: 20px;">
@@ -1036,6 +1084,47 @@
                         if (selectBox && payload.itemKey && selectBox.value !== payload.itemKey) {
                             selectBox.value = payload.itemKey;
                         }
+                        
+                        if (payload.planning) {
+                            const p = payload.planning;
+                            const minVal = document.getElementById('mobileMinValPreview');
+                            const minSlider = document.getElementById('mobileMinSlider');
+                            const leadVal = document.getElementById('mobileLeadValPreview');
+                            const leadSlider = document.getElementById('mobileLeadSlider');
+                            const veloPreview = document.getElementById('mobileVelocityPreview');
+                            const ropPreview = document.getElementById('mobileROPValPreview');
+                            const alertBadge = document.getElementById('mobileAlertStatusBadge');
+                            
+                            if (minVal) minVal.innerText = p.minTarget || '0';
+                            if (minSlider) minSlider.value = p.minTarget || 0;
+                            if (leadVal) leadVal.innerText = p.leadTime + ' days';
+                            if (leadSlider) leadSlider.value = p.leadTime || 0;
+                            if (veloPreview) veloPreview.innerText = p.velocityText || '0.00 / day';
+                            if (ropPreview) ropPreview.innerText = p.ropText || '0.00';
+                            
+                            if (alertBadge && p.alertBadgeHtml) {
+                                // Extract inner text and color from PC's badge
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = p.alertBadgeHtml;
+                                const child = tempDiv.firstElementChild;
+                                if (child) {
+                                    alertBadge.innerText = child.innerText;
+                                    alertBadge.style.background = child.style.background;
+                                    alertBadge.style.color = child.style.color;
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Listen for History broadcast
+                syncChannel.on('broadcast', { event: 'PC_HISTORY_UPDATE' }, (envelope) => {
+                    const payload = envelope.payload;
+                    if (payload && payload.html) {
+                        const histContainer = document.getElementById('mobileHistoryContent');
+                        if (histContainer) {
+                            histContainer.innerHTML = payload.html;
+                        }
                     }
                 });
                 
@@ -1315,7 +1404,29 @@
 
         let activeAuditMode = 'delta';
 
-        function switchMobileAuditMode(mode) {
+        // Dynamic tab switcher function
+        window.switchMobileTab = function(tabName) {
+            document.getElementById('mobileTab_audit').className = 'audit-tab inactive';
+            document.getElementById('mobileTab_planning').className = 'audit-tab inactive';
+            document.getElementById('mobileTab_history').className = 'audit-tab inactive';
+
+            document.getElementById('mobileWrapper_audit').style.display = 'none';
+            document.getElementById('mobileWrapper_planning').style.display = 'none';
+            document.getElementById('mobileWrapper_history').style.display = 'none';
+
+            document.getElementById('mobileTab_' + tabName).className = 'audit-tab active';
+            
+            if (tabName === 'audit') {
+                document.getElementById('mobileWrapper_audit').style.display = 'flex';
+            } else if (tabName === 'planning') {
+                document.getElementById('mobileWrapper_planning').style.display = 'flex';
+            } else if (tabName === 'history') {
+                document.getElementById('mobileWrapper_history').style.display = 'flex';
+            }
+            triggerHaptic(50);
+        };
+
+        window.switchMobileAuditMode = function(mode) {
             activeAuditMode = mode;
             const deltaPanel = document.getElementById('mobilePanel_delta');
             const reconPanel = document.getElementById('mobilePanel_reconciliation');
@@ -1423,15 +1534,34 @@
             }
         }
 
-        function decrementMobileCount() {
+        window.decrementMobileCount = function() {
             const input = document.getElementById('ccMobileCountInput');
             if (input) {
                 let current = parseFloat(input.value) || 0;
                 input.value = Math.max(0, current - 1);
                 triggerHaptic([40, 40]);
-                syncMobileReconciliationValuation();
+                window.syncMobileReconciliationValuation();
             }
-        }
+        };
+
+        window.updateMobileRopPreview = function() {
+            const minSlider = document.getElementById('mobileMinSlider');
+            const leadSlider = document.getElementById('mobileLeadSlider');
+            
+            document.getElementById('mobileMinValPreview').innerText = minSlider.value;
+            document.getElementById('mobileLeadValPreview').innerText = leadSlider.value + ' days';
+            
+            if (window.syncChannel) {
+                window.syncChannel.send({
+                    type: 'broadcast',
+                    event: 'MOBILE_PLANNING_UPDATE',
+                    payload: {
+                        minTarget: minSlider.value,
+                        leadTime: leadSlider.value
+                    }
+                }).catch(()=>{});
+            }
+        };
 
         // Discard & Save controllers
         document.getElementById('phoneDiscardBtn').addEventListener('click', async () => {

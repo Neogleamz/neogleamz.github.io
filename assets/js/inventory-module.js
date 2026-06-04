@@ -1493,6 +1493,26 @@ window.initializeCcSyncChannel = function() {
         }
     });
 
+    // Listen for phone-side planning slider changes
+    window.ccSyncChannel.on('broadcast', { event: 'MOBILE_PLANNING_UPDATE' }, (envelope) => {
+        const payload = envelope.payload;
+        if (payload) {
+            const minSlider = document.getElementById('stockzAuditMinSlider');
+            const leadSlider = document.getElementById('stockzAuditLeadSlider');
+            if (minSlider && typeof payload.minTarget !== 'undefined') {
+                minSlider.value = payload.minTarget;
+                document.getElementById('stockzAuditMinValPreview').innerText = payload.minTarget;
+            }
+            if (leadSlider && typeof payload.leadTime !== 'undefined') {
+                leadSlider.value = payload.leadTime;
+                document.getElementById('stockzAuditLeadValPreview').innerText = payload.leadTime + ' days';
+            }
+            if (typeof window.updateStockzAuditROPSimulator === 'function') {
+                window.updateStockzAuditROPSimulator();
+            }
+        }
+    });
+
     // Listen for mobile cockpit counts saving (supporting both Next and Close)
     window.ccSyncChannel.on('broadcast', { event: 'MOBILE_SAVE_COUNT' }, async (envelope) => {
         const payload = envelope.payload;
@@ -2430,7 +2450,14 @@ window.selectStockzAuditItem = function(itemKey) {
             itemKey: itemKey,
             netStock: expectedStock,
             scrapped: scrapped,
-            cost: avgCost || 0
+            cost: avgCost || 0,
+            planning: {
+                minTarget: document.getElementById('stockzAuditMinSlider')?.value || 0,
+                leadTime: document.getElementById('stockzAuditLeadSlider')?.value || 0,
+                velocityText: document.getElementById('stockzAuditVelocityPreview')?.innerText || '0.00 / day',
+                ropText: document.getElementById('stockzAuditROPValPreview')?.innerText || '0.00 units',
+                alertBadgeHtml: document.getElementById('stockzAuditAlertStatusBadge')?.outerHTML || ''
+            }
         };
         
         if (itemKey.startsWith('RECIPE:::')) {
@@ -3072,6 +3099,13 @@ window.refreshStockzAuditHistory = async function() {
         });
         
         historyContainer.innerHTML = h;
+        if (window.ccSyncChannel && window.currentAuditItemKey) {
+            window.ccSyncChannel.send({
+                type: 'broadcast',
+                event: 'PC_HISTORY_UPDATE',
+                payload: { html: h }
+            }).catch(()=>{});
+        }
     } catch(e) {
         sysLog(`[Audit History Load Error] ${e.message}`, true);
         historyContainer.innerHTML = `<div style="text-align:center; padding:40px; color:#ef4444; font-size:13px; font-weight:bold;">✕ Error loading history: ${e.message}</div>`;
