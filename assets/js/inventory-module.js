@@ -1364,9 +1364,7 @@ window.initializeCcSyncChannel = function() {
                             event: 'SESSION_TRANSFER',
                             payload: {
                                 accessToken: data.session.access_token,
-                                refreshToken: data.session.refresh_token || '',
-                                catalogCache: window.catalogCache || {},
-                                uuidMap: window.uuidMap || {}
+                                refreshToken: data.session.refresh_token || ''
                             }
                         }).catch(() => {});
                     }
@@ -1380,9 +1378,7 @@ window.initializeCcSyncChannel = function() {
                 event: 'SESSION_TRANSFER',
                 payload: {
                     accessToken: sessionToken,
-                    refreshToken: refreshToken,
-                    catalogCache: window.catalogCache || {},
-                    uuidMap: window.uuidMap || {}
+                    refreshToken: refreshToken
                 }
             }).catch(err => {
                 sysLog(`[Realtime Scanner] SESSION_TRANSFER send failed: ${err.message}`, true);
@@ -1451,9 +1447,6 @@ window.initializeCcSyncChannel = function() {
         const payload = envelope.payload;
         if (payload && payload.barcode) {
             sysLog(`[Realtime Scanner] Received remote scan lock: ${payload.barcode}`);
-            if (typeof window.click_openStockzAuditModal === 'function') {
-                window.click_openStockzAuditModal();
-            }
             window.onScanSuccess(payload.barcode);
         }
     });

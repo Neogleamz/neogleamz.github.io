@@ -762,7 +762,10 @@
                         hasSession = true;
                         isDesktopActive = true;
                         
-                        if (payload.catalogCache) window.catalogCache = payload.catalogCache;
+                        if (payload.catalogCache) {
+                            window.catalogCache = payload.catalogCache;
+                            populateItemsFromCache();
+                        }
                         if (payload.uuidMap) window.uuidMap = payload.uuidMap;
                         
                         await supabaseClient.auth.setSession({
@@ -837,8 +840,9 @@
                     }
                 });
 
-                // Listen for serialized PC item dropdown options list
+                // Listen for serialized PC item dropdown options list (fallback)
                 syncChannel.on('broadcast', { event: 'ITEM_DIRECTORY' }, (envelope) => {
+                    if (window.catalogCache && Object.keys(window.catalogCache).length > 0) return; // Ignore if we have native cache
                     const payload = envelope.payload;
                     if (payload && payload.items) {
                         const selectBox = document.getElementById('ccMobileItemSelect');
@@ -853,6 +857,40 @@
                         }
                     }
                 });
+                
+        // Natively render dropdown from cached metadata
+        function populateItemsFromCache() {
+            const selectBox = document.getElementById('ccMobileItemSelect');
+            if (!selectBox || !window.catalogCache) return;
+            
+            const groups = {};
+            for (let k in window.catalogCache) {
+                const item = window.catalogCache[k];
+                const name = item.neoName || item.itemName || k;
+                
+                // Determine group (e.g., HALO, NEO, etc.)
+                let prefix = 'OTHER';
+                if (item.type) {
+                    prefix = item.type.toUpperCase();
+                } else {
+                    const match = name.match(/^([a-zA-Z]+)/);
+                    if (match) prefix = match[1].toUpperCase();
+                }
+                
+                if (!groups[prefix]) groups[prefix] = [];
+                groups[prefix].push({ value: k, text: name });
+            }
+            
+            let html = '<option value="">-- Choose Item Natively --</option>';
+            for (let prefix in groups) {
+                html += `<optgroup label="${prefix}">`;
+                groups[prefix].sort((a,b) => a.text.localeCompare(b.text)).forEach(i => {
+                    html += `<option value="${i.value}">${i.text}</option>`;
+                });
+                html += `</optgroup>`;
+            }
+            selectBox.innerHTML = html;
+        }
 
                 // Listen for PC-side dynamic stock balances updates
                 syncChannel.on('broadcast', { event: 'PC_STOCK_UPDATE' }, (envelope) => {
