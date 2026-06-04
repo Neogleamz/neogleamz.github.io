@@ -1010,7 +1010,6 @@
 
                 // Listen for serialized PC item dropdown options list (fallback)
                 syncChannel.on('broadcast', { event: 'ITEM_DIRECTORY' }, (envelope) => {
-                    if (window.catalogCache && Object.keys(window.catalogCache).length > 0) return; // Ignore if we have native cache
                     const payload = envelope.payload;
                     if (payload && payload.items) {
                         const selectBox = document.getElementById('ccMobileItemSelect');
@@ -1064,25 +1063,18 @@
                 syncChannel.on('broadcast', { event: 'PC_STOCK_UPDATE' }, (envelope) => {
                     const payload = envelope.payload;
                     if (payload) {
-                        const netStock = document.getElementById('ccMobileNetStockVal');
-                        const prod = document.getElementById('ccMobileProdVal');
-                        const proto = document.getElementById('ccMobileProtoVal');
-                        const cons = document.getElementById('ccMobileConsVal');
-                        const scrap = document.getElementById('ccMobileScrapVal');
-                        const adj = document.getElementById('ccMobileAdjVal');
-                        const selectBox = document.getElementById('ccMobileItemSelect');
-
-                        if (netStock) netStock.innerText = payload.netStock || '—';
-                        if (prod) prod.innerText = payload.prod || '—';
-                        if (proto) proto.innerText = payload.proto || '—';
-                        if (cons) cons.innerText = payload.cons || '—';
-                        if (scrap) scrap.innerText = payload.scrap || '—';
-                        if (adj) adj.innerText = payload.adj || '—';
-                        
                         window.currentNetStock = parseFloat(payload.netStock) || 0;
                         
+                        const selectBox = document.getElementById('ccMobileItemSelect');
                         if (selectBox && payload.itemKey && selectBox.value !== payload.itemKey) {
                             selectBox.value = payload.itemKey;
+                        }
+                        
+                        if (payload.gridHtml) {
+                            const gridContainer = document.getElementById('mobileStockPanel');
+                            if (gridContainer) {
+                                gridContainer.innerHTML = `<div class="stock-grid" style="grid-template-columns: repeat(3, 1fr); gap: 6px;">${payload.gridHtml}</div>`;
+                            }
                         }
                         
                         if (payload.planning) {
