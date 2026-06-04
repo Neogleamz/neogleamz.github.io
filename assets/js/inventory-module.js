@@ -2873,7 +2873,12 @@ window.refreshStockzAuditHistory = async function() {
         let query = supabaseClient.from('inventory_adjustments_log').select('*');
         
         if (window.currentAuditItemKey) {
-            query = query.eq('item_key', window.currentAuditItemKey);
+            const uuid = window.uuidMap ? window.uuidMap[window.currentAuditItemKey] : null;
+            if (uuid) {
+                query = query.or(`item_key.eq.${window.currentAuditItemKey},item_uuid.eq.${uuid}`);
+            } else {
+                query = query.eq('item_key', window.currentAuditItemKey);
+            }
         }
         
         // Increase query limit to 100 to scale better with a long history
@@ -2903,11 +2908,20 @@ window.refreshStockzAuditHistory = async function() {
                 second: '2-digit'
             });
             
-            const isRecipe = row.item_key.startsWith('RECIPE:::');
-            const cleanName = row.item_key.replace('RECIPE:::', '');
+            let itemKey = row.item_key;
+            if (!itemKey && row.item_uuid && window.uuidToAllNamesMap) {
+                const names = window.uuidToAllNamesMap[row.item_uuid];
+                if (names && names.length > 0) {
+                    itemKey = names[0];
+                }
+            }
+            itemKey = itemKey || 'Unknown Item';
+            
+            const isRecipe = itemKey.startsWith('RECIPE:::');
+            const cleanName = itemKey.replace('RECIPE:::', '');
             let displayName = cleanName;
-            if (!isRecipe && typeof catalogCache !== 'undefined' && catalogCache[row.item_key]) {
-                const c = catalogCache[row.item_key];
+            if (!isRecipe && typeof catalogCache !== 'undefined' && catalogCache[itemKey]) {
+                const c = catalogCache[itemKey];
                 displayName = c.itemName || displayName;
                 if (c.neoName) displayName = `${c.neoName} (${displayName})`;
             }
