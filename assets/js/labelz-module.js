@@ -91,9 +91,22 @@ async function loadLabelzData() {
     try {
         const { data, error } = await supabaseClient
             .from('label_designs')
-            .select('*')
-            .order('product_name', { ascending: true });
+            .select('*');
         if (error) throw error;
+        
+        if (data && window.uuidToNameMap) {
+            data.forEach(row => {
+                if (row.product_item_uuid) {
+                    let mappedName = window.uuidToNameMap[row.product_item_uuid];
+                    if (mappedName) {
+                        row.product_name = mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName;
+                    }
+                }
+                if (!row.product_name) row.product_name = 'Unnamed Label';
+            });
+            data.sort((a,b) => (a.product_name||'').localeCompare(b.product_name||''));
+        }
+        
         labelzDB = data || [];
         renderLabelzGrid();
         if(typeof buildBarcodzCache === 'function') buildBarcodzCache();
@@ -108,7 +121,7 @@ function renderLabelzGrid() {
         if (!grid) return;
         const search = document.getElementById('labelzSearch')?.value.toLowerCase() || '';
 
-        const filtered = labelzDB.filter(l => l.product_name.toLowerCase().includes(search));
+        const filtered = labelzDB.filter(l => (l.product_name || 'Unnamed Label').toLowerCase().includes(search));
 
         if (filtered.length === 0) {
             grid.innerHTML = window.safeHTML(`
@@ -941,20 +954,23 @@ window.saveLabelzDesign = async function() {
         fCanvas.discardActiveObject(); // deselect handles before saving JSON
         const layout = fCanvas.toJSON(['isBarcode', 'barcodeOpts']); // keep custom props
 
+        let pUuid = window.uuidMap['RECIPE:::' + name];
+        if (!pUuid) throw new Error("UUID not found for label " + name);
+
         const payload = {
-            product_name: name,
+            product_item_uuid: pUuid,
             emoji,
             label_size: size,
             layout_json: layout,
             updated_at: new Date().toISOString()
         };
 
-        const { error } = await supabaseClient.from('label_designs').upsert(payload, { onConflict: 'product_name' });
+        const { error } = await supabaseClient.from('label_designs').upsert(payload, { onConflict: 'product_item_uuid' });
         if (error) throw error;
         
         // Ensure product_recipes has is_label
         const { error: prErr } = await supabaseClient.from('product_recipes').upsert({
-            product_name: name,
+            product_item_uuid: pUuid,
             components: (typeof productsDB!=='undefined' && productsDB[name]) ? productsDB[name] : [],
             is_label: true,
             label_emoji: emoji,
@@ -965,7 +981,7 @@ window.saveLabelzDesign = async function() {
             msrp: 0,
             wholesale_price: 0,
             print_time_mins: 0
-        }, { onConflict: 'product_name', ignoreDuplicates: false });
+        }, { onConflict: 'product_item_uuid', ignoreDuplicates: false });
         if(prErr) sysLog("Labelz Error: " + prErr.message, true);
 
         if(typeof productsDB!=='undefined') {
@@ -991,10 +1007,13 @@ window.deleteLabelzDesign = async function() {
         
         if(!confirm(`Are you sure you want to permanently delete the custom label '${name}'?`)) return;
         
-        const { error: err1 } = await supabaseClient.from('label_designs').delete().eq('product_name', name);
+        let pUuid = window.uuidMap['RECIPE:::' + name];
+        if (!pUuid) throw new Error("UUID not found for label " + name);
+        
+        const { error: err1 } = await supabaseClient.from('label_designs').delete().eq('product_item_uuid', pUuid);
         if (err1) throw err1;
         
-        await supabaseClient.from('product_recipes').delete().eq('product_name', name);
+        await supabaseClient.from('product_recipes').delete().eq('product_item_uuid', pUuid);
         
         if(typeof productsDB !== 'undefined' && productsDB[name]) {
             delete productsDB[name];

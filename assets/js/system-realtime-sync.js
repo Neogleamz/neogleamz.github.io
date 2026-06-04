@@ -255,7 +255,21 @@
 
             if (eventType === 'INSERT' || eventType === 'UPDATE') {
                 try {
-                    let comps = (typeof newRecord.components === 'string') ? JSON.parse(newRecord.components) : (newRecord.components || []);
+                    let mappedName = window.uuidToNameMap ? window.uuidToNameMap[newRecord.product_item_uuid] : undefined;
+                    let pName = mappedName ? (mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName) : undefined;
+                    if (!pName) return;
+
+                    let rawComps = (typeof newRecord.components === 'string') ? JSON.parse(newRecord.components) : (newRecord.components || []);
+                    let comps = [];
+                    rawComps.forEach(c => {
+                        let converted = { ...c };
+                        if (converted.item_uuid && window.uuidToNameMap) {
+                            let mappedKey = window.uuidToNameMap[converted.item_uuid];
+                            if (mappedKey) converted.item_key = mappedKey;
+                            else converted.item_key = converted.item_uuid;
+                        }
+                        comps.push(converted);
+                    });
                     comps.msrp = parseFloat(newRecord.msrp) || 0;
                     comps.is_subassembly = !!newRecord.is_subassembly;
                     comps.affiliate_pct = parseFloat(newRecord.affiliate_pct) || 0;
@@ -267,18 +281,22 @@
                     comps.print_grams = parseFloat(newRecord.print_grams) || 0;
                     comps.filament_item_key = newRecord.filament_item_key || "";
                     
-                    if (productsDB) productsDB[newRecord.product_name] = comps;
-                    if (laborDB) laborDB[newRecord.product_name] = { time: parseFloat(newRecord.labor_time_mins) || 0, rate: parseFloat(newRecord.labor_rate_hr) || 0 };
-                    if (pricingDB) pricingDB[newRecord.product_name] = { msrp: parseFloat(newRecord.msrp) || 0, wholesale: parseFloat(newRecord.wholesale_price) || 0 };
-                    if (isSubassemblyDB) isSubassemblyDB[newRecord.product_name] = !!newRecord.is_subassembly;
+                    if (productsDB) productsDB[pName] = comps;
+                    if (laborDB) laborDB[pName] = { time: parseFloat(newRecord.labor_time_mins) || 0, rate: parseFloat(newRecord.labor_rate_hr) || 0 };
+                    if (pricingDB) pricingDB[pName] = { msrp: parseFloat(newRecord.msrp) || 0, wholesale: parseFloat(newRecord.wholesale_price) || 0 };
+                    if (isSubassemblyDB) isSubassemblyDB[pName] = !!newRecord.is_subassembly;
                 } catch (e) {
                     console.error("[Realtime Sync] Failed to parse product_recipes components:", e);
                 }
             } else if (eventType === 'DELETE') {
-                if (productsDB) delete productsDB[oldRecord.product_name];
-                if (laborDB) delete laborDB[oldRecord.product_name];
-                if (pricingDB) delete pricingDB[oldRecord.product_name];
-                if (isSubassemblyDB) delete isSubassemblyDB[oldRecord.product_name];
+                let mappedName = window.uuidToNameMap ? window.uuidToNameMap[oldRecord.product_item_uuid] : undefined;
+                let pName = mappedName ? (mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName) : undefined;
+                if (!pName) return;
+
+                if (productsDB) delete productsDB[pName];
+                if (laborDB) delete laborDB[pName];
+                if (pricingDB) delete pricingDB[pName];
+                if (isSubassemblyDB) delete isSubassemblyDB[pName];
             }
 
             // Trigger UI updates for recipes

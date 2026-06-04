@@ -539,7 +539,7 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
         
         // 1. Array payload for Raw Media tracking
         payloads.push({
-             item_key: activeKey,
+             item_uuid: window.uuidMap[activeKey] || activeKey,
              consumed_qty: inventoryDB[activeKey].consumed_qty || 0,
              manual_adjustment: inventoryDB[activeKey].manual_adjustment || 0,
              produced_qty: inventoryDB[activeKey].produced_qty || 0,
@@ -565,7 +565,7 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
                     inventoryDB[labelKey].produced_qty += item.qty;
                     
                     payloads.push({
-                         item_key: labelKey,
+                         item_uuid: window.uuidMap[labelKey] || labelKey,
                          consumed_qty: inventoryDB[labelKey].consumed_qty,
                          manual_adjustment: inventoryDB[labelKey].manual_adjustment,
                          produced_qty: inventoryDB[labelKey].produced_qty,
@@ -585,7 +585,7 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
                     inventoryDB[labelKey].produced_qty += item.qty;
                     
                     payloads.push({
-                         item_key: labelKey,
+                         item_uuid: window.uuidMap[labelKey] || labelKey,
                          consumed_qty: inventoryDB[labelKey].consumed_qty,
                          manual_adjustment: inventoryDB[labelKey].manual_adjustment,
                          produced_qty: inventoryDB[labelKey].produced_qty,
@@ -601,7 +601,7 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
             });
         }
         
-        const { error } = await supabaseClient.from('inventory_consumption').upsert(payloads, {onConflict:'item_key'});
+        const { error } = await supabaseClient.from('inventory_consumption').upsert(payloads, {onConflict:'item_uuid'});
         if(error) throw error;
         
         sysLog(`Consumed ${qty}x ${sizeText} via Spool.`);

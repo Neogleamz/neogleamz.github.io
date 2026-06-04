@@ -29,6 +29,20 @@ async function refreshPrintQueue() {
         setMasterStatus("Fetching Queue...", "mod-working");
         const { data, error } = await supabaseClient.from('print_queue').select('*').order('created_at', { ascending: false }).order('id', { ascending: true });
         if (error) throw error;
+        
+        if (data && window.uuidToNameMap) {
+            data.forEach(row => {
+                if (row.part_item_uuid) {
+                    let mappedName = window.uuidToNameMap[row.part_item_uuid];
+                    if (mappedName && mappedName.startsWith('RECIPE:::')) {
+                        row.part_name = mappedName.replace('RECIPE:::', '');
+                    } else if (mappedName) {
+                        row.part_name = mappedName;
+                    }
+                }
+            });
+        }
+        
         printQueueDB = data;
         renderPrintQueue();
         
@@ -516,7 +530,7 @@ async function executeCleaningInventoryMath(partName, failedQ, wo_id, label) {
     inventoryDB[k].scrap_qty = (inventoryDB[k].scrap_qty || 0) + failedQ;
     
     let manualUpserts = [];
-    manualUpserts.push({ item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
+    manualUpserts.push({ item_uuid: window.uuidMap[k] || k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
     
     const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert(manualUpserts, { onConflict: 'item_key' });
     if (invErr) throw new Error("Cleaning Inventory update failed: " + invErr.message);
@@ -603,11 +617,11 @@ async function executePrintInventoryMath(partName, successQ, failedQ, isScrapTic
                 }
             }
             
-            manualUpserts.push({ item_key: rawK, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
+            manualUpserts.push({ item_uuid: window.uuidMap[k] || k, consumed_qty: inventoryDB[rawK].consumed_qty, manual_adjustment: inventoryDB[rawK].manual_adjustment, produced_qty: inventoryDB[rawK].produced_qty, sold_qty: inventoryDB[rawK].sold_qty, min_stock: inventoryDB[rawK].min_stock, scrap_qty: inventoryDB[rawK].scrap_qty, prototype_consumed_qty: inventoryDB[rawK].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rawK].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rawK].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rawK].prototype_produced_qty||0 });
         });
     }
 
-    manualUpserts.push({ item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
+    manualUpserts.push({ item_uuid: window.uuidMap[k] || k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0 });
     const { error: invErr } = await supabaseClient.from('inventory_consumption').upsert(manualUpserts, { onConflict: 'item_key' });
     if (invErr) throw new Error("Inventory update failed: " + invErr.message);
 
@@ -902,8 +916,12 @@ async function addPrintJob(partName, qty, woId = null, label = null) {
         }
     }
 
+    let uuidKey = partName.startsWith('RECIPE:::') ? partName : 'RECIPE:::' + partName;
+    let pUuid = window.uuidMap[uuidKey];
+    if (!pUuid) sysLog("Warning: UUID not found for part " + partName, true);
+
     const payload = {
-        part_name: partName,
+        part_item_uuid: pUuid,
         qty: qty,
         status: 'Queued',
         wo_id: woId,

@@ -243,7 +243,9 @@ function renderInventoryTable() {
     const getTh = (col, label, isRight = false, borderBottom = "") => {
         let sCls = (currentInvSort.column === col ? 'sorted-' + currentInvSort.direction : '');
         if (isRight) sCls += " text-right";
-        let style = borderBottom ? `border-bottom: 2px solid ${borderBottom};` : '';
+        let style = `background: var(--bg-th); box-shadow: inset -1px 0 0 var(--border-color); border: none;`;
+        if (borderBottom) style += ` border-bottom: 2px solid ${borderBottom};`;
+        else style += ` box-shadow: inset 0 -1px 0 var(--border-color), inset -1px 0 0 var(--border-color);`;
         return `<th class="${sCls}" data-app-click="sortInv" data-col="${col}" style="${style}">${label}</th>`;
     };
 
@@ -264,12 +266,12 @@ function renderInventoryTable() {
     let keys = ['np', 'nn', 'n', 'p', 'c', 'pc', 'prc', 'sq', 'a', 'ms', 'ld', 's', 'tp'];
     let filterRow = `<tr style="background: rgba(0,0,0,0.1);">` + keys.map(k => {
         let val = invColumnFilters[k] || "";
-        return `<th style="position: sticky; z-index: 19; background: var(--bg-panel); box-shadow: inset 0 -1px 0 var(--border-color), inset -1px 0 0 var(--border-color); border: none;">
-            <input type="text" data-col="${k}" value="${val.replace(/"/g, '&quot;')}" placeholder="Filter..." data-keyup="keyup_window_updateInvColumnFilter" data-colkey="${k}" data-click="click_stopProp" style="width: 100%; padding: 4px; font-size: 11px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+        return `<th style="background: var(--bg-panel); box-shadow: inset 0 -1px 0 var(--border-color), inset -1px 0 0 var(--border-color); border: none; padding: 4px;">
+            <input type="text" data-col="${k}" value="${val.replace(/"/g, '&quot;')}" placeholder="Filter..." data-keyup="keyup_window_updateInvColumnFilter" data-colkey="${k}" data-click="click_stopProp" style="width: 100%; padding: 4px; font-size: 11px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px; box-sizing: border-box;">
         </th>`;
     }).join('') + `</tr>`;
 
-    let h = `<table style="width:100%;"><thead><tr>${ths}</tr>${filterRow}</thead><tbody>`;
+    let h = `<table style="width:100%; border-collapse: separate; border-spacing: 0;"><thead><tr>${ths}</tr>${filterRow}</thead><tbody>`;
     let a = Object.keys(catalogCache).map(k => {
         let c = catalogCache[k], _f = fmtKey(k), i = inventoryDB[k]||{consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5};
         let s=c.totalQty-i.consumed_qty-i.scrap_qty+i.manual_adjustment;
@@ -364,7 +366,8 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         if(isNaN(v)) { cell.innerText = oldValTemp; return alert("Valid number required."); } 
         
         if(!inventoryDB[rKey]) inventoryDB[rKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5};
-        let payload = { item_key: rKey, consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0, rop_lead_time_days: parseFloat(inventoryDB[rKey].rop_lead_time_days)||5 };
+        let payload = { item_uuid: window.uuidMap[rKey], consumed_qty: inventoryDB[rKey].consumed_qty, manual_adjustment: inventoryDB[rKey].manual_adjustment, produced_qty: inventoryDB[rKey].produced_qty, sold_qty: inventoryDB[rKey].sold_qty, min_stock: inventoryDB[rKey].min_stock, scrap_qty: inventoryDB[rKey].scrap_qty, prototype_consumed_qty: inventoryDB[rKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[rKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[rKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[rKey].prototype_produced_qty||0, rop_lead_time_days: parseFloat(inventoryDB[rKey].rop_lead_time_days)||5 };
+
         
         if(mode === 'produced_qty') { payload.produced_qty = Math.abs(v); if(payload.produced_qty === inventoryDB[rKey].produced_qty) return; }
         else if(mode === 'prototype_produced_qty') { payload.prototype_produced_qty = Math.abs(v); if(payload.prototype_produced_qty === (inventoryDB[rKey].prototype_produced_qty||0)) return; }
@@ -399,7 +402,7 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
         else if(mode === 'rop_lead_time_days') { payload.rop_lead_time_days = Math.abs(v); if(payload.rop_lead_time_days === (parseFloat(inventoryDB[rKey].rop_lead_time_days)||5)) return; }
 
         sysLog(`Inv Edit: [${rKey}] ${mode} to ${v}`); setMasterStatus("Updating...", "mod-working"); 
-        const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_key'}); 
+        const { error } = await supabaseClient.from('inventory_consumption').upsert(payload, {onConflict:'item_uuid'}); 
         if(error) throw new Error(error.message); 
         
         inventoryDB[rKey] = payload;
@@ -425,7 +428,7 @@ async function runProductionBatch() {
             inventoryDB[k].consumed_qty += raw[k];
             if(batchType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + raw[k];
             else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + raw[k];
-            return {item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}; 
+            return {item_uuid: window.uuidMap[k], consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}; 
         }); 
         
         let fgiKey = `RECIPE:::${n}`;
@@ -436,10 +439,10 @@ async function runProductionBatch() {
         } else {
             inventoryDB[fgiKey].produced_qty += q;
         }
-        ups.push({item_key: fgiKey, consumed_qty: inventoryDB[fgiKey].consumed_qty, manual_adjustment: inventoryDB[fgiKey].manual_adjustment, produced_qty: inventoryDB[fgiKey].produced_qty, sold_qty: inventoryDB[fgiKey].sold_qty, min_stock: inventoryDB[fgiKey].min_stock, scrap_qty: inventoryDB[fgiKey].scrap_qty, prototype_consumed_qty: inventoryDB[fgiKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[fgiKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[fgiKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[fgiKey].prototype_produced_qty||0});
+        ups.push({item_uuid: window.uuidMap[fgiKey], consumed_qty: inventoryDB[fgiKey].consumed_qty, manual_adjustment: inventoryDB[fgiKey].manual_adjustment, produced_qty: inventoryDB[fgiKey].produced_qty, sold_qty: inventoryDB[fgiKey].sold_qty, min_stock: inventoryDB[fgiKey].min_stock, scrap_qty: inventoryDB[fgiKey].scrap_qty, prototype_consumed_qty: inventoryDB[fgiKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[fgiKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[fgiKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[fgiKey].prototype_produced_qty||0});
 
         setSysProgress(60, 'working'); 
-        const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'}); 
+        const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_uuid'}); 
         if(error) throw new Error(error.message); 
         
         setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); showToast(`✅ Built ${q}x ${n} (${batchType}) and deducted materials.`); 
@@ -553,12 +556,31 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         if (delErr) throw delErr;
         setSysProgress(60, 'working');
 
-        // 3. Re-inject snapshot rows
-        // Note: inventory_consumption has item_key as PK, so we use upsert to be safe, 
-        // though we just deleted everything.
+        // 3. Upgrade legacy string keys OR orphaned UUIDs in snapshot data to active UUIDs before inserting
+        const upgradedSnapshotData = snapshot.snapshot_data.map(r => {
+            // First, if it has a string key, always try to use the active UUID for that string key
+            if (r.item_key && window.uuidMap && window.uuidMap[r.item_key]) {
+                r.item_uuid = window.uuidMap[r.item_key];
+            } 
+            // Otherwise, if it has a UUID but no string key, check if this UUID is an orphaned one that needs translating
+            else if (r.item_uuid && window.uuidToNameMap && window.uuidMap) {
+                // Find the human-readable string key this orphaned UUID used to belong to
+                let oldStringKey = window.uuidToNameMap[r.item_uuid];
+                if (oldStringKey) {
+                    // Find the NEW active UUID for that string key
+                    let activeUuid = window.uuidMap[oldStringKey];
+                    if (activeUuid && activeUuid !== r.item_uuid) {
+                        r.item_uuid = activeUuid;
+                    }
+                }
+            }
+            return r;
+        });
+
+        // 4. Re-inject snapshot rows
         const { error: insertErr } = await supabaseClient
             .from('inventory_consumption')
-            .insert(snapshot.snapshot_data);
+            .insert(upgradedSnapshotData);
 
         if (insertErr) throw insertErr;
         setSysProgress(90, 'working');
@@ -619,11 +641,37 @@ window.previewInventorySnapshot = async function(snapshotId) {
         if (currentRes.error) throw currentRes.error;
 
         const snapData = snapshotRes.data.snapshot_data || [];
+        
+        // Decode all snapshot items to their ultimate string key to ensure deterministic matching
+        snapData.forEach(r => {
+            r.resolved_string_key = null;
+            if (r.item_uuid && window.uuidToNameMap) {
+                r.resolved_string_key = window.uuidToNameMap[r.item_uuid];
+            }
+            if (!r.resolved_string_key) {
+                r.resolved_string_key = r.item_key || r.item_uuid;
+            }
+        });
+
         const liveData = currentRes.data || [];
         
-        // 2. Index live data for fast lookup
+        // Decode all live items to their ultimate string key
         const liveMap = {};
-        liveData.forEach(row => { liveMap[row.item_key] = row; });
+        liveData.forEach(row => { 
+            row.resolved_string_key = null;
+            if (row.item_uuid && window.uuidToNameMap) {
+                row.resolved_string_key = window.uuidToNameMap[row.item_uuid];
+            }
+            if (!row.resolved_string_key) {
+                row.resolved_string_key = row.item_key || row.item_uuid;
+            }
+            if (row.resolved_string_key) {
+                liveMap[row.resolved_string_key] = row;
+            }
+        });
+
+        // Group by stable string keys
+        const allKeys = new Set([...snapData.map(r => r.resolved_string_key), ...Object.keys(liveMap)]);
 
         const calculateNet = (r) => {
             if (!r) return 0;
@@ -634,19 +682,26 @@ window.previewInventorySnapshot = async function(snapshotId) {
 
         // 3. Compare and build delta list
         const deltas = [];
-        const allKeys = new Set([...snapData.map(r => r.item_key), ...Object.keys(liveMap)]);
-
         allKeys.forEach(key => {
-            const s = snapData.find(r => r.item_key === key);
-            const l = liveMap[key];
+            if (!key) return;
+            let s = snapData.find(r => r.resolved_string_key === key);
+            let l = liveMap[key];
 
             const sNet = calculateNet(s);
             const lNet = calculateNet(l);
 
             if (sNet !== lNet || !s || !l) {
+                // Decode the UUID into a human-readable name
+                let decodedName = key;
+                if (window.uuidToAllNamesMap && window.uuidToAllNamesMap[key] && window.uuidToAllNamesMap[key].length > 0) {
+                    decodedName = window.uuidToAllNamesMap[key].join(' | ').replace(/RECIPE:::/g, '');
+                } else if (window.uuidToNameMap && window.uuidToNameMap[key]) {
+                    decodedName = window.uuidToNameMap[key].replace('RECIPE:::', '');
+                }
+
                 deltas.push({
                     key,
-                    name: s ? s.item_key : l.item_key,
+                    name: decodedName,
                     current: lNet,
                     target: sNet,
                     diff: sNet - lNet,
@@ -3128,7 +3183,7 @@ window.submitStockzAudit = async function() {
         
         if (countedIsValid) {
             const logPayload = {
-                item_key: key,
+                item_uuid: window.uuidMap[key],
                 operator_id: window.currentUser ? window.currentUser.id : null,
                 operator_email: window.currentUser ? window.currentUser.email : 'guest_operator',
                 previous_stock: window.currentAuditItemExpectedStock,
@@ -3185,7 +3240,7 @@ window.submitStockzAudit = async function() {
         }
         
         let savePayload = {
-            item_key: key,
+            item_uuid: window.uuidMap[key],
             consumed_qty: consumed_qty,
             manual_adjustment: manual_adjustment,
             produced_qty: i.produced_qty || 0,
@@ -3199,7 +3254,7 @@ window.submitStockzAudit = async function() {
             rop_lead_time_days: leadVal
         };
         
-        const { error: saveErr } = await supabaseClient.from('inventory_consumption').upsert(savePayload, {onConflict:'item_key'});
+        const { error: saveErr } = await supabaseClient.from('inventory_consumption').upsert(savePayload, {onConflict:'item_uuid'});
         if (saveErr) {
             sysLog(`[Inventory Upsert Error] ${saveErr.message}`, true);
             if (submitBtn) {

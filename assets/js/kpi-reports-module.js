@@ -20,7 +20,7 @@ window.openKPIReport = function(el) {
     
     // Defer generation slightly to allow UI to render the modal
     setTimeout(() => {
-        let html = '';
+        let html;
         try {
             switch(kpiId) {
                 case 'statDatazRecords': html = window.generateReport_statDatazRecords(); break;

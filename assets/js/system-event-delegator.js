@@ -98,10 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openKPIReport':
                     if (typeof window.openKPIReport === 'function') window.openKPIReport(el);
                     break;
-                case 'click_closeKPIReport':
+                case 'click_closeKPIReport': {
                     const kpiModal = document.getElementById('kpiReportModal');
                     if (kpiModal) kpiModal.style.display = 'none';
                     break;
+                }
                 case 'click_printKPIReport':
                     if (typeof window.printKPIReport === 'function') window.printKPIReport();
                     break;

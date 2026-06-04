@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/329</span>
+                <span class='fraction'>0/346</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/440</span>
+                <span class='fraction'>0/462</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/29</span>
+                <span class='fraction'>0/30</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/250</span>
+                <span class='fraction'>0/264</span>
             </div>
         
             
@@ -465,7 +465,25 @@
 <a name='L400'></a><a href='#L400'>400</a>
 <a name='L401'></a><a href='#L401'>401</a>
 <a name='L402'></a><a href='#L402'>402</a>
-<a name='L403'></a><a href='#L403'>403</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L403'></a><a href='#L403'>403</a>
+<a name='L404'></a><a href='#L404'>404</a>
+<a name='L405'></a><a href='#L405'>405</a>
+<a name='L406'></a><a href='#L406'>406</a>
+<a name='L407'></a><a href='#L407'>407</a>
+<a name='L408'></a><a href='#L408'>408</a>
+<a name='L409'></a><a href='#L409'>409</a>
+<a name='L410'></a><a href='#L410'>410</a>
+<a name='L411'></a><a href='#L411'>411</a>
+<a name='L412'></a><a href='#L412'>412</a>
+<a name='L413'></a><a href='#L413'>413</a>
+<a name='L414'></a><a href='#L414'>414</a>
+<a name='L415'></a><a href='#L415'>415</a>
+<a name='L416'></a><a href='#L416'>416</a>
+<a name='L417'></a><a href='#L417'>417</a>
+<a name='L418'></a><a href='#L418'>418</a>
+<a name='L419'></a><a href='#L419'>419</a>
+<a name='L420'></a><a href='#L420'>420</a>
+<a name='L421'></a><a href='#L421'>421</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -725,6 +743,19 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -733,6 +764,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -741,7 +773,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1124,7 +1160,21 @@
 &nbsp;
 <span class="cstat-no" title="statement not covered" >            if (eventType === 'INSERT' || eventType === 'UPDATE') {</span>
 <span class="cstat-no" title="statement not covered" >                try {</span>
-                    let comps = <span class="cstat-no" title="statement not covered" >(typeof newRecord.components === 'string') ? JSON.parse(newRecord.components) : (newRecord.components || []);</span>
+                    let mappedName = <span class="cstat-no" title="statement not covered" >window.uuidToNameMap ? window.uuidToNameMap[newRecord.product_item_uuid] : undefined;</span>
+                    let pName = <span class="cstat-no" title="statement not covered" >mappedName ? (mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName) : undefined;</span>
+<span class="cstat-no" title="statement not covered" >                    if (!pName) <span class="cstat-no" title="statement not covered" >return;</span></span>
+&nbsp;
+                    let rawComps = <span class="cstat-no" title="statement not covered" >(typeof newRecord.components === 'string') ? JSON.parse(newRecord.components) : (newRecord.components || []);</span>
+                    let comps = <span class="cstat-no" title="statement not covered" >[];</span>
+<span class="cstat-no" title="statement not covered" >                    rawComps.forEach(<span class="fstat-no" title="function not covered" >c </span>=&gt; {</span>
+                        let converted = <span class="cstat-no" title="statement not covered" >{ ...c };</span>
+<span class="cstat-no" title="statement not covered" >                        if (converted.item_uuid &amp;&amp; window.uuidToNameMap) {</span>
+                            let mappedKey = <span class="cstat-no" title="statement not covered" >window.uuidToNameMap[converted.item_uuid];</span>
+<span class="cstat-no" title="statement not covered" >                            if (mappedKey) <span class="cstat-no" title="statement not covered" >converted.item_key = mappedKey;</span></span>
+                            else <span class="cstat-no" title="statement not covered" >converted.item_key = converted.item_uuid;</span>
+                        }
+<span class="cstat-no" title="statement not covered" >                        comps.push(converted);</span>
+                    });
 <span class="cstat-no" title="statement not covered" >                    comps.msrp = parseFloat(newRecord.msrp) || 0;</span>
 <span class="cstat-no" title="statement not covered" >                    comps.is_subassembly = !!newRecord.is_subassembly;</span>
 <span class="cstat-no" title="statement not covered" >                    comps.affiliate_pct = parseFloat(newRecord.affiliate_pct) || 0;</span>
@@ -1136,18 +1186,22 @@
 <span class="cstat-no" title="statement not covered" >                    comps.print_grams = parseFloat(newRecord.print_grams) || 0;</span>
 <span class="cstat-no" title="statement not covered" >                    comps.filament_item_key = newRecord.filament_item_key || "";</span>
                     
-<span class="cstat-no" title="statement not covered" >                    if (productsDB) <span class="cstat-no" title="statement not covered" >productsDB[newRecord.product_name] = comps;</span></span>
-<span class="cstat-no" title="statement not covered" >                    if (laborDB) <span class="cstat-no" title="statement not covered" >laborDB[newRecord.product_name] = { time: parseFloat(newRecord.labor_time_mins) || 0, rate: parseFloat(newRecord.labor_rate_hr) || 0 };</span></span>
-<span class="cstat-no" title="statement not covered" >                    if (pricingDB) <span class="cstat-no" title="statement not covered" >pricingDB[newRecord.product_name] = { msrp: parseFloat(newRecord.msrp) || 0, wholesale: parseFloat(newRecord.wholesale_price) || 0 };</span></span>
-<span class="cstat-no" title="statement not covered" >                    if (isSubassemblyDB) <span class="cstat-no" title="statement not covered" >isSubassemblyDB[newRecord.product_name] = !!newRecord.is_subassembly;</span></span>
+<span class="cstat-no" title="statement not covered" >                    if (productsDB) <span class="cstat-no" title="statement not covered" >productsDB[pName] = comps;</span></span>
+<span class="cstat-no" title="statement not covered" >                    if (laborDB) <span class="cstat-no" title="statement not covered" >laborDB[pName] = { time: parseFloat(newRecord.labor_time_mins) || 0, rate: parseFloat(newRecord.labor_rate_hr) || 0 };</span></span>
+<span class="cstat-no" title="statement not covered" >                    if (pricingDB) <span class="cstat-no" title="statement not covered" >pricingDB[pName] = { msrp: parseFloat(newRecord.msrp) || 0, wholesale: parseFloat(newRecord.wholesale_price) || 0 };</span></span>
+<span class="cstat-no" title="statement not covered" >                    if (isSubassemblyDB) <span class="cstat-no" title="statement not covered" >isSubassemblyDB[pName] = !!newRecord.is_subassembly;</span></span>
                 } catch (e) {
 <span class="cstat-no" title="statement not covered" >                    console.error("[Realtime Sync] Failed to parse product_recipes components:", e);</span>
                 }
             } else <span class="cstat-no" title="statement not covered" >if (eventType === 'DELETE') {</span>
-<span class="cstat-no" title="statement not covered" >                if (productsDB) <span class="cstat-no" title="statement not covered" >delete productsDB[oldRecord.product_name];</span></span>
-<span class="cstat-no" title="statement not covered" >                if (laborDB) <span class="cstat-no" title="statement not covered" >delete laborDB[oldRecord.product_name];</span></span>
-<span class="cstat-no" title="statement not covered" >                if (pricingDB) <span class="cstat-no" title="statement not covered" >delete pricingDB[oldRecord.product_name];</span></span>
-<span class="cstat-no" title="statement not covered" >                if (isSubassemblyDB) <span class="cstat-no" title="statement not covered" >delete isSubassemblyDB[oldRecord.product_name];</span></span>
+                let mappedName = <span class="cstat-no" title="statement not covered" >window.uuidToNameMap ? window.uuidToNameMap[oldRecord.product_item_uuid] : undefined;</span>
+                let pName = <span class="cstat-no" title="statement not covered" >mappedName ? (mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName) : undefined;</span>
+<span class="cstat-no" title="statement not covered" >                if (!pName) <span class="cstat-no" title="statement not covered" >return;</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                if (productsDB) <span class="cstat-no" title="statement not covered" >delete productsDB[pName];</span></span>
+<span class="cstat-no" title="statement not covered" >                if (laborDB) <span class="cstat-no" title="statement not covered" >delete laborDB[pName];</span></span>
+<span class="cstat-no" title="statement not covered" >                if (pricingDB) <span class="cstat-no" title="statement not covered" >delete pricingDB[pName];</span></span>
+<span class="cstat-no" title="statement not covered" >                if (isSubassemblyDB) <span class="cstat-no" title="statement not covered" >delete isSubassemblyDB[pName];</span></span>
             }
 &nbsp;
             // Trigger UI updates for recipes
@@ -1276,7 +1330,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-03T07:24:21.802Z
+                at 2026-06-04T03:48:07.966Z
             </div>
         <script src="prettify.js"></script>
         <script>
