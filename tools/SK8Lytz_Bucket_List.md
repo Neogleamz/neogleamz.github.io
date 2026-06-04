@@ -19,7 +19,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 P1 High Priority (Active Epics)
 
-*Clean sweep — all active epics successfully completed and archived!* ✅\r
+### Target: main
+**Epic: Mobile Audit Console Sync & Fullscreen Modal**
+- [x] `feat/mobile-audit-console` : **Mobile Audit Console Sync & Fullscreen Modal** - Expand PC cycle count modal to fullscreen overlay. Upgrade mobile scanner to 1:1 functional clone with Bottom-Sheet UI. Fix WebRTC Base64 sync via Supabase channels, auto-trigger PC Audit Modal on scan. (Plan: [docs/plans/feat-mobile-audit-console.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat-mobile-audit-console.md))
 
 ## 🧹 Technical Debt
 
@@ -56,9 +58,6 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🗄️ Completed & Archived Epics
 
-### Target: main
-**Epic: Mobile Audit Console Sync & Fullscreen Modal**
-- [ ] `feat/mobile-audit-console` : **Mobile Audit Console Sync & Fullscreen Modal** - Expand PC cycle count modal to fullscreen overlay. Upgrade mobile scanner to 1:1 functional clone with Bottom-Sheet UI. Fix WebRTC Base64 sync via Supabase channels, auto-trigger PC Audit Modal on scan. (Plan: [docs/plans/feat-mobile-audit-console.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat-mobile-audit-console.md))
 
 **Epic: UUID Inventory Architecture Migration**\r
 *(Archived — 2026-06-03)*\r
