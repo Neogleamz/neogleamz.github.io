@@ -1439,6 +1439,17 @@ window.initializeCcSyncChannel = function() {
         if (payload && payload.mode) {
             currentPreviewMode = payload.mode;
             window.updateCCRouteUI(currentPreviewMode);
+            
+            const auditModal = document.getElementById('stockzAuditModal');
+            if (auditModal && auditModal.style.display !== 'none') {
+                const routePcBtn = document.getElementById('stockzAuditCameraRoute_pc');
+                const routePhoneBtn = document.getElementById('stockzAuditCameraRoute_phone');
+                if (payload.mode === 'pc' || payload.mode === 'both') {
+                    if (routePcBtn) window.switchStockzAuditCameraRoute(routePcBtn);
+                } else if (payload.mode === 'phone') {
+                    if (routePhoneBtn) window.switchStockzAuditCameraRoute(routePhoneBtn);
+                }
+            }
         }
     });
 
@@ -2802,6 +2813,15 @@ window.openStockzAuditModal = function(itemKey, preSelectTab = 'audit') {
         globalLeadEl.innerText = `Global Default: ${SUPPLIER_LEAD_TIME_DAYS} days`;
     }
     
+    const ipOverride = document.getElementById('stockzAuditLocalIPOverrideContainer');
+    if (ipOverride) {
+        const isLocalDev = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' || 
+                           window.location.hostname.startsWith('192.168.') ||
+                           window.location.hostname.startsWith('10.');
+        ipOverride.style.display = isLocalDev ? 'flex' : 'none';
+    }
+    
     const reconPanel = document.getElementById('stockzAuditPanel_reconciliation');
     const deltaPanel = document.getElementById('stockzAuditPanel_delta');
     if (reconPanel) reconPanel.style.display = 'none';
@@ -3427,3 +3447,23 @@ document.addEventListener('input', (e) => {
         if(typeof window.updateStockzAuditROPSimulator === 'function') window.updateStockzAuditROPSimulator();
     }
 });
+
+// Audit Scanner Global Click Wrappers
+if (typeof window !== 'undefined') {
+    window.click_startStockzAuditWebcam = function(e) { window.startStockzAuditWebcam(); };
+    window.click_stopStockzAuditWebcam = function(e) { window.stopStockzAuditWebcam(); };
+    window.click_switchStockzAuditCameraRoute = function(e) { window.switchStockzAuditCameraRoute(e.target.closest('button')); };
+    window.click_toggleStockzAuditScanner = function(e) { window.toggleStockzAuditScanner(); };
+    window.click_submitStockzAudit = function(e) { window.submitStockzAudit(); };
+    window.click_closeStockzAuditModal = function(e) { window.closeStockzAuditModal(); };
+    window.click_switchStockzAuditTab = function(e) { window.switchStockzAuditTab(e.target.closest('button')); };
+    window.click_switchStockzAuditMode = function(e) { window.switchStockzAuditMode(e.target.closest('button')); };
+    window.click_decrementStockzAuditDelta = function(e) { window.decrementStockzAuditDelta(); };
+    window.click_incrementStockzAuditDelta = function(e) { window.incrementStockzAuditDelta(); };
+    window.click_decrementStockzAuditCount = function(e) { window.decrementStockzAuditCount(); };
+    window.click_incrementStockzAuditCount = function(e) { window.incrementStockzAuditCount(); };
+    window.click_clearStockzAuditHistory = function(e) { window.clearStockzAuditHistory(); };
+    window.click_refreshStockzAuditHistory = function(e) { window.refreshStockzAuditHistory(); };
+    window.click_updateLocalIPQRCode_audit = function(e) { window.updateLocalIPQRCode_audit(); };
+}
+
