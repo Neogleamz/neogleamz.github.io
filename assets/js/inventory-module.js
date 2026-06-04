@@ -1428,8 +1428,11 @@ window.initializeCcSyncChannel = function() {
     window.ccSyncChannel.on('broadcast', { event: 'REMOTE_FRAME_STREAM' }, (envelope) => {
         const payload = envelope.payload;
         if (payload && payload.frame) {
-            const screen = document.getElementById('ccRemotePreviewScreen');
-            if (screen) screen.src = payload.frame;
+            const screenOld = document.getElementById('ccRemotePreviewScreen');
+            if (screenOld) screenOld.src = payload.frame;
+            
+            const screenNew = document.getElementById('stockzAuditMobilePreviewScreen');
+            if (screenNew) screenNew.src = payload.frame;
         }
     });
 
@@ -1442,12 +1445,21 @@ window.initializeCcSyncChannel = function() {
             
             const auditModal = document.getElementById('stockzAuditModal');
             if (auditModal && auditModal.style.display !== 'none') {
-                const routePcBtn = document.getElementById('stockzAuditCameraRoute_pc');
-                const routePhoneBtn = document.getElementById('stockzAuditCameraRoute_phone');
-                if (payload.mode === 'pc' || payload.mode === 'both') {
-                    if (routePcBtn) window.switchStockzAuditCameraRoute(routePcBtn);
-                } else if (payload.mode === 'phone') {
-                    if (routePhoneBtn) window.switchStockzAuditCameraRoute(routePhoneBtn);
+                const qrContainer = document.getElementById('stockzAuditMobileQRContainer');
+                const streamContainer = document.getElementById('stockzAuditMobilePreviewContainer');
+                const placeholder = document.getElementById('stockzAuditPhoneOnlyPlaceholder');
+                
+                if (qrContainer) qrContainer.style.display = 'none';
+                
+                if (payload.mode === 'phone') {
+                    if (streamContainer) streamContainer.style.display = 'flex';
+                    if (placeholder) placeholder.style.display = 'flex';
+                } else if (payload.mode === 'pc') {
+                    if (streamContainer) streamContainer.style.display = 'flex';
+                    if (placeholder) placeholder.style.display = 'none';
+                } else {
+                    if (streamContainer) streamContainer.style.display = 'flex';
+                    if (placeholder) placeholder.style.display = 'none';
                 }
             }
         }
