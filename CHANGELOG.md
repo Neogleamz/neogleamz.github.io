@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.3.12] - 2026-06-03
+
+### ✨ Features & Bug Fixes
+- **Inventory State Sync Fix**: Fixed a bug where live renaming of catalog items would occasionally display a temporary `0` stock count in the `STOCKZ` module due to global cache pollution in the UUID name-mapping arrays. Aggressively cleared cache mappings on sync and forced immediate foreground UI repaints.
+
 ## [1.3.11] - 2026-06-03
 
 ### ✨ Features & Bug Fixes
