@@ -2457,7 +2457,8 @@ window.selectStockzAuditItem = function(itemKey) {
                 velocityText: document.getElementById('stockzAuditVelocityPreview')?.innerText || '0.00 / day',
                 ropText: document.getElementById('stockzAuditROPValPreview')?.innerText || '0.00 units',
                 alertBadgeHtml: document.getElementById('stockzAuditAlertStatusBadge')?.outerHTML || ''
-            }
+            },
+            gridHtml: document.getElementById('stockzAuditBalancesGrid')?.innerHTML || ''
         };
         
         if (itemKey.startsWith('RECIPE:::')) {
@@ -2465,7 +2466,6 @@ window.selectStockzAuditItem = function(itemKey) {
             let pb = parseFloat(i.prototype_produced_qty) || 0;
             let sold = parseFloat(i.sold_qty) || 0;
             let c_prod = parseFloat(i.production_consumed_qty) || 0;
-            let c_proto = parseFloat(i.prototype_consumed_qty) || 0;
             payloadToSend.purchased = b.toFixed(2).replace(/\.?0+$/,'');
             payloadToSend.proto = pb.toFixed(2).replace(/\.?0+$/,'');
             payloadToSend.prod = c_prod.toFixed(2).replace(/\.?0+$/,'');
@@ -2474,7 +2474,6 @@ window.selectStockzAuditItem = function(itemKey) {
             let c = safeCatalogCache[itemKey] || {totalQty:0};
             let c_proto = parseFloat(i.prototype_consumed_qty) || 0;
             let c_prod = parseFloat(i.production_consumed_qty) || 0;
-            let c_asm = parseFloat(i.assembly_consumed_qty) || 0;
             payloadToSend.purchased = (parseFloat(c.totalQty) || 0).toFixed(2).replace(/\.?0+$/,'');
             payloadToSend.proto = c_proto.toFixed(2).replace(/\.?0+$/,'');
             payloadToSend.prod = c_prod.toFixed(2).replace(/\.?0+$/,'');
@@ -3503,20 +3502,20 @@ document.addEventListener('input', (e) => {
 
 // Audit Scanner Global Click Wrappers
 if (typeof window !== 'undefined') {
-    window.click_startStockzAuditWebcam = function(e) { window.startStockzAuditWebcam(); };
-    window.click_stopStockzAuditWebcam = function(e) { window.stopStockzAuditWebcam(); };
+    window.click_startStockzAuditWebcam = function(_e) { window.startStockzAuditWebcam(); };
+    window.click_stopStockzAuditWebcam = function(_e) { window.stopStockzAuditWebcam(); };
     window.click_switchStockzAuditCameraRoute = function(e) { window.switchStockzAuditCameraRoute(e.target.closest('button')); };
-    window.click_toggleStockzAuditScanner = function(e) { window.toggleStockzAuditScanner(); };
-    window.click_submitStockzAudit = function(e) { window.submitStockzAudit(); };
-    window.click_closeStockzAuditModal = function(e) { window.closeStockzAuditModal(); };
+    window.click_toggleStockzAuditScanner = function(_e) { window.toggleStockzAuditScanner(); };
+    window.click_submitStockzAudit = function(_e) { window.submitStockzAudit(); };
+    window.click_closeStockzAuditModal = function(_e) { window.closeStockzAuditModal(); };
     window.click_switchStockzAuditTab = function(e) { window.switchStockzAuditTab(e.target.closest('button')); };
     window.click_switchStockzAuditMode = function(e) { window.switchStockzAuditMode(e.target.closest('button')); };
-    window.click_decrementStockzAuditDelta = function(e) { window.decrementStockzAuditDelta(); };
-    window.click_incrementStockzAuditDelta = function(e) { window.incrementStockzAuditDelta(); };
-    window.click_decrementStockzAuditCount = function(e) { window.decrementStockzAuditCount(); };
-    window.click_incrementStockzAuditCount = function(e) { window.incrementStockzAuditCount(); };
-    window.click_clearStockzAuditHistory = function(e) { window.clearStockzAuditHistory(); };
-    window.click_refreshStockzAuditHistory = function(e) { window.refreshStockzAuditHistory(); };
-    window.click_updateLocalIPQRCode_audit = function(e) { window.updateLocalIPQRCode_audit(); };
+    window.click_decrementStockzAuditDelta = function(_e) { window.decrementStockzAuditDelta(); };
+    window.click_incrementStockzAuditDelta = function(_e) { window.incrementStockzAuditDelta(); };
+    window.click_decrementStockzAuditCount = function(_e) { window.decrementStockzAuditCount(); };
+    window.click_incrementStockzAuditCount = function(_e) { window.incrementStockzAuditCount(); };
+    window.click_clearStockzAuditHistory = function(_e) { window.clearStockzAuditHistory(); };
+    window.click_refreshStockzAuditHistory = function(_e) { window.refreshStockzAuditHistory(); };
+    window.click_updateLocalIPQRCode_audit = function(_e) { window.updateLocalIPQRCode_audit(); };
 }
 
