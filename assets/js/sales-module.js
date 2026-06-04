@@ -74,7 +74,7 @@ async function addManualSale() {
 
         // --- POWERED BY MASTER FORENSIC ENGINE ---
         let rawRow = {
-            order_id: id, sale_date: dt, storefront_sku: "MANUAL_ENTRY_" + rec, internal_recipe_name: rec,
+            order_id: id, sale_date: dt, storefront_sku: "MANUAL_ENTRY_" + rec, recipe_item_uuid: window.uuidMap['RECIPE:::' + rec],
             qty_sold: qty, actual_sale_price: pr, subtotal: subtot, shipping: ship, taxes: tax, 
             discount_code: discCode, discount_amount: discAmt, total: total, "Source": source, 
             "Outstanding Balance": balance
@@ -93,10 +93,10 @@ async function addManualSale() {
         let invK = `RECIPE:::${rec}`;
         if(!inventoryDB[invK]) inventoryDB[invK] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
         inventoryDB[invK].sold_qty += qty;
-        let invPayload = { item_key: invK, ...inventoryDB[invK] };
+        let invPayload = { item_uuid: window.uuidMap[invK] || invK, ...inventoryDB[invK] };
 
         const {error: e1} = await supabaseClient.from('sales_ledger').insert([sRow]); if(e1) throw new Error("Insert Error: " + e1.message);
-        const {error: e2} = await supabaseClient.from('inventory_consumption').upsert([invPayload], {onConflict:'item_key'}); if(e2) throw new Error("Inventory Error: " + e2.message);
+        const {error: e2} = await supabaseClient.from('inventory_consumption').upsert([invPayload], {onConflict:'item_uuid'}); if(e2) throw new Error("Inventory Error: " + e2.message);
 
         salesDB.unshift(sRow);
         ['manualSaleId', 'manualSalePrice', 'manualSaleSubtot', 'manualSaleShip', 'manualSaleTax', 'manualSaleDiscCode', 'manualSaleDisc', 'manualSaleTotal', 'manualSaleSource', 'manualSaleBalance'].forEach(el => {
@@ -236,7 +236,7 @@ async function processParsedSales(rows, isTestMode = false) {
 
         pendingSalesRows.push({
             order_id: String(orderId), sale_date: dateStr, storefront_sku: String(skuName),
-            qty_sold: qty, actual_sale_price: price, internal_recipe_name: internalName,
+            qty_sold: qty, actual_sale_price: price, recipe_item_uuid: window.uuidMap['RECIPE:::' + internalName],
             subtotal: subTot, shipping: ship, taxes: tax, discount_code: discCode, discount_amount: discAmt, total: tot,
             "Source": orderFirstRowFlags[orderId].source, "Outstanding Balance": isFirstRow ? orderFirstRowFlags[orderId].balance : 0,
 
@@ -347,7 +347,7 @@ async function saveAliasMapping() {
         
         const { error } = await supabaseClient.from('storefront_aliases').upsert({ 
             product_sku: sku, 
-            internal_recipe_name: recipe, 
+            recipe_item_uuid: window.uuidMap['RECIPE:::' + recipe], 
             barcode_value: mappedBarcode,
             is_shopify_synced: false,
             is_primary: false,
@@ -456,7 +456,7 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
         
         const { error: aliasError } = await supabaseClient.from('storefront_aliases').upsert({ 
             product_sku: sku, 
-            internal_recipe_name: targetRecipe, 
+            recipe_item_uuid: window.uuidMap['RECIPE:::' + targetRecipe], 
             barcode_value: barcodeVal,
             is_shopify_synced: isShopifySynced,
             is_primary: isPrimary,
@@ -525,7 +525,7 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
                         mainRow.internal_recipe_name = (fLine.storefront_sku === sku) ? targetRecipe : mainRow.internal_recipe_name;
                         
                         let dbPayload = {
-                            internal_recipe_name: mainRow.internal_recipe_name,
+                            recipe_item_uuid: window.uuidMap['RECIPE:::' + mainRow.internal_recipe_name],
                             cogs_at_sale: fLine.cogs,
                             transaction_fees: fLine.fee,
                             net_profit: fLine.net
@@ -1033,7 +1033,9 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
         let row = salesDB.find(s => s.order_id == orderId && s.storefront_sku == sku); if(!row) return;
         let oldQty = row.qty_sold; let oldRec = row.internal_recipe_name;
 
-        let payload = { [col]: dbVal };
+        let payloadCol = col === 'internal_recipe_name' ? 'recipe_item_uuid' : col;
+        let payloadVal = col === 'internal_recipe_name' ? window.uuidMap['RECIPE:::' + dbVal] : dbVal;
+        let payload = { [payloadCol]: payloadVal };
 
         // --- POWERED BY MASTER FORENSIC ENGINE ---
         let mathCols = ['actual_sale_price', 'qty_sold', 'shipping', 'taxes', 'discount_amount', 'internal_recipe_name', 'Source', 'Outstanding Balance'];
@@ -1083,16 +1085,16 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
             let invUps = [];
             if(col === 'internal_recipe_name') {
                 let oldK = `RECIPE:::${oldRec}`; let newK = `RECIPE:::${dbVal}`;
-                if(inventoryDB[oldK]) { inventoryDB[oldK].sold_qty -= oldQty; invUps.push({item_key:oldK, ...inventoryDB[oldK]}); }
+                if(inventoryDB[oldK]) { inventoryDB[oldK].sold_qty -= oldQty; invUps.push({item_uuid: window.uuidMap[oldK] || oldK, ...inventoryDB[oldK]}); }
                 if(!inventoryDB[newK]) inventoryDB[newK] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-                inventoryDB[newK].sold_qty += row.qty_sold; invUps.push({item_key:newK, ...inventoryDB[newK]});
+                inventoryDB[newK].sold_qty += row.qty_sold; invUps.push({item_uuid: window.uuidMap[newK] || newK, ...inventoryDB[newK]});
             } else if(col === 'qty_sold') {
                 let k = `RECIPE:::${row.internal_recipe_name}`;
                 if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
                 inventoryDB[k].sold_qty += (dbVal - oldQty);
-                invUps.push({item_key:k, ...inventoryDB[k]});
+                invUps.push({item_uuid: window.uuidMap[k] || k, ...inventoryDB[k]});
             }
-            if(invUps.length > 0) await supabaseClient.from('inventory_consumption').upsert(invUps, {onConflict:'item_key'});
+            if(invUps.length > 0) await supabaseClient.from('inventory_consumption').upsert(invUps, {onConflict:'item_uuid'});
         }
 
         setMasterStatus("Saved!", "mod-success"); cell.classList.add('edited-success'); setTimeout(()=>cell.classList.remove('edited-success'),1000);
@@ -1372,7 +1374,12 @@ window.click_commitSimToLedger = async function() {
                 cogs_at_sale: fLine.cogs 
             };
             
-            const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
+            let dbPayload = { ...payload };
+            if (dbPayload.internal_recipe_name) {
+                dbPayload.recipe_item_uuid = window.uuidMap['RECIPE:::' + dbPayload.internal_recipe_name];
+                delete dbPayload.internal_recipe_name;
+            }
+            const { error } = await supabaseClient.from('sales_ledger').update(dbPayload).eq('order_id', fLine.order_id).eq('storefront_sku', fLine.storefront_sku);
             if (error) throw error;
             
             // Update Memory

@@ -15,20 +15,27 @@ window.openBulkAddModal = function() {
         let pData = productsDB[p] || {}; 
         let iconStr = pData.is_3d_print ? "🖨️ " : (pData.is_label ? (pData.label_emoji ? pData.label_emoji + " " : "🏷️ ") : (isSubassemblyDB[p] ? "⚙️ " : "📦 ")); 
         let typeStr = pData.is_label ? "Custom Labelz" : (pData.is_3d_print ? "3D Print" : (isSubassemblyDB[p] ? "Sub-Assembly" : "Retail Product"));
-        bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: iconStr + p, np: typeStr, n: "", sp: "(Nested Recipe)", uc: getEngineTrueCogs(p), q: "" }); 
-        bulkAddData.push({ k: `BARCODE_LABEL:::${p}`, isSub: false, nn: "🏷️ [Barcode] " + p, np: "Product Barcode", n: p, sp: "Standard Thermal", uc: 0, q: "" });
+        let grp = pData.is_label ? 4 : (pData.is_3d_print ? 2 : 1);
+        bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: iconStr + p, np: typeStr, n: "", sp: "(Nested Recipe)", uc: getEngineTrueCogs(p), q: "", g: grp }); 
+        bulkAddData.push({ k: `BARCODE_LABEL:::${p}`, isSub: false, nn: "🏷️ [Barcode] " + p, np: "Product Barcode", n: p, sp: "Standard Thermal", uc: 0, q: "", g: 5 });
     });
-    Object.keys(catalogCache).forEach(k => { let c = catalogCache[k]; bulkAddData.push({ k: k, isSub: false, nn: "🔩 " + (c.neoName || c.itemName || ""), np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "" }); });
+    Object.keys(catalogCache).forEach(k => { let c = catalogCache[k]; if (c.is_anchor) return; bulkAddData.push({ k: k, isSub: false, nn: "🔩 " + (c.neoName || c.itemName || ""), np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "", g: 3 }); });
     document.getElementById('bulkSearch').value = ""; document.getElementById('bulkAddModal').style.display = 'flex'; window.renderBulkAddBody();
 }
-window.sortBulk = function(c) { currentBulkSort = { column: c, direction: currentBulkSort.column===c && currentBulkSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentBulkSort', currentBulkSort); window.renderBulkAddBody(); }
+window.sortBulk = function(c) { currentBulkSort = { column: c, direction: currentBulkSort.column===c && currentBulkSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentBulkSort_v2', currentBulkSort); window.renderBulkAddBody(); }
 window.updateBulkQty = function(k, v) { let i = bulkAddData.find(x => x.k === k); if(i) i.q = v; }
 window.filterBulkList = function() { window.renderBulkAddBody(); }
 window.renderBulkAddBody = function() {
     let wrap = document.getElementById('bulkAddTableWrap'); if(!wrap) return;
     let ths = ` <th class="${currentBulkSort.column==='nn'?'sorted-'+currentBulkSort.direction:''}" data-app-click="sortBulk" data-col="nn">Neogleamz Name</th> <th class="${currentBulkSort.column==='np'?'sorted-'+currentBulkSort.direction:''}" data-app-click="sortBulk" data-col="np">Neogleamz Product</th> <th class="${currentBulkSort.column==='n'?'sorted-'+currentBulkSort.direction:''}" data-app-click="sortBulk" data-col="n">Item Name</th> <th class="${currentBulkSort.column==='sp'?'sorted-'+currentBulkSort.direction:''}" data-app-click="sortBulk" data-col="sp">Spec</th> <th class="${currentBulkSort.column==='uc'?'sorted-'+currentBulkSort.direction:''} text-right" data-app-click="sortBulk" data-col="uc">Unit Cost</th> <th style="width:120px; text-align:center; background:#8b5cf6; color:white;">Qty to Add</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bulkAddBody">`; let qStr = document.getElementById('bulkSearch').value.toLowerCase(); let filtered = bulkAddData.filter(x => x.nn.toLowerCase().includes(qStr) || x.np.toLowerCase().includes(qStr) || x.n.toLowerCase().includes(qStr) || x.sp.toLowerCase().includes(qStr));
-    filtered.sort((x,y) => { let u = x[currentBulkSort.column]; let v = y[currentBulkSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBulkSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBulkSort.direction==='asc'?-1:1; if(u>v) return currentBulkSort.direction==='asc'?1:-1; return 0; });
+    filtered.sort((x,y) => { 
+        if (currentBulkSort.column === 'g') {
+            if (x.g !== y.g) return currentBulkSort.direction === 'asc' ? x.g - y.g : y.g - x.g;
+            return x.nn.localeCompare(y.nn);
+        }
+        let u = x[currentBulkSort.column]; let v = y[currentBulkSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBulkSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBulkSort.direction==='asc'?-1:1; if(u>v) return currentBulkSort.direction==='asc'?1:-1; return 0; 
+    });
     filtered.forEach(x => { let sk = String(x.k).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.isSub) { let safeSubName = String(x.k).replace('RECIPE:::', '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--accent-color, #38bdf8); cursor:pointer; text-decoration:underline;" data-app-click="selectProd" data-name="${safeSubName}" onclick="document.getElementById('bulkAddModal').style.display='none';">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">(Nested Recipe)</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" data-app-input="updateBulkQty" data-key="${sk}" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold;color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td style="text-align:center;"><input type="number" class="bulk-qty-input" value="${x.q}" data-app-input="updateBulkQty" data-key="${sk}" min="0" step="any" placeholder="0" style="width:80px;text-align:center;"></td></tr>`; } });
     wrap.innerHTML = window.safeHTML ? window.safeHTML(h + `</tbody></table>`) : h + `</tbody></table>`; applyTableInteractivity('bulkAddTableWrap');
 }
@@ -57,6 +64,10 @@ window.updateLaborCosts = async function() {
         productsDB[currentProduct].is_label = isLabel;
 
         sysLog(`Updating profile for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
+        
+        let pUuid = window.uuidMap['RECIPE:::' + currentProduct];
+        if (!pUuid) throw new Error("UUID mapping missing for product: " + currentProduct);
+
         const { error } = await supabaseClient.from('product_recipes').update({
             labor_time_mins: t,
             labor_rate_hr: r,
@@ -66,7 +77,7 @@ window.updateLaborCosts = async function() {
             is_3d_print: is3d,
             print_time_mins: pt,
             is_label: isLabel
-        }).eq('product_name', currentProduct);
+        }).eq('product_item_uuid', pUuid);
 
         if (error) throw new Error(error.message);
         setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
@@ -92,64 +103,38 @@ window.renameCurrentProduct = async function() {
     setMasterStatus("Renaming...", "mod-working");
 
     let oldName = currentProduct;
+    let pUuid = window.uuidMap['RECIPE:::' + oldName];
+    if (!pUuid) return alert("Fatal Error: No UUID linked to recipe " + oldName);
+
+    // With UUID architecture, renaming a recipe just means updating the master ledger string!
+    const { error: renameErr } = await supabaseClient.from('full_landed_costs')
+        .update({ neogleamz_product: newName, item_name: newName })
+        .eq('item_uuid', pUuid);
+
+    if (renameErr) {
+        sysLog(`Rename Failed: ${renameErr.message}`, true);
+        return alert("Error renaming recipe: " + renameErr.message);
+    }
+
+    // Refresh local mappings
     let c = productsDB[oldName] || [];
     let l = laborDB[oldName] || {time:0, rate:0};
     let pR = pricingDB[oldName] || {msrp:0, wholesale:0};
     let isSub = isSubassemblyDB[oldName] || false;
-    let is3D = c.is_3d_print || false;
-    let pt = c.print_time_mins || 0;
 
     productsDB[newName] = c;
     laborDB[newName] = l;
     pricingDB[newName] = pR;
     isSubassemblyDB[newName] = isSub;
 
-    // API Call 1: Upsert the new duplicate product
-    const { error: upsertErr } = await supabaseClient.from('product_recipes').upsert({
-        product_name: newName,
-        components: c,
-        labor_time_mins: l.time,
-        labor_rate_hr: l.rate,
-        msrp: pR.msrp,
-        wholesale_price: pR.wholesale,
-        is_subassembly: isSub,
-        is_3d_print: is3D,
-        print_time_mins: pt
-    });
-    if (upsertErr) sysLog(`Upsert Rename Failed: ${upsertErr.message}`, true);
-
-    // API Call 2: Delete the old artifact
-    const { error: delErr } = await supabaseClient.from('product_recipes')
-        .delete()
-        .eq('product_name', oldName);
-    if (delErr) sysLog(`Delete Old Artifact Failed: ${delErr.message}`, true);
-
     delete productsDB[oldName];
     delete laborDB[oldName];
     delete pricingDB[oldName];
     delete isSubassemblyDB[oldName];
-
-    // Search and Replace internal components across the universe
-    let upserts = [];
-    Object.keys(productsDB).forEach(k => {
-        let changed = false;
-        productsDB[k].forEach(p => {
-            if (String(p.item_key || p.di_item_id || p.name) === 'RECIPE:::' + oldName) {
-                p.item_key = 'RECIPE:::' + newName;
-                changed = true;
-            }
-        });
-        if (changed) {
-            upserts.push(supabaseClient.from('product_recipes').update({components: productsDB[k]}).eq('product_name', k));
-        }
-    });
-
-    if (upserts.length > 0) {
-        const results = await Promise.all(upserts);
-        results.forEach(res => {
-            if (res.error) sysLog(`Dependency Batch Sync Failed: ${res.error.message}`, true);
-        });
-    }
+    
+    window.uuidMap['RECIPE:::' + newName] = pUuid;
+    delete window.uuidMap['RECIPE:::' + oldName];
+    window.uuidToNameMap[pUuid] = 'RECIPE:::' + newName;
 
     currentProduct = newName;
     if (typeof populateDropdowns === 'function') populateDropdowns();
@@ -159,10 +144,32 @@ window.renameCurrentProduct = async function() {
     setTimeout(() => setMasterStatus("Ready.", "status-idle"), 3000);
 }
 
-window.syncRecipe = async function(name) {
-    try {
-        sysLog(`Syncing recipe: ${name}`);
-        const {error} = await supabaseClient.from('product_recipes').update({components: productsDB[name]}).eq('product_name', name);
+    window.translateRecipeForDB = function(arr) {
+        let dbPayload = [];
+        (arr || []).forEach(c => {
+            let p = { ...c };
+            let k = p.item_key || p.di_item_id || p.name;
+            if (k && k.startsWith('BARCODE_LABEL:::')) {
+                dbPayload.push(p);
+            } else if (k && window.uuidMap && window.uuidMap[k]) {
+                p.item_uuid = window.uuidMap[k];
+                // We deliberately keep p.item_key here so it saves to the database for human readability!
+                dbPayload.push(p);
+            } else {
+                dbPayload.push(p);
+            }
+        });
+        return dbPayload;
+    };
+
+    window.syncRecipe = async function(name) {
+        try {
+            sysLog(`Syncing recipe: ${name}`);
+            let pUuid = window.uuidMap['RECIPE:::' + name];
+            if (!pUuid) throw new Error("UUID mapping missing for recipe sync!");
+            
+            let dbPayload = window.translateRecipeForDB(productsDB[name]);
+            const {error} = await supabaseClient.from('product_recipes').update({components: dbPayload}).eq('product_item_uuid', pUuid);
         if (error) throw new Error(error.message);
         if (typeof populateDropdowns === 'function') populateDropdowns();
     } catch(e) {
@@ -178,7 +185,8 @@ window.renderProductList = function() {
         labelsToClean.forEach(lbl => {
             if (productsDB[lbl]) {
                 delete productsDB[lbl];
-                supabaseClient.from('product_recipes').delete().eq('product_name', lbl).then(()=>{});
+                let lUuid = window.uuidMap['RECIPE:::' + lbl];
+                if (lUuid) supabaseClient.from('product_recipes').delete().eq('product_item_uuid', lUuid).then(()=>{});
                 sysLog("Purged temp Retail Product: " + lbl);
             }
         });
@@ -454,9 +462,72 @@ window.submitRecipeModal = async function() {
     });
 }
 
-window.executeCreateNewProduct = async function(n) { try { if(!n || !n.trim() || productsDB[n.trim()]) return; n = n.trim(); productsDB[n] = []; laborDB[n] = {time:0, rate:0}; pricingDB[n] = {msrp:0, wholesale:0}; isSubassemblyDB[n] = false; await supabaseClient.from('product_recipes').insert({product_name: n, components: [], labor_time_mins: 0, labor_rate_hr: 0, msrp: 0, wholesale_price: 0, is_subassembly: false, is_3d_print: false, print_time_mins: 0}); currentProduct = n; window.renderProductList(); window.renderProductBOM(); if(typeof populateDropdowns === 'function') populateDropdowns(); } catch(e) { sysLog(e.message, true); } }
-window.executeDeleteCurrentProduct = async function() { try { if(!currentProduct) return; sysLog(`Deleting ${currentProduct}`); const {error} = await supabaseClient.from('product_recipes').delete().eq('product_name', currentProduct);
-            if(error) throw new Error(error.message); delete productsDB[currentProduct]; delete laborDB[currentProduct]; delete pricingDB[currentProduct]; delete isSubassemblyDB[currentProduct]; let ups = []; Object.keys(productsDB).forEach(n => { let arr = productsDB[n]; let oL = arr.length; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { arr.splice(i, 1); } } if(arr.length !== oL) ups.push(supabaseClient.from('product_recipes').update({components: arr}).eq('product_name', n)); }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); window.renderProductList(); } catch(e) { sysLog(e.message, true); } }
+window.executeCreateNewProduct = async function(n) { 
+    try { 
+        if(!n || !n.trim() || productsDB[n.trim()]) return; 
+        n = n.trim(); 
+        productsDB[n] = []; 
+        laborDB[n] = {time:0, rate:0}; 
+        pricingDB[n] = {msrp:0, wholesale:0}; 
+        isSubassemblyDB[n] = false; 
+
+        // 1. Insert master record into full_landed_costs
+        const { data: flcData, error: flcError } = await supabaseClient.from('full_landed_costs').insert({
+            parcel_no: 'RECIPE_AUTO',
+            di_item_id: 'RECIPE-' + Date.now(),
+            order_no: 'MANUAL',
+            alibaba_order: 'MANUAL',
+            item_name: n,
+            neogleamz_product: n,
+            quantity: 1,
+            order_date: new Date().toISOString().split('T')[0]
+        }).select('item_uuid').single();
+        if (flcError) throw new Error(flcError.message);
+        
+        let newUuid = flcData.item_uuid;
+
+        // Map the new UUID immediately
+        window.uuidMap = window.uuidMap || {};
+        window.uuidMap[`RECIPE:::${n}`] = newUuid;
+        window.uuidToNameMap = window.uuidToNameMap || {};
+        window.uuidToNameMap[newUuid] = `RECIPE:::${n}`;
+
+        // 2. Insert into product_recipes using UUID
+        await supabaseClient.from('product_recipes').insert({
+            product_item_uuid: newUuid, 
+            components: [], 
+            labor_time_mins: 0, 
+            labor_rate_hr: 0, 
+            msrp: 0, 
+            wholesale_price: 0, 
+            is_subassembly: false, 
+            is_3d_print: false, 
+            print_time_mins: 0
+        }); 
+        currentProduct = n; 
+        window.renderProductList(); 
+        window.renderProductBOM(); 
+        if(typeof populateDropdowns === 'function') populateDropdowns(); 
+    } catch(e) { sysLog(e.message, true); } 
+}
+
+window.executeDeleteCurrentProduct = async function() { 
+    try { 
+        if(!currentProduct) return; 
+        sysLog(`Deleting ${currentProduct}`); 
+        let pUuid = window.uuidMap['RECIPE:::' + currentProduct];
+        if(!pUuid) throw new Error("UUID missing for " + currentProduct);
+        // Cascade delete via full_landed_costs!
+        const {error} = await supabaseClient.from('full_landed_costs').delete().eq('item_uuid', pUuid);
+        if(error) throw new Error(error.message); 
+        
+        delete productsDB[currentProduct]; delete laborDB[currentProduct]; delete pricingDB[currentProduct]; delete isSubassemblyDB[currentProduct]; 
+        delete window.uuidMap['RECIPE:::' + currentProduct];
+        delete window.uuidToNameMap[pUuid];
+        
+        let ups = []; Object.keys(productsDB).forEach(n => { let arr = productsDB[n]; let oL = arr.length; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { arr.splice(i, 1); } } if(arr.length !== oL) { let tUuid = window.uuidMap['RECIPE:::'+n]; if(tUuid) ups.push(supabaseClient.from('product_recipes').update({components: window.translateRecipeForDB(arr)}).eq('product_item_uuid', tUuid)); } }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); window.renderProductList(); 
+    } catch(e) { sysLog(e.message, true); } 
+}
 
 // ==========================================
 // RECIPE MANAGER (STAGING SANDBOX)
@@ -516,6 +587,7 @@ window.renderRecipeManager = function() {
         let datalistHtml = `<datalist id="rmCatalogDatalist">`;
         if (typeof catalogCache !== 'undefined') {
             Object.keys(catalogCache).forEach(k => {
+                if (catalogCache[k].is_anchor) return;
                 let prod = catalogCache[k].neoProduct || 'Unknown';
                 let item = catalogCache[k].neoName || catalogCache[k].itemName || 'Unknown';
                 let spec = (catalogCache[k].specification && catalogCache[k].specification !== 'null' && catalogCache[k].specification !== '(Mixed Specs)') ? ` - ${catalogCache[k].specification}` : '';

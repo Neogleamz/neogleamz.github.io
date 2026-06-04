@@ -69,10 +69,19 @@ window.safeHTML = function(dirtyHTML) {
  * @param {string} pName - The internal recipe name to resolve.
  * @returns {{raw: number, labor: number, total: number}} Cost breakdown object.
  */
-window.calculateProductBreakdown = function(pName) {
+window.calculateProductBreakdown = function(pName, visited = new Set()) {
     let res = { raw: 0, labor: 0, total: 0 };
     if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return res;
     
+    if (visited.has(pName)) {
+        console.warn("Circular dependency detected for:", pName);
+        return res;
+    }
+    
+    // Create a new set so we don't accidentally block sibling branches
+    let branchVisited = new Set(visited);
+    branchVisited.add(pName);
+
     const components = productsDB[pName] || [];
     components.forEach(item => {
         let key = item?.item_key || item?.di_item_id || item?.name;
@@ -80,7 +89,7 @@ window.calculateProductBreakdown = function(pName) {
 
         let qty = parseFloat(item?.quantity || item?.qty) || 1;
         if (key.startsWith('RECIPE:::')) {
-            let sub = window.calculateProductBreakdown(key.replace('RECIPE:::', ''));
+            let sub = window.calculateProductBreakdown(key.replace('RECIPE:::', ''), branchVisited);
             res.raw += (sub?.total || 0) * qty; 
         } else if (typeof catalogCache !== 'undefined' && catalogCache[key]) {
             res.raw += (parseFloat(catalogCache[key]?.avgUnitCost) || 0) * qty;
@@ -110,9 +119,17 @@ window.calculateProductTotal = window.getEngineTrueCogs;
  * @param {number} [qty=1] - Multiplier.
  * @returns {Object.<string, number>} key-value pairs of raw material IDs and total quantity required.
  */
-window.getRawMaterials = function(pName, qty = 1) {
+window.getRawMaterials = function(pName, qty = 1, visited = new Set()) {
     let res = {};
     if (!pName || typeof productsDB === 'undefined' || !productsDB[pName]) return res;
+
+    if (visited.has(pName)) {
+        console.warn("Circular dependency detected in getRawMaterials for:", pName);
+        return res;
+    }
+    
+    let branchVisited = new Set(visited);
+    branchVisited.add(pName);
 
     const components = productsDB[pName] || [];
     components.forEach(item => {
@@ -121,7 +138,7 @@ window.getRawMaterials = function(pName, qty = 1) {
 
         let compQty = (parseFloat(item?.quantity || item?.qty) || 1) * qty;
         if (key.startsWith('RECIPE:::')) {
-            let sub = window.getRawMaterials(key.replace('RECIPE:::', ''), compQty);
+            let sub = window.getRawMaterials(key.replace('RECIPE:::', ''), compQty, branchVisited);
             Object.keys(sub).forEach(k => {
                 res[k] = (res[k] || 0) + sub[k];
             });
@@ -288,7 +305,7 @@ window.runForensicAccounting = function(rows) {
         let lStatus = (r.lineitem_fulfillment_status || '').toLowerCase();
         
         let cogs = (window.getEngineTrueCogs(r.internal_recipe_name) || 0) * (parseFloat(r.qty_sold) || 1);
-        let actShipCost = parseFloat(r.actual_shipping_cost || r.actualShipCost || 0);
+        let actShipCost;
         
         let isAbandonedPartial = (status !== 'pending' && status !== 'unfulfilled') && (lStatus === 'pending' || lStatus === 'unfulfilled');
         
@@ -300,7 +317,7 @@ window.runForensicAccounting = function(rows) {
         }
         if (type === 'Scrapped Exchange') {
             // cogs is preserved strictly for scraped returns
-            actShipCost = 0; 
+            // actShipCost assignment removed as it is overwritten later
         }
 
         let lineRevenue = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
@@ -534,7 +551,12 @@ window.applyDifferentialHighlighting = async function(payload, table, conflictSt
 // UNIVERSAL HELPERS
 
 // ==========================================
-window.getPrintTime = function(partName) {
+window.getPrintTime = function(partName, visited = new Set()) {
+    if (visited.has(partName)) return 0;
+    
+    let branchVisited = new Set(visited);
+    branchVisited.add(partName);
+
     let cat = typeof catalogByName !== 'undefined' ? catalogByName[partName] : null;
     if (cat && parseFloat(cat.print_time_mins) > 0) return parseFloat(cat.print_time_mins);
     
@@ -546,7 +568,7 @@ window.getPrintTime = function(partName) {
             let k = String(comp.item_key || comp.di_item_id || comp.name);
             let q = parseFloat(comp.quantity || comp.qty) || 1;
             if (k.startsWith('RECIPE:::')) {
-                total += (window.getPrintTime(k.replace('RECIPE:::', '')) * q);
+                total += (window.getPrintTime(k.replace('RECIPE:::', ''), branchVisited) * q);
             } else {
                 let cc = typeof catalogByName !== 'undefined' ? catalogByName[k] : null;
                 if (cc && cc.is_3d_print) {
@@ -596,8 +618,12 @@ function syncDatazStats() {
     let parcels = new Set(), totalWt = 0;
     let absoluteRawSpend = 0, pureGoodsCost = 0;
     let processedOrdersForPureGoods = new Set();
+    let visibleRecords = 0;
     finalResults.forEach(s => {
         let pno = s['Parcel No'];
+        if (pno === 'ORPHAN_PARCEL' || pno === 'RECIPE_AUTO') return;
+        visibleRecords++;
+
         if (pno && String(pno).trim().toUpperCase() !== 'MANUAL') {
             if (!parcels.has(pno)) {
                 parcels.add(pno);
@@ -625,7 +651,7 @@ function syncDatazStats() {
     let totalLogisticsSpend = absoluteRawSpend - pureGoodsCost;
     if (totalLogisticsSpend < 0) totalLogisticsSpend = 0; // Safeguard
     
-    setStat('statDatazRecords', fmtNum(finalResults.length));
+    setStat('statDatazRecords', fmtNum(visibleRecords));
     setStat('statDatazParcels', fmtNum(parcels.size));
     setStat('statDatazPaid', fmtMoney(totalLogisticsSpend));
     setStat('statDatazWt', fmtNum(totalWt));
@@ -667,6 +693,7 @@ function syncEditzStats() {
     });
 
     setStat('statEditzRetail', fmtNum(retailCount));
+    setStat('statEditzLabels', fmtNum(labelCount));
     setStat('statEditzPrints', fmtNum(printsCount));
     setStat('statEditzSubAssy', fmtNum(subAssyCount));
     setStat('statEditzRaw', fmtNum(cKeys.length));

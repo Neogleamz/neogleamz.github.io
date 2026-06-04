@@ -249,7 +249,9 @@ async function renderMasterSOP() {
         let qaChecks = [];
 
         if (sopType === 'packerz') {
-            const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', p);
+            let pUuid = window.uuidMap['RECIPE:::' + p];
+            if (!pUuid) throw new Error("UUID not found for recipe " + p);
+            const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('recipe_item_uuid', pUuid);
             const data = rows && rows.length > 0 ? rows[0] : null;
             if(data) {
                 const instructionJson = JSON.parse(data.instruction_json || '{"steps": [], "qaChecks": []}');
@@ -261,7 +263,9 @@ async function renderMasterSOP() {
                 qaChecks = [];
             }
         } else {
-            const { data: rows, error: _selectErr } = await supabaseClient.from('production_sops').select('*').eq('product_name', p);
+            let pUuid = window.uuidMap['RECIPE:::' + p];
+            if (!pUuid) throw new Error("UUID not found for recipe " + p);
+            const { data: rows, error: _selectErr } = await supabaseClient.from('production_sops').select('*').eq('product_item_uuid', pUuid);
             const data = rows && rows.length > 0 ? rows[0] : null;
             if(data) {
                 const instructionJson = typeof data.steps === 'string' ? JSON.parse(data.steps) : data.steps;
@@ -463,15 +467,19 @@ window.saveMasterSOP = async function() {
         setMasterStatus("Saving...", "mod-working");
 
         if (currentSopMode === 'packerz') {
+            let pUuid = window.uuidMap['RECIPE:::' + p];
+            if (!pUuid) throw new Error("UUID not found for recipe " + p);
             const dbPayload = {
-                internal_recipe_name: p,
+                recipe_item_uuid: pUuid,
                 required_box_sku: null,
                 instruction_json: JSON.stringify(payload)
             };
-            const { error } = await supabaseClient.from('pack_ship_sops').upsert(dbPayload, { onConflict: 'internal_recipe_name' });
+            const { error } = await supabaseClient.from('pack_ship_sops').upsert(dbPayload, { onConflict: 'recipe_item_uuid' });
             if(error) throw new Error(error.message);
         } else {
-            const {error} = await supabaseClient.from('production_sops').upsert({product_name: p, steps: payload}, {onConflict: 'product_name'});
+            let pUuid = window.uuidMap['RECIPE:::' + p];
+            if (!pUuid) throw new Error("UUID not found for recipe " + p);
+            const {error} = await supabaseClient.from('production_sops').upsert({product_item_uuid: pUuid, steps: payload}, {onConflict: 'product_item_uuid'});
             if(error) throw new Error(error.message);
         }
 
@@ -1112,7 +1120,7 @@ async function validateAndCreateWO() {
         sysLog(`Creating Work Order ${woId}`); setMasterStatus("Creating WO...", "mod-working");
 
         const {error} = await supabaseClient.from('work_orders').insert({
-            wo_id: wo.wo_id, product_name: wo.product_name, qty: wo.qty, label: wo.label, status: wo.status,
+            wo_id: wo.wo_id, product_item_uuid: window.uuidMap['RECIPE:::' + wo.product_name], qty: wo.qty, label: wo.label, status: wo.status,
             wip_state: wo.wip_state, routing: wo.routing
         });
         if(error) throw new Error(error.message);
@@ -1884,8 +1892,8 @@ async function advanceWO(newStatus, bypassModal = false) {
                     upsKeys.add(k);
                 });
 
-                let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
-                if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
+                let ups = Array.from(upsKeys).map(k => ({item_uuid: window.uuidMap[k] || k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
+                if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_uuid'});
 
                 if(!targetWO.wip_state) targetWO.wip_state = {};
                 targetWO.wip_state.materials_pulled = true;
@@ -1930,8 +1938,8 @@ async function advanceWO(newStatus, bypassModal = false) {
             else inventoryDB[fgiKey].produced_qty += targetWO.qty;
             upsKeys.add(fgiKey);
 
-            let ups = Array.from(upsKeys).map(k => ({item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
-            if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
+            let ups = Array.from(upsKeys).map(k => ({item_uuid: window.uuidMap[k] || k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}));
+            if(ups.length > 0) await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_uuid'});
         }
 
         if (!targetWO.wip_state) targetWO.wip_state = {};
@@ -3075,7 +3083,7 @@ window.submitFinalizeWo = async function() {
         if(upsKeys.size > 0) {
             setMasterStatus("Logging Scrap...", "mod-working");
             let ups = Array.from(upsKeys).map(k => ({
-                item_key: k,
+                item_uuid: window.uuidMap[k] || k,
                 consumed_qty: inventoryDB[k].consumed_qty,
                 manual_adjustment: inventoryDB[k].manual_adjustment,
                 produced_qty: inventoryDB[k].produced_qty,
@@ -3087,7 +3095,7 @@ window.submitFinalizeWo = async function() {
                 production_consumed_qty: inventoryDB[k].production_consumed_qty||0,
                 prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0
             }));
-            await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_key'});
+            await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_uuid'});
         }
 
         if (spawnedScrapWOs.length > 0 || spawnedScrapPrints.length > 0) {
@@ -3095,7 +3103,7 @@ window.submitFinalizeWo = async function() {
             if (spawnedScrapWOs.length > 0) {
                 const {error: scrapErr} = await supabaseClient.from('work_orders').insert(
                     spawnedScrapWOs.map(s => ({
-                        wo_id: s.wo_id, product_name: s.product_name, qty: s.qty, label: s.label, status: s.status,
+                        wo_id: s.wo_id, product_item_uuid: window.uuidMap['RECIPE:::' + s.product_name], qty: s.qty, label: s.label, status: s.status,
                         wip_state: s.wip_state, routing: s.routing
                     }))
                 );

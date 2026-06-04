@@ -100,9 +100,16 @@ async function fetchUnfulfilledOrders() {
                     items: []
                 };
             }
+            let mappedRecipe = row.recipe_item_uuid;
+            if (window.uuidToAllNamesMap && window.uuidToAllNamesMap[row.recipe_item_uuid]) {
+                mappedRecipe = window.uuidToAllNamesMap[row.recipe_item_uuid].join(' | ').replace(/RECIPE:::/g, '');
+            } else if (row.internal_recipe_name) {
+                mappedRecipe = row.internal_recipe_name;
+            }
+
             groupedOrders[row.order_id].items.push({
                 sku: row.storefront_sku,
-                recipe: row.internal_recipe_name,
+                recipe: mappedRecipe,
                 qty: row.qty_sold,
                 transaction_type: row.transaction_type || 'Standard',
                 qa_cleared_at: row.qa_cleared_at
@@ -625,13 +632,15 @@ window.loadActiveSOP = async function(orderId, sku, recipe, type = 'packerz') {
         }
 
         if (type === 'packerz') {
-            const { data: rows, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', recipe);
+            let targetUuid = window.uuidToAllNamesMap ? Object.keys(window.uuidToAllNamesMap).find(uuid => window.uuidToAllNamesMap[uuid].includes(`RECIPE:::${recipe}`) || window.uuidToAllNamesMap[uuid].includes(recipe)) : recipe;
+            const { data: rows, error } = await supabaseClient.from('pack_ship_sops').select('*').eq('recipe_item_uuid', targetUuid);
             if (error) throw error;
             rowData = rows && rows.length > 0 ? rows[0] : null;
             instructionJson = rowData ? JSON.parse(rowData.instruction_json || '{"steps": [], "qaChecks": []}') : { steps: [], qaChecks: [] };
             requiredBoxSku = rowData ? rowData.required_box_sku : '';
         } else {
-            const { data: rows, error } = await supabaseClient.from('production_sops').select('*').eq('product_name', recipe);
+            let targetUuid = window.uuidToAllNamesMap ? Object.keys(window.uuidToAllNamesMap).find(uuid => window.uuidToAllNamesMap[uuid].includes(`RECIPE:::${recipe}`) || window.uuidToAllNamesMap[uuid].includes(recipe)) : recipe;
+            const { data: rows, error } = await supabaseClient.from('production_sops').select('*').eq('product_item_uuid', targetUuid);
             if (error) throw error;
             rowData = rows && rows.length > 0 ? rows[0] : null;
             if (rowData) {
@@ -1205,8 +1214,12 @@ function showPackerzCompletionModal(orderId, lineItems, isBulk = false) {
             if (!isBulk) return items;
             let grouped = {};
             items.forEach(i => {
-                let key = `${i.internal_recipe_name}|${i.transaction_type || ''}`;
-                if (!grouped[key]) grouped[key] = { ...i, qty_sold: 0 };
+                let niceName = i.recipe_item_uuid;
+                if (window.uuidToAllNamesMap && window.uuidToAllNamesMap[niceName]) {
+                    niceName = window.uuidToAllNamesMap[niceName].join(' | ').replace(/RECIPE:::/g, '');
+                }
+                let key = `${niceName}|${i.transaction_type || ''}`;
+                if (!grouped[key]) grouped[key] = { ...i, internal_recipe_name: niceName, qty_sold: 0 };
                 grouped[key].qty_sold += i.qty_sold;
             });
             return Object.values(grouped);
@@ -1232,7 +1245,7 @@ function showPackerzCompletionModal(orderId, lineItems, isBulk = false) {
                         <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-heading); background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
                             <span style="color:#10b981; font-size:14px; margin-top:-1px;">✅</span>
                             <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                                <span style="font-weight:bold; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                                <span style="font-weight:bold; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name || (window.uuidToAllNamesMap && window.uuidToAllNamesMap[i.recipe_item_uuid] ? window.uuidToAllNamesMap[i.recipe_item_uuid].join(' | ').replace(/RECIPE:::/g, '') : i.recipe_item_uuid)}</span>
                                 <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">${i.item_type || 'Standard Item'}</span>
                             </div>
                             <span style="background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:2px 6px; border-radius:4px; font-size:10px; font-weight:900;">DEDUCTING</span>
@@ -1243,7 +1256,7 @@ function showPackerzCompletionModal(orderId, lineItems, isBulk = false) {
                     ${displayIgnored.map(i => `
                         <div style="background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.2); border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:flex-start;">
                             <div style="display:flex; flex-direction:column; gap:3px;">
-                                <span style="color:white; font-family:monospace; font-weight:700; font-size:13px; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name}</span>
+                                <span style="color:white; font-family:monospace; font-weight:700; font-size:13px; line-height:1.2;">${i.qty_sold}x ${i.internal_recipe_name || (window.uuidToAllNamesMap && window.uuidToAllNamesMap[i.recipe_item_uuid] ? window.uuidToAllNamesMap[i.recipe_item_uuid].join(' | ').replace(/RECIPE:::/g, '') : i.recipe_item_uuid)}</span>
                                 <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">${i.item_type || 'Special Item'}</span>
                             </div>
                             <span style="font-size:10px; color:#F59E0B; font-weight:900; text-transform:uppercase; margin-top:2px;">${i.transaction_type}</span>
@@ -1299,7 +1312,7 @@ async function executePackerzCompletion(orderId) {
         // 1. Fetch line items BEFORE confirming, so we can display them in the modal
         const { data: lineItems, error: itemsError } = await supabaseClient
             .from('sales_ledger')
-            .select('internal_recipe_name, qty_sold, transaction_type')
+            .select('recipe_item_uuid, qty_sold, transaction_type')
             .eq('order_id', orderId);
 
         if (btn) {
@@ -1325,40 +1338,46 @@ async function executePackerzCompletion(orderId) {
                 .eq('order_id', orderId);
 
             if(error) throw error;
-            if (typeof window.teSyncTask === 'function') { await window.teSyncTask('packerz', orderId, 'complete'); }
 
             // 4. Structurally deduct (upsert) the Inventory ledger
             let invMap = {};
             lineItems.forEach(r => {
                 if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
                 
-                let isFGI = false;
-                if (typeof productsDB !== 'undefined' && productsDB[r.internal_recipe_name]) isFGI = true;
-                if (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[r.internal_recipe_name]) isFGI = true;
+                let uuid = r.recipe_item_uuid;
+                if(!uuid) return;
+                
+                let strKey = (window.uuidToNameMap && window.uuidToNameMap[uuid]) ? window.uuidToNameMap[uuid] : uuid;
 
-                let k = `RECIPE:::${r.internal_recipe_name}`;
-                if(!invMap[k]) {
-                    invMap[k] = { 
-                        sold_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].sold_qty) || 0 : 0),
-                        consumed_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].consumed_qty) || 0 : 0)
+                if(!invMap[strKey]) {
+                    invMap[strKey] = { 
+                        uuid: uuid,
+                        sold_qty: (inventoryDB[strKey] ? parseFloat(inventoryDB[strKey].sold_qty) || 0 : 0),
+                        consumed_qty: (inventoryDB[strKey] ? parseFloat(inventoryDB[strKey].consumed_qty) || 0 : 0)
                     };
                 }
                 
+                let isFGI = false;
+                let cStrKey = strKey.replace('RECIPE:::', '');
+                if (typeof productsDB !== 'undefined' && productsDB[cStrKey]) isFGI = true;
+                if (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[cStrKey]) isFGI = true;
+
                 if (isFGI) {
-                    invMap[k].sold_qty += r.qty_sold;
+                    invMap[strKey].sold_qty += r.qty_sold;
                 } else {
-                    invMap[k].consumed_qty += r.qty_sold;
+                    invMap[strKey].consumed_qty += r.qty_sold;
                 }
             });
-            let invPayload = Object.keys(invMap).map(k => {
-                if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-                inventoryDB[k].sold_qty = invMap[k].sold_qty;
-                inventoryDB[k].consumed_qty = invMap[k].consumed_qty;
-                return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
+
+            let invPayload = Object.keys(invMap).map(strKey => {
+                if(!inventoryDB[strKey]) inventoryDB[strKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+                inventoryDB[strKey].sold_qty = invMap[strKey].sold_qty;
+                inventoryDB[strKey].consumed_qty = invMap[strKey].consumed_qty;
+                return { item_uuid: invMap[strKey].uuid, consumed_qty: inventoryDB[strKey].consumed_qty, manual_adjustment: inventoryDB[strKey].manual_adjustment, produced_qty: inventoryDB[strKey].produced_qty, sold_qty: inventoryDB[strKey].sold_qty, min_stock: inventoryDB[strKey].min_stock, scrap_qty: inventoryDB[strKey].scrap_qty };
             });
 
             if (invPayload.length > 0) {
-                const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
+                const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_uuid'});
                 if (invError) throw new Error("Inventory Deduction Error: " + invError.message);
             }
 
@@ -1398,7 +1417,7 @@ window.unarchivePackerzOrder = async function(orderId, skipConfirm = false, skip
         // 1. Fetch specific line items for this order and structurally refund (upsert) the Inventory ledger
         const { data: lineItems, error: itemsError } = await supabaseClient
             .from('sales_ledger')
-            .select('internal_recipe_name, qty_sold, transaction_type')
+            .select('recipe_item_uuid, qty_sold, transaction_type')
             .eq('order_id', orderId);
 
         if (itemsError) throw itemsError;
@@ -1406,18 +1425,40 @@ window.unarchivePackerzOrder = async function(orderId, skipConfirm = false, skip
         let invMap = {};
         lineItems.forEach(r => {
             if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
-            let k = `RECIPE:::${r.internal_recipe_name}`;
-            if(!invMap[k]) invMap[k] = (inventoryDB[k] ? inventoryDB[k].sold_qty : 0);
-            invMap[k] -= r.qty_sold;
+            let uuid = r.recipe_item_uuid;
+            if(!uuid) return;
+            
+            let strKey = (window.uuidToNameMap && window.uuidToNameMap[uuid]) ? window.uuidToNameMap[uuid] : uuid;
+            
+            if(!invMap[uuid]) {
+                invMap[uuid] = { 
+                    strKey: strKey, 
+                    sold_qty: (inventoryDB[strKey] ? parseFloat(inventoryDB[strKey].sold_qty) || 0 : 0),
+                    consumed_qty: (inventoryDB[strKey] ? parseFloat(inventoryDB[strKey].consumed_qty) || 0 : 0)
+                };
+            }
+            
+            let isFGI = false;
+            let cStrKey = strKey.replace('RECIPE:::', '');
+            if (typeof productsDB !== 'undefined' && productsDB[cStrKey]) isFGI = true;
+            if (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[cStrKey]) isFGI = true;
+
+            if (isFGI) {
+                invMap[uuid].sold_qty -= r.qty_sold;
+            } else {
+                invMap[uuid].consumed_qty -= r.qty_sold;
+            }
         });
-        let invPayload = Object.keys(invMap).map(k => {
-            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-            inventoryDB[k].sold_qty = invMap[k];
-            return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
+        let invPayload = Object.keys(invMap).map(uuid => {
+            let strKey = invMap[uuid].strKey;
+            if(!inventoryDB[strKey]) inventoryDB[strKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+            inventoryDB[strKey].sold_qty = invMap[uuid].sold_qty;
+            inventoryDB[strKey].consumed_qty = invMap[uuid].consumed_qty;
+            return { item_uuid: uuid, consumed_qty: inventoryDB[strKey].consumed_qty, manual_adjustment: inventoryDB[strKey].manual_adjustment, produced_qty: inventoryDB[strKey].produced_qty, sold_qty: inventoryDB[strKey].sold_qty, min_stock: inventoryDB[strKey].min_stock, scrap_qty: inventoryDB[strKey].scrap_qty };
         });
 
         if (invPayload.length > 0) {
-            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
+            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_uuid'});
             if (invError) throw new Error("Inventory Refund Error: " + invError.message);
         }
 
@@ -1748,7 +1789,8 @@ async function loadPackerzSopFromDB() {
     }
 
     try {
-        const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('internal_recipe_name', sku);
+        let targetUuid = window.uuidToAllNamesMap ? Object.keys(window.uuidToAllNamesMap).find(uuid => window.uuidToAllNamesMap[uuid].includes(`RECIPE:::${sku}`) || window.uuidToAllNamesMap[uuid].includes(sku)) : sku;
+        const { data: rows, error: _selectErr } = await supabaseClient.from('pack_ship_sops').select('*').eq('recipe_item_uuid', targetUuid);
         const data = rows && rows.length > 0 ? rows[0] : null;
 
         let steps = [{}];
@@ -1818,13 +1860,14 @@ window.savePackerzSOPToDB = async function() {
         let rawQa = document.getElementById('productionAdminQA').value;
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
 
+        let targetUuid = window.uuidToAllNamesMap ? Object.keys(window.uuidToAllNamesMap).find(uuid => window.uuidToAllNamesMap[uuid].includes(`RECIPE:::${sku}`) || window.uuidToAllNamesMap[uuid].includes(sku)) : sku;
+
         const payload = {
-            internal_recipe_name: sku,
-            required_box_sku: null,
+            recipe_item_uuid: targetUuid,
             instruction_json: JSON.stringify({ steps: stepsArray, qaChecks: qaLines })
         };
 
-        const { error } = await supabaseClient.from('pack_ship_sops').upsert(payload, { onConflict: 'internal_recipe_name' });
+        const { error } = await supabaseClient.from('pack_ship_sops').upsert(payload, { onConflict: 'recipe_item_uuid' });
         if(error) throw error;
     }).catch(e => {
         console.error(e);
@@ -2228,21 +2271,20 @@ window.closeSOPTokenGuide = function() { document.getElementById('sopTokenGuideM
 
 async function archiveSOPSnapshot(orderId, sku, recipeName, capturedTelemetry) {
     try {
-        // Fallback recipeName if null, empty, or literally "null" to satisfy Postgres NOT NULL
-        const finalRecipeName = (recipeName && recipeName !== 'null') ? recipeName : (sku || 'UNKNOWN_RECIPE');
-
+        let targetUuid = window.uuidToAllNamesMap ? Object.keys(window.uuidToAllNamesMap).find(uuid => window.uuidToAllNamesMap[uuid].includes(`RECIPE:::${sku}`) || window.uuidToAllNamesMap[uuid].includes(sku)) : sku;
+        
         // Fetch the live SOP at the moment of sign-off (may be null for products without a formal SOP)
         const { data: sopRows } = await supabaseClient
             .from('pack_ship_sops')
             .select('instruction_json, required_box_sku')
-            .eq('internal_recipe_name', finalRecipeName);
+            .eq('recipe_item_uuid', targetUuid);
         
         const sopData = sopRows && sopRows.length > 0 ? sopRows[0] : null;
         const telemetryData = capturedTelemetry || [];
 
         const { error: insErr } = await supabaseClient.from('sop_archives').insert({
             order_id: orderId,
-            internal_recipe_name: finalRecipeName,
+            internal_recipe_name: recipeName,
             qa_passed_at: new Date().toISOString(),
             packer_telemetry: telemetryData,
             sop_snapshot: sopData ? JSON.parse(sopData.instruction_json || '{}') : null,
@@ -2696,7 +2738,7 @@ window.click_bulkAdminFulfillPackerzOrders = async function() {
     try {
         const { data: lineItems, error: itemsError } = await supabaseClient
             .from('sales_ledger')
-            .select('order_id, internal_recipe_name, qty_sold, transaction_type')
+            .select('order_id, recipe_item_uuid, qty_sold, transaction_type')
             .in('order_id', orderIds);
 
         if (itemsError) throw itemsError;
@@ -2724,33 +2766,40 @@ window.click_bulkAdminFulfillPackerzOrders = async function() {
         lineItems.forEach(r => {
             if (r.transaction_type === 'IGNORE' || r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange') return;
             
-            let isFGI = false;
-            if (typeof productsDB !== 'undefined' && productsDB[r.internal_recipe_name]) isFGI = true;
-            if (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[r.internal_recipe_name]) isFGI = true;
+            let uuid = r.recipe_item_uuid;
+            if(!uuid) return;
+            
+            let strKey = (window.uuidToNameMap && window.uuidToNameMap[uuid]) ? window.uuidToNameMap[uuid] : uuid;
 
-            let k = `RECIPE:::${r.internal_recipe_name}`;
-            if(!invMap[k]) {
-                invMap[k] = { 
-                    sold_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].sold_qty) || 0 : 0),
-                    consumed_qty: (inventoryDB[k] ? parseFloat(inventoryDB[k].consumed_qty) || 0 : 0)
+            if(!invMap[strKey]) {
+                invMap[strKey] = { 
+                    uuid: uuid,
+                    sold_qty: (inventoryDB[strKey] ? parseFloat(inventoryDB[strKey].sold_qty) || 0 : 0),
+                    consumed_qty: (inventoryDB[strKey] ? parseFloat(inventoryDB[strKey].consumed_qty) || 0 : 0)
                 };
             }
             
+            // Increment logic for bulk fulfillment
+            let isFGI = false;
+            if (typeof productsDB !== 'undefined' && productsDB[strKey.replace('RECIPE:::', '')]) isFGI = true;
+            if (typeof isSubassemblyDB !== 'undefined' && isSubassemblyDB[strKey.replace('RECIPE:::', '')]) isFGI = true;
+            
             if (isFGI) {
-                invMap[k].sold_qty += r.qty_sold;
+                invMap[strKey].sold_qty += r.qty_sold;
             } else {
-                invMap[k].consumed_qty += r.qty_sold;
+                invMap[strKey].consumed_qty += r.qty_sold;
             }
         });
-        let invPayload = Object.keys(invMap).map(k => {
-            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
-            inventoryDB[k].sold_qty = invMap[k].sold_qty;
-            inventoryDB[k].consumed_qty = invMap[k].consumed_qty;
-            return { item_key: k, consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty };
+        
+        let invPayload = Object.keys(invMap).map(strKey => {
+            if(!inventoryDB[strKey]) inventoryDB[strKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0};
+            inventoryDB[strKey].sold_qty = invMap[strKey].sold_qty;
+            inventoryDB[strKey].consumed_qty = invMap[strKey].consumed_qty;
+            return { item_uuid: invMap[strKey].uuid, consumed_qty: inventoryDB[strKey].consumed_qty, manual_adjustment: inventoryDB[strKey].manual_adjustment, produced_qty: inventoryDB[strKey].produced_qty, sold_qty: inventoryDB[strKey].sold_qty, min_stock: inventoryDB[strKey].min_stock, scrap_qty: inventoryDB[strKey].scrap_qty };
         });
 
         if (invPayload.length > 0) {
-            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_key'});
+            const { error: invError } = await supabaseClient.from('inventory_consumption').upsert(invPayload, {onConflict:'item_uuid'});
             if (invError) throw new Error("Inventory Deduction Error: " + invError.message);
         }
 
