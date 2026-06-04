@@ -1,5 +1,11 @@
 # SK8Lytz Application Changelog
 
+## [1.3.11] - 2026-06-03
+
+### ✨ Features & Bug Fixes
+- **UUID Inventory Architecture Migration** (`feat/uuid-inventory-migration`): Migrate `full_landed_costs` and all 9 downstream relational tables from mutable string keys to permanent `item_uuid` foreign keys to ensure stable historical reporting. Implement UI data-binding refactors to handle `data-uuid` safely across modules.
+- **Packerz Assembly Modal** (`feat/packerz-assembly-modal`): Replace native confirm dialog with rich Vanilla JS verification modal.
+
 ## [1.3.10] - 2026-06-03
 
 ### ✨ Features & Bug Fixes
