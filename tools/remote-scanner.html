@@ -428,19 +428,23 @@
         
         /* Mobile Cockpit Cockpit Card & Stock Info Grid Styles */
         .cockpit-card {
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 14px;
-            padding: clamp(6px, 1.2vh, 12px) clamp(8px, 1.5vh, 14px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            max-width: 370px;
+            max-width: 100%;
+            background: rgba(7, 11, 19, 0.95);
+            border-top: 2px solid var(--primary);
+            border-radius: 20px 20px 0 0;
+            padding: clamp(12px, 2vh, 20px) clamp(12px, 2vh, 20px) 30px;
             display: flex;
             flex-direction: column;
-            gap: clamp(6px, 1vh, 10px);
+            gap: clamp(10px, 1.5vh, 15px);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            z-index: 15;
-            transition: all 0.3s ease;
+            z-index: 50;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .cockpit-title {
@@ -599,10 +603,22 @@
                 </div>
             </div>
 
+            <!-- Quick Delta Offset Block -->
+            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <label style="font-size: clamp(10px, 1.2vh, 12px); font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Quick Delta Helper</label>
+                <div style="display: flex; align-items: stretch; gap: 8px; width: 100%;">
+                    <input type="number" id="ccMobileDeltaInput" placeholder="e.g. +2" class="manual-input" style="flex: 1; font-size: 16px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); border-radius: 8px;" oninput="syncMobileDelta()">
+                    <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                        <button type="button" onclick="decrementMobileDelta()" style="width:45px; border-radius:8px; border:1px solid rgba(16,185,129,0.3); background:rgba(0,0,0,0.3); color:#fff; font-size:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer;">-</button>
+                        <button type="button" onclick="incrementMobileDelta()" style="width:45px; border-radius:8px; border:1px solid rgba(16,185,129,0.3); background:rgba(0,0,0,0.3); color:#fff; font-size:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer;">+</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Qty Input Block -->
-            <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
-                <label style="font-size: clamp(11px, 1.4vh, 13px); font-weight: 800; color: var(--text-muted); text-transform: uppercase;">New Physical Qty</label>
-                <input type="number" id="ccMobileQtyInput" placeholder="Enter Physical Qty" class="manual-input" style="width: 100%; font-size: 20px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); border-radius: 8px;">
+            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
+                <label style="font-size: clamp(11px, 1.4vh, 13px); font-weight: 800; color: var(--success); text-transform: uppercase;">New Physical Qty (Final)</label>
+                <input type="number" id="ccMobileQtyInput" placeholder="Absolute Qty..." class="manual-input" style="width: 100%; font-size: 20px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(16,185,129,0.3); border-radius: 8px;">
             </div>
 
             <!-- Action Controls Row -->
@@ -746,6 +762,9 @@
                         hasSession = true;
                         isDesktopActive = true;
                         
+                        if (payload.catalogCache) window.catalogCache = payload.catalogCache;
+                        if (payload.uuidMap) window.uuidMap = payload.uuidMap;
+                        
                         await supabaseClient.auth.setSession({
                             access_token: payload.accessToken,
                             refresh_token: payload.refreshToken || ''
@@ -854,6 +873,8 @@
                         if (scrap) scrap.innerText = payload.scrap || '—';
                         if (adj) adj.innerText = payload.adj || '—';
                         
+                        window.currentNetStock = parseFloat(payload.netStock) || 0;
+                        
                         if (selectBox && payload.itemKey && selectBox.value !== payload.itemKey) {
                             selectBox.value = payload.itemKey;
                         }
@@ -946,42 +967,51 @@
             if (readerEl) readerEl.innerHTML = '';
         }
 
+        let lastFrameTime = 0;
+        let frameGrabberAF = null;
+
         // Throttled canvas frame-grabber loop to send base64 preview frames to PC
         function startFrameStreaming() {
             stopFrameStreaming();
             
-            frameGrabberTimer = setInterval(() => {
-                if (activePreviewMode === 'phone') return; // saves bandwidth
-                if (!syncChannel || !isDesktopActive) return;
+            function loop(timestamp) {
+                frameGrabberAF = requestAnimationFrame(loop);
                 
-                const video = document.querySelector("#barcode-reader video");
-                if (!video || video.paused || video.ended) return;
+                if (activePreviewMode === 'phone' || !syncChannel || !isDesktopActive) return;
                 
-                const canvas = document.getElementById("compress-canvas");
-                const ctx = canvas.getContext("2d");
-                
-                // Draw crop centered square
-                const minSide = Math.min(video.videoWidth, video.videoHeight);
-                const sx = (video.videoWidth - minSide) / 2;
-                const sy = (video.videoHeight - minSide) / 2;
-                
-                ctx.drawImage(video, sx, sy, minSide, minSide, 0, 0, 240, 240);
-                
-                // High-performance light WebP or JPEG compression
-                const frameBase64 = canvas.toDataURL("image/jpeg", 0.35); // 35% JPEG compression is tiny (2-4KB)
-                
-                syncChannel.send({
-                    type: 'broadcast',
-                    event: 'REMOTE_FRAME_STREAM',
-                    payload: { frame: frameBase64 }
-                });
-            }, 180); // ~5.5 frames per second
+                if (timestamp - lastFrameTime >= 66) { // ~15 FPS
+                    lastFrameTime = timestamp;
+                    
+                    const video = document.querySelector("#barcode-reader video");
+                    if (!video || video.paused || video.ended) return;
+                    
+                    const canvas = document.getElementById("compress-canvas");
+                    const ctx = canvas.getContext("2d");
+                    
+                    // Draw crop centered square
+                    const minSide = Math.min(video.videoWidth, video.videoHeight);
+                    const sx = (video.videoWidth - minSide) / 2;
+                    const sy = (video.videoHeight - minSide) / 2;
+                    
+                    ctx.drawImage(video, sx, sy, minSide, minSide, 0, 0, 240, 240);
+                    
+                    // High-performance light WebP or JPEG compression
+                    const frameBase64 = canvas.toDataURL("image/jpeg", 0.35);
+                    
+                    syncChannel.send({
+                        type: 'broadcast',
+                        event: 'REMOTE_FRAME_STREAM',
+                        payload: { frame: frameBase64 }
+                    }).catch(() => {});
+                }
+            }
+            frameGrabberAF = requestAnimationFrame(loop);
         }
 
         function stopFrameStreaming() {
-            if (frameGrabberTimer) {
-                clearInterval(frameGrabberTimer);
-                frameGrabberTimer = null;
+            if (frameGrabberAF) {
+                cancelAnimationFrame(frameGrabberAF);
+                frameGrabberAF = null;
             }
         }
 
@@ -1109,6 +1139,12 @@
         // Mobile Cockpit Dropdown Selection Change Broadcast
         document.getElementById('ccMobileItemSelect').addEventListener('change', (e) => {
             const val = e.target.value;
+            
+            const deltaInput = document.getElementById('ccMobileDeltaInput');
+            const qtyInput = document.getElementById('ccMobileQtyInput');
+            if (deltaInput) deltaInput.value = '';
+            if (qtyInput) qtyInput.value = '';
+            
             if (syncChannel && isDesktopActive) {
                 syncChannel.send({
                     type: 'broadcast',
@@ -1118,6 +1154,38 @@
             }
             triggerHaptic(40);
         });
+
+        function incrementMobileDelta() {
+            const deltaInput = document.getElementById('ccMobileDeltaInput');
+            if (deltaInput) {
+                let current = parseFloat(deltaInput.value) || 0;
+                deltaInput.value = current + 1;
+                triggerHaptic(40);
+                syncMobileDelta();
+            }
+        }
+
+        function decrementMobileDelta() {
+            const deltaInput = document.getElementById('ccMobileDeltaInput');
+            if (deltaInput) {
+                let current = parseFloat(deltaInput.value) || 0;
+                deltaInput.value = current - 1;
+                triggerHaptic([40, 40]);
+                syncMobileDelta();
+            }
+        }
+        
+        function syncMobileDelta() {
+            const deltaInput = document.getElementById('ccMobileDeltaInput');
+            const qtyInput = document.getElementById('ccMobileQtyInput');
+            if (deltaInput && qtyInput) {
+                let offset = parseFloat(deltaInput.value);
+                if (!isNaN(offset)) {
+                    let base = window.currentNetStock || 0;
+                    qtyInput.value = base + offset;
+                }
+            }
+        }
 
         // Discard & Save controllers
         document.getElementById('phoneDiscardBtn').addEventListener('click', async () => {
@@ -1167,7 +1235,10 @@
                     
                     // Show momentary success overlay feedback
                     updateStatus('success', 'Count Logged ✓', 'Adjustment recorded cleanly.');
+                    const deltaInput = document.getElementById('ccMobileDeltaInput');
+                    if (deltaInput) deltaInput.value = '';
                     if (qtyInput) qtyInput.value = '';
+                    selectBox.value = '';
                     setTimeout(() => {
                         updateStatus('ready', 'Bridge Connected ✓', 'Rear camera active. Align barcode inside scanner frame.');
                     }, 1800);
