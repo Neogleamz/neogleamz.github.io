@@ -105,10 +105,10 @@
             letter-spacing: 1px;
         }
 
-        /* Scanner Frame Window Container */
         .scanner-window-container {
-            width: clamp(150px, 26vh, 260px);
-            height: clamp(150px, 26vh, 260px);
+            width: 90vw;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
             border-radius: 16px;
             border: 3px solid var(--primary);
             position: relative;
@@ -116,6 +116,7 @@
             background: rgba(0, 0, 0, 0.4);
             box-shadow: 0 0 30px var(--primary-glow);
             transition: all 0.3s ease;
+            margin: 0 auto;
         }
 
         #barcode-reader {
@@ -426,13 +427,10 @@
         }
         
         
-        /* Mobile Cockpit Cockpit Card & Stock Info Grid Styles */
         .cockpit-card {
-            position: fixed;
-            bottom: 0;
-            left: 0;
+            position: relative;
+            flex: 1;
             width: 100%;
-            max-width: 100%;
             background: rgba(7, 11, 19, 0.95);
             border-top: 2px solid var(--primary);
             border-radius: 20px 20px 0 0;
@@ -444,7 +442,6 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             z-index: 50;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .cockpit-title {
@@ -613,7 +610,7 @@
         </div>
 
         <!-- Mobile Cockpit Form Card (Dynamic sync cockpit) -->
-        <div id="mobileCockpitCard" class="cockpit-card" style="display: none; height: 75vh; overflow-y: auto; padding-top: 0; border-radius: 24px 24px 0 0;">
+        <div id="mobileCockpitCard" class="cockpit-card" style="display: none; height: auto; overflow-y: visible; padding-top: 0; margin-top: 10px;">
             <!-- Tabs Header -->
             <div style="display: flex; gap: 4px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; background: rgba(7, 11, 19, 0.95); z-index: 10;">
                 <div class="audit-tab active">📦 Physical Audit</div>

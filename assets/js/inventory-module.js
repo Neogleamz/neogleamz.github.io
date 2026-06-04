@@ -2711,8 +2711,7 @@ window.startStockzAuditWebcam = async function() {
                     disableFlip: true,
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true },
                     qrbox: function(vw, _vh) { return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; },
-                    aspectRatio: 1.0,
-                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+                    aspectRatio: 1.0
                 },
                 async (decodedText) => {
                     window.onScanSuccess(decodedText);
@@ -2740,8 +2739,7 @@ window.startStockzAuditWebcamWithDevice = async function(deviceId) {
                     disableFlip: true,
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true },
                     qrbox: function(vw, _vh) { return { width: Math.floor(vw * 0.55), height: Math.floor(vw * 0.25) }; },
-                    aspectRatio: 1.0,
-                    formatsToSupport: [ window.Html5QrcodeSupportedFormats.QR_CODE, window.Html5QrcodeSupportedFormats.CODE_128 ]
+                    aspectRatio: 1.0
             },
             async (decodedText) => {
                 window.onScanSuccess(decodedText);
