@@ -2671,6 +2671,15 @@ window.switchStockzAuditCameraRoute = async function(btn) {
         if (pcPanel) pcPanel.style.display = 'none';
         if (phonePanel) phonePanel.style.display = 'flex';
         
+        // Reset mobile preview state so QR is always visible initially
+        const qrContainer = document.getElementById('stockzAuditMobileQRContainer');
+        const streamContainer = document.getElementById('stockzAuditMobilePreviewContainer');
+        const placeholder = document.getElementById('stockzAuditPhoneOnlyPlaceholder');
+        
+        if (qrContainer) qrContainer.style.display = 'flex';
+        if (streamContainer) streamContainer.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'none';
+        
         await window.stopStockzAuditWebcam();
     }
     
