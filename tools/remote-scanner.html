@@ -500,7 +500,7 @@
         }
 
         .net-stock-label {
-            font-size: clamp(11px, 1.5vh, 13px);
+            font-size: clamp(10px, 1.4vh, 12px);
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -508,7 +508,7 @@
         }
 
         .net-stock-val {
-            font-size: clamp(20px, 2.5vh, 26px);
+            font-size: clamp(16px, 2vh, 22px);
             font-weight: 900;
             color: var(--warning);
             text-shadow: 0 0 8px rgba(245,158,11,0.3);
@@ -523,6 +523,54 @@
             transform: scale(0.95);
             background: rgba(14, 165, 233, 0.25) !important;
             border-color: #0ea5e9 !important;
+        }
+
+        /* Audit Tab Routes */
+        .audit-tab {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 10px 12px;
+            text-transform: uppercase;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .audit-tab.active {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+            box-shadow: 0 0 12px rgba(245,158,11,0.2);
+        }
+        .audit-tab.inactive {
+            color: rgba(255, 255, 255, 0.4);
+            border: 1px solid transparent;
+        }
+
+        .mode-btn {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 10px;
+            text-transform: uppercase;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: rgba(14, 165, 233, 0.15);
+            border: 1px solid #0ea5e9;
+            color: #0ea5e9;
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.3);
+        }
+        .mode-btn.inactive {
+            background: transparent;
+            border: 1px solid transparent;
+            color: rgba(255, 255, 255, 0.4);
         }
 
         /* Audio and hidden items */
@@ -565,72 +613,147 @@
         </div>
 
         <!-- Mobile Cockpit Form Card (Dynamic sync cockpit) -->
-        <div id="mobileCockpitCard" class="cockpit-card" style="display: none;">
-            <div class="cockpit-title">📋 Active Count Target</div>
-            
-            <!-- Dynamic Item Dropdown Select -->
-            <select id="ccMobileItemSelect" class="manual-input" style="width: 100%; border-color: rgba(16,185,129,0.3); font-weight: 800; cursor: pointer; background: rgba(0,0,0,0.4); color: #fff; border-radius: 8px; padding: 0 10px;">
-                <option value="">-- Choose Item Natively --</option>
-            </select>
+        <div id="mobileCockpitCard" class="cockpit-card" style="display: none; height: 75vh; overflow-y: auto; padding-top: 0; border-radius: 24px 24px 0 0;">
+            <!-- Tabs Header -->
+            <div style="display: flex; gap: 4px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; background: rgba(7, 11, 19, 0.95); z-index: 10;">
+                <div class="audit-tab active">📦 Physical Audit</div>
+                <div class="audit-tab inactive">📈 Planning</div>
+                <div class="audit-tab inactive">📜 History</div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
+                <div class="cockpit-title" style="margin: 0;">📋 Active Item:</div>
+                <select id="ccMobileItemSelect" class="manual-input" style="flex: 1; border-color: rgba(255,255,255,0.1); font-weight: 800; cursor: pointer; background: rgba(0,0,0,0.4); color: #fff; border-radius: 8px; padding: 0 10px; height: 35px; font-size: 13px;">
+                    <option value="">-- Choose Item Natively --</option>
+                </select>
+            </div>
             
             <!-- Stock Metrics Panel -->
-            <div id="mobileStockPanel" style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
-                <div class="net-stock-container">
-                    <span class="net-stock-label">System Net Stock</span>
-                    <span id="ccMobileNetStockVal" class="net-stock-val">—</span>
-                </div>
-                <div class="stock-grid">
+            <div id="mobileStockPanel" style="display: flex; flex-direction: column; width: 100%; margin-top: 10px;">
+                <div class="stock-grid" style="grid-template-columns: repeat(3, 1fr); gap: 6px;">
                     <div class="stock-badge">
-                        <span class="stock-label">PROD</span>
-                        <span id="ccMobileProdVal" class="stock-val">—</span>
+                        <span class="stock-label" style="color: #3b82f6;">PURCHASED</span>
+                        <span id="ccMobilePurchasedVal" class="stock-val" style="color: #3b82f6;">—</span>
                     </div>
                     <div class="stock-badge">
-                        <span class="stock-label">PROTO</span>
-                        <span id="ccMobileProtoVal" class="stock-val">—</span>
+                        <span class="stock-label" style="color: #c084fc;">PROTO CONS.</span>
+                        <span id="ccMobileProtoVal" class="stock-val" style="color: #c084fc;">—</span>
                     </div>
                     <div class="stock-badge">
-                        <span class="stock-label">CONS</span>
-                        <span id="ccMobileConsVal" class="stock-val" style="color:#ef4444;">—</span>
+                        <span class="stock-label" style="color: #3b82f6;">PROD CONS.</span>
+                        <span id="ccMobileProdVal" class="stock-val" style="color: #3b82f6;">—</span>
                     </div>
                     <div class="stock-badge">
-                        <span class="stock-label">SCRAP</span>
-                        <span id="ccMobileScrapVal" class="stock-val" style="color:#ef4444;">—</span>
+                        <span class="stock-label" style="color: #ef4444;">TOTAL CONS.</span>
+                        <span id="ccMobileConsVal" class="stock-val" style="color: #ef4444;">—</span>
                     </div>
                     <div class="stock-badge">
-                        <span class="stock-label">ADJ</span>
-                        <span id="ccMobileAdjVal" class="stock-val" style="color:#3b82f6;">—</span>
+                        <span class="stock-label" style="color: #ef4444;">SCRAPPED</span>
+                        <span id="ccMobileScrapVal" class="stock-val" style="color: #ef4444;">—</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Quick Delta Offset Block -->
-            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                <label style="font-size: clamp(10px, 1.2vh, 12px); font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Quick Delta Helper</label>
-                <div style="display: flex; align-items: stretch; gap: 8px; width: 100%;">
-                    <input type="number" id="ccMobileDeltaInput" placeholder="e.g. +2" class="manual-input" style="flex: 1; font-size: 16px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); border-radius: 8px;" oninput="syncMobileDelta()">
-                    <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                        <button type="button" onclick="decrementMobileDelta()" style="width:45px; border-radius:8px; border:1px solid rgba(16,185,129,0.3); background:rgba(0,0,0,0.3); color:#fff; font-size:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer;">-</button>
-                        <button type="button" onclick="incrementMobileDelta()" style="width:45px; border-radius:8px; border:1px solid rgba(16,185,129,0.3); background:rgba(0,0,0,0.3); color:#fff; font-size:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer;">+</button>
+                    <div class="stock-badge" style="border-color: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,0.1); background: rgba(245,158,11,0.05);">
+                        <span class="stock-label" style="color: #f59e0b;">EXPECTED STOCK</span>
+                        <span id="ccMobileNetStockVal" class="stock-val" style="color: #f59e0b; font-size: 18px;">—</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Qty Input Block -->
-            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
-                <label style="font-size: clamp(11px, 1.4vh, 13px); font-weight: 800; color: var(--success); text-transform: uppercase;">New Physical Qty (Final)</label>
-                <input type="number" id="ccMobileQtyInput" placeholder="Absolute Qty..." class="manual-input" style="width: 100%; font-size: 20px; font-weight: 900; text-align: center; background: rgba(0,0,0,0.4); border-color: rgba(16,185,129,0.3); border-radius: 8px;">
+            <!-- Audit Mode Switcher -->
+            <div style="margin-top: 15px;">
+                <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Select Audit Mode:</div>
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" id="mobileModeBtn_delta" onclick="switchMobileAuditMode('delta')" class="mode-btn active" style="flex: 1;">MODE 1: QUICK DELTA</button>
+                    <button type="button" id="mobileModeBtn_reconciliation" onclick="switchMobileAuditMode('reconciliation')" class="mode-btn inactive" style="flex: 1;">MODE 2: RECONCILIATION</button>
+                </div>
+            </div>
+
+            <!-- Input Panel: Delta Mode -->
+            <div id="mobilePanel_delta" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 800; color: var(--text-main); text-transform: uppercase;">1. Enter Quick Delta Offset:</label>
+                    <div style="display: flex; align-items: stretch; gap: 8px; margin-top: 8px;">
+                        <input type="number" id="ccMobileDeltaInput" placeholder="Enter offset (e.g. +2, -5)..." class="manual-input" style="flex: 1; text-align: left;" oninput="syncMobileDeltaValuation()">
+                        <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                            <button type="button" onclick="decrementMobileDelta()" style="width:45px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.4); color:#fff; font-size:20px; font-weight:bold; cursor:pointer;">-</button>
+                            <button type="button" onclick="incrementMobileDelta()" style="width:45px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.4); color:#fff; font-size:20px; font-weight:bold; cursor:pointer;">+</button>
+                        </div>
+                    </div>
+                    <div style="font-size: 9px; color: var(--text-muted); margin-top: 6px;">Directly enter positive or negative adjustment values to calibrate the stock level.</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 6px;">
+                    <div>
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Calculated Delta</div>
+                        <div id="calcMobileDelta" style="font-size: 16px; font-weight: 900; color: #fff;">0.00</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">New Stock</div>
+                        <div id="calcMobileNewStock" style="font-size: 16px; font-weight: 900; color: #fff;">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Valuation</div>
+                        <div id="calcMobileValuation" style="font-size: 16px; font-weight: 900; color: #fff;">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Panel: Reconciliation Mode -->
+            <div id="mobilePanel_reconciliation" style="display: none; flex-direction: column; gap: 15px; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 800; color: var(--text-main); text-transform: uppercase;">1. Enter Physical Count:</label>
+                    <div style="display: flex; align-items: stretch; gap: 8px; margin-top: 8px;">
+                        <input type="number" id="ccMobileCountInput" placeholder="Absolute physical quantity..." class="manual-input" style="flex: 1; text-align: left;" oninput="syncMobileReconciliationValuation()">
+                        <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                            <button type="button" onclick="decrementMobileCount()" style="width:45px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.4); color:#fff; font-size:20px; font-weight:bold; cursor:pointer;">-</button>
+                            <button type="button" onclick="incrementMobileCount()" style="width:45px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.4); color:#fff; font-size:20px; font-weight:bold; cursor:pointer;">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 6px;">
+                    <div>
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Reconciled Delta</div>
+                        <div id="calcMobileReconDelta" style="font-size: 16px; font-weight: 900; color: #fff;">0.00</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Expected Stock</div>
+                        <div id="calcMobileReconExpected" style="font-size: 16px; font-weight: 900; color: #fff;">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Valuation Loss</div>
+                        <div id="calcMobileReconValuation" style="font-size: 16px; font-weight: 900; color: #fff;">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reason Code & Notes -->
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Reason Code:</label>
+                        <select id="ccMobileReasonSelect" class="manual-input" style="width: 100%; margin-top: 4px; font-size: 13px;">
+                            <option value="Periodic Stock Audit (Calibration)">Periodic Stock Audit</option>
+                            <option value="Shrinkage (Lost/Stolen/Damaged)">Shrinkage</option>
+                            <option value="Process Scrap (Manufacturing Defect)">Process Scrap</option>
+                            <option value="Vendor Shortage/Overage">Vendor Shortage/Overage</option>
+                            <option value="Engineering/Prototype Consumption">Engineering/Prototype</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Reconciliation Notes:</label>
+                    <input type="text" id="ccMobileNotesInput" class="manual-input" placeholder="Add specific count notes..." style="width: 100%; margin-top: 4px; font-size: 13px;">
+                </div>
             </div>
 
             <!-- Action Controls Row -->
-            <div style="display: flex; gap: 8px; width: 100%; margin-top: clamp(2px, 0.5vh, 6px);">
-                <button id="phoneDiscardBtn" class="phone-btn-action phone-btn-discard" style="flex:1;">
+            <div style="display: flex; gap: 8px; width: 100%; margin-top: 25px; padding-bottom: 20px;">
+                <button id="phoneDiscardBtn" class="phone-btn-action phone-btn-discard" style="flex:1; background: transparent; border-color: rgba(255,255,255,0.1); color: #94a3b8;">
                     ✕ Close
                 </button>
-                <button id="phoneSaveBtn" class="phone-btn-action phone-btn-save" style="flex:1.4;">
-                    ✓ Save & Next
-                </button>
-                <button id="phoneSaveCloseBtn" class="phone-btn-action phone-btn-save-close" style="flex:1.4;">
-                    💾 Save & Close
+                <button id="phoneSaveBtn" class="phone-btn-action phone-btn-save" style="flex:2; background: rgba(14, 165, 233, 0.15); border-color: #0ea5e9; color: #bae6fd;">
+                    💾 RECORD AUDIT
                 </button>
             </div>
         </div>
@@ -1193,35 +1316,123 @@
             triggerHaptic(40);
         });
 
+        let activeAuditMode = 'delta';
+
+        function switchMobileAuditMode(mode) {
+            activeAuditMode = mode;
+            const deltaPanel = document.getElementById('mobilePanel_delta');
+            const reconPanel = document.getElementById('mobilePanel_reconciliation');
+            const deltaBtn = document.getElementById('mobileModeBtn_delta');
+            const reconBtn = document.getElementById('mobileModeBtn_reconciliation');
+
+            if (mode === 'delta') {
+                deltaPanel.style.display = 'flex';
+                reconPanel.style.display = 'none';
+                deltaBtn.className = 'mode-btn active';
+                reconBtn.className = 'mode-btn inactive';
+                syncMobileDeltaValuation();
+            } else {
+                deltaPanel.style.display = 'none';
+                reconPanel.style.display = 'flex';
+                deltaBtn.className = 'mode-btn inactive';
+                reconBtn.className = 'mode-btn active';
+                syncMobileReconciliationValuation();
+            }
+        }
+
+        function getActiveItemCost() {
+            const selectBox = document.getElementById('ccMobileItemSelect');
+            if (!selectBox || !selectBox.value || !window.catalogCache) return 0;
+            const itemKey = selectBox.value;
+            let c = window.catalogCache[itemKey] || {};
+            // check if RECIPE:::
+            if (itemKey.startsWith('RECIPE:::')) {
+                // If it's a recipe, we don't have local breakdown math on phone easily,
+                // so we rely on the cost passed via PC_STOCK_UPDATE if available.
+                return window.currentAuditItemAvgCost || 0;
+            }
+            return parseFloat(c.avgUnitCost) || 0;
+        }
+
+        function syncMobileDeltaValuation() {
+            const input = document.getElementById('ccMobileDeltaInput');
+            if (!input) return;
+            let delta = parseFloat(input.value) || 0;
+            let expected = window.currentNetStock || 0;
+            let newStock = expected + delta;
+            let val = delta * getActiveItemCost();
+
+            document.getElementById('calcMobileDelta').innerText = delta > 0 ? `+${delta}` : delta;
+            document.getElementById('calcMobileNewStock').innerText = newStock;
+            
+            const valEl = document.getElementById('calcMobileValuation');
+            valEl.innerText = (val >= 0 ? '+$' : '-$') + Math.abs(val).toFixed(2);
+            valEl.style.color = val >= 0 ? '#10b981' : '#ef4444';
+        }
+
+        function syncMobileReconciliationValuation() {
+            const input = document.getElementById('ccMobileCountInput');
+            if (!input) return;
+            let countStr = input.value;
+            let expected = window.currentNetStock || 0;
+            
+            document.getElementById('calcMobileReconExpected').innerText = expected;
+            
+            if (countStr === '' || isNaN(parseFloat(countStr))) {
+                document.getElementById('calcMobileReconDelta').innerText = '0.00';
+                document.getElementById('calcMobileReconValuation').innerText = '$0.00';
+                document.getElementById('calcMobileReconValuation').style.color = '#fff';
+                return;
+            }
+            
+            let count = parseFloat(countStr);
+            let delta = count - expected;
+            let val = delta * getActiveItemCost();
+
+            document.getElementById('calcMobileReconDelta').innerText = delta > 0 ? `+${delta}` : delta;
+            
+            const valEl = document.getElementById('calcMobileReconValuation');
+            valEl.innerText = (val >= 0 ? '+$' : '-$') + Math.abs(val).toFixed(2);
+            valEl.style.color = val >= 0 ? '#10b981' : '#ef4444';
+        }
+
         function incrementMobileDelta() {
-            const deltaInput = document.getElementById('ccMobileDeltaInput');
-            if (deltaInput) {
-                let current = parseFloat(deltaInput.value) || 0;
-                deltaInput.value = current + 1;
+            const input = document.getElementById('ccMobileDeltaInput');
+            if (input) {
+                let current = parseFloat(input.value) || 0;
+                input.value = current + 1;
                 triggerHaptic(40);
-                syncMobileDelta();
+                syncMobileDeltaValuation();
             }
         }
 
         function decrementMobileDelta() {
-            const deltaInput = document.getElementById('ccMobileDeltaInput');
-            if (deltaInput) {
-                let current = parseFloat(deltaInput.value) || 0;
-                deltaInput.value = current - 1;
+            const input = document.getElementById('ccMobileDeltaInput');
+            if (input) {
+                let current = parseFloat(input.value) || 0;
+                input.value = current - 1;
                 triggerHaptic([40, 40]);
-                syncMobileDelta();
+                syncMobileDeltaValuation();
             }
         }
-        
-        function syncMobileDelta() {
-            const deltaInput = document.getElementById('ccMobileDeltaInput');
-            const qtyInput = document.getElementById('ccMobileQtyInput');
-            if (deltaInput && qtyInput) {
-                let offset = parseFloat(deltaInput.value);
-                if (!isNaN(offset)) {
-                    let base = window.currentNetStock || 0;
-                    qtyInput.value = base + offset;
-                }
+
+        function incrementMobileCount() {
+            const input = document.getElementById('ccMobileCountInput');
+            if (input) {
+                let current = parseFloat(input.value) || 0;
+                input.value = current + 1;
+                triggerHaptic(40);
+                syncMobileReconciliationValuation();
+            }
+        }
+
+        function decrementMobileCount() {
+            const input = document.getElementById('ccMobileCountInput');
+            if (input) {
+                let current = parseFloat(input.value) || 0;
+                input.value = Math.max(0, current - 1);
+                triggerHaptic([40, 40]);
+                syncMobileReconciliationValuation();
             }
         }
 
@@ -1246,21 +1457,45 @@
             document.getElementById('scannerSuccessOverlay').style.display = 'flex';
         });
 
-        // ✓ Save & Next (Multi-count workflow)
+        // ✓ Save (Record Audit workflow)
         document.getElementById('phoneSaveBtn').addEventListener('click', async () => {
             const selectBox = document.getElementById('ccMobileItemSelect');
-            const qtyInput = document.getElementById('ccMobileQtyInput');
+            const reasonSelect = document.getElementById('ccMobileReasonSelect');
+            const notesInput = document.getElementById('ccMobileNotesInput');
+            
             if (!selectBox || !selectBox.value) {
                 return alert("Please select or scan an item first.");
             }
-            const qtyStr = qtyInput ? qtyInput.value.trim() : '';
-            if (qtyStr === '') {
-                return alert("Please enter the physical quantity.");
+            
+            let finalQty = 0;
+            
+            if (activeAuditMode === 'delta') {
+                const deltaInput = document.getElementById('ccMobileDeltaInput');
+                const deltaStr = deltaInput ? deltaInput.value.trim() : '';
+                if (deltaStr === '') {
+                    return alert("Please enter a delta offset.");
+                }
+                let delta = parseFloat(deltaStr);
+                if (isNaN(delta)) return alert("Please enter a valid numeric delta.");
+                finalQty = (window.currentNetStock || 0) + delta;
+            } else {
+                const qtyInput = document.getElementById('ccMobileCountInput');
+                const qtyStr = qtyInput ? qtyInput.value.trim() : '';
+                if (qtyStr === '') {
+                    return alert("Please enter the physical quantity.");
+                }
+                finalQty = parseFloat(qtyStr);
+                if (isNaN(finalQty)) return alert("Please enter a valid numeric quantity.");
             }
-            const qty = parseFloat(qtyStr);
-            if (isNaN(qty)) {
-                return alert("Please enter a valid numeric quantity.");
-            }
+            
+            const payloadToSend = { 
+                value: selectBox.value, 
+                qty: finalQty, 
+                close: true,
+                auditMode: activeAuditMode,
+                reasonCode: reasonSelect ? reasonSelect.value : '',
+                notes: notesInput ? notesInput.value.trim() : ''
+            };
             
             triggerHaptic([100, 50, 100]);
             if (syncChannel && isDesktopActive) {
@@ -1268,15 +1503,22 @@
                     await syncChannel.send({
                         type: 'broadcast',
                         event: 'MOBILE_SAVE_COUNT',
-                        payload: { value: selectBox.value, qty: qty, close: false }
+                        payload: payloadToSend
                     });
                     
                     // Show momentary success overlay feedback
                     updateStatus('success', 'Count Logged ✓', 'Adjustment recorded cleanly.');
+                    
                     const deltaInput = document.getElementById('ccMobileDeltaInput');
+                    const qtyInput = document.getElementById('ccMobileCountInput');
                     if (deltaInput) deltaInput.value = '';
                     if (qtyInput) qtyInput.value = '';
+                    if (notesInput) notesInput.value = '';
                     selectBox.value = '';
+                    
+                    syncMobileDeltaValuation();
+                    syncMobileReconciliationValuation();
+                    
                     setTimeout(() => {
                         updateStatus('ready', 'Bridge Connected ✓', 'Rear camera active. Align barcode inside scanner frame.');
                     }, 1800);
@@ -1288,45 +1530,7 @@
             }
         });
 
-        // 💾 Save & Close (Finalize count session)
-        document.getElementById('phoneSaveCloseBtn').addEventListener('click', async () => {
-            const selectBox = document.getElementById('ccMobileItemSelect');
-            const qtyInput = document.getElementById('ccMobileQtyInput');
-            if (!selectBox || !selectBox.value) {
-                return alert("Please select or scan an item first.");
-            }
-            const qtyStr = qtyInput ? qtyInput.value.trim() : '';
-            if (qtyStr === '') {
-                return alert("Please enter the physical quantity.");
-            }
-            const qty = parseFloat(qtyStr);
-            if (isNaN(qty)) {
-                return alert("Please enter a valid numeric quantity.");
-            }
-            
-            triggerHaptic([100, 50, 100]);
-            if (syncChannel && isDesktopActive) {
-                try {
-                    await syncChannel.send({
-                        type: 'broadcast',
-                        event: 'MOBILE_SAVE_COUNT',
-                        payload: { value: selectBox.value, qty: qty, close: true }
-                    });
-                    
-                    // Reset overlay back to default success text
-                    document.getElementById('overlayEmoji').innerText = '🎉';
-                    document.getElementById('overlayTitle').innerText = 'Count Synchronized!';
-                    document.getElementById('overlayDesc').innerText = 'Your cycle count entries have been cleanly recorded. You can safely close this browser window now!';
-                    
-                    shutdownCameraEngine();
-                    document.getElementById('scannerSuccessOverlay').style.display = 'flex';
-                } catch(e) {
-                    alert("Sync transmission failed: " + e.message);
-                }
-            } else {
-                alert("Cannot sync: PC bridge is not active.");
-            }
-        });
+
 
         // Page startup bootstrap
         window.addEventListener('DOMContentLoaded', () => {

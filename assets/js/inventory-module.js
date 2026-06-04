@@ -1478,9 +1478,35 @@ window.initializeCcSyncChannel = function() {
             if (auditModal && auditModal.style.display === 'flex') {
                 if (payload.value === window.currentAuditItemKey) {
                     const countInput = document.getElementById('stockzAuditCountInput');
-                    if (countInput) {
-                        countInput.value = payload.qty;
-                        window.updateStockzAuditDeltaValuation();
+                    const deltaInput = document.getElementById('stockzAuditDeltaInput');
+                    const reasonSelect = document.getElementById('stockzAuditReasonSelect');
+                    const notesInput = document.getElementById('stockzAuditNotesInput');
+                    
+                    if (reasonSelect && payload.reasonCode) reasonSelect.value = payload.reasonCode;
+                    if (notesInput && payload.notes !== undefined) notesInput.value = payload.notes;
+                    
+                    if (payload.auditMode === 'delta') {
+                        let expected = window.currentAuditItemExpectedStock || 0;
+                        let delta = payload.qty - expected;
+                        if (deltaInput) deltaInput.value = delta;
+                        if (countInput) countInput.value = '';
+                        // Switch UI to delta mode
+                        const deltaBtn = document.getElementById('stockzAuditModeBtn_delta');
+                        if (deltaBtn) window.switchStockzAuditMode(deltaBtn);
+                    } else {
+                        if (countInput) countInput.value = payload.qty;
+                        if (deltaInput) deltaInput.value = '';
+                        // Switch UI to reconciliation mode
+                        const reconBtn = document.getElementById('stockzAuditModeBtn_reconciliation');
+                        if (reconBtn) window.switchStockzAuditMode(reconBtn);
+                    }
+                    
+                    window.updateStockzAuditDeltaValuation();
+                    
+                    await window.submitStockzAudit();
+                    
+                    if (payload.close) {
+                        window.closeStockzAuditModal();
                     }
                 }
             } else {
@@ -2375,6 +2401,42 @@ window.selectStockzAuditItem = function(itemKey) {
     }
     document.getElementById('stockzAuditMobileQRCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
     document.getElementById('stockzAuditMobileSessionDetails').innerText = `Session Token: ${window.ccSessionId}`;
+    
+    if (window.ccSyncChannel) {
+        let payloadToSend = {
+            itemKey: itemKey,
+            netStock: expectedStock,
+            scrapped: scrapped,
+            cost: avgCost || 0
+        };
+        
+        if (itemKey.startsWith('RECIPE:::')) {
+            let b = parseFloat(i.produced_qty) || 0;
+            let pb = parseFloat(i.prototype_produced_qty) || 0;
+            let sold = parseFloat(i.sold_qty) || 0;
+            let c_prod = parseFloat(i.production_consumed_qty) || 0;
+            let c_proto = parseFloat(i.prototype_consumed_qty) || 0;
+            payloadToSend.purchased = b.toFixed(2).replace(/\.?0+$/,'');
+            payloadToSend.proto = pb.toFixed(2).replace(/\.?0+$/,'');
+            payloadToSend.prod = c_prod.toFixed(2).replace(/\.?0+$/,'');
+            payloadToSend.cons = (sold + c_prod).toFixed(2).replace(/\.?0+$/,'');
+        } else {
+            let c = safeCatalogCache[itemKey] || {totalQty:0};
+            let c_proto = parseFloat(i.prototype_consumed_qty) || 0;
+            let c_prod = parseFloat(i.production_consumed_qty) || 0;
+            let c_asm = parseFloat(i.assembly_consumed_qty) || 0;
+            payloadToSend.purchased = (parseFloat(c.totalQty) || 0).toFixed(2).replace(/\.?0+$/,'');
+            payloadToSend.proto = c_proto.toFixed(2).replace(/\.?0+$/,'');
+            payloadToSend.prod = c_prod.toFixed(2).replace(/\.?0+$/,'');
+            payloadToSend.cons = (parseFloat(i.consumed_qty) || 0).toFixed(2).replace(/\.?0+$/,'');
+        }
+
+        window.ccSyncChannel.send({
+            type: 'broadcast',
+            event: 'PC_STOCK_UPDATE',
+            payload: payloadToSend
+        }).catch(()=>{});
+    }
 };
 
 window.toggleStockzAuditScanner = async function() {
