@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/346</span>
+                <span class='fraction'>0/359</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/462</span>
+                <span class='fraction'>0/488</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/264</span>
+                <span class='fraction'>0/275</span>
             </div>
         
             
@@ -483,7 +483,26 @@
 <a name='L418'></a><a href='#L418'>418</a>
 <a name='L419'></a><a href='#L419'>419</a>
 <a name='L420'></a><a href='#L420'>420</a>
-<a name='L421'></a><a href='#L421'>421</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L421'></a><a href='#L421'>421</a>
+<a name='L422'></a><a href='#L422'>422</a>
+<a name='L423'></a><a href='#L423'>423</a>
+<a name='L424'></a><a href='#L424'>424</a>
+<a name='L425'></a><a href='#L425'>425</a>
+<a name='L426'></a><a href='#L426'>426</a>
+<a name='L427'></a><a href='#L427'>427</a>
+<a name='L428'></a><a href='#L428'>428</a>
+<a name='L429'></a><a href='#L429'>429</a>
+<a name='L430'></a><a href='#L430'>430</a>
+<a name='L431'></a><a href='#L431'>431</a>
+<a name='L432'></a><a href='#L432'>432</a>
+<a name='L433'></a><a href='#L433'>433</a>
+<a name='L434'></a><a href='#L434'>434</a>
+<a name='L435'></a><a href='#L435'>435</a>
+<a name='L436'></a><a href='#L436'>436</a>
+<a name='L437'></a><a href='#L437'>437</a>
+<a name='L438'></a><a href='#L438'>438</a>
+<a name='L439'></a><a href='#L439'>439</a>
+<a name='L440'></a><a href='#L440'>440</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -693,7 +712,16 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -703,10 +731,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1112,23 +1150,42 @@
 &nbsp;
 <span class="cstat-no" title="statement not covered" >            if (eventType === 'INSERT' || eventType === 'UPDATE') {</span>
 <span class="cstat-no" title="statement not covered" >                if (aliasDB) {</span>
-<span class="cstat-no" title="statement not covered" >                    aliasDB[newRecord.product_sku] = newRecord.internal_recipe_name;</span>
+                    let mappedRecipeName = <span class="cstat-no" title="statement not covered" >(window.uuidToNameMap &amp;&amp; newRecord.recipe_item_uuid) ? window.uuidToNameMap[newRecord.recipe_item_uuid] : null;</span>
+<span class="cstat-no" title="statement not covered" >                    if (mappedRecipeName) {</span>
+<span class="cstat-no" title="statement not covered" >                        mappedRecipeName = mappedRecipeName.replace('RECIPE:::', '');</span>
+                    }
+                    const uniqueKey = <span class="cstat-no" title="statement not covered" >newRecord.shopify_sku || newRecord.product_sku;</span>
+<span class="cstat-no" title="statement not covered" >                    aliasDB[uniqueKey] = mappedRecipeName;</span>
+<span class="cstat-no" title="statement not covered" >                    if (newRecord.shopify_sku &amp;&amp; newRecord.product_sku !== newRecord.shopify_sku) {</span>
+<span class="cstat-no" title="statement not covered" >                        aliasDB[newRecord.product_sku] = mappedRecipeName;</span>
+                    }
                 }
 <span class="cstat-no" title="statement not covered" >                if (aliasMetadataDB) {</span>
-<span class="cstat-no" title="statement not covered" >                    aliasMetadataDB[newRecord.product_sku] = {</span>
+                    const uniqueKey = <span class="cstat-no" title="statement not covered" >newRecord.shopify_sku || newRecord.product_sku;</span>
+<span class="cstat-no" title="statement not covered" >                    aliasMetadataDB[uniqueKey] = {</span>
                         barcode_value: newRecord.barcode_value || null,
                         is_shopify_synced: !!newRecord.is_shopify_synced,
                         is_primary: !!newRecord.is_primary,
                         platform: newRecord.platform || (newRecord.is_shopify_synced ? 'Shopify Webhook' : 'Local Emulator'),
-                        shopify_sku: newRecord.shopify_sku || null
+                        shopify_sku: newRecord.shopify_sku || null,
+                        product_sku: newRecord.product_sku || null,
+                        matched_shopify_sku: newRecord.matched_shopify_sku || null
                     };
+<span class="cstat-no" title="statement not covered" >                    if (newRecord.shopify_sku &amp;&amp; newRecord.product_sku !== newRecord.shopify_sku) {</span>
+<span class="cstat-no" title="statement not covered" >                        aliasMetadataDB[newRecord.product_sku] = {</span>
+                            ...aliasMetadataDB[uniqueKey],
+                            is_memory_only: true
+                        };
+                    }
                 }
             } else <span class="cstat-no" title="statement not covered" >if (eventType === 'DELETE') {</span>
 <span class="cstat-no" title="statement not covered" >                if (aliasDB) {</span>
 <span class="cstat-no" title="statement not covered" >                    delete aliasDB[oldRecord.product_sku];</span>
+<span class="cstat-no" title="statement not covered" >                    if (oldRecord.shopify_sku) <span class="cstat-no" title="statement not covered" >delete aliasDB[oldRecord.shopify_sku];</span></span>
                 }
 <span class="cstat-no" title="statement not covered" >                if (aliasMetadataDB) {</span>
 <span class="cstat-no" title="statement not covered" >                    delete aliasMetadataDB[oldRecord.product_sku];</span>
+<span class="cstat-no" title="statement not covered" >                    if (oldRecord.shopify_sku) <span class="cstat-no" title="statement not covered" >delete aliasMetadataDB[oldRecord.shopify_sku];</span></span>
                 }
             }
 &nbsp;
@@ -1330,7 +1387,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-04T07:13:08.533Z
+                at 2026-06-05T04:55:59.397Z
             </div>
         <script src="prettify.js"></script>
         <script>

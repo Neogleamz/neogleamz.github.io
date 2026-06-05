@@ -56,6 +56,41 @@ serve(async (req: Request) => {
     // Initialize Supabase Admin Client
     const supabase = createClient(supabaseUrl, supabaseKey)
 
+    // TOPIC ROUTER: If it's a product update/create, securely ingest the barcode
+    if (topic === 'products/update' || topic === 'products/create') {
+        const product = payload;
+        const aliasUpsertPromises: any[] = [];
+        
+        if (product.variants && Array.isArray(product.variants)) {
+            product.variants.forEach((variant: any) => {
+                const sku = (variant.sku || "").trim();
+                const barcode = String(variant.barcode || "").trim();
+                if (sku) {
+                    const upsertPayload: any = {
+                        product_sku: sku,
+                        is_shopify_synced: true,
+                        platform: 'Shopify Webhook',
+                        shopify_sku: sku
+                    };
+                    if (barcode) {
+                        upsertPayload.barcode_value = barcode;
+                    }
+                    
+                    aliasUpsertPromises.push(
+                        supabase.from('storefront_aliases').upsert(upsertPayload, { onConflict: 'product_sku' })
+                    );
+                }
+            });
+        }
+        
+        if (aliasUpsertPromises.length > 0) {
+            await Promise.all(aliasUpsertPromises).catch(err => {
+                console.error("Failed to sync product variants:", err);
+            });
+        }
+        return new Response(JSON.stringify({ success: true, mode: 'product_update' }), { status: 200 });
+    }
+
     // TOPIC ROUTER: If it's a pure fulfillment create, handle lightweight tracking update
     if (topic === 'fulfillments/create') {
         const tracking_number = payload.tracking_numbers?.[0] || null;
@@ -142,20 +177,27 @@ serve(async (req: Request) => {
           const internalName = aliasMap[item.sku] || aliasMap[item.name] || aliasMap[item.title] || item.name || item.title;
           console.log(` -> Mapping SKU: [${skuName}] to Internal Recipe: [${internalName}]`);
 
-          // Auto-upsert/register storefront alias mapping using variant name as product_sku and official variant SKU
+          // Auto-upsert/register storefront alias mapping using official variant SKU
           if (item.sku) {
               const cleanItemSku = String(item.sku).trim();
-              const cleanItemName = String(item.name || item.title || "").trim();
-              const targetSku = cleanItemName || cleanItemSku;
+              const targetSku = cleanItemSku;
+              
+              const itemTitle = item.title === 'Default Title' ? '' : ` - ${item.title}`;
+              const fullTitle = `${item.name}${itemTitle}`.trim();
 
-              const aliasPromise = supabase.from('storefront_aliases').upsert({
-                  product_sku: targetSku,
-                  internal_recipe_name: internalName,
-                  barcode_value: item.barcode || null,
+              const upsertPayload: any = {
+                  product_sku: fullTitle || targetSku,
                   is_shopify_synced: true,
                   platform: 'Shopify Webhook',
                   shopify_sku: cleanItemSku || null
-              });
+              };
+              
+              // Only inject barcode_value if it exists, explicitly preventing null overwrites
+              if (item.barcode) {
+                  upsertPayload.barcode_value = String(item.barcode).trim();
+              }
+
+              const aliasPromise = supabase.from('storefront_aliases').upsert(upsertPayload, { onConflict: 'shopify_sku' });
               aliasUpsertPromises.push(aliasPromise);
           }
 

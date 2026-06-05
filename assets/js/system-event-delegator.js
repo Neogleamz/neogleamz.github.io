@@ -1527,8 +1527,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     let selectId = el.getAttribute('data-select-id');
                     let selectEl = document.getElementById(selectId);
                     let selectedRecipe = selectEl ? selectEl.value : "";
+                    if (!selectedRecipe) {
+                        if (typeof window.sysToast === 'function') window.sysToast('Please select a Target Recipe first!', 'error');
+                        else alert('Please select a Target Recipe first!');
+                        break;
+                    }
                     if (window.resolveOrphanSKUMapping) {
-                        window.resolveOrphanSKUMapping(sku, selectedRecipe);
+                        window.executeWithButtonAction(el, 'MAPPING...', '✅ MAPPED', async () => {
+                            await window.resolveOrphanSKUMapping(sku, selectedRecipe);
+                        });
                     }
                     break;
                 }

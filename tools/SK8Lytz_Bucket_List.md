@@ -14,6 +14,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟠 P1 High Priority:** Core application features, necessary infrastructure, and major business logic. 
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
+### 🔴 P0 Critical (Blockers & Hotfixes)
+- [ ] `fix/sku-alias-manager-barcode` : **SKU Alias Manager Barcode Overwrite** - Add product webhook routing to `shopify-webhook` to ingest barcodes via `products/update`. Remove destructive `null` barcode overwrites from the `orders/create` payload. Switch database conflict target from Product Title to `shopify_sku` across all functions and UI.
+
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 *Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
 

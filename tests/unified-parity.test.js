@@ -239,10 +239,17 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
         const updateMock = jest.fn().mockReturnValue({
             eq: eqMock
         });
+        const selectChainMock = {
+            maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null })
+        };
+        selectChainMock.eq = jest.fn().mockReturnValue(selectChainMock);
+        selectChainMock.is = jest.fn().mockReturnValue(selectChainMock);
+
         window.supabaseClient = {
             from: jest.fn().mockReturnValue({
                 upsert: upsertMock,
-                update: updateMock
+                update: updateMock,
+                select: jest.fn().mockReturnValue(selectChainMock)
             })
         };
 
@@ -267,7 +274,8 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
             is_shopify_synced: true,
             is_primary: false,
             platform: "Shopify Webhook",
-            shopify_sku: "NG-3090-SK8Lytz HALOZ"
+            shopify_sku: "NG-3090-SK8Lytz HALOZ",
+            matched_shopify_sku: "NG-3090-SK8Lytz HALOZ"
         });
 
         expect(window.aliasMetadataDB["NG-3090-SK8Lytz HALOZ"]).toEqual({
@@ -291,7 +299,8 @@ describe("Unified SKU & Barcode Parity Engine (UHIA)", () => {
             is_shopify_synced: false,
             is_primary: false,
             platform: "Auto Scanner",
-            shopify_sku: null
+            shopify_sku: null,
+            matched_shopify_sku: null
         });
 
         expect(window.aliasMetadataDB["LOCAL-MANUAL-SKU"]).toEqual({

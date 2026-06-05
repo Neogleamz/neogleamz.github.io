@@ -453,16 +453,34 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
             platform: platform,
             shopify_sku: shopifySku
         };
+
+        const insertShopifySku = (shopifySku && shopifySku === sku) ? shopifySku : null;
+
+        let existingRowQuery = supabaseClient.from('storefront_aliases').select('id').eq('product_sku', sku);
+        if (shopifySku) {
+            existingRowQuery = existingRowQuery.eq('shopify_sku', shopifySku);
+        } else {
+            existingRowQuery = existingRowQuery.is('shopify_sku', null);
+        }
         
-        const { error: aliasError } = await supabaseClient.from('storefront_aliases').upsert({ 
+        const { data: existingData } = await existingRowQuery.maybeSingle();
+
+        const upsertPayload = { 
             product_sku: sku, 
             recipe_item_uuid: window.uuidMap['RECIPE:::' + targetRecipe], 
             barcode_value: barcodeVal,
             is_shopify_synced: isShopifySynced,
-            is_primary: isPrimary,
             platform: platform,
-            shopify_sku: shopifySku
-        });
+            is_primary: isPrimary,
+            shopify_sku: insertShopifySku,
+            matched_shopify_sku: shopifySku
+        };
+
+        if (existingData && existingData.id) {
+            upsertPayload.id = existingData.id;
+        }
+
+        const { error: aliasError } = await supabaseClient.from('storefront_aliases').upsert(upsertPayload);
         
         if (aliasError) throw new Error("DB Error saving alias: " + aliasError.message);
         
@@ -658,10 +676,12 @@ window.findShopifyVariantForAlias = function(aliasSku) {
             }
             if (score > bestScore) {
                 bestScore = score;
-                bestMatch = { sku, barcode: m.barcode_value || 'None' };
+                bestMatch = { sku: m.shopify_sku || sku, barcode: m.barcode_value || 'None' };
+                console.log('findShopifyVariantForAlias found match:', { sku, m_shopify_sku: m.shopify_sku, score });
             }
         }
     });
+    console.log('findShopifyVariantForAlias returning:', bestMatch);
     return bestMatch;
 };
 
