@@ -76,7 +76,7 @@ function buildBarcodzCache() {
         }
 
         // Alphabetical sort by product name
-        barcodzCache.sort((a,b) => a.name.localeCompare(b.name));
+        barcodzCache.sort((a,b) => String(a.name || '').localeCompare(String(b.name || '')));
 
         // Update KPI counter
         const kpi = document.getElementById('kpiBarcodzCount');
@@ -193,12 +193,12 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
 
 window.barcodzSpoolQueue = [];
 
-window.addBarcodzToSpool = function(name, slug, icon, type) {
+window.addBarcodzToSpool = function(name, slug, icon, type, dbName) {
     let existing = window.barcodzSpoolQueue.find(x => x.slug === slug);
     if (existing) {
         existing.qty++;
     } else {
-        window.barcodzSpoolQueue.push({ name, slug, icon, type, qty: 1 });
+        window.barcodzSpoolQueue.push({ name, slug, icon, type, dbName: dbName || name, qty: 1 });
     }
     renderBarcodzSpool();
 }
@@ -332,6 +332,15 @@ window.executeBatchPrint = function() {
     if (window.ldState && window.ldState.activeTemplateId && typeof window.click_ldPrintState === 'function') {
         window.click_ldPrintState();
         return;
+    }
+    
+    if (window.ldState && window.ldState.templates) {
+        let stdTpl = window.ldState.templates.find(t => t.name.toLowerCase() === 'standard template');
+        if (stdTpl && typeof window.click_ldLoadTemplate === 'function' && typeof window.click_ldPrintState === 'function') {
+            window.click_ldLoadTemplate(stdTpl.id);
+            window.click_ldPrintState();
+            return;
+        }
     }
     
     let activeSizeSelect = 'barcodzSizeSelect';
@@ -519,7 +528,11 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
         
         let activeKey = sizeText;
         if(typeof catalogCache !== 'undefined') {
-            const foundKey = Object.keys(catalogCache).find(k => catalogCache[k].neoName === sizeText);
+            const foundKey = Object.keys(catalogCache).find(k => {
+                let n1 = (catalogCache[k].neoName || "").replace(/["'\s]/g, '').toLowerCase().replace('thermal', '');
+                let n2 = sizeText.replace(/["'\s]/g, '').toLowerCase().replace('thermal', '');
+                return n1 === n2 || (catalogCache[k].neoName || "").replace(/["']/g, '') === sizeText.replace(/["']/g, '');
+            });
             if(foundKey) activeKey = foundKey;
             else activeKey = `${sizeText}::::::(Grouped Raw Items):::(Mixed Specs)`;
         } else {
@@ -538,75 +551,95 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
         const payloads = [];
         
         // 1. Array payload for Raw Media tracking
-        payloads.push({
-             item_uuid: window.uuidMap[activeKey] || activeKey,
-             consumed_qty: inventoryDB[activeKey].consumed_qty || 0,
-             manual_adjustment: inventoryDB[activeKey].manual_adjustment || 0,
-             produced_qty: inventoryDB[activeKey].produced_qty || 0,
-             sold_qty: inventoryDB[activeKey].sold_qty || 0,
-             min_stock: inventoryDB[activeKey].min_stock || 0,
-             scrap_qty: inventoryDB[activeKey].scrap_qty || 0,
-             prototype_consumed_qty: inventoryDB[activeKey].prototype_consumed_qty || 0,
-             assembly_consumed_qty: inventoryDB[activeKey].assembly_consumed_qty || 0,
-             production_consumed_qty: inventoryDB[activeKey].production_consumed_qty,
-             prototype_produced_qty: inventoryDB[activeKey].prototype_produced_qty || 0
-        });
+        let activeUuid = window.uuidMap && window.uuidMap[activeKey] ? window.uuidMap[activeKey] : null;
+        if (activeUuid) {
+            payloads.push({
+                 item_uuid: activeUuid,
+                 consumed_qty: inventoryDB[activeKey].consumed_qty || 0,
+                 manual_adjustment: inventoryDB[activeKey].manual_adjustment || 0,
+                 produced_qty: inventoryDB[activeKey].produced_qty || 0,
+                 sold_qty: inventoryDB[activeKey].sold_qty || 0,
+                 min_stock: inventoryDB[activeKey].min_stock || 0,
+                 scrap_qty: inventoryDB[activeKey].scrap_qty || 0,
+                 prototype_consumed_qty: inventoryDB[activeKey].prototype_consumed_qty || 0,
+                 assembly_consumed_qty: inventoryDB[activeKey].assembly_consumed_qty || 0,
+                 production_consumed_qty: inventoryDB[activeKey].production_consumed_qty,
+                 prototype_produced_qty: inventoryDB[activeKey].prototype_produced_qty || 0
+            });
+        } else {
+            sysLog(`Warning: Thermal media "${activeKey}" missing UUID. Skipping database upsert for this item.`, true);
+        }
         
         // 2. Loop through spool queue to build produced labels
         if (window.barcodzSpoolQueue && window.barcodzSpoolQueue.length > 0) {
             window.barcodzSpoolQueue.forEach(item => {
+                let actualDbName = item.dbName || item.name;
                 // If it's registered as a custom label in productsDB, track its produced stock
-                if (typeof productsDB !== 'undefined' && productsDB[item.name] && productsDB[item.name].is_label) {
-                    let labelKey = `RECIPE:::${item.name}`;
+                if (typeof productsDB !== 'undefined' && productsDB[actualDbName] && productsDB[actualDbName].is_label) {
+                    let labelKey = `RECIPE:::${actualDbName}`;
                     if (!inventoryDB[labelKey]) {
                         inventoryDB[labelKey] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
                     }
                     // Add produced quantity from the spool
                     inventoryDB[labelKey].produced_qty += item.qty;
                     
-                    payloads.push({
-                         item_uuid: window.uuidMap[labelKey] || labelKey,
-                         consumed_qty: inventoryDB[labelKey].consumed_qty,
-                         manual_adjustment: inventoryDB[labelKey].manual_adjustment,
-                         produced_qty: inventoryDB[labelKey].produced_qty,
-                         sold_qty: inventoryDB[labelKey].sold_qty,
-                         min_stock: inventoryDB[labelKey].min_stock,
-                         scrap_qty: inventoryDB[labelKey].scrap_qty,
-                         prototype_consumed_qty: inventoryDB[labelKey].prototype_consumed_qty,
-                         assembly_consumed_qty: inventoryDB[labelKey].assembly_consumed_qty,
-                         production_consumed_qty: inventoryDB[labelKey].production_consumed_qty,
-                         prototype_produced_qty: inventoryDB[labelKey].prototype_produced_qty
-                    });
-                } else if (typeof productsDB !== 'undefined' && productsDB[item.name]) {
-                    let labelKey = `BARCODE_LABEL:::${item.name}`;
+                    let lblUuid = window.uuidMap && window.uuidMap[labelKey] ? window.uuidMap[labelKey] : null;
+                    if (lblUuid) {
+                        payloads.push({
+                             item_uuid: lblUuid,
+                             consumed_qty: inventoryDB[labelKey].consumed_qty,
+                             manual_adjustment: inventoryDB[labelKey].manual_adjustment,
+                             produced_qty: inventoryDB[labelKey].produced_qty,
+                             sold_qty: inventoryDB[labelKey].sold_qty,
+                             min_stock: inventoryDB[labelKey].min_stock,
+                             scrap_qty: inventoryDB[labelKey].scrap_qty,
+                             prototype_consumed_qty: inventoryDB[labelKey].prototype_consumed_qty,
+                             assembly_consumed_qty: inventoryDB[labelKey].assembly_consumed_qty,
+                             production_consumed_qty: inventoryDB[labelKey].production_consumed_qty,
+                             prototype_produced_qty: inventoryDB[labelKey].prototype_produced_qty
+                        });
+                    } else {
+                        sysLog(`Warning: Label "${labelKey}" missing UUID. Skipping database upsert.`, true);
+                    }
+                } else if (typeof productsDB !== 'undefined' && productsDB[actualDbName]) {
+                    let labelKey = `BARCODE_LABEL:::${actualDbName}`;
                     if (!inventoryDB[labelKey]) {
                         inventoryDB[labelKey] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
                     }
                     inventoryDB[labelKey].produced_qty += item.qty;
                     
-                    payloads.push({
-                         item_uuid: window.uuidMap[labelKey] || labelKey,
-                         consumed_qty: inventoryDB[labelKey].consumed_qty,
-                         manual_adjustment: inventoryDB[labelKey].manual_adjustment,
-                         produced_qty: inventoryDB[labelKey].produced_qty,
-                         sold_qty: inventoryDB[labelKey].sold_qty,
-                         min_stock: inventoryDB[labelKey].min_stock,
-                         scrap_qty: inventoryDB[labelKey].scrap_qty,
-                         prototype_consumed_qty: inventoryDB[labelKey].prototype_consumed_qty,
-                         assembly_consumed_qty: inventoryDB[labelKey].assembly_consumed_qty,
-                         production_consumed_qty: inventoryDB[labelKey].production_consumed_qty,
-                         prototype_produced_qty: inventoryDB[labelKey].prototype_produced_qty
-                    });
+                    let lblUuid = window.uuidMap && window.uuidMap[labelKey] ? window.uuidMap[labelKey] : null;
+                    if (lblUuid) {
+                        payloads.push({
+                             item_uuid: lblUuid,
+                             consumed_qty: inventoryDB[labelKey].consumed_qty,
+                             manual_adjustment: inventoryDB[labelKey].manual_adjustment,
+                             produced_qty: inventoryDB[labelKey].produced_qty,
+                             sold_qty: inventoryDB[labelKey].sold_qty,
+                             min_stock: inventoryDB[labelKey].min_stock,
+                             scrap_qty: inventoryDB[labelKey].scrap_qty,
+                             prototype_consumed_qty: inventoryDB[labelKey].prototype_consumed_qty,
+                             assembly_consumed_qty: inventoryDB[labelKey].assembly_consumed_qty,
+                             production_consumed_qty: inventoryDB[labelKey].production_consumed_qty,
+                             prototype_produced_qty: inventoryDB[labelKey].prototype_produced_qty
+                        });
+                    } else {
+                        sysLog(`Warning: Barcode Label "${labelKey}" missing UUID. Skipping database upsert.`, true);
+                    }
                 }
             });
         }
         
-        const { error } = await supabaseClient.from('inventory_consumption').upsert(payloads, {onConflict:'item_uuid'});
-        if(error) throw error;
+        if (payloads.length > 0) {
+            const { error } = await supabaseClient.from('inventory_consumption').upsert(payloads, {onConflict:'item_uuid'});
+            if(error) throw error;
+        }
         
         sysLog(`Consumed ${qty}x ${sizeText} via Spool.`);
         if(typeof renderInventoryTable === 'function') renderInventoryTable();
         if(typeof renderAnalyticsDashboard === 'function' && document.getElementById('paneSalezAnalyticz')?.style.display === 'flex') renderAnalyticsDashboard();
+        if(typeof renderBarcodzGrid === 'function') renderBarcodzGrid();
+        if(typeof renderLabelzGrid === 'function') renderLabelzGrid();
     } catch(err) {
         sysLog(`Failed to log thermal consumption: ${err.message}`, true);
     }

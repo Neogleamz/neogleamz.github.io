@@ -169,7 +169,10 @@ function selectPrintJob(id) {
 
 function renderActivePrintJob(id) {
     const job = printQueueDB.find(j => j.id === id);
-    if (!job) return;
+    if (!job) {
+        document.getElementById('printMainArea').style.display = 'none';
+        return;
+    }
 
     document.getElementById('printMainArea').style.display = 'block';
     

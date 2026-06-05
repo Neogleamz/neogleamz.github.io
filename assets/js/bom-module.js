@@ -372,7 +372,24 @@ window.renderProductBOM = function() {
     let p = productsDB[currentProduct]||[];
     document.getElementById('is3dPrintInput').checked = !!p.is_3d_print;
     document.getElementById('recipePrintTimeInput').value = p.print_time_mins || 0;
+    document.getElementById('recipePrintTimeInput').value = p.print_time_mins || 0;
     if (document.getElementById('isLabelInput')) document.getElementById('isLabelInput').checked = !!p.is_label;
+    
+    let labelBtn = document.getElementById('autoCreateLabelBtn');
+    if (labelBtn) {
+        if (!p.is_label && !p.is_3d_print) { 
+            let labelName = "Label - " + currentProduct;
+            let existingLabel = productsDB[labelName] && productsDB[labelName].is_label;
+            let hasLabelInBOM = p.some(x => String(x.item_key || x.di_item_id || x.name) === `RECIPE:::${labelName}`);
+            if (!existingLabel && !hasLabelInBOM) {
+                labelBtn.style.display = 'inline-block';
+            } else {
+                labelBtn.style.display = 'none';
+            }
+        } else {
+            labelBtn.style.display = 'none';
+        }
+    }
 
     let _gt = 0; let wrap = document.getElementById('bomTableWrap');
 
@@ -532,6 +549,127 @@ window.executeDeleteCurrentProduct = async function() {
         
         let ups = []; Object.keys(productsDB).forEach(n => { let arr = productsDB[n]; let oL = arr.length; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { arr.splice(i, 1); } } if(arr.length !== oL) { let tUuid = window.uuidMap['RECIPE:::'+n]; if(tUuid) ups.push(supabaseClient.from('product_recipes').update({components: window.translateRecipeForDB(arr)}).eq('product_item_uuid', tUuid)); } }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); window.renderProductList(); 
     } catch(e) { sysLog(e.message, true); } 
+}
+
+window.autoCreateCustomLabel = async function(eventOrBtn) {
+    let btn = (eventOrBtn instanceof Event) ? eventOrBtn.target : eventOrBtn;
+    if (!btn || !btn.tagName) {
+        btn = document.querySelector('[data-click="click_window_autoCreateCustomLabel"]') || document.createElement('button');
+    }
+    if(!currentProduct) return;
+    
+    let n = "Label - " + currentProduct;
+    if(productsDB[n]) return alert("A custom label with this name already exists!");
+
+    await executeWithButtonAction(btn, 'CREATING...', '✅ CREATED', async () => {
+        try {
+            sysLog(`Auto-creating label: ${n}`);
+            productsDB[n] = [];
+            productsDB[n].is_label = true;
+            laborDB[n] = {time:0, rate:0}; 
+            pricingDB[n] = {msrp:0, wholesale:0}; 
+            isSubassemblyDB[n] = false; 
+            
+            const { data: flcData, error: flcError } = await supabaseClient.from('full_landed_costs').insert({
+                parcel_no: 'RECIPE_AUTO',
+                di_item_id: 'RECIPE-' + Date.now(),
+                order_no: 'MANUAL',
+                alibaba_order: 'MANUAL',
+                item_name: n,
+                neogleamz_product: n,
+                quantity: 1,
+                order_date: new Date().toISOString().split('T')[0]
+            }).select('item_uuid').single();
+            if (flcError) throw new Error(flcError.message);
+            
+            let newUuid = flcData.item_uuid;
+
+            window.uuidMap = window.uuidMap || {};
+            window.uuidMap[`RECIPE:::${n}`] = newUuid;
+            window.uuidToNameMap = window.uuidToNameMap || {};
+            window.uuidToNameMap[newUuid] = `RECIPE:::${n}`;
+
+            await supabaseClient.from('product_recipes').insert({
+                product_item_uuid: newUuid, 
+                components: [], 
+                labor_time_mins: 0, 
+                labor_rate_hr: 0, 
+                msrp: 0, 
+                wholesale_price: 0, 
+                is_subassembly: false, 
+                is_3d_print: false, 
+                print_time_mins: 0,
+                is_label: true
+            }); 
+            
+            // Generate a standard template matching the basic Barcodz style
+            const defaultLayout = {
+                version: "5.3.0",
+                objects: [
+                    {
+                        type: "textbox",
+                        left: 108,
+                        top: 20,
+                        originX: "center",
+                        originY: "center",
+                        width: 200,
+                        fontSize: 16,
+                        fontFamily: "Arial",
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        fill: "#000000",
+                        text: "{{PRODUCT_NAME}}",
+                        isDynamic: true,
+                        templateText: "{{PRODUCT_NAME}}"
+                    },
+                    {
+                        type: "image",
+                        left: 108,
+                        top: 60,
+                        originX: "center",
+                        originY: "center",
+                        width: 180,
+                        height: 40,
+                        isBarcode: true,
+                        isDynamic: true,
+                        templateText: "{{BARCODE}}",
+                        barcodeOpts: { text: "{{BARCODE}}", bcid: "code128" }
+                    }
+                ],
+                background: "#ffffff"
+            };
+
+            await supabaseClient.from('label_designs').insert({
+                product_item_uuid: newUuid,
+                emoji: '🏷️',
+                label_size: '2.25x1.25',
+                layout_json: defaultLayout,
+                updated_at: new Date().toISOString()
+            });
+
+            // Update local memory so Labelz Pane catches it
+            if(typeof labelzDB !== 'undefined') {
+                labelzDB.push({
+                    product_item_uuid: newUuid,
+                    product_name: n,
+                    emoji: '🏷️',
+                    label_size: '2.25x1.25',
+                    layout_json: defaultLayout
+                });
+                labelzDB.sort((a,b) => (a.product_name||'').localeCompare(b.product_name||''));
+                if(typeof renderLabelzGrid === 'function') renderLabelzGrid();
+            }
+
+            window.renderProductList(); 
+            window.renderProductBOM(); 
+            if(typeof populateDropdowns === 'function') populateDropdowns(); 
+            
+            sysLog(`Created Custom Label ${n} with standard Barcode Template.`);
+        } catch(e) { 
+            sysLog(e.message, true); 
+            throw e;
+        } 
+    });
 }
 
 // ==========================================

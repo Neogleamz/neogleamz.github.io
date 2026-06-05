@@ -2722,7 +2722,7 @@ window.tePopulateTagFilter = function() {
     if (!filterSelect) return;
     
     let html = '<option value="">All Tags</option>';
-    let sortedTags = [...taskEngineDB.tagz].sort((a, b) => a.name.localeCompare(b.name));
+    let sortedTags = [...taskEngineDB.tagz].sort((a, b) => String(a.name||'').localeCompare(String(b.name||'')));
     sortedTags.forEach(t => {
         html += `<option value="${t.id}">${t.name}</option>`;
     });
@@ -2754,7 +2754,7 @@ window.teRenderTagManagerList = function() {
     if (!list) return;
     
     let html = '';
-    let sortedTags = [...taskEngineDB.tagz].sort((a, b) => a.name.localeCompare(b.name));
+    let sortedTags = [...taskEngineDB.tagz].sort((a, b) => String(a.name||'').localeCompare(String(b.name||'')));
     
     if (sortedTags.length === 0) {
         list.innerHTML = window.safeHTML ? window.safeHTML('<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>') : '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>';

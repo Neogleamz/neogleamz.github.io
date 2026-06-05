@@ -291,6 +291,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_renameCurrentProduct':
                     renameCurrentProduct();
                     break;
+                case 'click_window_autoCreateCustomLabel':
+                    window.autoCreateCustomLabel(el);
+                    break;
                 case 'click_addPartToProduct':
                     addPartToProduct();
                     break;

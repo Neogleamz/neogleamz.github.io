@@ -7,6 +7,7 @@ window.ldState = {
     selectedId: null,
     widthIn: 2.25,
     heightIn: 1.25,
+    paperProfile: null,
     zoom: 3.5,
     dragging: null,
     resizing: null,
@@ -28,6 +29,7 @@ async function ldLoadTemplatesFromStorage() {
                     name: row.name,
                     widthIn: row.widthIn,
                     heightIn: row.heightIn,
+                    paperProfile: row.paper_profile,
                     elements: row.elements
                 }));
                 localStorage.setItem('neogleamz_label_templates', JSON.stringify(window.ldState.templates));
@@ -47,6 +49,7 @@ async function ldSaveTemplatesToStorage() {
                 name: t.name,
                 widthIn: t.widthIn,
                 heightIn: t.heightIn,
+                paper_profile: t.paperProfile,
                 elements: t.elements
             }));
             await supabaseClient.from('label_templates').upsert(payloads, {onConflict: 'id'});
@@ -104,6 +107,14 @@ window.click_openWhiteboardDesigner = function() {
         templateOptions += `<option value="${t.id}" ${isSelected}>${t.name}</option>`;
     });
 
+    let paperOptions = '<option value="">-- Custom Size --</option>';
+    if (window.activePaperProfiles) {
+        window.activePaperProfiles.forEach(p => {
+            const isSelected = window.ldState.paperProfile === p.n ? 'selected' : '';
+            paperOptions += `<option value="${p.n.replace(/"/g, '&quot;')}" ${isSelected}>${p.n}</option>`;
+        });
+    }
+
     modal.innerHTML = window.safeHTML ? window.safeHTML(`
         <div style="height:60px; background:var(--bg-panel); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; padding:0 24px; box-shadow:0 4px 15px rgba(0,0,0,0.2); z-index:10;">
             <div style="display:flex; align-items:center; gap:10px;">
@@ -111,7 +122,7 @@ window.click_openWhiteboardDesigner = function() {
                 <span style="font-weight:bold; font-size:18px; color:white; letter-spacing:0.5px;">Whiteboard Designer</span>
                 <span style="color:var(--text-muted); font-size:14px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:12px;">Template Engine</span>
             </div>
-            <button data-click="click_closeWhiteboardDesigner" class="btn-red" style="font-weight:bold; letter-spacing:1px; padding:6px 16px;">
+            <button data-click="click_closeWhiteboardDesigner" class="btn-red" style="font-weight:bold; letter-spacing:1px; padding:6px 20px; width:max-content; border-radius:6px;">
                 CLOSE
             </button>
         </div>
@@ -138,6 +149,12 @@ window.click_openWhiteboardDesigner = function() {
                 <button class="btn-blue" data-click="click_ldAddBarcode">Add Barcode</button>
                 <hr style="border:0; border-bottom:1px solid var(--border-color); margin:5px 0;">
                 
+                <h3 style="margin:0; font-size:12px; color:var(--text-heading); text-transform:uppercase;">PAPER PROFILE</h3>
+                <select id="ldPaperProfileSelect" style="width:100%; padding:5px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
+                    ${paperOptions}
+                </select>
+                <hr style="border:0; border-bottom:1px solid var(--border-color); margin:5px 0;">
+
                 <label>Width (in)</label>
                 <input type="number" id="ldWidth" value="${window.ldState.widthIn}" step="0.1" style="width:100%; padding:5px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
                 <label>Height (in)</label>
@@ -164,6 +181,7 @@ window.click_openWhiteboardDesigner = function() {
     
     document.getElementById('ldTemplateSelect')?.addEventListener('change', function() { window.click_ldLoadTemplate(this.value); });
     document.getElementById('ldPreviewSelect')?.addEventListener('change', function() { window.click_ldChangePreview(this.value); });
+    document.getElementById('ldPaperProfileSelect')?.addEventListener('change', function() { window.click_ldChangePaperProfile(this.value); });
     
     document.getElementById('ldCanvas').addEventListener('pointerdown', ldPointerDown);
     modal.style.display = 'flex';
@@ -179,6 +197,23 @@ window.click_ldChangePreview = function(slug) {
     ldRender();
 };
 
+window.click_ldChangePaperProfile = function(val) {
+    window.ldState.paperProfile = val;
+    if (val && window.activePaperProfiles) {
+        let p = window.activePaperProfiles.find(x => x.n === val);
+        if (p) {
+            window.ldState.widthIn = p.w;
+            window.ldState.heightIn = p.h;
+            
+            const wInput = document.getElementById('ldWidth');
+            const hInput = document.getElementById('ldHeight');
+            if (wInput) wInput.value = p.w;
+            if (hInput) hInput.value = p.h;
+        }
+    }
+    ldRender();
+};
+
 window.click_ldSaveTemplate = async function() {
     if (window.ldState.activeTemplateId) {
         const existing = window.ldState.templates.find(t => t.id === window.ldState.activeTemplateId);
@@ -186,6 +221,7 @@ window.click_ldSaveTemplate = async function() {
             if (confirm("Update existing template '" + existing.name + "'?\n\nClick OK to Overwrite it.\nClick Cancel to Save As a New Template instead.")) {
                 existing.widthIn = window.ldState.widthIn;
                 existing.heightIn = window.ldState.heightIn;
+                existing.paperProfile = window.ldState.paperProfile;
                 existing.elements = JSON.parse(JSON.stringify(window.ldState.elements));
                 await ldSaveTemplatesToStorage();
                 alert("Template updated!");
@@ -205,6 +241,7 @@ window.click_ldSaveTemplate = async function() {
         name: name,
         widthIn: window.ldState.widthIn,
         heightIn: window.ldState.heightIn,
+        paperProfile: window.ldState.paperProfile,
         elements: elementsCopy
     };
     
@@ -230,6 +267,7 @@ window.click_ldLoadTemplate = function(id) {
         window.ldState.activeTemplateId = tpl.id;
         window.ldState.widthIn = tpl.widthIn;
         window.ldState.heightIn = tpl.heightIn;
+        window.ldState.paperProfile = tpl.paperProfile || null;
         window.ldState.elements = JSON.parse(JSON.stringify(tpl.elements));
         window.ldState.selectedId = null;
         
@@ -237,9 +275,25 @@ window.click_ldLoadTemplate = function(id) {
         const hInput = document.getElementById('ldHeight');
         if (wInput) wInput.value = tpl.widthIn;
         if (hInput) hInput.value = tpl.heightIn;
+        const pSelect = document.getElementById('ldPaperProfileSelect');
+        if (pSelect) pSelect.value = window.ldState.paperProfile || "";
         
         ldRender();
         if (typeof window.ldRenderGlobalTemplateDropdown === 'function') window.ldRenderGlobalTemplateDropdown();
+        
+        if (tpl.paperProfile) {
+            const sizeSel = document.getElementById('barcodzSizeSelect');
+            if (sizeSel) {
+                Array.from(sizeSel.options).forEach(opt => {
+                    try {
+                        let p = JSON.parse(opt.value);
+                        if (p.n === tpl.paperProfile) sizeSel.value = opt.value;
+                    } catch (e) {
+                        // ignore parse errors for invalid paper options
+                    }
+                });
+            }
+        }
     }
 };
 
@@ -640,7 +694,7 @@ window.click_ldPrintState = function() {
                         <h2 style="margin:0 0 10px 0; color:var(--text-heading);">Print Verification</h2>
                         <p style="color:var(--text-main); margin-bottom:20px;">Did all <b>${totalPrinted}</b> labels print successfully?</p>
                         <div style="display:flex; gap:10px; justify-content:center;">
-                            <button class="btn-green" data-click="click_confirmPrintSuccess" data-total="${totalPrinted}" data-size="${window.ldState.widthIn}x${window.ldState.heightIn}" style="padding:10px 20px; font-weight:bold; font-size:16px; cursor:pointer;">✅ Yes</button>
+                            <button class="btn-green" data-click="click_confirmPrintSuccess" data-total="${totalPrinted}" data-size="${window.ldState.paperProfile || (window.ldState.widthIn + 'x' + window.ldState.heightIn)}" style="padding:10px 20px; font-weight:bold; font-size:16px; cursor:pointer;">✅ Yes</button>
                             <button class="btn-red" data-click="click_cancelPrintSuccess" style="padding:10px 20px; font-weight:bold; font-size:16px; cursor:pointer;">❌ No</button>
                         </div>
                     </div>
