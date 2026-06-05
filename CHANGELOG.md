@@ -1,5 +1,14 @@
 # SK8Lytz Application Changelog
 
+## [1.3.15] - 2026-06-04
+
+### ✨ Features & Bug Fixes
+- **Storefront Alias Explicit Resolution** (`fix/sku-alias-manager-barcode`): Eradicated sloppy heuristic frontend visual bandages in `index.html` by explicitly adding a non-unique `matched_shopify_sku` reference column to the `storefront_aliases` PostgreSQL schema. Restored the fundamental `UNIQUE` database constraint on `shopify_sku` to safely repair and un-break the `shopify-force-sync` Edge Function `ON CONFLICT` pipeline.
+
+### 🧹 Chores & Cleanup
+- **Unified SKU Parity Unit Tests**: Fixed the Jest `upsertMock` logic within `unified-parity.test.js` to natively support chained `.eq()` and `.is()` query selectors. Updated payload assertions to correctly expect the new `matched_shopify_sku` parameter.
+- **Database Engineering Meta-Evolution**: Established a strict new `/meta_evolution` rule prioritizing foundational database schemas over frontend string-matching workarounds.
+
 ## [1.3.14] - 2026-06-04
 
 ### ✨ Features & Bug Fixes
