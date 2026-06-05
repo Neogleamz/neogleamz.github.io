@@ -70,13 +70,13 @@ serve(async (req) => {
             // Fetch all existing storefront_aliases to preserve manual/previously defined mappings
             const { data: existingAliases } = await supabase
                 .from('storefront_aliases')
-                .select('product_sku, internal_recipe_name, is_primary');
+                .select('product_sku, recipe_item_uuid, is_primary');
             
             const existingMap = new Map();
             if (existingAliases) {
                 existingAliases.forEach((row: any) => {
                     existingMap.set(row.product_sku, {
-                        internal_recipe_name: row.internal_recipe_name,
+                        recipe_item_uuid: row.recipe_item_uuid,
                         is_primary: !!row.is_primary
                     });
                 });
@@ -111,22 +111,22 @@ serve(async (req) => {
                             
                             const existingSkuEntry = existingMap.get(sku);
                             const existingTitleEntry = fullTitle ? existingMap.get(fullTitle) : null;
-                            let existingRecipe = (existingSkuEntry && existingSkuEntry.internal_recipe_name)
-                                || (existingTitleEntry && existingTitleEntry.internal_recipe_name)
+                            let existingRecipe = (existingSkuEntry && existingSkuEntry.recipe_item_uuid)
+                                || (existingTitleEntry && existingTitleEntry.recipe_item_uuid)
                                 || null;
                             const existingPrimary = (existingSkuEntry && existingSkuEntry.is_primary)
                                 || (existingTitleEntry && existingTitleEntry.is_primary)
                                 || false;
 
-                            const targetSku = fullTitle || sku;
+                            const targetSku = sku;
                             upsertRows.push({
-                                product_sku: targetSku,
-                                internal_recipe_name: existingRecipe,
+                                product_sku: fullTitle || targetSku,
+                                recipe_item_uuid: existingRecipe,
                                 barcode_value: barcode || null,
                                 is_shopify_synced: true,
                                 platform: 'Shopify Webhook', // Match standard webhook platform value
                                 is_primary: existingPrimary, // Preserve primary state
-                                shopify_sku: sku || null
+                                shopify_sku: sku
                             });
                             
                             importedCount++;
@@ -138,7 +138,7 @@ serve(async (req) => {
                 if (upsertRows.length > 0) {
                     const { error: upsertErr } = await supabase
                         .from('storefront_aliases')
-                        .upsert(upsertRows, { onConflict: 'product_sku' });
+                        .upsert(upsertRows, { onConflict: 'shopify_sku' });
                     if (upsertErr) throw upsertErr;
                 }
                 

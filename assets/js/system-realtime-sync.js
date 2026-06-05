@@ -207,23 +207,42 @@
 
             if (eventType === 'INSERT' || eventType === 'UPDATE') {
                 if (aliasDB) {
-                    aliasDB[newRecord.product_sku] = newRecord.internal_recipe_name;
+                    let mappedRecipeName = (window.uuidToNameMap && newRecord.recipe_item_uuid) ? window.uuidToNameMap[newRecord.recipe_item_uuid] : null;
+                    if (mappedRecipeName) {
+                        mappedRecipeName = mappedRecipeName.replace('RECIPE:::', '');
+                    }
+                    const uniqueKey = newRecord.shopify_sku || newRecord.product_sku;
+                    aliasDB[uniqueKey] = mappedRecipeName;
+                    if (newRecord.shopify_sku && newRecord.product_sku !== newRecord.shopify_sku) {
+                        aliasDB[newRecord.product_sku] = mappedRecipeName;
+                    }
                 }
                 if (aliasMetadataDB) {
-                    aliasMetadataDB[newRecord.product_sku] = {
+                    const uniqueKey = newRecord.shopify_sku || newRecord.product_sku;
+                    aliasMetadataDB[uniqueKey] = {
                         barcode_value: newRecord.barcode_value || null,
                         is_shopify_synced: !!newRecord.is_shopify_synced,
                         is_primary: !!newRecord.is_primary,
                         platform: newRecord.platform || (newRecord.is_shopify_synced ? 'Shopify Webhook' : 'Local Emulator'),
-                        shopify_sku: newRecord.shopify_sku || null
+                        shopify_sku: newRecord.shopify_sku || null,
+                        product_sku: newRecord.product_sku || null,
+                        matched_shopify_sku: newRecord.matched_shopify_sku || null
                     };
+                    if (newRecord.shopify_sku && newRecord.product_sku !== newRecord.shopify_sku) {
+                        aliasMetadataDB[newRecord.product_sku] = {
+                            ...aliasMetadataDB[uniqueKey],
+                            is_memory_only: true
+                        };
+                    }
                 }
             } else if (eventType === 'DELETE') {
                 if (aliasDB) {
                     delete aliasDB[oldRecord.product_sku];
+                    if (oldRecord.shopify_sku) delete aliasDB[oldRecord.shopify_sku];
                 }
                 if (aliasMetadataDB) {
                     delete aliasMetadataDB[oldRecord.product_sku];
+                    if (oldRecord.shopify_sku) delete aliasMetadataDB[oldRecord.shopify_sku];
                 }
             }
 

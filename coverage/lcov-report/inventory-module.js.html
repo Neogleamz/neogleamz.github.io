@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.95% </span>
+                <span class="strong">5.96% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>142/2383</span>
+                <span class='fraction'>142/2381</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">1.87% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>36/1924</span>
+                <span class='fraction'>36/1920</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.04% </span>
+                <span class="strong">7.05% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>140/1986</span>
+                <span class='fraction'>140/1984</span>
             </div>
         
             
@@ -3584,9 +3584,7 @@
 <a name='L3519'></a><a href='#L3519'>3519</a>
 <a name='L3520'></a><a href='#L3520'>3520</a>
 <a name='L3521'></a><a href='#L3521'>3521</a>
-<a name='L3522'></a><a href='#L3522'>3522</a>
-<a name='L3523'></a><a href='#L3523'>3523</a>
-<a name='L3524'></a><a href='#L3524'>3524</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L3522'></a><a href='#L3522'>3522</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -6058,9 +6056,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -9577,7 +9573,6 @@ window.selectStockzAuditItem = <span class="fstat-no" title="function not covere
             let pb = <span class="cstat-no" title="statement not covered" >parseFloat(i.prototype_produced_qty) || 0;</span>
             let sold = <span class="cstat-no" title="statement not covered" >parseFloat(i.sold_qty) || 0;</span>
             let c_prod = <span class="cstat-no" title="statement not covered" >parseFloat(i.production_consumed_qty) || 0;</span>
-            let c_proto = <span class="cstat-no" title="statement not covered" >parseFloat(i.prototype_consumed_qty) || 0;</span>
 <span class="cstat-no" title="statement not covered" >            payloadToSend.purchased = b.toFixed(2).replace(/\.?0+$/,'');</span>
 <span class="cstat-no" title="statement not covered" >            payloadToSend.proto = pb.toFixed(2).replace(/\.?0+$/,'');</span>
 <span class="cstat-no" title="statement not covered" >            payloadToSend.prod = c_prod.toFixed(2).replace(/\.?0+$/,'');</span>
@@ -9586,7 +9581,6 @@ window.selectStockzAuditItem = <span class="fstat-no" title="function not covere
             let c = <span class="cstat-no" title="statement not covered" >safeCatalogCache[itemKey] || {totalQty:0};</span>
             let c_proto = <span class="cstat-no" title="statement not covered" >parseFloat(i.prototype_consumed_qty) || 0;</span>
             let c_prod = <span class="cstat-no" title="statement not covered" >parseFloat(i.production_consumed_qty) || 0;</span>
-            let c_asm = <span class="cstat-no" title="statement not covered" >parseFloat(i.assembly_consumed_qty) || 0;</span>
 <span class="cstat-no" title="statement not covered" >            payloadToSend.purchased = (parseFloat(c.totalQty) || 0).toFixed(2).replace(/\.?0+$/,'');</span>
 <span class="cstat-no" title="statement not covered" >            payloadToSend.proto = c_proto.toFixed(2).replace(/\.?0+$/,'');</span>
 <span class="cstat-no" title="statement not covered" >            payloadToSend.prod = c_prod.toFixed(2).replace(/\.?0+$/,'');</span>
@@ -10615,21 +10609,21 @@ document.addEventListener('input', <span class="fstat-no" title="function not co
 &nbsp;
 // Audit Scanner Global Click Wrappers
 <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof window !== 'undefined') {
-    window.click_startStockzAuditWebcam = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.startStockzAuditWebcam(); </span>};
-    window.click_stopStockzAuditWebcam = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.stopStockzAuditWebcam(); </span>};
+    window.click_startStockzAuditWebcam = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.startStockzAuditWebcam(); </span>};
+    window.click_stopStockzAuditWebcam = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.stopStockzAuditWebcam(); </span>};
     window.click_switchStockzAuditCameraRoute = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.switchStockzAuditCameraRoute(e.target.closest('button')); </span>};
-    window.click_toggleStockzAuditScanner = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.toggleStockzAuditScanner(); </span>};
-    window.click_submitStockzAudit = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.submitStockzAudit(); </span>};
-    window.click_closeStockzAuditModal = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.closeStockzAuditModal(); </span>};
+    window.click_toggleStockzAuditScanner = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.toggleStockzAuditScanner(); </span>};
+    window.click_submitStockzAudit = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.submitStockzAudit(); </span>};
+    window.click_closeStockzAuditModal = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.closeStockzAuditModal(); </span>};
     window.click_switchStockzAuditTab = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.switchStockzAuditTab(e.target.closest('button')); </span>};
     window.click_switchStockzAuditMode = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.switchStockzAuditMode(e.target.closest('button')); </span>};
-    window.click_decrementStockzAuditDelta = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.decrementStockzAuditDelta(); </span>};
-    window.click_incrementStockzAuditDelta = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.incrementStockzAuditDelta(); </span>};
-    window.click_decrementStockzAuditCount = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.decrementStockzAuditCount(); </span>};
-    window.click_incrementStockzAuditCount = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.incrementStockzAuditCount(); </span>};
-    window.click_clearStockzAuditHistory = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.clearStockzAuditHistory(); </span>};
-    window.click_refreshStockzAuditHistory = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.refreshStockzAuditHistory(); </span>};
-    window.click_updateLocalIPQRCode_audit = <span class="fstat-no" title="function not covered" >fu</span>nction(e) { <span class="cstat-no" title="statement not covered" >window.updateLocalIPQRCode_audit(); </span>};
+    window.click_decrementStockzAuditDelta = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.decrementStockzAuditDelta(); </span>};
+    window.click_incrementStockzAuditDelta = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.incrementStockzAuditDelta(); </span>};
+    window.click_decrementStockzAuditCount = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.decrementStockzAuditCount(); </span>};
+    window.click_incrementStockzAuditCount = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.incrementStockzAuditCount(); </span>};
+    window.click_clearStockzAuditHistory = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.clearStockzAuditHistory(); </span>};
+    window.click_refreshStockzAuditHistory = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.refreshStockzAuditHistory(); </span>};
+    window.click_updateLocalIPQRCode_audit = <span class="fstat-no" title="function not covered" >fu</span>nction(_e) { <span class="cstat-no" title="statement not covered" >window.updateLocalIPQRCode_audit(); </span>};
 }
 &nbsp;
 &nbsp;</pre></td></tr></table></pre>
@@ -10639,7 +10633,7 @@ document.addEventListener('input', <span class="fstat-no" title="function not co
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-04T07:13:08.533Z
+                at 2026-06-05T04:55:59.397Z
             </div>
         <script src="prettify.js"></script>
         <script>
