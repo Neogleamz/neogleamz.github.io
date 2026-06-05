@@ -22,6 +22,9 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 P1 High Priority (Active Epics)
 
+### Target: main
+- [ ] `feat/label-inventory-sync` : **Label Inventory & Template Sync** - Track physical sticker and label stock as an actual raw material inventory item. When a "Retail Product" or "Sub-assembly" is manufactured, its associated physical label should be automatically deducted from inventory. (Plan: [docs/plans/feat/label-inventory-sync.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/label-inventory-sync.md))
+
 *Clean sweep — all high priority active epics successfully completed and archived!* ✅
 
 ## 🧹 Technical Debt

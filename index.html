@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.06.05.0009"></script>
+    <script src="assets/js/system-version.js?v=v.2026.06.05.0200"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.05.0009"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.05.0200"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.05.0009"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.05.0200"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.06.05.0009"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.06.05.0200"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -2796,7 +2796,7 @@
                     <canvas id="labelzBwipjsRenderer" style="display:none;"></canvas>
 
                     <!-- Label Template -->
-                    <select id="labelzDesignerTemplateSelect" style="padding:6px 8px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); font-size:12px; font-weight:bold;" onchange="if(typeof window.click_ldLoadTemplate === 'function') { window.click_ldLoadTemplate(this.value); }">
+                    <select id="labelzDesignerTemplateSelect" style="padding:6px 8px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); font-size:12px; font-weight:bold;" onchange="if(typeof window.click_labelzLoadTemplate === 'function') { window.click_labelzLoadTemplate(this.value); }">
                         <option value="">Default (No Template)</option>
                     </select>
                     <!-- Label Size -->
@@ -2813,10 +2813,35 @@
                 </div>
             </div>
             
-            <!-- 3 Pane Layout -->
+            <!-- 2 Pane Layout -->
             <div style="display:flex; flex:1; overflow:hidden;">
                 <!-- Left Pane: Tools & Properties -->
                 <div style="width:280px; min-width:280px; background:var(--bg-panel); border-right:1px solid var(--border-color); display:flex; flex-direction:column; overflow-y:auto;">
+                    
+                    <!-- CATALOG CONNECTOR -->
+                    <div style="padding:15px; border-bottom:1px solid var(--border-color);">
+                        <h3 style="margin:0; font-size:12px; color:#0ea5e9; text-transform:uppercase; margin-bottom:6px;">🔗 CATALOG CONNECTOR</h3>
+                        <p style="font-size:10px; color:var(--text-muted); margin-top:0; line-height:1.4; margin-bottom:8px;">Pick a product to insert a linked Barcode or Dynamic Text.</p>
+                        <input type="text" id="labelzCatalogSearch" placeholder="🔍 Search Catalog..." data-input="input_searchLabelzCatalog" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px;">
+                        <div id="labelzCatalogResults" style="max-height:150px; overflow-y:auto; margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+                            <div style="text-align:center; padding:10px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>
+                        </div>
+                    </div>
+
+                    <!-- PREVIEW CONTEXT & QUICK ADD -->
+                    <div style="padding:15px; border-bottom:1px solid var(--border-color);">
+                        <h3 style="margin:0; font-size:12px; color:var(--text-heading); text-transform:uppercase; margin-bottom:8px;">PREVIEW CONTEXT</h3>
+                        <select id="labelzDesignerPreviewContext" style="width:100%; padding:6px; margin-bottom:10px; border-radius:6px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); font-size:11px;">
+                            <option value="">-- No Preview Context --</option>
+                        </select>
+                        
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <button class="btn-blue" data-click="click_labelzAddProductName" style="padding:6px; font-size:11px;">Add Product Name</button>
+                            <button class="btn-blue" data-click="click_labelzAddSku" style="padding:6px; font-size:11px;">Add SKU</button>
+                            <button class="btn-blue" data-click="click_labelzAddBarcodeContext" style="padding:6px; font-size:11px;">Add Barcode</button>
+                        </div>
+                    </div>
+
                     <div style="padding:15px; border-bottom:1px solid var(--border-color);">
                         <h3 style="margin:0; font-size:12px; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">ADD ELEMENT</h3>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
@@ -2832,7 +2857,7 @@
                     </div>
                     
                     <!-- Contextual Properties Panel -->
-                    <div id="labelzPropertiesPanel" style="flex:1; padding:15px;">
+                    <div id="labelzPropertiesPanel" style="flex:1; padding:15px; min-height:200px;">
                         <div style="text-align:center; color:var(--text-muted); margin-top:20px; font-style:italic;">Select an element to edit properties.</div>
                     </div>
 
@@ -2863,19 +2888,6 @@
                     </div>
                     <div style="position:absolute; top:20px; right:20px;">
                         <button class="print-btn" data-click="click_exportLabelzPDF">🖨️ PDF Preview</button>
-                    </div>
-                </div>
-                
-                <!-- Right Pane: Catalog Connector -->
-                <div style="width:300px; min-width:300px; background:var(--bg-panel); border-left:1px solid var(--border-color); display:flex; flex-direction:column; overflow-y:auto;">
-                    <div style="padding:15px; border-bottom:1px solid var(--border-color);">
-                        <h3 style="margin:0; font-size:12px; color:#0ea5e9; text-transform:uppercase; margin-bottom:6px;">🔗 CATALOG CONNECTOR</h3>
-                        <p style="font-size:11px; color:var(--text-muted); margin-top:0; line-height:1.4;">Pick any product or raw material to insert a linked Barcode or Dynamic Text.</p>
-                        <input type="text" id="labelzCatalogSearch" placeholder="🔍 Search Catalog..." data-input="input_searchLabelzCatalog" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px; margin-top:4px;">
-                    </div>
-                    <div id="labelzCatalogResults" style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:6px;">
-                        <!-- Results populated via JS -->
-                        <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:11px; font-style:italic;">Search to link items...</div>
                     </div>
                 </div>
             </div>
@@ -3984,7 +3996,7 @@
     </div>
 <div id="mediaModal" style="z-index:10006;">
     <div id="mediaContainer" style="width:98vw; height:98vh; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center;"></div>
-    <div style="position:absolute; top:20px; right:30px; color:white; font-size:45px; font-weight:bold; cursor:pointer;" data-click="click_closeMediaModal">×</div>
+    <div style="position:absolute; top:20px; right:30px; color:white; font-size:16px; font-weight:bold; cursor:pointer; background:rgba(0,0,0,0.5); padding:8px 16px; border-radius:6px;" data-click="click_closeMediaModal">Close</div>
 </div>
 
 <div id="aliasModal" style="z-index:10002;">
@@ -4689,8 +4701,30 @@
         const btn = typeof btnIdOrElement === 'string' ? document.getElementById(btnIdOrElement) : btnIdOrElement;
         let originalText = ""; let originalBg = "";
         if(btn) {
-            originalText = btn.innerHTML;
-            originalBg = btn.style.background;
+            // RACE CONDITION FIX: Clear any pending timeout from a previous click
+            if (btn._stateTimeout) {
+                clearTimeout(btn._stateTimeout);
+            }
+            
+            // If the current innerHTML isn't the loading or success string, it means the UI was 
+            // freshly re-rendered by the app (e.g. switching work orders). Trust the new text!
+            let currentSafeText = btn.innerHTML;
+            if (currentSafeText !== loadingStr && currentSafeText !== successStr && 
+                currentSafeText !== (window.safeHTML ? window.safeHTML(loadingStr) : loadingStr) &&
+                currentSafeText !== (window.safeHTML ? window.safeHTML(successStr) : successStr)) {
+                btn.dataset.originalText = currentSafeText;
+                btn.dataset.originalBg = btn.style.background || "";
+            } else if (!btn.dataset.originalText) {
+                btn.dataset.originalText = currentSafeText;
+            }
+            
+            if (!btn.dataset.originalBg && btn.dataset.originalBg !== "") {
+                btn.dataset.originalBg = btn.style.background || "";
+            }
+            
+            originalText = btn.dataset.originalText;
+            originalBg = btn.dataset.originalBg;
+
             btn.innerHTML = window.safeHTML ? window.safeHTML(loadingStr) : loadingStr; 
             btn.style.opacity = "0.6";
             btn.disabled = true;
@@ -4713,10 +4747,13 @@
             throw e;
         } finally {
             if(btn) {
-                setTimeout(() => {
+                btn._stateTimeout = setTimeout(() => {
                     btn.innerHTML = window.safeHTML ? window.safeHTML(originalText) : originalText;
                     btn.style.background = originalBg;
                     btn.disabled = false;
+                    delete btn.dataset.originalText;
+                    delete btn.dataset.originalBg;
+                    delete btn._stateTimeout;
                 }, 3000);
             }
         }
@@ -5318,37 +5355,47 @@
         renderAliasManager();
     };
 
-    window.saveAliasBarcode = async function(sku, newBarcode) {
-        setMasterStatus("Saving Barcode...", "mod-working");
-        
-        // Use the true shopify_sku from metadata if available, to guarantee perfect matching
-        const targetShopifySku = (window.aliasMetadataDB && window.aliasMetadataDB[sku] && window.aliasMetadataDB[sku].shopify_sku) 
-            ? window.aliasMetadataDB[sku].shopify_sku 
-            : sku;
+    window.saveAliasBarcode = async function(sku, newBarcode, btn) {
+        const actionCallback = async () => {
+            // Use the true shopify_sku from metadata if available, to guarantee perfect matching
+            const targetShopifySku = (window.aliasMetadataDB && window.aliasMetadataDB[sku] && window.aliasMetadataDB[sku].shopify_sku) 
+                ? window.aliasMetadataDB[sku].shopify_sku 
+                : sku;
+                
+            const { error } = await supabaseClient.from('storefront_aliases')
+                .update({ barcode_value: newBarcode })
+                .eq('shopify_sku', targetShopifySku);
+            if (error) {
+                setMasterStatus("Error", "mod-error");
+                throw new Error(error.message);
+            }
             
-        const { error } = await supabaseClient.from('storefront_aliases')
-            .update({ barcode_value: newBarcode })
-            .eq('shopify_sku', targetShopifySku);
-        if (error) {
-            alert(error.message);
-            setMasterStatus("Error", "mod-error");
-            return;
+            if (window.aliasMetadataDB && window.aliasMetadataDB[sku]) {
+                window.aliasMetadataDB[sku].barcode_value = newBarcode;
+            }
+            
+            // Rebuild and refresh print spooler cache
+            if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
+            if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
+            
+            renderAliasManager();
+            setMasterStatus("Barcode Saved!", "mod-success");
+            setTimeout(() => {
+                const sm = document.getElementById('statusMaster');
+                if(sm) setMasterStatus("Ready.", "status-idle");
+            }, 2000);
+        };
+        
+        if (btn && window.executeWithButtonAction) {
+            await window.executeWithButtonAction(btn, "SYNCING...", "✅ SAVED", actionCallback);
+        } else {
+            setMasterStatus("Saving Barcode...", "mod-working");
+            try {
+                await actionCallback();
+            } catch (err) {
+                alert(err.message);
+            }
         }
-        
-        if (window.aliasMetadataDB && window.aliasMetadataDB[sku]) {
-            window.aliasMetadataDB[sku].barcode_value = newBarcode;
-        }
-        
-        // Rebuild and refresh print spooler cache
-        if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
-        if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
-        
-        renderAliasManager();
-        setMasterStatus("Barcode Saved!", "mod-success");
-        setTimeout(() => {
-            const sm = document.getElementById('statusMaster');
-            if(sm) setMasterStatus("Ready.", "status-idle");
-        }, 2000);
     };
 
     window.removeAliasMapping = removeAliasMapping;
@@ -5356,152 +5403,186 @@
 
 
 
-    async function removeAliasMapping(sku) {
+    async function removeAliasMapping(sku, btn) {
         if(!confirm(`Remove mapping for SKU: ${sku}?`)) return;
-        setMasterStatus("Unmapping...", "mod-working");
         
-        const isSynced = window.aliasMetadataDB[sku] ? !!window.aliasMetadataDB[sku].is_shopify_synced : false;
-        
-        let error;
-        if (isSynced) {
-            // Update to null mapping
-            const { error: err } = await supabaseClient.from('storefront_aliases')
-                .update({ recipe_item_uuid: null, is_primary: false })
-                .eq('product_sku', sku);
-            error = err;
+        const actionCallback = async () => {
+            const isSynced = window.aliasMetadataDB[sku] ? !!window.aliasMetadataDB[sku].is_shopify_synced : false;
+            const targetShopifySku = window.aliasMetadataDB[sku] ? window.aliasMetadataDB[sku].shopify_sku : null;
+            
+            let query;
+            if (isSynced) {
+                // Update to null mapping
+                query = supabaseClient.from('storefront_aliases')
+                    .update({ recipe_item_uuid: null, is_primary: false });
+            } else {
+                // Delete completely
+                query = supabaseClient.from('storefront_aliases').delete();
+            }
+
+            if (targetShopifySku) {
+                query = query.eq('shopify_sku', targetShopifySku);
+            } else {
+                query = query.eq('product_sku', sku);
+            }
+            
+            const { error } = await query;
+            
+            if (error) {
+                setMasterStatus("Error", "mod-error");
+                throw new Error(error.message);
+            }
+            
+            // Update local caches
+            const shopifySku = window.aliasMetadataDB[sku]?.shopify_sku;
+            if (isSynced) {
+                if (typeof aliasDB !== 'undefined') {
+                    aliasDB[sku] = null;
+                    if (shopifySku) aliasDB[shopifySku] = null;
+                }
+                if (window.aliasMetadataDB[sku]) {
+                    window.aliasMetadataDB[sku].is_primary = false;
+                }
+                if (shopifySku && window.aliasMetadataDB[shopifySku]) {
+                    window.aliasMetadataDB[shopifySku].is_primary = false;
+                }
+            } else {
+                if (typeof aliasDB !== 'undefined') {
+                    delete aliasDB[sku];
+                    if (shopifySku) delete aliasDB[shopifySku];
+                }
+                if (window.aliasMetadataDB) {
+                    delete window.aliasMetadataDB[sku];
+                    if (shopifySku) delete window.aliasMetadataDB[shopifySku];
+                }
+            }
+            
+            // Re-run orphan scanner to update local state immediately
+            if (typeof window.scanOrphanStorefrontSKUs === 'function') {
+                window.scanOrphanStorefrontSKUs();
+            }
+            
+            // Rebuild and refresh print spooler cache
+            if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
+            if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
+            
+            renderAliasManager();
+            setMasterStatus("Unmapped!", "mod-success");
+            setTimeout(()=> {
+                const sm = document.getElementById('statusMaster');
+                if(sm) setMasterStatus("Ready.", "status-idle");
+            }, 2000);
+        };
+
+        if (btn && window.executeWithButtonAction) {
+            await window.executeWithButtonAction(btn, "UNMAPPING...", "✅ REMOVED", actionCallback);
         } else {
-            // Delete completely
-            const { error: err } = await supabaseClient.from('storefront_aliases')
-                .delete()
-                .eq('product_sku', sku);
-            error = err;
-        }
-        
-        if (error) {
-            alert(error.message);
-            setMasterStatus("Error", "mod-error");
-            return;
-        }
-        
-        // Update local caches
-        const shopifySku = window.aliasMetadataDB[sku]?.shopify_sku;
-        if (isSynced) {
-            if (typeof aliasDB !== 'undefined') {
-                aliasDB[sku] = null;
-                if (shopifySku) aliasDB[shopifySku] = null;
-            }
-            if (window.aliasMetadataDB[sku]) {
-                window.aliasMetadataDB[sku].is_primary = false;
-            }
-            if (shopifySku && window.aliasMetadataDB[shopifySku]) {
-                window.aliasMetadataDB[shopifySku].is_primary = false;
-            }
-        } else {
-            if (typeof aliasDB !== 'undefined') {
-                delete aliasDB[sku];
-                if (shopifySku) delete aliasDB[shopifySku];
-            }
-            if (window.aliasMetadataDB) {
-                delete window.aliasMetadataDB[sku];
-                if (shopifySku) delete window.aliasMetadataDB[shopifySku];
+            setMasterStatus("Unmapping...", "mod-working");
+            try {
+                await actionCallback();
+            } catch (err) {
+                alert(err.message);
             }
         }
-        
-        // Re-run orphan scanner to update local state immediately
-        if (typeof window.scanOrphanStorefrontSKUs === 'function') {
-            window.scanOrphanStorefrontSKUs();
-        }
-        
-        // Rebuild and refresh print spooler cache
-        if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
-        if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
-        
-        renderAliasManager();
-        setMasterStatus("Unmapped!", "mod-success");
-        setTimeout(()=> {
-            const sm = document.getElementById('statusMaster');
-            if(sm) setMasterStatus("Ready.", "status-idle");
-        }, 2000);
     }
 
-    async function togglePrimaryAliasMapping(sku) {
+    async function togglePrimaryAliasMapping(sku, btn) {
         if (!aliasDB || !aliasDB[sku]) return;
-        const itemName = aliasDB[sku];
-        const wasPrimary = window.aliasMetadataDB[sku] ? !!window.aliasMetadataDB[sku].is_primary : false;
-        const nextPrimaryState = !wasPrimary;
-        const shopifySku = window.aliasMetadataDB[sku] ? window.aliasMetadataDB[sku].shopify_sku : null;
         
-        setMasterStatus("Updating Primary...", "mod-working");
-        
-        if (nextPrimaryState) {
-            // Set all other aliases for this recipe to is_primary = false
-            let itemUuid = window.uuidMap['RECIPE:::' + itemName];
-            const { error: resetError } = await supabaseClient.from('storefront_aliases')
-                .update({ is_primary: false })
-                .eq('recipe_item_uuid', itemUuid);
-                
-            if (resetError) {
-                alert(resetError.message);
-                setMasterStatus("Error", "mod-error");
-                return;
-            }
+        const actionCallback = async () => {
+            const itemName = aliasDB[sku];
+            const wasPrimary = window.aliasMetadataDB[sku] ? !!window.aliasMetadataDB[sku].is_primary : false;
+            const nextPrimaryState = !wasPrimary;
+            const shopifySku = window.aliasMetadataDB[sku] ? window.aliasMetadataDB[sku].shopify_sku : null;
             
-            // Set this alias to is_primary = true
-            const { error: updateError } = await supabaseClient.from('storefront_aliases')
-                .update({ is_primary: true })
-                .eq('product_sku', sku);
-                
-            if (updateError) {
-                alert(updateError.message);
-                setMasterStatus("Error", "mod-error");
-                return;
-            }
-            
-            // Update local cache
-            Object.keys(window.aliasMetadataDB).forEach(s => {
-                if (aliasDB[s] === itemName) {
-                    const meta = window.aliasMetadataDB[s];
-                    const isTarget = (s === sku || (meta && meta.shopify_sku === sku) || (window.aliasMetadataDB[sku] && window.aliasMetadataDB[sku].shopify_sku === s));
-                    window.aliasMetadataDB[s].is_primary = isTarget;
+            if (nextPrimaryState) {
+                // Set all other aliases for this recipe to is_primary = false
+                let itemUuid = window.uuidMap['RECIPE:::' + itemName];
+                const { error: resetError } = await supabaseClient.from('storefront_aliases')
+                    .update({ is_primary: false })
+                    .eq('recipe_item_uuid', itemUuid);
+                    
+                if (resetError) {
+                    setMasterStatus("Error", "mod-error");
+                    throw new Error(resetError.message);
                 }
-            });
-        } else {
-            // Toggle off
-            const { error: updateError } = await supabaseClient.from('storefront_aliases')
-                .update({ is_primary: false })
-                .eq('product_sku', sku);
                 
-            if (updateError) {
-                alert(updateError.message);
-                setMasterStatus("Error", "mod-error");
-                return;
+                // Set this alias to is_primary = true
+                let query = supabaseClient.from('storefront_aliases').update({ is_primary: true });
+                if (shopifySku) {
+                    query = query.eq('shopify_sku', shopifySku);
+                } else {
+                    query = query.eq('product_sku', sku);
+                }
+                const { error: updateError } = await query;
+                    
+                if (updateError) {
+                    setMasterStatus("Error", "mod-error");
+                    throw new Error(updateError.message);
+                }
+                
+                // Update local cache
+                Object.keys(window.aliasMetadataDB).forEach(s => {
+                    if (aliasDB[s] === itemName) {
+                        const meta = window.aliasMetadataDB[s];
+                        const isTarget = (s === sku || (meta && meta.shopify_sku === sku) || (window.aliasMetadataDB[sku] && window.aliasMetadataDB[sku].shopify_sku === s));
+                        window.aliasMetadataDB[s].is_primary = isTarget;
+                    }
+                });
+            } else {
+                // Toggle off
+                let query = supabaseClient.from('storefront_aliases').update({ is_primary: false });
+                if (shopifySku) {
+                    query = query.eq('shopify_sku', shopifySku);
+                } else {
+                    query = query.eq('product_sku', sku);
+                }
+                const { error: updateError } = await query;
+                    
+                if (updateError) {
+                    setMasterStatus("Error", "mod-error");
+                    throw new Error(updateError.message);
+                }
+                
+                if (window.aliasMetadataDB[sku]) {
+                    window.aliasMetadataDB[sku].is_primary = false;
+                }
+                if (shopifySku && window.aliasMetadataDB[shopifySku]) {
+                    window.aliasMetadataDB[shopifySku].is_primary = false;
+                }
             }
             
             if (window.aliasMetadataDB[sku]) {
-                window.aliasMetadataDB[sku].is_primary = false;
+                window.aliasMetadataDB[sku].is_primary = nextPrimaryState;
             }
             if (shopifySku && window.aliasMetadataDB[shopifySku]) {
-                window.aliasMetadataDB[shopifySku].is_primary = false;
+                window.aliasMetadataDB[shopifySku].is_primary = nextPrimaryState;
+            }
+            
+            // Rebuild and refresh print spooler cache
+            if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
+            if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
+            
+            renderAliasManager();
+            setMasterStatus("Updated Primary!", "mod-success");
+            setTimeout(() => {
+                const sm = document.getElementById('statusMaster');
+                if(sm) setMasterStatus("Ready.", "status-idle");
+            }, 2000);
+        };
+        
+        if (btn && window.executeWithButtonAction) {
+            const wasPrimary = window.aliasMetadataDB[sku] ? !!window.aliasMetadataDB[sku].is_primary : false;
+            const successTxt = !wasPrimary ? 'LINKED' : 'LINK';
+            await window.executeWithButtonAction(btn, "SYNCING...", successTxt, actionCallback);
+        } else {
+            setMasterStatus("Updating Primary...", "mod-working");
+            try {
+                await actionCallback();
+            } catch (err) {
+                alert(err.message);
             }
         }
-        
-        if (window.aliasMetadataDB[sku]) {
-            window.aliasMetadataDB[sku].is_primary = nextPrimaryState;
-        }
-        if (shopifySku && window.aliasMetadataDB[shopifySku]) {
-            window.aliasMetadataDB[shopifySku].is_primary = nextPrimaryState;
-        }
-        
-        // Rebuild and refresh print spooler cache
-        if (typeof buildBarcodzCache === 'function') buildBarcodzCache();
-        if (typeof renderBarcodzGrid === 'function') renderBarcodzGrid(true);
-        
-        renderAliasManager();
-        setMasterStatus("Updated Primary!", "mod-success");
-        setTimeout(() => {
-            const sm = document.getElementById('statusMaster');
-            if(sm) setMasterStatus("Ready.", "status-idle");
-        }, 2000);
     }
 
     function applyTableInteractivity(containerId) {
@@ -6178,21 +6259,21 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/kpi-reports-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/bom-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/production-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/sales-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/task-engine.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/print-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.06.05.0009"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.06.05.0009"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/kpi-reports-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/bom-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/production-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/sales-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/task-engine.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/print-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.06.05.0200"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.06.05.0200"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -6973,19 +7054,19 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.05.0009"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.05.0200"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.05.0009"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.05.0200"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.05.0009"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.05.0200"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.05.0009"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.05.0009"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.05.0009"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.05.0200"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.05.0200"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.05.0200"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.06.05.0009"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.06.05.0200"></script>
     <script src="assets/js/label-designer.js?v=1"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.06.05.0009"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.06.05.0200"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
