@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.4.0] - 2026-06-05
+
+### ✨ Features & Bug Fixes
+- **Label Inventory & Template Sync** (`feat/label-inventory-sync`): Track physical sticker and label stock as an actual raw material inventory item. Enable adding this label stock to a recipe (e.g., a "product box") so that when the recipe is manufactured, it correctly deducts the label inventory like all other standard components.
+
 ## [1.3.15] - 2026-06-04
 
 ### ✨ Features & Bug Fixes

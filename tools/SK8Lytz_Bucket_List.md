@@ -23,7 +23,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟠 P1 High Priority (Active Epics)
 
 ### Target: main
-- [x] `feat/label-inventory-sync` : **Label Inventory & Template Sync** - Track physical sticker and label stock as an actual raw material inventory item. Enable adding this label stock to a recipe (e.g., a "product box") so that when the recipe is manufactured, it correctly deducts the label inventory like all other standard components. (Plan: [docs/plans/feat/label-inventory-sync.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/label-inventory-sync.md))
+- [🚀] `feat/label-inventory-sync` : **Label Inventory & Template Sync** - Track physical sticker and label stock as an actual raw material inventory item. Enable adding this label stock to a recipe (e.g., a "product box") so that when the recipe is manufactured, it correctly deducts the label inventory like all other standard components. (Plan: [docs/plans/feat/label-inventory-sync.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/label-inventory-sync.md))
 
 *Clean sweep — all high priority active epics successfully completed and archived!* ✅
 
