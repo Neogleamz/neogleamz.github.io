@@ -1450,6 +1450,9 @@ function renderActiveWO(id) {
             el.classList.remove('active');
             el.style.pointerEvents = 'auto';
             el.style.opacity = '1';
+            el.style.background = '';
+            el.disabled = false;
+            if (el._stateTimeout) { clearTimeout(el._stateTimeout); delete el._stateTimeout; }
             document.getElementById('sect-'+s).classList.remove('active');
         });
 
@@ -2273,13 +2276,13 @@ async function hardDeleteArchive(type, id) {
 
 async function deleteAllArchive() {
     if(!confirm(`⚠️ DANGER: Are you sure you want to permanently delete ALL archived records in the ${currentArchiveTab === 'batchez' ? 'Batchez' : 'Layerz'} tab?\n\nThis action cannot be undone.`)) return;
-    sysLog(`Hard deleting ALL archives from ${currentArchiveTab}`);
-    setMasterStatus("Deleting Archive...", "mod-working");
-
+    
     const btn = document.querySelector('.btn-red[data-click="click_window_deleteAllArchive"]');
-    if (btn) { btn.innerText = "Deleting..."; btn.disabled = true; }
+    
+    await window.executeWithButtonAction(btn, 'Deleting...', '✅ Cleared', async () => {
+        sysLog(`Hard deleting ALL archives from ${currentArchiveTab}`);
+        setMasterStatus("Deleting Archive...", "mod-working");
 
-    try {
         if(currentArchiveTab === 'batchez') {
             const {error} = await supabaseClient.from('work_orders').delete().eq('status', 'Archived');
             if (error) throw new Error(error.message);
@@ -2296,12 +2299,7 @@ async function deleteAllArchive() {
         setMasterStatus("Archive Cleared!", "mod-success");
         setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
         renderArchiveList();
-    } catch(e) {
-        sysLog(e.message, true);
-        setMasterStatus("Error", "mod-error");
-    } finally {
-        if (btn) { btn.innerText = "🗑️ Clear Archive"; btn.disabled = false; }
-    }
+    });
 }
 
 function printPickList() {

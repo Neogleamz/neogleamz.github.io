@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">28.51% </span>
+                <span class="strong">29.15% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>223/782</span>
+                <span class='fraction'>228/782</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">20.19% </span>
+                <span class="strong">20.46% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>168/832</span>
+                <span class='fraction'>169/826</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">28.35% </span>
+                <span class="strong">27.53% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>19/67</span>
+                <span class='fraction'>19/69</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">29.83% </span>
+                <span class="strong">30.58% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>202/677</span>
+                <span class='fraction'>208/680</span>
             </div>
         
             
@@ -1256,7 +1256,8 @@
 <a name='L1191'></a><a href='#L1191'>1191</a>
 <a name='L1192'></a><a href='#L1192'>1192</a>
 <a name='L1193'></a><a href='#L1193'>1193</a>
-<a name='L1194'></a><a href='#L1194'>1194</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1194'></a><a href='#L1194'>1194</a>
+<a name='L1195'></a><a href='#L1195'>1195</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1488,6 +1489,13 @@
 <span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -1767,13 +1775,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2679,7 +2681,14 @@ function renderActivePrintJob(id) {
     ['Queued', 'Printing', 'Cleaned', 'Completed'].forEach(s =&gt; {
         const pEl = document.getElementById('pipe-P-' + s);
         const sEl = document.getElementById('sect-P-' + s);
-        <span class="missing-if-branch" title="else path not taken" >E</span>if (pEl) pEl.classList.remove('active');
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (pEl) {
+            pEl.classList.remove('active');
+            pEl.style.pointerEvents = 'auto';
+            pEl.style.opacity = '1';
+            pEl.style.background = '';
+            pEl.disabled = false;
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (pEl._stateTimeout) { <span class="cstat-no" title="statement not covered" >clearTimeout(pEl._stateTimeout); <span class="cstat-no" title="statement not covered" ></span>delete pEl._stateTimeout; </span>}
+        }
         <span class="missing-if-branch" title="else path not taken" >E</span>if (sEl) sEl.style.display = 'none';
     });
 &nbsp;
@@ -2958,18 +2967,12 @@ function renderActivePrintJob(id) {
 &nbsp;
 window.submitFinalizePrint = <span class="fstat-no" title="function not covered" >as</span>ync function() {
     let btn = <span class="cstat-no" title="statement not covered" >document.querySelector('[data-click="click_submitFinalizePrint"]');</span>
-<span class="cstat-no" title="statement not covered" >    if (btn &amp;&amp; btn.disabled) <span class="cstat-no" title="statement not covered" >return;</span></span>
-<span class="cstat-no" title="statement not covered" >    if (btn) { <span class="cstat-no" title="statement not covered" >btn.disabled = true; <span class="cstat-no" title="statement not covered" ></span>btn.innerText = "Logging..."; </span>}</span>
-&nbsp;
-    let success = <span class="cstat-no" title="statement not covered" >parseFloat(document.getElementById('finalizePrintSuccess').value) || 0;</span>
-    let failed = <span class="cstat-no" title="statement not covered" >parseFloat(document.getElementById('finalizePrintFailed').value) || 0;</span>
-    
-<span class="cstat-no" title="statement not covered" >    try {</span>
+<span class="cstat-no" title="statement not covered" >    await window.executeWithButtonAction(btn, 'LOGGING...', '✅ LOGGED', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
+        let success = <span class="cstat-no" title="statement not covered" >parseFloat(document.getElementById('finalizePrintSuccess').value) || 0;</span>
+        let failed = <span class="cstat-no" title="statement not covered" >parseFloat(document.getElementById('finalizePrintFailed').value) || 0;</span>
 <span class="cstat-no" title="statement not covered" >        await advancePrintStatus('Completed', true, success, failed);</span>
-    } finally {
-<span class="cstat-no" title="statement not covered" >        if (btn) { <span class="cstat-no" title="statement not covered" >btn.disabled = false; <span class="cstat-no" title="statement not covered" ></span>btn.innerText = "Complete &amp; Log"; </span>}</span>
-<span class="cstat-no" title="statement not covered" >        document.getElementById('finalizePrintModal').style.display = 'none';</span>
-    }
+<span class="cstat-no" title="statement not covered" >        setTimeout(<span class="fstat-no" title="function not covered" >()</span> =&gt; { <span class="cstat-no" title="statement not covered" >document.getElementById('finalizePrintModal').style.display = 'none'; </span>}, 800);</span>
+    });
 };
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >executeCleaningInventoryMath(</span>partName, failedQ, wo_id, label) {
@@ -3649,7 +3652,7 @@ initPrintTimers();
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-05T04:55:59.397Z
+                at 2026-06-05T07:02:14.615Z
             </div>
         <script src="prettify.js"></script>
         <script>

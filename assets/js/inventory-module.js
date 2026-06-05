@@ -3274,9 +3274,12 @@ window.updateStockzAuditROPSimulator = function() {
 };
 
 window.submitStockzAudit = async function() {
-    try {
+    const submitBtn = document.getElementById('stockzAuditSubmitBtn');
+    if (submitBtn && submitBtn.disabled) return;
+    
+    await window.executeWithButtonAction(submitBtn, '⚡ COMMITTING...', '✅ SUCCESS', async () => {
         const key = window.currentAuditItemKey;
-        if (!key) return alert("No active audit item key found.");
+        if (!key) { alert("No active audit item key found."); return; }
         
         let safeInventoryDB = (typeof inventoryDB !== 'undefined') ? inventoryDB : (window.inventoryDB || {});
         let i = safeInventoryDB[key] || {consumed_qty:0, manual_adjustment:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0, rop_lead_time_days:5, produced_qty:0, sold_qty:0};
@@ -3285,7 +3288,6 @@ window.submitStockzAudit = async function() {
         const leadSlider = document.getElementById('stockzAuditLeadSlider');
         const reasonSelect = document.getElementById('stockzAuditReasonSelect');
         const notesInput = document.getElementById('stockzAuditNotesInput');
-        const submitBtn = document.getElementById('stockzAuditSubmitBtn');
         
         const minVal = parseFloat(minSlider.value) || 0;
         const leadVal = parseFloat(leadSlider.value) || 5;
@@ -3301,7 +3303,7 @@ window.submitStockzAudit = async function() {
                 if (countedStr !== "") {
                     counted = parseFloat(countedStr);
                     if (isNaN(counted)) {
-                        return alert("Please enter a valid physical count quantity.");
+                        alert("Please enter a valid physical count quantity."); return;
                     }
                     delta = counted - window.currentAuditItemExpectedStock;
                     countedIsValid = true;
@@ -3314,17 +3316,12 @@ window.submitStockzAudit = async function() {
                 if (deltaStr !== "") {
                     delta = parseFloat(deltaStr);
                     if (isNaN(delta)) {
-                        return alert("Please enter a valid adjustment delta offset.");
+                        alert("Please enter a valid adjustment delta offset."); return;
                     }
                     counted = window.currentAuditItemExpectedStock + delta;
                     countedIsValid = true;
                 }
             }
-        }
-        
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerText = "⚡ COMMITTING...";
         }
         
         setMasterStatus("Recording...", "mod-working");
@@ -3346,12 +3343,8 @@ window.submitStockzAudit = async function() {
             const { error: logErr } = await supabaseClient.from('inventory_adjustments_log').insert([logPayload]);
             if (logErr) {
                 sysLog(`[Audit Log Error] ${logErr.message}`, true);
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
-                }
                 setMasterStatus("Error", "mod-error");
-                return alert("Failed to save audit transaction log: " + logErr.message);
+                throw new Error("Failed to save audit transaction log: " + logErr.message);
             }
         }
         
@@ -3405,12 +3398,8 @@ window.submitStockzAudit = async function() {
         const { error: saveErr } = await supabaseClient.from('inventory_consumption').upsert(savePayload, {onConflict:'item_uuid'});
         if (saveErr) {
             sysLog(`[Inventory Upsert Error] ${saveErr.message}`, true);
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
-            }
             setMasterStatus("Error", "mod-error");
-            return alert("Failed to save inventory updates: " + saveErr.message);
+            throw new Error("Failed to save inventory updates: " + saveErr.message);
         }
         
         if (typeof inventoryDB !== 'undefined') {
@@ -3419,19 +3408,21 @@ window.submitStockzAudit = async function() {
         if (window.inventoryDB) {
             window.inventoryDB[key] = savePayload;
         }
-        setMasterStatus("Reconciled!", "mod-success");
         
-        setTimeout(() => {
-            setMasterStatus("Ready.", "status-idle");
-        }, 2000);
+        sysLog(`Audit transaction processed for ${key}.`);
+        if (typeof showToast === 'function') showToast("✅ Audit saved successfully", "success");
+        setMasterStatus("Audit Saved", "mod-success");
+        setTimeout(() => setMasterStatus("Ready", "mod-success"), 3000);
         
-        window.renderInventoryTable();
-        window.updateCcMngrStock();
+        // Re-render UI
+        const countInput = document.getElementById('stockzAuditCountInput');
+        const deltaInput = document.getElementById('stockzAuditDeltaInput');
+        if (countInput) countInput.value = '';
+        if (deltaInput) deltaInput.value = '';
+        window.selectStockzAuditItem(key);
         
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
-        }
+        if (typeof renderInventoryTable === 'function') renderInventoryTable();
+        if (typeof renderFgiTable === 'function') renderFgiTable();
         
         if (typeof window.refreshStockzAuditHistory === 'function') {
             await window.refreshStockzAuditHistory();
@@ -3441,17 +3432,11 @@ window.submitStockzAudit = async function() {
             renderAnalyticsDashboard();
         }
         
-    } catch(err) {
-        console.error("submitStockzAudit error:", err);
-        sysLog(`[Audit Submit Error] ${err.message || err}`, true);
-        const submitBtn = document.getElementById('stockzAuditSubmitBtn');
+        // Let executeWithButtonAction naturally restore the button text via data attributes
         if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
+            submitBtn.dataset.originalText = (window.currentStockzAuditTab === 'planning') ? "💾 COMMIT CHANGES" : "💾 RECORD AUDIT";
         }
-        setMasterStatus("Error", "mod-error");
-        alert("Unexpected error committing audit: " + (err.message || err));
-    }
+    });
 };
 
 // ====== GLOBAL BINDINGS ======

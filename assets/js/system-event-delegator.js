@@ -599,6 +599,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openActualNetModal':
                     if (typeof openActualNetModal === 'function') openActualNetModal();
                     break;
+                case 'click_labelzAddProductName':
+                    if (typeof window.click_labelzAddProductName === 'function') window.click_labelzAddProductName();
+                    break;
+                case 'click_labelzAddSku':
+                    if (typeof window.click_labelzAddSku === 'function') window.click_labelzAddSku();
+                    break;
+                case 'click_labelzAddBarcodeContext':
+                    if (typeof window.click_labelzAddBarcodeContext === 'function') window.click_labelzAddBarcodeContext();
+                    break;
                 case 'click_closeActualNetModal':
                     if (typeof closeActualNetModal === 'function') closeActualNetModal();
                     break;
@@ -1474,18 +1483,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
 
                 case 'click_removeAliasMapping':
-                    if(window.removeAliasMapping) window.removeAliasMapping(el.getAttribute('data-sku'));
+                    if(window.removeAliasMapping) window.removeAliasMapping(el.getAttribute('data-sku'), el);
                     break;
                 case 'click_togglePrimaryAliasMapping':
-                    if(window.togglePrimaryAliasMapping) window.togglePrimaryAliasMapping(el.getAttribute('data-sku'));
+                    if(window.togglePrimaryAliasMapping) window.togglePrimaryAliasMapping(el.getAttribute('data-sku'), el);
                     break;
                 case 'click_toggleAliasCardExpand':
-                    if(window.toggleAliasCardExpand) window.toggleAliasCardExpand(el.getAttribute('data-sku'));
+                    if(window.toggleAliasCardExpand) window.toggleAliasCardExpand(el.getAttribute('data-sku'), el);
                     break;
                 case 'click_saveAliasBarcode': {
                     const sku = el.getAttribute('data-sku');
                     const input = document.getElementById(`aliasBarcodeVal_${sku.replace(/[^a-zA-Z0-9_-]/g, '_')}`);
-                    if (window.saveAliasBarcode && input) window.saveAliasBarcode(sku, input.value);
+                    if (window.saveAliasBarcode && input) window.saveAliasBarcode(sku, input.value, el);
                     break;
                 }
                 case 'click_triggerShopifyCatalogSync': {

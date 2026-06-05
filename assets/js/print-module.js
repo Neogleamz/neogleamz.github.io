@@ -228,7 +228,14 @@ function renderActivePrintJob(id) {
     ['Queued', 'Printing', 'Cleaned', 'Completed'].forEach(s => {
         const pEl = document.getElementById('pipe-P-' + s);
         const sEl = document.getElementById('sect-P-' + s);
-        if (pEl) pEl.classList.remove('active');
+        if (pEl) {
+            pEl.classList.remove('active');
+            pEl.style.pointerEvents = 'auto';
+            pEl.style.opacity = '1';
+            pEl.style.background = '';
+            pEl.disabled = false;
+            if (pEl._stateTimeout) { clearTimeout(pEl._stateTimeout); delete pEl._stateTimeout; }
+        }
         if (sEl) sEl.style.display = 'none';
     });
 
@@ -507,18 +514,12 @@ function renderActivePrintJob(id) {
 
 window.submitFinalizePrint = async function() {
     let btn = document.querySelector('[data-click="click_submitFinalizePrint"]');
-    if (btn && btn.disabled) return;
-    if (btn) { btn.disabled = true; btn.innerText = "Logging..."; }
-
-    let success = parseFloat(document.getElementById('finalizePrintSuccess').value) || 0;
-    let failed = parseFloat(document.getElementById('finalizePrintFailed').value) || 0;
-    
-    try {
+    await window.executeWithButtonAction(btn, 'LOGGING...', '✅ LOGGED', async () => {
+        let success = parseFloat(document.getElementById('finalizePrintSuccess').value) || 0;
+        let failed = parseFloat(document.getElementById('finalizePrintFailed').value) || 0;
         await advancePrintStatus('Completed', true, success, failed);
-    } finally {
-        if (btn) { btn.disabled = false; btn.innerText = "Complete & Log"; }
-        document.getElementById('finalizePrintModal').style.display = 'none';
-    }
+        setTimeout(() => { document.getElementById('finalizePrintModal').style.display = 'none'; }, 800);
+    });
 };
 
 async function executeCleaningInventoryMath(partName, failedQ, wo_id, label) {

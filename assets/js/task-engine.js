@@ -1490,13 +1490,7 @@ window.click_teSaveProjectEdit = async function(element) {
         return;
     }
     
-    let btn = element;
-    let oldText = btn.textContent;
-    btn.textContent = 'Saving...';
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    
-    try {
+    await executeWithButtonAction(element, 'SAVING...', '✅ SAVED', async () => {
         const { error } = await supabaseClient.from('projectz').update({ title: newTitle, color_hex: newColor, visibility: newVisibility }).eq('id', projectId);
         if (error) throw error;
         
@@ -1518,14 +1512,7 @@ window.click_teSaveProjectEdit = async function(element) {
                 titleEl.innerHTML = window.safeHTML ? window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`) : `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`;
             }
         }
-        
-    } catch(e) {
-        console.error('[TaskEngine] Update Project failed', e);
-        alert('Failed to update project. Check console.');
-        btn.textContent = oldText;
-        btn.disabled = false;
-        btn.style.opacity = '1';
-    }
+    });
 };
 
 window.teToggleGlobalCreateMenu = function() {
@@ -1615,10 +1602,7 @@ window.teCreateProject = async function() {
         let vis = visibilityInput ? visibilityInput.value : 'Organization';
         let currentUser = window.currentUser ? window.currentUser.id : null;
         
-        submitBtn.textContent = 'CREATING...';
-        submitBtn.disabled = true;
-        
-        try {
+        await executeWithButtonAction(submitBtn, 'CREATING...', '✅ CREATED', async () => {
             const { data, error } = await supabaseClient.from('projectz').insert([{
                 id: generateUUID(),
                 title: title,
@@ -1635,11 +1619,7 @@ window.teCreateProject = async function() {
                 window.teSelectProject(data[0].id);
                 closeModal();
             }
-        } catch(e) { 
-            console.error(e); 
-            submitBtn.textContent = 'ERROR';
-            setTimeout(() => { submitBtn.textContent = 'Create Project'; submitBtn.disabled = false; }, 2000);
-        }
+        });
     };
     
     if (submitBtn) {

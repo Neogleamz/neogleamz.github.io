@@ -42,8 +42,13 @@ window.renderBulkAddBody = function() {
 window.saveBulkAdd = async function() { await executeWithButtonAction('btnSaveBulkAdd', '💾 SAVING...', '✅ SAVED!', async () => { let addedCount = 0; bulkAddData.forEach(i => { let v = parseFloat(i.q); if(v > 0) { let k = i.k; let ex = productsDB[currentProduct].find(p => String(p.item_key || p.di_item_id || p.name) === k); if(ex) { ex.quantity = (parseFloat(ex.quantity)||0) + v; ex.qty = ex.quantity; } else { productsDB[currentProduct].push({item_key: k, quantity: v}); } addedCount++; } }); if(addedCount > 0) { document.getElementById('bulkAddModal').style.display = 'none'; sysLog(`Bulk added ${addedCount} items.`); setMasterStatus("Saving...", "mod-working"); await window.syncRecipe(currentProduct); window.renderProductBOM(); window.renderProductList(); setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000); } else { throw new Error("No quantities greater than 0 were entered."); } }).catch(e => { alert(e.message); }); }
 
 // --- 7. PRODUCT BUILDER & LABOR LOGIC ---
-window.updateLaborCosts = async function() {
-    try {
+window.updateLaborCosts = async function(eventOrBtn) {
+    let btn = (eventOrBtn instanceof Event) ? eventOrBtn.target : eventOrBtn;
+    if (!btn || !btn.tagName) {
+        // Fallback if not called directly with a button
+        btn = document.querySelector('[data-app-click="updateLaborCosts"]') || document.createElement('button');
+    }
+    await executeWithButtonAction(btn, 'SAVING...', '✅ SAVED', async () => {
         if(!currentProduct) return;
         let t = parseFloat(document.getElementById('laborTimeInput').value) || 0;
         let r = parseFloat(document.getElementById('laborRateInput').value) || 0;
@@ -63,7 +68,7 @@ window.updateLaborCosts = async function() {
         productsDB[currentProduct].print_time_mins = pt;
         productsDB[currentProduct].is_label = isLabel;
 
-        sysLog(`Updating profile for ${currentProduct}`); setMasterStatus("Saving...", "mod-working");
+        sysLog(`Updating profile for ${currentProduct}`);
         
         let pUuid = window.uuidMap['RECIPE:::' + currentProduct];
         if (!pUuid) throw new Error("UUID mapping missing for product: " + currentProduct);
@@ -80,16 +85,19 @@ window.updateLaborCosts = async function() {
         }).eq('product_item_uuid', pUuid);
 
         if (error) throw new Error(error.message);
-        setMasterStatus("Saved!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
         if(typeof populateDropdowns === 'function') populateDropdowns();
         window.renderProductList(); window.renderProductBOM();
         if(typeof renderFgiTable === 'function') renderFgiTable();
         let aTab = document.getElementById('analytics-tab');
         if(typeof renderAnalyticsDashboard === 'function' && aTab && aTab.classList.contains('active')) renderAnalyticsDashboard();
-    } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); }
+    });
 }
 
-window.renameCurrentProduct = async function() {
+window.renameCurrentProduct = async function(eventOrBtn) {
+    let btn = (eventOrBtn instanceof Event) ? eventOrBtn.target : eventOrBtn;
+    if (!btn || !btn.tagName) {
+        btn = document.querySelector('[data-app-click="renameCurrentProduct"]') || document.createElement('button');
+    }
     if (!currentProduct) return;
     let newName = prompt("Enter new name:", currentProduct);
     if (!newName || !newName.trim() || newName.trim() === currentProduct) return;
@@ -99,49 +107,46 @@ window.renameCurrentProduct = async function() {
         return alert("A product with this name already exists.");
     }
 
-    sysLog(`Renaming ${currentProduct} to ${newName}...`);
-    setMasterStatus("Renaming...", "mod-working");
+    await executeWithButtonAction(btn, 'RENAMING...', '✅ RENAMED', async () => {
+        sysLog(`Renaming ${currentProduct} to ${newName}...`);
 
-    let oldName = currentProduct;
-    let pUuid = window.uuidMap['RECIPE:::' + oldName];
-    if (!pUuid) return alert("Fatal Error: No UUID linked to recipe " + oldName);
+        let oldName = currentProduct;
+        let pUuid = window.uuidMap['RECIPE:::' + oldName];
+        if (!pUuid) throw new Error("Fatal Error: No UUID linked to recipe " + oldName);
 
-    // With UUID architecture, renaming a recipe just means updating the master ledger string!
-    const { error: renameErr } = await supabaseClient.from('full_landed_costs')
-        .update({ neogleamz_product: newName, item_name: newName })
-        .eq('item_uuid', pUuid);
+        // With UUID architecture, renaming a recipe just means updating the master ledger string!
+        const { error: renameErr } = await supabaseClient.from('full_landed_costs')
+            .update({ neogleamz_product: newName, item_name: newName })
+            .eq('item_uuid', pUuid);
 
-    if (renameErr) {
-        sysLog(`Rename Failed: ${renameErr.message}`, true);
-        return alert("Error renaming recipe: " + renameErr.message);
-    }
+        if (renameErr) {
+            throw new Error("Error renaming recipe: " + renameErr.message);
+        }
 
-    // Refresh local mappings
-    let c = productsDB[oldName] || [];
-    let l = laborDB[oldName] || {time:0, rate:0};
-    let pR = pricingDB[oldName] || {msrp:0, wholesale:0};
-    let isSub = isSubassemblyDB[oldName] || false;
+        // Refresh local mappings
+        let c = productsDB[oldName] || [];
+        let l = laborDB[oldName] || {time:0, rate:0};
+        let pR = pricingDB[oldName] || {msrp:0, wholesale:0};
+        let isSub = isSubassemblyDB[oldName] || false;
 
-    productsDB[newName] = c;
-    laborDB[newName] = l;
-    pricingDB[newName] = pR;
-    isSubassemblyDB[newName] = isSub;
+        productsDB[newName] = c;
+        laborDB[newName] = l;
+        pricingDB[newName] = pR;
+        isSubassemblyDB[newName] = isSub;
 
-    delete productsDB[oldName];
-    delete laborDB[oldName];
-    delete pricingDB[oldName];
-    delete isSubassemblyDB[oldName];
-    
-    window.uuidMap['RECIPE:::' + newName] = pUuid;
-    delete window.uuidMap['RECIPE:::' + oldName];
-    window.uuidToNameMap[pUuid] = 'RECIPE:::' + newName;
+        delete productsDB[oldName];
+        delete laborDB[oldName];
+        delete pricingDB[oldName];
+        delete isSubassemblyDB[oldName];
+        
+        window.uuidMap['RECIPE:::' + newName] = pUuid;
+        delete window.uuidMap['RECIPE:::' + oldName];
+        window.uuidToNameMap[pUuid] = 'RECIPE:::' + newName;
 
-    currentProduct = newName;
-    if (typeof populateDropdowns === 'function') populateDropdowns();
-    window.renderProductList();
-
-    setMasterStatus("Renamed!", "mod-success");
-    setTimeout(() => setMasterStatus("Ready.", "status-idle"), 3000);
+        currentProduct = newName;
+        if (typeof populateDropdowns === 'function') populateDropdowns();
+        window.renderProductList();
+    });
 }
 
     window.translateRecipeForDB = function(arr) {
@@ -415,7 +420,7 @@ window.renderProductBOM = function() {
             a.push({rawKey: k, nn: nn, np: np, n: n, sp: sp, q: q, uc: uc, ec: ec}); 
         });
         a.sort((x,y) => { let u = x[currentBOMSort.column]; let v = y[currentBOMSort.column]; if (typeof u === 'number' && typeof v === 'number') return currentBOMSort.direction === 'asc' ? u - v : v - u; u = (u||"").toString().toLowerCase(); v = (v||"").toString().toLowerCase(); if(u<v) return currentBOMSort.direction==='asc'?-1:1; if(u>v) return currentBOMSort.direction==='asc'?1:-1; return 0; });
-        a.forEach(x => { let sk = String(x.rawKey).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.rawKey.startsWith('RECIPE:::')) { let safeSubName = String(x.rawKey).replace('RECIPE:::', '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--accent-color, #38bdf8); cursor:pointer; text-decoration:underline;" data-app-click="selectProd" data-name="${safeSubName}">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" data-app-focus="bomStoreOldVal" data-app-blur="updateBOMQty">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" data-app-click="removeBOMPart">X</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" data-app-focus="bomStoreOldVal" data-app-blur="updateBOMQty">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 8px; font-size:12px; width:auto;" data-key="${sk}" data-app-click="removeBOMPart">X</button></td></tr>`; } });
+        a.forEach(x => { let sk = String(x.rawKey).replace(/'/g, "\\'").replace(/"/g, '&quot;'); let displaySpec = x.sp === "(Mixed Specs)" ? "⚙️ (Mixed Specs)" : x.sp; if(x.rawKey.startsWith('RECIPE:::')) { let safeSubName = String(x.rawKey).replace('RECIPE:::', '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--accent-color, #38bdf8); cursor:pointer; text-decoration:underline;" data-app-click="selectProd" data-name="${safeSubName}">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" data-app-focus="bomStoreOldVal" data-app-blur="updateBOMQty">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 10px; font-size:11px; font-weight:bold; letter-spacing:0.5px;" data-key="${sk}" data-app-click="removeBOMPart">REMOVE</button></td></tr>`; } else { h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">${x.nn}</td><td tabindex="0" class="trunc-col" style="color:var(--text-muted);">${x.np}</td><td tabindex="0" class="trunc-col">${x.n}</td><td tabindex="0" class="trunc-col">${displaySpec}</td><td class="text-right editable" style="font-weight:bold; color:#0ea5e9;" contenteditable="true" data-key="${sk}" data-app-focus="bomStoreOldVal" data-app-blur="updateBOMQty">${x.q}</td><td class="text-right">$${x.uc.toFixed(4)}</td><td class="text-right" style="font-weight:bold;">$${x.ec.toFixed(4)}</td><td style="text-align:center;"><button style="background:#ef4444; padding:4px 10px; font-size:11px; font-weight:bold; letter-spacing:0.5px;" data-key="${sk}" data-app-click="removeBOMPart">REMOVE</button></td></tr>`; } });
     }
     wrap.innerHTML = window.safeHTML ? window.safeHTML(h + `</tbody></table>`) : h + `</tbody></table>`; document.getElementById('bomTotalCost').innerText = `$${getEngineTrueCogs(currentProduct).toFixed(2)}`; applyTableInteractivity('bomTableWrap');
 }

@@ -42,7 +42,7 @@ let isHistoryLocked = false;
 
 function saveLabelzHistory() {
     if (isHistoryLocked || !fCanvas) return;
-    const json = fCanvas.toJSON(['isBarcode', 'barcodeOpts', 'isDynamic']);
+    const json = fCanvas.toJSON(['isBarcode', 'barcodeOpts', 'isDynamic', 'templateText']);
     lblzHistory = lblzHistory.slice(0, lblzHistoryProg + 1);
     lblzHistory.push(JSON.stringify(json));
     lblzHistoryProg++;
@@ -89,10 +89,11 @@ function loadLabelzHistory(jsonStr) {
 
 async function loadLabelzData() {
     try {
-        const { data, error } = await supabaseClient
+        const { data: dbData, error } = await supabaseClient
             .from('label_designs')
             .select('*');
         if (error) throw error;
+        let data = dbData || [];
         
         if (data && window.uuidToNameMap) {
             data.forEach(row => {
@@ -104,10 +105,29 @@ async function loadLabelzData() {
                 }
                 if (!row.product_name) row.product_name = 'Unnamed Label';
             });
-            data.sort((a,b) => (a.product_name||'').localeCompare(b.product_name||''));
         }
         
-        labelzDB = data || [];
+        // Merge labels from productsDB that don't have a design yet
+        if (typeof productsDB !== 'undefined') {
+            Object.keys(productsDB).forEach(pName => {
+                if (productsDB[pName].is_label) {
+                    const existing = data.find(r => r.product_name === pName);
+                    if (!existing) {
+                        data.push({
+                            product_item_uuid: window.uuidMap ? window.uuidMap['RECIPE:::' + pName] : null,
+                            product_name: pName,
+                            emoji: productsDB[pName].label_emoji || '🏷️',
+                            label_size: '2.25x1.25',
+                            layout_json: null
+                        });
+                    }
+                }
+            });
+        }
+        
+        data.sort((a,b) => (a.product_name||'').localeCompare(b.product_name||''));
+        
+        labelzDB = data;
         renderLabelzGrid();
         if(typeof buildBarcodzCache === 'function') buildBarcodzCache();
     } catch(e) {
@@ -205,7 +225,19 @@ function initFabricCanvas() {
     // Live update the properties panel when an object is being dragged or resized
     const updateProps = (e) => onCanvasSelection(e);
     fCanvas.on('object:moving', updateProps);
-    fCanvas.on('object:scaling', updateProps);
+    fCanvas.on('object:scaling', (e) => {
+        const obj = e.target;
+        if (obj.type === 'textbox' || obj.type === 'i-text' || obj.type === 'text') {
+            const newFontSize = obj.fontSize * obj.scaleY;
+            obj.set({
+                fontSize: newFontSize,
+                width: obj.width * obj.scaleX / obj.scaleY,
+                scaleX: 1,
+                scaleY: 1
+            });
+        }
+        updateProps(e);
+    });
     fCanvas.on('object:rotating', updateProps);
     
     fCanvas.on('object:modified', (e) => {
@@ -323,7 +355,7 @@ function zoomLabelzCanvas(delta) {
         let scaleW = (wrapper.offsetWidth - padding) / cWidth;
         let scaleH = (wrapper.offsetHeight - padding) / cHeight;
         currentZoom = Math.min(scaleW, scaleH);
-        if(currentZoom > 2) currentZoom = 2; // cap max initial fit zoom
+        if(currentZoom > 1) currentZoom = 1; // cap max initial fit zoom to 100%
     } else {
         currentZoom += delta;
         if(currentZoom < 0.2) currentZoom = 0.2;
@@ -503,7 +535,7 @@ function handleLabelzPaste(e) {
 }
 
 
-function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
+function addLabelzBarcode(codeStr = '1234567890', format = 'code128', templateText = null) {
     disableLabelzDrawingMode();
     // We use an offscreen canvas to render with bwipjs, then drop it into fabric as an image
     const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
@@ -522,6 +554,7 @@ function addLabelzBarcode(codeStr = '1234567890', format = 'code128') {
                 left: fCanvas.width / 2, top: fCanvas.height / 2,
                 originX: 'center', originY: 'center',
                 isBarcode: true,
+                templateText: templateText,
                 barcodeOpts: { bcid: format, text: codeStr } // store state for regeneration
             });
             img.scaleToWidth(fCanvas.width * 0.6);
@@ -592,6 +625,13 @@ function regenerateBarcodeImage(obj, text, format) {
         
         obj.setSrc(tmpCanvas.toDataURL('image/png'), function() {
             obj.set({ barcodeOpts: { bcid: format, text: text }});
+            // Re-apply physical target bounds if this object was locked to a template grid
+            if (obj.targetWPx && obj.width) {
+                obj.scaleToWidth(obj.targetWPx);
+            }
+            if (obj.targetHPx && obj.height && obj.getScaledHeight() !== obj.targetHPx) {
+                obj.set({ scaleX: obj.targetWPx / obj.width, scaleY: obj.targetHPx / obj.height });
+            }
             fCanvas.renderAll();
         });
     } catch(e) {
@@ -603,6 +643,12 @@ function regenerateBarcodeImage(obj, text, format) {
         ctx.fillStyle = '#ffffff'; ctx.font = '12px Arial'; ctx.textAlign = 'center'; ctx.fillText('INVALID FORMAT', 75, 20);
         obj.setSrc(tmpCanvas.toDataURL('image/png'), function() {
             obj.set({ barcodeOpts: { bcid: format, text: text }});
+            if (obj.targetWPx && obj.width) {
+                obj.scaleToWidth(obj.targetWPx);
+            }
+            if (obj.targetHPx && obj.height && obj.getScaledHeight() !== obj.targetHPx) {
+                obj.set({ scaleX: obj.targetWPx / obj.width, scaleY: obj.targetHPx / obj.height });
+            }
             fCanvas.renderAll();
         });
         alert('Format Constraint Violation: \n' + e.message);
@@ -631,7 +677,7 @@ function onCanvasSelection(_e) {
     // Common Position/Size
     html += `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-            <div><label style="font-size:10px;">X</label><input type="number" data-app-change="lblzUpdObj" data-key="left" data-type="float" value="${Math.round(obj.left)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
+            <div><label style="font-size:10px;">X Coord</label><input type="number" data-app-change="lblzUpdObj" data-key="left" data-type="float" value="${Math.round(obj.left)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
             <div><label style="font-size:10px;">Y</label><input type="number" data-app-change="lblzUpdObj" data-key="top" data-type="float" value="${Math.round(obj.top)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
             <div><label style="font-size:10px;">Scale W%</label><input type="number" data-app-change="lblzUpdObj" data-key="scaleX" data-type="float100" value="${Math.round(obj.scaleX*100)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
             <div><label style="font-size:10px;">Scale H%</label><input type="number" data-app-change="lblzUpdObj" data-key="scaleY" data-type="float100" value="${Math.round(obj.scaleY*100)}" style="width:100%; padding:4px; font-size:11px; background:var(--bg-input); border:1px solid var(--border-color); color:white;"></div>
@@ -852,6 +898,108 @@ window.applyCatalogData = function(name, bcValue, _cost) {
     onCanvasSelection({target: obj}); // refresh properties panel
 };
 
+window.populateLabelzPreviewContextDropdown = function() {
+    const sel = document.getElementById('labelzDesignerPreviewContext');
+    if (!sel) return;
+    
+    let html = '<option value="">-- No Preview Context --</option>';
+    if (typeof productsDB !== 'undefined') {
+        let sortedProducts = Object.keys(productsDB).sort((a,b) => { 
+            let oa = productsDB[a]?.is_3d_print ? 3 : (isSubassemblyDB[a] ? 2 : 1); 
+            let ob = productsDB[b]?.is_3d_print ? 3 : (isSubassemblyDB[b] ? 2 : 1); 
+            return oa !== ob ? oa - ob : a.localeCompare(b); 
+        });
+        
+        let retailProds = sortedProducts.filter(p => !isSubassemblyDB[p] && (!productsDB[p] || !productsDB[p].is_3d_print) && (!productsDB[p] || !productsDB[p].is_label));
+        let subProds = sortedProducts.filter(p => isSubassemblyDB[p] && (!productsDB[p] || !productsDB[p].is_3d_print) && (!productsDB[p] || !productsDB[p].is_label));
+        let printProds = sortedProducts.filter(p => productsDB[p] && productsDB[p].is_3d_print && !productsDB[p].is_label);
+        let labelProds = sortedProducts.filter(p => productsDB[p] && productsDB[p].is_label);
+        
+        const mapOpts = (arr, char) => arr.map(p => `<option value="${String(p).replace(/"/g, '&quot;')}">${char} ${p}</option>`).join('');
+
+        if (retailProds.length) html += `<optgroup label="📦 RETAIL PRODUCTS">${mapOpts(retailProds, '📦')}</optgroup>`;
+        if (subProds.length) html += `<optgroup label="⚙️ SUB-ASSEMBLIES">${mapOpts(subProds, '⚙️')}</optgroup>`;
+        if (printProds.length) html += `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>`;
+        if (labelProds.length) html += `<optgroup label="🏷️ CUSTOM LABELS">${mapOpts(labelProds, '🏷️')}</optgroup>`;
+    }
+    sel.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    sel.onchange = function() {
+        if (typeof window.applyLabelzPreviewContext === 'function') {
+            window.applyLabelzPreviewContext();
+        }
+    };
+};
+
+function getLabelzPreviewContextValues() {
+    const sel = document.getElementById('labelzDesignerPreviewContext');
+    let pName = sel ? sel.value : '';
+    if (!pName) return { name: 'Product Name', sku: 'SKU-PREVIEW', barcode: '123456789' };
+    
+    let sku = typeof getItemSKUValue === 'function' ? getItemSKUValue(pName) : 'SKU-PREVIEW';
+    let bcVal = typeof getItemBarcodeValue === 'function' ? getItemBarcodeValue(pName, true) : '123456789';
+    return { name: pName, sku: sku, barcode: bcVal };
+}
+
+window.applyLabelzPreviewContext = function() {
+    if(!fCanvas) return;
+    const ctx = getLabelzPreviewContextValues();
+    fCanvas.getObjects().forEach(obj => {
+        if(obj.templateText) {
+            let res = obj.templateText;
+            res = res.replace(/\{\{PRODUCT_NAME\}\}/g, ctx.name);
+            res = res.replace(/\{\{SKU\}\}/g, ctx.sku);
+            res = res.replace(/\{\{BARCODE\}\}/g, ctx.barcode);
+            
+            if(obj.isBarcode) {
+                let f = obj.barcodeOpts ? obj.barcodeOpts.bcid : 'code128';
+                // Don't lose templateText on regenerate, regenerate handles it if we pass it, but wait:
+                // regenerateBarcodeImage replaces the object! We must ensure regenerateBarcodeImage preserves templateText!
+                // Actually, let's just regenerate it with the new value.
+                regenerateBarcodeImage(obj, res, f, obj.templateText);
+            } else {
+                obj.set({text: res});
+            }
+        }
+    });
+    fCanvas.renderAll();
+};
+
+window.click_labelzAddProductName = function() {
+    const ctx = getLabelzPreviewContextValues();
+    if(typeof disableLabelzDrawingMode === 'function') disableLabelzDrawingMode();
+    const text = new fabric.Textbox(ctx.name, {
+        left: fCanvas.width / 2, top: fCanvas.height / 2,
+        originX: 'center', originY: 'center',
+        width: 150, fontSize: 14, fontFamily: 'Arial', fill: '#000000',
+        editable: true, isDynamic: false, fontWeight: 'bold', textAlign: 'center',
+        templateText: '{{PRODUCT_NAME}}'
+    });
+    fCanvas.add(text);
+    fCanvas.setActiveObject(text);
+};
+
+window.click_labelzAddSku = function() {
+    const ctx = getLabelzPreviewContextValues();
+    if(typeof disableLabelzDrawingMode === 'function') disableLabelzDrawingMode();
+    const text = new fabric.Textbox(ctx.sku, {
+        left: fCanvas.width / 2, top: fCanvas.height / 2 + 30,
+        originX: 'center', originY: 'center',
+        width: 150, fontSize: 10, fontFamily: 'Arial', fill: '#000000',
+        editable: true, isDynamic: false, textAlign: 'center',
+        templateText: '{{SKU}}'
+    });
+    fCanvas.add(text);
+    fCanvas.setActiveObject(text);
+};
+
+window.click_labelzAddBarcodeContext = function() {
+    const ctx = getLabelzPreviewContextValues();
+    if(typeof disableLabelzDrawingMode === 'function') disableLabelzDrawingMode();
+    if(typeof addLabelzBarcode === 'function') {
+        addLabelzBarcode(ctx.barcode, 'code128', '{{BARCODE}}');
+    }
+};
+
 // ============================================================
 // MODAL CONTROLS & LIFECYCLE
 // ============================================================
@@ -882,6 +1030,8 @@ window.openCreateLabelModal = function() {
     assignLabelzDesignerEmoji('🏷️');
     
     document.getElementById('labelzDesignerModal').style.display = 'flex';
+    populateLabelzPreviewContextDropdown();
+    
     let sizeSel = document.getElementById('labelzDesignerSize');
     if(sizeSel && sizeSel.options && sizeSel.options.length > 0) { sizeSel.selectedIndex = 0; }
     updateLabelCanvasSize();
@@ -895,6 +1045,118 @@ window.openCreateLabelModal = function() {
     saveLabelzHistory();
 }
 
+window.click_labelzLoadTemplate = function(id) {
+    if (!id) return;
+    if (!window.ldState || !window.ldState.templates) return;
+    const tpl = window.ldState.templates.find(t => t.id === id);
+    if (!tpl) return;
+    
+    // Set size to match template if possible
+    let targetSizeStr = `${tpl.widthIn}x${tpl.heightIn}`;
+    let sizeSel = document.getElementById('labelzDesignerSize');
+    let matched = false;
+    if (sizeSel && sizeSel.options) {
+        for (let opt of sizeSel.options) {
+            try {
+                let oObj = JSON.parse(opt.value);
+                if (oObj.w === tpl.widthIn && oObj.h === tpl.heightIn) {
+                    sizeSel.value = opt.value;
+                    matched = true;
+                    break;
+                }
+            } catch(e) {
+                // ignore parsing errors on dropdown options
+            }
+        }
+        if(!matched && sizeSel.options.length > 0) sizeSel.selectedIndex = 0;
+    }
+    updateLabelCanvasSize();
+    
+    fCanvas.clear();
+    fCanvas.backgroundColor = '#ffffff';
+    document.getElementById('labelzBgColor').value = '#ffffff';
+    
+    // Inject Elements translated from Barcodz
+    tpl.elements.forEach(el => {
+        let wPx = (el.width || 1.5) * PPI;
+        let hPx = (el.height || 0.3) * PPI;
+        let leftPx = (el.x * PPI) + (wPx / 2); // Center X
+        let topPx = (el.y * PPI) + (hPx / 2); // Center Y
+        
+        let hasTemplate = el.value && el.value.includes('{{');
+        
+        if (el.type === 'text') {
+            let exactFontSize = (el.fontSize || 12) * (300 / 72); // pt to px exact conversion
+            let tObj = new fabric.Textbox(el.value, {
+                left: leftPx, top: topPx,
+                originX: 'center', originY: 'center',
+                width: wPx,
+                fontSize: exactFontSize,
+                fontWeight: el.fontWeight || 'normal',
+                textAlign: el.textAlign || 'center',
+                fontFamily: 'Arial',
+                fill: el.color || '#000000',
+                isDynamic: hasTemplate,
+                templateText: hasTemplate ? el.value : null
+            });
+            fCanvas.add(tObj);
+        } else if (el.type === 'barcode' || el.type === 'qrcode') {
+            let bcid = el.bcid || (el.type === 'qrcode' ? 'qrcode' : 'code128');
+            
+            // Generate the image immediately so we can scale it
+            const tmpCanvas = document.getElementById('labelzBwipjsRenderer');
+            try {
+                let drawOpts = {
+                    bcid: bcid,
+                    text: el.value || '123456789',
+                    scale: 3,
+                    includetext: bcid !== 'qrcode',
+                    textxalign: 'center'
+                };
+                if (bcid !== 'qrcode') drawOpts.height = 10;
+                bwipjs.toCanvas('labelzBwipjsRenderer', drawOpts);
+                
+                fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), function(img) {
+                    img.set({
+                        left: leftPx, top: topPx,
+                        originX: 'center', originY: 'center',
+                        isBarcode: true,
+                        isDynamic: hasTemplate,
+                        templateText: hasTemplate ? el.value : null,
+                        barcodeOpts: { text: el.value, bcid: bcid },
+                        targetWPx: wPx,
+                        targetHPx: hPx
+                    });
+                    
+                    // Force the image to match the Barcodz box exactly
+                    img.scaleToWidth(wPx);
+                    if (hPx > 0 && img.getScaledHeight() !== hPx) {
+                        img.set({ scaleX: wPx / img.width, scaleY: hPx / img.height });
+                    }
+                    
+                    fCanvas.add(img);
+                    
+                    // We must apply preview context AFTER async load if we need to replace it
+                    if (typeof window.applyLabelzPreviewContext === 'function') {
+                        window.applyLabelzPreviewContext();
+                    } else {
+                        fCanvas.renderAll();
+                    }
+                });
+            } catch(e) {
+                console.error("Barcode gen error in template load", e);
+            }
+        }
+    });
+    
+    if (typeof window.applyLabelzPreviewContext === 'function') {
+        window.applyLabelzPreviewContext();
+    } else {
+        fCanvas.renderAll();
+    }
+    saveLabelzHistory();
+};
+
 window.openEditLabelModal = function(name) {
     initFabricCanvas();
     const l = labelzDB.find(x => x.product_name === name);
@@ -905,12 +1167,20 @@ window.openEditLabelModal = function(name) {
     assignLabelzDesignerEmoji(l.emoji || '🏷️');
     
     document.getElementById('labelzDesignerModal').style.display = 'flex';
+    populateLabelzPreviewContextDropdown();
+    const sel = document.getElementById('labelzDesignerPreviewContext');
+    if (sel) sel.value = name;
+    
     document.getElementById('labelzDesignerSize').value = l.label_size || '2.25x1.25';
     updateLabelCanvasSize();
     
     if(l.layout_json) {
         fCanvas.loadFromJSON(l.layout_json, function() {
-            fCanvas.renderAll();
+            if (typeof window.applyLabelzPreviewContext === 'function') {
+                window.applyLabelzPreviewContext();
+            } else {
+                fCanvas.renderAll();
+            }
             // Need to regenerate barcode images because Data URLs from JSON often break or get stale cross-origin
             fCanvas.getObjects().forEach(o => {
                 if(o.isBarcode && o.barcodeOpts) {
@@ -952,7 +1222,7 @@ window.saveLabelzDesign = async function() {
         const size = document.getElementById('labelzDesignerSize').value;
         
         fCanvas.discardActiveObject(); // deselect handles before saving JSON
-        const layout = fCanvas.toJSON(['isBarcode', 'barcodeOpts']); // keep custom props
+        const layout = fCanvas.toJSON(['isBarcode', 'barcodeOpts', 'isDynamic', 'templateText']); // keep custom props
 
         let pUuid = window.uuidMap['RECIPE:::' + name];
         if (!pUuid) throw new Error("UUID not found for label " + name);

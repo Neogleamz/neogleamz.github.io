@@ -456,11 +456,11 @@ window.resolveOrphanSKUMapping = async function(sku, targetRecipe) {
 
         const insertShopifySku = (shopifySku && shopifySku === sku) ? shopifySku : null;
 
-        let existingRowQuery = supabaseClient.from('storefront_aliases').select('id').eq('product_sku', sku);
+        let existingRowQuery = supabaseClient.from('storefront_aliases').select('id');
         if (shopifySku) {
             existingRowQuery = existingRowQuery.eq('shopify_sku', shopifySku);
         } else {
-            existingRowQuery = existingRowQuery.is('shopify_sku', null);
+            existingRowQuery = existingRowQuery.eq('product_sku', sku).is('shopify_sku', null);
         }
         
         const { data: existingData } = await existingRowQuery.maybeSingle();
@@ -677,11 +677,10 @@ window.findShopifyVariantForAlias = function(aliasSku) {
             if (score > bestScore) {
                 bestScore = score;
                 bestMatch = { sku: m.shopify_sku || sku, barcode: m.barcode_value || 'None' };
-                console.log('findShopifyVariantForAlias found match:', { sku, m_shopify_sku: m.shopify_sku, score });
             }
         }
     });
-    console.log('findShopifyVariantForAlias returning:', bestMatch);
+    
     return bestMatch;
 };
 
@@ -1374,17 +1373,11 @@ function renderSimulatorOrder(orderId) {
 }
 
 window.click_commitSimToLedger = async function() {
-    let commitBtn = document.getElementById('sim-commit-btn');
+    let commitBtn = document.getElementById('sim-commit-btn') || document.createElement('button');
     
-    if(commitBtn) {
-        commitBtn.textContent = "💾 SAVING...";
-        commitBtn.style.opacity = "0.5";
-        commitBtn.disabled = true;
-    }
-    
-    if(typeof setMasterStatus === 'function') setMasterStatus("Saving Forensic Sandbox...", "mod-working");
+    await executeWithButtonAction(commitBtn, '💾 SAVING...', '✅ SAVED', async () => {
+        if(typeof setMasterStatus === 'function') setMasterStatus("Saving Forensic Sandbox...", "mod-working");
 
-    try {
         let forensicResults = window.runForensicAccounting(window.currentSimPayload);
         for (let fLine of forensicResults) {
             let payload = { 
@@ -1422,25 +1415,13 @@ window.click_commitSimToLedger = async function() {
                 }
             }
         }
-        if(commitBtn) {
-            commitBtn.textContent = "✅ COMMITTED!";
-            commitBtn.style.background = "#3b82f6";
-        }
-        if(typeof setMasterStatus === 'function') setMasterStatus("Saved!", "mod-success");
         
+        if(typeof renderSalesTable === 'function') renderSalesTable();
+        if(typeof setMasterStatus === 'function') setMasterStatus("Forensic Ledger Updated", "mod-success");
         setTimeout(() => {
             if(typeof setMasterStatus === 'function') setMasterStatus("Ready.", "status-idle");
-        }, 1000);
-    } catch (err) {
-        console.error(err);
-        if(typeof setMasterStatus === 'function') setMasterStatus("Error Saving", "mod-error");
-        if(typeof sysLog === 'function') sysLog("Error committing forensic payload: " + err.message, true);
-        if(commitBtn) {
-            commitBtn.textContent = "💾 COMMIT TO LEDGER";
-            commitBtn.style.opacity = "1";
-            commitBtn.disabled = false;
-        }
-    }
+        }, 2000);
+    });
 };
 
 function recomputeSimulator() {

@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1738</span>
+                <span class='fraction'>0/1747</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1409</span>
+                <span class='fraction'>0/1418</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1363</span>
+                <span class='fraction'>0/1369</span>
             </div>
         
             
@@ -2168,7 +2168,16 @@
 <a name='L2103'></a><a href='#L2103'>2103</a>
 <a name='L2104'></a><a href='#L2104'>2104</a>
 <a name='L2105'></a><a href='#L2105'>2105</a>
-<a name='L2106'></a><a href='#L2106'>2106</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L2106'></a><a href='#L2106'>2106</a>
+<a name='L2107'></a><a href='#L2107'>2107</a>
+<a name='L2108'></a><a href='#L2108'>2108</a>
+<a name='L2109'></a><a href='#L2109'>2109</a>
+<a name='L2110'></a><a href='#L2110'>2110</a>
+<a name='L2111'></a><a href='#L2111'>2111</a>
+<a name='L2112'></a><a href='#L2112'>2112</a>
+<a name='L2113'></a><a href='#L2113'>2113</a>
+<a name='L2114'></a><a href='#L2114'>2114</a>
+<a name='L2115'></a><a href='#L2115'>2115</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2756,6 +2765,15 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -4874,6 +4892,15 @@
                 case 'click_openActualNetModal':
 <span class="cstat-no" title="statement not covered" >                    if (typeof openActualNetModal === 'function') <span class="cstat-no" title="statement not covered" >openActualNetModal();</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_labelzAddProductName':
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.click_labelzAddProductName === 'function') <span class="cstat-no" title="statement not covered" >window.click_labelzAddProductName();</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_labelzAddSku':
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.click_labelzAddSku === 'function') <span class="cstat-no" title="statement not covered" >window.click_labelzAddSku();</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_labelzAddBarcodeContext':
+<span class="cstat-no" title="statement not covered" >                    if (typeof window.click_labelzAddBarcodeContext === 'function') <span class="cstat-no" title="statement not covered" >window.click_labelzAddBarcodeContext();</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_closeActualNetModal':
 <span class="cstat-no" title="statement not covered" >                    if (typeof closeActualNetModal === 'function') <span class="cstat-no" title="statement not covered" >closeActualNetModal();</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
@@ -5749,18 +5776,18 @@
 <span class="cstat-no" title="statement not covered" >                    break;</span>
 &nbsp;
                 case 'click_removeAliasMapping':
-<span class="cstat-no" title="statement not covered" >                    if(window.removeAliasMapping) <span class="cstat-no" title="statement not covered" >window.removeAliasMapping(el.getAttribute('data-sku'));</span></span>
+<span class="cstat-no" title="statement not covered" >                    if(window.removeAliasMapping) <span class="cstat-no" title="statement not covered" >window.removeAliasMapping(el.getAttribute('data-sku'), el);</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_togglePrimaryAliasMapping':
-<span class="cstat-no" title="statement not covered" >                    if(window.togglePrimaryAliasMapping) <span class="cstat-no" title="statement not covered" >window.togglePrimaryAliasMapping(el.getAttribute('data-sku'));</span></span>
+<span class="cstat-no" title="statement not covered" >                    if(window.togglePrimaryAliasMapping) <span class="cstat-no" title="statement not covered" >window.togglePrimaryAliasMapping(el.getAttribute('data-sku'), el);</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_toggleAliasCardExpand':
-<span class="cstat-no" title="statement not covered" >                    if(window.toggleAliasCardExpand) <span class="cstat-no" title="statement not covered" >window.toggleAliasCardExpand(el.getAttribute('data-sku'));</span></span>
+<span class="cstat-no" title="statement not covered" >                    if(window.toggleAliasCardExpand) <span class="cstat-no" title="statement not covered" >window.toggleAliasCardExpand(el.getAttribute('data-sku'), el);</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_saveAliasBarcode': {
                     const sku = <span class="cstat-no" title="statement not covered" >el.getAttribute('data-sku');</span>
                     const input = <span class="cstat-no" title="statement not covered" >document.getElementById(`aliasBarcodeVal_${sku.replace(/[^a-zA-Z0-9_-]/g, '_')}`);</span>
-<span class="cstat-no" title="statement not covered" >                    if (window.saveAliasBarcode &amp;&amp; input) <span class="cstat-no" title="statement not covered" >window.saveAliasBarcode(sku, input.value);</span></span>
+<span class="cstat-no" title="statement not covered" >                    if (window.saveAliasBarcode &amp;&amp; input) <span class="cstat-no" title="statement not covered" >window.saveAliasBarcode(sku, input.value, el);</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 }
                 case 'click_triggerShopifyCatalogSync': {
@@ -6385,7 +6412,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-05T04:55:59.397Z
+                at 2026-06-05T07:02:14.615Z
             </div>
         <script src="prettify.js"></script>
         <script>
