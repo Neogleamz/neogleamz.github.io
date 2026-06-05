@@ -1441,7 +1441,7 @@ window.click_teOpenEditProject = function(element) {
         <div style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 400px; max-width: 90vw; margin: auto; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
             <div class="pane-header-bar" style="position: relative; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
                 <div class="pane-header-title">Edit Project</div>
-                <div class="modal-close-btn te-proj-close" data-click="click_window_closeEditProject" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" class="te-hover-bg-red-close">✖ CLOSE</div>
+                <div class="modal-close-btn te-proj-close" data-click="click_window_closeEditProject" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" class="te-hover-bg-red-close">CLOSE</div>
             </div>
             <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
                 <div>
@@ -1562,7 +1562,7 @@ window.teCreateProject = async function() {
         <div style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 400px; max-width: 90vw; margin: auto; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
             <div class="pane-header-bar" style="position: relative; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
                 <div class="pane-header-title">Create New Project</div>
-                <div class="modal-close-btn te-proj-close" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" class="te-hover-bg-red-close">✕ CLOSE</div>
+                <div class="modal-close-btn te-proj-close" style="position: absolute; top: 50%; right: 16px; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 4px 12px; border-radius: 4px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);" class="te-hover-bg-red-close">CLOSE</div>
             </div>
             <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
                 <div>

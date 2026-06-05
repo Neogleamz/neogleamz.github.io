@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.06.05.0001"></script>
+    <script src="assets/js/system-version.js?v=v.2026.06.05.0006"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.05.0001"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.05.0006"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.05.0001"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.05.0006"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.06.05.0001"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.06.05.0006"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -2809,7 +2809,7 @@
                     </select>
                     <button id="btnSaveLabelz" class="btn-green" data-click="click_saveLabelzDesign" style="padding:6px 16px; font-size:12px;">💾 SAVE</button>
                     <button id="btnDeleteLabelz" class="btn-red-neon" data-click="click_deleteLabelzDesign" style="padding:6px 16px; font-size:12px; margin-right: 15px;">🗑️ DELETE</button>
-                    <button class="btn-red" data-click="click_closeLabelzDesigner" style="padding:6px 16px; font-size:12px; display:flex; align-items:center; gap:6px; white-space:nowrap;">✕ CLOSE</button>
+                    <button class="btn-red" data-click="click_closeLabelzDesigner" style="padding:6px 16px; font-size:12px; display:flex; align-items:center; gap:6px; white-space:nowrap;">CLOSE</button>
                 </div>
             </div>
             
@@ -3727,7 +3727,7 @@
                     <h2 style="margin: 0; font-size: 24px; color: var(--text-heading); text-transform: uppercase; font-family: 'Space Grotesk', sans-serif;"><span id="kpiReportTitle">KPI Report</span></h2>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn-green" data-click="click_printKPIReport" style="padding: 8px 16px; font-size: 14px; font-weight: bold;">🖨️ PRINT</button>
-                        <button class="btn-close" data-click="click_closeKPIReport" style="background: none; border: none; color: var(--text-muted); font-size: 28px; cursor: pointer; padding: 0 10px;">&times;</button>
+                        <button class="btn-close" data-click="click_closeKPIReport" style="background: none; border: none; color: var(--text-muted); font-size: 28px; cursor: pointer; padding: 0 10px;">CLOSE</button>
                     </div>
                 </div>
                 <div class="modal-body" id="kpiReportContent" style="padding: 30px 40px; flex-grow: 1; overflow-y: auto; background: var(--bg-body);">
@@ -3908,7 +3908,7 @@
     <div style="background:var(--bg-panel); border:1px solid var(--border-color); border-radius:12px; width:90%; max-width:1000px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
         <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; background:var(--bg-bar); border-radius:12px 12px 0 0; position:relative;">
             <h2 style="margin:0; font-size:22px;">📂 Archive Explorer</h2>
-            <button class="modal-close-btn" data-click="click_window_closeArchiveExplorer">✕ CLOSE</button>
+            <button class="modal-close-btn" data-click="click_window_closeArchiveExplorer">CLOSE</button>
         </div>
         <div style="display:flex; border-bottom:1px solid var(--border-color); background:var(--bg-input);">
             <button id="tabArchBatchez" class="btn-blue" style="flex:1; border-radius:0; border:none; background:transparent; color:var(--text-main); font-weight:bold; font-size:16px; border-bottom:3px solid transparent; padding:15px;" data-click="click_window_switchArchiveTab_batche">🏭 Batchez</button>
@@ -3930,7 +3930,7 @@
                     <span style="font-size:24px;">⏳</span> VELOCITYZ FORECASTER
                 </div>
                 <div class="pane-header-actions">
-                    <button class="modal-close-btn" data-click="click_window_closeVelocityzModal">✕ CLOSE</button>
+                    <button class="modal-close-btn" data-click="click_window_closeVelocityzModal">CLOSE</button>
                 </div>
             </div>
             
@@ -4058,7 +4058,7 @@
                     <label class="btn-blue" style="width:auto; padding:6px 14px; font-size:13px; margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">⬆ UPLOAD
                         <input type="file" id="sopMediaUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,video/mp4,video/webm,application/pdf" style="display:none;" data-change="change_uploadSOPMedia_this_files_0">
                     </label>
-                    <button class="modal-close-btn" data-click="click_closeSOPMediaPicker">✕ CLOSE</button>
+                    <button class="modal-close-btn" data-click="click_closeSOPMediaPicker">CLOSE</button>
                 </div>
             </div>
             <!-- Breadcrumb Nav -->
@@ -4096,7 +4096,7 @@
                     <span style="font-size:11px; color:var(--text-muted); line-height:1.4;">Launches native camera app on your phone. Snap on phone to auto-sync.</span>
                 </div>
             </div>
-            <button data-click="click_closeSOPSnapshotCamera" class="btn-red-muted" style="margin-top:10px; padding:10px 24px; border-radius:6px; font-weight:800; font-size:12px;">✕ Cancel</button>
+            <button data-click="click_closeSOPSnapshotCamera" class="btn-red-muted" style="margin-top:10px; padding:10px 24px; border-radius:6px; font-weight:800; font-size:12px;">CLOSE Cancel</button>
         </div>
 
         <!-- Webcam Stream View (Initially Hidden) -->
@@ -4116,7 +4116,7 @@
                 <canvas id="sopSnapshotCanvas" style="display:none;"></canvas>
             </div>
             <div style="display:flex; gap:12px;">
-                <button data-click="click_backToSOPCameraSelection" class="btn-red-muted" style="padding:10px 24px; border-radius:8px; font-weight:800; font-size:12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fca5a5; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1); width: auto !important;" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.borderColor='#ef4444';" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';">✕ Back</button>
+                <button data-click="click_backToSOPCameraSelection" class="btn-red-muted" style="padding:10px 24px; border-radius:8px; font-weight:800; font-size:12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fca5a5; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1); width: auto !important;" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.borderColor='#ef4444';" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';">CLOSE Back</button>
                 <button id="btnSOPSnapshotCapture" data-click="click_captureSOPSnapshot" class="btn-orange-neon" style="padding:10px 30px; border-radius:6px; font-weight:900; letter-spacing:1px;">📸 CAPTURE</button>
             </div>
         </div>
@@ -4153,7 +4153,7 @@
             </div>
 
             <div style="display:flex; gap:12px; align-items:center; margin-top:4px;">
-                <button data-click="click_discardRemoteMobileStagedPhotos" class="btn-red-muted" style="padding:10px 20px; border-radius:8px; font-weight:800; font-size:12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fca5a5; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1); width: auto !important;" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.borderColor='#ef4444';" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';">✕ Discard & Back</button>
+                <button data-click="click_discardRemoteMobileStagedPhotos" class="btn-red-muted" style="padding:10px 20px; border-radius:8px; font-weight:800; font-size:12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fca5a5; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1); width: auto !important;" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.borderColor='#ef4444';" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';">CLOSE Discard & Back</button>
                 <button data-click="click_saveRemoteMobileStagedPhotos" class="btn-green" style="padding:10px 24px; border-radius:8px; font-weight:800; font-size:12px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #a7f3d0; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); width: auto !important;" onmouseover="this.style.background='rgba(16,185,129,0.25)'; this.style.borderColor='#10b981';" onmouseout="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.borderColor='rgba(16, 185, 129, 0.4)';">✓ Save & Close</button>
             </div>
         </div>
@@ -4177,7 +4177,7 @@
                         <button class="btn-green-neon" style="padding:6px 10px; font-size:11px; font-weight:900; letter-spacing:0.5px; white-space:nowrap;" data-click="click_unarchiveSelectedArchive">⟲ UNARCHIVE</button>
                     </div>
                     <input type="text" id="sopAuditSearch" placeholder="Search by order or recipe..." data-input="input_filterSOPAuditLog" style="padding:7px 12px; border-radius:6px; border:1px solid var(--border-input); background:var(--bg-input); color:var(--text-main); font-size:12px; width:220px;">
-                    <button class="modal-close-btn" data-click="click_closeSOPAuditLog">✕ CLOSE</button>
+                    <button class="modal-close-btn" data-click="click_closeSOPAuditLog">CLOSE</button>
                 </div>
             </div>
             <!-- Log Table -->
@@ -6178,21 +6178,21 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/kpi-reports-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/bom-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/production-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/sales-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/task-engine.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/print-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.06.05.0001"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.06.05.0001"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/kpi-reports-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/bom-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/production-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/sales-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/task-engine.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/print-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.06.05.0006"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.06.05.0006"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -6347,7 +6347,7 @@
     </div>
     <div id="sopCameraStatus" style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); min-height:20px; text-align:center;">Point at the QR code on the bin label...</div>
     <div style="display:flex; gap:12px;">
-        <button data-click="click_closeCameraScanner" class="btn-red" style="padding:10px 28px; width:max-content; border-radius:8px; font-weight:800; font-size:14px;">✕ Cancel</button>
+        <button data-click="click_closeCameraScanner" class="btn-red" style="padding:10px 28px; width:max-content; border-radius:8px; font-weight:800; font-size:14px;">CLOSE Cancel</button>
     </div>
 </div>
 
@@ -6596,7 +6596,7 @@
                     <span id="stockzAuditScannerStatusIndicator" style="display:inline-block; width:10px; height:10px; background:#ef4444; border-radius:50%; box-shadow:0 0 10px #ef4444; animation:pulse 1.5s infinite;"></span>
                     <span id="stockzAuditScannerHeaderTitle">📷 AUDIT SCANNER</span>
                 </h2>
-                <button class="modal-close-btn" data-click="click_toggleStockzAuditScanner" style="width:auto; padding:4px 10px; font-size:11px; font-weight:bold;">✕ CLOSE</button>
+                <button class="modal-close-btn" data-click="click_toggleStockzAuditScanner" style="width:auto; padding:4px 10px; font-size:11px; font-weight:bold;">CLOSE</button>
             </div>
 
             <!-- Scanner Body -->
@@ -6625,7 +6625,7 @@
                     </div>
                     <div style="display:flex; gap:10px; align-items:center;">
                         <button id="stockzAuditStartWebcamBtn" data-click="click_startStockzAuditWebcam" class="btn-slate-muted" style="width:auto; padding:8px 20px; font-size:12px; font-weight:bold; border-radius:6px; cursor:pointer;">📷 START WEBCAM</button>
-                        <button id="stockzAuditStopWebcamBtn" data-click="click_stopStockzAuditWebcam" class="btn-red" style="width:auto; padding:8px 20px; font-size:12px; font-weight:bold; border-radius:6px; display:none; cursor:pointer;">✕ STOP WEBCAM</button>
+                        <button id="stockzAuditStopWebcamBtn" data-click="click_stopStockzAuditWebcam" class="btn-red" style="width:auto; padding:8px 20px; font-size:12px; font-weight:bold; border-radius:6px; display:none; cursor:pointer;">CLOSE STOP WEBCAM</button>
                     </div>
                 </div>
 
@@ -6677,7 +6677,7 @@
                 <div style="font-size:17px; font-weight:900; color:#0ea5e9;">❓ SOP Token Reference Guide</div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">All syntax tokens available in the CHECKLIST editor</div>
             </div>
-            <button data-click="click_closeSOPTokenGuide" class="modal-close-btn" style="width:auto; padding:7px 16px; font-size:13px;"><i class="fa-solid fa-times"></i> Close</button>
+            <button data-click="click_closeSOPTokenGuide" class="modal-close-btn" style="width:auto; padding:7px 16px; font-size:13px;">Close</button>
         </div>
         <div style="flex-grow:1; overflow-y:auto; padding:28px; display:flex; flex-direction:column; gap:20px;">
             <div style="font-size:10px; font-weight:900; color:#0ea5e9; letter-spacing:2.5px; border-bottom:1px solid rgba(14,165,233,0.2); padding-bottom:6px;">QA CHECKLIST TOKENS</div>
@@ -6973,19 +6973,19 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.05.0001"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.05.0006"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.05.0001"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.05.0006"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.05.0001"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.05.0006"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.05.0001"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.05.0001"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.05.0001"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.05.0006"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.05.0006"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.05.0006"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.06.05.0001"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.06.05.0006"></script>
     <script src="assets/js/label-designer.js?v=1"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.06.05.0001"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.06.05.0006"></script>
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -7159,7 +7159,7 @@
         <div style="background:var(--bg-panel); border:1px solid #8b5cf6; border-radius:12px; width:90%; max-width:600px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
             <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(139, 92, 246, 0.1); border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="margin:0; font-size:18px; color:#8b5cf6; display:flex; align-items:center; gap:10px;">📄 Paper Stock Manager</h2>
-                <button class="btn-ghost-base btn-ghost-slate" data-click="click_document_getElementById_paperP_15" style="width:auto !important; min-width:auto !important; height:32px !important; min-height:auto !important; padding:0 12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;"><i class="fa-solid fa-times"></i> Close</button>
+                <button class="btn-ghost-base btn-ghost-slate" data-click="click_document_getElementById_paperP_15" style="width:auto !important; min-width:auto !important; height:32px !important; min-height:auto !important; padding:0 12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;">Close</button>
             </div>
             <div style="padding:20px; display:flex; flex-direction:column; gap:15px;">
                 <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px; padding:15px; display:flex; align-items:flex-end; gap:10px;">
@@ -7456,7 +7456,7 @@
         <div style="width:100%; height:100%; max-width:800px; margin:0 auto; display:flex; flex-direction:column;">
             <div style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; background: rgba(0,0,0,0.2);">
                 <h2 style="margin:0; font-size:24px; color:white; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-tags text-indigo-400"></i> Manage Tags</h2>
-                <button class="modal-close-btn" data-click="click_window_closeTagManager" style="position:static; transform:none; font-size: 14px; padding: 8px 16px;">✕ CLOSE</button>
+                <button class="modal-close-btn" data-click="click_window_closeTagManager" style="position:static; transform:none; font-size: 14px; padding: 8px 16px;">CLOSE</button>
             </div>
             <div style="padding:20px; display:flex; flex-direction:column; gap:15px; flex: 1; overflow-y: auto;">
                 <div style="display:flex; gap:10px; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
@@ -7578,7 +7578,7 @@
             <div style="padding:12px 20px; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(245, 158, 11, 0.08); display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
                 <h2 style="margin:0; font-size:16px; color:#f59e0b; display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:1px; text-transform:uppercase;">🛰️ Inventory Snapshot Dashboard</h2>
                 <div style="display:flex; gap:10px;">
-                    <button class="modal-close-btn" data-click="click_window_closeSnapshotManager">✕ CLOSE DASHBOARD</button>
+                    <button class="modal-close-btn" data-click="click_window_closeSnapshotManager">CLOSE DASHBOARD</button>
                 </div>
             </div>
             
@@ -7626,7 +7626,7 @@
         <div style="background:var(--bg-panel); border:1px solid #0ea5e9; border-radius:12px; width:90%; max-width:400px; display:flex; flex-direction:column; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
             <div style="padding:15px 25px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(14, 165, 233, 0.1); border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="margin:0; font-size:18px; color:#0ea5e9; display:flex; align-items:center; gap:10px;">🖨️ Print SOP Options</h2>
-                <button class="modal-close-btn" data-click="click_window_closeSopPrintModal" style="position:static; transform:none; font-size: 14px; padding: 4px 8px;">✕</button>
+                <button class="modal-close-btn" data-click="click_window_closeSopPrintModal" style="position:static; transform:none; font-size: 14px; padding: 4px 8px;">CLOSE</button>
             </div>
             <div style="padding:20px; display:flex; flex-direction:column; gap:15px;">
                 <button class="btn-slate" data-click="click_executeSopPrint_checklist" style="width:100%; padding:12px; font-size:14px; text-align:left; display:flex; align-items:center; gap:10px;">
@@ -7658,7 +7658,7 @@
         <div style="background:#0f172a; width:90%; max-width:400px; border-radius:12px; border:1px solid #1e293b; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
             <div style="padding:1.5rem; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; background:#1e293b; border-radius:12px 12px 0 0;">
                 <h2 style="margin:0; font-size:16px; color:#f8fafc; display:flex; align-items:center; gap:8px;">⚡ FORCE SYNC ORDER</h2>
-                <button data-click="click_window_closeForceSyncModal" style="background:transparent; border:none; color:#64748b; font-size:20px; cursor:pointer; transition:color 0.2s;">&times;</button>
+                <button data-click="click_window_closeForceSyncModal" style="background:transparent; border:none; color:#64748b; font-size:20px; cursor:pointer; transition:color 0.2s;">CLOSE</button>
             </div>
             
             <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
