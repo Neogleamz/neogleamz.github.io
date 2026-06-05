@@ -9,17 +9,17 @@ The SKU Alias Manager serves as the crucial translation bridge between external 
 * **The Fix**: This update requires a schema paradigm shift within `storefront_aliases` to align with Shopify's true unique identifiers, coupled with updates to both edge functions and the Vanilla JS DOM rendering logic to decouple the human-readable product name from the system's mapping logic.
 
 ## 3. Industry Standard Validation
-The **Shopify API Validator** subagent was dispatched and confirmed the following industry standards and payload behaviors:
-* **Vanilla JS & Data Flow**: The `orders/create` webhook payload natively includes the true `sku` field within the `line_items` array. However, it **does not** natively include the `barcode` field. The missing barcode in the UI is a direct result of Shopify's REST webhook constraints.
-* **Security & Performance**: Shopify explicitly warns against using the Product Title as a primary identifier because it is highly mutable (frequently changed by SEO apps) and not guaranteed to be unique. 
-* **UI/UX Strategy**: The UI should display the Product Title for human glanceability, but all underlying state mutations (e.g., the UNMAP and SAVE BARCODE buttons) must be structurally bound to the immutable `variant_id` or the actual business `sku`.
+The **Vanilla JS & Data Flow Validator** subagent was dispatched and confirmed three major systemic flaws preventing accurate mapping:
+1. **Destructive Barcode Overwrite (`shopify-webhook`)**: The webhook forces `barcode_value: item.barcode || null` during upsert. Because Shopify `orders/create` webhooks famously do not natively include the barcode in the line items payload, this continually erases any previously stored barcodes.
+2. **Mini SKU / `shopify_sku` Overshadowing (`shopify-force-sync` & `shopify-webhook`)**: Both scripts use `const targetSku = fullTitle || sku` for the `product_sku` conflict resolution column. This effectively buries the actual short SKU ("mini SKU") and forces the system to rely on highly mutable Product Titles, causing duplication.
+3. **Silent Update Failure (`index.html`)**: The UI function `saveAliasBarcode` attempts to `update({ barcode_value })` by matching `product_sku` to the visually rendered mini SKU string. Because the database actually holds the long title in `product_sku`, it updates 0 rows and fails silently without user feedback.
 
 ## 4. Design Decisions & Trade-offs
-* **Decision 1: Switch Primary Identifier to Variant SKU (`sku`)**
-  * *Approach*: Refactor `storefront_aliases` so that the actual Shopify Variant SKU is used as the unique `product_sku` constraint. A new column (or payload) will be dedicated to `storefront_name` to store the human-readable title strictly for the UI.
-  * *Trade-off*: Existing legacy aliases mapped via product titles will need a one-time migration or cleanup script to prevent them from lingering as permanent orphans.
-  * *Why*: This definitively eliminates the "multiplication glitch" where a single product generates endless aliases every time its SEO title is updated.
-* **Decision 2: Asynchronous Barcode Hydration**
-  * *Approach*: Because the Shopify Order webhook lacks the barcode, we will not force a blocking API call inside the webhook execution (which risks Shopify timing out and killing the webhook delivery). 
-  * *Trade-off*: Barcodes will temporarily display as "None" for brand new, never-before-seen variants hitting the webhook for the first time.
-  * *Why*: The `shopify-force-sync` catalog sync job will be designated as the authoritative mechanism to hydrate missing barcodes asynchronously via the Shopify Products API, maintaining hyper-fast webhook response times.
+* **Decision 1: Protect Existing Barcodes from Null Overwrites**
+  * *Approach*: Refactor `shopify-webhook` so that `barcode_value` is conditionally omitted from the upsert payload entirely if `item.barcode` is undefined or falsy. 
+  * *Why*: This explicitly prevents the webhook from destructively overwriting barcodes that were successfully hydrated by the asynchronous `shopify-force-sync` job or manually entered by warehouse staff.
+* **Decision 2: Switch Primary Identifier to the Immutable Mini SKU**
+  * *Approach*: Refactor the edge functions so the database constraint strictly utilizes the `sku` / `shopify_sku` as the unique `product_sku`. Move the human-readable full title into a secondary UI-only column (e.g., `storefront_name`).
+  * *Trade-off*: We must run a migration script to clean up legacy aliases that were mapped via product titles to prevent them from becoming orphaned.
+* **Decision 3: Hard-Bind UI Updates to Internal IDs**
+  * *Approach*: Update the Vanilla JS DOM logic (`saveAliasBarcode`) to bind state mutations to either the internal database UUID of the alias row, or explicitly match on the newly corrected `shopify_sku` column, rather than attempting to match against the frontend visual string.
