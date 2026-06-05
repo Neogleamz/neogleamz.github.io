@@ -858,3 +858,6 @@ All developers and subagents must consult these specialized documents to maintai
 3. **Challenge Dogma:** Question the underlying database constraints and schema. Often, a dogmatic `UNIQUE` constraint or a missing column is the true root cause. 
 4. **Architect Explicit Truth:** Instead of writing sloppy frontend JavaScript to guess data lineage, architect the backend to permanently and explicitly store the truth. Use explicit references, UUIDs, foreign keys, and direct column mappings to eliminate ambiguity.
 5. **Backend First:** The database is the ultimate source of truth. Fix the architecture at the root, and the frontend will naturally become simple and clean.
+
+### Label Inventory Architecture
+* **Labelz vs Barcodz vs Stockz:** The physical sticker inventory is tracked natively in Stockz (inventory table) using an `is_label: true` flag to categorize it as a raw material. The visual template and coordinate mapping for printing is stored independently in `label_designs` (for Labelz pane) and `barcodzDB`. The physical inventory systems and the design matrix are bridged cleanly via the `slug` (e.g., `142-glowz-round`). This prevents visual JSON from bloating the financial inventory ledger while enabling true physical deduction during product SOP finalization.
