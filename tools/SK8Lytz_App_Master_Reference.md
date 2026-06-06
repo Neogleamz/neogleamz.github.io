@@ -321,6 +321,10 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 * **Inline Handlers Scrubbed**: `DOMPurify` will violently scrub all inline JavaScript execution attributes (`onclick`, `onchange`, `ondragstart`, etc.) from HTML strings.
 * **The Solution**: When generating complex dynamic DOM elements (like lists or SOP groups), you MUST assign explicit CSS classes or `data-*` attributes within the template string. Immediately following the `innerHTML = window.safeHTML(html)` assignment, you MUST natively attach event handlers via `querySelectorAll` and `addEventListener()`. Relying on inline string execution will result in dead UI components.
 
+### Global State & Await Race Condition Safeties (Zero-Trust Syncing)
+* **The Threat**: Supabase Real-Time Sync listeners and fast operator spam-clicking will dynamically mutate or nullify global trackers (like `currentPrintJob` or `currentWO`) while an asynchronous function is asleep waiting for an `await` yield. This causes fatal null pointer exceptions when the function resumes.
+* **The Fix**: You **MUST** cache the global object into a strict local variable (e.g., `let localJob = currentPrintJob;`) **BEFORE** yielding execution. Only perform state mutations or `id` lookups against the cached `localJob`. Upon function resumption, ONLY update the global tracker if the user hasn't actively navigated away (`if (currentPrintJob && currentPrintJob.id === localJob.id)`).
+
 ### Local State Caching Matrix
 * **Synchronous Speed Priority**: `localStorage` is used exclusively for global toggles, persistent states, and zero-latency configs.
 * **Storage Keys**:
