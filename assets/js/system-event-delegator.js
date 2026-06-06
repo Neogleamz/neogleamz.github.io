@@ -92,6 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_triggerForceSync':
                     if (typeof window.triggerForceSync === 'function') window.triggerForceSync();
                     break;
+                case 'click_openWebhooksModal':
+                    if (typeof window.click_openWebhooksModal === 'function') window.click_openWebhooksModal();
+                    break;
+                case 'click_closeWebhooksModal':
+                    if (typeof window.click_closeWebhooksModal === 'function') window.click_closeWebhooksModal();
+                    break;
+                case 'click_manuallyRunWebhook':
+                    if (typeof window.click_manuallyRunWebhook === 'function') window.click_manuallyRunWebhook();
+                    break;
                 case 'click_openTipzModal':
                     openTipzModal();
                     break;
