@@ -213,7 +213,7 @@ serve(async (req: Request) => {
               const cleanItemSku = String(item.sku).trim();
               const targetSku = cleanItemSku;
               
-              const itemTitle = item.title === 'Default Title' ? '' : ` - ${item.title}`;
+              const itemTitle = (item.title === 'Default Title' || item.name.includes(item.title)) ? '' : ` - ${item.title}`;
               const fullTitle = `${item.name}${itemTitle}`.trim();
 
               const upsertPayload: any = {
