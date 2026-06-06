@@ -133,11 +133,15 @@ serve(async (req: Request) => {
     // 1. Fetch alias mapping to convert Shopify SKUs to Internal Recipes
     const { data: aliases } = await supabase.from('storefront_aliases').select('*')
     const aliasMap: Record<string, string> = {}
+    const titleMap: Record<string, string> = {}
     if (aliases) {
         aliases.forEach((a: any) => { 
             if (a.product_sku) aliasMap[a.product_sku] = a.recipe_item_uuid;
             if (a.shopify_sku) aliasMap[a.shopify_sku] = a.recipe_item_uuid;
             if (a.barcode_value) aliasMap[a.barcode_value] = a.recipe_item_uuid;
+            
+            if (a.shopify_sku && a.product_sku) titleMap[a.shopify_sku] = a.product_sku;
+            if (a.barcode_value && a.product_sku) titleMap[a.barcode_value] = a.product_sku;
         })
     }
 
@@ -196,7 +200,7 @@ serve(async (req: Request) => {
 
       if(order.line_items) {
         order.line_items.forEach((item: any, index: any) => {
-          const skuName = item.sku || item.name || item.title;
+          const skuName = titleMap[item.sku] || titleMap[item.name] || titleMap[item.title] || item.title || item.name || item.sku;
           const qty = parseInt(item.quantity) || 1;
           const price = parseFloat(item.price) || 0;
           
