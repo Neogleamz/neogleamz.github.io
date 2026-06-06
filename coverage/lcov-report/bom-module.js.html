@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/912</span>
+                <span class='fraction'>0/920</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/788</span>
+                <span class='fraction'>0/791</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/610</span>
+                <span class='fraction'>0/618</span>
             </div>
         
             
@@ -1117,7 +1117,17 @@
 <a name='L1052'></a><a href='#L1052'>1052</a>
 <a name='L1053'></a><a href='#L1053'>1053</a>
 <a name='L1054'></a><a href='#L1054'>1054</a>
-<a name='L1055'></a><a href='#L1055'>1055</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1055'></a><a href='#L1055'>1055</a>
+<a name='L1056'></a><a href='#L1056'>1056</a>
+<a name='L1057'></a><a href='#L1057'>1057</a>
+<a name='L1058'></a><a href='#L1058'>1058</a>
+<a name='L1059'></a><a href='#L1059'>1059</a>
+<a name='L1060'></a><a href='#L1060'>1060</a>
+<a name='L1061'></a><a href='#L1061'>1061</a>
+<a name='L1062'></a><a href='#L1062'>1062</a>
+<a name='L1063'></a><a href='#L1063'>1063</a>
+<a name='L1064'></a><a href='#L1064'>1064</a>
+<a name='L1065'></a><a href='#L1065'>1065</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1579,6 +1589,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1589,6 +1604,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1799,6 +1818,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2626,6 +2646,15 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
     const i = <span class="cstat-no" title="statement not covered" >document.getElementById('recipeModalInput');</span>
     const b = <span class="cstat-no" title="statement not covered" >document.getElementById('recipeModalConfirmBtn');</span>
 &nbsp;
+<span class="cstat-no" title="statement not covered" >    if (b._stateTimeout) {</span>
+<span class="cstat-no" title="statement not covered" >        clearTimeout(b._stateTimeout);</span>
+<span class="cstat-no" title="statement not covered" >        delete b._stateTimeout;</span>
+<span class="cstat-no" title="statement not covered" >        delete b.dataset.originalText;</span>
+<span class="cstat-no" title="statement not covered" >        delete b.dataset.originalBg;</span>
+<span class="cstat-no" title="statement not covered" >        b.style.background = '';</span>
+<span class="cstat-no" title="statement not covered" >        b.disabled = false;</span>
+    }
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    if(mode === 'create') {</span>
 <span class="cstat-no" title="statement not covered" >        t.innerText = "Create New Recipe";</span>
 <span class="cstat-no" title="statement not covered" >        p.innerText = "Enter a unique name for the new product or sub-assembly:";</span>
@@ -2859,7 +2888,8 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
 <span class="cstat-no" title="statement not covered" >            comps.forEach(<span class="fstat-no" title="function not covered" >x </span>=&gt; {</span>
                 let k = <span class="cstat-no" title="statement not covered" >String(x.item_key||x.di_item_id||x.name);</span>
                 let isRecipe = <span class="cstat-no" title="statement not covered" >k.startsWith('RECIPE:::');</span>
-                let isOrphan = <span class="cstat-no" title="statement not covered" >!isRecipe &amp;&amp; !catalogCache[k];</span>
+                let isBarcode = <span class="cstat-no" title="statement not covered" >k.startsWith('BARCODE_LABEL:::');</span>
+                let isOrphan = <span class="cstat-no" title="statement not covered" >!isRecipe &amp;&amp; !isBarcode &amp;&amp; !catalogCache[k];</span>
                 
 <span class="cstat-no" title="statement not covered" >                if (mode === 'orphans' &amp;&amp; !isOrphan) <span class="cstat-no" title="statement not covered" >return;</span></span>
                 
@@ -3232,7 +3262,7 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-06T21:53:23.345Z
+                at 2026-06-06T22:23:03.244Z
             </div>
         <script src="prettify.js"></script>
         <script>

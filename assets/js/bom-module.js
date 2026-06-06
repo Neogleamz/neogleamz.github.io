@@ -453,6 +453,15 @@ window.showRecipeModal = function(mode) {
     const i = document.getElementById('recipeModalInput');
     const b = document.getElementById('recipeModalConfirmBtn');
 
+    if (b._stateTimeout) {
+        clearTimeout(b._stateTimeout);
+        delete b._stateTimeout;
+        delete b.dataset.originalText;
+        delete b.dataset.originalBg;
+        b.style.background = '';
+        b.disabled = false;
+    }
+
     if(mode === 'create') {
         t.innerText = "Create New Recipe";
         p.innerText = "Enter a unique name for the new product or sub-assembly:";
@@ -686,7 +695,8 @@ window.openRecipeManager = function() {
             comps.forEach(x => {
                 let k = String(x.item_key||x.di_item_id||x.name);
                 let isRecipe = k.startsWith('RECIPE:::');
-                let isOrphan = !isRecipe && !catalogCache[k];
+                let isBarcode = k.startsWith('BARCODE_LABEL:::');
+                let isOrphan = !isRecipe && !isBarcode && !catalogCache[k];
                 
                 if (mode === 'orphans' && !isOrphan) return;
                 
