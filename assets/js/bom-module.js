@@ -1033,18 +1033,22 @@ document.addEventListener('click', (e) => {
     }
 });
 document.addEventListener('dragstart', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     let el = e.target.closest('[data-app-dragstart]');
     if(el && el.dataset.appDragstart === 'prodDragStart') { if(typeof productDragStart === 'function') productDragStart(e, el.dataset.name); }
 });
 document.addEventListener('dragover', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     let el = e.target.closest('[data-app-dragover]');
     if(el && el.dataset.appDragover === 'prodDragOver') { if(typeof productDragOver === 'function') productDragOver(e); }
 });
 document.addEventListener('drop', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     let el = e.target.closest('[data-app-drop]');
     if(el && el.dataset.appDrop === 'prodDrop') { if(typeof productDrop === 'function') productDrop(e, el.dataset.name); }
 });
 document.addEventListener('dragend', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     let el = e.target.closest('[data-app-dragend]');
     if(el && el.dataset.appDragend === 'prodDragEnd') { if(typeof productDragEnd === 'function') productDragEnd(e); }
 });

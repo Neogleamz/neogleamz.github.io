@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1872</span>
+                <span class='fraction'>0/1880</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1276</span>
+                <span class='fraction'>0/1292</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1495</span>
+                <span class='fraction'>0/1499</span>
             </div>
         
             
@@ -2807,7 +2807,11 @@
 <a name='L2742'></a><a href='#L2742'>2742</a>
 <a name='L2743'></a><a href='#L2743'>2743</a>
 <a name='L2744'></a><a href='#L2744'>2744</a>
-<a name='L2745'></a><a href='#L2745'>2745</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L2745'></a><a href='#L2745'>2745</a>
+<a name='L2746'></a><a href='#L2746'>2746</a>
+<a name='L2747'></a><a href='#L2747'>2747</a>
+<a name='L2748'></a><a href='#L2748'>2748</a>
+<a name='L2749'></a><a href='#L2749'>2749</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -4881,9 +4885,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -4896,9 +4902,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -7621,6 +7629,7 @@ let paperDraggedIdx = <span class="cstat-no" title="statement not covered" >null
 &nbsp;
 // Delegate drag events globally
 <span class="cstat-no" title="statement not covered" >document.addEventListener('dragstart', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     const el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-dragstart]');</span>
 <span class="cstat-no" title="statement not covered" >    if (el &amp;&amp; el.dataset.appDragstart === 'paperDragStart') {</span>
         const idx = <span class="cstat-no" title="statement not covered" >parseInt(el.getAttribute('data-idx'));</span>
@@ -7629,6 +7638,7 @@ let paperDraggedIdx = <span class="cstat-no" title="statement not covered" >null
 });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >document.addEventListener('dragover', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     const el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-dragover]');</span>
 <span class="cstat-no" title="statement not covered" >    if (el &amp;&amp; el.dataset.appDragover === 'paperDragOver') {</span>
 <span class="cstat-no" title="statement not covered" >        window.paperDragOver(e);</span>
@@ -7636,6 +7646,7 @@ let paperDraggedIdx = <span class="cstat-no" title="statement not covered" >null
 });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >document.addEventListener('drop', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     const el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-drop]');</span>
 <span class="cstat-no" title="statement not covered" >    if (el &amp;&amp; el.dataset.appDrop === 'paperDragDrop') {</span>
         const idx = <span class="cstat-no" title="statement not covered" >parseInt(el.getAttribute('data-idx'));</span>
@@ -7644,6 +7655,7 @@ let paperDraggedIdx = <span class="cstat-no" title="statement not covered" >null
 });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >document.addEventListener('dragend', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     const el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-dragend]');</span>
 <span class="cstat-no" title="statement not covered" >    if (el &amp;&amp; el.dataset.appDragend === 'paperDragEnd') {</span>
 <span class="cstat-no" title="statement not covered" >        window.paperDragEnd(e);</span>
@@ -8302,7 +8314,7 @@ function <span class="fstat-no" title="function not covered" >billingTrace(</spa
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-05T10:03:51.682Z
+                at 2026-06-06T21:46:00.364Z
             </div>
         <script src="prettify.js"></script>
         <script>

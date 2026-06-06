@@ -30,9 +30,10 @@ async function refreshPrintQueue() {
         const { data, error } = await supabaseClient.from('print_queue').select('*').order('created_at', { ascending: false }).order('id', { ascending: true });
         if (error) throw error;
         
-        if (data && window.uuidToNameMap) {
+        if (data) {
             data.forEach(row => {
-                if (row.part_item_uuid) {
+                row.part_name = row.part_name || '';
+                if (window.uuidToNameMap && row.part_item_uuid) {
                     let mappedName = window.uuidToNameMap[row.part_item_uuid];
                     if (mappedName && mappedName.startsWith('RECIPE:::')) {
                         row.part_name = mappedName.replace('RECIPE:::', '');
@@ -40,6 +41,7 @@ async function refreshPrintQueue() {
                         row.part_name = mappedName;
                     }
                 }
+                if (!row.part_name) row.part_name = 'Unknown Part';
             });
         }
         
@@ -92,6 +94,19 @@ function renderPrintQueue() {
         let printListHtml = [];
         printQueueDB.forEach((job, index) => {
             if (job.status === 'Archived') return;
+
+            if (!job.part_name) {
+                if (window.uuidToNameMap && job.part_item_uuid) {
+                    let mappedName = window.uuidToNameMap[job.part_item_uuid];
+                    if (mappedName && mappedName.startsWith('RECIPE:::')) {
+                        job.part_name = mappedName.replace('RECIPE:::', '');
+                    } else if (mappedName) {
+                        job.part_name = mappedName;
+                    }
+                }
+                if (!job.part_name) job.part_name = 'Unknown Part';
+            }
+
             let cleanPartName = job.part_name.startsWith('RECIPE:::') ? job.part_name.replace('RECIPE:::', '') : job.part_name.split(':::')[0];
             const catalogItem = catalogByName[cleanPartName];
             let printTimePer = typeof getPrintTime === 'function' ? getPrintTime(cleanPartName) : 0;
@@ -227,7 +242,6 @@ function renderActivePrintJob(id) {
         }
     }
 
-    // Pipeline highlights
     ['Queued', 'Printing', 'Cleaned', 'Completed'].forEach(s => {
         const pEl = document.getElementById('pipe-P-' + s);
         const sEl = document.getElementById('sect-P-' + s);
@@ -240,6 +254,19 @@ function renderActivePrintJob(id) {
             if (pEl._stateTimeout) { clearTimeout(pEl._stateTimeout); delete pEl._stateTimeout; }
         }
         if (sEl) sEl.style.display = 'none';
+    });
+
+    ['click_deletePrintJob', 'click_archiveCurrentPrint'].forEach(action => {
+        let btn = document.querySelector(`[data-click="${action}"]`);
+        if (btn && btn._stateTimeout) {
+            clearTimeout(btn._stateTimeout);
+            if (btn.dataset.originalText) btn.innerHTML = window.safeHTML ? window.safeHTML(btn.dataset.originalText) : btn.dataset.originalText;
+            if (btn.dataset.originalBg !== undefined) btn.style.background = btn.dataset.originalBg;
+            btn.disabled = false;
+            delete btn.dataset.originalText;
+            delete btn.dataset.originalBg;
+            delete btn._stateTimeout;
+        }
     });
 
     const activePipe = document.getElementById('pipe-P-' + job.status);
@@ -823,28 +850,36 @@ async function advancePrintStatus(newStatus, bypassModal = false, finalSuccess =
 async function deletePrintJob() {
     try {
         if (!currentPrintJob) return;
-        let oldJobId = currentPrintJob.id;
-        let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+        
+        let localJob = currentPrintJob;
+        let oldJobId = localJob.id;
+        let cleanPartName = localJob.part_name.startsWith('RECIPE:::') ? localJob.part_name.replace('RECIPE:::', '') : localJob.part_name.split(':::')[0];
         const catalogItem = catalogByName[cleanPartName];
         const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
-        let displayID = (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());
+        let displayID = (localJob.wo_id && localJob.wo_id.startsWith('WO-')) ? localJob.wo_id : ('PR-' + localJob.id.substring(0, 8).toUpperCase());
+        
         if (!confirm(`Delete ${displayID}: ${displayName}?`)) return;
-        sysLog(`Deleting Print Job ${currentPrintJob.id}`);
+        sysLog(`Deleting Print Job ${localJob.id}`);
         setMasterStatus("Deleting...", "mod-working");
 
-        const { error } = await supabaseClient.from('print_queue').delete().eq('id', currentPrintJob.id);
+        const { error } = await supabaseClient.from('print_queue').delete().eq('id', localJob.id);
         if (error) throw new Error(error.message);
 
         if (typeof window.teSyncTask === 'function') {
-            await window.teSyncTask('layerz', oldJobId, 'delete');
+            await window.teSyncTask('layerz', localJob.id, 'delete');
         }
 
-        printQueueDB = printQueueDB.filter(p => p.id !== currentPrintJob.id);
-        currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
+        printQueueDB = printQueueDB.filter(p => p.id !== localJob.id);
+        
+        if (currentPrintJob && currentPrintJob.id === localJob.id) {
+            currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
+            if (currentPrintJob) renderActivePrintJob(currentPrintJob.id); 
+            else document.getElementById('printMainArea').style.display = 'none';
+        }
+
         setMasterStatus("Deleted", "mod-success");
         setTimeout(() => setMasterStatus("Ready.", "status-idle"), 2000);
         refreshPrintQueue();
-        if (currentPrintJob) renderActivePrintJob(currentPrintJob.id); else document.getElementById('printMainArea').style.display = 'none';
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -852,23 +887,36 @@ async function archiveCurrentPrint() {
     try {
         if(!currentPrintJob) return;
         if(currentPrintJob.status === 'Archived') return alert("Already archived.");
-        let cleanPartName = currentPrintJob.part_name.startsWith('RECIPE:::') ? currentPrintJob.part_name.replace('RECIPE:::', '') : currentPrintJob.part_name.split(':::')[0];
+        
+        let localJob = currentPrintJob;
+        let cleanPartName = localJob.part_name.startsWith('RECIPE:::') ? localJob.part_name.replace('RECIPE:::', '') : localJob.part_name.split(':::')[0];
         const catalogItem = catalogByName[cleanPartName];
         const displayName = catalogItem ? (catalogItem.neoName || catalogItem.itemName) : cleanPartName;
-        let displayID = (currentPrintJob.wo_id && currentPrintJob.wo_id.startsWith('WO-')) ? currentPrintJob.wo_id : ('PR-' + currentPrintJob.id.substring(0, 8).toUpperCase());
+        let displayID = (localJob.wo_id && localJob.wo_id.startsWith('WO-')) ? localJob.wo_id : ('PR-' + localJob.id.substring(0, 8).toUpperCase());
+        
         if(confirm(`Archive Print Job ${displayID}: ${displayName}?`)) {
-            sysLog(`Archiving Print ${currentPrintJob.id}`); setMasterStatus("Archiving...", "mod-working");
-            let w = currentPrintJob.wip_state || {};
+            sysLog(`Archiving Print ${localJob.id}`); setMasterStatus("Archiving...", "mod-working");
+            let w = localJob.wip_state || {};
             w.completed_by_email = window.currentUser ? window.currentUser.email : 'guest_operator';
             w.completed_by_id = window.currentUser ? window.currentUser.id : null;
-            const {error} = await supabaseClient.from('print_queue').update({status: 'Archived', wip_state: w}).eq('id', currentPrintJob.id);
+            
+            const {error} = await supabaseClient.from('print_queue').update({status: 'Archived', wip_state: w}).eq('id', localJob.id);
             if(error) throw new Error(error.message);
-            currentPrintJob.wip_state = w;
-            currentPrintJob.status = 'Archived';
+            
+            let cachedJob = printQueueDB.find(p => p.id === localJob.id);
+            if(cachedJob) {
+                cachedJob.wip_state = w;
+                cachedJob.status = 'Archived';
+            }
+            
             setMasterStatus("Archived!", "mod-success"); setTimeout(()=>setMasterStatus("Ready.", "status-idle"), 2000);
-            currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
+            
+            if (currentPrintJob && currentPrintJob.id === localJob.id) {
+                currentPrintJob = printQueueDB.find(p => p.status !== 'Archived') || null;
+                if (currentPrintJob) renderActivePrintJob(currentPrintJob.id); 
+                else document.getElementById('printMainArea').style.display = 'none';
+            }
             refreshPrintQueue();
-            if (currentPrintJob) renderActivePrintJob(currentPrintJob.id); else document.getElementById('printMainArea').style.display = 'none';
         }
     } catch(e) { sysLog(e.message, true); }
 }
@@ -920,8 +968,10 @@ async function addPrintJob(partName, qty, woId = null, label = null) {
         }
     }
 
-    let uuidKey = partName.startsWith('RECIPE:::') ? partName : 'RECIPE:::' + partName;
-    let pUuid = window.uuidMap[uuidKey];
+    let pUuid = window.uuidMap[partName];
+    if (!pUuid && !partName.startsWith('RECIPE:::')) {
+        pUuid = window.uuidMap['RECIPE:::' + partName];
+    }
     if (!pUuid) sysLog("Warning: UUID not found for part " + partName, true);
 
     const payload = {

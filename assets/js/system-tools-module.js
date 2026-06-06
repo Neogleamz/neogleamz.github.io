@@ -2068,6 +2068,7 @@ window.paperDragEnd = function(e) {
 
 // Delegate drag events globally
 document.addEventListener('dragstart', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const el = e.target.closest('[data-app-dragstart]');
     if (el && el.dataset.appDragstart === 'paperDragStart') {
         const idx = parseInt(el.getAttribute('data-idx'));
@@ -2076,6 +2077,7 @@ document.addEventListener('dragstart', (e) => {
 });
 
 document.addEventListener('dragover', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const el = e.target.closest('[data-app-dragover]');
     if (el && el.dataset.appDragover === 'paperDragOver') {
         window.paperDragOver(e);
@@ -2083,6 +2085,7 @@ document.addEventListener('dragover', (e) => {
 });
 
 document.addEventListener('drop', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const el = e.target.closest('[data-app-drop]');
     if (el && el.dataset.appDrop === 'paperDragDrop') {
         const idx = parseInt(el.getAttribute('data-idx'));
@@ -2091,6 +2094,7 @@ document.addEventListener('drop', (e) => {
 });
 
 document.addEventListener('dragend', (e) => {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const el = e.target.closest('[data-app-dragend]');
     if (el && el.dataset.appDragend === 'paperDragEnd') {
         window.paperDragEnd(e);

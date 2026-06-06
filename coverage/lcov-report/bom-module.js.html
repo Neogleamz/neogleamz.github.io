@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/904</span>
+                <span class='fraction'>0/912</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/772</span>
+                <span class='fraction'>0/788</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/606</span>
+                <span class='fraction'>0/610</span>
             </div>
         
             
@@ -1113,7 +1113,11 @@
 <a name='L1048'></a><a href='#L1048'>1048</a>
 <a name='L1049'></a><a href='#L1049'>1049</a>
 <a name='L1050'></a><a href='#L1050'>1050</a>
-<a name='L1051'></a><a href='#L1051'>1051</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1051'></a><a href='#L1051'>1051</a>
+<a name='L1052'></a><a href='#L1052'>1052</a>
+<a name='L1053'></a><a href='#L1053'>1053</a>
+<a name='L1054'></a><a href='#L1054'>1054</a>
+<a name='L1055'></a><a href='#L1055'>1055</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2150,7 +2154,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2158,7 +2164,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3198,18 +3206,22 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
     }
 });
 <span class="cstat-no" title="statement not covered" >document.addEventListener('dragstart', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     let el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-dragstart]');</span>
 <span class="cstat-no" title="statement not covered" >    if(el &amp;&amp; el.dataset.appDragstart === 'prodDragStart') { <span class="cstat-no" title="statement not covered" >if(typeof productDragStart === 'function') <span class="cstat-no" title="statement not covered" >productDragStart(e, el.dataset.name); </span></span>}</span>
 });
 <span class="cstat-no" title="statement not covered" >document.addEventListener('dragover', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     let el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-dragover]');</span>
 <span class="cstat-no" title="statement not covered" >    if(el &amp;&amp; el.dataset.appDragover === 'prodDragOver') { <span class="cstat-no" title="statement not covered" >if(typeof productDragOver === 'function') <span class="cstat-no" title="statement not covered" >productDragOver(e); </span></span>}</span>
 });
 <span class="cstat-no" title="statement not covered" >document.addEventListener('drop', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     let el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-drop]');</span>
 <span class="cstat-no" title="statement not covered" >    if(el &amp;&amp; el.dataset.appDrop === 'prodDrop') { <span class="cstat-no" title="statement not covered" >if(typeof productDrop === 'function') <span class="cstat-no" title="statement not covered" >productDrop(e, el.dataset.name); </span></span>}</span>
 });
 <span class="cstat-no" title="statement not covered" >document.addEventListener('dragend', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!e.target || typeof e.target.closest !== 'function') <span class="cstat-no" title="statement not covered" >return;</span></span>
     let el = <span class="cstat-no" title="statement not covered" >e.target.closest('[data-app-dragend]');</span>
 <span class="cstat-no" title="statement not covered" >    if(el &amp;&amp; el.dataset.appDragend === 'prodDragEnd') { <span class="cstat-no" title="statement not covered" >if(typeof productDragEnd === 'function') <span class="cstat-no" title="statement not covered" >productDragEnd(e); </span></span>}</span>
 });
@@ -3220,7 +3232,7 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-05T10:03:51.682Z
+                at 2026-06-06T21:46:00.364Z
             </div>
         <script src="prettify.js"></script>
         <script>

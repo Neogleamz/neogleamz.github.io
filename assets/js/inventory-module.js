@@ -3002,7 +3002,7 @@ window.refreshStockzAuditHistory = async function() {
         if (window.currentAuditItemKey) {
             const uuid = window.uuidMap ? window.uuidMap[window.currentAuditItemKey] : null;
             if (uuid) {
-                query = query.or(`item_key.eq.${window.currentAuditItemKey},item_uuid.eq.${uuid}`);
+                query = query.or(`item_key.eq."${window.currentAuditItemKey.replace(/"/g, '""')}",item_uuid.eq.${uuid}`);
             } else {
                 query = query.eq('item_key', window.currentAuditItemKey);
             }
