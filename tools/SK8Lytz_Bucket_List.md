@@ -46,6 +46,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🗄️ Completed & Archived Epics
 
 ### Target: `main`
+**Epic: Standalone Technical Debt Sweep**
+*(Archived — 2026-06-06)*
+- [🚀] `debt/eslint-warnings-sweep` : **ESLint Zero Warnings** - Resolved 25 persistent `no-undef` and `no-unused-vars` warnings across `label-designer.js`, `labelz-module.js`, and `system-realtime-sync.js` to achieve a pristine 0-warning output state.
+
+### Target: `main`
 **Epic: Label Inventory & Template Sync**
 *(Archived — 2026-06-05)*
 - [🚀] `feat/label-inventory-sync` : **Label Inventory & Template Sync** - Track physical sticker and label stock as an actual raw material inventory item. Enable adding this label stock to a recipe (e.g., a "product box") so that when the recipe is manufactured, it correctly deducts the label inventory like all other standard components. (Plan: [docs/plans/feat/label-inventory-sync.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/label-inventory-sync.md))

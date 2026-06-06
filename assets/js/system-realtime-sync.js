@@ -1,4 +1,4 @@
-/* global supabaseClient, teRenderTaskGrid, finalResults, sopsDB, socialzSkaters, renderInventoryTable, renderFgiTable, renderWOList, renderSalesTable, renderAliasManager, buildBarcodzCache, renderBarcodzGrid, renderProductList, populateDropdowns, renderAnalyticsDashboard, updateHubStats, mapToUI, buildCatalogCache, renderColToggles, renderActiveTable, renderSkaters, updateFilterDropdownOptions, renderActiveWO, renderPrintQueue */
+/* global supabaseClient, teRenderTaskGrid, finalResults, sopsDB, socialzSkaters, renderInventoryTable, renderFgiTable, renderWOList, renderActiveWO, renderPrintQueue */
 // system-realtime-sync.js
 // Centralized WebSocket listener for global real-time synchronization
 
@@ -37,51 +37,51 @@
             if (name === 'teOpenTaskContext') return () => {
                 if (typeof window.teOpenTaskContext === 'function' && window.currentOpenTaskId) window.teOpenTaskContext(window.currentOpenTaskId);
             };
-            if (name === 'teFetchTaskEngineData') return typeof teFetchTaskEngineData === 'function' ? teFetchTaskEngineData : null;
-            if (name === 'refreshPrintQueue') return typeof refreshPrintQueue === 'function' ? refreshPrintQueue : null;
-            if (name === 'fetchWorkOrders') return typeof fetchWorkOrders === 'function' ? fetchWorkOrders : null;
-            if (name === 'fetchInventoryData') return typeof fetchInventoryData === 'function' ? fetchInventoryData : null;
-            if (name === 'fetchSalesData') return typeof fetchSalesData === 'function' ? fetchSalesData : null;
+            if (name === 'teFetchTaskEngineData') return typeof window.teFetchTaskEngineData === 'function' ? window.teFetchTaskEngineData : null;
+            if (name === 'refreshPrintQueue') return typeof window.refreshPrintQueue === 'function' ? window.refreshPrintQueue : null;
+            if (name === 'fetchWorkOrders') return typeof window.fetchWorkOrders === 'function' ? window.fetchWorkOrders : null;
+            if (name === 'fetchInventoryData') return typeof window.fetchInventoryData === 'function' ? window.fetchInventoryData : null;
+            if (name === 'fetchSalesData') return typeof window.fetchSalesData === 'function' ? window.fetchSalesData : null;
 
-            if (name === 'renderSalesTable') return typeof renderSalesTable === 'function' ? renderSalesTable : null;
-            if (name === 'renderAliasManager') return typeof renderAliasManager === 'function' ? renderAliasManager : null;
+            if (name === 'renderSalesTable') return typeof window.renderSalesTable === 'function' ? window.renderSalesTable : null;
+            if (name === 'renderAliasManager') return typeof window.renderAliasManager === 'function' ? window.renderAliasManager : null;
             if (name === 'scanOrphanStorefrontSKUs') return typeof window.scanOrphanStorefrontSKUs === 'function' ? window.scanOrphanStorefrontSKUs : null;
-            if (name === 'buildBarcodzCache') return typeof buildBarcodzCache === 'function' ? buildBarcodzCache : null;
-            if (name === 'renderBarcodzGrid') return typeof renderBarcodzGrid === 'function' ? renderBarcodzGrid : null;
-            if (name === 'renderLabelzGrid') return typeof renderLabelzGrid === 'function' ? renderLabelzGrid : null;
-            if (name === 'renderProductList') return typeof renderProductList === 'function' ? renderProductList : null;
-            if (name === 'populateDropdowns') return typeof populateDropdowns === 'function' ? populateDropdowns : null;
-            if (name === 'renderAnalyticsDashboard') return typeof renderAnalyticsDashboard === 'function' ? renderAnalyticsDashboard : null;
-            if (name === 'updateHubStats') return typeof updateHubStats === 'function' ? updateHubStats : null;
-            if (name === 'mapToUI') return typeof mapToUI === 'function' ? mapToUI : null;
-            if (name === 'buildCatalogCache') return typeof buildCatalogCache === 'function' ? buildCatalogCache : null;
-            if (name === 'renderColToggles') return typeof renderColToggles === 'function' ? renderColToggles : null;
-            if (name === 'renderActiveTable') return typeof renderActiveTable === 'function' ? renderActiveTable : null;
-            if (name === 'renderSkaters') return typeof renderSkaters === 'function' ? renderSkaters : null;
-            if (name === 'updateFilterDropdownOptions') return typeof updateFilterDropdownOptions === 'function' ? updateFilterDropdownOptions : null;
-            if (name === 'fetchUnfulfilledOrders') return typeof fetchUnfulfilledOrders === 'function' ? fetchUnfulfilledOrders : null;
+            if (name === 'buildBarcodzCache') return typeof window.buildBarcodzCache === 'function' ? window.buildBarcodzCache : null;
+            if (name === 'renderBarcodzGrid') return typeof window.renderBarcodzGrid === 'function' ? window.renderBarcodzGrid : null;
+            if (name === 'renderLabelzGrid') return typeof window.renderLabelzGrid === 'function' ? window.renderLabelzGrid : null;
+            if (name === 'renderProductList') return typeof window.renderProductList === 'function' ? window.renderProductList : null;
+            if (name === 'populateDropdowns') return typeof window.populateDropdowns === 'function' ? window.populateDropdowns : null;
+            if (name === 'renderAnalyticsDashboard') return typeof window.renderAnalyticsDashboard === 'function' ? window.renderAnalyticsDashboard : null;
+            if (name === 'updateHubStats') return typeof window.updateHubStats === 'function' ? window.updateHubStats : null;
+            if (name === 'mapToUI') return typeof window.mapToUI === 'function' ? window.mapToUI : null;
+            if (name === 'buildCatalogCache') return typeof window.buildCatalogCache === 'function' ? window.buildCatalogCache : null;
+            if (name === 'renderColToggles') return typeof window.renderColToggles === 'function' ? window.renderColToggles : null;
+            if (name === 'renderActiveTable') return typeof window.renderActiveTable === 'function' ? window.renderActiveTable : null;
+            if (name === 'renderSkaters') return typeof window.renderSkaters === 'function' ? window.renderSkaters : null;
+            if (name === 'updateFilterDropdownOptions') return typeof window.updateFilterDropdownOptions === 'function' ? window.updateFilterDropdownOptions : null;
+            if (name === 'fetchUnfulfilledOrders') return typeof window.fetchUnfulfilledOrders === 'function' ? window.fetchUnfulfilledOrders : null;
             
             // Newly mapped UI modals and grids
-            if (name === 'renderProductBOM') return typeof renderProductBOM === 'function' ? renderProductBOM : null;
-            if (name === 'renderRecipeManager') return typeof renderRecipeManager === 'function' ? renderRecipeManager : null;
-            if (name === 'renderBulkAddBody') return typeof renderBulkAddBody === 'function' ? renderBulkAddBody : null;
-            if (name === 'renderMasterSOP') return typeof renderMasterSOP === 'function' ? renderMasterSOP : null;
-            if (name === 'renderStagedBatchItems') return typeof renderStagedBatchItems === 'function' ? renderStagedBatchItems : null;
-            if (name === 'renderArchiveList') return typeof renderArchiveList === 'function' ? renderArchiveList : null;
-            if (name === 'renderProductionTelemetryPreview') return typeof renderProductionTelemetryPreview === 'function' ? renderProductionTelemetryPreview : null;
-            if (name === 'renderVelocityzFGI') return typeof renderVelocityzFGI === 'function' ? renderVelocityzFGI : null;
-            if (name === 'renderSOPAuditLogRows') return typeof renderSOPAuditLogRows === 'function' ? renderSOPAuditLogRows : null;
-            if (name === 'renderPackerzTelemetryPreview') return typeof renderPackerzTelemetryPreview === 'function' ? renderPackerzTelemetryPreview : null;
-            if (name === 'renderSimulatorOrder') return typeof renderSimulatorOrder === 'function' ? renderSimulatorOrder : null;
-            if (name === 'renderActualNetList') return typeof renderActualNetList === 'function' ? renderActualNetList : null;
-            if (name === 'renderCeoTerminal') return typeof renderCeoTerminal === 'function' ? renderCeoTerminal : null;
-            if (name === 'renderUnifiedBuilderTable') return typeof renderUnifiedBuilderTable === 'function' ? renderUnifiedBuilderTable : null;
-            if (name === 'renderLtvWhalesTable') return typeof renderLtvWhalesTable === 'function' ? renderLtvWhalesTable : null;
-            if (name === 'renderDashboardCharts') return typeof renderDashboardCharts === 'function' ? renderDashboardCharts : null;
-            if (name === 'renderSocialzCharts') return typeof renderSocialzCharts === 'function' ? renderSocialzCharts : null;
-            if (name === 'renderPaperProfileTable') return typeof renderPaperProfileTable === 'function' ? renderPaperProfileTable : null;
-            if (name === 'renderPresetDropdown') return typeof renderPresetDropdown === 'function' ? renderPresetDropdown : null;
-            if (name === 'renderParcelPresetDropdown') return typeof renderParcelPresetDropdown === 'function' ? renderParcelPresetDropdown : null;
+            if (name === 'renderProductBOM') return typeof window.renderProductBOM === 'function' ? window.renderProductBOM : null;
+            if (name === 'renderRecipeManager') return typeof window.renderRecipeManager === 'function' ? window.renderRecipeManager : null;
+            if (name === 'renderBulkAddBody') return typeof window.renderBulkAddBody === 'function' ? window.renderBulkAddBody : null;
+            if (name === 'renderMasterSOP') return typeof window.renderMasterSOP === 'function' ? window.renderMasterSOP : null;
+            if (name === 'renderStagedBatchItems') return typeof window.renderStagedBatchItems === 'function' ? window.renderStagedBatchItems : null;
+            if (name === 'renderArchiveList') return typeof window.renderArchiveList === 'function' ? window.renderArchiveList : null;
+            if (name === 'renderProductionTelemetryPreview') return typeof window.renderProductionTelemetryPreview === 'function' ? window.renderProductionTelemetryPreview : null;
+            if (name === 'renderVelocityzFGI') return typeof window.renderVelocityzFGI === 'function' ? window.renderVelocityzFGI : null;
+            if (name === 'renderSOPAuditLogRows') return typeof window.renderSOPAuditLogRows === 'function' ? window.renderSOPAuditLogRows : null;
+            if (name === 'renderPackerzTelemetryPreview') return typeof window.renderPackerzTelemetryPreview === 'function' ? window.renderPackerzTelemetryPreview : null;
+            if (name === 'renderSimulatorOrder') return typeof window.renderSimulatorOrder === 'function' ? window.renderSimulatorOrder : null;
+            if (name === 'renderActualNetList') return typeof window.renderActualNetList === 'function' ? window.renderActualNetList : null;
+            if (name === 'renderCeoTerminal') return typeof window.renderCeoTerminal === 'function' ? window.renderCeoTerminal : null;
+            if (name === 'renderUnifiedBuilderTable') return typeof window.renderUnifiedBuilderTable === 'function' ? window.renderUnifiedBuilderTable : null;
+            if (name === 'renderLtvWhalesTable') return typeof window.renderLtvWhalesTable === 'function' ? window.renderLtvWhalesTable : null;
+            if (name === 'renderDashboardCharts') return typeof window.renderDashboardCharts === 'function' ? window.renderDashboardCharts : null;
+            if (name === 'renderSocialzCharts') return typeof window.renderSocialzCharts === 'function' ? window.renderSocialzCharts : null;
+            if (name === 'renderPaperProfileTable') return typeof window.renderPaperProfileTable === 'function' ? window.renderPaperProfileTable : null;
+            if (name === 'renderPresetDropdown') return typeof window.renderPresetDropdown === 'function' ? window.renderPresetDropdown : null;
+            if (name === 'renderParcelPresetDropdown') return typeof window.renderParcelPresetDropdown === 'function' ? window.renderParcelPresetDropdown : null;
 
             return null;
         } catch (_e) {

@@ -1119,7 +1119,7 @@ window.openCreateLabelModal = function() {
     assignLabelzDesignerEmoji('🏷️');
     
     document.getElementById('labelzDesignerModal').style.display = 'flex';
-    populateLabelzPreviewContextDropdown();
+    window.populateLabelzPreviewContextDropdown();
     
     const mainTplSel = document.getElementById('labelzTemplateSelect');
     const mainSizeSel = document.getElementById('labelzSizeSelect');
@@ -1170,7 +1170,7 @@ window.click_labelzLoadTemplate = function(id) {
     if (!tpl) return;
     
     // Set size to match template if possible
-    let targetSizeStr = `${tpl.widthIn}x${tpl.heightIn}`;
+    let _targetSizeStr = `${tpl.widthIn}x${tpl.heightIn}`;
     let sizeSel = document.getElementById('labelzDesignerSize');
     let matched = false;
     if (sizeSel && sizeSel.options) {
@@ -1182,7 +1182,7 @@ window.click_labelzLoadTemplate = function(id) {
                     matched = true;
                     break;
                 }
-            } catch(e) {
+            } catch(_e) {
                 // ignore parsing errors on dropdown options
             }
         }
@@ -1285,7 +1285,7 @@ window.openEditLabelModal = function(name) {
     assignLabelzDesignerEmoji(l.emoji || '🏷️');
     
     document.getElementById('labelzDesignerModal').style.display = 'flex';
-    populateLabelzPreviewContextDropdown();
+    window.populateLabelzPreviewContextDropdown();
     const sel = document.getElementById('labelzDesignerPreviewContext');
     if (sel) {
         // Intelligently fallback to the parent product if it's an auto-created label

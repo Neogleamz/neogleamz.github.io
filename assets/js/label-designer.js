@@ -288,7 +288,7 @@ window.click_ldLoadTemplate = function(id) {
                     try {
                         let p = JSON.parse(opt.value);
                         if (p.n === tpl.paperProfile) sizeSel.value = opt.value;
-                    } catch (e) {
+                    } catch (_e) {
                         // ignore parse errors for invalid paper options
                     }
                 });
