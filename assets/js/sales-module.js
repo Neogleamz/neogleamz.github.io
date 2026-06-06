@@ -2097,3 +2097,148 @@ window.triggerShopifyCatalogSync = async function() {
         }, 2000);
     }
 };
+
+// ==========================================
+// WEBHOOKS MANAGER SYSTEM
+// ==========================================
+
+let cachedWebhookLogs = [];
+
+window.click_openWebhooksModal = async function() {
+    const modal = document.getElementById('webhooksModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        await window.fetchWebhookLogs();
+    }
+};
+
+window.click_closeWebhooksModal = function() {
+    const modal = document.getElementById('webhooksModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.fetchWebhookLogs = async function() {
+    const tbody = document.getElementById('webhooksTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading webhook logs...</td></tr>';
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('shopify_webhook_logs')
+            .select('id, shopify_event_id, topic, status, created_at')
+            .order('created_at', { ascending: false })
+            .limit(100);
+            
+        if (error) throw error;
+        
+        cachedWebhookLogs = data || [];
+        window.renderWebhooksTable(cachedWebhookLogs);
+        
+        const summary = document.getElementById('webhookStatsSummary');
+        if (summary) {
+            const pending = cachedWebhookLogs.filter(l => l.status === 'pending').length;
+            const failed = cachedWebhookLogs.filter(l => l.status === 'failed').length;
+            summary.innerHTML = window.safeHTML(`Logs: ${cachedWebhookLogs.length} | Pending: ${pending} | Failed: <span style="color:#ef4444;">${failed}</span>`);
+        }
+    } catch (err) {
+        console.error("Error fetching webhook logs:", err);
+        tbody.innerHTML = window.safeHTML(`<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Failed to load logs: ${err.message}</td></tr>`);
+    }
+}
+
+window.renderWebhooksTable = function(logs) {
+    const tbody = document.getElementById('webhooksTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No webhook logs found.</td></tr>';
+        return;
+    }
+    
+    logs.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        
+        let statusColor = '#94a3b8';
+        if (log.status === 'processed') statusColor = '#10b981';
+        if (log.status === 'failed') statusColor = '#ef4444';
+        if (log.status === 'pending') statusColor = '#f59e0b';
+        
+        const date = new Date(log.created_at).toLocaleString();
+        
+        tr.innerHTML = window.safeHTML(`
+            <td style="padding:8px; text-align:center;">
+                <input type="radio" name="webhookSelect" value="${log.shopify_event_id}">
+            </td>
+            <td style="padding:8px; font-family:monospace; font-size:10px;">${log.shopify_event_id}</td>
+            <td style="padding:8px;">${log.topic || 'N/A'}</td>
+            <td style="padding:8px; font-size:10px; color:#94a3b8;">${date}</td>
+            <td style="padding:8px; color:${statusColor}; font-weight:bold; text-transform:uppercase;">${log.status}</td>
+        `);
+        tbody.appendChild(tr);
+    });
+}
+
+window.click_manuallyRunWebhook = async function() {
+    const selected = document.querySelector('input[name="webhookSelect"]:checked');
+    if (!selected) {
+        alert("Please select a webhook event to replay.");
+        return;
+    }
+    
+    const eventId = selected.value;
+    const btn = document.getElementById('btnManuallyRunWebhook');
+    if(btn) {
+        btn.innerHTML = window.safeHTML('Executing...');
+        btn.disabled = true;
+    }
+    
+    setMasterStatus("Replaying Webhook...", "mod-working");
+    sysLog(`Initiating manual replay for Shopify Webhook Event: ${eventId}`);
+    
+    try {
+        const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError || !sessionData.session) throw new Error("Authentication failed.");
+        
+        const functionUrl = `${supabaseClient.supabaseUrl}/functions/v1/shopify-webhook`;
+        
+        const res = await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({ action: 'replay', shopify_event_id: eventId })
+        });
+        
+        const text = await res.text();
+        let json;
+        try { json = JSON.parse(text); } catch(e) { json = { error: text }; }
+        
+        if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+        
+        setMasterStatus("Replay Success!", "mod-success");
+        sysLog(`Replay successful for ${eventId}.`);
+        alert("Webhook replayed successfully!");
+        
+        await window.fetchWebhookLogs();
+        if (typeof fetchSalesData === 'function') {
+            await fetchSalesData(true);
+        }
+        
+    } catch (err) {
+        console.error(err);
+        setMasterStatus("Replay Failed", "mod-error");
+        alert(`Failed to replay webhook: ${err.message}`);
+    } finally {
+        if(btn) {
+            btn.innerHTML = window.safeHTML('Manually Run Selected');
+            btn.disabled = false;
+        }
+        setTimeout(() => {
+            const sm = document.getElementById('statusMaster');
+            if(sm) setMasterStatus("Ready.", "status-idle");
+        }, 2000);
+    }
+};

@@ -38,23 +38,46 @@ serve(async (req: Request) => {
 
   const hmacHeader = req.headers.get('x-shopify-hmac-sha256');
   const shopifySecret = Deno.env.get('SHOPIFY_WEBHOOK_SECRET');
-  const topic = req.headers.get('x-shopify-topic');
-  // API Token intentionally removed as Shopify requires Dev Dashboard OAuth server.
+  let topic = req.headers.get('x-shopify-topic');
+  const shopifyEventId = req.headers.get('x-shopify-webhook-id');
+  
+  let activeEventId: string | null = null;
   
   try {
     const rawBuffer = await req.arrayBuffer();
-
-    if (!hmacHeader || !await verifyShopifyWebhook(rawBuffer, hmacHeader, shopifySecret || '')) {
-        console.error("HMAC Verification Failed! Unauthorized access attempt.");
-        return new Response('Unauthorized', { status: 401 });
-    }
-
     const rawBody = new TextDecoder().decode(rawBuffer);
-
     const payload = JSON.parse(rawBody)
 
     // Initialize Supabase Admin Client
     const supabase = createClient(supabaseUrl, supabaseKey)
+
+    if (payload.action === 'replay' && payload.shopify_event_id) {
+        // UI MANUALLY TRIGGERED REPLAY (Bypass HMAC, fetch from DB)
+        activeEventId = payload.shopify_event_id;
+        const { data: logEntry } = await supabase.from('shopify_webhook_logs').select('*').eq('shopify_event_id', activeEventId).single();
+        if (!logEntry) return new Response(JSON.stringify({ error: 'Log not found' }), { status: 404 });
+        
+        Object.assign(payload, logEntry.payload);
+        topic = logEntry.topic || topic;
+        
+        delete payload.action;
+        delete payload.shopify_event_id;
+    } else {
+        // NATIVE WEBHOOK INGESTION
+        if (!hmacHeader || !await verifyShopifyWebhook(rawBuffer, hmacHeader, shopifySecret || '')) {
+            console.error("HMAC Verification Failed! Unauthorized access attempt.");
+            return new Response('Unauthorized', { status: 401 });
+        }
+
+        activeEventId = shopifyEventId || `custom-${Date.now()}`;
+        const { error: logErr } = await supabase.from('shopify_webhook_logs').insert({
+            shopify_event_id: activeEventId,
+            topic: topic,
+            payload: payload,
+            status: 'pending'
+        });
+        if (logErr && logErr.code !== '23505') console.error('Failed to log webhook', logErr);
+    }
 
     // TOPIC ROUTER: If it's a product update/create, securely ingest the barcode
     if (topic === 'products/update' || topic === 'products/create') {
@@ -417,6 +440,10 @@ serve(async (req: Request) => {
     // NOTE: Inventory updates via API edge function would require reading current qty and adding to it,
     // or utilizing a Postgres RPC function.
 
+    if (activeEventId) {
+        await supabase.from('shopify_webhook_logs').update({ status: 'processed' }).eq('shopify_event_id', activeEventId);
+    }
+
     return new Response(JSON.stringify({ success: true, count: ledgerRows.length }), {
       headers: { 'Content-Type': 'application/json' },
       status: 200
@@ -424,6 +451,10 @@ serve(async (req: Request) => {
 
   } catch (err: any) {
     console.error("Webhook Error", err)
+    if (activeEventId) {
+        const supabase = createClient(supabaseUrl, supabaseKey)
+        await supabase.from('shopify_webhook_logs').update({ status: 'failed' }).eq('shopify_event_id', activeEventId);
+    }
     return new Response(JSON.stringify({ error: err.message }), { status: 400 })
   }
 })

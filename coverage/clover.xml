@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1780784583798" clover="3.2.0">
-  <project timestamp="1780784583798" name="All files">
-    <metrics statements="17093" coveredstatements="1480" conditionals="17290" coveredconditionals="929" methods="2292" coveredmethods="129" elements="36675" coveredelements="2538" complexity="0" loc="17093" ncloc="17093" packages="1" files="20" classes="20"/>
+<coverage generated="1780785778746" clover="3.2.0">
+  <project timestamp="1780785778746" name="All files">
+    <metrics statements="17170" coveredstatements="1486" conditionals="17332" coveredconditionals="929" methods="2301" coveredmethods="129" elements="36803" coveredelements="2544" complexity="0" loc="17170" ncloc="17170" packages="1" files="20" classes="20"/>
     <file name="analytics-module.js" path="D:\GitHub\neogleamz.github.io\assets\js\analytics-module.js">
       <metrics statements="145" coveredstatements="0" conditionals="136" coveredconditionals="0" methods="22" coveredmethods="0"/>
       <line num="12" count="0" type="stmt"/>
@@ -10227,7 +10227,7 @@
       <line num="3283" count="2" type="cond" truecount="1" falsecount="1"/>
     </file>
     <file name="sales-module.js" path="D:\GitHub\neogleamz.github.io\assets\js\sales-module.js">
-      <metrics statements="1079" coveredstatements="151" conditionals="1209" coveredconditionals="116" methods="156" coveredmethods="27"/>
+      <metrics statements="1156" coveredstatements="157" conditionals="1251" coveredconditionals="116" methods="165" coveredmethods="27"/>
       <line num="31" count="0" type="stmt"/>
       <line num="32" count="0" type="cond" truecount="0" falsecount="4"/>
       <line num="33" count="0" type="stmt"/>
@@ -11307,6 +11307,83 @@
       <line num="2094" count="0" type="stmt"/>
       <line num="2095" count="0" type="stmt"/>
       <line num="2096" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2105" count="1" type="stmt"/>
+      <line num="2107" count="1" type="stmt"/>
+      <line num="2108" count="0" type="stmt"/>
+      <line num="2109" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2110" count="0" type="stmt"/>
+      <line num="2111" count="0" type="stmt"/>
+      <line num="2115" count="1" type="stmt"/>
+      <line num="2116" count="0" type="stmt"/>
+      <line num="2117" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2120" count="1" type="stmt"/>
+      <line num="2121" count="0" type="stmt"/>
+      <line num="2122" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2123" count="0" type="stmt"/>
+      <line num="2125" count="0" type="stmt"/>
+      <line num="2126" count="0" type="stmt"/>
+      <line num="2132" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2134" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2135" count="0" type="stmt"/>
+      <line num="2137" count="0" type="stmt"/>
+      <line num="2138" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2139" count="0" type="stmt"/>
+      <line num="2140" count="0" type="stmt"/>
+      <line num="2141" count="0" type="stmt"/>
+      <line num="2144" count="0" type="stmt"/>
+      <line num="2145" count="0" type="stmt"/>
+      <line num="2149" count="1" type="stmt"/>
+      <line num="2150" count="0" type="stmt"/>
+      <line num="2151" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2152" count="0" type="stmt"/>
+      <line num="2154" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2155" count="0" type="stmt"/>
+      <line num="2156" count="0" type="stmt"/>
+      <line num="2159" count="0" type="stmt"/>
+      <line num="2160" count="0" type="stmt"/>
+      <line num="2161" count="0" type="stmt"/>
+      <line num="2163" count="0" type="stmt"/>
+      <line num="2164" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2165" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2166" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2168" count="0" type="stmt"/>
+      <line num="2170" count="0" type="stmt"/>
+      <line num="2179" count="0" type="stmt"/>
+      <line num="2183" count="1" type="stmt"/>
+      <line num="2184" count="0" type="stmt"/>
+      <line num="2185" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2186" count="0" type="stmt"/>
+      <line num="2187" count="0" type="stmt"/>
+      <line num="2190" count="0" type="stmt"/>
+      <line num="2191" count="0" type="stmt"/>
+      <line num="2192" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2193" count="0" type="stmt"/>
+      <line num="2194" count="0" type="stmt"/>
+      <line num="2197" count="0" type="stmt"/>
+      <line num="2198" count="0" type="stmt"/>
+      <line num="2200" count="0" type="stmt"/>
+      <line num="2201" count="0" type="stmt"/>
+      <line num="2202" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="2204" count="0" type="stmt"/>
+      <line num="2206" count="0" type="stmt"/>
+      <line num="2215" count="0" type="stmt"/>
+      <line num="2217" count="0" type="stmt"/>
+      <line num="2219" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="2221" count="0" type="stmt"/>
+      <line num="2222" count="0" type="stmt"/>
+      <line num="2223" count="0" type="stmt"/>
+      <line num="2225" count="0" type="stmt"/>
+      <line num="2226" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2227" count="0" type="stmt"/>
+      <line num="2231" count="0" type="stmt"/>
+      <line num="2232" count="0" type="stmt"/>
+      <line num="2233" count="0" type="stmt"/>
+      <line num="2235" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="2236" count="0" type="stmt"/>
+      <line num="2237" count="0" type="stmt"/>
+      <line num="2239" count="0" type="stmt"/>
+      <line num="2240" count="0" type="stmt"/>
+      <line num="2241" count="0" type="cond" truecount="0" falsecount="2"/>
     </file>
     <file name="scraper-module.js" path="D:\GitHub\neogleamz.github.io\assets\js\scraper-module.js">
       <metrics statements="234" coveredstatements="0" conditionals="98" coveredconditionals="0" methods="31" coveredmethods="0"/>
