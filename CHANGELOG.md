@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+
+### ✨ Features & Bug Fixes
+- **Print Queue Concurrency & Race Condition Hotfixes**: Fixed a critical UI crash by actively mapping raw database records injected via the Supabase real-time sync. Hardened the global `currentPrintJob` state tracker in `deletePrintJob` and `archiveCurrentPrint` by locking state locally before `await` yields, completely eliminating `Cannot read properties of null` crashes caused by rapid spam-clicking. Eliminated the confusing 3-second ghost "DELETED" button delay upon switching active jobs.
+
 ## [1.4.0] - 2026-06-05
 
 ### ✨ Features & Bug Fixes
