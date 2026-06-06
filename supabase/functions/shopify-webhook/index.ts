@@ -134,7 +134,11 @@ serve(async (req: Request) => {
     const { data: aliases } = await supabase.from('storefront_aliases').select('*')
     const aliasMap: Record<string, string> = {}
     if (aliases) {
-        aliases.forEach((a: any) => { aliasMap[a.product_sku] = a.recipe_item_uuid })
+        aliases.forEach((a: any) => { 
+            if (a.product_sku) aliasMap[a.product_sku] = a.recipe_item_uuid;
+            if (a.shopify_sku) aliasMap[a.shopify_sku] = a.recipe_item_uuid;
+            if (a.barcode_value) aliasMap[a.barcode_value] = a.recipe_item_uuid;
+        })
     }
 
     // 2. Map Shopify Data to Neogleamz `sales_ledger` format
