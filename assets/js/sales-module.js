@@ -882,7 +882,7 @@ function renderSalesTable() {
         let t = parseFloat((x.forensic_taxes ?? x.taxes) || 0);
         let d = parseFloat((x.forensic_discount_amount ?? x.discount_amount) || 0);
         let trueLineCaptured = (p * q) + s + t - d;
-        x.localDerivedTotal = trueLineCaptured; // Store for the UI rendering below
+        x.trueLineCaptured = trueLineCaptured; // Store for the UI rendering below
 
         totals.gross += (x.rawItemRevenue > 0 || (x.revenueDerivation && x.revenueDerivation.includes('Replacement Funded'))) ? (x.rawItemRevenue + d) : 0;
         totals.discounts += (x.rawItemRevenue > 0 || (x.revenueDerivation && x.revenueDerivation.includes('Replacement Funded'))) ? d : 0;
