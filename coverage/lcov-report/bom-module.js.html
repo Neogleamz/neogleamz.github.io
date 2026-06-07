@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/929</span>
+                <span class='fraction'>0/937</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/806</span>
+                <span class='fraction'>0/818</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/623</span>
+                <span class='fraction'>0/628</span>
             </div>
         
             
@@ -1143,7 +1143,14 @@
 <a name='L1078'></a><a href='#L1078'>1078</a>
 <a name='L1079'></a><a href='#L1079'>1079</a>
 <a name='L1080'></a><a href='#L1080'>1080</a>
-<a name='L1081'></a><a href='#L1081'>1081</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1081'></a><a href='#L1081'>1081</a>
+<a name='L1082'></a><a href='#L1082'>1082</a>
+<a name='L1083'></a><a href='#L1083'>1083</a>
+<a name='L1084'></a><a href='#L1084'>1084</a>
+<a name='L1085'></a><a href='#L1085'>1085</a>
+<a name='L1086'></a><a href='#L1086'>1086</a>
+<a name='L1087'></a><a href='#L1087'>1087</a>
+<a name='L1088'></a><a href='#L1088'>1088</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1560,6 +1567,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2640,7 +2654,14 @@ function <span class="fstat-no" title="function not covered" >productDrop(</span
         }
     }
 &nbsp;
+    let disclaimer = <span class="cstat-no" title="statement not covered" >document.getElementById('customLabelDisclaimer');</span>
+<span class="cstat-no" title="statement not covered" >    if (disclaimer) <span class="cstat-no" title="statement not covered" >disclaimer.style.display = p.is_label ? 'block' : 'none';</span></span>
+    
+    let addPartBar = <span class="cstat-no" title="statement not covered" >document.getElementById('addPartBar');</span>
+<span class="cstat-no" title="statement not covered" >    if (addPartBar) <span class="cstat-no" title="statement not covered" >addPartBar.style.display = p.is_label ? 'none' : 'flex';</span></span>
+&nbsp;
     let _gt = <span class="cstat-no" title="statement not covered" >0;</span> let wrap = <span class="cstat-no" title="statement not covered" >document.getElementById('bomTableWrap');</span>
+<span class="cstat-no" title="statement not covered" >    if (wrap) <span class="cstat-no" title="statement not covered" >wrap.style.display = p.is_label ? 'none' : 'block';</span></span>
 &nbsp;
     let ths = <span class="cstat-no" title="statement not covered" >` &lt;th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="nn"&gt;Neogleamz Name&lt;/th&gt; &lt;th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="np"&gt;Neogleamz Product&lt;/th&gt; &lt;th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="n"&gt;Item Name&lt;/th&gt; &lt;th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="sp"&gt;Spec&lt;/th&gt; &lt;th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="q"&gt;Qty&lt;/th&gt; &lt;th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="uc"&gt;Unit Cost&lt;/th&gt; &lt;th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="ec"&gt;Total Ext. Cost&lt;/th&gt; &lt;th style="width: 40px; text-align:center;"&gt;Action&lt;/th&gt; `;</span>
     let h = <span class="cstat-no" title="statement not covered" >`&lt;table style="width:100%;"&gt;&lt;thead&gt;&lt;tr&gt;${ths}&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id="bomTableBody"&gt;`;</span>
@@ -3310,7 +3331,7 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-07T01:22:06.370Z
+                at 2026-06-07T01:29:58.622Z
             </div>
         <script src="prettify.js"></script>
         <script>
