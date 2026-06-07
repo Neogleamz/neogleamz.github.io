@@ -242,8 +242,6 @@ window.renderProductList = function() {
     let printProds = allProds.filter(p => productsDB[p] && productsDB[p].is_3d_print);
     let labelProds = allProds.filter(p => productsDB[p] && productsDB[p].is_label);
 
-    if(!currentProduct && allProds.length > 0) currentProduct = allProds[0];
-
     let retailProds = allProds.filter(p => !isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
     let subProds = allProds.filter(p => isSubassemblyDB[p] && !printProds.includes(p) && !labelProds.includes(p));
     let realPrintProds = printProds.filter(p => !labelProds.includes(p));
@@ -383,7 +381,12 @@ window.selectProduct = function(n) { currentProduct = n; window.renderProductLis
 window.sortBOM = function(c) { currentBOMSort = { column: c, direction: currentBOMSort.column===c && currentBOMSort.direction==='asc' ? 'desc' : 'asc' }; window.saveSort('currentBOMSort', currentBOMSort); window.renderProductBOM(); }
 
 window.renderProductBOM = function() {
-    if(!currentProduct) return; document.getElementById('bomMainArea').style.display='block'; document.getElementById('bomTitle').innerText=currentProduct;
+    if(!currentProduct) {
+        let el = document.getElementById('bomMainArea');
+        if(el) el.style.display = 'none';
+        return;
+    }
+    document.getElementById('bomMainArea').style.display='block'; document.getElementById('bomTitle').innerText=currentProduct;
 
     let lData = laborDB[currentProduct] || {time:0, rate:0};
     let pData = pricingDB[currentProduct] || {msrp:0, wholesale:0};
@@ -580,7 +583,7 @@ window.executeDeleteCurrentProduct = async function() {
         delete window.uuidMap['RECIPE:::' + currentProduct];
         delete window.uuidToNameMap[pUuid];
         
-        let ups = []; Object.keys(productsDB).forEach(n => { let arr = productsDB[n]; let oL = arr.length; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { arr.splice(i, 1); } } if(arr.length !== oL) { let tUuid = window.uuidMap['RECIPE:::'+n]; if(tUuid) ups.push(supabaseClient.from('product_recipes').update({components: window.translateRecipeForDB(arr)}).eq('product_item_uuid', tUuid)); } }); if(ups.length>0) await Promise.all(ups); currentProduct = Object.keys(productsDB)[0]||null; if(typeof populateDropdowns === 'function') populateDropdowns(); window.renderProductList(); 
+        let ups = []; Object.keys(productsDB).forEach(n => { let arr = productsDB[n]; let oL = arr.length; for(let i=arr.length-1; i>=0; i--) { if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { arr.splice(i, 1); } } if(arr.length !== oL) { let tUuid = window.uuidMap['RECIPE:::'+n]; if(tUuid) ups.push(supabaseClient.from('product_recipes').update({components: window.translateRecipeForDB(arr)}).eq('product_item_uuid', tUuid)); } }); if(ups.length>0) await Promise.all(ups); currentProduct = null; if(typeof populateDropdowns === 'function') populateDropdowns(); window.renderProductList(); 
     } catch(e) { sysLog(e.message, true); } 
 }
 
