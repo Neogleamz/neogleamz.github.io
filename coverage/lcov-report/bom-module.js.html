@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/937</span>
+                <span class='fraction'>0/938</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/818</span>
+                <span class='fraction'>0/814</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/628</span>
+                <span class='fraction'>0/631</span>
             </div>
         
             
@@ -1150,7 +1150,10 @@
 <a name='L1085'></a><a href='#L1085'>1085</a>
 <a name='L1086'></a><a href='#L1086'>1086</a>
 <a name='L1087'></a><a href='#L1087'>1087</a>
-<a name='L1088'></a><a href='#L1088'>1088</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1088'></a><a href='#L1088'>1088</a>
+<a name='L1089'></a><a href='#L1089'>1089</a>
+<a name='L1090'></a><a href='#L1090'>1090</a>
+<a name='L1091'></a><a href='#L1091'>1091</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1395,10 +1398,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1534,7 +1535,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2481,8 +2487,6 @@ let productDraggedName = <span class="cstat-no" title="statement not covered" >n
     let printProds = <span class="cstat-no" title="statement not covered" >allProds.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >productsDB[p] &amp;&amp; productsDB[p].is_3d_print)</span>;</span>
     let labelProds = <span class="cstat-no" title="statement not covered" >allProds.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >productsDB[p] &amp;&amp; productsDB[p].is_label)</span>;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    if(!currentProduct &amp;&amp; allProds.length &gt; 0) <span class="cstat-no" title="statement not covered" >currentProduct = allProds[0];</span></span>
-&nbsp;
     let retailProds = <span class="cstat-no" title="statement not covered" >allProds.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >!isSubassemblyDB[p] &amp;&amp; !printProds.includes(p) &amp;&amp; !labelProds.includes(p))</span>;</span>
     let subProds = <span class="cstat-no" title="statement not covered" >allProds.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >isSubassemblyDB[p] &amp;&amp; !printProds.includes(p) &amp;&amp; !labelProds.includes(p))</span>;</span>
     let realPrintProds = <span class="cstat-no" title="statement not covered" >printProds.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >!labelProds.includes(p))</span>;</span>
@@ -2622,7 +2626,12 @@ function <span class="fstat-no" title="function not covered" >productDrop(</span
 <span class="cstat-no" title="statement not covered" >window.sortBOM = <span class="fstat-no" title="function not covered" >fu</span>nction(c) { <span class="cstat-no" title="statement not covered" >currentBOMSort = { column: c, direction: currentBOMSort.column===c &amp;&amp; currentBOMSort.direction==='asc' ? 'desc' : 'asc' }; <span class="cstat-no" title="statement not covered" ></span>window.saveSort('currentBOMSort', currentBOMSort); <span class="cstat-no" title="statement not covered" ></span>window.renderProductBOM(); </span>}</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >window.renderProductBOM = <span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
-<span class="cstat-no" title="statement not covered" >    if(!currentProduct) <span class="cstat-no" title="statement not covered" >return; <span class="cstat-no" title="statement not covered" ></span></span>document.getElementById('bomMainArea').style.display='block'; <span class="cstat-no" title="statement not covered" ></span>document.getElementById('bomTitle').innerText=currentProduct;</span>
+<span class="cstat-no" title="statement not covered" >    if(!currentProduct) {</span>
+        let el = <span class="cstat-no" title="statement not covered" >document.getElementById('bomMainArea');</span>
+<span class="cstat-no" title="statement not covered" >        if(el) <span class="cstat-no" title="statement not covered" >el.style.display = 'none';</span></span>
+<span class="cstat-no" title="statement not covered" >        return;</span>
+    }
+<span class="cstat-no" title="statement not covered" >    document.getElementById('bomMainArea').style.display='block'; <span class="cstat-no" title="statement not covered" ></span>document.getElementById('bomTitle').innerText=currentProduct;</span>
 &nbsp;
     let lData = <span class="cstat-no" title="statement not covered" >laborDB[currentProduct] || {time:0, rate:0};</span>
     let pData = <span class="cstat-no" title="statement not covered" >pricingDB[currentProduct] || {msrp:0, wholesale:0};</span>
@@ -2819,7 +2828,7 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
 <span class="cstat-no" title="statement not covered" >        delete window.uuidMap['RECIPE:::' + currentProduct];</span>
 <span class="cstat-no" title="statement not covered" >        delete window.uuidToNameMap[pUuid];</span>
         
-        let ups = <span class="cstat-no" title="statement not covered" >[];</span> <span class="cstat-no" title="statement not covered" >Object.keys(productsDB).forEach(<span class="fstat-no" title="function not covered" >n </span>=&gt; { let arr = <span class="cstat-no" title="statement not covered" >productsDB[n];</span> let oL = <span class="cstat-no" title="statement not covered" >arr.length;</span> <span class="cstat-no" title="statement not covered" >for(let i=<span class="cstat-no" title="statement not covered" >arr.length-1;</span> i&gt;=0; i--) { <span class="cstat-no" title="statement not covered" >if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { <span class="cstat-no" title="statement not covered" >arr.splice(i, 1); </span>} </span>} <span class="cstat-no" title="statement not covered" ></span>if(arr.length !== oL) { let tUuid = <span class="cstat-no" title="statement not covered" >window.uuidMap['RECIPE:::'+n];</span> <span class="cstat-no" title="statement not covered" >if(tUuid) <span class="cstat-no" title="statement not covered" >ups.push(supabaseClient.from('product_recipes').update({components: window.translateRecipeForDB(arr)}).eq('product_item_uuid', tUuid)); </span></span>} </span>}); <span class="cstat-no" title="statement not covered" ></span>if(ups.length&gt;0) <span class="cstat-no" title="statement not covered" >await Promise.all(ups); <span class="cstat-no" title="statement not covered" ></span></span>currentProduct = Object.keys(productsDB)[0]||null; <span class="cstat-no" title="statement not covered" ></span>if(typeof populateDropdowns === 'function') <span class="cstat-no" title="statement not covered" >populateDropdowns(); <span class="cstat-no" title="statement not covered" ></span></span>window.renderProductList(); </span>
+        let ups = <span class="cstat-no" title="statement not covered" >[];</span> <span class="cstat-no" title="statement not covered" >Object.keys(productsDB).forEach(<span class="fstat-no" title="function not covered" >n </span>=&gt; { let arr = <span class="cstat-no" title="statement not covered" >productsDB[n];</span> let oL = <span class="cstat-no" title="statement not covered" >arr.length;</span> <span class="cstat-no" title="statement not covered" >for(let i=<span class="cstat-no" title="statement not covered" >arr.length-1;</span> i&gt;=0; i--) { <span class="cstat-no" title="statement not covered" >if(String(arr[i].item_key || arr[i].di_item_id || arr[i].name) === 'RECIPE:::'+currentProduct) { <span class="cstat-no" title="statement not covered" >arr.splice(i, 1); </span>} </span>} <span class="cstat-no" title="statement not covered" ></span>if(arr.length !== oL) { let tUuid = <span class="cstat-no" title="statement not covered" >window.uuidMap['RECIPE:::'+n];</span> <span class="cstat-no" title="statement not covered" >if(tUuid) <span class="cstat-no" title="statement not covered" >ups.push(supabaseClient.from('product_recipes').update({components: window.translateRecipeForDB(arr)}).eq('product_item_uuid', tUuid)); </span></span>} </span>}); <span class="cstat-no" title="statement not covered" ></span>if(ups.length&gt;0) <span class="cstat-no" title="statement not covered" >await Promise.all(ups); <span class="cstat-no" title="statement not covered" ></span></span>currentProduct = null; <span class="cstat-no" title="statement not covered" ></span>if(typeof populateDropdowns === 'function') <span class="cstat-no" title="statement not covered" >populateDropdowns(); <span class="cstat-no" title="statement not covered" ></span></span>window.renderProductList(); </span>
     } catch(e) { <span class="cstat-no" title="statement not covered" >sysLog(e.message, true); </span>} 
 }
 &nbsp;
@@ -3331,7 +3340,7 @@ let recipeModalMode = <span class="cstat-no" title="statement not covered" >'';<
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-07T01:29:58.622Z
+                at 2026-06-07T01:47:54.439Z
             </div>
         <script src="prettify.js"></script>
         <script>
