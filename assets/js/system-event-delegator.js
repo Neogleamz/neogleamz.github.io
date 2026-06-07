@@ -816,16 +816,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     syncAndCalculate();
                     break;
                 case 'click_pingLocalEngine':
-                    if(typeof pingLocalEngine === 'function') pingLocalEngine();
+                    if(typeof window.pingLocalEngine === 'function') window.pingLocalEngine();
                     break;
                 case 'click_executeSandboxBackupStart':
-                    if(typeof executeSandboxBackupStart === 'function') executeSandboxBackupStart();
+                    if(typeof window.executeSandboxBackupStart === 'function') window.executeSandboxBackupStart();
                     break;
                 case 'click_toggleSandboxMode':
-                    if(typeof toggleSandboxMode === 'function') toggleSandboxMode();
+                    if(typeof window.toggleSandboxMode === 'function') window.toggleSandboxMode();
                     break;
                 case 'click_runChaosMonkey':
-                    if(typeof runChaosMonkey === 'function') runChaosMonkey();
+                    if(typeof window.runChaosMonkey === 'function') window.runChaosMonkey();
                     break;
                 case 'click_alert_FORCE_RECALCULATION_n_nT':
                     alert('FORCE RECALCULATION:\\n\\nThis mathematical tool sequentially pulls down your entire live database (Operations Ledger, Materials Ledger, etc.), processes every record through the local Master Engine, and verifies alignment.\\n\\nIt serves to instantly correct drift or refresh local caching, and will not execute dangerous overwrites without your explicit permission.');

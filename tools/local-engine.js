@@ -79,8 +79,6 @@ const server = http.createServer(async (req, res) => {
         currentStreamRes = res;
 
         try {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            
             log(`=== STARTING SANDBOX WORKFLOW ===`);
             log(`Step 0: Checking local data cache...`);
             
