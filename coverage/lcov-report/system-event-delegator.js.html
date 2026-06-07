@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1758</span>
+                <span class='fraction'>0/1779</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1428</span>
+                <span class='fraction'>0/1449</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1377</span>
+                <span class='fraction'>0/1391</span>
             </div>
         
             
@@ -2189,7 +2189,28 @@
 <a name='L2124'></a><a href='#L2124'>2124</a>
 <a name='L2125'></a><a href='#L2125'>2125</a>
 <a name='L2126'></a><a href='#L2126'>2126</a>
-<a name='L2127'></a><a href='#L2127'>2127</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L2127'></a><a href='#L2127'>2127</a>
+<a name='L2128'></a><a href='#L2128'>2128</a>
+<a name='L2129'></a><a href='#L2129'>2129</a>
+<a name='L2130'></a><a href='#L2130'>2130</a>
+<a name='L2131'></a><a href='#L2131'>2131</a>
+<a name='L2132'></a><a href='#L2132'>2132</a>
+<a name='L2133'></a><a href='#L2133'>2133</a>
+<a name='L2134'></a><a href='#L2134'>2134</a>
+<a name='L2135'></a><a href='#L2135'>2135</a>
+<a name='L2136'></a><a href='#L2136'>2136</a>
+<a name='L2137'></a><a href='#L2137'>2137</a>
+<a name='L2138'></a><a href='#L2138'>2138</a>
+<a name='L2139'></a><a href='#L2139'>2139</a>
+<a name='L2140'></a><a href='#L2140'>2140</a>
+<a name='L2141'></a><a href='#L2141'>2141</a>
+<a name='L2142'></a><a href='#L2142'>2142</a>
+<a name='L2143'></a><a href='#L2143'>2143</a>
+<a name='L2144'></a><a href='#L2144'>2144</a>
+<a name='L2145'></a><a href='#L2145'>2145</a>
+<a name='L2146'></a><a href='#L2146'>2146</a>
+<a name='L2147'></a><a href='#L2147'>2147</a>
+<a name='L2148'></a><a href='#L2148'>2148</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2789,6 +2810,27 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -5117,11 +5159,32 @@
                 case 'click_executeExport':
 <span class="cstat-no" title="statement not covered" >                    executeExport();</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_executeSqlBackup':
+<span class="cstat-no" title="statement not covered" >                    if(typeof window.executeSqlBackup === 'function') <span class="cstat-no" title="statement not covered" >window.executeSqlBackup();</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_executeSqlRestore_sandbox':
+<span class="cstat-no" title="statement not covered" >                    if(typeof window.executeSqlRestore === 'function') <span class="cstat-no" title="statement not covered" >window.executeSqlRestore('sandbox');</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_executeSqlRestore_production':
+<span class="cstat-no" title="statement not covered" >                    if(typeof window.executeSqlRestore === 'function') <span class="cstat-no" title="statement not covered" >window.executeSqlRestore('production');</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_executeRestore':
 <span class="cstat-no" title="statement not covered" >                    executeRestore();</span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_syncAndCalculate':
 <span class="cstat-no" title="statement not covered" >                    syncAndCalculate();</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_pingLocalEngine':
+<span class="cstat-no" title="statement not covered" >                    if(typeof pingLocalEngine === 'function') <span class="cstat-no" title="statement not covered" >pingLocalEngine();</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_executeSandboxBackupStart':
+<span class="cstat-no" title="statement not covered" >                    if(typeof executeSandboxBackupStart === 'function') <span class="cstat-no" title="statement not covered" >executeSandboxBackupStart();</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_toggleSandboxMode':
+<span class="cstat-no" title="statement not covered" >                    if(typeof toggleSandboxMode === 'function') <span class="cstat-no" title="statement not covered" >toggleSandboxMode();</span></span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                case 'click_runChaosMonkey':
+<span class="cstat-no" title="statement not covered" >                    if(typeof runChaosMonkey === 'function') <span class="cstat-no" title="statement not covered" >runChaosMonkey();</span></span>
 <span class="cstat-no" title="statement not covered" >                    break;</span>
                 case 'click_alert_FORCE_RECALCULATION_n_nT':
 <span class="cstat-no" title="statement not covered" >                    alert('FORCE RECALCULATION:\\n\\nThis mathematical tool sequentially pulls down your entire live database (Operations Ledger, Materials Ledger, etc.), processes every record through the local Master Engine, and verifies alignment.\\n\\nIt serves to instantly correct drift or refresh local caching, and will not execute dangerous overwrites without your explicit permission.');</span>
@@ -6448,7 +6511,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-07T01:47:54.439Z
+                at 2026-06-07T03:53:08.376Z
             </div>
         <script src="prettify.js"></script>
         <script>

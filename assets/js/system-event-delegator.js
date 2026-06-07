@@ -800,11 +800,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_executeExport':
                     executeExport();
                     break;
+                case 'click_executeSqlBackup':
+                    if(typeof window.executeSqlBackup === 'function') window.executeSqlBackup();
+                    break;
+                case 'click_executeSqlRestore_sandbox':
+                    if(typeof window.executeSqlRestore === 'function') window.executeSqlRestore('sandbox');
+                    break;
+                case 'click_executeSqlRestore_production':
+                    if(typeof window.executeSqlRestore === 'function') window.executeSqlRestore('production');
+                    break;
                 case 'click_executeRestore':
                     executeRestore();
                     break;
                 case 'click_syncAndCalculate':
                     syncAndCalculate();
+                    break;
+                case 'click_pingLocalEngine':
+                    if(typeof pingLocalEngine === 'function') pingLocalEngine();
+                    break;
+                case 'click_executeSandboxBackupStart':
+                    if(typeof executeSandboxBackupStart === 'function') executeSandboxBackupStart();
+                    break;
+                case 'click_toggleSandboxMode':
+                    if(typeof toggleSandboxMode === 'function') toggleSandboxMode();
+                    break;
+                case 'click_runChaosMonkey':
+                    if(typeof runChaosMonkey === 'function') runChaosMonkey();
                     break;
                 case 'click_alert_FORCE_RECALCULATION_n_nT':
                     alert('FORCE RECALCULATION:\\n\\nThis mathematical tool sequentially pulls down your entire live database (Operations Ledger, Materials Ledger, etc.), processes every record through the local Master Engine, and verifies alignment.\\n\\nIt serves to instantly correct drift or refresh local caching, and will not execute dangerous overwrites without your explicit permission.');

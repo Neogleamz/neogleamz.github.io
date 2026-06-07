@@ -5,7 +5,7 @@ const whitelist = new Set([
   '.gitignore', '.env.example', '.env.local', '.eslintrc.json', 'eslint.config.mjs',
   '.hintrc', '.htmlhintrc', '.prettierignore', '.prettierrc', 'jest.config.js',
   'package.json', 'package-lock.json', 'index.html', 'qa-dashboard.html',
-  'README.md', 'CHANGELOG.md'
+  'README.md', 'CHANGELOG.md', 'START_NEO_ENGINE.bat'
 ]);
 
 try {

@@ -46,6 +46,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🗄️ Completed & Archived Epics
 
 ### Target: `main`
+**Epic: Zero-Drift Sandbox Protocol**
+*(Archived — 2026-06-06)*
+- [🚀] `feat/zero-drift-sandbox` : **Zero-Drift Local Engine** - Build a standalone Node.js `local-engine.js` server to orchestrate local Docker containers, executing `pg_dump` data and schema pulls directly from the Live DB, hardening dumps against circular foreign keys with `session_replication_role = 'replica'`, and streaming chunked HTTP logs directly into the frontend BRAINZ Vault Trace UI. [🤖 Antigravity] [🧠 20k / 20k] [💸 $0.05 / $0.05]
+
+### Target: `main`
 **Epic: Webhooks Manager**
 *(Archived — 2026-06-06)*
 - [🚀] `feat/webhooks-manager` : **Webhooks Manager Pane** - Build a native UI pane in SALEZ to log, inspect, and manually replay incoming Shopify webhooks via Supabase Edge Functions. (Plan: [docs/plans/feat/webhooks-manager.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/feat/webhooks-manager.md))

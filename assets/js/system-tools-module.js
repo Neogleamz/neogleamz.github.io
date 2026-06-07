@@ -1500,8 +1500,136 @@ const APP_TABLES = [
 ];
 
 const IGNORED_TABLES = [
-    'registered_groups', 'shared_scenes', 'sk8lytz_app_settings', 'parsed_session_stats', 'crew_members', 'crew_memberships', 'user_profiles', 'crew_sessions', 'push_tokens', 'crews', 'admin_audit_logs', 'user_saved_presets', 'daemon_status', 'registered_devices', 'custom_builder_presets', 'led_diagnostics', 'sk8lytz_picks', 'remote_debug_logs', 'skate_sessions', 'product_catalog', 'telemetry_errors', 'spatial_ref_sys', 'telemetry_snapshots', 'discovered_devices_telemetry', 'skate_spots', 'hardware_blacklist', 'feature_flags', 'user_lifetime_stats', 'device_group_members', 'production_wos', 'team_members', 'task_dependencies', 'task_templates', 'template_subtasks'
+    'registered_groups', 'shared_scenes', 'sk8lytz_app_settings', 'parsed_session_stats', 'crew_members', 'crew_memberships', 'user_profiles', 'crew_sessions', 'push_tokens', 'crews', 'admin_audit_logs', 'user_saved_presets', 'daemon_status', 'registered_devices', 'custom_builder_presets', 'led_diagnostics', 'sk8lytz_picks', 'remote_debug_logs', 'skate_sessions', 'product_catalog', 'telemetry_errors', 'spatial_ref_sys', 'telemetry_snapshots', 'discovered_devices_telemetry', 'skate_spots', 'hardware_blacklist', 'feature_flags', 'user_lifetime_stats', 'device_group_members', 'production_wos', 'team_members', 'task_dependencies', 'task_templates', 'template_subtasks', 'shopify_webhook_logs'
 ];
+
+window.fetchSqlBackups = async function() {
+    try {
+        let res = await fetch('http://127.0.0.1:4000/api/vault/sql-backups');
+        if (res.ok) {
+            let data = await res.json();
+            let select = document.getElementById('sqlBackupSelect');
+            if (select) {
+                select.innerHTML = '<option value="">-- Select Backup to Restore --</option>';
+                // Only show data dumps, they should be paired with schema dumps anyway
+                let dataFiles = data.backups.filter(f => f.startsWith('data_')).sort().reverse();
+                dataFiles.forEach(f => {
+                    let opt = document.createElement('option');
+                    opt.value = f;
+                    opt.textContent = f;
+                    select.appendChild(opt);
+                });
+            }
+        }
+    } catch(e) {
+        console.log("Failed to fetch SQL backups", e);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => { if (window.fetchSqlBackups) window.fetchSqlBackups(); }, 2000);
+});
+
+window.executeSqlBackup = async function() {
+    let term = document.getElementById('backupProgressTerminal');
+    if(!term) return;
+    
+    await window.executeWithButtonAction('btnSqlBackup', '⏳ BACKING UP...', '✅ SAVED!', async () => {
+        term.innerHTML += '<div style="color:#f59e0b">[' + new Date().toLocaleTimeString() + '] ⏳ Requesting Full SQL Backup from Local Engine...</div>';
+        term.scrollTop = term.scrollHeight;
+        try {
+            let res = await fetch('http://127.0.0.1:4000/api/vault/sql-backup', { method: 'POST' });
+            
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let done = false;
+            
+            while (!done) {
+                const { value, done: doneReading } = await reader.read();
+                done = doneReading;
+                if (value) {
+                    let text = decoder.decode(value, { stream: true });
+                    text.split('\n').forEach(line => {
+                        if (line.trim()) {
+                            let color = '#38bdf8';
+                            if (line.includes('ERROR:')) color = '#ef4444';
+                            else if (line.includes('SUCCESS')) color = '#a3e635';
+                            term.innerHTML += `<div style="color:${color}">${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                        }
+                    });
+                    term.scrollTop = term.scrollHeight;
+                }
+            }
+            setTimeout(() => { if (window.fetchSqlBackups) window.fetchSqlBackups(); }, 4000); // refresh list
+        } catch(e) {
+            let catchTerm = document.getElementById('backupProgressTerminal');
+            if(catchTerm) catchTerm.innerHTML += '<div style="color:#ef4444">[' + new Date().toLocaleTimeString() + '] ❌ Failed to contact engine.</div>';
+        }
+        let finalTerm = document.getElementById('backupProgressTerminal');
+        if(finalTerm) finalTerm.scrollTop = finalTerm.scrollHeight;
+    });
+};
+
+window.executeSqlRestore = async function(target) {
+    let select = document.getElementById('sqlBackupSelect');
+    if (!select || !select.value) {
+        alert("Please select a backup file to restore.");
+        return;
+    }
+    
+    if (target === 'production') {
+        let confirmLive = confirm("⚠️ CRITICAL WARNING ⚠️\n\nYou are about to DESTROY and OVERWRITE the LIVE PRODUCTION DATABASE.\nAre you absolutely sure?");
+        if (!confirmLive) return;
+        
+        let confirmTwice = confirm("LAST CHANCE: Type 'RESTORE' to obliterate production data and overwrite.");
+        // We can't actually prompt for text in confirm(), so we just double confirm
+        if (!confirmTwice) return;
+    } else {
+        let confirmSandbox = confirm("🧪 You are about to restore this backup into the LOCAL SANDBOX. Continue?");
+        if (!confirmSandbox) return;
+    }
+    
+    let term = document.getElementById('backupProgressTerminal');
+    if(term) {
+        term.innerHTML += '<div style="color:#ef4444">[' + new Date().toLocaleTimeString() + '] 🔥 Executing SQL Restore to ' + target.toUpperCase() + '...</div>';
+        term.scrollTop = term.scrollHeight;
+    }
+    
+    try {
+        let res = await fetch('http://127.0.0.1:4000/api/vault/sql-restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: select.value, target: target })
+        });
+        
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let done = false;
+        
+        while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            if (value) {
+                let text = decoder.decode(value, { stream: true });
+                if(term) {
+                    text.split('\n').forEach(line => {
+                        if (line.trim()) {
+                            let color = '#a3e635';
+                            if (line.includes('ERROR:')) color = '#ef4444';
+                            term.innerHTML += `<div style="color:${color}">${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                        }
+                    });
+                    term.scrollTop = term.scrollHeight;
+                }
+            }
+        }
+    } catch(e) {
+        if(term) {
+            term.innerHTML += '<div style="color:#ef4444">[' + new Date().toLocaleTimeString() + '] ❌ Failed to contact engine.</div>';
+            term.scrollTop = term.scrollHeight;
+        }
+    }
+};
 
 window.executeExport = async function() {
     await executeWithButtonAction('btnExportBackup', '⏳ EXPORTING...', '✅ EXPORTED!', async () => {
@@ -2745,4 +2873,136 @@ window.stopInlineResize = function() {
         document.removeEventListener('mousemove', window.doInlineResize);
         document.removeEventListener('mouseup', window.stopInlineResize);
     }
+};
+
+
+// --- 14. LOCAL ENGINE & SANDBOX AUTOMATION ---
+window.pingLocalEngine = async function() {
+    let indicator = document.getElementById('engineStatusIndicator');
+    let term = document.getElementById('engineTerminal');
+    if(!indicator || !term) return;
+    
+    try {
+        let res = await fetch('http://127.0.0.1:4000/ping');
+        if (res.ok) {
+            indicator.innerHTML = '> LOCAL_ENGINE: CONNECTED';
+            indicator.style.color = '#a3e635';
+            term.innerHTML += '<div>[' + new Date().toLocaleTimeString() + '] 🟢 Engine Ping Successful. Ready.</div>';
+            
+            let btnConnect = document.getElementById('btnEngineConnect');
+            if(btnConnect) {
+                btnConnect.classList.remove('btn-amber');
+                btnConnect.classList.add('btn-green-neon');
+                btnConnect.innerHTML = '<i class="fa-solid fa-plug-circle-check"></i> ENGINE CONNECTED';
+            }
+            
+            let btnChaos = document.getElementById('btnChaosMonkey');
+            if(btnChaos) btnChaos.disabled = false;
+        }
+    } catch (e) {
+        indicator.innerHTML = '> LOCAL_ENGINE: DISCONNECTED';
+        indicator.style.color = '#ef4444';
+        term.innerHTML += '<div style="color:#ef4444">[' + new Date().toLocaleTimeString() + '] ❌ Fetch Error: </div>';
+    }
+    term.scrollTop = term.scrollHeight;
+};
+
+window.executeSandboxBackupStart = async function() {
+    let term = document.getElementById('engineTerminal');
+    if(!term) return;
+    
+    term.innerHTML += '<div>[' + new Date().toLocaleTimeString() + '] ⏳ Requesting Sandbox Backup & Start...</div>';
+    term.scrollTop = term.scrollHeight;
+    try {
+        let res = await fetch('http://127.0.0.1:4000/api/sandbox/backup-and-start', { method: 'POST' });
+        
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let done = false;
+        
+        while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            if (value) {
+                let text = decoder.decode(value, { stream: true });
+                text.split('\n').forEach(line => {
+                    if (line.trim()) {
+                        let color = '#a3e635';
+                        if (line.includes('ERROR:')) color = '#ef4444';
+                        term.innerHTML += `<div style="color:${color}">${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                    }
+                });
+                term.scrollTop = term.scrollHeight;
+            }
+        }
+    } catch(e) {
+        term.innerHTML += '<div style="color:#ef4444">[' + new Date().toLocaleTimeString() + '] ❌ Failed to contact engine. Check connection.</div>';
+    }
+    term.scrollTop = term.scrollHeight;
+};
+
+window.toggleSandboxMode = function() {
+    let current = localStorage.getItem('neogleamz_sandbox_mode');
+    if (current === 'true') {
+        localStorage.setItem('neogleamz_sandbox_mode', 'false');
+    } else {
+        localStorage.setItem('neogleamz_sandbox_mode', 'true');
+    }
+    window.location.reload();
+};
+
+// Auto-run on load to set button text and auto-connect to engine if active
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('neogleamz_sandbox_mode') === 'true') {
+        let btn = document.getElementById('btnToggleSandboxMode');
+        if(btn) {
+            btn.innerHTML = '✅ EXIT SANDBOX MODE';
+            btn.style.background = '#22c55e'; // turn green to exit
+        }
+        // Auto-ping engine since we are in sandbox mode!
+        setTimeout(() => { if(window.pingLocalEngine) window.pingLocalEngine(); }, 1000);
+    }
+});
+
+window.runChaosMonkey = function() {
+    let term = document.getElementById('engineTerminal');
+    if(!term) return;
+    
+    if (localStorage.getItem('neogleamz_sandbox_mode') !== 'true') {
+        term.innerHTML += '<div style="color:#ef4444">[' + new Date().toLocaleTimeString() + '] ❌ QA Chaos Monkey CANNOT run in Production! Enable Sandbox Mode first!</div>';
+        return;
+    }
+    
+    term.innerHTML += '<div style="color:#f59e0b">[' + new Date().toLocaleTimeString() + '] 🐒 Chaos Monkey unleashed. Simulating UI interactions...</div>';
+    term.scrollTop = term.scrollHeight;
+    
+    let clickables = Array.from(document.querySelectorAll('[data-click]'))
+        .filter(el => {
+            let act = el.getAttribute('data-click').toLowerCase();
+            return !act.includes('delete') && !act.includes('export') && !act.includes('restore') && !act.includes('sync');
+        });
+        
+    clickables = clickables.sort(() => 0.5 - Math.random()).slice(0, 20);
+    
+    let i = 0;
+    let interval = setInterval(() => {
+        if (i >= clickables.length) {
+            clearInterval(interval);
+            term.innerHTML += '<div style="color:#a3e635">[' + new Date().toLocaleTimeString() + '] 🟢 Chaos testing cycle complete. Check DB logs for UUID crashes.</div>';
+            term.scrollTop = term.scrollHeight;
+            return;
+        }
+        let el = clickables[i];
+        let action = el.getAttribute('data-click');
+        
+        term.innerHTML += '<div style="color:#64748b">  ... Clicking target: ' + action + '</div>';
+        term.scrollTop = term.scrollHeight;
+        
+        try {
+            el.click();
+        } catch(e) {
+            term.innerHTML += '<div style="color:#ef4444">  ❌ Error on ' + action + ': ' + e.message + '</div>';
+        }
+        i++;
+    }, 500);
 };

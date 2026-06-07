@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.06.06.2049"></script>
+    <script src="assets/js/system-version.js?v=v.2026.06.06.2255"></script>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' http://127.0.0.1:4000 http://127.0.0.1:54321 ws://127.0.0.1:54321 https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neogleamz Command Center</title>
     <link rel="icon" type="image/png" href="https://neogleamz.com/cdn/shop/files/zlogomark.png?v=1748841111">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.06.2049"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.06.2255"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.06.2049"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.06.2255"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.06.06.2049"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.06.06.2255"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -3201,8 +3201,20 @@
                             
                             <div style="display:flex; gap:15px; flex-grow:1;">
                                 <div style="flex:0 0 220px; display:flex; flex-direction:column; gap:12px;">
-                                    <button id="btnExportBackup" class="btn-blue" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:6px;" data-click="click_executeExport">⬇️ EXPORT BACKUP</button>
+                                    <button id="btnExportBackup" class="btn-blue" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:6px; margin-bottom: 4px;" data-click="click_executeExport">⬇️ EXPORT BACKUP (XLSX)</button>
+                                    <button id="btnSqlBackup" class="btn-blue-neon" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:6px; margin-bottom: 4px;" data-click="click_executeSqlBackup">💾 FULL SQL BACKUP</button>
                                     
+                                    <div style="padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px;">
+                                        <div style="display:flex; flex-direction:column; gap:4px;">
+                                            <h4 style="margin:0; font-size:10px; color:#9ca3af;">SQL RESTORE</h4>
+                                            <select id="sqlBackupSelect" style="width:100%; padding:4px; font-size:10px; background:#1e293b; color:white; border:1px solid #475569; border-radius:4px;"></select>
+                                            <div style="display:flex; gap:4px; margin-top:4px;">
+                                                <button class="btn-amber" style="flex:1; padding:6px; font-size:9px; font-weight:bold;" data-click="click_executeSqlRestore_sandbox">🔥 TO SANDBOX</button>
+                                                <button class="btn-red" style="flex:1; padding:6px; font-size:9px; font-weight:bold;" data-click="click_executeSqlRestore_production">⚠️ TO LIVE</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div style="padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px;">
                                         <input type="file" id="importBackupFile" accept=".xlsx" style="display:none;" data-change="change_handleFileSelect_this">
                                         <button class="btn-green" style="width:100%; padding:6px; font-size:10px; font-weight:bold; letter-spacing:0.5px; border-radius:4px; display:flex; justify-content:center; align-items:center; gap:6px;" data-click="click_document_getElementById_importBackupFile">📦 IMPORT BACKUP FILE</button>
@@ -3258,7 +3270,40 @@
                             </div>
                         </div>
 
-                        <!-- 6. Vendor Scraper Foundry -->
+                        <!-- 6. Local Sandbox Environment -->
+                        <div class="panel-card" style="border-left: 4px solid #f59e0b; display:flex; flex-direction:column; grid-column: span 2;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">🧪 Offline Sandbox & QA Engine</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">Connect to Local Engine for isolated database testing and auto-QA.</p>
+                                <div style="flex:1;"></div>
+                            </div>
+                            
+                            <div style="display:flex; gap:15px;">
+                                <div style="flex:0 0 250px; display:flex; flex-direction:column; gap:12px;">
+                                    <button class="btn-amber" id="btnEngineConnect" data-click="click_pingLocalEngine" style="width:100%; padding:8px; font-size:11px; font-weight:bold; letter-spacing:0.5px; border-radius:6px; display:flex; justify-content:center; align-items:center; gap:6px;">🔌 CONNECT ENGINE</button>
+                                    
+                                    <div style="padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; border:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px;">
+                                        <button class="btn-green" style="width:100%; padding:6px; font-size:10px; font-weight:bold; letter-spacing:0.5px; border-radius:4px; display:flex; justify-content:center; align-items:center; gap:6px;" data-click="click_executeSandboxBackupStart">💾 DUMP & START SANDBOX</button>
+                                        <button class="btn-red" id="btnToggleSandboxMode" style="width:100%; padding:6px; font-size:10px; font-weight:bold; letter-spacing:0.5px; border-radius:4px; display:flex; justify-content:center; align-items:center; gap:6px;" data-click="click_toggleSandboxMode">⚠️ ENTER SANDBOX MODE</button>
+                                    </div>
+                                    
+                                    <div style="padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+                                        <button class="btn-blue-neon" data-click="click_runChaosMonkey" style="width:100%; padding:6px; font-size:10px; font-weight:bold; letter-spacing:0.5px; border-radius:4px;" disabled id="btnChaosMonkey">🐒 UNLEASH CHAOS QA</button>
+                                    </div>
+                                </div>
+                                <div style="flex:1; display:flex; flex-direction:column; min-height:160px; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px;">
+                                    <div style="color:#f59e0b; font-size:10px; font-family:monospace; margin-bottom:5px; font-weight:bold; display:flex; justify-content:space-between;">
+                                        <span id="engineStatusIndicator">> LOCAL_ENGINE: DISCONNECTED</span>
+                                        <span style="font-size:9px; color:rgba(255,255,255,0.2);">🟢 REQUIRED: START_NEO_ENGINE.bat</span>
+                                    </div>
+                                    <div id="engineTerminal" style="font-family:monospace; font-size:10px; color:#a3e635; display:flex; flex-direction:column; gap:4px; overflow-y:auto; flex-grow:1;">
+                                        <div>Waiting for Local Engine connection...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. Vendor Scraper Foundry -->
                         <div class="panel-card" style="border-left: 4px solid #f59e0b; display:flex; flex-direction:column;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
                                 <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">🔬 Scraper Foundry</h3>
@@ -4249,7 +4294,25 @@
     console.log("🚀 Neogleamz Zero-Cache Protocol: Local/Session Storage cleared.");
 
     // --- 1. GLOBAL VARIABLES & SUPABASE ---
-    const supabaseClient = window.supabase.createClient('https://qefmeivpjyaukbwadgaz.supabase.co', 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7', { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
+    let sbUrl = 'https://qefmeivpjyaukbwadgaz.supabase.co';
+    let sbKey = 'sb_publishable_-wsts8Q7fKRYZiDV4n2vMg_-R7Ud3l7';
+    if (localStorage.getItem('neogleamz_sandbox_mode') === 'true') {
+        sbUrl = 'http://127.0.0.1:54321';
+        sbKey = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH'; // Modern Local Supabase Anon Key
+        
+        // Change the header bar color to NEON RED
+        document.addEventListener('DOMContentLoaded', () => {
+            let header = document.querySelector('.header-area');
+            if(header) {
+                header.style.backgroundColor = '#b91c1c'; // Tailwind red-700
+                header.style.borderBottom = '2px solid #ef4444'; // Tailwind red-500
+                header.innerHTML += `<div style="background:#ef4444; color:white; font-weight:900; padding:4px 15px; font-size:11px; letter-spacing:1px; animation: pulse 2s infinite;">[ 🧪 SANDBOX MODE ACTIVE - CONNECTED TO LOCAL DB ]</div>`;
+            }
+            document.body.style.border = '4px solid #ef4444'; // Red border around entire app
+        });
+    }
+
+    const supabaseClient = window.supabase.createClient(sbUrl, sbKey, { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
     
     window.getSavedSort = function(key, def) { try { let v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } };
     window.saveSort = function(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} };
@@ -6306,21 +6369,21 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/kpi-reports-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/bom-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/production-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/sales-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/task-engine.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/print-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.06.06.2049"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.06.06.2049"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/kpi-reports-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/bom-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/production-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/sales-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/task-engine.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/print-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.06.06.2255"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.06.06.2255"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -7101,19 +7164,19 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.06.2049"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.06.2255"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.06.2049"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.06.2255"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.06.2049"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.06.2255"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.06.2049"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.06.2049"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.06.2049"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.06.2255"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.06.2255"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.06.2255"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.06.06.2049"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.06.06.2255"></script>
     <script src="assets/js/label-designer.js?v=1"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.06.06.2049"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.06.06.2255"></script>
     <!-- Webhooks Manager Modal -->
     <div id="webhooksModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
         <div class="container" style="width:100%; max-width:1000px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px; max-height:85vh; border-radius:8px;">
