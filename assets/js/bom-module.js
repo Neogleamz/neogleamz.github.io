@@ -415,7 +415,14 @@ window.renderProductBOM = function() {
         }
     }
 
+    let disclaimer = document.getElementById('customLabelDisclaimer');
+    if (disclaimer) disclaimer.style.display = p.is_label ? 'block' : 'none';
+    
+    let addPartBar = document.getElementById('addPartBar');
+    if (addPartBar) addPartBar.style.display = p.is_label ? 'none' : 'flex';
+
     let _gt = 0; let wrap = document.getElementById('bomTableWrap');
+    if (wrap) wrap.style.display = p.is_label ? 'none' : 'block';
 
     let ths = ` <th class="${currentBOMSort.column==='nn'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="nn">Neogleamz Name</th> <th class="${currentBOMSort.column==='np'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="np">Neogleamz Product</th> <th class="${currentBOMSort.column==='n'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="n">Item Name</th> <th class="${currentBOMSort.column==='sp'?'sorted-'+currentBOMSort.direction:''}" data-app-click="sortBOM" data-col="sp">Spec</th> <th class="${currentBOMSort.column==='q'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="q">Qty</th> <th class="${currentBOMSort.column==='uc'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="uc">Unit Cost</th> <th class="${currentBOMSort.column==='ec'?'sorted-'+currentBOMSort.direction:''} text-right" data-app-click="sortBOM" data-col="ec">Total Ext. Cost</th> <th style="width: 40px; text-align:center;">Action</th> `;
     let h = `<table style="width:100%;"><thead><tr>${ths}</tr></thead><tbody id="bomTableBody">`;
