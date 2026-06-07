@@ -490,6 +490,7 @@ Known verified tables currently in active use across the JavaScript modules:
 - `sales_ledger`: Tracks order hashes, COGS, and sales mapping.
 - `inventory_consumption`: Tracks recipe components and stock levels. Fields: `item_key` (PK), `consumed_qty`, `produced_qty`, `sold_qty`, `scrap_qty`, `manual_adjustment`, `assembly_consumed_qty`, `production_consumed_qty`, `prototype_consumed_qty`, `prototype_produced_qty`, `rop_lead_time_days`, `min_stock`.
 - `inventory_adjustments_log`: Forensic audit transaction ledger. Fields: `id` (PK, UUID), `item_key` (TEXT), `operator_id` (UUID), `operator_email` (TEXT), `previous_stock` (NUMERIC), `counted_stock` (NUMERIC), `delta` (NUMERIC), `avg_unit_cost` (NUMERIC), `valuation_impact` (NUMERIC), `reason_code` (TEXT), `notes` (TEXT), `created_at` (TIMESTAMP).
+- `shopify_webhook_logs`: Forensic audit trail and replay cache for incoming Shopify/Etsy API webhooks. Fields: `id` (PK, UUID), `shopify_event_id` (UNIQUE TEXT), `topic` (TEXT), `payload` (JSONB), `status` (TEXT), `created_at` (TIMESTAMP WITH TIME ZONE).
 
 ### Products & Costs
 - `full_landed_costs`: Calculates absolute profitability (`parcel_no`, `di_item_id`, `neogleamz_product`, `quantity`, `lot_multiplier`).

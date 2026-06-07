@@ -166,7 +166,7 @@ function renderLabelzGrid() {
             let displayContext = label.product_name;
             if (label.layout_json && label.layout_json.defaultContext) {
                 displayContext = label.layout_json.defaultContext;
-            } else if (label.product_name.startsWith("Label - ")) {
+            } else if (label.product_name && (label.product_name || "").startsWith("Label - ")) {
                 displayContext = label.product_name.replace("Label - ", "");
             }
 
@@ -185,7 +185,7 @@ function renderLabelzGrid() {
                     type = 'Retail Product';
                     icon = '📦';
                 }
-            } else if (typeof inventoryDB !== 'undefined' && inventoryDB[displayContext] && !displayContext.startsWith("RECIPE:::")) {
+            } else if (typeof inventoryDB !== 'undefined' && inventoryDB[displayContext] && !(displayContext || "").startsWith("RECIPE:::")) {
                 type = 'Raw Material';
                 icon = '🔩';
             }
@@ -239,7 +239,7 @@ function renderLabelzGrid() {
                 let displayContext = label.product_name;
                 if (label.layout_json && label.layout_json.defaultContext) {
                     displayContext = label.layout_json.defaultContext;
-                } else if (label.product_name.startsWith("Label - ")) {
+                } else if (label.product_name && (label.product_name || "").startsWith("Label - ")) {
                     displayContext = label.product_name.replace("Label - ", "");
                 }
 

@@ -237,6 +237,9 @@
 
         // 4. Sales Ledger Cache
         if (table === 'sales_ledger' && salesDB) {
+            if (newRecord && newRecord.recipe_item_uuid && window.uuidToNameMap && window.uuidToNameMap[newRecord.recipe_item_uuid]) {
+                newRecord.internal_recipe_name = window.uuidToNameMap[newRecord.recipe_item_uuid].replace('RECIPE:::', '');
+            }
             if (eventType === 'INSERT') {
                 if (!salesDB.some(r => String(r.id) === String(newRecord.id))) salesDB.push(newRecord);
             } else if (eventType === 'UPDATE') {
@@ -260,6 +263,7 @@
             queueRender('renderLtvWhalesTable');
             queueRender('renderVelocityzFGI');
             queueRender('renderAnalyticsDashboard');
+            queueRender('updateHubStats');
         }
 
         // 5. Storefront Aliases Cache

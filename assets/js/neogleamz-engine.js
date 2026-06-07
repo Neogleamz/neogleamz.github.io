@@ -414,7 +414,7 @@ window.runForensicAccounting = function(rows) {
         r.stripeFee = r.fee;
 
         if (!isVoided && !isDonor) {
-            r.net = r._tempLineRevenue - r.fee - r.actShipCost - r.cogs;
+            r.net = r._tempLineRevenue + parseFloat(r.forensic_shipping || r.shipping || 0) - r.fee - r.actShipCost - r.cogs;
             if (i === firstShippableIndex && exchangeBalanceCredit > 0) {
                 r.net += exchangeBalanceCredit;
             }

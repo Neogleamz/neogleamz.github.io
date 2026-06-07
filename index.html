@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.06.06.1735"></script>
+    <script src="assets/js/system-version.js?v=v.2026.06.06.1901"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.06.1735"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.06.1901"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.06.1735"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.06.1901"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.06.06.1735"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.06.06.1901"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -3072,7 +3072,6 @@
                                         <button class="btn-orange" data-click="click_backfillFinancials_sales" style="flex:1; padding:6px; font-size:9px; font-weight:bold;">↻ BACKFILL</button>
                                         <button class="btn-blue" data-click="click_alert_BACKFILL_FINANCIALS_n_nT" style="padding:6px; font-size:10px; font-weight:bold; background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:#38bdf8; cursor:help;">ℹ️ GUIDE</button>
                                     </div>
-                                    <button data-click="click_openForceSyncModal" style="width:100%; padding:6px; font-size:10px; font-weight:bold; letter-spacing:0.5px; border-radius:4px; display:flex; justify-content:center; align-items:center; gap:6px; background:transparent; border:1px solid #10b981; color:#10b981; cursor:pointer; transition: all 0.2s ease;">⚡ FORCE SYNC ORDER</button>
                                 </div>
                                 <div style="flex:1; display:flex; flex-direction:column; min-height:160px; background: #0b1121; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; overflow-y: auto; font-family: monospace; font-size: 10px; color: #10b981;">
                                     <div style="color:#64748b; margin-bottom: 5px; font-weight:bold; display:flex; justify-content:space-between;">
@@ -3156,6 +3155,22 @@
                                 <div id="aliasManagerList" style="flex:1; max-height:500px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; background:rgba(0,0,0,0.1); padding:10px; display:flex; flex-direction:column; gap:5px;">
                                     <div style="padding:10px; text-align:center; font-size:10px; color:var(--text-muted);">Loading mappings...</div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Webhooks Manager -->
+                        <div class="panel-card" style="border-left: 4px solid #3b82f6; display:flex; flex-direction:column;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <h3 style="margin:0; font-size:14px; text-transform:uppercase; flex:1;">🪝 Webhooks Manager</h3>
+                                <p style="margin:0; font-size:10px; color:var(--text-muted); text-align:center; flex:2;">View, manage, and manually trigger webhook events.</p>
+                                <div style="flex:1; display:flex; justify-content:flex-end; gap:6px;">
+                                    <button class="btn-green" data-click="click_openForceSyncModal" style="padding:6px 12px; font-size:10px; font-weight:900; border-radius:4px; border:1px solid #10b981; color:#10b981; background:transparent;">⚡ FORCE SYNC</button>
+                                    <button class="btn-blue-neon" data-click="click_openWebhooksModal" style="padding:6px 12px; font-size:10px; font-weight:900; border-radius:4px;">OPEN MANAGER</button>
+                                </div>
+                            </div>
+                            
+                            <div style="display:flex; flex-direction:column; gap:8px; flex-grow:1; justify-content:center; align-items:center; color:var(--text-muted); font-size:11px;">
+                                <span id="webhookStatsSummary">System ready. Awaiting webhook events.</span>
                             </div>
                         </div>
                     </div>
@@ -6282,21 +6297,21 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/kpi-reports-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/bom-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/production-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/sales-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/task-engine.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/print-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.06.06.1735"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.06.06.1735"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/kpi-reports-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/bom-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/production-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/sales-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/task-engine.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/print-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.06.06.1901"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.06.06.1901"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -7077,19 +7092,48 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.06.1735"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.06.1901"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.06.1735"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.06.1901"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.06.1735"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.06.1901"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.06.1735"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.06.1735"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.06.1735"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.06.1901"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.06.1901"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.06.1901"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.06.06.1735"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.06.06.1901"></script>
     <script src="assets/js/label-designer.js?v=1"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.06.06.1735"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.06.06.1901"></script>
+    <!-- Webhooks Manager Modal -->
+    <div id="webhooksModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+        <div class="container" style="width:100%; max-width:1000px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px; max-height:85vh; border-radius:8px;">
+            <h2 style="margin-top:0; border-bottom:1px solid var(--border-color); padding-bottom:10px;">🪝 Webhook Events Log</h2>
+            
+            <div style="flex:1; overflow-y:auto; margin-bottom:15px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); padding:10px;">
+                <table style="width:100%; text-align:left; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <th style="padding:8px; width:40px;"></th>
+                            <th style="padding:8px;">Event ID</th>
+                            <th style="padding:8px;">Topic</th>
+                            <th style="padding:8px;">Timestamp</th>
+                            <th style="padding:8px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="webhooksTableBody">
+                        <!-- JS will populate rows here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <button id="btnManuallyRunWebhook" class="btn-green" style="width:auto; padding:8px 20px;" data-click="click_manuallyRunWebhook">Manually Run Selected</button>
+                <button class="btn-red" style="width:auto; padding:8px 20px;" data-click="click_closeWebhooksModal">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Global Sandbox Validation Overlay -->
     <div id="sandboxDataModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; backdrop-filter:blur(5px); justify-content:center; align-items:center;">
         <div style="background:var(--bg-main); border:2px dashed #f59e0b; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; overflow:hidden;">
@@ -7762,7 +7806,7 @@
         <div style="background:#0f172a; width:90%; max-width:400px; border-radius:12px; border:1px solid #1e293b; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
             <div style="padding:1.5rem; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; background:#1e293b; border-radius:12px 12px 0 0;">
                 <h2 style="margin:0; font-size:16px; color:#f8fafc; display:flex; align-items:center; gap:8px;">⚡ FORCE SYNC ORDER</h2>
-                <button data-click="click_window_closeForceSyncModal" style="background:transparent; border:none; color:#64748b; font-size:20px; cursor:pointer; transition:color 0.2s;">CLOSE</button>
+                <button data-click="click_window_closeForceSyncModal" style="background:#ef4444; border:none; color:#ffffff; font-size:12px; font-weight:bold; padding:4px 12px; border-radius:4px; cursor:pointer; transition:background 0.2s; letter-spacing:1px;">CLOSE</button>
             </div>
             
             <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
