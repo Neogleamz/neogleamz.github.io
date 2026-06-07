@@ -867,3 +867,23 @@ All developers and subagents must consult these specialized documents to maintai
 ### Label Inventory Architecture
 * **Labelz vs Barcodz vs Stockz:** The physical sticker inventory is tracked natively in Stockz (inventory table) using an `is_label: true` flag to categorize it as a raw material. The visual template and coordinate mapping for printing is stored independently in `label_designs` (for Labelz pane) and `barcodzDB`. The physical inventory systems and the design matrix are bridged cleanly via the `slug` (e.g., `142-glowz-round`). This prevents visual JSON from bloating the financial inventory ledger while enabling true physical deduction during product SOP finalization.
 * **Recipe Manager Barcode Bypass:** When recipes are scanned by the Recipe Manager Staging modal or on boot, barcode labels (which natively use the `BARCODE_LABEL:::` component prefix) must be strictly bypassed. Because they are not strictly physical "raw material" entries inside the core `catalogCache`, running standard validation against them will falsely trigger an "Orphaned" state. The validation engines exclusively skip `RECIPE:::` and `BARCODE_LABEL:::` prefixes.
+
+---
+
+## 🏗️ 15. Zero-Drift Sandbox Protocol (Local Engine)
+
+To resolve systemic SQL timeout failures and circular foreign key constraint errors during full database restores via Supabase Edge Functions, Neogleamz enforces the **Zero-Drift Sandbox Protocol**.
+
+### A. Local Node.js Engine (`local-engine.js`)
+* **Purpose**: Orchestrates all heavy, long-running Docker-based PostgreSQL `pg_dump` and `psql` restore operations natively on the host machine to bypass the 10-second serverless timeout hard limits.
+* **Architecture**: The script boots a lightweight local HTTP server (`localhost:4000`) and serves explicitly allowed endpoints (`/ping`, `/api/vault/sql-backups`, `/api/vault/sql-restore`). 
+* **HTTP Chunked Streaming**: During a heavy task (e.g., executing `psql`), the engine does NOT wait for the entire process to finish before returning a response. Instead, it leverages HTTP Chunked Transfer Encoding (`Transfer-Encoding: chunked`) and `res.write()` to stream `stdout` and `stderr` logs back to the frontend in real-time.
+
+### B. Frontend VAULT TRACE Terminal Integration
+* **Streaming Parser**: The frontend module (`system-tools-module.js`) utilizes `fetch()` with native `ReadableStream` and `TextDecoder` to ingest the chunked HTTP chunks from the local engine as they arrive.
+* **Live DOM Repainting**: Rather than freezing the UI, the frontend dynamically repaints the incoming logs line-by-line into a visual Terminal window (`#vaultTerminalWindow`), giving the operator full confidence and transparency into the internal Docker process.
+* **Global Whitelists**: To prevent ESLint errors, any new local engine interaction functions must explicitly define global variables or rely on native browser APIs (e.g. `window.pingLocalEngine()`, `/* global TextDecoder */`).
+
+### C. Restricting Circular Foreign Key Blocks
+* **The Problem**: Restoring a database with tightly coupled tables (e.g. Task Engine subtasks linking to parents) natively triggers `circular foreign-key constraints` errors in standard `psql` pipelines.
+* **The Solution**: The local engine's `sql-restore` endpoint strictly injects `SET session_replication_role = 'replica';` at the very beginning of the streaming pipeline (via `echo "SET session_replication_role = 'replica';" | psql ...`). This temporarily suspends strict constraint validation during the import, allowing all rows to insert organically before constraints are verified, preventing deadlock failure cascades.
