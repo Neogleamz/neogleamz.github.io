@@ -205,7 +205,7 @@ serve(async (req: Request) => {
           const price = parseFloat(item.price) || 0;
           
           // Map to internal recipe name by checking SKU first, then full item name, then product title
-          const internalName = aliasMap[item.sku] || aliasMap[item.name] || aliasMap[item.title] || item.name || item.title;
+          const internalName = aliasMap[item.sku] || aliasMap[skuName] || aliasMap[item.name] || aliasMap[item.title] || item.name || item.title;
           console.log(` -> Mapping SKU: [${skuName}] to Internal Recipe: [${internalName}]`);
 
           // Auto-upsert/register storefront alias mapping using official variant SKU

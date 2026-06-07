@@ -928,7 +928,7 @@ function renderSalesTable() {
             <td class="trunc-col" style="font-weight:bold;">${x.order_id}</td>
             <td class="trunc-col" style="color:var(--text-muted);">${x["Source"] || ''}</td>
             <td class="trunc-col">${x.storefront_sku}</td>
-            <td class="editable trunc-col" contenteditable="true" data-focus="focus_storeOldVal" data-blur="blur_updateSaleCell" data-order="${x.order_id}" data-sku="${safeSku}" data-col="internal_recipe_name" data-isnum="false" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name}</td>
+            <td class="editable trunc-col" contenteditable="true" data-focus="focus_storeOldVal" data-blur="blur_updateSaleCell" data-order="${x.order_id}" data-sku="${safeSku}" data-col="internal_recipe_name" data-isnum="false" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name || '-- UNMAPPED --'}</td>
             <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" data-change="change_updateSaleType" data-order="${x.order_id}" data-sku="${safeSku}">
                 ${window.getTransactionTypeOptions(x.transaction_type)}
             </select></td>
