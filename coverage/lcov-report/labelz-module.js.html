@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/986</span>
+                <span class='fraction'>0/997</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/768</span>
+                <span class='fraction'>0/783</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/846</span>
+                <span class='fraction'>0/858</span>
             </div>
         
             
@@ -1732,7 +1732,21 @@
 <a name='L1667'></a><a href='#L1667'>1667</a>
 <a name='L1668'></a><a href='#L1668'>1668</a>
 <a name='L1669'></a><a href='#L1669'>1669</a>
-<a name='L1670'></a><a href='#L1670'>1670</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1670'></a><a href='#L1670'>1670</a>
+<a name='L1671'></a><a href='#L1671'>1671</a>
+<a name='L1672'></a><a href='#L1672'>1672</a>
+<a name='L1673'></a><a href='#L1673'>1673</a>
+<a name='L1674'></a><a href='#L1674'>1674</a>
+<a name='L1675'></a><a href='#L1675'>1675</a>
+<a name='L1676'></a><a href='#L1676'>1676</a>
+<a name='L1677'></a><a href='#L1677'>1677</a>
+<a name='L1678'></a><a href='#L1678'>1678</a>
+<a name='L1679'></a><a href='#L1679'>1679</a>
+<a name='L1680'></a><a href='#L1680'>1680</a>
+<a name='L1681'></a><a href='#L1681'>1681</a>
+<a name='L1682'></a><a href='#L1682'>1682</a>
+<a name='L1683'></a><a href='#L1683'>1683</a>
+<a name='L1684'></a><a href='#L1684'>1684</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1830,10 +1844,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1959,6 +1983,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3321,9 +3352,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3496,17 +3524,27 @@ function <span class="fstat-no" title="function not covered" >loadLabelzHistory(
 // DATA LAYER
 // ============================================================
 &nbsp;
-async function <span class="fstat-no" title="function not covered" >loadLabelzData(</span>) {
+async function <span class="fstat-no" title="function not covered" >loadLabelzData(</span>preloadedData = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
 <span class="cstat-no" title="statement not covered" >    try {</span>
-        const { data: dbData, error } = <span class="cstat-no" title="statement not covered" >await supabaseClient</span>
-            .from('label_designs')
-            .select('*');
-<span class="cstat-no" title="statement not covered" >        if (error) <span class="cstat-no" title="statement not covered" >throw error;</span></span>
-        let data = <span class="cstat-no" title="statement not covered" >dbData || [];</span>
+<span class="cstat-no" title="statement not covered" >        if (!window.uuidToNameMap || Object.keys(window.uuidToNameMap).length === 0) {</span>
+<span class="cstat-no" title="statement not covered" >            setTimeout(<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >loadLabelzData(preloadedData),</span> 500);</span>
+<span class="cstat-no" title="statement not covered" >            return;</span>
+        }
+&nbsp;
+        let data = <span class="cstat-no" title="statement not covered" >[];</span>
+<span class="cstat-no" title="statement not covered" >        if (preloadedData) {</span>
+<span class="cstat-no" title="statement not covered" >            data = preloadedData;</span>
+        } else {
+            const { data: dbData, error } = <span class="cstat-no" title="statement not covered" >await supabaseClient</span>
+                .from('label_designs')
+                .select('*');
+<span class="cstat-no" title="statement not covered" >            if (error) <span class="cstat-no" title="statement not covered" >throw error;</span></span>
+<span class="cstat-no" title="statement not covered" >            data = dbData || [];</span>
+        }
         
-<span class="cstat-no" title="statement not covered" >        if (data &amp;&amp; window.uuidToNameMap) {</span>
+<span class="cstat-no" title="statement not covered" >        if (data) {</span>
 <span class="cstat-no" title="statement not covered" >            data.forEach(<span class="fstat-no" title="function not covered" >ro</span>w =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >                if (row.product_item_uuid) {</span>
+<span class="cstat-no" title="statement not covered" >                if (window.uuidToNameMap &amp;&amp; row.product_item_uuid) {</span>
                     let mappedName = <span class="cstat-no" title="statement not covered" >window.uuidToNameMap[row.product_item_uuid];</span>
 <span class="cstat-no" title="statement not covered" >                    if (mappedName) {</span>
 <span class="cstat-no" title="statement not covered" >                        row.product_name = mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName;</span>
@@ -3627,7 +3665,14 @@ function <span class="fstat-no" title="function not covered" >renderLabelzGrid(<
                 const invData = <span class="cstat-no" title="statement not covered" >typeof inventoryDB !== 'undefined' ? inventoryDB[invKey] : null;</span>
                 let stockQty = <span class="cstat-no" title="statement not covered" >0;</span>
 <span class="cstat-no" title="statement not covered" >                if(invData) {</span>
-<span class="cstat-no" title="statement not covered" >                    stockQty = (invData.produced_qty || 0) - (invData.sold_qty || 0);</span>
+                    let b = <span class="cstat-no" title="statement not covered" >parseFloat(invData.produced_qty) || 0;</span>
+                    let pb = <span class="cstat-no" title="statement not covered" >parseFloat(invData.prototype_produced_qty) || 0;</span>
+                    let sold = <span class="cstat-no" title="statement not covered" >parseFloat(invData.sold_qty) || 0;</span>
+                    let c_prod = <span class="cstat-no" title="statement not covered" >parseFloat(invData.production_consumed_qty) || 0;</span>
+                    let c_proto = <span class="cstat-no" title="statement not covered" >parseFloat(invData.prototype_consumed_qty) || 0;</span>
+                    let scrap = <span class="cstat-no" title="statement not covered" >parseFloat(invData.scrap_qty) || 0;</span>
+                    let adj = <span class="cstat-no" title="statement not covered" >parseFloat(invData.manual_adjustment) || 0;</span>
+<span class="cstat-no" title="statement not covered" >                    stockQty = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);</span>
                 }
                 
                 const lowThreshold = <span class="cstat-no" title="statement not covered" >10;</span>
@@ -4991,9 +5036,6 @@ function <span class="fstat-no" title="function not covered" >closeLabelzDesigne
 <span class="cstat-no" title="statement not covered" >    if(labelzDB.length === 0) <span class="cstat-no" title="statement not covered" >loadLabelzData();</span></span>
 }
 &nbsp;
-// Initial pull triggered on script load if supabase available
-<span class="cstat-no" title="statement not covered" >setTimeout(<span class="fstat-no" title="function not covered" >()</span> =&gt; { <span class="cstat-no" title="statement not covered" >if(typeof supabaseClient !== 'undefined') <span class="cstat-no" title="statement not covered" >loadLabelzData(); </span></span>}, 3000);</span>
-&nbsp;
 // ============================================================
 // SPOOL INTEGRATION
 // ============================================================
@@ -5077,7 +5119,7 @@ function <span class="fstat-no" title="function not covered" >closeLabelzDesigne
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-07T00:00:34.769Z
+                at 2026-06-07T01:22:06.370Z
             </div>
         <script src="prettify.js"></script>
         <script>

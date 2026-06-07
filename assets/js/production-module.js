@@ -750,8 +750,9 @@ window.calculateExactWODeductions = function(wo) {
 
             let subName = k.replace('RECIPE:::', '');
             let is3DPrint = productsDB[subName] && productsDB[subName].is_3d_print;
+            let isLabel = productsDB[subName] && productsDB[subName].is_label;
 
-            if(!k.startsWith('RECIPE:::') || is3DPrint) {
+            if(!k.startsWith('RECIPE:::') || is3DPrint || isLabel) {
                 if (isTopLevel) {
                     raws_production[k] = (raws_production[k] || 0) + q;
                 } else {
@@ -1071,6 +1072,17 @@ async function validateAndCreateWO() {
             routingMap[subName] = { pull: pull, build: build };
         });
 
+        // FAILSAFE: Ensure the UI routing map perfectly matches the top-level BOM in memory
+        if (productsDB[p]) {
+            let expectedSubs = productsDB[p].filter(c => c.item_key && c.item_key.startsWith('RECIPE:::')).map(c => c.item_key.replace('RECIPE:::', ''));
+            for (let sub of expectedSubs) {
+                if (!routingMap[sub]) {
+                    document.getElementById('woErrorBox').style.display = 'none';
+                    return alert(`Integrity Lock: The routing map on your screen is out of sync with the master recipe database (Missing: ${sub}). Please cancel and reopen this menu to refresh the data.`);
+                }
+            }
+        }
+
         let tempWO = { product_name: p, qty: q, routing: routingMap };
         let exactDeductions = calculateExactWODeductions(tempWO);
         let shortfalls = [];
@@ -1078,6 +1090,7 @@ async function validateAndCreateWO() {
         Object.keys(exactDeductions.raws).forEach(k => {
             let cleanK = k.replace('RECIPE:::', '');
             let is3DPrint = productsDB[cleanK] && productsDB[cleanK].is_3d_print;
+            let isLabel = productsDB[cleanK] && productsDB[cleanK].is_label;
 
             let req = exactDeductions.raws[k];
             let c = catalogCache[k] || {totalQty: 0, is_3d_print: false};
@@ -1085,7 +1098,7 @@ async function validateAndCreateWO() {
 
             let onHand = c.totalQty - i.consumed_qty - i.scrap_qty + i.manual_adjustment;
 
-            if (is3DPrint) {
+            if (is3DPrint || isLabel) {
                 let FGI = inventoryDB[k] || {produced_qty:0, sold_qty:0, consumed_qty:0, scrap_qty:0, manual_adjustment:0};
                 let c_prod = parseFloat(FGI.production_consumed_qty)||0; let c_proto = parseFloat(FGI.prototype_consumed_qty)||0; let pb = parseFloat(FGI.prototype_produced_qty)||0;
                 onHand = (FGI.produced_qty||0) - (FGI.sold_qty||0) - c_prod - (FGI.scrap_qty||0) + (FGI.manual_adjustment||0) - Math.max(0, c_proto - pb);
@@ -1093,7 +1106,10 @@ async function validateAndCreateWO() {
 
             if(req > onHand) {
                 if (!is3DPrint) {
-                    let f = fmtKey(k); let name = f.nn ? f.nn : f.in; shortfalls.push(`<li><strong>${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`);
+                    let name = k.startsWith('RECIPE:::') ? k.replace('RECIPE:::', '') : (() => { let f = fmtKey(k); return f.nn ? f.nn : f.in; })();
+                    let isLabel = productsDB[name] && productsDB[name].is_label;
+                    let emo = isLabel ? (productsDB[name].label_emoji || "🏷️") : "🔩";
+                    shortfalls.push(`<li><strong>${emo} ${name}</strong>: Need ${req.toFixed(2)}, Have ${onHand.toFixed(2)}</li>`);
                 }
             }
         });

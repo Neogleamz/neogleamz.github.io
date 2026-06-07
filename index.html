@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.06.06.1904"></script>
+    <script src="assets/js/system-version.js?v=v.2026.06.06.2022"></script>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://qefmeivpjyaukbwadgaz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://unavatar.io https://corsproxy.io; img-src 'self' data: https: blob:; child-src 'self' blob:; frame-src 'self' blob: https:; worker-src 'self' blob:; media-src 'self' https://assets.mixkit.co;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.06.1904"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?v=v.2026.06.06.2022"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.06.1904"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js?v=v.2026.06.06.2022"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.06.06.1904"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.06.06.2022"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -4801,7 +4801,7 @@
         try {
             setSysProgress(10, 'working');
             if (!silentUpdate) setBootProgress(35, "Syncing Secure Ledgers", "Querying full landed costs, recipes, and storefront mappings...");
-            const [lR, pR, cR, wR, sR, saleR, aliasR, socR] = await Promise.all([ 
+            const [lR, pR, cR, wR, sR, saleR, aliasR, socR, lblzR] = await Promise.all([ 
                 supabaseClient.from('full_landed_costs').select('*').order('created_at', { ascending: false }), 
                 supabaseClient.from('product_recipes').select('*'), 
                 supabaseClient.from('inventory_consumption').select('*'), 
@@ -4809,13 +4809,15 @@
                 supabaseClient.from('production_sops').select('*'),
                 supabaseClient.from('sales_ledger').select('*').order('sale_date', { ascending: false }),
                 supabaseClient.from('storefront_aliases').select('*'),
-                supabaseClient.from('socialz_audience').select('*')
+                supabaseClient.from('socialz_audience').select('*'),
+                supabaseClient.from('label_designs').select('*')
             ]);
             
             if (!silentUpdate) setBootProgress(50, "Parsing Ledger Payloads", "Validating schema integrity and mapping landed costs...");
             if (lR.error) throw new Error(lR.error.message); if (pR.error) throw new Error(pR.error.message); 
             if (wR.error) throw new Error(wR.error.message); if (sR.error) throw new Error(sR.error.message);
             if (saleR.error) throw new Error(saleR.error.message); if (aliasR.error) throw new Error(aliasR.error.message);
+            if (lblzR && lblzR.error) throw new Error(lblzR.error.message);
             if (socR && socR.error) { console.warn("SOCIALZ DB Warning:", socR.error.message); }
             if (socR && socR.data && typeof initSocialzData === 'function') { initSocialzData(socR.data); }
             
@@ -5007,6 +5009,10 @@
             // STOREFRONT SKU SCANNER
             if (typeof window.scanOrphanStorefrontSKUs === 'function') {
                 window.scanOrphanStorefrontSKUs();
+            }
+
+            if (lblzR && lblzR.data && typeof loadLabelzData === 'function') {
+                loadLabelzData(lblzR.data);
             }
 
             if (!silentUpdate) setBootProgress(85, "Rendering Workspace Views", "Building stockpilez, makerz, fulfillz, and sales grids...");
@@ -6297,21 +6303,21 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/kpi-reports-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/bom-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/production-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/sales-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/task-engine.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/print-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.06.06.1904"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.06.06.1904"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/kpi-reports-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/bom-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/production-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/sales-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/task-engine.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/print-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.06.06.2022"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.06.06.2022"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -7092,19 +7098,19 @@
     }
 </script>
     <!-- JsBarcode (MIT) — Code128 + other formats, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.06.1904"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js?v=v.2026.06.06.2022"></script>
     <!-- QRCode.js (MIT) — Canvas-based QR generation, client-side only -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.06.1904"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js?v=v.2026.06.06.2022"></script>
     <!-- html5-qrcode (MIT) — Phone/tablet camera barcode & QR scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.06.1904"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js?v=v.2026.06.06.2022"></script>
     <!-- Labelz Designer Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.06.1904"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.06.1904"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.06.1904"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js?v=v.2026.06.06.2022"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js?v=v.2026.06.06.2022"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js?v=v.2026.06.06.2022"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.06.06.1904"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.06.06.2022"></script>
     <script src="assets/js/label-designer.js?v=1"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.06.06.1904"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.06.06.2022"></script>
     <!-- Webhooks Manager Modal -->
     <div id="webhooksModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
         <div class="container" style="width:100%; max-width:1000px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px; max-height:85vh; border-radius:8px;">

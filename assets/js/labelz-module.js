@@ -93,17 +93,27 @@ function loadLabelzHistory(jsonStr) {
 // DATA LAYER
 // ============================================================
 
-async function loadLabelzData() {
+async function loadLabelzData(preloadedData = null) {
     try {
-        const { data: dbData, error } = await supabaseClient
-            .from('label_designs')
-            .select('*');
-        if (error) throw error;
-        let data = dbData || [];
+        if (!window.uuidToNameMap || Object.keys(window.uuidToNameMap).length === 0) {
+            setTimeout(() => loadLabelzData(preloadedData), 500);
+            return;
+        }
+
+        let data = [];
+        if (preloadedData) {
+            data = preloadedData;
+        } else {
+            const { data: dbData, error } = await supabaseClient
+                .from('label_designs')
+                .select('*');
+            if (error) throw error;
+            data = dbData || [];
+        }
         
-        if (data && window.uuidToNameMap) {
+        if (data) {
             data.forEach(row => {
-                if (row.product_item_uuid) {
+                if (window.uuidToNameMap && row.product_item_uuid) {
                     let mappedName = window.uuidToNameMap[row.product_item_uuid];
                     if (mappedName) {
                         row.product_name = mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName;
@@ -224,7 +234,14 @@ function renderLabelzGrid() {
                 const invData = typeof inventoryDB !== 'undefined' ? inventoryDB[invKey] : null;
                 let stockQty = 0;
                 if(invData) {
-                    stockQty = (invData.produced_qty || 0) - (invData.sold_qty || 0);
+                    let b = parseFloat(invData.produced_qty) || 0;
+                    let pb = parseFloat(invData.prototype_produced_qty) || 0;
+                    let sold = parseFloat(invData.sold_qty) || 0;
+                    let c_prod = parseFloat(invData.production_consumed_qty) || 0;
+                    let c_proto = parseFloat(invData.prototype_consumed_qty) || 0;
+                    let scrap = parseFloat(invData.scrap_qty) || 0;
+                    let adj = parseFloat(invData.manual_adjustment) || 0;
+                    stockQty = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);
                 }
                 
                 const lowThreshold = 10;
@@ -1587,9 +1604,6 @@ window.initLabelzPane = function() {
     // Already populated on boot, just ensure layout wrapper displays cleanly
     if(labelzDB.length === 0) loadLabelzData();
 }
-
-// Initial pull triggered on script load if supabase available
-setTimeout(() => { if(typeof supabaseClient !== 'undefined') loadLabelzData(); }, 3000);
 
 // ============================================================
 // SPOOL INTEGRATION

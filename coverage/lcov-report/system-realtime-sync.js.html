@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/450</span>
+                <span class='fraction'>0/464</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/614</span>
+                <span class='fraction'>0/639</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/344</span>
+                <span class='fraction'>0/357</span>
             </div>
         
             
@@ -592,7 +592,28 @@
 <a name='L527'></a><a href='#L527'>527</a>
 <a name='L528'></a><a href='#L528'>528</a>
 <a name='L529'></a><a href='#L529'>529</a>
-<a name='L530'></a><a href='#L530'>530</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L530'></a><a href='#L530'>530</a>
+<a name='L531'></a><a href='#L531'>531</a>
+<a name='L532'></a><a href='#L532'>532</a>
+<a name='L533'></a><a href='#L533'>533</a>
+<a name='L534'></a><a href='#L534'>534</a>
+<a name='L535'></a><a href='#L535'>535</a>
+<a name='L536'></a><a href='#L536'>536</a>
+<a name='L537'></a><a href='#L537'>537</a>
+<a name='L538'></a><a href='#L538'>538</a>
+<a name='L539'></a><a href='#L539'>539</a>
+<a name='L540'></a><a href='#L540'>540</a>
+<a name='L541'></a><a href='#L541'>541</a>
+<a name='L542'></a><a href='#L542'>542</a>
+<a name='L543'></a><a href='#L543'>543</a>
+<a name='L544'></a><a href='#L544'>544</a>
+<a name='L545'></a><a href='#L545'>545</a>
+<a name='L546'></a><a href='#L546'>546</a>
+<a name='L547'></a><a href='#L547'>547</a>
+<a name='L548'></a><a href='#L548'>548</a>
+<a name='L549'></a><a href='#L549'>549</a>
+<a name='L550'></a><a href='#L550'>550</a>
+<a name='L551'></a><a href='#L551'>551</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -787,6 +808,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -811,6 +840,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1316,6 +1358,14 @@
 &nbsp;
         // 3. Work Orders Cache
 <span class="cstat-no" title="statement not covered" >        if (table === 'work_orders' &amp;&amp; workOrdersDB) {</span>
+            // Rehydrate missing human-readable name from UUID map (Same fix as print_queue)
+<span class="cstat-no" title="statement not covered" >            if (newRecord &amp;&amp; newRecord.product_item_uuid &amp;&amp; window.uuidToNameMap) {</span>
+                let mappedName = <span class="cstat-no" title="statement not covered" >window.uuidToNameMap[newRecord.product_item_uuid];</span>
+<span class="cstat-no" title="statement not covered" >                if (mappedName) {</span>
+<span class="cstat-no" title="statement not covered" >                    newRecord.product_name = mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName;</span>
+                }
+            }
+&nbsp;
 <span class="cstat-no" title="statement not covered" >            if (eventType === 'INSERT') {</span>
 <span class="cstat-no" title="statement not covered" >                if (!workOrdersDB.some(<span class="fstat-no" title="function not covered" >r </span>=&gt; <span class="cstat-no" title="statement not covered" >String(r.wo_id) === String(newRecord.wo_id))</span>) <span class="cstat-no" title="statement not covered" >workOrdersDB.push(newRecord);</span></span>
             } else <span class="cstat-no" title="statement not covered" >if (eventType === 'UPDATE') {</span>
@@ -1340,6 +1390,19 @@
         // 3b. Print Queue Cache
         const printQueueDB = <span class="cstat-no" title="statement not covered" >getGlobal('printQueueDB');</span>
 <span class="cstat-no" title="statement not covered" >        if (table === 'print_queue' &amp;&amp; printQueueDB) {</span>
+<span class="cstat-no" title="statement not covered" >            if (newRecord) {</span>
+<span class="cstat-no" title="statement not covered" >                newRecord.part_name = newRecord.part_name || '';</span>
+<span class="cstat-no" title="statement not covered" >                if (window.uuidToNameMap &amp;&amp; newRecord.part_item_uuid) {</span>
+                    let mappedName = <span class="cstat-no" title="statement not covered" >window.uuidToNameMap[newRecord.part_item_uuid];</span>
+<span class="cstat-no" title="statement not covered" >                    if (mappedName &amp;&amp; mappedName.startsWith('RECIPE:::')) {</span>
+<span class="cstat-no" title="statement not covered" >                        newRecord.part_name = mappedName.replace('RECIPE:::', '');</span>
+                    } else <span class="cstat-no" title="statement not covered" >if (mappedName) {</span>
+<span class="cstat-no" title="statement not covered" >                        newRecord.part_name = mappedName;</span>
+                    }
+                }
+<span class="cstat-no" title="statement not covered" >                if (!newRecord.part_name) <span class="cstat-no" title="statement not covered" >newRecord.part_name = 'Unknown Part';</span></span>
+            }
+&nbsp;
 <span class="cstat-no" title="statement not covered" >            if (eventType === 'INSERT') {</span>
 <span class="cstat-no" title="statement not covered" >                if (!printQueueDB.some(<span class="fstat-no" title="function not covered" >r </span>=&gt; <span class="cstat-no" title="statement not covered" >String(r.id) === String(newRecord.id))</span>) <span class="cstat-no" title="statement not covered" >printQueueDB.unshift(newRecord);</span></span>
             } else <span class="cstat-no" title="statement not covered" >if (eventType === 'UPDATE') {</span>
@@ -1657,7 +1720,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-07T00:00:34.769Z
+                at 2026-06-07T01:22:06.370Z
             </div>
         <script src="prettify.js"></script>
         <script>

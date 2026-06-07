@@ -601,31 +601,6 @@ async function consumeThermalMedia(qty, activeSizeSelectId) {
                     } else {
                         sysLog(`Warning: Label "${labelKey}" missing UUID. Skipping database upsert.`, true);
                     }
-                } else if (typeof productsDB !== 'undefined' && productsDB[actualDbName]) {
-                    let labelKey = `BARCODE_LABEL:::${actualDbName}`;
-                    if (!inventoryDB[labelKey]) {
-                        inventoryDB[labelKey] = { consumed_qty: 0, manual_adjustment: 0, produced_qty: 0, sold_qty: 0, min_stock: 0, scrap_qty: 0, prototype_consumed_qty: 0, assembly_consumed_qty: 0, production_consumed_qty: 0, prototype_produced_qty: 0 };
-                    }
-                    inventoryDB[labelKey].produced_qty += item.qty;
-                    
-                    let lblUuid = window.uuidMap && window.uuidMap[labelKey] ? window.uuidMap[labelKey] : null;
-                    if (lblUuid) {
-                        payloads.push({
-                             item_uuid: lblUuid,
-                             consumed_qty: inventoryDB[labelKey].consumed_qty,
-                             manual_adjustment: inventoryDB[labelKey].manual_adjustment,
-                             produced_qty: inventoryDB[labelKey].produced_qty,
-                             sold_qty: inventoryDB[labelKey].sold_qty,
-                             min_stock: inventoryDB[labelKey].min_stock,
-                             scrap_qty: inventoryDB[labelKey].scrap_qty,
-                             prototype_consumed_qty: inventoryDB[labelKey].prototype_consumed_qty,
-                             assembly_consumed_qty: inventoryDB[labelKey].assembly_consumed_qty,
-                             production_consumed_qty: inventoryDB[labelKey].production_consumed_qty,
-                             prototype_produced_qty: inventoryDB[labelKey].prototype_produced_qty
-                        });
-                    } else {
-                        sysLog(`Warning: Barcode Label "${labelKey}" missing UUID. Skipping database upsert.`, true);
-                    }
                 }
             });
         }

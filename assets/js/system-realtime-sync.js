@@ -193,6 +193,14 @@
 
         // 3. Work Orders Cache
         if (table === 'work_orders' && workOrdersDB) {
+            // Rehydrate missing human-readable name from UUID map (Same fix as print_queue)
+            if (newRecord && newRecord.product_item_uuid && window.uuidToNameMap) {
+                let mappedName = window.uuidToNameMap[newRecord.product_item_uuid];
+                if (mappedName) {
+                    newRecord.product_name = mappedName.startsWith('RECIPE:::') ? mappedName.replace('RECIPE:::', '') : mappedName;
+                }
+            }
+
             if (eventType === 'INSERT') {
                 if (!workOrdersDB.some(r => String(r.wo_id) === String(newRecord.wo_id))) workOrdersDB.push(newRecord);
             } else if (eventType === 'UPDATE') {
@@ -217,6 +225,19 @@
         // 3b. Print Queue Cache
         const printQueueDB = getGlobal('printQueueDB');
         if (table === 'print_queue' && printQueueDB) {
+            if (newRecord) {
+                newRecord.part_name = newRecord.part_name || '';
+                if (window.uuidToNameMap && newRecord.part_item_uuid) {
+                    let mappedName = window.uuidToNameMap[newRecord.part_item_uuid];
+                    if (mappedName && mappedName.startsWith('RECIPE:::')) {
+                        newRecord.part_name = mappedName.replace('RECIPE:::', '');
+                    } else if (mappedName) {
+                        newRecord.part_name = mappedName;
+                    }
+                }
+                if (!newRecord.part_name) newRecord.part_name = 'Unknown Part';
+            }
+
             if (eventType === 'INSERT') {
                 if (!printQueueDB.some(r => String(r.id) === String(newRecord.id))) printQueueDB.unshift(newRecord);
             } else if (eventType === 'UPDATE') {

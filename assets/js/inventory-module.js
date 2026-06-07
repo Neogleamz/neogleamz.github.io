@@ -60,7 +60,7 @@ function renderFgiTable() {
         let k = `RECIPE:::${p}`; let i = inventoryDB[k] || {produced_qty: 0, sold_qty: 0, consumed_qty: 0, prototype_produced_qty: 0, scrap_qty: 0, manual_adjustment: 0}; 
         let b = parseFloat(i.produced_qty) || 0; let pb = parseFloat(i.prototype_produced_qty) || 0; let sold = parseFloat(i.sold_qty) || 0; 
         let c_prod = parseFloat(i.production_consumed_qty) || 0; let c_proto = parseFloat(i.prototype_consumed_qty) || 0; let scrap = parseFloat(i.scrap_qty) || 0; let adj = parseFloat(i.manual_adjustment) || 0;
-        let warranty = 0; if (typeof salesDB !== 'undefined') { warranty = salesDB.filter(s => s.internal_recipe_name === p && (s.transaction_type === 'Replacement / Warranty' || s.transaction_type === 'Warranty' || s.transaction_type === 'Post-Ship Exchange')).reduce((sum, s) => sum + (parseFloat(s.qty_sold) || 0), 0); }
+        let warranty = 0; if (typeof salesDB !== 'undefined') { warranty = salesDB.filter(s => s.internal_recipe_name === p && (s.transaction_type === 'Replacement / Warranty' || s.transaction_type === 'Warranty')).reduce((sum, s) => sum + (parseFloat(s.qty_sold) || 0), 0); }
         let s = b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);
         let breakdown = calculateProductBreakdown(p);
         let tv = s * breakdown.total;
@@ -3002,9 +3002,9 @@ window.refreshStockzAuditHistory = async function() {
         if (window.currentAuditItemKey) {
             const uuid = window.uuidMap ? window.uuidMap[window.currentAuditItemKey] : null;
             if (uuid) {
-                query = query.or(`item_key.eq."${window.currentAuditItemKey.replace(/"/g, '""')}",item_uuid.eq.${uuid}`);
+                query = query.eq('item_uuid', uuid);
             } else {
-                query = query.eq('item_key', window.currentAuditItemKey);
+                query = query.eq('item_uuid', '00000000-0000-0000-0000-000000000000');
             }
         }
         

@@ -17,7 +17,6 @@ window.openBulkAddModal = function() {
         let typeStr = pData.is_label ? "Custom Labelz" : (pData.is_3d_print ? "3D Print" : (isSubassemblyDB[p] ? "Sub-Assembly" : "Retail Product"));
         let grp = pData.is_label ? 4 : (pData.is_3d_print ? 2 : 1);
         bulkAddData.push({ k: `RECIPE:::${p}`, isSub: true, nn: iconStr + p, np: typeStr, n: "", sp: "(Nested Recipe)", uc: getEngineTrueCogs(p), q: "", g: grp }); 
-        bulkAddData.push({ k: `BARCODE_LABEL:::${p}`, isSub: false, nn: "🏷️ [Barcode] " + p, np: "Product Barcode", n: p, sp: "Standard Thermal", uc: 0, q: "", g: 5 });
     });
     Object.keys(catalogCache).forEach(k => { let c = catalogCache[k]; if (c.is_anchor) return; bulkAddData.push({ k: k, isSub: false, nn: "🔩 " + (c.neoName || c.itemName || ""), np: c.neoProd||"", n: c.itemName||"", sp: c.spec||"", uc: c.avgUnitCost, q: "", g: 3 }); });
     document.getElementById('bulkSearch').value = ""; document.getElementById('bulkAddModal').style.display = 'flex'; window.renderBulkAddBody();
@@ -139,9 +138,36 @@ window.renameCurrentProduct = async function(eventOrBtn) {
         delete pricingDB[oldName];
         delete isSubassemblyDB[oldName];
         
-        window.uuidMap['RECIPE:::' + newName] = pUuid;
-        delete window.uuidMap['RECIPE:::' + oldName];
-        window.uuidToNameMap[pUuid] = 'RECIPE:::' + newName;
+        // Ensure local maps are instantly updated
+        if (window.uuidMap) {
+            window.uuidMap['RECIPE:::' + newName] = pUuid;
+            delete window.uuidMap['RECIPE:::' + oldName];
+        }
+        if (window.uuidToNameMap) {
+            window.uuidToNameMap[pUuid] = 'RECIPE:::' + newName;
+        }
+
+        // Recursively walk memory and fix any recipes that use this part
+        let memoryUpserts = [];
+        Object.keys(productsDB).forEach(rName => {
+            let madeChange = false;
+            productsDB[rName].forEach(comp => {
+                if (comp.item_uuid === pUuid || comp.item_key === 'RECIPE:::' + oldName || comp.di_item_id === 'RECIPE:::' + oldName || comp.name === 'RECIPE:::' + oldName) {
+                    comp.item_key = 'RECIPE:::' + newName;
+                    if(comp.di_item_id) comp.di_item_id = comp.item_key;
+                    if(comp.name) comp.name = comp.item_key;
+                    madeChange = true;
+                }
+            });
+            if (madeChange && rName !== newName) {
+                // Background save the updated human-readable string to the DB just to be clean
+                let dUuid = window.uuidMap['RECIPE:::' + rName];
+                if (dUuid) {
+                    memoryUpserts.push(supabaseClient.from('product_recipes').update({ components: window.translateRecipeForDB(productsDB[rName]) }).eq('product_item_uuid', dUuid));
+                }
+            }
+        });
+        if (memoryUpserts.length > 0) Promise.all(memoryUpserts).catch(e => console.error(e));
 
         currentProduct = newName;
         if (typeof populateDropdowns === 'function') populateDropdowns();
@@ -154,9 +180,7 @@ window.renameCurrentProduct = async function(eventOrBtn) {
         (arr || []).forEach(c => {
             let p = { ...c };
             let k = p.item_key || p.di_item_id || p.name;
-            if (k && k.startsWith('BARCODE_LABEL:::')) {
-                dbPayload.push(p);
-            } else if (k && window.uuidMap && window.uuidMap[k]) {
+            if (k && window.uuidMap && window.uuidMap[k]) {
                 p.item_uuid = window.uuidMap[k];
                 // We deliberately keep p.item_key here so it saves to the database for human readability!
                 dbPayload.push(p);
@@ -410,13 +434,6 @@ window.renderProductBOM = function() {
                 n=""; 
                 sp=""; 
                 uc=getEngineTrueCogs(s); 
-            } else if (k.startsWith('BARCODE_LABEL:::')) {
-                let s = k.replace('BARCODE_LABEL:::', '');
-                nn = "🏷️ [Barcode] " + s;
-                np = "Product Barcode";
-                n = s;
-                sp = "Standard Thermal";
-                uc = 0;
             } else { 
                 let c = catalogCache[k];
 
@@ -695,8 +712,7 @@ window.openRecipeManager = function() {
             comps.forEach(x => {
                 let k = String(x.item_key||x.di_item_id||x.name);
                 let isRecipe = k.startsWith('RECIPE:::');
-                let isBarcode = k.startsWith('BARCODE_LABEL:::');
-                let isOrphan = !isRecipe && !isBarcode && !catalogCache[k];
+                let isOrphan = !isRecipe && !catalogCache[k];
                 
                 if (mode === 'orphans' && !isOrphan) return;
                 
