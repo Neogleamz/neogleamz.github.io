@@ -1522,7 +1522,8 @@ window.fetchSqlBackups = async function() {
             }
         }
     } catch(e) {
-        console.log("Failed to fetch SQL backups", e);
+        // Silently fail if local daemon is not running
+        // console.warn("Local SQL backup daemon offline");
     }
 };
 
@@ -2082,7 +2083,16 @@ window.loadPaperProfiles = async function() {
     try {
         const { data, error } = await supabaseClient.from('app_settings').select('setting_value').eq('setting_key', 'paper_profiles').single();
         if (data && data.setting_value) {
-            window.activePaperProfiles = data.setting_value;
+            let val = data.setting_value;
+            if (typeof val === 'string') {
+                try { val = JSON.parse(val); } catch(e) { /* ignore */ }
+            }
+            if (Array.isArray(val)) {
+                window.activePaperProfiles = val;
+            } else {
+                console.warn("Paper profiles cloud config was not an array. Resetting.");
+                await savePaperProfiles(false);
+            }
         } else {
             await savePaperProfiles(false);
         }
