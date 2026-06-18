@@ -1,0 +1,58 @@
+---
+description: The primary project engine. Automates branching, planning, execution, and documentation for the next item on the Bucket List.
+allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
+---
+
+# Auto-Branching Execution Workflow
+
+When the user instructs you to start the next task (e.g., "what's next"), you must act as the Lead Engineer and execute this sequence exactly:
+
+1. **Read Status**: 
+   - Parse `@tools/SK8Lytz_Bucket_List.md` (use chunking if needed).
+   - Identify the very first incomplete item (marked with `- [ ]`).
+   - Scan upwards from that item to find the nearest section header formatted as `### Target: <branch-name>`. The value inside the backticks is your `<target-base-branch>`.
+
+2. **Branch Creation**:
+   - Extract the specific branch slug for the task.
+   - Run `git branch --list <extracted-branch-slug>`. If the branch already exists locally, execute `git checkout <extracted-branch-slug>` to resume it.
+   - If the branch does NOT exist, check if `<target-base-branch>` exists. If the target epic branch also does NOT exist, run `git status`. If the active tree has uncommitted modifications, **HALT** and warn the user. If clean, execute `git checkout main; git pull; git checkout -b <target-base-branch>`.
+   - Now safely standing on the epic base branch, execute `git checkout -b <extracted-branch-slug>`.
+   - **CRITICAL SAFETY RULE**: YOU ARE STRICTLY FORBIDDEN from ever using the `-B` flag inside `git checkout`. Forcing a branch recreation via `-B` wipes out unmerged user commits and destroys local history. Never guess; check if the branch exists before creating.
+
+3. **Discovery & Clarification Phase**:
+   - Analyze the bucket list requirement.
+   - Determine if you have 100% of the information required to build a perfect Vanilla JS / Supabase implementation plan.
+   - If requirements are ambiguous, **HALT ALL ACTION.** Output a numbered list of clarifying questions for the user (e.g., *"1. What specific flexbox layout do you want for this UI?", "2. Should this Supabase query be cached in localStorage?"*). Wait for answers before proceeding.
+
+4. **Plan Retrieval & Mandatory Review Gate (HALT)**:
+   - First, check if a pre-compiled plan exists in the Bucket List entry (e.g., `docs/plans/<extracted-branch-slug>.md`). If it exists, read it.
+   - If a plan does NOT exist, you MUST generate a highly detailed, fully documented Implementation Plan from scratch. This plan must cover security considerations, flexbox UI structure, performance impacts, and strict Vanilla JS standards. Save this new plan to `docs/plans/<extracted-branch-slug>.md` for permanent storage.
+   - Use your **Native Antigravity Artifact Generator** to present the plan (either retrieved or newly generated) in the UI.
+   - **Crucial:** Ensure the plan starts with `### Design Decisions & Rationale`, explaining *why* specific Vanilla JS or Web Bluetooth approaches were chosen.
+   - Set the `RequestFeedback` parameter in the Artifact generator to `true`.
+   - **HALT ALL ACTION.** Explicitly ask: *"I have loaded the dual-synced plan artifact. Review the plan in the UI panel. Type 'proceed' to execute, or provide feedback."* Do not write code until approved.
+
+5. **Execute Work**: 
+   - Once the user types "proceed", use your code-editing tools to implement the module exactly as outlined in the approved plan.
+
+6. **Self-Review, QA & Refactor Phase**:
+   - Before committing, act as a Senior Security & Performance Engineer.
+   - Review your newly written code. Look for: hardcoded Supabase keys, memory leaks (e.g., un-removed DOM event listeners), missing `try/catch` blocks, or poor naming conventions.
+   - **Continuous QA Gate (CRITICAL):** You MUST execute `npm test` and `npx eslint .` in the terminal to verify zero regressions and zero syntax flaws. You are strictly forbidden from committing code if either command throws an error.
+   - Output a brief "Code Review Report". If flaws or test failures are found, refactor them immediately. If pristine and tests pass, state "Code Review Passed."
+
+7. **Commit & Sync Phase**:
+   - Check if your changes affected Supabase schemas, Web Bluetooth logic, or core system architecture.
+   - If so, autonomously trigger the *Corporate Memory Synchronization Rule* to update `@tools/SK8Lytz_App_Master_Reference.md`.
+   - Stage your specific file changes (avoid blind `git add .` if there are untracked files).
+   - Execute: `git commit -m "feat(<scope>): complete <extracted-branch-slug>"`
+
+8. **Update Tracking, Archive & Halt**: 
+   - **LEDGER HYDRATION GATE:** Before modifying the ledger, you MUST execute `git checkout main && git pull origin main && git checkout -` to ensure your local `SK8Lytz_Bucket_List.md` is not stale.
+   - Change the checkbox for this item to `- [x]`.
+   - **Enforce Archiving Protocol**: Scan the surrounding epic `### Target:` block. If every single item in this specific Epic is now marked as `[x]` (or if it was a single-task Epic to begin with), you MUST autonomously cut the entire block (the `### Target:` header, the `*(Epic...)*` subheader, and all the `[x]` tasks) and paste it at the absolute bottom of the file under the `🗄️ Completed & Archived Epics` section to keep the active list clean. Do not wait for the wind-down sequence to do this. **NEVER DELETE THE RAW TASKS**. The Bucket List is an immutable ledger.
+   - If the Epic block was just fully completed and archived, you must output a massive warning message tailored to the context:
+     - **If it was a Single-Task Epic directly on `main`**: Tell the user to run `[/ship_it]` to merge the feature branch, followed by `[/release]` to formally deploy it.
+     - **If it was a Multi-Part Epic on an `epic/*` branch**: Tell the user to run `[/ship_it]` to merge this final feature into the epic branch, and then run `[/finalize_epic]` to safely deploy the entire Epic branch into production.
+   - **Mandatory UI Testing Instructions**: You MUST output a clearly formatted list instructing the user exactly *where* and *how* to manually test the changes in the live browser. You must explicitly name the correct Hub tab (e.g., STOCKZ, EDITZ, SOCIALZ) and the specific page elements or buttons they need to click to verify your work.
+   - Output a clean confirmation message to the chat that the task is complete and the branch is ready for testing. Do not automatically start the next task.
