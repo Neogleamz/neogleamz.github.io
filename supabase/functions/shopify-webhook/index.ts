@@ -31,6 +31,12 @@ async function verifyShopifyWebhook(rawBuffer: ArrayBuffer, hmacHeader: string, 
 // GRAPHQL Fetch completely removed due to Shopify Dev Dashboard API constraints.
 // System strictly relies on Webhook pushed payloads.
 
+// recipe_item_uuid is a uuid column. Raw items (and any unmapped SKU) legitimately have
+// no recipe, so we must store null rather than a product-name string (which would throw
+// 22P02 invalid input syntax for type uuid and abort the whole ledger insert).
+const isUuid = (s: any) =>
+    typeof s === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+
 serve(async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
@@ -273,7 +279,8 @@ serve(async (req: Request) => {
           if (tot === 0 && fStat !== 'refunded') {
               tType = 'NEEDS ATTENTION';
           } else if (itemFulfill === 'pending' || itemFulfill === 'unfulfilled') {
-              if (fStat === 'paid') tType = 'Pre-Ship Exchange';
+              // A paid, not-yet-shipped order is a normal pending sale -> stays 'Standard'.
+              // Genuine exchanges/warranties are set via the Shopify "Type:" tag override below.
               if (fStat === 'refunded' || fStat === 'partially_refunded') tType = 'Cancelled';
           } else if (fStat === 'refunded' || fStat === 'partially_refunded') {
               tType = 'Refund';
@@ -309,7 +316,7 @@ serve(async (req: Request) => {
             order_id: orderIdStr,
             sale_date: dateStr,
             storefront_sku: skuName,
-            recipe_item_uuid: internalName,
+            recipe_item_uuid: isUuid(internalName) ? internalName : null,
             qty_sold: qty,
             actual_sale_price: price,
             cogs_at_sale: 0, 
@@ -425,6 +432,8 @@ serve(async (req: Request) => {
       const { error: insertErr } = await supabase.from('sales_ledger').insert(insertRows);
       if (insertErr) {
         console.error("Insert Error", insertErr);
+        // Mark the log as failed (not left stranded at 'pending') so the failure is visible.
+        if (activeEventId) await supabase.from('shopify_webhook_logs').update({ status: 'failed' }).eq('shopify_event_id', activeEventId);
         return new Response(JSON.stringify({ error: insertErr.message }), { status: 500 });
       }
     }
@@ -434,6 +443,8 @@ serve(async (req: Request) => {
       const firstError = results.find(r => r.error);
       if (firstError && firstError.error) {
         console.error("Update Error", firstError.error);
+        // Mark the log as failed (not left stranded at 'pending') so the failure is visible.
+        if (activeEventId) await supabase.from('shopify_webhook_logs').update({ status: 'failed' }).eq('shopify_event_id', activeEventId);
         return new Response(JSON.stringify({ error: firstError.error.message }), { status: 500 });
       }
     }
