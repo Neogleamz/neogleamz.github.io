@@ -183,6 +183,7 @@ window.getTransactionTypeOptions = function(selectedValue) {
         { val: 'Cancelled', color: '#ef4444' },
         { val: 'Refunded - Restocked', color: '#f59e0b' },
         { val: 'Refunded - Scrapped', color: '#f59e0b' },
+        { val: 'Refunded - Warranty', color: '#f59e0b' },
         { val: 'NEEDS ATTENTION', color: '#ef4444', weight: 'bold' }
     ];
     return opts.map(o => {
@@ -246,6 +247,7 @@ window.runForensicAccounting = function(rows) {
     let totalShipping = 0;
     let totalTaxes = 0;
     let donorCreditPool = 0;
+    let refundLossPool = 0;
     
     rows.forEach((r, i) => {
         let t = parseFloat(r.total || 0);
@@ -274,9 +276,12 @@ window.runForensicAccounting = function(rows) {
         if (tx > totalTaxes) totalTaxes = tx;
 
         let type = r.transaction_type || 'Standard';
+        let val = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
+        
         if (type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange' || type === 'Scrapped Exchange') {
-            let val = (parseFloat(r.actual_sale_price || 0) * parseFloat(r.qty_sold || 1)) - parseFloat(r.discount_amount || 0);
             donorCreditPool += val;
+        } else if (type === 'Refunded - Restocked' || type === 'Refunded - Scrapped' || type === 'Refunded - Warranty' || type === 'Cancelled' || type === 'IGNORE' || type === 'Partial Refund') {
+            refundLossPool += val;
         }
     });
 
@@ -289,7 +294,10 @@ window.runForensicAccounting = function(rows) {
     });
 
     let exchangeBalanceCredit = Math.max(0, donorCreditPool);
-    let trueConcessionRefund = Math.max(0, orderRefundTotal - exchangeBalanceCredit);
+    let consumedCredit = Math.min(exchangeBalanceCredit, orderRefundTotal);
+    let unspentExchangeCredit = exchangeBalanceCredit - consumedCredit;
+    
+    let trueConcessionRefund = Math.max(0, orderRefundTotal - consumedCredit - refundLossPool);
 
     let firstShippableIndex = rows.findIndex(r => {
         let t = r.transaction_type || 'Standard';
@@ -334,12 +342,13 @@ window.runForensicAccounting = function(rows) {
         
         const isExchangeDonor = type === 'Pre-Ship Exchange' || type === 'Post-Ship Exchange' || type === 'Scrapped Exchange';
         const isVoided = type === 'Cancelled' || type === 'IGNORE' || type === 'Partial Refund';
+        const isRefundLoss = type === 'Refunded - Warranty' || type === 'Refunded - Scrapped' || type === 'Refunded - Restocked';
         
-        if (isExchangeDonor || isVoided) {
+        if (isExchangeDonor || isVoided || isRefundLoss) {
             let surrenderedVal = lineRevenue;
             lineRevenue = 0;
-            work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${surrenderedVal.toFixed(2)})` : `[Voided] (Surrendered $${surrenderedVal.toFixed(2)})`;
-            revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${surrenderedVal.toFixed(2)} -> $0.00)` : `Voided/Cancelled ($0.00)`;
+            work = isExchangeDonor ? `[Exchange Donor] (Surrendered $${surrenderedVal.toFixed(2)})` : `[Voided/Refunded] (Surrendered $${surrenderedVal.toFixed(2)})`;
+            revenueDerivation = isExchangeDonor ? `Surrendered to Replacement ($${surrenderedVal.toFixed(2)} -> $0.00)` : `Refunded/Voided ($0.00)`;
         } else if (type === 'Exchange Replacement') {
             work = `[Replacement Funded]`;
             revenueDerivation = `True Line Value: $${lineRevenue.toFixed(2)}`;
@@ -370,7 +379,7 @@ window.runForensicAccounting = function(rows) {
         let net = lineRevenue - fee - actShipCost - cogs;
         if (isVoided) net = 0;
 
-        let isCostOnlyItem = (type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund' || type === 'Refunded - Restocked' || type === 'Refunded - Scrapped');
+        let isCostOnlyItem = (type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund' || type === 'Refunded - Restocked' || type === 'Refunded - Scrapped' || type === 'Refunded - Warranty');
 
         return { 
             ...r, 
@@ -396,7 +405,7 @@ window.runForensicAccounting = function(rows) {
     });
 
     let activeLineRevenueSum = processed.reduce((sum, r) => sum + r._tempLineRevenue, 0);
-    let trueOrderCaptured = activeLineRevenueSum + totalShipping + totalTaxes + exchangeBalanceCredit;
+    let trueOrderCaptured = activeLineRevenueSum + totalShipping + totalTaxes + unspentExchangeCredit;
     
     let orderStripeFee = 0;
     if (exactPayoutTotal > 0) {
@@ -409,20 +418,24 @@ window.runForensicAccounting = function(rows) {
     processed.forEach((r, i) => {
         let isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange' || r.transaction_type === 'Scrapped Exchange';
         let isVoided = r.transaction_type === 'Cancelled' || r.transaction_type === 'IGNORE' || r.transaction_type === 'Partial Refund';
+        let isRefundLoss = r.transaction_type === 'Refunded - Warranty' || r.transaction_type === 'Refunded - Scrapped' || r.transaction_type === 'Refunded - Restocked';
         
         r.fee = (i === firstShippableIndex) ? orderStripeFee : 0;
         r.stripeFee = r.fee;
 
         if (!isVoided && !isDonor) {
+            // This runs for Standard, Warranty, Gift, Exchange Replacement, AND our isRefundLoss types (using 0 revenue)
             r.net = r._tempLineRevenue + parseFloat(r.forensic_shipping || r.shipping || 0) - r.fee - r.actShipCost - r.cogs;
-            if (i === firstShippableIndex && exchangeBalanceCredit > 0) {
-                r.net += exchangeBalanceCredit;
+            if (i === firstShippableIndex && unspentExchangeCredit > 0) {
+                r.net += unspentExchangeCredit;
             }
         }
 
         r.engineGrossCaptured = (isVoided || isDonor || r.isCostOnlyItem) ? 0 : r.trueLineCaptured;
-        if (i === firstShippableIndex && exchangeBalanceCredit > 0 && !isVoided && !isDonor && !r.isCostOnlyItem) {
-            r.engineGrossCaptured += exchangeBalanceCredit;
+        if (i === firstShippableIndex && !isVoided && !isDonor && !r.isCostOnlyItem) {
+            if (unspentExchangeCredit > 0) r.engineGrossCaptured += unspentExchangeCredit;
+            r.engineGrossCaptured += totalShipping;
+            r.engineGrossCaptured += totalTaxes;
         }
 
         if (i === firstShippableIndex && trueConcessionRefund > 0) {

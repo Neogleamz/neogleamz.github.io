@@ -151,6 +151,84 @@ serve(async (req: Request) => {
         })
     }
 
+    // 1b. Load recipe + cost data to compute COGS server-side (mirrors browser calculateProductBreakdown)
+    const [{ data: allRecipes }, { data: allCosts }] = await Promise.all([
+        supabase.from('product_recipes').select('product_item_uuid,components,labor_time_mins,labor_rate_hr'),
+        supabase.from('full_landed_costs').select('item_uuid,parcel_no,item_name,neogleamz_name,total_cost_weight,quantity,lot_multiplier')
+    ]);
+
+    // uuid → recipe components map
+    const recipeByUuid: Record<string, any[]> = {};
+    // uuid → labor map
+    const laborByUuid: Record<string, { time: number; rate: number }> = {};
+    if (allRecipes) {
+        allRecipes.forEach((r: any) => {
+            recipeByUuid[r.product_item_uuid] = r.components || [];
+            laborByUuid[r.product_item_uuid] = { time: parseFloat(r.labor_time_mins) || 0, rate: parseFloat(r.labor_rate_hr) || 0 };
+        });
+    }
+
+    // Build uuid -> name mapping for sub-assemblies (stored in full_landed_costs with parcel_no = 'RECIPE_AUTO')
+    const subassemblyUuidMap: Record<string, string> = {};
+    if (allCosts) {
+        allCosts.forEach((c: any) => {
+            if (c.parcel_no === 'RECIPE_AUTO' || c.parcel_no === 'ORPHAN_PARCEL') {
+                const name = c.item_name || c.neogleamz_name;
+                if (name) subassemblyUuidMap[name] = c.item_uuid;
+            }
+        });
+    }
+
+    // item_uuid → average unit cost map (weighted average across all purchase batches)
+    const avgCostByUuid: Record<string, number> = {};
+    if (allCosts) {
+        const totals: Record<string, { sumCost: number; sumQty: number }> = {};
+        allCosts.forEach((c: any) => {
+            if (!c.item_uuid || c.parcel_no === 'RECIPE_AUTO' || c.parcel_no === 'ORPHAN_PARCEL') return;
+            const qty = (parseFloat(c.quantity) || 1) * (parseFloat(c.lot_multiplier) || 1);
+            const totalCost = parseFloat(c.total_cost_weight) || 0;
+            if (!totals[c.item_uuid]) totals[c.item_uuid] = { sumCost: 0, sumQty: 0 };
+            totals[c.item_uuid].sumCost += totalCost;
+            totals[c.item_uuid].sumQty += qty;
+        });
+        Object.entries(totals).forEach(([uuid, t]) => {
+            avgCostByUuid[uuid] = t.sumQty > 0 ? (t.sumCost / t.sumQty) : 0;
+        });
+    }
+
+    // Recursive COGS resolver — mirrors window.calculateProductBreakdown
+    const computeCogs = (recipeUuid: string, visited = new Set<string>()): number => {
+        if (!recipeUuid || visited.has(recipeUuid)) return 0;
+        const branch = new Set(visited);
+        branch.add(recipeUuid);
+
+        const components = recipeByUuid[recipeUuid] || [];
+        let raw = 0;
+        components.forEach((comp: any) => {
+            const qty = parseFloat(comp.quantity || comp.qty) || 1;
+            if (comp.item_key && comp.item_key.startsWith('RECIPE:::')) {
+                // Sub-assembly
+                const subName = comp.item_key.replace('RECIPE:::', '');
+                const subUuid = comp.item_uuid || subassemblyUuidMap[subName] || aliases?.find((a: any) => 
+                    a.product_sku === subName || a.product_sku === `RECIPE:::${subName}`
+                )?.recipe_item_uuid;
+                if (subUuid) {
+                    raw += computeCogs(subUuid, branch) * qty;
+                }
+            } else if (comp.item_uuid && avgCostByUuid[comp.item_uuid]) {
+                // Raw material
+                raw += avgCostByUuid[comp.item_uuid] * qty;
+            }
+        });
+
+        const labor = laborByUuid[recipeUuid]
+            ? (laborByUuid[recipeUuid].time / 60) * laborByUuid[recipeUuid].rate
+            : 0;
+
+        return raw + labor;
+    };
+
+
     // 2. Map Shopify Data to Neogleamz `sales_ledger` format
       const dateStr = order.created_at ? order.created_at.split('T')[0] : new Date().toISOString().split('T')[0];
       
@@ -217,8 +295,10 @@ serve(async (req: Request) => {
       const piiShipName = await hashPII(order.shipping_address?.name);
       const piiShipAddr = await hashPII(order.shipping_address?.address1);
 
+      let orderLevelAssigned = false; // Ensure order-level fees go to the first ACTIVE row only
+
       if(order.line_items) {
-        order.line_items.forEach((item: any, index: any) => {
+        order.line_items.forEach((item: any, _index: any) => {
           const skuName = titleMap[item.sku] || titleMap[item.name] || titleMap[item.title] || item.title || item.name || item.sku;
           const qty = parseInt(item.quantity) || 1;
           const price = parseFloat(item.price) || 0;
@@ -226,6 +306,12 @@ serve(async (req: Request) => {
           const lineItemId = String(item.id);
           const refundedQty = refundedLineItems[lineItemId] || 0;
           const netQty = Math.max(0, qty - refundedQty);
+          // isReturned = this line item was fully returned/refunded (no net units remain)
+          // qty_sold stays as the original qty (1) — the TYPE label explains the situation
+          const isReturned = netQty === 0 && qty > 0;
+          // isFirstActiveRow = the first non-returned item, which receives all order-level aggregates
+          const isFirstActiveRow = !isReturned && !orderLevelAssigned;
+          if (isFirstActiveRow) orderLevelAssigned = true;
           
           // Map to internal recipe name by checking SKU first, then full item name, then product title
           const internalName = aliasMap[item.sku] || aliasMap[skuName] || aliasMap[item.name] || aliasMap[item.title] || item.name || item.title;
@@ -255,24 +341,28 @@ serve(async (req: Request) => {
               aliasUpsertPromises.push(aliasPromise);
           }
 
-          // Sum accurate discount allocations for this specific line item to avoid cart-level double-counting
+          // Sum accurate discount allocations — only for active (non-returned) items
           let lineDiscount = 0;
-          if (netQty > 0 && item.discount_allocations && item.discount_allocations.length > 0) {
+          if (!isReturned && item.discount_allocations && item.discount_allocations.length > 0) {
             lineDiscount = item.discount_allocations.reduce((sum: any, d: any) => sum + parseFloat(d.amount || 0), 0);
           }
 
-          // Segregate specific order-level aggregate fees/shipping only onto the FIRST row to perfectly replicate CSV behavior
-          const rowShip = index === 0 ? ship : 0;
-          const rowTax = index === 0 ? tax : 0;
-          const rowFee = index === 0 ? trueFee : 0;
-          const rowBalance = index === 0 ? balance : 0;
-          const rowCartTotal = index === 0 ? tot : 0;
-          const rowPayout = index === 0 ? truePayout : 0;
-          const rowActualShippingCost = index === 0 ? extData.shippingCost : 0;
+          // Order-level aggregates (fees, shipping, refunded amount) only go to the FIRST ACTIVE row.
+          // Returned rows are purely informational — they carry no financial impact.
+          const rowShip = isFirstActiveRow ? ship : 0;
+          const rowTax = isFirstActiveRow ? tax : 0;
+          const rowFee = isFirstActiveRow ? trueFee : 0;
+          const rowBalance = isFirstActiveRow ? balance : 0;
+          const rowCartTotal = isFirstActiveRow ? tot : 0;
+          const rowPayout = isFirstActiveRow ? truePayout : 0;
+          const rowActualShippingCost = isFirstActiveRow ? extData.shippingCost : 0;
 
-          // Accurately calculate True Net Profit for this specific loop matrix
-          const subtotal = price * netQty;
-          
+          // Returned rows: subtotal = 0 (no revenue captured, item came back)
+          // Active rows: subtotal = price * qty
+          const subtotal = isReturned ? 0 : price * qty;
+
+          // refunded_amount is stored on returned rows for reference but NOT deducted from net profit.
+          // The returned row's subtotal=0 already accounts for the revenue reversal.
           let orderTotalRefunded = parseFloat(order.total_refunded) || 0;
           if (orderTotalRefunded === 0 && order.refunds && order.refunds.length > 0) {
               order.refunds.forEach((r: any) => {
@@ -285,7 +375,7 @@ serve(async (req: Request) => {
                   }
               });
           }
-          const rowRefundedAmount = index === 0 ? orderTotalRefunded : 0;
+          const rowRefundedAmount = isReturned ? orderTotalRefunded : 0;
           
           // Deduce Transaction Type Native Match
           let itemFulfill = String(item.fulfillment_status || "pending").trim().toLowerCase();
@@ -293,56 +383,49 @@ serve(async (req: Request) => {
           const fStat = String(order.financial_status || "").trim().toLowerCase();
           
           let tType = 'Standard';
-          if (netQty === 0 && qty > 0) {
-              tType = 'Refunded - Restocked';
-          } else if (tot === 0 && fStat !== 'refunded') {
-              tType = 'NEEDS ATTENTION';
-          } else if (itemFulfill === 'pending' || itemFulfill === 'unfulfilled') {
-              // A paid, not-yet-shipped order is a normal pending sale -> stays 'Standard'.
-              // Genuine exchanges/warranties are set via the Shopify "Type:" tag override below.
-              if (fStat === 'refunded' || fStat === 'partially_refunded') tType = 'Cancelled';
-          } else if (fStat === 'refunded' || fStat === 'partially_refunded') {
-              tType = 'Refund';
-          }
-
-          // Override deduction with Explicit Tag if present
-          if (tagTransactionType) {
-              tType = tagTransactionType;
-          }
-
-          // Net Profit deducts Refunds naturally if they occurred.
-          const net = subtotal + rowShip + rowTax - lineDiscount - rowFee - rowActualShippingCost - rowRefundedAmount;
-
-          // AGGREGATOR: Prevent false-flagging of legitimate identical line items in Draft Orders
-          const existingRow = ledgerRows.find((r: any) => String(r.storefront_sku) === String(skuName));
-          if (existingRow) {
-              console.log(` -> Aggregating duplicate line item: [${skuName}] (+${netQty})`);
-              existingRow.qty_sold += netQty;
-              existingRow.subtotal += subtotal;
-              existingRow.discount_amount += lineDiscount;
-              existingRow.net_profit += (subtotal - lineDiscount); // rowShip, rowFee, etc are mapped to the first index.
-              
-              if (existingRow.qty_sold > 0 && existingRow.transaction_type === 'Refunded - Restocked') {
-                  existingRow.transaction_type = tagTransactionType || 'Standard';
-              }
-              
-              const existingInv = invUpdates.find((i: any) => i.item_key === `RECIPE:::${internalName}`);
-              if (existingInv) {
-                  existingInv.sold_qty_increment += netQty;
+          if (isReturned) {
+              // Derive the refund label from the order tag to reflect why it was returned,
+              // not just that it was restocked (it may have been defective, exchanged, etc.)
+              if (tagTransactionType) {
+                  tType = `Refunded - ${tagTransactionType}`;
               } else {
-                  invUpdates.push({ item_key: `RECIPE:::${internalName}`, sold_qty_increment: netQty });
+                  tType = 'Refunded - Restocked';
               }
-              return;
+          } else {
+              if (tot === 0 && fStat !== 'refunded') {
+                  tType = 'NEEDS ATTENTION';
+              } else if (itemFulfill === 'pending' || itemFulfill === 'unfulfilled') {
+                  // A paid, not-yet-shipped order is a normal pending sale -> stays 'Standard'.
+                  // Genuine exchanges/warranties are set via the Shopify "Type:" tag override below.
+                  if (fStat === 'refunded' || fStat === 'partially_refunded') tType = 'Cancelled';
+              } else if (fStat === 'refunded' || fStat === 'partially_refunded') {
+                  tType = 'Refund';
+              }
+
+              // Override deduction with Explicit Tag if present
+              if (tagTransactionType) {
+                  tType = tagTransactionType;
+              }
           }
+
+          const recipeUuidForRow = isUuid(internalName) ? internalName : null;
+          const cogsAtSale = recipeUuidForRow ? computeCogs(recipeUuidForRow) * qty : 0;
+
+          // Returned rows: net = -(cogs_at_sale) - (actual_shipping_cost) i.e. the true cost of the warranty/return.
+          // Active rows: net = subtotal + order-level aggregates - fees - label cost - cogs
+          const net = isReturned
+              ? -(cogsAtSale) - rowActualShippingCost
+              : (subtotal + rowShip + rowTax - lineDiscount - rowFee - rowActualShippingCost - cogsAtSale);
 
           ledgerRows.push({
             order_id: orderIdStr,
+            line_item_id: lineItemId,
             sale_date: dateStr,
             storefront_sku: skuName,
-            recipe_item_uuid: isUuid(internalName) ? internalName : null,
-            qty_sold: netQty,
+            recipe_item_uuid: recipeUuidForRow,
+            qty_sold: qty,
             actual_sale_price: price,
-            cogs_at_sale: 0, 
+            cogs_at_sale: cogsAtSale,
             subtotal: subtotal,
             shipping: rowShip,
             taxes: rowTax,
@@ -380,7 +463,7 @@ serve(async (req: Request) => {
             actual_payout: rowPayout,
             linked_order_id: String(order.id),
             transaction_type: tType,
-            isFirstRow: index === 0
+            isFirstRow: isFirstActiveRow
           });
 
           invUpdates.push({
@@ -400,16 +483,25 @@ serve(async (req: Request) => {
     const updatePromises: any[] = [];
 
     ledgerRows.forEach(row => {
-      const existing = existingRecords?.find((e: any) => String(e.order_id) === String(row.order_id) && String(e.storefront_sku) === String(row.storefront_sku));
+      const existing = existingRecords?.find((e: any) => 
+        String(e.order_id) === String(row.order_id) && 
+        (e.line_item_id ? String(e.line_item_id) === String(row.line_item_id) : String(e.storefront_sku) === String(row.storefront_sku))
+      );
       if (existing && existing.id) {
         
-        // Carry forward existing manually injected values that the webhook does not natively receive
+        // Carry forward existing manually injected values that the webhook does not natively receive.
+        // If cogs_at_sale is currently 0 in the DB, adopt the newly computed COGS from the webhook.
         const dbShippingCost = parseFloat(existing.actual_shipping_cost) || 0;
-        const dbCogs = parseFloat(existing.cogs_at_sale) || 0;
+        const dbCogs = parseFloat(existing.cogs_at_sale) || row.cogs_at_sale || 0;
         
-        // Recalculate Net Profit and Actual Payout preserving the database's existing cost data
-        const updatedNetProfit = row.subtotal + row.shipping + row.taxes - row.discount_amount - row.transaction_fees - dbShippingCost - row.refunded_amount - dbCogs;
-        const updatedPayout = row.total - row.transaction_fees - row.refunded_amount;
+        // Recalculate Net Profit and Actual Payout preserving the database's existing cost data.
+        // For returned rows: net = -(cogs) - (return label cost), reflecting the true cost of the warranty/return.
+        // For active rows: standard formula including all order-level aggregates.
+        const isReturnedRow = String(existing.transaction_type || '').startsWith('Refunded -');
+        const updatedNetProfit = isReturnedRow
+            ? -(dbCogs) - (dbShippingCost)
+            : row.subtotal + row.shipping + row.taxes - row.discount_amount - row.transaction_fees - dbShippingCost - dbCogs;
+        const updatedPayout = isReturnedRow ? 0 : (row.total - row.transaction_fees);
         
         row.actual_shipping_cost = dbShippingCost;
         row.cogs_at_sale = dbCogs;
@@ -424,6 +516,12 @@ serve(async (req: Request) => {
         if (updatePayload.tracking_number === null && existing.tracking_number !== null) delete updatePayload.tracking_number;
         if (updatePayload.carrier_name === null && existing.carrier_name !== null) delete updatePayload.carrier_name;
 
+        // Preserve manually-set transaction_type — if the user has already labeled this row
+        // (e.g. 'Warranty', 'Post-ship exchange') directly in Orderz, never overwrite it via webhook replay.
+        if (existing.transaction_type && existing.transaction_type !== 'Standard' && existing.transaction_type !== 'Refunded - Restocked') {
+            delete updatePayload.transaction_type;
+        }
+
         updatePromises.push(supabase.from('sales_ledger').update(updatePayload).eq('id', existing.id));
       } else {
         insertRows.push(row);
@@ -432,7 +530,10 @@ serve(async (req: Request) => {
 
     // Ghost Row Detection: Identify items physically removed from the order in Shopify
     const existingToCancel = existingRecords?.filter((e: any) => 
-      !ledgerRows.some(r => String(r.order_id) === String(e.order_id) && String(r.storefront_sku) === String(e.storefront_sku))
+      !ledgerRows.some(r => 
+        String(r.order_id) === String(e.order_id) && 
+        (e.line_item_id ? String(r.line_item_id) === String(e.line_item_id) : String(r.storefront_sku) === String(e.storefront_sku))
+      )
     );
 
     if (existingToCancel && existingToCancel.length > 0) {
