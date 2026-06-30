@@ -847,7 +847,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### Target: `main`
 **Epic: Shopify Exchange & Return Reconciliation**
 *(Archived — 2026-06-30)*
-- [x] `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level. (Plan: [shopify_exchange_reconciliation.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/shopify_exchange_reconciliation.md))
+- [🚀] `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level. (Plan: [shopify_exchange_reconciliation.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/shopify_exchange_reconciliation.md))
 
 ## 🧹 Technical Debt
 

@@ -1,5 +1,8 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+- `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level.
+
 ## [1.5.0] - 2026-06-30
 
 ### ✨ Features & Bug Fixes
