@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 - `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level.
+- `debt/security` : **Unguarded innerHTML** - `modalEl.innerHTML = innerHtml;` is currently used in `assets/js/barcodz-module.js` (Line 476) without `window.safeHTML()` wrapper. This poses an XSS risk.
+- `debt/security` : **Unguarded insertAdjacentHTML** - `b.insertAdjacentHTML(...)` is currently used in `index.html` (Line 4268) without `window.safeHTML()` wrapper.
+- `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).
 
 ## [1.5.0] - 2026-06-30
 
