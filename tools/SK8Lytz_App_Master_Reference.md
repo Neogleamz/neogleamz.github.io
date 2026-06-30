@@ -887,3 +887,23 @@ To resolve systemic SQL timeout failures and circular foreign key constraint err
 ### C. Restricting Circular Foreign Key Blocks
 * **The Problem**: Restoring a database with tightly coupled tables (e.g. Task Engine subtasks linking to parents) natively triggers `circular foreign-key constraints` errors in standard `psql` pipelines.
 * **The Solution**: The local engine's `sql-restore` endpoint strictly injects `SET session_replication_role = 'replica';` at the very beginning of the streaming pipeline (via `echo "SET session_replication_role = 'replica';" | psql ...`). This temporarily suspends strict constraint validation during the import, allowing all rows to insert organically before constraints are verified, preventing deadlock failure cascades.
+
+---
+
+## 16. Sub-Assembly Scrap Propagation & Realtime Sync UI Safeguards
+
+### A. Sub-Assembly Scrap Propagation to Raw Materials
+When a sub-assembly (e.g. `Haloz LED Strip`) is finalized as scrapped (either as the main product of a work order or a nested component), the system automatically rolls down its Bill of Materials (BOM) recursively via `getRecursiveRawMaterials` to identify the constituent raw components (such as JST connectors or LED strips).
+- The system **deducts** the proportional recipe quantity of these raw materials from the `consumed_qty` (CONS) column.
+- The system **adds** the exact same quantity to the `scrap_qty` (SCRAP) column.
+- This shifting ensures that the materials consumed inside scrapped products are reported in the scrap columns on the stockpile dashboard without double-deducting them (retaining perfect physical stock calculations).
+
+### B. Archived Work Order Detail View Safeties
+In realtime multi-tab workflows, database updates to a work order can trigger background sync repaints across multiple browser instances.
+- The detail pane rendering engine (`renderActiveWO`) enforces a strict lifecycle guard. If the active work order has a status of `Archived`, or if the work order has been deleted, the detail container (`woMainArea`) is immediately hidden (`display = 'none'`) instead of remaining visible with clickable stages.
+
+### C. Cycle Count Reason Code Strict Validation
+To prevent mismatched or legacy reason code strings from the mobile remote scanner polluting database ledgers:
+- The desktop sync receiver strictly validates the incoming count's reason code against the official allowed list.
+- If an incompatible code is detected, the desktop rejects the save, shows an error toast, and broadcasts a `PC_OUTDATED_MOBILE` command back to the handheld device.
+- Upon receiving `PC_OUTDATED_MOBILE`, the handheld device alerts the operator and automatically triggers a `window.location.reload(true)` to force-load the latest live build.
