@@ -5,6 +5,11 @@
 - `debt/security` : **Unguarded innerHTML** - `modalEl.innerHTML = innerHtml;` is currently used in `assets/js/barcodz-module.js` (Line 476) without `window.safeHTML()` wrapper. This poses an XSS risk.
 - `debt/security` : **Unguarded insertAdjacentHTML** - `b.insertAdjacentHTML(...)` is currently used in `index.html` (Line 4268) without `window.safeHTML()` wrapper.
 - `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).
+- `debt/security` : **XSS — inventory-module.js:3162** — Wrapped `historyContainer.innerHTML = h` (DB row data incl. user-supplied `row.notes`) in `window.safeHTML()`.
+- `debt/security` : **XSS — inventory-module.js:3172** — Wrapped `historyContainer.innerHTML = \`...\${e.message}\`` error injection in `window.safeHTML()`.
+- `debt/security` : **XSS — label-designer.js:78** — Wrapped `sel.innerHTML = html` (DB template names/IDs) in `window.safeHTML()`.
+- `debt/security` : **XSS + inline handler — packerz-module.js:3479** — Replaced `card.innerHTML` double violation (unguarded src injection + inline `onclick`) with `createElement` + `addEventListener`.
+- `fix/ui` : **Audit History blank space** — Replaced fixed `max-height:480px` on `#stockzAuditHistoryContent` with `flex-grow:1; min-height:0` so the list fills full modal height and scrolls internally.
 
 ## [1.5.0] - 2026-06-30
 
