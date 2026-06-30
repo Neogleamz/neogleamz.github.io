@@ -75,7 +75,7 @@ window.ldRenderGlobalTemplateDropdown = function() {
     }
     
     selects.forEach(sel => {
-        if (sel) sel.innerHTML = html;
+        if (sel) sel.innerHTML = window.safeHTML(html);
     });
 };
 

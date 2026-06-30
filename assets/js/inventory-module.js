@@ -3159,7 +3159,7 @@ window.refreshStockzAuditHistory = async function() {
             </details>`;
         });
         
-        historyContainer.innerHTML = h;
+        historyContainer.innerHTML = window.safeHTML(h);
         if (window.ccSyncChannel && window.currentAuditItemKey) {
             window.ccSyncChannel.send({
                 type: 'broadcast',
@@ -3169,7 +3169,7 @@ window.refreshStockzAuditHistory = async function() {
         }
     } catch(e) {
         sysLog(`[Audit History Load Error] ${e.message}`, true);
-        historyContainer.innerHTML = `<div style="text-align:center; padding:40px; color:#ef4444; font-size:13px; font-weight:bold;">✕ Error loading history: ${e.message}</div>`;
+        historyContainer.innerHTML = window.safeHTML(`<div style="text-align:center; padding:40px; color:#ef4444; font-size:13px; font-weight:bold;">✕ Error loading history: ${e.message}</div>`);
     }
 };
 
