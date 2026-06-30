@@ -3114,7 +3114,7 @@ window.refreshStockzAuditHistory = async function() {
             const valSign = valImpact >= 0 ? '+' : '';
             
             h += `
-            <details class="stockz-audit-details" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:6px; margin-bottom:6px; overflow:hidden; backdrop-filter:blur(4px); transition:all 0.2s;">
+            <details class="stockz-audit-details" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:6px; margin-bottom:6px; overflow:hidden; backdrop-filter:blur(4px); transition:all 0.2s; flex-shrink:0;">
                 <summary style="padding:8px 12px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12px; user-select:none; outline:none;" onmouseover="this.parentElement.style.borderColor='#0ea5e9'; this.parentElement.style.background='rgba(255,255,255,0.04)';" onmouseout="this.parentElement.style.borderColor='var(--border-color)'; this.parentElement.style.background='rgba(255,255,255,0.02)';">
                     <!-- Left: Name and type with ellipsis to prevent vertical wrap layout explosion -->
                     <div style="display:flex; align-items:center; gap:8px; overflow:hidden; min-width:0; flex:1;">
@@ -3159,7 +3159,7 @@ window.refreshStockzAuditHistory = async function() {
             </details>`;
         });
         
-        historyContainer.innerHTML = h;
+        historyContainer.innerHTML = window.safeHTML(h);
         if (window.ccSyncChannel && window.currentAuditItemKey) {
             window.ccSyncChannel.send({
                 type: 'broadcast',
@@ -3169,7 +3169,7 @@ window.refreshStockzAuditHistory = async function() {
         }
     } catch(e) {
         sysLog(`[Audit History Load Error] ${e.message}`, true);
-        historyContainer.innerHTML = `<div style="text-align:center; padding:40px; color:#ef4444; font-size:13px; font-weight:bold;">✕ Error loading history: ${e.message}</div>`;
+        historyContainer.innerHTML = window.safeHTML(`<div style="text-align:center; padding:40px; color:#ef4444; font-size:13px; font-weight:bold;">✕ Error loading history: ${e.message}</div>`);
     }
 };
 

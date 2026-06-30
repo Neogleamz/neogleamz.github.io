@@ -3476,10 +3476,21 @@ window.handleRemoteCaptureCompleteOnPC = function(imageUrl) {
         card.onmouseover = () => { card.style.transform = "scale(1.05)"; };
         card.onmouseout = () => { card.style.transform = "scale(1.0)"; };
         
-        card.innerHTML = `
-            <img src="${imageUrl}" style="width:100%; height:100%; object-fit:cover;" onclick="window.open('${imageUrl}', '_blank')" />
-            <button onclick="window.deleteRemoteStagedPhoto('${imageUrl}')" style="position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold; line-height:1; box-shadow:0 2px 4px rgba(0,0,0,0.5);">✕</button>
-        `;
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.style.cssText = "width:100%; height:100%; object-fit:cover;";
+        img.addEventListener('click', () => window.open(imageUrl, '_blank'));
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '✕';
+        deleteBtn.style.cssText = "position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold; line-height:1; box-shadow:0 2px 4px rgba(0,0,0,0.5);";
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.deleteRemoteStagedPhoto(imageUrl);
+        });
+
+        card.appendChild(img);
+        card.appendChild(deleteBtn);
         container.appendChild(card);
     }
     
