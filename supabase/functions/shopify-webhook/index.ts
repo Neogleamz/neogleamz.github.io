@@ -167,6 +167,19 @@ serve(async (req: Request) => {
 
       const orderIdStr = order.name || String(order.id); // Define orderIdStr here
 
+      // Pre-calculate refunded quantities by line_item_id
+      const refundedLineItems: Record<string, number> = {};
+      if (order.refunds) {
+          order.refunds.forEach((r: any) => {
+              if (r.refund_line_items) {
+                  r.refund_line_items.forEach((ri: any) => {
+                      const liId = String(ri.line_item_id);
+                      refundedLineItems[liId] = (refundedLineItems[liId] || 0) + (parseInt(ri.quantity) || 0);
+                  });
+              }
+          });
+      }
+
       // No API available to fetch exact payouts or historical tracking on initial order load.
       // System will fallback to estimated fees. Real tracking injected later via fulfillments/create webhook.
       const trueFee = fee;
@@ -209,6 +222,10 @@ serve(async (req: Request) => {
           const skuName = titleMap[item.sku] || titleMap[item.name] || titleMap[item.title] || item.title || item.name || item.sku;
           const qty = parseInt(item.quantity) || 1;
           const price = parseFloat(item.price) || 0;
+
+          const lineItemId = String(item.id);
+          const refundedQty = refundedLineItems[lineItemId] || 0;
+          const netQty = Math.max(0, qty - refundedQty);
           
           // Map to internal recipe name by checking SKU first, then full item name, then product title
           const internalName = aliasMap[item.sku] || aliasMap[skuName] || aliasMap[item.name] || aliasMap[item.title] || item.name || item.title;
@@ -240,7 +257,7 @@ serve(async (req: Request) => {
 
           // Sum accurate discount allocations for this specific line item to avoid cart-level double-counting
           let lineDiscount = 0;
-          if (item.discount_allocations && item.discount_allocations.length > 0) {
+          if (netQty > 0 && item.discount_allocations && item.discount_allocations.length > 0) {
             lineDiscount = item.discount_allocations.reduce((sum: any, d: any) => sum + parseFloat(d.amount || 0), 0);
           }
 
@@ -254,7 +271,7 @@ serve(async (req: Request) => {
           const rowActualShippingCost = index === 0 ? extData.shippingCost : 0;
 
           // Accurately calculate True Net Profit for this specific loop matrix
-          const subtotal = price * qty;
+          const subtotal = price * netQty;
           
           let orderTotalRefunded = parseFloat(order.total_refunded) || 0;
           if (orderTotalRefunded === 0 && order.refunds && order.refunds.length > 0) {
@@ -276,7 +293,9 @@ serve(async (req: Request) => {
           const fStat = String(order.financial_status || "").trim().toLowerCase();
           
           let tType = 'Standard';
-          if (tot === 0 && fStat !== 'refunded') {
+          if (netQty === 0 && qty > 0) {
+              tType = 'Refunded - Restocked';
+          } else if (tot === 0 && fStat !== 'refunded') {
               tType = 'NEEDS ATTENTION';
           } else if (itemFulfill === 'pending' || itemFulfill === 'unfulfilled') {
               // A paid, not-yet-shipped order is a normal pending sale -> stays 'Standard'.
@@ -297,17 +316,21 @@ serve(async (req: Request) => {
           // AGGREGATOR: Prevent false-flagging of legitimate identical line items in Draft Orders
           const existingRow = ledgerRows.find((r: any) => String(r.storefront_sku) === String(skuName));
           if (existingRow) {
-              console.log(` -> Aggregating duplicate line item: [${skuName}] (+${qty})`);
-              existingRow.qty_sold += qty;
+              console.log(` -> Aggregating duplicate line item: [${skuName}] (+${netQty})`);
+              existingRow.qty_sold += netQty;
               existingRow.subtotal += subtotal;
               existingRow.discount_amount += lineDiscount;
               existingRow.net_profit += (subtotal - lineDiscount); // rowShip, rowFee, etc are mapped to the first index.
               
+              if (existingRow.qty_sold > 0 && existingRow.transaction_type === 'Refunded - Restocked') {
+                  existingRow.transaction_type = tagTransactionType || 'Standard';
+              }
+              
               const existingInv = invUpdates.find((i: any) => i.item_key === `RECIPE:::${internalName}`);
               if (existingInv) {
-                  existingInv.sold_qty_increment += qty;
+                  existingInv.sold_qty_increment += netQty;
               } else {
-                  invUpdates.push({ item_key: `RECIPE:::${internalName}`, sold_qty_increment: qty });
+                  invUpdates.push({ item_key: `RECIPE:::${internalName}`, sold_qty_increment: netQty });
               }
               return;
           }
@@ -317,7 +340,7 @@ serve(async (req: Request) => {
             sale_date: dateStr,
             storefront_sku: skuName,
             recipe_item_uuid: isUuid(internalName) ? internalName : null,
-            qty_sold: qty,
+            qty_sold: netQty,
             actual_sale_price: price,
             cogs_at_sale: 0, 
             subtotal: subtotal,
@@ -362,7 +385,7 @@ serve(async (req: Request) => {
 
           invUpdates.push({
             item_key: `RECIPE:::${internalName}`,
-            sold_qty_increment: qty // custom DB function needed or read-modify-write
+            sold_qty_increment: netQty
           });
         });
       }
