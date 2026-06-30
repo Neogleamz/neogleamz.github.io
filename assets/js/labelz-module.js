@@ -75,7 +75,7 @@ window.lblzRedo = function() {
 function loadLabelzHistory(jsonStr) {
     if (!jsonStr || !fCanvas) return;
     isHistoryLocked = true;
-    fCanvas.loadFromJSON(jsonStr, function() {
+    fCanvas.loadFromJSON(jsonStr).then(function() {
         fCanvas.renderAll();
         // Restore dynamic regenerations
         fCanvas.getObjects().forEach(o => {
@@ -590,7 +590,7 @@ window.handleLabelzImageUpload = function(e) {
     const reader = new FileReader();
     reader.onload = function(f){
         const data = f.target.result;
-        fabric.Image.fromURL(data, function(img){
+        fabric.Image.fromURL(data).then(function(img){
             // Scaled down to fit canvas
             img.scaleToWidth(fCanvas.width * 0.5);
             img.set({left: fCanvas.width/2, top: fCanvas.height/2, originX: 'center', originY: 'center'});
@@ -619,7 +619,7 @@ function handleLabelzPaste(e) {
             const reader = new FileReader();
             reader.onload = function(f){
                 const data = f.target.result;
-                fabric.Image.fromURL(data, function(img){
+                fabric.Image.fromURL(data).then(function(img){
                     img.scaleToWidth(fCanvas.width * 0.5);
                     img.set({left: fCanvas.width/2, top: fCanvas.height/2, originX: 'center', originY: 'center'});
                     if(fCanvas) {
@@ -650,7 +650,7 @@ function addLabelzBarcode(codeStr = '1234567890', format = 'code128', templateTe
             textxalign: 'center',
         });
         
-        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), function(img) {
+        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(function(img) {
             img.set({
                 left: fCanvas.width / 2, top: fCanvas.height / 2,
                 originX: 'center', originY: 'center',
@@ -668,7 +668,7 @@ function addLabelzBarcode(codeStr = '1234567890', format = 'code128', templateTe
         const ctx = tmpCanvas.getContext('2d');
         ctx.fillStyle = '#ff0000'; ctx.fillRect(0,0,150,30);
         ctx.fillStyle = '#ffffff'; ctx.font = '12px Arial'; ctx.textAlign = 'center'; ctx.fillText('INVALID FORMAT', 75, 20);
-        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), function(img) {
+        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(function(img) {
             img.set({
                 left: fCanvas.width / 2, top: fCanvas.height / 2,
                 originX: 'center', originY: 'center',
@@ -692,7 +692,7 @@ window.addLabelzQR = function(codeStr = 'NEOGLEAMZ') {
             scale: 3,
         });
         
-        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), function(img) {
+        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(function(img) {
             img.set({
                 left: fCanvas.width / 2, top: fCanvas.height / 2,
                 originX: 'center', originY: 'center',
@@ -724,7 +724,7 @@ function regenerateBarcodeImage(obj, text, format) {
         if (format !== 'qrcode') drawOpts.height = 10;
         bwipjs.toCanvas('labelzBwipjsRenderer', drawOpts);
         
-        obj.setSrc(tmpCanvas.toDataURL('image/png'), function() {
+        obj.setSrc(tmpCanvas.toDataURL('image/png')).then(function() {
             obj.set({ barcodeOpts: { bcid: format, text: text }});
             // Re-apply physical target bounds if this object was locked to a template grid
             if (obj.targetWPx && obj.width) {
@@ -742,7 +742,7 @@ function regenerateBarcodeImage(obj, text, format) {
         const ctx = tmpCanvas.getContext('2d');
         ctx.fillStyle = '#ff0000'; ctx.fillRect(0,0,150,30);
         ctx.fillStyle = '#ffffff'; ctx.font = '12px Arial'; ctx.textAlign = 'center'; ctx.fillText('INVALID FORMAT', 75, 20);
-        obj.setSrc(tmpCanvas.toDataURL('image/png'), function() {
+        obj.setSrc(tmpCanvas.toDataURL('image/png')).then(function() {
             obj.set({ barcodeOpts: { bcid: format, text: text }});
             if (obj.targetWPx && obj.width) {
                 obj.scaleToWidth(obj.targetWPx);
@@ -1251,7 +1251,7 @@ window.click_labelzLoadTemplate = function(id) {
                 if (bcid !== 'qrcode') drawOpts.height = 10;
                 bwipjs.toCanvas('labelzBwipjsRenderer', drawOpts);
                 
-                fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), function(img) {
+                fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(function(img) {
                     img.set({
                         left: leftPx, top: topPx,
                         originX: 'center', originY: 'center',
@@ -1358,7 +1358,7 @@ window.openEditLabelModal = function(name) {
             }
         } catch(e) { console.error("JSON sanitize error", e); }
 
-        fCanvas.loadFromJSON(safeJson, function() {
+        fCanvas.loadFromJSON(safeJson).then(function() {
             if (typeof window.applyLabelzPreviewContext === 'function') {
                 window.applyLabelzPreviewContext();
             } else {

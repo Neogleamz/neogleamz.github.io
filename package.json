@@ -25,19 +25,19 @@
   "homepage": "https://github.com/Neogleamz/neogleamz.github.io#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.3.0",
+    "eslint": "^10.6.0",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
-    "prettier": "^3.8.3",
-    "supabase": "^2.101.0"
+    "prettier": "^3.9.4",
+    "supabase": "^2.109.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.0",
     "canvas": "^3.2.3",
     "dompurify": "^3.4.5",
     "dotenv": "^17.4.2",
-    "exceljs": "^4.4.0",
-    "fabric": "^5.3.0",
+    "exceljs": "^3.4.0",
+    "fabric": "^7.4.0",
     "jsdom": "^29.1.1"
   }
 }
