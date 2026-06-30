@@ -38,16 +38,16 @@ This document acts as the permanent, living task tracker integrated directly wit
 ### 🟡 Legacy HTML Audits
 *Clean sweep — all legacy audits successfully completed and archived!* ✅
 
-### 🔴 Security & DOM Risk
-- [🚀] `debt/security` : **Unguarded innerHTML** - `modalEl.innerHTML = innerHtml;` is currently used in `assets/js/barcodz-module.js` (Line 476) without `window.safeHTML()` wrapper. This poses an XSS risk.
-- [🚀] `debt/security` : **Unguarded insertAdjacentHTML** - `b.insertAdjacentHTML(...)` is currently used in `index.html` (Line 4268) without `window.safeHTML()` wrapper.
-
-### 🟡 Dependencies
-- [🚀] `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).
 ---
 
 ## 🗄️ Completed & Archived Epics
 
+### Target: `main`
+**Epic: Technical Debt Sweep**
+*(Archived — 2026-06-30)*
+- [🚀] `debt/security` : **Unguarded innerHTML** - `modalEl.innerHTML = innerHtml;` is currently used in `assets/js/barcodz-module.js` (Line 476) without `window.safeHTML()` wrapper. This poses an XSS risk.
+- [🚀] `debt/security` : **Unguarded insertAdjacentHTML** - `b.insertAdjacentHTML(...)` is currently used in `index.html` (Line 4268) without `window.safeHTML()` wrapper.
+- [🚀] `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).
 ### Target: `main`
 **Epic: Zero-Drift Sandbox Protocol**
 *(Archived — 2026-06-06)*
