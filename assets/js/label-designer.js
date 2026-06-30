@@ -66,11 +66,16 @@ window.ldRenderGlobalTemplateDropdown = function() {
         document.getElementById('labelzDesignerTemplateSelect')
     ];
     
-    let html = '<option value="">Default (No Template)</option>';
+    const _fallbackStd = (!window.ldState.activeTemplateId && window.ldState.templates)
+        ? (window.ldState.templates.find(t => t.name.toLowerCase() === 'standard template') || {}).id
+        : null;
+    let html = `<option value=""${!window.ldState.activeTemplateId && !_fallbackStd ? ' selected' : ''}>Default (No Template)</option>`;
     if (window.ldState && window.ldState.templates) {
         window.ldState.templates.forEach(t => {
-            const selected = (window.ldState.activeTemplateId === t.id) ? 'selected' : '';
-            html += `<option value="${t.id}" ${selected}>${t.name}</option>`;
+            const isSelected = window.ldState.activeTemplateId
+                ? (window.ldState.activeTemplateId === t.id)
+                : (t.id === _fallbackStd);
+            html += `<option value="${t.id}"${isSelected ? ' selected' : ''}>${t.name}</option>`;
         });
     }
     
