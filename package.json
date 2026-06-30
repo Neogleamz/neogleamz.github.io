@@ -32,7 +32,7 @@
     "supabase": "^2.101.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.106.1",
+    "@supabase/supabase-js": "^2.110.0",
     "canvas": "^3.2.3",
     "dompurify": "^3.4.5",
     "dotenv": "^17.4.2",

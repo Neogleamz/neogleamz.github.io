@@ -43,7 +43,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `debt/security` : **Unguarded insertAdjacentHTML** - `b.insertAdjacentHTML(...)` is currently used in `index.html` (Line 4268) without `window.safeHTML()` wrapper.
 
 ### 🟡 Dependencies
-- [ ] `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).
+- [x] `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).
 ---
 
 ## 🗄️ Completed & Archived Epics
