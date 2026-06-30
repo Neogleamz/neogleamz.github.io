@@ -418,7 +418,6 @@ window.runForensicAccounting = function(rows) {
     processed.forEach((r, i) => {
         let isDonor = r.transaction_type === 'Pre-Ship Exchange' || r.transaction_type === 'Post-Ship Exchange' || r.transaction_type === 'Scrapped Exchange';
         let isVoided = r.transaction_type === 'Cancelled' || r.transaction_type === 'IGNORE' || r.transaction_type === 'Partial Refund';
-        let isRefundLoss = r.transaction_type === 'Refunded - Warranty' || r.transaction_type === 'Refunded - Scrapped' || r.transaction_type === 'Refunded - Restocked';
         
         r.fee = (i === firstShippableIndex) ? orderStripeFee : 0;
         r.stripeFee = r.fee;

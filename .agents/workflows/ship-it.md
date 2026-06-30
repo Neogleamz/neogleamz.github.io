@@ -15,7 +15,7 @@ When the user invokes `/ship-it` (or says "ship it", "merge task", or "finalize 
    - Security flaws (e.g., hardcoded secrets, unhandled exceptions).
    - Performance bottlenecks (e.g., memory leaks from uncleared native event listeners, expensive DOM reflows, unoptimized loops).
    - Code cleanliness and proper modular architecture.
-   - **Continuous QA Command (CRITICAL):** You MUST execute `npm test` and `npx eslint .` in the terminal to verify zero regressions and zero syntax flaws. You are strictly forbidden from executing a merge if either command throws an error.
+   - **Continuous QA Command (CRITICAL):** You MUST execute `npm test` and `npx eslint .` in the terminal to verify zero regressions and zero syntax flaws. You are strictly forbidden from executing a merge if `npm test` fails or if `npx eslint .` outputs ANY errors OR ANY warnings. (You must achieve exactly 0 errors and 0 warnings).
    *If any issues or test failures are flagged, list them out and **HALT**. Wait for permission to either fix them or abort the merge.*
 4. **Ledger Reconciliation**: Open `@/tools/SK8Lytz_Bucket_List.md`. Review the active queues (P0, P1, P2). Did the code changes you just made accidentally or intentionally fulfill any *other* unchecked `[ ]` tasks, even if they belong to a different Epic block? If yes, explicitly check them off (`[x]`) right now to prevent orphaned tasks.
 5. **Database Sync Gate**: Check if any `.sql` files in `supabase/migrations/` were created or modified. If yes, you MUST invoke the `/supabase_sync` protocol to ensure `npx supabase db push` is executed and documentation is updated BEFORE merging.
@@ -47,7 +47,7 @@ Render a Markdown table with every gate from above, its result (✅ PASS, ❌ FA
 |---|---|---|
 | 🌿 Branch Verified | ✅ | `feat/xxx` → `main` |
 | 🧪 Tests (`npm test`) | ✅ | 27/27 PASS |
-| 🔎 ESLint (`npx eslint`) | ✅ | 0 errors (N warnings) |
+| 🔎 ESLint (`npx eslint`) | ✅ | 0 errors (0 warnings) |
 | 📋 Ledger Reconciliation | ✅ | N task(s) marked `[x]` |
 | 💾 Database Sync Gate | ⏭️ | No `.sql` migrations found |
 | 📚 Knowledge Audit Gate | ⏭️ | No new protocols documented |
