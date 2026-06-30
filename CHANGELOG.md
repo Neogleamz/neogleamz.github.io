@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [1.5.0] - 2026-06-30
+
+### ✨ Features & Bug Fixes
+- **Forensic Engine Revenue Consolidation**: Modified the forensic engine logic to calculate total shipping and taxes for the entire order, and consolidate them directly onto the primary active row (the replacement row) during complex exchanges. Upgraded the UI table rendering to prevent splitting captured revenues across surrendered donor rows.
+
 ## [1.4.2] - 2026-06-29
 
 ### ✨ Features & Bug Fixes
