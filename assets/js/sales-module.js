@@ -871,6 +871,7 @@ function renderSalesTable() {
     });
 
     let totals = { gross: 0, captured: 0, cogs: 0, shipping: 0, stripe: 0, net: 0, count: a.length, discounts: 0, units: 0, burdenUnits: 0, burdenPct: 0 };
+    let warrantyCustomers = new Set();
 
 
     // Final Calculation Pass for Totals
@@ -891,14 +892,21 @@ function renderSalesTable() {
         totals.shipping += x.actualShipCost || 0;
         totals.stripe += x.stripeFee;
         totals.net += x.net;
-        totals.units += (x.transaction_type === 'IGNORE') ? 0 : (parseFloat(x.qty_sold) || 0);
+        
+        let isRealSale = (x.transaction_type === 'Standard' || x.transaction_type === 'Exchange Replacement' || x.transaction_type === 'Pre-Ship Exchange' || x.transaction_type === 'Post-Ship Exchange');
+        totals.units += isRealSale ? (parseFloat(x.qty_sold) || 0) : 0;
 
-        // Track strictly isolated Warranty overhead
-        if(x.transaction_type === 'Warranty') {
-            totals.burdenUnits += (parseFloat(x.qty_sold) || 0);
+        // Track strictly isolated Warranty overhead (Unique Customers to prevent multi-part inflation)
+        if(x.transaction_type === 'Warranty' || x.transaction_type === 'Refunded - Warranty' || x.transaction_type === 'Replacement / Warranty') {
+            if (x.customer_email_hash) {
+                warrantyCustomers.add(x.customer_email_hash);
+            } else {
+                totals.burdenUnits += 1;
+            }
         }
     });
 
+    totals.burdenUnits += warrantyCustomers.size;
     totals.burdenPct = totals.units > 0 ? (totals.burdenUnits / totals.units) * 100 : 0;
 
     // --- EXPORT TO ANALYTICS MODULE ---
@@ -928,8 +936,8 @@ function renderSalesTable() {
             <td class="trunc-col" style="font-weight:bold;">${x.order_id}</td>
             <td class="trunc-col" style="color:var(--text-muted);">${x["Source"] || ''}</td>
             <td class="trunc-col">${x.storefront_sku}</td>
-            <td class="editable trunc-col" contenteditable="true" data-focus="focus_storeOldVal" data-blur="blur_updateSaleCell" data-order="${x.order_id}" data-sku="${safeSku}" data-col="internal_recipe_name" data-isnum="false" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name || '-- UNMAPPED --'}</td>
-            <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" data-change="change_updateSaleType" data-order="${x.order_id}" data-sku="${safeSku}">
+            <td class="editable trunc-col" contenteditable="true" data-focus="focus_storeOldVal" data-blur="blur_updateSaleCell" data-order="${x.order_id}" data-sku="${safeSku}" data-id="${x.id}" data-col="internal_recipe_name" data-isnum="false" style="color:#0ea5e9; font-weight:bold;">${x.internal_recipe_name || '-- UNMAPPED --'}</td>
+            <td style="padding:4px;"><select style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-input); border-radius:4px; font-size:12px; padding:4px; outline:none;" data-change="change_updateSaleType" data-order="${x.order_id}" data-sku="${safeSku}" data-id="${x.id}">
                 ${window.getTransactionTypeOptions(x.transaction_type)}
             </select></td>
 
@@ -972,14 +980,15 @@ window.openSandboxForOrder = function(orderId) {
     }
 };
 
-window.updateSaleType = async function(sel, orderId, sku) {
+window.updateSaleType = async function(sel, orderId, sku, id) {
     try {
         let newVal = sel.value;
         sysLog(`Editing Sale Type ${orderId}: ${newVal}`);
         setMasterStatus("Saving...", "mod-working");
-        let row = salesDB.find(s => s.order_id == orderId && s.storefront_sku == sku);
+        
+        let row = id ? salesDB.find(s => s.id == id) : salesDB.find(s => s.order_id == orderId && s.storefront_sku == sku);
         if(!row) {
-            console.error(`Row not found for orderId: ${orderId}, sku: ${sku}`);
+            console.error(`Row not found for orderId: ${orderId}, sku: ${sku}, id: ${id}`);
             alert("Error: Cannot find local row data to update.");
             return;
         }
@@ -994,7 +1003,7 @@ window.updateSaleType = async function(sel, orderId, sku) {
                 
                 // 2. Map the type change
                 let updatedLines = orderLines.map(line => {
-                    if (line.storefront_sku === sku) {
+                    if (line.id === row.id) {
                         return { ...line, transaction_type: newVal };
                     }
                     return { ...line };
@@ -1002,7 +1011,7 @@ window.updateSaleType = async function(sel, orderId, sku) {
 
                 // 3. Run the Forensic Engine
                 let forensicResults = window.runForensicAccounting(updatedLines);
-                let sim = forensicResults.find(l => l.storefront_sku === sku);
+                let sim = forensicResults.find(l => l.id === row.id);
 
                 payload.cogs_at_sale = sim.cogs;
                 payload.transaction_fees = sim.fee;
@@ -1010,10 +1019,10 @@ window.updateSaleType = async function(sel, orderId, sku) {
 
                 // 4. Update siblings in DB and memory
                 forensicResults.forEach(async (fLine) => {
-                    if (fLine.storefront_sku !== sku) {
+                    if (fLine.id !== row.id) {
                         let sibPayload = { net_profit: fLine.net, transaction_fees: fLine.fee, cogs_at_sale: fLine.cogs };
-                        await supabaseClient.from('sales_ledger').update(sibPayload).eq('order_id', orderId).eq('storefront_sku', fLine.storefront_sku);
-                        let sibRow = salesDB.find(s => s.order_id == orderId && s.storefront_sku == fLine.storefront_sku);
+                        await supabaseClient.from('sales_ledger').update(sibPayload).eq('id', fLine.id);
+                        let sibRow = salesDB.find(s => s.id === fLine.id);
                         if(sibRow) Object.keys(sibPayload).forEach(k => { sibRow[k] = sibPayload[k]; });
                     }
                 });
@@ -1022,7 +1031,7 @@ window.updateSaleType = async function(sel, orderId, sku) {
             }
 
             sysLog(`Pushing Sale Type update to Supabase for ${orderId}...`, false, payload);
-            const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku);
+            const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('id', row.id);
             if(error) throw new Error("DB Error saving type: " + error.message);
 
             Object.keys(payload).forEach(k => { row[k] = payload[k]; });
@@ -1036,7 +1045,7 @@ window.updateSaleType = async function(sel, orderId, sku) {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); alert("Error saving type: \n" + e.message); }
 }
 
-async function updateSaleCell(cell, orderId, sku, col, isNum) {
+async function updateSaleCell(cell, orderId, sku, col, isNum, id) {
     try {
         let newVal = cell.innerText.trim(); if(newVal === oldValTemp) return;
         let dbVal = newVal;
@@ -1049,7 +1058,9 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
         }
 
         sysLog(`Editing Sale ${orderId}: ${col}`); setMasterStatus("Saving...", "mod-working");
-        let row = salesDB.find(s => s.order_id == orderId && s.storefront_sku == sku); if(!row) return;
+        let row = id ? salesDB.find(s => s.id == id) : salesDB.find(s => s.order_id == orderId && s.storefront_sku == sku); 
+        if(!row) return;
+        
         let oldQty = row.qty_sold; let oldRec = row.internal_recipe_name;
 
         let payloadCol = col === 'internal_recipe_name' ? 'recipe_item_uuid' : col;
@@ -1064,41 +1075,41 @@ async function updateSaleCell(cell, orderId, sku, col, isNum) {
             
             // 2. Map the change into the local line
             let updatedLines = orderLines.map(line => {
-                if (line.storefront_sku === sku) {
+                if (line.id === row.id) {
                     return { ...line, [col]: dbVal };
                 }
                 return { ...line };
             });
 
-            // 3. Run the Forensic Engine on the entire order group
+            // 3. Run the engine
             let forensicResults = window.runForensicAccounting(updatedLines);
-            let sim = forensicResults.find(l => l.storefront_sku === sku);
+            let sim = forensicResults.find(l => l.id === row.id);
 
-            payload.subtotal = isNaN(sim.subtotal) ? (sim.qty_sold * sim.actual_sale_price) : sim.subtotal;
-            payload.total = isNaN(sim.total) ? (sim.subtotal + sim.shipping + sim.taxes - sim.discount_amount) : sim.total;
             payload.cogs_at_sale = sim.cogs;
             payload.transaction_fees = sim.fee;
             payload.net_profit = sim.net;
-            
-            // Update the siblings in the database if they were impacted by shifting
+            if(col === 'qty_sold' || col === 'internal_recipe_name') {
+                payload.actual_sale_price = sim.actual_sale_price;
+                if(col==='internal_recipe_name') { row.actual_sale_price = sim.actual_sale_price; row.recipe_item_uuid = payloadVal; }
+            }
+
+            // 4. Save siblings
             forensicResults.forEach(async (fLine) => {
-                if (fLine.storefront_sku !== sku) {
+                if (fLine.id !== row.id) {
                     let sibPayload = { net_profit: fLine.net, transaction_fees: fLine.fee, cogs_at_sale: fLine.cogs };
-                    await supabaseClient.from('sales_ledger').update(sibPayload).eq('order_id', orderId).eq('storefront_sku', fLine.storefront_sku);
-                    // Update local memory for siblings too
-                    let sibRow = salesDB.find(s => s.order_id == orderId && s.storefront_sku == fLine.storefront_sku);
+                    await supabaseClient.from('sales_ledger').update(sibPayload).eq('id', fLine.id);
+                    let sibRow = salesDB.find(s => s.id === fLine.id);
                     if(sibRow) Object.keys(sibPayload).forEach(k => { sibRow[k] = sibPayload[k]; });
                 }
             });
         }
-        // --------------------------------------------------------
 
         sysLog(`Pushing Sale Cell update to Supabase for ${orderId}...`, false, payload);
-        const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('order_id', orderId).eq('storefront_sku', sku);
-        if(error) throw new Error(error.message);
+        const { error } = await supabaseClient.from('sales_ledger').update(payload).eq('id', row.id);
+        if(error) throw new Error("DB Error saving cell: " + error.message);
 
-        // Update local memory securely
         Object.keys(payload).forEach(k => { row[k] = payload[k]; });
+        row[col] = dbVal; 
 
         if(col === 'qty_sold' || col === 'internal_recipe_name') {
             let invUps = [];

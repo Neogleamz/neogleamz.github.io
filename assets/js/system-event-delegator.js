@@ -1769,7 +1769,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'change_updateSaleType':
-                    if (typeof window.updateSaleType === 'function') window.updateSaleType(el, el.getAttribute('data-order'), el.getAttribute('data-sku'));
+                    if (typeof window.updateSaleType === 'function') window.updateSaleType(el, el.getAttribute('data-order'), el.getAttribute('data-sku'), el.getAttribute('data-id'));
                     break;
                 case 'change_handleNativeMobileCameraCapture':
                     if (typeof window.change_handleNativeMobileCameraCapture === 'function') window.change_handleNativeMobileCameraCapture(event);
@@ -2110,7 +2110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof window.sysLog === 'function') { window.sysLog(`[Telemetry] ${event.type.toUpperCase()}: ${action}`, false, null, true); }
             switch(action) {
                 case 'blur_updateSaleCell':
-                    if (typeof window.updateSaleCell === 'function') window.updateSaleCell(el, el.getAttribute('data-order'), el.getAttribute('data-sku'), el.getAttribute('data-col'), el.getAttribute('data-isnum') === 'true');
+                    if (typeof window.updateSaleCell === 'function') window.updateSaleCell(el, el.getAttribute('data-order'), el.getAttribute('data-sku'), el.getAttribute('data-col'), el.getAttribute('data-isnum') === 'true', el.getAttribute('data-id'));
                     break;
                 case 'blur_updateDBCell':
                     if (typeof window.blur_updateDBCell === 'function') window.blur_updateDBCell(el);

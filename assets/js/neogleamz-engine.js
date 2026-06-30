@@ -376,7 +376,7 @@ window.runForensicAccounting = function(rows) {
             actShipCost = 0;
         }
 
-        let net = lineRevenue - fee - actShipCost - cogs;
+        let net = lineRevenue + parseFloat(r.forensic_shipping ?? r.shipping ?? 0) - fee - actShipCost - cogs;
         if (isVoided) net = 0;
 
         let isCostOnlyItem = (type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund' || type === 'Refunded - Restocked' || type === 'Refunded - Scrapped' || type === 'Refunded - Warranty');
@@ -425,6 +425,12 @@ window.runForensicAccounting = function(rows) {
         if (!isVoided && !isDonor) {
             // This runs for Standard, Warranty, Gift, Exchange Replacement, AND our isRefundLoss types (using 0 revenue)
             r.net = r._tempLineRevenue + parseFloat(r.forensic_shipping || r.shipping || 0) - r.fee - r.actShipCost - r.cogs;
+            if (i === firstShippableIndex && unspentExchangeCredit > 0) {
+                r.net += unspentExchangeCredit;
+            }
+        } else {
+            // Apply order-level fee and unspent credit to Donors/Voided if they are the primary row
+            r.net -= r.fee;
             if (i === firstShippableIndex && unspentExchangeCredit > 0) {
                 r.net += unspentExchangeCredit;
             }
