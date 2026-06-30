@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/396</span>
+                <span class='fraction'>0/399</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/204</span>
+                <span class='fraction'>0/210</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/67</span>
+                <span class='fraction'>0/68</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/330</span>
+                <span class='fraction'>0/333</span>
             </div>
         
             
@@ -779,7 +779,13 @@
 <a name='L714'></a><a href='#L714'>714</a>
 <a name='L715'></a><a href='#L715'>715</a>
 <a name='L716'></a><a href='#L716'>716</a>
-<a name='L717'></a><a href='#L717'>717</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L717'></a><a href='#L717'>717</a>
+<a name='L718'></a><a href='#L718'>718</a>
+<a name='L719'></a><a href='#L719'>719</a>
+<a name='L720'></a><a href='#L720'>720</a>
+<a name='L721'></a><a href='#L721'>721</a>
+<a name='L722'></a><a href='#L722'>722</a>
+<a name='L723'></a><a href='#L723'>723</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -847,6 +853,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1563,16 +1575,22 @@ async function <span class="fstat-no" title="function not covered" >ldSaveTempla
         document.getElementById('labelzDesignerTemplateSelect')
     ];
     
-    let html = <span class="cstat-no" title="statement not covered" >'&lt;option value=""&gt;Default (No Template)&lt;/option&gt;';</span>
+    // Default (No Template) uses Standard Template's UUID as its value so both options
+    // are functionally identical everywhere code reads the select's .value
+    const _stdTpl = <span class="cstat-no" title="statement not covered" >window.ldState.templates</span>
+        ? window.ldState.templates.find(<span class="fstat-no" title="function not covered" >t </span>=&gt; <span class="cstat-no" title="statement not covered" >t.name.toLowerCase() === 'standard template')</span>
+        : null;
+    const _defaultVal = <span class="cstat-no" title="statement not covered" >_stdTpl ? _stdTpl.id : '';</span>
+    let html = <span class="cstat-no" title="statement not covered" >`&lt;option value="${_defaultVal}"${!window.ldState.activeTemplateId ? ' selected' : ''}&gt;Default (No Template)&lt;/option&gt;`;</span>
 <span class="cstat-no" title="statement not covered" >    if (window.ldState &amp;&amp; window.ldState.templates) {</span>
 <span class="cstat-no" title="statement not covered" >        window.ldState.templates.forEach(<span class="fstat-no" title="function not covered" >t </span>=&gt; {</span>
-            const selected = <span class="cstat-no" title="statement not covered" >(window.ldState.activeTemplateId === t.id) ? 'selected' : '';</span>
-<span class="cstat-no" title="statement not covered" >            html += `&lt;option value="${t.id}" ${selected}&gt;${t.name}&lt;/option&gt;`;</span>
+            const isSelected = <span class="cstat-no" title="statement not covered" >window.ldState.activeTemplateId === t.id;</span>
+<span class="cstat-no" title="statement not covered" >            html += `&lt;option value="${t.id}"${isSelected ? ' selected' : ''}&gt;${t.name}&lt;/option&gt;`;</span>
         });
     }
     
 <span class="cstat-no" title="statement not covered" >    selects.forEach(<span class="fstat-no" title="function not covered" >se</span>l =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        if (sel) <span class="cstat-no" title="statement not covered" >sel.innerHTML = html;</span></span>
+<span class="cstat-no" title="statement not covered" >        if (sel) <span class="cstat-no" title="statement not covered" >sel.innerHTML = window.safeHTML(html);</span></span>
     });
 };
 &nbsp;
@@ -2218,7 +2236,7 @@ function <span class="fstat-no" title="function not covered" >ldPointerUp(</span
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-30T21:57:24.110Z
+                at 2026-06-30T23:34:41.125Z
             </div>
         <script src="prettify.js"></script>
         <script>

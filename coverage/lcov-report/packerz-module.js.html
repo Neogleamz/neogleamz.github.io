@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">6.98% </span>
+                <span class="strong">6.94% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>149/2133</span>
+                <span class='fraction'>149/2145</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">2.59% </span>
+                <span class="strong">2.57% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>7/270</span>
+                <span class='fraction'>7/272</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">8% </span>
+                <span class="strong">7.95% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>147/1836</span>
+                <span class='fraction'>147/1847</span>
             </div>
         
             
@@ -3694,7 +3694,18 @@
 <a name='L3629'></a><a href='#L3629'>3629</a>
 <a name='L3630'></a><a href='#L3630'>3630</a>
 <a name='L3631'></a><a href='#L3631'>3631</a>
-<a name='L3632'></a><a href='#L3632'>3632</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L3632'></a><a href='#L3632'>3632</a>
+<a name='L3633'></a><a href='#L3633'>3633</a>
+<a name='L3634'></a><a href='#L3634'>3634</a>
+<a name='L3635'></a><a href='#L3635'>3635</a>
+<a name='L3636'></a><a href='#L3636'>3636</a>
+<a name='L3637'></a><a href='#L3637'>3637</a>
+<a name='L3638'></a><a href='#L3638'>3638</a>
+<a name='L3639'></a><a href='#L3639'>3639</a>
+<a name='L3640'></a><a href='#L3640'>3640</a>
+<a name='L3641'></a><a href='#L3641'>3641</a>
+<a name='L3642'></a><a href='#L3642'>3642</a>
+<a name='L3643'></a><a href='#L3643'>3643</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -7173,9 +7184,20 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -10803,10 +10825,21 @@ window.handleRemoteCaptureCompleteOnPC = <span class="fstat-no" title="function 
 <span class="cstat-no" title="statement not covered" >        card.onmouseover = <span class="fstat-no" title="function not covered" >()</span> =&gt; { <span class="cstat-no" title="statement not covered" >card.style.transform = "scale(1.05)"; </span>};</span>
 <span class="cstat-no" title="statement not covered" >        card.onmouseout = <span class="fstat-no" title="function not covered" >()</span> =&gt; { <span class="cstat-no" title="statement not covered" >card.style.transform = "scale(1.0)"; </span>};</span>
         
-<span class="cstat-no" title="statement not covered" >        card.innerHTML = `</span>
-            &lt;img src="${imageUrl}" style="width:100%; height:100%; object-fit:cover;" onclick="window.open('${imageUrl}', '_blank')" /&gt;
-            &lt;button onclick="window.deleteRemoteStagedPhoto('${imageUrl}')" style="position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold; line-height:1; box-shadow:0 2px 4px rgba(0,0,0,0.5);"&gt;✕&lt;/button&gt;
-        `;
+        const img = <span class="cstat-no" title="statement not covered" >document.createElement('img');</span>
+<span class="cstat-no" title="statement not covered" >        img.src = imageUrl;</span>
+<span class="cstat-no" title="statement not covered" >        img.style.cssText = "width:100%; height:100%; object-fit:cover;";</span>
+<span class="cstat-no" title="statement not covered" >        img.addEventListener('click', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >window.open(imageUrl, '_blank'))</span>;</span>
+&nbsp;
+        const deleteBtn = <span class="cstat-no" title="statement not covered" >document.createElement('button');</span>
+<span class="cstat-no" title="statement not covered" >        deleteBtn.textContent = '✕';</span>
+<span class="cstat-no" title="statement not covered" >        deleteBtn.style.cssText = "position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold; line-height:1; box-shadow:0 2px 4px rgba(0,0,0,0.5);";</span>
+<span class="cstat-no" title="statement not covered" >        deleteBtn.addEventListener('click', <span class="fstat-no" title="function not covered" >(e</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            e.stopPropagation();</span>
+<span class="cstat-no" title="statement not covered" >            window.deleteRemoteStagedPhoto(imageUrl);</span>
+        });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        card.appendChild(img);</span>
+<span class="cstat-no" title="statement not covered" >        card.appendChild(deleteBtn);</span>
 <span class="cstat-no" title="statement not covered" >        container.appendChild(card);</span>
     }
     
@@ -10963,7 +10996,7 @@ window.click_saveRemoteMobileStagedPhotos = <span class="fstat-no" title="functi
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-30T21:57:24.110Z
+                at 2026-06-30T23:34:41.125Z
             </div>
         <script src="prettify.js"></script>
         <script>

@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/997</span>
+                <span class='fraction'>0/1007</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/783</span>
+                <span class='fraction'>0/793</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/122</span>
+                <span class='fraction'>0/123</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/858</span>
+                <span class='fraction'>0/866</span>
             </div>
         
             
@@ -1746,7 +1746,18 @@
 <a name='L1681'></a><a href='#L1681'>1681</a>
 <a name='L1682'></a><a href='#L1682'>1682</a>
 <a name='L1683'></a><a href='#L1683'>1683</a>
-<a name='L1684'></a><a href='#L1684'>1684</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1684'></a><a href='#L1684'>1684</a>
+<a name='L1685'></a><a href='#L1685'>1685</a>
+<a name='L1686'></a><a href='#L1686'>1686</a>
+<a name='L1687'></a><a href='#L1687'>1687</a>
+<a name='L1688'></a><a href='#L1688'>1688</a>
+<a name='L1689'></a><a href='#L1689'>1689</a>
+<a name='L1690'></a><a href='#L1690'>1690</a>
+<a name='L1691'></a><a href='#L1691'>1691</a>
+<a name='L1692'></a><a href='#L1692'>1692</a>
+<a name='L1693'></a><a href='#L1693'>1693</a>
+<a name='L1694'></a><a href='#L1694'>1694</a>
+<a name='L1695'></a><a href='#L1695'>1695</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2158,7 +2169,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3079,15 +3089,27 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3506,7 +3528,7 @@ function <span class="fstat-no" title="function not covered" >saveLabelzHistory(
 function <span class="fstat-no" title="function not covered" >loadLabelzHistory(</span>jsonStr) {
 <span class="cstat-no" title="statement not covered" >    if (!jsonStr || !fCanvas) <span class="cstat-no" title="statement not covered" >return;</span></span>
 <span class="cstat-no" title="statement not covered" >    isHistoryLocked = true;</span>
-<span class="cstat-no" title="statement not covered" >    fCanvas.loadFromJSON(jsonStr, <span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
+<span class="cstat-no" title="statement not covered" >    fCanvas.loadFromJSON(jsonStr).then(<span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
 <span class="cstat-no" title="statement not covered" >        fCanvas.renderAll();</span>
         // Restore dynamic regenerations
 <span class="cstat-no" title="statement not covered" >        fCanvas.getObjects().forEach(<span class="fstat-no" title="function not covered" >o </span>=&gt; {</span>
@@ -3840,8 +3862,7 @@ function <span class="fstat-no" title="function not covered" >updateLabelCanvasS
 &nbsp;
 &nbsp;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    fCanvas.setWidth(pxWidth);</span>
-<span class="cstat-no" title="statement not covered" >    fCanvas.setHeight(pxHeight);</span>
+<span class="cstat-no" title="statement not covered" >    fCanvas.setDimensions({ width: pxWidth, height: pxHeight });</span>
     
     // Resize container visually via CSS so it fits nicely
     const _wrapper = <span class="cstat-no" title="statement not covered" >document.getElementById('labelzCanvasWrapper');</span>
@@ -4021,7 +4042,7 @@ function <span class="fstat-no" title="function not covered" >disableLabelzDrawi
     const reader = <span class="cstat-no" title="statement not covered" >new FileReader();</span>
 <span class="cstat-no" title="statement not covered" >    reader.onload = <span class="fstat-no" title="function not covered" >fu</span>nction(f){</span>
         const data = <span class="cstat-no" title="statement not covered" >f.target.result;</span>
-<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(data, <span class="fstat-no" title="function not covered" >fu</span>nction(img){</span>
+<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(data).then(<span class="fstat-no" title="function not covered" >fu</span>nction(img){</span>
             // Scaled down to fit canvas
 <span class="cstat-no" title="statement not covered" >            img.scaleToWidth(fCanvas.width * 0.5);</span>
 <span class="cstat-no" title="statement not covered" >            img.set({left: fCanvas.width/2, top: fCanvas.height/2, originX: 'center', originY: 'center'});</span>
@@ -4050,7 +4071,7 @@ function <span class="fstat-no" title="function not covered" >handleLabelzPaste(
             const reader = <span class="cstat-no" title="statement not covered" >new FileReader();</span>
 <span class="cstat-no" title="statement not covered" >            reader.onload = <span class="fstat-no" title="function not covered" >fu</span>nction(f){</span>
                 const data = <span class="cstat-no" title="statement not covered" >f.target.result;</span>
-<span class="cstat-no" title="statement not covered" >                fabric.Image.fromURL(data, <span class="fstat-no" title="function not covered" >fu</span>nction(img){</span>
+<span class="cstat-no" title="statement not covered" >                fabric.Image.fromURL(data).then(<span class="fstat-no" title="function not covered" >fu</span>nction(img){</span>
 <span class="cstat-no" title="statement not covered" >                    img.scaleToWidth(fCanvas.width * 0.5);</span>
 <span class="cstat-no" title="statement not covered" >                    img.set({left: fCanvas.width/2, top: fCanvas.height/2, originX: 'center', originY: 'center'});</span>
 <span class="cstat-no" title="statement not covered" >                    if(fCanvas) {</span>
@@ -4081,7 +4102,7 @@ function <span class="fstat-no" title="function not covered" >addLabelzBarcode(<
             textxalign: 'center',
         });
         
-<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), <span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
+<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(<span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
 <span class="cstat-no" title="statement not covered" >            img.set({</span>
                 left: fCanvas.width / 2, top: fCanvas.height / 2,
                 originX: 'center', originY: 'center',
@@ -4099,7 +4120,7 @@ function <span class="fstat-no" title="function not covered" >addLabelzBarcode(<
         const ctx = <span class="cstat-no" title="statement not covered" >tmpCanvas.getContext('2d');</span>
 <span class="cstat-no" title="statement not covered" >        ctx.fillStyle = '#ff0000'; <span class="cstat-no" title="statement not covered" ></span>ctx.fillRect(0,0,150,30);</span>
 <span class="cstat-no" title="statement not covered" >        ctx.fillStyle = '#ffffff'; <span class="cstat-no" title="statement not covered" ></span>ctx.font = '12px Arial'; <span class="cstat-no" title="statement not covered" ></span>ctx.textAlign = 'center'; <span class="cstat-no" title="statement not covered" ></span>ctx.fillText('INVALID FORMAT', 75, 20);</span>
-<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), <span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
+<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(<span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
 <span class="cstat-no" title="statement not covered" >            img.set({</span>
                 left: fCanvas.width / 2, top: fCanvas.height / 2,
                 originX: 'center', originY: 'center',
@@ -4123,7 +4144,7 @@ function <span class="fstat-no" title="function not covered" >addLabelzBarcode(<
             scale: 3,
         });
         
-<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), <span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
+<span class="cstat-no" title="statement not covered" >        fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(<span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
 <span class="cstat-no" title="statement not covered" >            img.set({</span>
                 left: fCanvas.width / 2, top: fCanvas.height / 2,
                 originX: 'center', originY: 'center',
@@ -4155,7 +4176,7 @@ function <span class="fstat-no" title="function not covered" >regenerateBarcodeI
 <span class="cstat-no" title="statement not covered" >        if (format !== 'qrcode') <span class="cstat-no" title="statement not covered" >drawOpts.height = 10;</span></span>
 <span class="cstat-no" title="statement not covered" >        bwipjs.toCanvas('labelzBwipjsRenderer', drawOpts);</span>
         
-<span class="cstat-no" title="statement not covered" >        obj.setSrc(tmpCanvas.toDataURL('image/png'), <span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
+<span class="cstat-no" title="statement not covered" >        obj.setSrc(tmpCanvas.toDataURL('image/png')).then(<span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
 <span class="cstat-no" title="statement not covered" >            obj.set({ barcodeOpts: { bcid: format, text: text }});</span>
             // Re-apply physical target bounds if this object was locked to a template grid
 <span class="cstat-no" title="statement not covered" >            if (obj.targetWPx &amp;&amp; obj.width) {</span>
@@ -4173,7 +4194,7 @@ function <span class="fstat-no" title="function not covered" >regenerateBarcodeI
         const ctx = <span class="cstat-no" title="statement not covered" >tmpCanvas.getContext('2d');</span>
 <span class="cstat-no" title="statement not covered" >        ctx.fillStyle = '#ff0000'; <span class="cstat-no" title="statement not covered" ></span>ctx.fillRect(0,0,150,30);</span>
 <span class="cstat-no" title="statement not covered" >        ctx.fillStyle = '#ffffff'; <span class="cstat-no" title="statement not covered" ></span>ctx.font = '12px Arial'; <span class="cstat-no" title="statement not covered" ></span>ctx.textAlign = 'center'; <span class="cstat-no" title="statement not covered" ></span>ctx.fillText('INVALID FORMAT', 75, 20);</span>
-<span class="cstat-no" title="statement not covered" >        obj.setSrc(tmpCanvas.toDataURL('image/png'), <span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
+<span class="cstat-no" title="statement not covered" >        obj.setSrc(tmpCanvas.toDataURL('image/png')).then(<span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
 <span class="cstat-no" title="statement not covered" >            obj.set({ barcodeOpts: { bcid: format, text: text }});</span>
 <span class="cstat-no" title="statement not covered" >            if (obj.targetWPx &amp;&amp; obj.width) {</span>
 <span class="cstat-no" title="statement not covered" >                obj.scaleToWidth(obj.targetWPx);</span>
@@ -4682,7 +4703,7 @@ function <span class="fstat-no" title="function not covered" >assignLabelzDesign
 <span class="cstat-no" title="statement not covered" >                if (bcid !== 'qrcode') <span class="cstat-no" title="statement not covered" >drawOpts.height = 10;</span></span>
 <span class="cstat-no" title="statement not covered" >                bwipjs.toCanvas('labelzBwipjsRenderer', drawOpts);</span>
                 
-<span class="cstat-no" title="statement not covered" >                fabric.Image.fromURL(tmpCanvas.toDataURL('image/png'), <span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
+<span class="cstat-no" title="statement not covered" >                fabric.Image.fromURL(tmpCanvas.toDataURL('image/png')).then(<span class="fstat-no" title="function not covered" >fu</span>nction(img) {</span>
 <span class="cstat-no" title="statement not covered" >                    img.set({</span>
                         left: leftPx, top: topPx,
                         originX: 'center', originY: 'center',
@@ -4769,10 +4790,22 @@ function <span class="fstat-no" title="function not covered" >assignLabelzDesign
 <span class="cstat-no" title="statement not covered" >        document.getElementById('labelzDesignerSize').value = l.label_size || '2.25x1.25';</span>
     }
     
+    // Resolve the effective template from the main screen — Default now carries Standard Template's UUID
+    const _editMainTpl = <span class="cstat-no" title="statement not covered" >document.getElementById('labelzTemplateSelect');</span>
+    const _editTplId = <span class="cstat-no" title="statement not covered" >_editMainTpl ? _editMainTpl.value : '';</span>
+    const _editTplValid = <span class="cstat-no" title="statement not covered" >_editTplId &amp;&amp; window.ldState &amp;&amp; window.ldState.templates &amp;&amp; window.ldState.templates.some(<span class="fstat-no" title="function not covered" >t </span>=&gt; <span class="cstat-no" title="statement not covered" >t.id === _editTplId)</span>;</span>
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    updateLabelCanvasSize();</span>
-    
-<span class="cstat-no" title="statement not covered" >    if(l.layout_json) {</span>
-<span class="cstat-no" title="statement not covered" >        if (desTplSel) <span class="cstat-no" title="statement not covered" >desTplSel.value = ""; </span></span>// A saved label is custom, detach it from any active template visually
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (_editTplValid) {</span>
+        // Template is selected (or Default = Standard Template): apply it to canvas
+<span class="cstat-no" title="statement not covered" >        if (desTplSel) <span class="cstat-no" title="statement not covered" >desTplSel.value = _editTplId;</span></span>
+<span class="cstat-no" title="statement not covered" >        window.click_labelzLoadTemplate(_editTplId);</span>
+<span class="cstat-no" title="statement not covered" >        lblzHistory = [];</span>
+<span class="cstat-no" title="statement not covered" >        lblzHistoryProg = -1;</span>
+<span class="cstat-no" title="statement not covered" >        saveLabelzHistory();</span>
+    } else <span class="cstat-no" title="statement not covered" >if(l.layout_json) {</span>
+<span class="cstat-no" title="statement not covered" >        if (desTplSel) <span class="cstat-no" title="statement not covered" >desTplSel.value = ""; </span></span>// No template: load the label's saved custom design
         let safeJson = <span class="cstat-no" title="statement not covered" >l.layout_json;</span>
 <span class="cstat-no" title="statement not covered" >        try {</span>
 <span class="cstat-no" title="statement not covered" >            if (typeof l.layout_json === 'string') {</span>
@@ -4789,7 +4822,7 @@ function <span class="fstat-no" title="function not covered" >assignLabelzDesign
             }
         } catch(e) { <span class="cstat-no" title="statement not covered" >console.error("JSON sanitize error", e); </span>}
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        fCanvas.loadFromJSON(safeJson, <span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
+<span class="cstat-no" title="statement not covered" >        fCanvas.loadFromJSON(safeJson).then(<span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
 <span class="cstat-no" title="statement not covered" >            if (typeof window.applyLabelzPreviewContext === 'function') {</span>
 <span class="cstat-no" title="statement not covered" >                window.applyLabelzPreviewContext();</span>
             } else {
@@ -5119,7 +5152,7 @@ function <span class="fstat-no" title="function not covered" >closeLabelzDesigne
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-30T21:57:24.110Z
+                at 2026-06-30T23:34:41.125Z
             </div>
         <script src="prettify.js"></script>
         <script>
