@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">12.3% </span>
+                <span class="strong">12.25% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>108/878</span>
+                <span class='fraction'>108/881</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">10.93% </span>
+                <span class="strong">10.85% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>97/887</span>
+                <span class='fraction'>97/894</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">13.71% </span>
+                <span class="strong">13.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>103/751</span>
+                <span class='fraction'>103/754</span>
             </div>
         
             
@@ -1381,7 +1381,13 @@
 <a name='L1316'></a><a href='#L1316'>1316</a>
 <a name='L1317'></a><a href='#L1317'>1317</a>
 <a name='L1318'></a><a href='#L1318'>1318</a>
-<a name='L1319'></a><a href='#L1319'>1319</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1319'></a><a href='#L1319'>1319</a>
+<a name='L1320'></a><a href='#L1320'>1320</a>
+<a name='L1321'></a><a href='#L1321'>1321</a>
+<a name='L1322'></a><a href='#L1322'>1322</a>
+<a name='L1323'></a><a href='#L1323'>1323</a>
+<a name='L1324'></a><a href='#L1324'>1324</a>
+<a name='L1325'></a><a href='#L1325'>1325</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1806,6 +1812,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3077,7 +3089,7 @@ window.runForensicAccounting = <span class="fstat-no" title="function not covere
 <span class="cstat-no" title="statement not covered" >            actShipCost = 0;</span>
         }
 &nbsp;
-        let net = <span class="cstat-no" title="statement not covered" >lineRevenue - fee - actShipCost - cogs;</span>
+        let net = <span class="cstat-no" title="statement not covered" >lineRevenue + parseFloat(r.forensic_shipping ?? r.shipping ?? 0) - fee - actShipCost - cogs;</span>
 <span class="cstat-no" title="statement not covered" >        if (isVoided) <span class="cstat-no" title="statement not covered" >net = 0;</span></span>
 &nbsp;
         let isCostOnlyItem = (<span class="cstat-no" title="statement not covered" >type === 'Gift' || type === 'Warranty' || type === 'NEEDS ATTENTION' || type === 'IGNORE' || type === 'Cancelled' || type === 'Partial Refund' || type === 'Refunded - Restocked' || type === 'Refunded - Scrapped' || type === 'Refunded - Warranty')</span>;
@@ -3126,6 +3138,12 @@ window.runForensicAccounting = <span class="fstat-no" title="function not covere
 <span class="cstat-no" title="statement not covered" >        if (!isVoided &amp;&amp; !isDonor) {</span>
             // This runs for Standard, Warranty, Gift, Exchange Replacement, AND our isRefundLoss types (using 0 revenue)
 <span class="cstat-no" title="statement not covered" >            r.net = r._tempLineRevenue + parseFloat(r.forensic_shipping || r.shipping || 0) - r.fee - r.actShipCost - r.cogs;</span>
+<span class="cstat-no" title="statement not covered" >            if (i === firstShippableIndex &amp;&amp; unspentExchangeCredit &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >                r.net += unspentExchangeCredit;</span>
+            }
+        } else {
+            // Apply order-level fee and unspent credit to Donors/Voided if they are the primary row
+<span class="cstat-no" title="statement not covered" >            r.net -= r.fee;</span>
 <span class="cstat-no" title="statement not covered" >            if (i === firstShippableIndex &amp;&amp; unspentExchangeCredit &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >                r.net += unspentExchangeCredit;</span>
             }
@@ -4024,7 +4042,7 @@ window.initNeoDropdownMemory();
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-30T21:13:55.546Z
+                at 2026-06-30T21:46:32.353Z
             </div>
         <script src="prettify.js"></script>
         <script>
