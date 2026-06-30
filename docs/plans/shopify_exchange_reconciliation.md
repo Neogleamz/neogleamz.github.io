@@ -48,6 +48,20 @@ No breaking database migration changes are required. This change updates the bac
 
 ---
 
+## Immediate Data Repair (Order #1041)
+We have verified that the original Shopify webhook payload for order `#1041` is stored under `shopify_webhook_logs` with **Event ID: `custom-1782789448880`**.
+Once the edge function code is updated and deployed:
+1. We will issue a local/live POST request to the `shopify-webhook` endpoint with:
+   ```json
+   {
+     "action": "replay",
+     "shopify_event_id": "custom-1782789448880"
+   }
+   ```
+2. This will re-trigger the ingestion pipeline using the new, correct exchange logic and immediately fix order `#1041`'s quantities and net profit calculations in the database.
+
+---
+
 ## Verification Plan
 
 ### Automated Tests
