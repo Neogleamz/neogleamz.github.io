@@ -22,9 +22,8 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ### 🟠 P1 High Priority (Active Epics)
 
-### Target: `main`
-**Epic: Shopify Exchange & Return Reconciliation**
-- [ ] `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level. (Plan: [shopify_exchange_reconciliation.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/shopify_exchange_reconciliation.md))
+
+*Clean sweep — all high priority active epics successfully completed and archived!* ✅
 
 ## 🧹 Technical Debt
 
@@ -844,6 +843,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 **Epic: Packerz Assembly Verification Modal**
 *(Archived — 2026-06-02)*
 - [🚀] feat/packerz-assembly-modal : **Packerz Assembly Modal** - Replace native confirm dialog with rich Vanilla JS verification modal. (Plan: [docs/plans/packerz_assembly_modal.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/packerz_assembly_modal.md))
+
+### Target: `main`
+**Epic: Shopify Exchange & Return Reconciliation**
+*(Archived — 2026-06-30)*
+- [x] `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level. (Plan: [shopify_exchange_reconciliation.md](file:///d:/GitHub/neogleamz.github.io/docs/plans/shopify_exchange_reconciliation.md))
 
 ## 🧹 Technical Debt
 
