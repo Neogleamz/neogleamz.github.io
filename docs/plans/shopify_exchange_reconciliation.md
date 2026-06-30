@@ -1,9 +1,15 @@
-# Implementation Plan: Shopify Exchange Reconciliation
+# Implementation Plan: Shopify Exchange Reconciliation (Webhook-Only)
 
-Implement explicit quantity subtraction and fulfillment status checks during Shopify CSV imports and webhook processing to prevent duplicate quantity/revenue calculations for returns and exchanges.
+Implement explicit quantity subtraction in the Shopify webhook processing to prevent duplicate quantity/revenue calculations for returns and exchanges.
+
+### Design Decisions & Rationale
+*   **Leverage authoritative `refund_line_items` in Webhook:** Instead of estimating returned items from general refund totals, parsing the webhook's `refund_line_items` by `line_item_id` provides exact, row-level returns tracking, avoiding mismatches on orders with different items.
+*   **Preserve Historical Records with Qty = 0:** Rather than discarding returned rows completely (which destroys the order log structure), setting their `qty_sold` and `subtotal` to `0` and their `transaction_type` to `'Refunded - Restocked'` keeps the dataset structurally complete while ensuring they don't double-count financial totals.
+
+---
 
 ## User Review Required
-No breaking database migration changes are required. This change updates the backend and frontend application logic for ingesting Shopify order payloads.
+No breaking database migration changes are required. This change updates the backend logic for the Deno-based Supabase `shopify-webhook` edge function.
 
 ---
 
@@ -13,23 +19,32 @@ No breaking database migration changes are required. This change updates the bac
 
 #### [MODIFY] [index.ts](file:///d:/GitHub/neogleamz.github.io/supabase/functions/shopify-webhook/index.ts)
 *   **Extract Refund Mapping:**
-    Iterate over `order.refunds` at the start of order parsing. Sum the refunded quantities per `line_item_id` and store them in a temporary map.
+    Iterate over `order.refunds` at the start of order parsing. Sum the refunded quantities per `line_item_id` and store them in a temporary map:
+    ```typescript
+    const refundedLineItems: Record<string, number> = {};
+    if (order.refunds) {
+        order.refunds.forEach((r: any) => {
+            if (r.refund_line_items) {
+                r.refund_line_items.forEach((ri: any) => {
+                    const liId = String(ri.line_item_id);
+                    refundedLineItems[liId] = (refundedLineItems[liId] || 0) + (parseInt(ri.quantity) || 0);
+                });
+            }
+        });
+    }
+    ```
 *   **Calculate Net Quantities:**
-    In the `line_items` loop, fetch the item's refunded quantity from the map. Deduct it from the item's original quantity to obtain the true `netQty`.
+    In the `line_items` loop, fetch the item's refunded quantity from the map. Deduct it from the item's original quantity to obtain the true `netQty`:
+    ```typescript
+    const lineItemId = String(item.id);
+    const refundedQty = refundedLineItems[lineItemId] || 0;
+    const netQty = Math.max(0, qty - refundedQty);
+    ```
 *   **Filter/Aggregate Adjustments:**
-    If `netQty === 0`, ensure that the item does not add to the aggregated `qty_sold`, `subtotal`, and `discount_amount` of the row. Set the row's `qty_sold = 0` and `transaction_type = 'Refunded - Restocked'` (preserving the row historically without duplicating the financial figures).
-
----
-
-### CSV Import Engine
-
-#### [MODIFY] [sales-module.js](file:///d:/GitHub/neogleamz.github.io/assets/js/sales-module.js)
-*   **Evaluate Lineitem Fulfillment Status:**
-    In the `processParsedSales` iteration, inspect `r['Lineitem fulfillment status']`.
-*   **Zero Out Restocked Items:**
-    If the status is `'restocked'`, `'refunded'`, or `'cancelled'`, treat the net quantity for this row as `0`.
-*   **Classify Transaction Type:**
-    Mark these rows with `transaction_type = 'Refunded - Restocked'` to reflect their return status cleanly.
+    Modify the aggregator and row generation:
+    - If `netQty === 0`, ensure that the item does not add to the aggregated `qty_sold`, `subtotal`, and `discount_amount` of the row.
+    - Set the row's `qty_sold = 0`, `subtotal = 0`, `discount_amount = 0`, `net_profit = 0`, and `transaction_type = 'Refunded - Restocked'` (preserving the row historically without duplicating the financial figures).
+    - If `netQty > 0`, use `netQty` to calculate the row's values.
 
 ---
 
@@ -39,5 +54,4 @@ No breaking database migration changes are required. This change updates the bac
 *   Ensure that existing test suites pass with zero regressions.
 
 ### Manual Verification
-*   **Dry Run Import Test:** Upload a test CSV containing order `#1041` with both rows, and verify that the Sandbox sync modal displays a single unit of `SK8Lytz HALOZ` and a subtotal of `$76.50` instead of `$153.00`.
 *   **Webhook Replay Test:** Replay the webhook event for order `#1041` on the development database, verifying that the database record is updated to `qty_sold = 1`, `total = 76.50`, and correct COGS/net calculations.
