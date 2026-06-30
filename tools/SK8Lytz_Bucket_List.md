@@ -36,14 +36,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `debt/security` : **[packerz-module.js:3479](../assets/js/packerz-module.js)** — `card.innerHTML` injects `imageUrl` into `src` AND an inline `onclick` handler — double violation (unguarded innerHTML + forbidden inline event handler). Refactor to use `data-click` token and `window.safeHTML()`.
 
 ### 🔴 Vulnerabilities (npm audit — 5 total, 3 high)
-- [ ] `debt/dependencies` : **fabric@5.5.2 → 7.4.0** — HIGH severity stored XSS via SVG export (GHSA-hfvx-25r5-qc3w, GHSA-w22m-hvvm-xmwx). Run `npm audit fix --force` — **BREAKING CHANGE**, audit fabric 7.x API diff before upgrading.
-- [ ] `debt/dependencies` : **tar (via @mapbox/node-pre-gyp)** — HIGH severity path traversal (6 CVEs). Run `npm audit fix` — non-breaking, safe to run.
-- [ ] `debt/dependencies` : **uuid < 11.1.1 (via exceljs)** — MODERATE, missing buffer bounds check. Requires `npm audit fix --force` (downgrades exceljs to 3.4.0).
+- [x] `debt/dependencies` : **fabric@5.5.2 → 7.4.0** — HIGH severity stored XSS via SVG export (GHSA-hfvx-25r5-qc3w, GHSA-w22m-hvvm-xmwx). Run `npm audit fix --force` — **BREAKING CHANGE**, audit fabric 7.x API diff before upgrading.
+- [x] `debt/dependencies` : **tar (via @mapbox/node-pre-gyp)** — HIGH severity path traversal (6 CVEs). Run `npm audit fix` — non-breaking, safe to run.
+- [x] `debt/dependencies` : **uuid < 11.1.1 (via exceljs)** — MODERATE, missing buffer bounds check. Requires `npm audit fix --force` (downgrades exceljs to 3.4.0).
 
 ### 🟡 Stale Packages (safe patch/minor bumps)
-- [ ] `debt/dependencies` : `eslint` 10.4.1 → 10.6.0 (patch — safe)
-- [ ] `debt/dependencies` : `prettier` 3.8.3 → 3.9.4 (patch — safe)
-- [ ] `debt/dependencies` : `supabase` 2.104.0 → 2.109.0 (minor — safe)
+- [x] `debt/dependencies` : `eslint` 10.4.1 → 10.6.0 (patch — safe)
+- [x] `debt/dependencies` : `prettier` 3.8.3 → 3.9.4 (patch — safe)
+- [x] `debt/dependencies` : `supabase` 2.104.0 → 2.109.0 (minor — safe)
 
 ---
 

@@ -513,7 +513,7 @@ window.click_cancelPrintSuccess = function(_btn) {
     if (m) m.remove();
     const printArea = document.getElementById('printableBarcodeArea');
     if (printArea) printArea.innerHTML = '';
-    if(typeof sysLog === 'function') sysLog("Print job cancelled by user. Inventory not deducted.", true);
+    if(typeof sysLog === 'function') sysLog("Print job cancelled by user. Inventory not deducted.", false);
 };
 
 async function consumeThermalMedia(qty, activeSizeSelectId) {
