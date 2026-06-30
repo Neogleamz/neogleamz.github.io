@@ -409,8 +409,7 @@ function updateLabelCanvasSize() {
 
 
 
-    fCanvas.setWidth(pxWidth);
-    fCanvas.setHeight(pxHeight);
+    fCanvas.setDimensions({ width: pxWidth, height: pxHeight });
     
     // Resize container visually via CSS so it fits nicely
     const _wrapper = document.getElementById('labelzCanvasWrapper');
