@@ -1337,10 +1337,22 @@ window.openEditLabelModal = function(name) {
         document.getElementById('labelzDesignerSize').value = l.label_size || '2.25x1.25';
     }
     
+    // Resolve the effective template from the main screen — Default now carries Standard Template's UUID
+    const _editMainTpl = document.getElementById('labelzTemplateSelect');
+    const _editTplId = _editMainTpl ? _editMainTpl.value : '';
+    const _editTplValid = _editTplId && window.ldState && window.ldState.templates && window.ldState.templates.some(t => t.id === _editTplId);
+
     updateLabelCanvasSize();
-    
-    if(l.layout_json) {
-        if (desTplSel) desTplSel.value = ""; // A saved label is custom, detach it from any active template visually
+
+    if (_editTplValid) {
+        // Template is selected (or Default = Standard Template): apply it to canvas
+        if (desTplSel) desTplSel.value = _editTplId;
+        window.click_labelzLoadTemplate(_editTplId);
+        lblzHistory = [];
+        lblzHistoryProg = -1;
+        saveLabelzHistory();
+    } else if(l.layout_json) {
+        if (desTplSel) desTplSel.value = ""; // No template: load the label's saved custom design
         let safeJson = l.layout_json;
         try {
             if (typeof l.layout_json === 'string') {

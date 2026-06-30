@@ -66,15 +66,16 @@ window.ldRenderGlobalTemplateDropdown = function() {
         document.getElementById('labelzDesignerTemplateSelect')
     ];
     
-    const _fallbackStd = (!window.ldState.activeTemplateId && window.ldState.templates)
-        ? (window.ldState.templates.find(t => t.name.toLowerCase() === 'standard template') || {}).id
+    // Default (No Template) uses Standard Template's UUID as its value so both options
+    // are functionally identical everywhere code reads the select's .value
+    const _stdTpl = window.ldState.templates
+        ? window.ldState.templates.find(t => t.name.toLowerCase() === 'standard template')
         : null;
-    let html = `<option value=""${!window.ldState.activeTemplateId && !_fallbackStd ? ' selected' : ''}>Default (No Template)</option>`;
+    const _defaultVal = _stdTpl ? _stdTpl.id : '';
+    let html = `<option value="${_defaultVal}"${!window.ldState.activeTemplateId ? ' selected' : ''}>Default (No Template)</option>`;
     if (window.ldState && window.ldState.templates) {
         window.ldState.templates.forEach(t => {
-            const isSelected = window.ldState.activeTemplateId
-                ? (window.ldState.activeTemplateId === t.id)
-                : (t.id === _fallbackStd);
+            const isSelected = window.ldState.activeTemplateId === t.id;
             html += `<option value="${t.id}"${isSelected ? ' selected' : ''}>${t.name}</option>`;
         });
     }
