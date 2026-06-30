@@ -1,5 +1,15 @@
 # SK8Lytz Application Changelog
 
+## [1.4.2] - 2026-06-29
+
+### ✨ Features & Bug Fixes
+- **Sub-Assembly Scrap Propagation to Raw Materials**: Automatically calculate raw materials consumed by scrapped sub-assemblies (nested or top-level) using a recursive Bill of Materials (BOM) traversal. Shift the raw material deductions from the `consumed_qty` (CONS) column to the `scrap_qty` (SCRAP) column in `inventory_consumption`, providing accurate raw material wastage reporting on the stockpile dashboard while preventing double-deduction.
+- **Archived Work Order Active View Guard**: Hardened the active work order view rendering to check for archived status. The main panel now automatically hides if the active work order is completed, archived, or deleted, preventing concurrent browser tabs from forcing open old completed work orders upon receiving Supabase Realtime sync updates.
+- **Cycle Count Reason Code Standardization & Validation**: Standardized mobile scanner dropdown options with desktop reason codes. Added strict version validation on the sync receiver; if an outdated mobile browser session broadcasts an invalid reason code, the desktop rejects the update and sends a broadcast reload request to the phone, which prompts the operator and reloads the mobile app automatically.
+
+### 🧹 Chores & Cleanup
+- **ESLint Warning Cleanup**: Renamed the unused parameter `q` to `_q` in `assets/js/production-module.js` to ensure the eslint report has zero warnings and zero errors.
+
 ## [1.4.1] - 2026-06-17
 
 ### ✨ Features & Bug Fixes
