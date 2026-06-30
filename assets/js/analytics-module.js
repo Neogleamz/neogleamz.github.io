@@ -334,14 +334,24 @@ window.backfillFinancials = async function(context = 'sales') {
                 let roundedNet = Math.round(sim.net * 100) / 100;
                 let roundedCogs = Math.round(sim.cogs * 100) / 100;
                 
-                const { error } = await supabaseClient.from('sales_ledger')
+                // Build the match query — prefer line_item_id for precision (multi-line same-SKU orders)
+                let query = supabaseClient.from('sales_ledger')
                     .update({ 
                         transaction_fees: roundedFee, 
                         net_profit: roundedNet,
                         cogs_at_sale: roundedCogs 
                     })
-                    .eq('order_id', oid)
-                    .eq('storefront_sku', sim.storefront_sku);
+                    .eq('order_id', oid);
+
+                if (sim.line_item_id) {
+                    query = query.eq('line_item_id', sim.line_item_id);
+                } else {
+                    // Legacy rows without line_item_id: match by SKU, skip returned rows (they handle COGS manually)
+                    query = query.eq('storefront_sku', sim.storefront_sku)
+                                 .not('transaction_type', 'like', 'Refunded -%');
+                }
+                
+                const { error } = await query;
                 
                 if(error) {
                     sysLog(`Backfill row error [${oid} | ${sim.storefront_sku}]: ${error.message}`, true);
