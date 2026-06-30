@@ -729,12 +729,11 @@
                     <div style="flex: 1;">
                         <label style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Reason Code:</label>
                         <select id="ccMobileReasonSelect" class="manual-input" style="width: 100%; margin-top: 4px; font-size: 13px;">
-                            <option value="Periodic Stock Audit (Calibration)">Periodic Stock Audit</option>
-                            <option value="Shrinkage (Lost/Stolen/Damaged)">Shrinkage</option>
-                            <option value="Process Scrap (Manufacturing Defect)">Process Scrap</option>
-                            <option value="Vendor Shortage/Overage">Vendor Shortage/Overage</option>
-                            <option value="Engineering/Prototype Consumption">Engineering/Prototype</option>
-                            <option value="Other">Other</option>
+                            <option value="Periodic Stock Audit">Periodic Stock Audit (Calibration)</option>
+                            <option value="Damaged / Expired Goods">Scrapped / Damaged</option>
+                            <option value="Prototype Consumed">Prototype Consumed</option>
+                            <option value="Production Consumed">Production Consumed</option>
+                            <option value="Supplier Shortage / Overage">Supplier Shortage / Overage</option>
                         </select>
                     </div>
                 </div>
@@ -965,6 +964,12 @@
                     if (cockpit) cockpit.style.display = 'flex';
                     
                     startCameraEngine();
+                });
+
+                // Listen for version mismatch and reload request
+                syncChannel.on('broadcast', { event: 'PC_OUTDATED_MOBILE' }, () => {
+                    alert("Outdated scanner version detected! The page will now reload to get the latest version.");
+                    window.location.reload(true);
                 });
 
                 // Listen for PC discard or save actions

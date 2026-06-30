@@ -1850,6 +1850,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_renderMasterSOP':
                     renderMasterSOP();
                     break;
+                case 'change_window_handleArchiveSortChange':
+                    if (typeof window.handleArchiveSortChange === 'function') window.handleArchiveSortChange();
+                    break;
                 case 'change_window_recomputeVelocityzBasel':
                     window.recomputeVelocityzBaseline();
                     break;

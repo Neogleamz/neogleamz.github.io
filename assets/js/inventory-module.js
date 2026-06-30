@@ -465,7 +465,7 @@ window.resetInventoryConsumption = async function() {
         const { error: delErr } = await supabaseClient
             .from('inventory_consumption')
             .delete()
-            .neq('item_key', 'system_lock_preventer'); // "delete all" hack
+            .neq('item_uuid', '00000000-0000-0000-0000-000000000000'); // Standard dummy UUID for delete all
             
         if (delErr) throw delErr;
         
@@ -551,7 +551,7 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         const { error: delErr } = await supabaseClient
             .from('inventory_consumption')
             .delete()
-            .neq('item_key', 'system_lock_preventer'); // Standard "delete all" hack
+            .neq('item_uuid', '00000000-0000-0000-0000-000000000000'); // Standard dummy UUID for delete all
         
         if (delErr) throw delErr;
         setSysProgress(60, 'working');
@@ -559,22 +559,37 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         // 3. Upgrade legacy string keys OR orphaned UUIDs in snapshot data to active UUIDs before inserting
         const upgradedSnapshotData = snapshot.snapshot_data.map(r => {
             // First, if it has a string key, always try to use the active UUID for that string key
+            let activeUuid = r.item_uuid;
             if (r.item_key && window.uuidMap && window.uuidMap[r.item_key]) {
-                r.item_uuid = window.uuidMap[r.item_key];
+                activeUuid = window.uuidMap[r.item_key];
             } 
             // Otherwise, if it has a UUID but no string key, check if this UUID is an orphaned one that needs translating
-            else if (r.item_uuid && window.uuidToNameMap && window.uuidMap) {
+            else if (activeUuid && window.uuidToNameMap && window.uuidMap) {
                 // Find the human-readable string key this orphaned UUID used to belong to
-                let oldStringKey = window.uuidToNameMap[r.item_uuid];
+                let oldStringKey = window.uuidToNameMap[activeUuid];
                 if (oldStringKey) {
                     // Find the NEW active UUID for that string key
-                    let activeUuid = window.uuidMap[oldStringKey];
-                    if (activeUuid && activeUuid !== r.item_uuid) {
-                        r.item_uuid = activeUuid;
+                    let mappedUuid = window.uuidMap[oldStringKey];
+                    if (mappedUuid && mappedUuid !== activeUuid) {
+                        activeUuid = mappedUuid;
                     }
                 }
             }
-            return r;
+            // Construct a clean database row object to prevent sending any non-existent columns (like item_key)
+            return {
+                item_uuid: activeUuid,
+                consumed_qty: parseFloat(r.consumed_qty) || 0,
+                manual_adjustment: parseFloat(r.manual_adjustment) || 0,
+                produced_qty: parseFloat(r.produced_qty) || 0,
+                sold_qty: parseFloat(r.sold_qty) || 0,
+                min_stock: parseFloat(r.min_stock) || 0,
+                scrap_qty: parseFloat(r.scrap_qty) || 0,
+                prototype_consumed_qty: parseFloat(r.prototype_consumed_qty) || 0,
+                assembly_consumed_qty: parseFloat(r.assembly_consumed_qty) || 0,
+                production_consumed_qty: parseFloat(r.production_consumed_qty) || 0,
+                prototype_produced_qty: parseFloat(r.prototype_produced_qty) || 0,
+                rop_lead_time_days: parseFloat(r.rop_lead_time_days) || 5
+            };
         });
 
         // 4. Re-inject snapshot rows
@@ -585,13 +600,30 @@ window.restoreInventorySnapshot = async function(snapshotId) {
         if (insertErr) throw insertErr;
         setSysProgress(90, 'working');
 
-        // 4. Update Local State & UI
-        // Refresh the global inventoryDB object from Supabase
-        // 4. Update Local State & UI
-        // Refresh the global inventoryDB object from Supabase
         const { data: freshData, error: fetchFreshErr } = await supabaseClient.from('inventory_consumption').select('*');
         if (fetchFreshErr) throw fetchFreshErr;
-        inventoryDB = freshData.reduce((acc, row) => ({ ...acc, [row.item_key]: row }), {});
+
+        inventoryDB = {};
+        if (freshData) {
+            freshData.forEach(r => {
+                let keys = (window.uuidToAllNamesMap && r.item_uuid && window.uuidToAllNamesMap[r.item_uuid]) ? window.uuidToAllNamesMap[r.item_uuid] : [r.item_key];
+                keys.forEach(mappedKey => {
+                    inventoryDB[mappedKey] = {
+                        consumed_qty: parseFloat(r.consumed_qty) || 0,
+                        manual_adjustment: parseFloat(r.manual_adjustment) || 0,
+                        produced_qty: parseFloat(r.produced_qty) || 0,
+                        sold_qty: parseFloat(r.sold_qty) || 0,
+                        min_stock: parseFloat(r.min_stock) || 0,
+                        scrap_qty: parseFloat(r.scrap_qty) || 0,
+                        prototype_consumed_qty: parseFloat(r.prototype_consumed_qty) || 0,
+                        assembly_consumed_qty: parseFloat(r.assembly_consumed_qty) || 0,
+                        production_consumed_qty: parseFloat(r.production_consumed_qty) || 0,
+                        prototype_produced_qty: parseFloat(r.prototype_produced_qty) || 0,
+                        rop_lead_time_days: parseFloat(r.rop_lead_time_days) || 5
+                    };
+                });
+            });
+        }
 
         window.renderInventoryTable();
         window.updateCcMngrStock();
@@ -673,11 +705,22 @@ window.previewInventorySnapshot = async function(snapshotId) {
         // Group by stable string keys
         const allKeys = new Set([...snapData.map(r => r.resolved_string_key), ...Object.keys(liveMap)]);
 
-        const calculateNet = (r) => {
+        const calculateNet = (r, itemKey) => {
             if (!r) return 0;
-            const pos = (parseFloat(r.produced_qty) || 0) + (parseFloat(r.prototype_produced_qty) || 0) + (parseFloat(r.manual_adjustment) || 0);
-            const neg = (parseFloat(r.sold_qty) || 0) + (parseFloat(r.consumed_qty) || 0) + (parseFloat(r.scrap_qty) || 0) + (parseFloat(r.assembly_consumed_qty) || 0) + (parseFloat(r.production_consumed_qty) || 0) + (parseFloat(r.prototype_consumed_qty) || 0);
-            return pos - neg;
+            const isProduct = itemKey.startsWith('RECIPE:::');
+            if (isProduct) {
+                const b = parseFloat(r.produced_qty) || 0;
+                const pb = parseFloat(r.prototype_produced_qty) || 0;
+                const sold = parseFloat(r.sold_qty) || 0;
+                const c_prod = parseFloat(r.production_consumed_qty) || 0;
+                const c_proto = parseFloat(r.prototype_consumed_qty) || 0;
+                const scrap = parseFloat(r.scrap_qty) || 0;
+                const adj = parseFloat(r.manual_adjustment) || 0;
+                return b - sold - c_prod - scrap + adj - Math.max(0, c_proto - pb);
+            } else {
+                const totalQty = (typeof catalogCache !== 'undefined' && catalogCache[itemKey]) ? (catalogCache[itemKey].totalQty || 0) : 0;
+                return totalQty - (parseFloat(r.consumed_qty) || 0) - (parseFloat(r.scrap_qty) || 0) + (parseFloat(r.manual_adjustment) || 0);
+            }
         };
 
         // 3. Compare and build delta list
@@ -687,8 +730,8 @@ window.previewInventorySnapshot = async function(snapshotId) {
             let s = snapData.find(r => r.resolved_string_key === key);
             let l = liveMap[key];
 
-            const sNet = calculateNet(s);
-            const lNet = calculateNet(l);
+            const sNet = calculateNet(s, key);
+            const lNet = calculateNet(l, key);
 
             if (sNet !== lNet || !s || !l) {
                 // Decode the UUID into a human-readable name
@@ -1525,6 +1568,16 @@ window.initializeCcSyncChannel = function() {
                     const reasonSelect = document.getElementById('stockzAuditReasonSelect');
                     const notesInput = document.getElementById('stockzAuditNotesInput');
                     
+                    const validReasons = ['Periodic Stock Audit', 'Damaged / Expired Goods', 'Prototype Consumed', 'Production Consumed', 'Supplier Shortage / Overage'];
+                    if (payload.reasonCode && !validReasons.includes(payload.reasonCode)) {
+                        showToast("Outdated mobile scanner version detected. Requesting mobile reload...", "error");
+                        await window.ccSyncChannel.send({
+                            type: 'broadcast',
+                            event: 'PC_OUTDATED_MOBILE',
+                            payload: {}
+                        }).catch(()=>{});
+                        return;
+                    }
                     if (reasonSelect && payload.reasonCode) reasonSelect.value = payload.reasonCode;
                     if (notesInput && payload.notes !== undefined) notesInput.value = payload.notes;
                     
@@ -3355,17 +3408,21 @@ window.submitStockzAudit = async function() {
         let production_consumed_qty = parseFloat(i.production_consumed_qty) || 0;
         
         if (countedIsValid) {
+            let reason = (reasonSelect.value || '').trim();
+            let isScrap = reason === 'Damaged / Expired Goods';
+            let isProto = reason === 'Prototype Consumed';
+            let isProd = reason === 'Production Consumed';
+
             if (delta < 0) {
                 let absDelta = Math.abs(delta);
-                let reason = reasonSelect.value;
-                if (reason === 'Damaged / Expired Goods') {
+                if (isScrap) {
                     scrap_qty += absDelta;
-                } else if (reason === 'Prototype Consumed') {
+                } else if (isProto) {
                     prototype_consumed_qty += absDelta;
                     if (!key.startsWith('RECIPE:::')) {
                         consumed_qty += absDelta;
                     }
-                } else if (reason === 'Production Consumed') {
+                } else if (isProd) {
                     if (key.startsWith('RECIPE:::')) {
                         production_consumed_qty += absDelta;
                     } else {
@@ -3376,7 +3433,33 @@ window.submitStockzAudit = async function() {
                     manual_adjustment += delta;
                 }
             } else {
-                manual_adjustment += delta;
+                if (isScrap) {
+                    let decrease = Math.min(scrap_qty, delta);
+                    scrap_qty -= decrease;
+                    manual_adjustment += (delta - decrease);
+                } else if (isProto) {
+                    let decreaseProto = Math.min(prototype_consumed_qty, delta);
+                    prototype_consumed_qty -= decreaseProto;
+                    if (!key.startsWith('RECIPE:::')) {
+                        let decreaseCons = Math.min(consumed_qty, delta);
+                        consumed_qty -= decreaseCons;
+                    }
+                    manual_adjustment += (delta - decreaseProto);
+                } else if (isProd) {
+                    if (key.startsWith('RECIPE:::')) {
+                        let decreaseProd = Math.min(production_consumed_qty, delta);
+                        production_consumed_qty -= decreaseProd;
+                        manual_adjustment += (delta - decreaseProd);
+                    } else {
+                        let decreaseProd = Math.min(production_consumed_qty, delta);
+                        production_consumed_qty -= decreaseProd;
+                        let decreaseCons = Math.min(consumed_qty, delta);
+                        consumed_qty -= decreaseCons;
+                        manual_adjustment += (delta - decreaseProd);
+                    }
+                } else {
+                    manual_adjustment += delta;
+                }
             }
         }
         

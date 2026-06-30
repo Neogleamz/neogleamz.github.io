@@ -1438,7 +1438,12 @@ window.editWOQty = async function(id) {
 
 function renderActiveWO(id) {
     try {
-        let wo = workOrdersDB.find(w => w.wo_id === id); if(!wo) return;
+        if (!id) id = currentWO ? currentWO.wo_id : null;
+        let wo = workOrdersDB.find(w => w.wo_id === id);
+        if (!wo || wo.status === 'Archived') {
+            document.getElementById('woMainArea').style.display = 'none';
+            return;
+        }
         document.getElementById('woMainArea').style.display = 'flex';
         let isEditableQty = !(wo.wip_state && wo.wip_state.materials_pulled) && wo.status !== 'Completed';
         let qtyDisplay = isEditableQty ? `<span class="hover-bg-blue-light" data-click="click_editWOQty" data-id="${wo.wo_id}" title="Edit WO Yield Target" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:rgba(14,165,233,0.15); border:1px dashed #0ea5e9; padding:2px 10px; border-radius:6px; color:#0ea5e9; transition:all 0.2s; position:relative; top:-2px;">${wo.qty} ✏️</span>` : wo.qty;
@@ -2115,6 +2120,9 @@ async function switchArchiveTab(tab) {
     document.getElementById('tabArchBatchez').style.borderBottom = tab === 'batchez' ? '3px solid #0ea5e9' : '3px solid transparent';
     document.getElementById('tabArchLayerz').style.borderBottom = tab === 'layerz' ? '3px solid #0ea5e9' : '3px solid transparent';
 
+    const searchEl = document.getElementById('archiveSearchInput');
+    if (searchEl) searchEl.value = '';
+
     if (tab === 'layerz' && !window._layerzArchiveLoaded) {
         if (typeof refreshPrintQueue === 'function') {
             document.getElementById('archiveListArea').innerHTML = window.safeHTML(
@@ -2131,38 +2139,69 @@ let _archiveFullData = [];
 function renderArchiveList() {
     try {
         const searchEl = document.getElementById('archiveSearchInput');
-        if (searchEl) searchEl.value = '';
+        const searchVal = searchEl ? searchEl.value.toLowerCase().trim() : '';
 
+        let items = [];
         if (currentArchiveTab === 'batchez') {
-            _archiveFullData = workOrdersDB.filter(w => w.status === 'Archived');
+            items = workOrdersDB.filter(w => w.status === 'Archived');
         } else {
-            _archiveFullData = printQueueDB.filter(p => p.status === 'Archived');
+            items = printQueueDB.filter(p => p.status === 'Archived');
         }
+
+        if (searchVal) {
+            if (currentArchiveTab === 'batchez') {
+                items = items.filter(w =>
+                    (w.wo_id || '').toLowerCase().includes(searchVal) ||
+                    (w.product_name || '').toLowerCase().includes(searchVal) ||
+                    (w.label || '').toLowerCase().includes(searchVal)
+                );
+            } else {
+                items = items.filter(j =>
+                    (j.wo_id || '').toLowerCase().includes(searchVal) ||
+                    (j.part_name || '').toLowerCase().includes(searchVal) ||
+                    (j.label || '').toLowerCase().includes(searchVal)
+                );
+            }
+        }
+
+        const sortEl = document.getElementById('archiveSortSelect');
+        const sortVal = sortEl ? sortEl.value : 'date-desc';
+
+        items.sort((a, b) => {
+            if (sortVal === 'date-desc' || sortVal === 'date-asc') {
+                let dateA = new Date(a.completed_at || a.started_at || a.created_at || 0).getTime();
+                let dateB = new Date(b.completed_at || b.started_at || b.created_at || 0).getTime();
+                return sortVal === 'date-desc' ? dateB - dateA : dateA - dateB;
+            }
+            if (sortVal === 'id-asc' || sortVal === 'id-desc') {
+                let idA = (a.wo_id || '').toLowerCase();
+                let idB = (b.wo_id || '').toLowerCase();
+                if (idA < idB) return sortVal === 'id-asc' ? -1 : 1;
+                if (idA > idB) return sortVal === 'id-asc' ? 1 : -1;
+                return 0;
+            }
+            if (sortVal === 'name-asc' || sortVal === 'name-desc') {
+                let nameA = (a.product_name || a.part_name || '').toLowerCase();
+                let nameB = (b.product_name || b.part_name || '').toLowerCase();
+                if (nameA < nameB) return sortVal === 'name-asc' ? -1 : 1;
+                if (nameA > nameB) return sortVal === 'name-asc' ? 1 : -1;
+                return 0;
+            }
+            return 0;
+        });
+
+        _archiveFullData = items;
         _renderArchiveCards(_archiveFullData);
     } catch(e) { sysLog(e.message, true); }
 }
 
-window.filterArchiveList = function(q) {
-    try {
-        if (!q || !q.trim()) { _renderArchiveCards(_archiveFullData); return; }
-        const lq = q.toLowerCase().trim();
-        let filtered;
-        if (currentArchiveTab === 'batchez') {
-            filtered = _archiveFullData.filter(w =>
-                (w.wo_id || '').toLowerCase().includes(lq) ||
-                (w.product_name || '').toLowerCase().includes(lq) ||
-                (w.label || '').toLowerCase().includes(lq)
-            );
-        } else {
-            filtered = _archiveFullData.filter(j =>
-                (j.wo_id || '').toLowerCase().includes(lq) ||
-                (j.part_name || '').toLowerCase().includes(lq) ||
-                (j.label || '').toLowerCase().includes(lq)
-            );
-        }
-        _renderArchiveCards(filtered);
-    } catch(e) { sysLog(e.message, true); }
-}
+window.filterArchiveList = function(_q) {
+    renderArchiveList();
+};
+
+window.handleArchiveSortChange = function() {
+    renderArchiveList();
+};
 
 window.toggleArchiveDetail = function(id) {
     try {
@@ -2900,6 +2939,33 @@ function buildDraftModalHtml(wo, drafts) {
     try {
     let ht = '';
 
+    // Main Finished Product Scrap Card
+    let cleanMainName = wo.product_name.replace('RECIPE:::', '');
+    let mainScrapKey = `RECIPE:::${cleanMainName}__BUILD`;
+    let mainCurVal = drafts[mainScrapKey] ? drafts[mainScrapKey] : '';
+    
+    ht += `<div class="kitting-card" style="box-sizing:border-box; flex: 1 1 100%; border-left: 4px solid #ef4444;">
+        <h4>🚨 Batch Run Scrap (Finished Product)</h4>
+        <div class="checklist-item" style="padding: 10px 15px; display:flex; justify-content:space-between; align-items:center;">
+            <div class="chk-text" style="font-size:14px; flex-grow:1; font-weight:bold; color:#ef4444;">
+                🚨 SCRAP ENTIRE: ${cleanMainName}
+                <div style="font-size:10px; color:var(--text-muted); font-weight:normal; margin-top:2px;">
+                    Enter the number of finished units from this batch (up to ${wo.qty}) that were damaged or scrapped.
+                </div>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Batch Qty</span>
+                    <input type="text" disabled value="${wo.qty}" style="width:65px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); text-align:center; padding:6px; border-radius:6px; font-weight:bold; cursor:not-allowed;">
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Scrap</span>
+                    <input type="number" class="wo-scrap-input" data-key="${mainScrapKey}" min="0" max="${wo.qty}" step="any" placeholder="0" value="${mainCurVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
+                </div>
+            </div>
+        </div>
+    </div>`;
+
     // Direct Raws
     let directRaws = getDirectMaterials(wo.product_name, wo.qty);
     if(Object.keys(directRaws).length > 0) {
@@ -2920,7 +2986,7 @@ function buildDraftModalHtml(wo, drafts) {
                         <input type="text" disabled value="${req.toFixed(2)}" style="width:65px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); text-align:center; padding:6px; border-radius:6px; font-weight:bold; cursor:not-allowed;">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center;">
-                        <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                        <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Scrap</span>
                         <input type="number" class="wo-scrap-input" data-key="${k}" min="0" step="any" placeholder="0" value="${curVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
                     </div>
                 </div>
@@ -2950,7 +3016,7 @@ function buildDraftModalHtml(wo, drafts) {
                         <input type="text" disabled value="${sub.q.toFixed(2)}" style="width:65px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); text-align:center; padding:6px; border-radius:6px; font-weight:bold; cursor:not-allowed;">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center;">
-                        <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                        <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Scrap</span>
                         <input type="number" class="wo-scrap-input" data-key="${k}" min="0" step="any" placeholder="0" value="${curVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
                     </div>
                 </div>
@@ -2988,7 +3054,7 @@ function buildDraftModalHtml(wo, drafts) {
                         <div class="chk-text" style="font-size:14px; flex-grow:1; font-weight:bold; color:#ef4444;">🚨 SCRAP ENTIRE: ${cleanSubName} <div style="font-size:10px; color:var(--text-muted); font-weight:normal; margin-top:2px;">Scrapping this will forcefully deduct its required raw materials from stock.</div></div>
                         <div style="display:flex; gap:12px;">
                             <div style="display:flex; flex-direction:column; align-items:center;">
-                                <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                                <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Scrap</span>
                                 <input type="number" class="wo-scrap-input" data-key="${topScrapKey}__BUILD" min="0" step="any" placeholder="0" value="${topCurVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
                             </div>
                         </div>
@@ -3010,7 +3076,7 @@ function buildDraftModalHtml(wo, drafts) {
                                     <input type="text" disabled value="${req.toFixed(2)}" style="width:65px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); text-align:center; padding:6px; border-radius:6px; font-weight:bold; cursor:not-allowed;">
                                 </div>
                                 <div style="display:flex; flex-direction:column; align-items:center;">
-                                    <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Loss</span>
+                                    <span style="font-size:10px; color:#ef4444; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Scrap</span>
                                     <input type="number" class="wo-scrap-input" data-key="${k}" min="0" step="any" placeholder="0" value="${curVal}" style="width:65px; background:var(--bg-input); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; padding:6px; border-radius:6px; text-align:center; font-weight:bold; font-size:14px;" />
                                 </div>
                             </div>
@@ -3028,6 +3094,28 @@ function buildDraftModalHtml(wo, drafts) {
 
     return ht;
     } catch(e) { sysLog(e.message, true); return ''; }
+}
+
+function getRecursiveRawMaterials(recipeName, qty) {
+    let raws = {};
+    function traverse(name, q) {
+        let parts = productsDB[name] || [];
+        parts.forEach(part => {
+            let k = String(part.item_key || part.di_item_id || part.name);
+            let partQty = (parseFloat(part.quantity || part.qty) || 1) * q;
+            let subName = k.replace('RECIPE:::', '');
+            let is3DPrint = productsDB[subName] && productsDB[subName].is_3d_print;
+            let isLabel = productsDB[subName] && productsDB[subName].is_label;
+
+            if (!k.startsWith('RECIPE:::') || is3DPrint || isLabel) {
+                raws[k] = (raws[k] || 0) + partQty;
+            } else {
+                traverse(subName, partQty);
+            }
+        });
+    }
+    traverse(recipeName, qty);
+    return raws;
 }
 
 window.submitFinalizeWo = async function() {
@@ -3064,6 +3152,28 @@ window.submitFinalizeWo = async function() {
             inventoryDB[actualK].scrap_qty = (inventoryDB[actualK].scrap_qty || 0) + v;
             upsKeys.add(actualK);
             totalScrapEntries++;
+
+            // Shift raw materials consumed by scrapped sub-assemblies to scrap_qty
+            if (k.endsWith('__BUILD')) {
+                let cleanSubName = actualK.replace('RECIPE:::', '');
+                let rawLoss = getRecursiveRawMaterials(cleanSubName, v);
+                let bType = currentWO.wip_state && currentWO.wip_state.batch_type ? currentWO.wip_state.batch_type : 'Production';
+                
+                Object.keys(rawLoss).forEach(rawK => {
+                    let rawQty = rawLoss[rawK];
+                    if (!inventoryDB[rawK]) inventoryDB[rawK] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
+                    
+                    inventoryDB[rawK].consumed_qty = Math.max(0, (inventoryDB[rawK].consumed_qty || 0) - rawQty);
+                    if (bType === 'Prototype') {
+                        inventoryDB[rawK].prototype_consumed_qty = Math.max(0, (inventoryDB[rawK].prototype_consumed_qty || 0) - rawQty);
+                    } else {
+                        inventoryDB[rawK].production_consumed_qty = Math.max(0, (inventoryDB[rawK].production_consumed_qty || 0) - rawQty);
+                    }
+                    
+                    inventoryDB[rawK].scrap_qty = (inventoryDB[rawK].scrap_qty || 0) + rawQty;
+                    upsKeys.add(rawK);
+                });
+            }
 
             if (isYieldEnforced) {
                 let cleanK = actualK.replace('RECIPE:::', '');
