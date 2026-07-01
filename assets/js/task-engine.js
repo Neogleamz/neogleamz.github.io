@@ -470,7 +470,7 @@ function teRenderTaskGrid(filter = null) {
         
         html += `
         <div class="te-section-container" data-cycle-id="${cid}" style="margin-bottom: 12px;">
-            <div class="te-section-header neo-category-row" style="cursor: grab;">
+            <div class="te-section-header neo-category-row" style="cursor: grab; --te-section-color: ${headerColor};">
                 <span style="font-weight:900; color:var(--text-heading); font-size:12px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
                     <span class="cat-arrow" data-click="click_teToggleCycleGroup" data-cycle-id="${cid}" style="color:var(--text-muted); width:20px; text-align:center; cursor:pointer;" class="te-hover-text-white">${toggleIcon}</span> 
                     <span class="te-section-title" data-click="click_teEditSectionTitle" data-cycle-id="${cid}" style="color: ${headerColor}; cursor: text; padding: 4px; border-radius: 4px;" class="te-hover-bg-dynamic">${group.title}</span>
@@ -1511,6 +1511,8 @@ window.click_teSaveProjectEdit = async function(element) {
             if (titleEl) {
                 titleEl.innerHTML = window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`);
             }
+            // Zero-refresh: re-render the board so cycle/section rows adopt the new project color (project-color override at teRenderTaskGrid)
+            if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
         }
     });
 };
