@@ -1578,7 +1578,8 @@ window.openPackerzAuditLog = function(sku, telemetryJsonString) {
     });
 
     h += `</div></div></div>`;
-    document.body.insertAdjacentHTML('beforeend', window.safeHTML ? window.safeHTML(h) : h);
+    if (!window.safeHTML) { console.error('[PACKERZ] safeHTML unavailable — audit overlay blocked'); return; }
+    document.body.insertAdjacentHTML('beforeend', window.safeHTML(h));
 }
 
 window.renderPackerzTelemetryPreview = function renderPackerzTelemetryPreview() {
