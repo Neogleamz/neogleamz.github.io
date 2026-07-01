@@ -11,11 +11,13 @@ When the user requests to log an idea or task for later, you must execute the fo
 2. **Mandatory Pre-Planning Gate**:
    - Before logging the task, you MUST check if a High-Level Architectural Document was generated during a preceding `/whiteboard_mode` session (e.g., at `docs/architecture/<slug>.md`).
    - If it exists, use that documentation to generate a highly detailed, fully documented Implementation Plan artifact. The plan must translate the high-level hierarchy and agent validations into strict technical approaches (covering security, flexbox UI, performance, and Vanilla JS standards). If no architectural doc exists, build the Implementation Plan from scratch based on the user's prompt.
+   - **Files Touched (required):** The plan MUST include a `## Files Touched` section listing every file the task will modify (e.g., `assets/js/barcodz-module.js`, `index.html`). This is used by `/bucketlist` to automatically group tasks into parallel execution batches.
    - Write this Implementation Plan to `docs/plans/<slug>.md`.
 3. **Triaging & Injection**: 
    - Analyze the request. If it relates to an active Epic, assign it there. Otherwise, assign it to `### Target: main`.
    - Inject the task as a `- [ ]` markdown item into @tools/SK8Lytz_Bucket_List.md.
-   - **Crucial Linkage**: The new task line MUST explicitly reference the pre-compiled plan (e.g., `- [ ] feat/xxx : **Feature Name** - Description. (Plan: [docs/plans/feat/xxx.md](docs/plans/feat/xxx.md))`).
+   - **Crucial Linkage**: The new task line MUST explicitly reference the pre-compiled plan AND append a `[Files: ...]` tag listing every file from the plan's `## Files Touched` section. Format: `- [ ] feat/xxx : **Feature Name** - Description. (Plan: [docs/plans/feat/xxx.md](docs/plans/feat/xxx.md)) [Files: assets/js/foo-module.js, index.html]`
+   - The `[Files:]` tag is machine-readable metadata that `/bucketlist` uses to auto-group non-overlapping tasks into parallel execution batches. Always include it — even for single-file tasks.
 
 4. **The Background Sync**:
    - Immediately execute `git add tools/SK8Lytz_Bucket_List.md docs/plans/ docs/architecture/`
