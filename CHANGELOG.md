@@ -1,6 +1,7 @@
 # SK8Lytz Application Changelog
 
 ## [Unreleased]
+- `debt/dependencies` : **exceljs removed** — package was unused at runtime (all Excel I/O uses SheetJS). Removal eliminated the `uuid` moderate vulnerability; `npm audit` now reports 0 vulnerabilities and 95 fewer packages.
 - `chore/hygiene` : **coverage/ added to .gitignore** — Untracked and removed 31 test artifact files (clover.xml, lcov.info, HTML coverage reports) from the repo; `npm test` output now stays local-only and never deploys to GitHub Pages.
 - `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level.
 - `debt/security` : **Unguarded innerHTML** - `modalEl.innerHTML = innerHtml;` is currently used in `assets/js/barcodz-module.js` (Line 476) without `window.safeHTML()` wrapper. This poses an XSS risk.
