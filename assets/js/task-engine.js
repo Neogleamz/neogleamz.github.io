@@ -1511,6 +1511,8 @@ window.click_teSaveProjectEdit = async function(element) {
             if (titleEl) {
                 titleEl.innerHTML = window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`);
             }
+            // Zero-refresh: re-render the board so cycle/section rows adopt the new project color (project-color override at teRenderTaskGrid)
+            if (typeof teRenderTaskGrid === 'function') teRenderTaskGrid();
         }
     });
 };
