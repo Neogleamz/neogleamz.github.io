@@ -51,7 +51,7 @@ window.openKPIReport = function(el) {
         } catch(e) {
             html = `<div style="color: #ef4444; padding: 20px;">Error generating report: ${e.message}</div>`;
         }
-        contentEl.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        contentEl.innerHTML = window.safeHTML(html);
         
         // Initialize interactivity
         if (typeof window.initInteractiveKpiTable === 'function') window.initInteractiveKpiTable();

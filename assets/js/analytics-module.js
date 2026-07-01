@@ -294,7 +294,7 @@ function renderProfitabilityMatrix() {
             h += `<tr><td tabindex="0" class="trunc-col" style="font-weight:bold; color:var(--text-heading);">📦 ${x.n}</td><td class="text-right" style="color:#ef4444;">$${x.tc.toFixed(2)}</td><td class="text-right" style="color:#0ea5e9;">$${x.ms.toFixed(2)}</td><td class="text-right"><span class="margin-badge ${badgeClass}">${x.mg.toFixed(1)}%</span></td><td class="text-right" style="font-weight:bold;">${x.ts.toFixed(0)}</td><td class="text-right" style="font-weight:bold; color:${profitColor};">$${x.tp.toFixed(2)}</td></tr>`; 
         });
     }
-        wrap.innerHTML = window.safeHTML ? window.safeHTML(h + `</tbody></table>`) : h + `</tbody></table>`; applyTableInteractivity('analyticsTableWrap');
+        wrap.innerHTML = window.safeHTML(h + `</tbody></table>`); applyTableInteractivity('analyticsTableWrap');
     } catch(e) { sysLog('Profitability matrix render error: ' + e.message, true); }
 }
 

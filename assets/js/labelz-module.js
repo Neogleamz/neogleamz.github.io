@@ -296,7 +296,7 @@ function renderLabelzGrid() {
         });
 
         grid.style.display = 'block';
-        grid.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        grid.innerHTML = window.safeHTML(html);
         
         // Post-render bindings for details toggle
         grid.querySelectorAll('.labelz-group-details').forEach(el => {
@@ -1029,7 +1029,7 @@ window.populateLabelzPreviewContextDropdown = function() {
         if (printProds.length) html += `<optgroup label="🖨️ 3D PRINTS">${mapOpts(printProds, '🖨️')}</optgroup>`;
         if (labelProds.length) html += `<optgroup label="🏷️ CUSTOM LABELS">${mapOpts(labelProds, '🏷️')}</optgroup>`;
     }
-    sel.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    sel.innerHTML = window.safeHTML(html);
     sel.onchange = function() {
         if (typeof window.applyLabelzPreviewContext === 'function') {
             window.applyLabelzPreviewContext();

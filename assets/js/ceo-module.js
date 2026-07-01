@@ -238,7 +238,7 @@ function renderCeoTerminal() {
     });
 
     let elSliders = document.getElementById('ceo-dynamic-sliders');
-    if (elSliders) elSliders.innerHTML = window.safeHTML ? window.safeHTML(slidersHtml) : slidersHtml;
+    if (elSliders) elSliders.innerHTML = window.safeHTML(slidersHtml);
     if(!ceoExpenseChart) initCeoCharts();
     updateCeoEngine();
 }
@@ -375,7 +375,7 @@ function _buildCeoTable({ tableRows }) {
 
     const wrap = document.getElementById('ceoTableWrap');
     if (wrap) {
-        wrap.innerHTML = window.safeHTML ? window.safeHTML(tableHtml) : tableHtml;
+        wrap.innerHTML = window.safeHTML(tableHtml);
         if (typeof applyTableInteractivity === 'function') applyTableInteractivity('ceoTableWrap');
     }
 }
@@ -574,7 +574,7 @@ function renderUnifiedBuilderTable() {
     });
 
     html += `</tbody></table>`;
-    document.getElementById('ceoUnifiedTableWrap').innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    document.getElementById('ceoUnifiedTableWrap').innerHTML = window.safeHTML(html);
 }
 
 window.addCeoSessionTestItem = function() {
@@ -687,7 +687,7 @@ function renderLtvWhalesTable() {
             </tr>`;
         });
     }
-    tBody.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    tBody.innerHTML = window.safeHTML(html);
 }
 
 window.openLtvModal = function() {
