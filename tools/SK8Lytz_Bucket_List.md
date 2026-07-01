@@ -36,7 +36,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `chore/hygiene` : Add `coverage/` to [.gitignore](../.gitignore) — test artifacts (`clover.xml`, `lcov.info`, HTML coverage reports) are currently tracked and deploy to the live GitHub Pages site on every push.
 
 ### 🟢 Dependencies (Low Priority)
-- [ ] `debt/dependencies` : `exceljs` 3.10.0 → 4.4.0 (MAJOR) — runtime unused (all Excel I/O uses SheetJS). Review breaking changes before upgrading. The `uuid` moderate vulnerability via `exceljs` is a circular fix loop — acceptable until exceljs v4 is confirmed safe.
+- [x] `debt/dependencies` : `exceljs` removed entirely — runtime unused (all Excel I/O uses SheetJS). Removal eliminates the `uuid` moderate vulnerability at the root. `npm audit` now reports 0 vulnerabilities.
 
 ---
 
