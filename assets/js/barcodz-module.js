@@ -106,9 +106,9 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
         );
 
         if (filtered.length === 0) {
-            grid.innerHTML = window.safeHTML ? window.safeHTML(
+            grid.innerHTML = window.safeHTML(
                 `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No labels found matching search.</div>`
-            ) : `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted); font-style:italic;">No labels found matching search.</div>`;
+            );
             return;
         }
 
@@ -174,7 +174,7 @@ window.renderBarcodzGrid = function(forceRebuild = false) {
         // Push grid layout down into details elements
         
         grid.style.display = 'block';
-        grid.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        grid.innerHTML = window.safeHTML(html);
         
         // Post-render bindings for details toggle
         grid.querySelectorAll('.barcodz-group-details').forEach(el => {
@@ -302,7 +302,7 @@ function renderBarcodzSpool() {
     }
     
     
-    lists.forEach(list => list.innerHTML = window.safeHTML ? window.safeHTML(html) : html);
+    lists.forEach(list => list.innerHTML = window.safeHTML(html));
     counters.forEach(c => c.innerText = totalQty);
 
     // Post-render bindings for drag, drop, and inputs
@@ -356,7 +356,7 @@ window.executeBatchPrint = function() {
     if (!printArea) return alert("Printable area missing from DOM.");
     
     // Clear Area
-    printArea.innerHTML = window.safeHTML ? window.safeHTML('') : '';
+    printArea.innerHTML = '';
     
     // Parse JSON injected value
     let pObj = {w: 4, h: 6, n: "Default Paper"};
@@ -366,7 +366,7 @@ window.executeBatchPrint = function() {
 
     let pageCss = `@page { size: ${pW}in ${pH}in; margin: 0; }`;
     if (pageCss) {
-        printArea.innerHTML = window.safeHTML ? window.safeHTML(`<style>${pageCss}</style>`) : `<style>${pageCss}</style>`;
+        printArea.innerHTML = window.safeHTML(`<style>${pageCss}</style>`);
     }
     
     let totalInjected = 0;
@@ -388,14 +388,14 @@ window.executeBatchPrint = function() {
             
             if (pW >= 4 && pH >= 6) {
                 wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.25in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
-                wrapper.innerHTML = window.safeHTML ? window.safeHTML(
+                wrapper.innerHTML = window.safeHTML(
                     `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace; font-weight:bold;">SKU: ${getItemSKUValue(item.name)}</div><div style="font-size:11pt; margin-top:4px; font-family:monospace; opacity:0.8;">[Barcode: ${item.slug}]</div>`
-                ) : `<div style="font-size:24pt; font-weight:900; line-height:1.2; margin-bottom:20px;">${item.name}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? 'width:2.5in; height:2.5in; object-fit:contain; margin:0 auto; display:block;' : 'width:100%; height:2.5in;'}">${isQR ? '' : '</svg>'}<div style="font-size:14pt; margin-top:20px; font-family:monospace; font-weight:bold;">SKU: ${getItemSKUValue(item.name)}</div><div style="font-size:11pt; margin-top:4px; font-family:monospace; opacity:0.8;">[Barcode: ${item.slug}]</div>`;
+                );
             } else {
                 wrapper.style.cssText = `width: ${pW}in; height: ${pH}in; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 0.05in; overflow: hidden; background: white; color: black; font-family: sans-serif; page-break-after: always;`;
-                wrapper.innerHTML = window.safeHTML ? window.safeHTML(
+                wrapper.innerHTML = window.safeHTML(
                     `<div style="font-size:${fontSizeTitle}pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? `width:${bcHeight}in; height:${bcHeight}in; object-fit:contain; margin:0 auto; display:block;` : `width:100%; height:${bcHeight}in;`}">${isQR ? '' : '</svg>'}`
-                ) : `<div style="font-size:${fontSizeTitle}pt; font-weight:900; line-height:1; margin-bottom:2px;">${shortName}</div>${isQR ? '<img' : '<svg'} id="${svgId}" style="${isQR ? `width:${bcHeight}in; height:${bcHeight}in; object-fit:contain; margin:0 auto; display:block;` : `width:100%; height:${bcHeight}in;`}">${isQR ? '' : '</svg>'}`;
+                );
             }
 
             printArea.appendChild(wrapper);
@@ -412,7 +412,7 @@ window.executeBatchPrint = function() {
                         const imgEl = document.getElementById(svgId);
                         if (imgEl && imgEl.parentElement) {
                             let h = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID QR]</div>`;
-                            imgEl.parentElement.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
+                            imgEl.parentElement.innerHTML = window.safeHTML(h);
                         }
                     }
                 }
@@ -432,7 +432,7 @@ window.executeBatchPrint = function() {
                         const ele = document.getElementById(svgId);
                         if(ele && ele.parentElement) {
                             let h = `<div style="color:red; font-size:10px; font-weight:bold; height:100%; display:flex; align-items:center; justify-content:center;">[INVALID FORMAT:\n${typeSelect}]</div>`;
-                            ele.parentElement.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
+                            ele.parentElement.innerHTML = window.safeHTML(h);
                         }
                     }
                 }
@@ -448,7 +448,7 @@ window.executeBatchPrint = function() {
                         const ele = document.getElementById(svgId);
                         if (ele && ele.parentElement) {
                             let h = `<div style="color:red; font-size:10px; font-weight:bold;">[INVALID QR]</div>`;
-                            ele.parentElement.innerHTML = window.safeHTML ? window.safeHTML(h) : h;
+                            ele.parentElement.innerHTML = window.safeHTML(h);
                         }
                     }
                 }
@@ -482,7 +482,7 @@ window.executeBatchPrint = function() {
                     </div>
                 </div>
             `;
-            modalEl.innerHTML = innerHtml;
+            modalEl.innerHTML = window.safeHTML(innerHtml);
             document.body.appendChild(modalEl);
         };
         window.addEventListener('afterprint', afterPrintHandler);

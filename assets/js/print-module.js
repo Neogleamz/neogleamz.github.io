@@ -260,7 +260,7 @@ function renderActivePrintJob(id) {
         let btn = document.querySelector(`[data-click="${action}"]`);
         if (btn && btn._stateTimeout) {
             clearTimeout(btn._stateTimeout);
-            if (btn.dataset.originalText) btn.innerHTML = window.safeHTML ? window.safeHTML(btn.dataset.originalText) : btn.dataset.originalText;
+            if (btn.dataset.originalText) btn.innerHTML = window.safeHTML(btn.dataset.originalText);
             if (btn.dataset.originalBg !== undefined) btn.style.background = btn.dataset.originalBg;
             btn.disabled = false;
             delete btn.dataset.originalText;
@@ -953,7 +953,8 @@ function openPrintSOP(pName) {
         
         html += `</body></html>`;
         let win = window.open('', '', 'width=800,height=600');
-        win.document.write(html);
+        const safe = DOMPurify.sanitize(html);
+        win.document.write(safe);
         win.document.close();
         setTimeout(() => win.print(), 500);
     } catch(e) { 

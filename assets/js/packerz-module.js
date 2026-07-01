@@ -160,7 +160,7 @@ async function fetchUnfulfilledOrders() {
             card.innerHTML = window.safeHTML(`
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:4px;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" class="packerz-queue-cb" data-order-id="${order.order_id}" style="width:16px; height:16px; cursor:pointer;" data-app-click="stopProp" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="packerz-queue-cb" data-order-id="${order.order_id}" style="width:16px; height:16px; cursor:pointer;" data-app-click="stopProp">
                         <strong style="color:var(--text-heading); font-size:15px; font-weight:900;">ORDER ${order.order_id}</strong>
                     </div>
                     <span style="font-size:11px; color:#F59E0B; font-weight:900; background:rgba(245,158,11,0.1); padding:4px 10px; border-radius:6px; letter-spacing:0.5px;">${shortDate}</span>
@@ -1005,7 +1005,8 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
         html += `</body></html>`;
         
         let win = window.open('', '', 'width=800,height=800');
-        win.document.write(html);
+        const safe = DOMPurify.sanitize(html);
+        win.document.write(safe);
         win.document.close();
         setTimeout(() => win.print(), 700);
         
@@ -1731,7 +1732,7 @@ window.renderPackerzTelemetryPreview = function renderPackerzTelemetryPreview() 
                     displayValue: true, fontSize: 11, margin: 6,
                     lineColor: '#000', background: '#ffffff'
                 });
-            } catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ Barcode error: ${e.message}</span>`; }
+            } catch(e) { const errorEl = document.createElement('span'); errorEl.style.cssText = 'color:#ef4444;font-size:11px;'; errorEl.textContent = `⚠️ Barcode error: ${e.message}`; el.replaceWith(errorEl); }
         });
     }
 
@@ -1739,7 +1740,7 @@ window.renderPackerzTelemetryPreview = function renderPackerzTelemetryPreview() 
     if (typeof QRCode !== 'undefined') {
         previewContainer.querySelectorAll('.sop-qr-canvas').forEach(el => {
             QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', { width: 90, margin: 1, color: { dark: '#000', light: '#fff' } })
-                .catch(e => { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ QR error: ${e.message}</span>`; });
+                .catch(e => { const errorEl = document.createElement('span'); errorEl.style.cssText = 'color:#ef4444;font-size:11px;'; errorEl.textContent = `⚠️ QR error: ${e.message}`; el.replaceWith(errorEl); });
         });
     }
 }
@@ -2486,7 +2487,7 @@ function renderSOPAuditLogRows(rows) {
             <!-- Row header —— always visible -->
             <div class="packerz-audit-row" style="display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer;"
                  data-click="click_toggleSOPAuditDetail" data-target="sop-audit-detail-${i}">
-                <input type="checkbox" class="packerz-archive-cb" data-order-id="${order.order_id}" style="width:16px; height:16px; cursor:pointer;" data-app-click="stopProp" onclick="event.stopPropagation()">
+                <input type="checkbox" class="packerz-archive-cb" data-order-id="${order.order_id}" style="width:16px; height:16px; cursor:pointer;" data-app-click="stopProp">
                 <div style="background:#10b981; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; flex-shrink:0;">✓ QA PASSED</div>
                 <div style="font-weight:900; color:var(--text-heading); font-size:13px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:0;">${order.order_id || '—'}</div>
                 <div style="font-size:12px; color:#0ea5e9; font-weight:700; flex:1;">${sumRecipes} <span style="color:var(--text-muted); font-size:10px;">(${(order.items || []).length} items)</span></div>
