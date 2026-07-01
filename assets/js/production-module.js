@@ -1053,7 +1053,9 @@ window.printBatchOrderReport = function() {
     const printContent = document.getElementById('batchOrderReportContent').innerHTML;
     const printWindow = window.open('', '', 'height=600,width=800');
     // Ensure styles map to printable black/white/red/green versions for paper
-    printWindow.document.write(`<html><head><title>Batch Order Projection</title><style>body{font-family:sans-serif; padding:20px; color:#000;} table{width:100%; border-collapse:collapse; margin-bottom:20px;} th,td{border-bottom:1px solid #ccc; padding:8px; text-align:left;} th.right, td.right{text-align:right;} h3{border-bottom:2px solid #000; padding-bottom:5px; margin-top:20px;}</style></head><body><h1>📦 Batch Order Projection</h1>${printContent.replace(/color:#ef4444/g, 'color:red').replace(/color:#10b981/g, 'color:green').replace(/color:var\(--text-[^)]+\)/g, 'color:black').replace(/ ▲| ▼| ↕/g, '')}</body></html>`);
+    const html = `<html><head><title>Batch Order Projection</title><style>body{font-family:sans-serif; padding:20px; color:#000;} table{width:100%; border-collapse:collapse; margin-bottom:20px;} th,td{border-bottom:1px solid #ccc; padding:8px; text-align:left;} th.right, td.right{text-align:right;} h3{border-bottom:2px solid #000; padding-bottom:5px; margin-top:20px;}</style></head><body><h1>📦 Batch Order Projection</h1>${printContent.replace(/color:#ef4444/g, 'color:red').replace(/color:#10b981/g, 'color:green').replace(/color:var\(--text-[^)]+\)/g, 'color:black').replace(/ ▲| ▼| ↕/g, '')}</body></html>`;
+    const safe = DOMPurify.sanitize(html);
+    printWindow.document.write(safe);
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => { printWindow.print(); }, 250);
@@ -2422,7 +2424,7 @@ function printPickList() {
                 }
             });
         }
-        html += `</tbody></table></body></html>`; let win = window.open('', '', 'width=800,height=600'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
+        html += `</tbody></table></body></html>`; let win = window.open('', '', 'width=800,height=600'); const safe = DOMPurify.sanitize(html); win.document.write(safe); win.document.close(); setTimeout(() => win.print(), 250);
     } catch(e) { sysLog(e.message, true); }
 }
 
@@ -2622,9 +2624,10 @@ h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
 
         html += `</body></html>`; 
         
-        let win = window.open('', '', 'width=800,height=800'); 
-        win.document.write(html); 
-        win.document.close(); 
+        let win = window.open('', '', 'width=800,height=800');
+        const safe = DOMPurify.sanitize(html);
+        win.document.write(safe);
+        win.document.close();
         
         // Slight delay to allow image loading before triggering print dialog
         setTimeout(() => win.print(), 700);
@@ -2760,13 +2763,13 @@ function processTelemetryCanvasRendering(container) {
     if (typeof JsBarcode !== 'undefined') {
         container.querySelectorAll('.sop-barcode-svg').forEach(el => {
             try { JsBarcode(el, el.dataset.value || 'NEOGLEAMZ', { format: 'CODE128', width: 1.8, height: 50, displayValue: true, fontSize: 11, margin: 6, lineColor: '#000', background: '#ffffff' }); }
-            catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ Barcode error: ${e.message}</span>`; }
+            catch(e) { const errorEl = document.createElement('span'); errorEl.style.cssText = 'color:#ef4444;font-size:11px;'; errorEl.textContent = `⚠️ Barcode error: ${e.message}`; el.replaceWith(errorEl); }
         });
     }
     if (typeof QRCode !== 'undefined') {
         container.querySelectorAll('.sop-qr-canvas').forEach(el => {
             try { QRCode.toCanvas(el, el.dataset.value || 'https://neogleamz.com', { width: 80, margin: 1 }); }
-            catch(e) { el.outerHTML = `<span style="color:#ef4444;font-size:11px;">⚠️ QR error: ${e.message}</span>`; }
+            catch(e) { const errorEl = document.createElement('span'); errorEl.style.cssText = 'color:#ef4444;font-size:11px;'; errorEl.textContent = `⚠️ QR error: ${e.message}`; el.replaceWith(errorEl); }
         });
     }
 }

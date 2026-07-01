@@ -1789,6 +1789,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_updateLaborCosts':
                     updateLaborCosts();
                     break;
+                case 'change_ldLoadTemplate':
+                    if (typeof window.click_ldLoadTemplate === 'function') window.click_ldLoadTemplate(event.target.value);
+                    break;
+                case 'change_labelzLoadTemplate':
+                    if (typeof window.click_labelzLoadTemplate === 'function') window.click_labelzLoadTemplate(event.target.value);
+                    break;
                 case 'change_updateCeoEngine':
                     updateCeoEngine();
                     break;

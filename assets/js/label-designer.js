@@ -121,7 +121,7 @@ window.click_openWhiteboardDesigner = function() {
         });
     }
 
-    modal.innerHTML = window.safeHTML ? window.safeHTML(`
+    modal.innerHTML = window.safeHTML(`
         <div style="height:60px; background:var(--bg-panel); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; padding:0 24px; box-shadow:0 4px 15px rgba(0,0,0,0.2); z-index:10;">
             <div style="display:flex; align-items:center; gap:10px;">
                 <span style="font-size:24px;">✏️</span>
@@ -183,8 +183,8 @@ window.click_openWhiteboardDesigner = function() {
                 <div style="color:var(--text-muted); font-style:italic; text-align:center;">Select an element to edit properties.</div>
             </div>
         </div>
-    `) : '';
-    
+    `);
+
     document.getElementById('ldTemplateSelect')?.addEventListener('change', function() { window.click_ldLoadTemplate(this.value); });
     document.getElementById('ldPreviewSelect')?.addEventListener('change', function() { window.click_ldChangePreview(this.value); });
     document.getElementById('ldPaperProfileSelect')?.addEventListener('change', function() { window.click_ldChangePaperProfile(this.value); });
@@ -426,7 +426,7 @@ function ldRender() {
         }
     });
     
-    canvas.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    canvas.innerHTML = window.safeHTML(html);
     
     // Post-render Barcodes
     window.ldState.elements.forEach(el => {
@@ -454,7 +454,7 @@ function ldRenderProperties() {
     const el = window.ldState.elements.find(e => e.id === selId);
     
     if (!el) {
-        props.innerHTML = window.safeHTML ? window.safeHTML('<div style="color:var(--text-muted); font-style:italic; text-align:center;">Select an element to edit properties.</div>') : '';
+        props.innerHTML = window.safeHTML('<div style="color:var(--text-muted); font-style:italic; text-align:center;">Select an element to edit properties.</div>');
         return;
     }
     
@@ -483,7 +483,7 @@ function ldRenderProperties() {
         <button id="ldCenterBtn" class="btn-blue" style="margin-top:10px;">Center on Label</button>
         <button id="ldDeleteBtn" class="btn-red" style="margin-top:5px;">Delete Element</button>
     `;
-    props.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    props.innerHTML = window.safeHTML(html);
     
     // Attach Event Listeners dynamically to avoid DOMPurify stripping inline handlers
     document.getElementById('ldPropX')?.addEventListener('change', () => window.ldUpdateProp('x'));
@@ -705,7 +705,7 @@ window.click_ldPrintState = function() {
                         </div>
                     </div>
                 `;
-                modalEl.innerHTML = innerHtml;
+                modalEl.innerHTML = window.safeHTML(innerHtml);
                 document.body.appendChild(modalEl);
             }
         };

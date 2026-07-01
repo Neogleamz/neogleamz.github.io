@@ -2055,7 +2055,7 @@ window.updateCCRouteUI = function(mode) {
         activeBtn.style.boxShadow = '0 0 10px rgba(16,185,129,0.3)';
     }
 
-    if (statusCheck) statusCheck.innerHTML = `🟢 📱 Phone Connected | ${sub}`;
+    if (statusCheck) statusCheck.innerHTML = window.safeHTML(`🟢 📱 Phone Connected | ${sub}`);
 };
 
 window.click_setCCRoutePhone = function() {
@@ -3067,7 +3067,7 @@ window.refreshStockzAuditHistory = async function() {
         if (error) throw error;
         
         if (!data || data.length === 0) {
-            historyContainer.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-weight:bold;">📂 No recent adjustments logged ${window.currentAuditItemKey ? 'for this item' : 'sitewide'}.</div>`;
+            historyContainer.innerHTML = window.safeHTML(`<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px; font-weight:bold;">📂 No recent adjustments logged ${window.currentAuditItemKey ? 'for this item' : 'sitewide'}.</div>`);
             return;
         }
         
