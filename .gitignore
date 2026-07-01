@@ -33,3 +33,6 @@ data/exports/
 supabase/dumps/
 .qa-reports/
 supabase/seed.sql
+
+# Jest coverage reports
+coverage/
