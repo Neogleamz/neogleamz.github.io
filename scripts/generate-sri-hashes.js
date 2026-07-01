@@ -12,7 +12,7 @@ const CDN_SCRIPTS = [
   { label: 'html5-qrcode@2.3.8-head',       pinnedUrl: 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js' },
   { label: 'sortablejs@1.15.7',             pinnedUrl: 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js' },
   { label: 'jsbarcode@3.11.6',              pinnedUrl: 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js' },
-  { label: 'qrcode@1.5.3',                  pinnedUrl: 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/lib/browser.js' },
+  { label: 'qrcode@1.4.4',                  pinnedUrl: 'https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js' },
   { label: 'html5-qrcode@2.3.8-bottom',     pinnedUrl: 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js' },
   { label: 'fabric@7.4.0',                  pinnedUrl: 'https://cdn.jsdelivr.net/npm/fabric@7.4.0/dist/index.min.js' },
   { label: 'bwip-js@3.4.1',                pinnedUrl: 'https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js' },
