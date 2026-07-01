@@ -1,5 +1,8 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+- `chore/agent-model-tiering` : **Agent Model & Effort Tiering** — Assigned every command, skill, and subagent a deliberate model tier (Balanced strategy). Added `model:` frontmatter to all 68 entry points (52 commands + 16 skills; haiku 23 / sonnet 29 / opus 16) and created 7 named `.claude/agents/` subagents (explore-mapper, test-lint-runner, security-scout, implementation-planner, xss-validator, test-guide-generator, implementer) with pinned tiers so `/bucketlist` swarm dispatches stop inheriting the parent model. Reprosed bucketlist + teamwork_preview to dispatch named agents; documented the taxonomy in CLAUDE.md. Config-only — 0 XSS, 59/59 tests, 0 lint errors, 0 alias drift across 15 twin pairs.
+
 ## [1.5.1] - 2026-07-01
 
 ### 🔒 Security Hardening
