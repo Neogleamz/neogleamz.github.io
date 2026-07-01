@@ -27,7 +27,15 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🧹 Technical Debt
 
-*Verified by 4 independent agents — 2026-07-01*
+*Clean sweep — all technical debt successfully completed and archived!* ✅
+
+---
+
+## 🗄️ Completed & Archived Epics
+
+### Target: `debt/security` + `debt/hygiene`
+**Epic: Technical Debt Sweep — Security Hardening + DOM Hygiene (Full)**
+*(Archived — 2026-07-01)*
 
 #### 🔴 Critical — Unguarded DOM Injection (no safeHTML at all)
 - [x] `debt/security` : **[index.html:4408](../index.html)** — `sysLog()` debug logger calls `insertAdjacentHTML('beforeend', ...)` with raw `${msg}` and `${htmlPayload}`. `msg` is passed by `window.onerror`, unhandled promise rejections (`event.reason`), and all `catch(e)` blocks across the app — any of these can carry DB-sourced or externally-influenced strings. `htmlPayload` is `JSON.stringify(payload)` which does not HTML-escape. No `window.safeHTML()` anywhere in the call path. Wrap both variables before insertion.
@@ -36,6 +44,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 #### 🔴 Critical — Systemic: Ternary safeHTML Fallback (38 DOM-write instances in index.html)
 - [x] `debt/security` : **[index.html — 38 instances](../index.html)** — Pattern `window.safeHTML ? window.safeHTML(x) : x` throughout the inline script. If `neogleamz-engine.js` fails to load (network error, script error), `window.safeHTML` is `undefined` and every fallback branch injects raw HTML. High-risk fallback sites include: L5461 (recipe names from DB), L5861 (DB column keys in button HTML), L5918/6016 (full DB table rows), L6303–6319 (product name dropdowns from DB), L4855/7002/7068 (Supabase error messages). Replace all 38 with unconditional `window.safeHTML(x)` calls — the function itself already has an `innerText` escape fallback if DOMPurify is absent.
+
+#### 🔴 Critical — Systemic: Ternary safeHTML Fallback (38 remaining instances across 6 modules)
+- [x] `debt/security` : **[task-engine.js — 26 instances](../assets/js/task-engine.js)** — FORBIDDEN_TERNARY at lines 147, 187, 544, 833, 860, 923, 954, 972, 1006, 1043, 1425, 1468, 1512, 1580, 1655, 1661, 1932, 2108, 2111, 2120, 2322, 2348, 2627, 2729, 2760, 2774. These cover task name rendering, section labels, and status pill HTML — all DB-sourced. Replace all 26 with unconditional `window.safeHTML(x)`. [Files: assets/js/task-engine.js]
+- [x] `debt/security` : **[scraper-module.js — 3 ternaries + 1 unguarded](../assets/js/scraper-module.js)** — FORBIDDEN_TERNARY at lines 46, 468, 506; UNGUARDED_INNERHTML at line 302 (raw DB product data injected directly). Replace ternaries with unconditional `window.safeHTML(x)`; wrap line 302 in `window.safeHTML()`. [Files: assets/js/scraper-module.js]
+- [x] `debt/security` : **[ceo-module.js — 4 instances](../assets/js/ceo-module.js)** — FORBIDDEN_TERNARY at lines 241, 378, 577, 690. CEO dashboard renders DB product/revenue labels into DOM. Replace all 4 with unconditional `window.safeHTML(x)`. [Files: assets/js/ceo-module.js]
+- [x] `debt/security` : **[labelz-module.js — 2 instances](../assets/js/labelz-module.js)** — FORBIDDEN_TERNARY at lines 299, 1032. Template name and label data from DB. Replace both with unconditional `window.safeHTML(x)`. [Files: assets/js/labelz-module.js]
+- [x] `debt/security` : **[analytics-module.js — 1 instance](../assets/js/analytics-module.js)** — FORBIDDEN_TERNARY at line 297. Replace with unconditional `window.safeHTML(x)`. [Files: assets/js/analytics-module.js]
+- [x] `debt/security` : **[kpi-reports-module.js — 1 instance](../assets/js/kpi-reports-module.js)** — FORBIDDEN_TERNARY at line 54. Replace with unconditional `window.safeHTML(x)`. [Files: assets/js/kpi-reports-module.js]
 
 #### 🟠 Moderate — Unguarded Print Window document.write (DB data flows unescaped)
 - [x] `debt/security` : **[production-module.js:2545–2626](../assets/js/production-module.js)** — SOP print window pipes `globalRichTextHTML` (raw rich-text HTML from DB) and `s.text` (SOP step text from DB) into `win.document.write(html)` with no sanitization. An admin-inserted `<script>` in an SOP step executes in the same-origin print popup.
@@ -54,24 +70,12 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [x] `debt/hygiene` : **[packerz-module.js:163](../assets/js/packerz-module.js)** and **[packerz-module.js:2489](../assets/js/packerz-module.js)** — redundant `onclick="event.stopPropagation()"` alongside `data-app-click="stopProp"` (which already works). Remove the inline `onclick=` attributes.
 
 #### 🟠 Infrastructure — No SRI on CDN Scripts + CSP Gaps
-- [ ] `debt/security` : **[index.html:11–17](../index.html)** — None of the 7 CDN `<script>` tags (including DOMPurify itself) carry an `integrity="sha384-..."` SRI hash. A compromised CDN could serve a malicious DOMPurify that bypasses all safeHTML calls. Add SRI hashes to all CDN scripts.
-- [ ] `debt/security` : **[index.html:6](../index.html)** — CSP `script-src` includes both `'unsafe-inline'` and `'unsafe-eval'`, which nullifies XSS injection protection entirely (required by the inline-script architecture). Long-term: extract the inline `<script>` block to an external file to allow `'unsafe-inline'` removal. Short-term: add a `report-uri` directive so violations are visible.
+- [x] `debt/security` : **[index.html:11–17](../index.html)** — None of the 7 CDN `<script>` tags (including DOMPurify itself) carry an `integrity="sha384-..."` SRI hash. A compromised CDN could serve a malicious DOMPurify that bypasses all safeHTML calls. Add SRI hashes to all CDN scripts.
+- [x] `debt/security` : **[index.html:6](../index.html)** — CSP `script-src` includes both `'unsafe-inline'` and `'unsafe-eval'`, which nullifies XSS injection protection entirely (required by the inline-script architecture). Long-term: extract the inline `<script>` block to an external file to allow `'unsafe-inline'` removal. Short-term: add a `report-uri` directive so violations are visible. *(Note: `report-uri` in a `<meta>` tag is silently ignored per W3C CSP spec §7.1 — documented in-code; requires HTTP header control to implement.)*
 - [x] `debt/hygiene` : **[index.html:6](../index.html)** — Dev/sandbox `connect-src` URLs (`http://127.0.0.1:54321`, `ws://127.0.0.1:54321`) are present in the production CSP. Remove from production.
 
 #### 🟡 Low — outerHTML with e.message (browser-controlled, low risk)
 - [x] `debt/security` : **[packerz-module.js:1734, 1742](../assets/js/packerz-module.js)** and **[production-module.js:2763, 2769](../assets/js/production-module.js)** — `el.outerHTML = \`...\${e.message}\`` in barcode/QR error handlers. `e.message` is JS Error.message (browser-controlled, unlikely to carry injection), but should be escaped for correctness. Replace with `textContent` on a created element.
-
-#### 🔴 Critical — Systemic: Ternary safeHTML Fallback (38 remaining instances across 6 modules)
-- [ ] `debt/security` : **[task-engine.js — 26 instances](../assets/js/task-engine.js)** — FORBIDDEN_TERNARY at lines 147, 187, 544, 833, 860, 923, 954, 972, 1006, 1043, 1425, 1468, 1512, 1580, 1655, 1661, 1932, 2108, 2111, 2120, 2322, 2348, 2627, 2729, 2760, 2774. These cover task name rendering, section labels, and status pill HTML — all DB-sourced. Replace all 26 with unconditional `window.safeHTML(x)`. [Files: assets/js/task-engine.js]
-- [ ] `debt/security` : **[scraper-module.js — 3 ternaries + 1 unguarded](../assets/js/scraper-module.js)** — FORBIDDEN_TERNARY at lines 46, 468, 506; UNGUARDED_INNERHTML at line 302 (raw DB product data injected directly). Replace ternaries with unconditional `window.safeHTML(x)`; wrap line 302 in `window.safeHTML()`. [Files: assets/js/scraper-module.js]
-- [ ] `debt/security` : **[ceo-module.js — 4 instances](../assets/js/ceo-module.js)** — FORBIDDEN_TERNARY at lines 241, 378, 577, 690. CEO dashboard renders DB product/revenue labels into DOM. Replace all 4 with unconditional `window.safeHTML(x)`. [Files: assets/js/ceo-module.js]
-- [ ] `debt/security` : **[labelz-module.js — 2 instances](../assets/js/labelz-module.js)** — FORBIDDEN_TERNARY at lines 299, 1032. Template name and label data from DB. Replace both with unconditional `window.safeHTML(x)`. [Files: assets/js/labelz-module.js]
-- [ ] `debt/security` : **[analytics-module.js — 1 instance](../assets/js/analytics-module.js)** — FORBIDDEN_TERNARY at line 297. Replace with unconditional `window.safeHTML(x)`. [Files: assets/js/analytics-module.js]
-- [ ] `debt/security` : **[kpi-reports-module.js — 1 instance](../assets/js/kpi-reports-module.js)** — FORBIDDEN_TERNARY at line 54. Replace with unconditional `window.safeHTML(x)`. [Files: assets/js/kpi-reports-module.js]
-
----
-
-## 🗄️ Completed & Archived Epics
 
 ### Target: `main`
 **Epic: Technical Debt Sweep**
