@@ -657,6 +657,16 @@ To prevent compounding data corruption from Shopify retries, the edge function M
 - **Algorithm**: The application architecture strictly maps all dynamic `.innerHTML` string evaluations through `window.safeHTML(...)` to sanitize injection payloads.
 - **Execution Engine**: Utilizes **DOMPurify** internally natively enforcing a specialized structural configuration (`DOMPurify.addHook('uponSanitizeAttribute')`) designed to preserve legacy functional UI events (`onclick`, `onchange`) whilst surgically destroying disguised `javascript:` payload executions.
 - **System Firewall**: The active web architecture globally utilizes a strict `Content-Security-Policy (CSP)` enforced explicitly at the `index.html` runtime via Meta Headers to sever untrusted script execution.
+- **FORBIDDEN_TERNARY rule**: `window.safeHTML ? window.safeHTML(x) : x` is **permanently banned**. `window.safeHTML` is always defined by `neogleamz-engine.js` (it has its own `innerText` escape fallback). The ternary's false-branch `: x` creates an XSS gate if the engine module fails to load. Always use unconditional `window.safeHTML(x)`. The canonical scanner `node scripts/xss-audit.js` catches all violations.
+- **Print window pattern**: For `printWin.document.write(html)` calls, the assembled HTML string MUST be sanitized first: `const safe = DOMPurify.sanitize(html); printWin.document.write(safe);` — never pass raw template literals containing DB-sourced strings directly to `document.write`.
+- **CSP §7.1 limitation**: `report-uri` directives inside `<meta http-equiv="Content-Security-Policy">` tags are silently ignored per W3C CSP Level 2 spec §7.1. The `report-uri` directive is only functional when delivered via an HTTP response header. Documented in-code; implementing it requires server-side header control (not available on GitHub Pages static hosting).
+
+### C. CDN Subresource Integrity (SRI)
+- **Status**: All 13 CDN `<script>` tags in `index.html` carry `integrity="sha384-..."` + `crossorigin="anonymous"` hashes (as of v1.5.1, 2026-07-01).
+- **Pinned CDN versions**: `supabase-js@2.110.0`, `chart.js@4.5.1/dist/chart.umd.min.js`, `sortablejs@1.15.7`, `html5-qrcode@2.3.8`, `jspdf@4.2.1`, `qrcode@1.4.4/build/qrcode.min.js` (UMD bundle — not `lib/browser.js` which is CommonJS and throws `require is not defined`).
+- **`?v=` cache-busters**: CDN lines must NEVER include `?v=` query strings — they invalidate SRI hashes. The `scripts/bump-system-version.js` version bump script skips any line containing `cdn.jsdelivr.net`, `cdnjs.cloudflare.com`, `unpkg.com`, or `cdn.sheetjs.com` to preserve SRI integrity on future bumps.
+- **Regeneration utility**: `scripts/generate-sri-hashes.js` — fetches all 13 CDN scripts concurrently (with redirect following up to 5 hops) and computes `sha384` hashes. Run this when pinning a new CDN version.
+- **Constraint**: When upgrading any CDN dependency, ALWAYS regenerate the SRI hash and update `index.html` in the same commit. Floating version strings (`@2`, `@latest`) are forbidden on CDN lines.
 
 ---
 
