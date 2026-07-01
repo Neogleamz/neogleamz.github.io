@@ -33,7 +33,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 - [🚀] `debt/security` : **[packerz-module.js:1581](../assets/js/packerz-module.js)** — `insertAdjacentHTML('beforeend', window.safeHTML ? window.safeHTML(h) : h)` — the ternary fallback `: h` injects raw unguarded HTML if `window.safeHTML` is undefined. Hardened to early-return with console error if safeHTML unavailable.
 
 ### 🟡 Hygiene
-- [ ] `chore/hygiene` : Add `coverage/` to [.gitignore](../.gitignore) — test artifacts (`clover.xml`, `lcov.info`, HTML coverage reports) are currently tracked and deploy to the live GitHub Pages site on every push.
+- [x] `chore/hygiene` : Add `coverage/` to [.gitignore](../.gitignore) — test artifacts (`clover.xml`, `lcov.info`, HTML coverage reports) are currently tracked and deploy to the live GitHub Pages site on every push.
 
 ### 🟢 Dependencies (Low Priority)
 - [ ] `debt/dependencies` : `exceljs` 3.10.0 → 4.4.0 (MAJOR) — runtime unused (all Excel I/O uses SheetJS). Review breaking changes before upgrading. The `uuid` moderate vulnerability via `exceljs` is a circular fix loop — acceptable until exceljs v4 is confirmed safe.
